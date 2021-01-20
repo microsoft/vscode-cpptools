@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Change Log
 
+
+## Version 1.2.0-insiders2: January 19, 2021
+### Bug Fixes
+* Fix autocomplete not working with `for` loop variables with C code. [#2946](https://github.com/microsoft/vscode-cpptools/issues/2946)
+* Fix an entry not found error for files in `compile_commands.json` that didn't initially exist. [#6311](https://github.com/microsoft/vscode-cpptools/issues/6311)
+* Fix IntelliSense errors with C++20 std::range in gcc/clang modes. [#6342](https://github.com/microsoft/vscode-cpptools/issues/6342)
+* Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
+* Fix IntelliSense errors when "module" is used as a variable name with C++20. [#6719](https://github.com/microsoft/vscode-cpptools/issues/6719)
+* Fix runtime failure on macOS 10.13 or older. [#6787](https://github.com/microsoft/vscode-cpptools/issues/6787)
+* Fix `Go to Symbol in Workspace`. [#6793](https://github.com/microsoft/vscode-cpptools/issues/6793)
+
 ## Version 1.2.0-insiders: January 14, 2021
 ### New Features
 * Add support for cross-compilation configurations for IntelliSense. For example, `intelliSenseMode` value "linux-gcc-x64" could be used on a Mac host machine. [#1083](https://github.com/microsoft/vscode-cpptools/issues/1083)
@@ -21,6 +32,7 @@
 * Fix IntelliSense not switching the language mode after changing C versus C++ `files.associations`. [#2557](https://github.com/microsoft/vscode-cpptools/issues/2557)
 * Fix Switch Header/Source not switching to an existing file in another column if it's not visible. [#2667](https://github.com/microsoft/vscode-cpptools/issues/2667), [#6749](https://github.com/microsoft/vscode-cpptools/issues/6749)
 * Fix `#include` completion not sorting _ last. [#3465](https://github.com/microsoft/vscode-cpptools/issues/3465)
+* Fix completion not working for templates in gcc/clang mode. [#3501](https://github.com/microsoft/vscode-cpptools/issues/3501)
 * Fix crash when certain JavaScript files are parsed as C++. [#3858](https://github.com/microsoft/vscode-cpptools/issues/3858)
 * Fix IntelliSense squiggle about not being able to assign to an object of its own type. [#3883](https://github.com/microsoft/vscode-cpptools/issues/3883)
 * Fix hover and Find All References for template function overloads. [#4044](https://github.com/microsoft/vscode-cpptools/issues/4044), [#4249](https://github.com/microsoft/vscode-cpptools/issues/4249)
@@ -46,7 +58,6 @@
 * Fix gcc problem matcher when the column is missing.
   * @guntern [PR #6490](https://github.com/microsoft/vscode-cpptools/pull/6490)
 * Disable Insiders prompt for Codespaces. [#6491](https://github.com/microsoft/vscode-cpptools/issues/6491)
-* Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
 * Show an error message when gdb can't be found when generating a `launch.json` (instead of using an invalid `miDebuggerPath`). [#6511](https://github.com/microsoft/vscode-cpptools/issues/6511)
 * Fix IntelliSense crash with a parenthesized type followed by an initializer list. [#6554](https://github.com/microsoft/vscode-cpptools/issues/6554), [#6624](https://github.com/microsoft/vscode-cpptools/issues/6624)
 * Fix IntelliSense updating after pasting multi-line code. [#6565](https://github.com/microsoft/vscode-cpptools/issues/6565)
