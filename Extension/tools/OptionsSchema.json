@@ -546,6 +546,23 @@
           "description": "%c_cpp.debuggers.cppvsdbg.externalConsole.description%",
           "default": false
         },
+        "console": {
+          "type": "string",
+          "enum": [
+            "internalConsole",
+            "integratedTerminal",
+            "externalTerminal",
+            "newExternalWindow"
+          ],
+          "enumDescriptions": [
+            "%c_cpp.debuggers.cppvsdbg.console.internalConsole.description%",
+            "%c_cpp.debuggers.cppvsdbg.console.integratedTerminal.description%",
+            "%c_cpp.debuggers.cppvsdbg.console.externalTerminal.description%",
+            "%c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description%"
+          ],
+          "description": "%c_cpp.debuggers.cppvsdbg.console.description%",
+          "default": "internalConsole"
+        },
         "sourceFileMap": {
           "type": "object",
           "description": "%c_cpp.debuggers.sourceFileMap.description%",
