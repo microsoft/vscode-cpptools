@@ -182,7 +182,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const editor: TextEditor | undefined = window.activeTextEditor;
-        const folder: WorkspaceFolder | undefined = editor? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
+        const folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
         // Check uri exists (single-mode files are ignored).
         if (folder) {
             const activeClient: Client = ext.getActiveClient();
@@ -194,7 +194,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 throw new Error("No target WorkspaceFolder found in getBuildTasks()");
             }
         }
-        
+
         const scope: TaskScope = TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
