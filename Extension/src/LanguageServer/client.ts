@@ -2365,17 +2365,18 @@ export class DefaultClient implements Client {
     }
 
     private isSourceFileConfigurationItem(input: any, providerVersion: Version): input is SourceFileConfigurationItem {
-        const intelliSenseModeValid = providerVersion > Version.v4 ?
-            util.isOptionalString(input.configuration.intelliSenseMode) : util.isString(input.configuration.intelliSenseMode)
-        const standardValid = providerVersion > Version.v4 ?
-            util.isOptionalString(input.configuration.standard) :  util.isString(input.configuration.standard)
+        // IntelliSenseMode and standard are optional for version 5+. However, they are required when compilerPath is not defined.
+        let areOptionalsValid: boolean = false;
+        if (providerVersion < Version.v5 || input.configuration.compilerPath === undefined) {
+            areOptionalsValid = util.isString(input.configuration.intelliSenseMode) && util.isString(input.configuration.standard);
+        } else if (util.isString(input.configuration.compilerPath)) {
+            areOptionalsValid = util.isOptionalString(input.configuration.intelliSenseMode) && util.isOptionalString(input.configuration.standard);
+        }
         return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
             input.configuration &&
+            areOptionalsValid &&
             util.isArrayOfString(input.configuration.includePath) &&
             util.isArrayOfString(input.configuration.defines) &&
-            intelliSenseModeValid &&
-            standardValid &&
-            util.isOptionalString(input.configuration.compilerPath) &&
             util.isOptionalArrayOfString(input.configuration.compilerArgs) &&
             util.isOptionalArrayOfString(input.configuration.forcedInclude));
     }
@@ -2437,11 +2438,12 @@ export class DefaultClient implements Client {
     private configurationLogging: Map<string, string> = new Map<string, string>();
 
     private isWorkspaceBrowseConfiguration(input: any): boolean {
-        return !util.isArrayOfString(input.browsePath) ||
-        !util.isOptionalString(input.compilerPath) ||
-        !util.isOptionalArrayOfString(input.compilerArgs) ||
-        !util.isOptionalString(input.standard) ||
-        !util.isOptionalString(input.windowsSdkVersion)
+        const areOptionalsValid: boolean = (util.isString(input.standard) && util.isOptionalString(input.compilerArgs)) ||
+            (input.standard === undefined && util.isString(input.compilerPath))
+        return areOptionalsValid &&
+        util.isArrayOfString(input.browsePath) &&
+        util.isOptionalString(input.compilerPath) &&
+        util.isOptionalString(input.windowsSdkVersion)
     }
 
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
@@ -2473,7 +2475,7 @@ export class DefaultClient implements Client {
             }
 
             sanitized = {...<WorkspaceBrowseConfiguration>config};
-            if (this.isWorkspaceBrowseConfiguration(sanitized)) {
+            if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
                 console.log("Received an invalid browse configuration from configuration provider.");
                 const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
                 if (configValue) {
