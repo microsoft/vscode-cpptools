@@ -5,7 +5,7 @@
 import * as path from 'path';
 import {
     TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
-    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window
+    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder
 } from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
@@ -181,15 +181,20 @@ export class CppBuildTaskProvider implements TaskProvider {
             };
         }
 
-        const activeClient: Client = ext.getActiveClient();
-        const uri: Uri | undefined = activeClient.RootUri;
-        if (!uri) {
-            throw new Error("No client URI found in getBuildTasks()");
+        const editor: TextEditor | undefined = window.activeTextEditor;
+        const folder: WorkspaceFolder | undefined = editor? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
+        // Check uri exists (single-mode files are ignored).
+        if (folder) {
+            const activeClient: Client = ext.getActiveClient();
+            const uri: Uri | undefined = activeClient.RootUri;
+            if (!uri) {
+                throw new Error("No client URI found in getBuildTasks()");
+            }
+            if (!workspace.getWorkspaceFolder(uri)) {
+                throw new Error("No target WorkspaceFolder found in getBuildTasks()");
+            }
         }
-        if (!workspace.getWorkspaceFolder(uri)) {
-            throw new Error("No target WorkspaceFolder found in getBuildTasks()");
-        }
-
+        
         const scope: TaskScope = TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
