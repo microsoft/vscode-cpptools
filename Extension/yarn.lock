@@ -5631,10 +5631,10 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vscode-cpptools@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-4.0.1.tgz#7e591572b437a6aca47b767487b52bc253e6d911"
-  integrity sha512-2IjtWe7rjIp20J+5m0Yjpa8TjGhdQWChwE49iYJBUUTHFqJDFq0aXNAyiDNw6BDWI1Q2Z/gmeQGsJBoxTb0J0Q==
+vscode-cpptools@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-5.0.0.tgz#f1195736af1cfa10727482be57093a3997c8f63b"
+  integrity sha512-TPG6/o9+DisDj2U4AiTOihtfjEzBb/4CErYaB1JIWFMZTQE7zlNTdsgCs+l4xIS2Y34us0RMBIC6On1mBuwxww==
 
 vscode-debugadapter@^1.35.0:
   version "1.38.0"
