@@ -2438,12 +2438,12 @@ export class DefaultClient implements Client {
     private configurationLogging: Map<string, string> = new Map<string, string>();
 
     private isWorkspaceBrowseConfiguration(input: any): boolean {
-        const areOptionalsValid: boolean = (util.isString(input.standard) && util.isOptionalString(input.compilerArgs)) ||
-            (input.standard === undefined && util.isString(input.compilerPath))
+        const areOptionalsValid: boolean = (input.compilerPath === undefined && util.isString(input.standard)) ||
+            (util.isString(input.compilerPath) && util.isOptionalString(input.standard));
         return areOptionalsValid &&
         util.isArrayOfString(input.browsePath) &&
-        util.isOptionalString(input.compilerPath) &&
-        util.isOptionalString(input.windowsSdkVersion)
+        util.isOptionalString(input.compilerArgs) &&
+        util.isOptionalString(input.windowsSdkVersion);
     }
 
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
