@@ -151,6 +151,10 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
+    const str: string = `
+`;
+    logCrashTelemetry(str);
+    logCrashTelemetry(str);
     if (realActivationOccurred) {
         return; // Occurs if multiple delayed commands occur before the real commands are registered.
     }
@@ -1120,10 +1124,16 @@ function reportMacCrashes(): void {
     }
 }
 
+let previousMacCrashData: string;
+let previousMacCrashCount: number = 0;
 function logCrashTelemetry(data: string): void {
     const crashObject: { [key: string]: string } = {};
+    const crashCountObject: { [key: string]: number } = {};
     crashObject["CrashingThreadCallStack"] = data;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+    previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
+    previousMacCrashData = data;
+    crashCountObject["CrashCount"] = previousMacCrashCount;
+    telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
 }
 
 function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
