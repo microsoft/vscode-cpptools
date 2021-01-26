@@ -151,10 +151,6 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
-    const str: string = `
-`;
-    logCrashTelemetry(str);
-    logCrashTelemetry(str);
     if (realActivationOccurred) {
         return; // Occurs if multiple delayed commands occur before the real commands are registered.
     }
