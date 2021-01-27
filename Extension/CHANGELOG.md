@@ -2,9 +2,10 @@
 
 ## Version 1.2.0-insiders3: January 26, 2021
 ### Bug Fixes
+* Fix build tasks errors in single file mode. [#4638](https://github.com/microsoft/vscode-cpptools/issues/4638), [#6764](https://github.com/microsoft/vscode-cpptools/issues/6764)
 * Fix IntelliSense not supporting `__float128` (and `Q` literals) on x64 Linux. [#6574](https://github.com/microsoft/vscode-cpptools/issues/6574)
 * Fix IntelliSense process infinitely restarting after crashing. [#6724](https://github.com/microsoft/vscode-cpptools/issues/6724)
-* Fix not being able to attach to cpptools-srv on Mac (to get crash callstacks). [#6736](https://github.com/microsoft/vscode-cpptools/issues/6736)
+* Fix not being able to attach to cpptools-srv on Mac (to get crash call stacks). [#6736](https://github.com/microsoft/vscode-cpptools/issues/6736)
 * Fix compiler querying with compilers that do not output `__STD_VERSION__` by default (gcc <= 4.8.x). [#6792](https://github.com/microsoft/vscode-cpptools/issues/6792)
 * Fix document symbols when nested symbols have the same name as a parent. [#6830](https://github.com/microsoft/vscode-cpptools/issues/6830)
 * Fix automatic adding of header files to `files.associations` after `Go to Definition` on a `#include`. [#6845](https://github.com/microsoft/vscode-cpptools/issues/6845)
