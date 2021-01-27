@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.2.0-insiders3: January 26, 2021
+## Version 1.2.0-insiders3: January 27, 2021
 ### Bug Fixes
 * Fix build tasks errors in single file mode. [#4638](https://github.com/microsoft/vscode-cpptools/issues/4638), [#6764](https://github.com/microsoft/vscode-cpptools/issues/6764)
 * Fix IntelliSense not supporting `__float128` (and `Q` literals) on x64 Linux. [#6574](https://github.com/microsoft/vscode-cpptools/issues/6574)
