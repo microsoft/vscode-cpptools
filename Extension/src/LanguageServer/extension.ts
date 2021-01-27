@@ -1106,10 +1106,10 @@ function reportMacCrashes(): void {
                         fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
                             if (err) {
                                 // Try again?
-                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
+                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleMacCrashFileRead);
                                 return;
                             }
-                            handleCrashFileRead(err, data);
+                            handleMacCrashFileRead(err, data);
                         });
                     }, 5000);
                 });
@@ -1122,7 +1122,8 @@ function reportMacCrashes(): void {
 
 let previousMacCrashData: string;
 let previousMacCrashCount: number = 0;
-function logCrashTelemetry(data: string): void {
+
+function logMacCrashTelemetry(data: string): void {
     const crashObject: { [key: string]: string } = {};
     const crashCountObject: { [key: string]: number } = {};
     crashObject["CrashingThreadCallStack"] = data;
@@ -1132,9 +1133,9 @@ function logCrashTelemetry(data: string): void {
     telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
 }
 
-function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
+function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
     if (err) {
-        return logCrashTelemetry("readFile: " + err.code);
+        return logMacCrashTelemetry("readFile: " + err.code);
     }
 
     // Extract the crashing process version, because the version might not match
@@ -1151,7 +1152,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     const crashStart: string = " Crashed:";
     let startCrash: number = data.indexOf(crashStart);
     if (startCrash < 0) {
-        return logCrashTelemetry("No crash start");
+        return logMacCrashTelemetry("No crash start");
     }
     startCrash += crashStart.length + 1; // Skip past crashStart.
     let endCrash: number = data.indexOf("Thread ", startCrash);
@@ -1159,7 +1160,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         endCrash = data.length - 1; // Not expected, but just in case.
     }
     if (endCrash <= startCrash) {
-        return logCrashTelemetry("No crash end");
+        return logMacCrashTelemetry("No crash end");
     }
     data = data.substr(startCrash, endCrash - startCrash);
 
@@ -1197,7 +1198,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         data = data.substr(0, 8189) + "...";
     }
 
-    logCrashTelemetry(data);
+    logMacCrashTelemetry(data);
 }
 
 export function deactivate(): Thenable<void> {
