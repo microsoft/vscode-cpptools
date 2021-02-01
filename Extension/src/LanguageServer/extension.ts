@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings, generateEditorConfig, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -432,10 +432,10 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
-        clients.timeTelemetryCollector.setDidOpenTime(document.uri);
         if (clients.checkOwnership(client, document)) {
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
+                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 client.TrackedDocuments.add(document);
                 const finishDidOpen = (doc: vscode.TextDocument) => {
                     client.provideCustomConfiguration(doc.uri, undefined);
@@ -608,6 +608,10 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!suggestInsiders.Value) {
         return;
     }
+    if (vscode.env.uiKind === vscode.UIKind.Web) {
+        // Do not prompt users of Web-based Codespaces to join Insiders.
+        return;
+    }
     let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders", false);
@@ -767,6 +771,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -801,14 +806,9 @@ function onSwitchHeaderSource(): void {
                     vscode.window.showTextDocument(document, editor.viewColumn);
                 }
             });
-            // TODO: Handle non-visibleTextEditor...not sure how yet.
+
             if (!foundEditor) {
-                if (vscode.window.activeTextEditor !== undefined) {
-                    // TODO: Change to show it in a different column?
-                    vscode.window.showTextDocument(document, vscode.window.activeTextEditor.viewColumn);
-                } else {
-                    vscode.window.showTextDocument(document);
-                }
+                vscode.window.showTextDocument(document);
             }
         });
     });
@@ -887,6 +887,15 @@ function onEditConfiguration(): void {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
         selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+    }
+}
+
+function onGenerateEditorConfig(): void {
+    onActivationEvent();
+    if (!isFolderOpen()) {
+        generateEditorConfig();
+    } else {
+        selectClient().then(client => generateEditorConfig(client.RootUri));
     }
 }
 
@@ -1068,10 +1077,7 @@ function onShowRefCommand(arg?: TreeNode): void {
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
         prevCrashFile = "";
-        const home: string | undefined = process.env.HOME;
-        if (!home) {
-            return;
-        }
+        const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err, stats) => {
             const crashObject: { [key: string]: string } = {};
@@ -1100,10 +1106,10 @@ function reportMacCrashes(): void {
                         fs.readFile(path.resolve(crashFolder, filename), 'utf8', (err, data) => {
                             if (err) {
                                 // Try again?
-                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleCrashFileRead);
+                                fs.readFile(path.resolve(crashFolder, filename), 'utf8', handleMacCrashFileRead);
                                 return;
                             }
-                            handleCrashFileRead(err, data);
+                            handleMacCrashFileRead(err, data);
                         });
                     }, 5000);
                 });
@@ -1114,15 +1120,22 @@ function reportMacCrashes(): void {
     }
 }
 
-function logCrashTelemetry(data: string): void {
+let previousMacCrashData: string;
+let previousMacCrashCount: number = 0;
+
+function logMacCrashTelemetry(data: string): void {
     const crashObject: { [key: string]: string } = {};
+    const crashCountObject: { [key: string]: number } = {};
     crashObject["CrashingThreadCallStack"] = data;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+    previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
+    previousMacCrashData = data;
+    crashCountObject["CrashCount"] = previousMacCrashCount;
+    telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
 }
 
-function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
+function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
     if (err) {
-        return logCrashTelemetry("readFile: " + err.code);
+        return logMacCrashTelemetry("readFile: " + err.code);
     }
 
     // Extract the crashing process version, because the version might not match
@@ -1139,7 +1152,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
     const crashStart: string = " Crashed:";
     let startCrash: number = data.indexOf(crashStart);
     if (startCrash < 0) {
-        return logCrashTelemetry("No crash start");
+        return logMacCrashTelemetry("No crash start");
     }
     startCrash += crashStart.length + 1; // Skip past crashStart.
     let endCrash: number = data.indexOf("Thread ", startCrash);
@@ -1147,7 +1160,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         endCrash = data.length - 1; // Not expected, but just in case.
     }
     if (endCrash <= startCrash) {
-        return logCrashTelemetry("No crash end");
+        return logMacCrashTelemetry("No crash end");
     }
     data = data.substr(startCrash, endCrash - startCrash);
 
@@ -1185,7 +1198,7 @@ function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data
         data = data.substr(0, 8189) + "...";
     }
 
-    logCrashTelemetry(data);
+    logMacCrashTelemetry(data);
 }
 
 export function deactivate(): Thenable<void> {

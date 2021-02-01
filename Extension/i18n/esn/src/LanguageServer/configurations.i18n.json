@@ -15,5 +15,6 @@
 	"cannot.resolve.compiler.path": "Entrada no válida. No se puede resolver la ruta de acceso del compilador.",
 	"path.is.not.a.file": "La ruta de acceso no es un archivo: {0}",
 	"path.is.not.a.directory": "La ruta de acceso no es un directorio: {0}",
+	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
 	"cannot.find2": "No se encuentra \"{0}\"."
 }

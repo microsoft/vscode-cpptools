@@ -1,0 +1,29 @@
+name: More Info Needed Closer - debugger
+on:
+  schedule:
+    - cron: 10 11 * * * # Run at 11:10 AM UTC (3:10 AM PST, 4:10 AM PDT)
+  workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Stale Closer
+        uses: ./.github/actions/StaleCloser
+        with:
+          readonly: ${{ github.event.inputs.readonly }}
+          labels: more info needed,debugger
+          ignoreLabels: language service,internal
+          involves: wardengnaw,pieandcakes,calgagi
+          closeDays: 14
+          closeComment: "This issue has been closed automatically because it needs more information and has not had recent activity."
+          pingDays: 7
+          pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the problem no longer exists, or adding more information."

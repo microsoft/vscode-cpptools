@@ -3300,7 +3300,7 @@
   "uso del concetto non valido",
   "un operatore di confronto membri impostato come predefinito non può essere qualificato con '&&'",
   "la funzione di confronto constexpr predefinita chiama la funzione non constexpr %nd",
-  "il confronto di memoria constexpr è supportato solo per gli oggetti intero o matrice di intero di primo livello",
+  "il confronto di memoria constexpr è supportato solo per gli oggetti intero o matrice di interi",
   "un modello di concetto non può avere vincoli associati",
   "'export' non è consentito",
   "l'esportazione di singoli membri di classe non è consentita",
@@ -3351,5 +3351,11 @@
   "non è possibile leggere il file del modulo",
   "la funzione predefinita non è disponibile perché il tipo char8_t non è supportato con le opzioni correnti",
   "non è possibile specificare l'opzione della riga di comando --ms_await se le coroutine di C++20 sono abilitate",
-  "uso non standard del costruttore esplicito %nod per l'inizializzazione dell'elemento di aggregazione predefinito"
+  "uso non standard del costruttore esplicito %nod per l'inizializzazione dell'elemento di aggregazione predefinito",
+  "l'origine o la destinazione dell'intrinseco simile a memcpy non punta a un oggetto",
+  "l'intrinseco simile a memcpy prova a copiare i tipi distinti dal punto di vista della rappresentazione %t1 e %t2",
+  "l'intrinseco simile a memcpy prova a copiare il tipo non facilmente copiabile %t",
+  "l'intrinseco simile a memcpy prova a copiare l'oggetto parziale",
+  "l'intrinseco simile a memcpy prova a copiare oltre il limite della matrice",
+  "l'intrinseco simile a memcpy prova a copiare intervalli di byte sovrapposti (usando invece l'operazione memmove corrispondente)"
 ]

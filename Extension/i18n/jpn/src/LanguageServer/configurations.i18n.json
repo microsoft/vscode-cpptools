@@ -15,5 +15,6 @@
 	"cannot.resolve.compiler.path": "無効な入力です。コンパイラ パスを解決できません",
 	"path.is.not.a.file": "パスがファイルではありません: {0}",
 	"path.is.not.a.directory": "パスがディレクトリではありません: {0}",
+	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
 	"cannot.find2": "\"{0}\" が見つかりません。"
 }
