@@ -15,5 +15,6 @@
 	"cannot.resolve.compiler.path": "Giriş geçersiz, derleyici yolu çözümlenemiyor",
 	"path.is.not.a.file": "Yol bir dosya değil: {0}",
 	"path.is.not.a.directory": "Yol bir dizin değil: {0}",
+	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
 	"cannot.find2": "\"{0}\" bulunamıyor."
 }

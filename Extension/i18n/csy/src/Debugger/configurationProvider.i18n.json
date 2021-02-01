@@ -7,6 +7,8 @@
 	"default.configuration.menuitem": "Výchozí konfigurace",
 	"select.configuration": "Vybrat konfiguraci",
 	"cl.exe.not.available": "Sestavení a ladění {0} je k dispozici jen v případě, že se nástroj VS Code spustil z nástroje Developer Command Prompt pro VS.",
+	"miDebuggerPath.not.available": "miDebuggerPath does not exist: {0}. Has a debugger been installed?",
+	"debugger.deprecated.config": "The key '{0}' is deprecated. Please use '{1}' instead.",
 	"debugger.not.available": "Ladicí program typu {0} je k dispozici jen ve Windows. Na aktuální platformě operačního systému použijte typ {1}.",
 	"lldb.framework.install.xcode": "Další informace",
 	"lldb.framework.not.found": "Nepovedlo se najít LLDB.framework pro lldb-mi. Nainstalujte prosím XCode nebo jeho nástroje příkazového řádku.",

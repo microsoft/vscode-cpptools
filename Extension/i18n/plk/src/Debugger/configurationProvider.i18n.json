@@ -7,6 +7,8 @@
 	"default.configuration.menuitem": "Konfiguracja domyślna",
 	"select.configuration": "Wybierz konfigurację",
 	"cl.exe.not.available": "{0} — funkcji kompilacji i debugowania można używać tylko wtedy, gdy program VS Code został uruchomiony z wiersza polecenia dla deweloperów w programie VS.",
+	"miDebuggerPath.not.available": "miDebuggerPath does not exist: {0}. Has a debugger been installed?",
+	"debugger.deprecated.config": "The key '{0}' is deprecated. Please use '{1}' instead.",
 	"debugger.not.available": "Debuger typu: „{0}” jest dostępny tylko w systemie Windows. Użyj typu: „{1}” na bieżącej platformie systemu operacyjnego.",
 	"lldb.framework.install.xcode": "Więcej informacji",
 	"lldb.framework.not.found": "Nie można zlokalizować elementu „LLDB.framework” dla narzędzia lldb-mi. Zainstaluj środowisko XCode lub narzędzia wiersza polecenia środowiska XCode.",
