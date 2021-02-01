@@ -7,6 +7,8 @@
 	"default.configuration.menuitem": "預設組態",
 	"select.configuration": "選取組態",
 	"cl.exe.not.available": "只有從 VS 的開發人員命令提示字元執行 VS Code 時，才可使用 {0} 組建和偵錯。",
+	"miDebuggerPath.not.available": "miDebuggerPath does not exist: {0}. Has a debugger been installed?",
+	"debugger.deprecated.config": "The key '{0}' is deprecated. Please use '{1}' instead.",
 	"debugger.not.available": "只能在 Windows 上使用類型為 '{0}' 的偵錯工具。在目前的 OS 平台上使用類型 '{1}'。",
 	"lldb.framework.install.xcode": "更多資訊",
 	"lldb.framework.not.found": "找不到 lldb-mi 的 'LLDB.framework'。請安裝 XCode 或 XCode 命令列工具。",

@@ -25,17 +25,16 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                 symbols.forEach((symbol) => {
                     const suffix: string = util.getLocalizedString(symbol.suffix);
                     let name: string = symbol.name;
-                    const range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
-                    const uri: vscode.Uri = vscode.Uri.parse(symbol.location.uri.toString());
                     if (suffix.length) {
                         name = name + ' (' + suffix + ')';
                     }
+                    const range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
+                    const uri: vscode.Uri = vscode.Uri.parse(symbol.location.uri.toString());
                     const vscodeSymbol: vscode.SymbolInformation = new vscode.SymbolInformation(
                         name,
                         symbol.kind,
-                        range,
-                        uri,
-                        symbol.containerName
+                        symbol.containerName,
+                        new vscode.Location(uri, range)
                     );
                     resultSymbols.push(vscodeSymbol);
                 });

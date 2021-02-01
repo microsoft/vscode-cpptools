@@ -83,7 +83,7 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
         return this._version < Version.v2 ? Promise.resolve(false) : this.provider.canProvideBrowseConfiguration(token);
     }
 
-    public provideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
+    public provideBrowseConfiguration(token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration | null> {
         console.assert(this._version >= Version.v2);
         return this._version < Version.v2 ? Promise.resolve({browsePath: []}) : this.provider.provideBrowseConfiguration(token);
     }
@@ -92,7 +92,7 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
         return this._version < Version.v3 ? Promise.resolve(false) : this.provider.canProvideBrowseConfigurationsPerFolder(token);
     }
 
-    public provideFolderBrowseConfiguration(uri: vscode.Uri, token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration> {
+    public provideFolderBrowseConfiguration(uri: vscode.Uri, token?: vscode.CancellationToken): Thenable<WorkspaceBrowseConfiguration | null> {
         console.assert(this._version >= Version.v3);
         return this._version < Version.v3 ? Promise.resolve({browsePath: []}) : this.provider.provideFolderBrowseConfiguration(uri, token);
     }

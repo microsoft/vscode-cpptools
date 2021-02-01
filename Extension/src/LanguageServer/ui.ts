@@ -165,7 +165,7 @@ export class UI {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "c"));
 
             let isCppPropertiesJson: boolean = false;
-            if (activeEditor.document.languageId === "json") {
+            if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
                 isCppPropertiesJson = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
                 if (isCppPropertiesJson) {
                     vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");

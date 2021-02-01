@@ -7,6 +7,7 @@
 const elementId: { [key: string]: string } = {
     // Basic settings
     configName: "configName",
+    configNameInvalid: "configNameInvalid",
     configSelection: "configSelection",
     addConfigDiv: "addConfigDiv",
     addConfigBtn: "addConfigBtn",
@@ -285,6 +286,7 @@ class SettingsApp {
     private updateErrors(errors: any): void {
         this.updating = true;
         try {
+            this.showErrorWithInfo(elementId.configNameInvalid, errors.name);
             this.showErrorWithInfo(elementId.intelliSenseModeInvalid, errors.intelliSenseMode);
             this.showErrorWithInfo(elementId.compilerPathInvalid, errors.compilerPath);
             this.showErrorWithInfo(elementId.includePathInvalid, errors.includePath);

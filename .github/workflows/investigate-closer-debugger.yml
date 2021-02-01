@@ -1,0 +1,26 @@
+name: Investigate closer - debugger
+on:
+  schedule:
+    - cron: 10 11 * * * # Run at 11:10 AM UTC (3:10 AM PST, 4:10 AM PDT)
+  workflow_dispatch:
+   inputs:
+     readonly:
+       description: "readonly: Specify true or 1 to prevent changes from being commited to GitHub"
+       default: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+      - name: Install Actions
+        run: cd ./.github/actions && npm install --production && cd ../..
+      - name: Stale Closer
+        uses: ./.github/actions/StaleCloser
+        with:
+          readonly: ${{ github.event.inputs.readonly }}
+          labels: investigate,debugger
+          ignoreLabels: language service,internal
+          closeDays: 180
+          closeComment: "This issue has been closed automatically because it has not had recent activity."

@@ -3300,7 +3300,7 @@
   "kavram kullanımı geçersiz",
   "varsayılan olarak ayarlanan üye karşılaştırma işleci tam '&&' ile nitelenemez",
   "varsayılan constexpr karşılaştırma işlevi constexpr olmayan %nd işlevini çağırıyor",
-  "constexpr bellek karşılaştırması yalnızca üst düzey tamsayı veya tamsayı dizisi nesneleri için desteklenir",
+  "constexpr bellek karşılaştırması yalnızca tamsayı veya tamsayı dizisi nesneleri için desteklenir",
   "kavram şablonunda ilişkili kısıtlamalar olamaz",
   "'export'a izin verilmiyor",
   "sınıf üyelerini tek tek dışarı aktarmaya izin verilmiyor",
@@ -3351,5 +3351,11 @@
   "modül dosyası okunamıyor",
   "char8_t türü geçerli seçeneklerle desteklenmediği için yerleşik işlev kullanılamıyor",
   "C++20 eş yordamları etkinleştirilirse --ms_await komut satırı seçeneği belirtilemez",
-  "varsayılan toplama öğesi başlatma için açık oluşturucu %nod için standart olmayan kullanım"
+  "varsayılan toplama öğesi başlatma için açık oluşturucu %nod için standart olmayan kullanım",
+  "memcpy benzeri iç öğenin kaynağı veya hedefi bir nesneye işaret etmiyor",
+  "memcpy benzeri iç öğe, temsili olarak farklı %t1 ve %t2 türlerini kopyalamaya çalışıyor",
+  "memcpy benzeri iç öğe, önemsiz olarak kopyalanabilir %t türünü kopyalamaya çalışıyor",
+  "memcpy benzeri iç öğe, kısmi nesneyi kopyalamaya çalışıyor",
+  "memcpy benzeri iç öğe, geçmiş dizi sınırını kopyalamaya çalışıyor",
+  "memcpy benzeri iç öğe, çakışan bayt aralıklarını kopyalamaya çalışıyor (bunun yerine karşılık gelen memmove işlemini kullanarak)"
 ]

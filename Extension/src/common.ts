@@ -45,6 +45,14 @@ export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
 
+let cachedClangFormatPath: string | null | undefined;
+export function getCachedClangFormatPath(): string | null | undefined {
+    return cachedClangFormatPath;
+}
+export function setCachedClangFormatPath(path: string | null): void {
+    cachedClangFormatPath = path;
+}
+
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
@@ -126,10 +134,7 @@ export function getVcpkgPathDescriptorFile(): string {
         }
         return path.join(pathPrefix, "vcpkg/vcpkg.path.txt");
     } else {
-        const pathPrefix: string | undefined = process.env.HOME;
-        if (!pathPrefix) {
-            throw new Error("Unable to read process.env.HOME");
-        }
+        const pathPrefix: string = os.homedir();
         return path.join(pathPrefix, ".vcpkg/vcpkg.path.txt");
     }
 }
@@ -355,10 +360,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
 
     // Resolve '~' at the start of the path.
     regexp = () => /^\~/g;
-    ret = ret.replace(regexp(), (match: string, name: string) => {
-        const newValue: string | undefined = (process.platform === 'win32') ? process.env.USERPROFILE : process.env.HOME;
-        return newValue ? newValue : match;
-    });
+    ret = ret.replace(regexp(), (match: string, name: string) => os.homedir());
 
     return ret;
 }
@@ -514,7 +516,7 @@ export function getInstalledBinaryPlatform(): string | undefined {
     return installedPlatform;
 }
 
-/* Check if the core binaries exists in extension's installation folder */
+/** Check if the core binaries exists in extension's installation folder */
 export async function checkInstallBinariesExist(): Promise<boolean> {
     if (!checkInstallLockFile()) {
         return false;
@@ -538,23 +540,39 @@ export async function checkInstallBinariesExist(): Promise<boolean> {
     return installBinariesExist;
 }
 
-/* Check if the core Json files exists in extension's installation folder */
+/** Check if the core Json files exists in extension's installation folder */
 export async function checkInstallJsonsExist(): Promise<boolean> {
     let installJsonsExist: boolean = true;
     const jsonFiles: string[] = [
-        "bin/msvc.arm32.clang.json",
-        "bin/msvc.arm32.gcc.json",
-        "bin/msvc.arm32.msvc.json",
-        "bin/msvc.arm64.clang.json",
-        "bin/msvc.arm64.gcc.json",
-        "bin/msvc.arm64.msvc.json",
-        "bin/msvc.json",
-        "bin/msvc.x64.clang.json",
-        "bin/msvc.x64.gcc.json",
-        "bin/msvc.x64.msvc.json",
-        "bin/msvc.x86.clang.json",
-        "bin/msvc.x86.gcc.json",
-        "bin/msvc.x86.msvc.json",
+        "bin/common.json",
+        "bin/linux.clang.arm.json",
+        "bin/linux.clang.arm64.json",
+        "bin/linux.clang.x64.json",
+        "bin/linux.clang.x86.json",
+        "bin/linux.gcc.arm.json",
+        "bin/linux.gcc.arm64.json",
+        "bin/linux.gcc.x64.json",
+        "bin/linux.gcc.x86.json",
+        "bin/macos.clang.arm.json",
+        "bin/macos.clang.arm64.json",
+        "bin/macos.clang.x64.json",
+        "bin/macos.clang.x86.json",
+        "bin/macos.gcc.arm.json",
+        "bin/macos.gcc.arm64.json",
+        "bin/macos.gcc.x64.json",
+        "bin/macos.gcc.x86.json",
+        "bin/windows.clang.arm.json",
+        "bin/windows.clang.arm64.json",
+        "bin/windows.clang.x64.json",
+        "bin/windows.clang.x86.json",
+        "bin/windows.gcc.arm.json",
+        "bin/windows.gcc.arm64.json",
+        "bin/windows.gcc.x64.json",
+        "bin/windows.gcc.x86.json",
+        "bin/windows.msvc.arm.json",
+        "bin/windows.msvc.arm64.json",
+        "bin/windows.msvc.x64.json",
+        "bin/windows.msvc.x86.json",
         "debugAdapters/bin/cppdbg.ad7Engine.json"
     ];
     await Promise.all(jsonFiles.map(async (file) => {
@@ -895,6 +913,7 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
     });
 }
 
+/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
 export interface CompilerPathAndArgs {
     compilerPath?: string;
     compilerName: string;
@@ -950,14 +969,13 @@ function extractArgs(argsString: string): string[] {
 
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
+    const compilerPathLowercase: string | undefined = inputCompilerPath?.toLowerCase();
     let compilerName: string = "";
     let additionalArgs: string[] = [];
-    const isWindows: boolean = os.platform() === 'win32';
-    if (compilerPath) {
-        if (compilerPath.endsWith("\\cl.exe") || compilerPath.endsWith("/cl.exe") || compilerPath === "cl.exe") {
-            // Input is only compiler name, this is only for cl.exe
-            compilerName = path.basename(compilerPath);
 
+    if (compilerPath) {
+        if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")) {
+            compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
             const endQuote: number = compilerPath.substr(1).search("\"") + 1;
@@ -967,12 +985,16 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                 compilerName = path.basename(compilerPath);
             }
         } else {
-            // Input has no quotes but can have a compiler path with spaces and args.
-            // Go from right to left checking if a valid path is to the left of a space.
+            // Input has no quotes around compiler path
             let spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (spaceStart !== -1 && (!isWindows || !compilerPath.endsWith("cl.exe")) && !checkFileExistsSync(compilerPath)) {
+            if (checkFileExistsSync(compilerPath)) {
+                // Get compiler name if there are no args but path is valid.
+                compilerName = path.basename(compilerPath);
+            } else if (spaceStart !== -1 && !checkFileExistsSync(compilerPath)) {
+                // Get compiler name if compiler path has spaces and args.
+                // Go from right to left checking if a valid path is to the left of a space.
                 let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
-                while ((!isWindows || !potentialCompilerPath.endsWith("cl.exe")) && !checkFileExistsSync(potentialCompilerPath)) {
+                while (!checkFileExistsSync(potentialCompilerPath)) {
                     spaceStart = potentialCompilerPath.lastIndexOf(" ");
                     if (spaceStart === -1) {
                         // Reached the start without finding a valid path. Use the original value.
@@ -985,12 +1007,8 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                     // Found a valid compilerPath and args.
                     additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
                     compilerPath = potentialCompilerPath;
+                    compilerName = path.basename(potentialCompilerPath);
                 }
-                compilerName = path.basename(compilerPath);
-            }
-            // Get compiler name if there are no args but path is valid or a valid path was found with args.
-            if (compilerPath === "cl.exe" || checkFileExistsSync(compilerPath)) {
-                compilerName = path.basename(compilerPath);
             }
         }
     }

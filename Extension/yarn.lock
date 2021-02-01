@@ -204,10 +204,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/vscode@1.49.0":
-  version "1.49.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.49.0.tgz#f3731d97d7e8b2697510eb26f6e6d04ee8c17352"
-  integrity sha512-wfNQmLmm1VdMBr6iuNdprWmC1YdrgZ9dQzadv+l2eSjJlElOdJw8OTm4RU4oGTBcfvG6RZI2jOcppkdSS18mZw==
+"@types/vscode@1.52.0":
+  version "1.52.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.52.0.tgz#61917968dd403932127fc4004a21fd8d69e4f61c"
+  integrity sha512-Kt3bvWzAvvF/WH9YEcrCICDp0Z7aHhJGhLJ1BxeyNP6yRjonWqWnAIh35/pXAjswAnWOABrYlF7SwXR9+1nnLA==
 
 "@types/webpack-sources@*":
   version "0.1.6"
@@ -2840,9 +2840,9 @@ inherits@2.0.3:
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
 ini@^1.3.4, ini@^1.3.5:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
-  integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.7.tgz#a09363e1911972ea16d7a8851005d84cf09a9a84"
+  integrity sha512-iKpRpXP+CrP2jyrxvg1kMUpXDyRUFDWurxbnVT1vQPx+Wz9uCYsMIqYuSBLV+PAaZG/d7kRLKRFc9oDMsH+mFQ==
 
 inquirer@^7.0.0:
   version "7.0.4"
@@ -5631,10 +5631,10 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vscode-cpptools@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-4.0.1.tgz#7e591572b437a6aca47b767487b52bc253e6d911"
-  integrity sha512-2IjtWe7rjIp20J+5m0Yjpa8TjGhdQWChwE49iYJBUUTHFqJDFq0aXNAyiDNw6BDWI1Q2Z/gmeQGsJBoxTb0J0Q==
+vscode-cpptools@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-5.0.0.tgz#f1195736af1cfa10727482be57093a3997c8f63b"
+  integrity sha512-TPG6/o9+DisDj2U4AiTOihtfjEzBb/4CErYaB1JIWFMZTQE7zlNTdsgCs+l4xIS2Y34us0RMBIC6On1mBuwxww==
 
 vscode-debugadapter@^1.35.0:
   version "1.38.0"
