@@ -77,6 +77,7 @@
 * Fix compiler querying with compilers that do not output `__STD_VERSION__` by default (gcc <= 4.8.x). [#6792](https://github.com/microsoft/vscode-cpptools/issues/6792)
 * Fix document symbols when nested symbols have the same name as a parent. [#6830](https://github.com/microsoft/vscode-cpptools/issues/6830)
 * Fix automatic adding of header files to `files.associations` after `Go to Definition` on a `#include`. [#6845](https://github.com/microsoft/vscode-cpptools/issues/6845)
+* Fix `"Insiders"` `updateChannel` for VS Code - Exploration. [#6875](https://github.com/microsoft/vscode-cpptools/issues/6875)
 * Fix "D" command line warnings not appearing with cl.exe cppbuild build tasks.
 * Fix cl.exe cppbuild tasks when `/nologo` is used (and make /nologo a default arg).
 * Fix a cpptools crash and multiple deadlocks.
