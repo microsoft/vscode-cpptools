@@ -14,7 +14,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "供 Intellisense 引擎在 Mac 架構中搜尋包含的標頭時使用的路徑清單。僅支援用於 Mac 組態。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.windowsSdkVersion": "要在 Windows 上使用的 Windows SDK 包含路徑版本，例如 '10.0.17134.0'。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.defines": "剖析檔案時，IntelliSense 引擎要使用的前置處理器定義清單。您可使用 = 來設定值，例如 VERSION=1。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.intelliSenseMode": "要使用的 IntelliSense 模式 (對應到 MSVC、gcc 或 Clang 的架構專屬變體)。如果未設定或設為 ${default}，延伸模組會選擇該平台的預設。Windows 預設為 msvc-x64、Linux 預設為 gcc-x64、macOS 預設為 clang-x64。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.intelliSenseMode": "The IntelliSense mode to use that maps to a platform and architecture variant of MSVC, gcc, or Clang. If not set or if set to ${default}, the extension will choose the default for that platform. Windows defaults to windows-msvc-x64, Linux defaults to linux-gcc-x64, and macOS defaults to macos-clang-x64.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.forcedInclude": "應包含在編譯單位中任何 include 檔案之前的檔案清單。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.configurationProvider": "提供原始程式檔 IntelliSense 組態資訊的 VS Code 延伸模組識別碼。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.limitSymbolsToIncludedHeaders": "設為 true，就會只處理直接或間接以標頭形式包含的檔案; 設為 false，則會處理位於指定 include 路徑下的所有檔案。",

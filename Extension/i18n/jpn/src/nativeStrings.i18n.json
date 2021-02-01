@@ -205,5 +205,6 @@
 	"unhandled_target_arg_detected": "ハンドルされていないターゲット引数値が検出されました: {0}",
 	"memory_limit_shutting_down_intellisense": "IntelliSense サーバーをシャットダウンしています: {0}。メモリ使用量は {1} MB で、{2} MB の制限を超えました。",
 	"failed_to_query_for_standard_version": "既定の標準バージョンのパス \"{0}\" でコンパイラをクエリできませんでした。このコンパイラでは、コンパイラのクエリが無効になっています。",
-	"unrecognized_language_standard_version": "コンパイラ クエリにより、認識されない言語標準バージョンが返されました。代わりに、サポートされている最新のバージョンが使用されます。"
+	"unrecognized_language_standard_version": "コンパイラ クエリにより、認識されない言語標準バージョンが返されました。代わりに、サポートされている最新のバージョンが使用されます。",
+	"intellisense_process_crash_detected": "IntelliSense process crash detected."
 }

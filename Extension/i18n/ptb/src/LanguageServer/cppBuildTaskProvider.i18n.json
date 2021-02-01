@@ -8,7 +8,7 @@
 	"compiler_details": "compilador:",
 	"task_generated_by_debugger": "Tarefa gerada pelo Depurador.",
 	"starting_build": "Iniciando o build...",
-	"build_finished_with_error": "Build concluído com erros",
+	"build_finished_with_error": "Build finished with error(s)",
 	"build_finished_with_warnings": "Build concluído com avisos",
 	"build finished successfully": "Build concluído com êxito."
 }

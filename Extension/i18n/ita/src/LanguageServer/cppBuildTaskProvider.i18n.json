@@ -8,7 +8,7 @@
 	"compiler_details": "compilatore:",
 	"task_generated_by_debugger": "Attività generata dal debugger.",
 	"starting_build": "Avvio della compilazione...",
-	"build_finished_with_error": "La compilazione è terminata con uno o più errori",
+	"build_finished_with_error": "La compilazione è terminata con errore/i",
 	"build_finished_with_warnings": "La compilazione è terminata con uno o più avvisi",
 	"build finished successfully": "La compilazione è terminata."
 }

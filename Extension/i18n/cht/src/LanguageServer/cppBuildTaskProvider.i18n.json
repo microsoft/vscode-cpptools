@@ -8,7 +8,7 @@
 	"compiler_details": "編譯器:",
 	"task_generated_by_debugger": "偵錯工具產生的工作。",
 	"starting_build": "正在開始建置...",
-	"build_finished_with_error": "建置已完成，但出現錯誤",
+	"build_finished_with_error": "建置已完成，但發生錯誤",
 	"build_finished_with_warnings": "建置已完成，但出現警告",
 	"build finished successfully": "已成功完成建置。"
 }
