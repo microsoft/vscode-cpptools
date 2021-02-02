@@ -15,6 +15,6 @@
 	"cannot.resolve.compiler.path": "輸入無效，無法解析編譯器路徑",
 	"path.is.not.a.file": "路徑不是檔案: {0}",
 	"path.is.not.a.directory": "路徑不是目錄: {0}",
-	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
+	"duplicate.name": "{0} 重複。組態名稱應該是唯一的。",
 	"cannot.find2": "找不到 \"{0}\"。"
 }
