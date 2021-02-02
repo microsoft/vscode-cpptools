@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.2.0: February 1, 2021
+## Version 1.2.0: February 2, 2021
 ### New Features
 * Add support for cross-compilation configurations for IntelliSense. For example, `intelliSenseMode` value "linux-gcc-x64" could be used on a Mac host machine. [#1083](https://github.com/microsoft/vscode-cpptools/issues/1083)
 
