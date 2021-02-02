@@ -302,6 +302,7 @@ export interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
+/** Differs from vscode.Location, which has a uri of type vscode.Uri. */
 interface Location {
     uri: string;
     range: Range;
@@ -399,7 +400,7 @@ enum SemanticTokenTypes {
     referenceType = 5,
     valueType = 6,
     function = 7,
-    member = 8,
+    method = 8,
     property = 9,
     cliProperty = 10,
     event = 11,
@@ -606,6 +607,7 @@ export class DefaultClient implements Client {
     private documentFormattingProviderDisposable: vscode.Disposable | undefined;
     private formattingRangeProviderDisposable: vscode.Disposable | undefined;
     private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
+    private codeFoldingProvider: FoldingRangeProvider | undefined;
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
@@ -700,7 +702,7 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         let storagePath: string | undefined;
         if (util.extensionContext) {
-            const path: string | undefined = util.extensionContext.storagePath;
+            const path: string | undefined = util.extensionContext.storageUri?.fsPath;
             if (path) {
                 storagePath = path;
             }
@@ -838,7 +840,8 @@ export class DefaultClient implements Client {
                                 this.onTypeFormattingProviderDisposable  = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
                             }
                             if (settings.codeFolding) {
-                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                                this.codeFoldingProvider = new FoldingRangeProvider(this);
+                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
                             }
                             if (settings.enhancedColorization && this.semanticTokensLegend) {
                                 this.semanticTokensProvider = new SemanticTokensProvider(this);
@@ -1347,21 +1350,28 @@ export class DefaultClient implements Client {
                     }
                     if (changedSettings["codeFolding"]) {
                         if (settings.codeFolding) {
-                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, new FoldingRangeProvider(this));
+                            this.codeFoldingProvider = new FoldingRangeProvider(this);
+                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
                         } else if (this.codeFoldingProviderDisposable) {
                             this.codeFoldingProviderDisposable.dispose();
                             this.codeFoldingProviderDisposable = undefined;
+                            this.codeFoldingProvider = undefined;
                         }
                     }
                     if (changedSettings["enhancedColorization"]) {
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, new SemanticTokensProvider(this), this.semanticTokensLegend);                        ;
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);                        ;
                         } else if (this.semanticTokensProviderDisposable) {
                             this.semanticTokensProviderDisposable.dispose();
                             this.semanticTokensProviderDisposable = undefined;
                             this.semanticTokensProvider = undefined;
                         }
+                    }
+                    // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
+                    // or node-addon-api was installed so prompt for reload.
+                    if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
+                        util.promptForReloadWindowDueToSettingsChange();
                     }
                 }
                 this.configuration.onDidChangeSettings();
@@ -1692,7 +1702,7 @@ export class DefaultClient implements Client {
             return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
                 (configs?: SourceFileConfigurationItem[] | null) => {
                     if (configs && configs.length > 0) {
-                        this.sendCustomConfigurations(configs);
+                        this.sendCustomConfigurations(configs, provider.version);
                     }
                     onFinished();
                 },
@@ -2162,6 +2172,9 @@ export class DefaultClient implements Client {
                 }
             }
         }
+        if (this.codeFoldingProvider) {
+            this.codeFoldingProvider.refresh();
+        }
     }
 
     public logIntellisenseSetupTime(notification: IntelliSenseSetup): void {
@@ -2351,19 +2364,24 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
 
-    private isSourceFileConfigurationItem(input: any): input is SourceFileConfigurationItem {
+    private isSourceFileConfigurationItem(input: any, providerVersion: Version): input is SourceFileConfigurationItem {
+        // IntelliSenseMode and standard are optional for version 5+. However, they are required when compilerPath is not defined.
+        let areOptionalsValid: boolean = false;
+        if (providerVersion < Version.v5 || input.configuration.compilerPath === undefined) {
+            areOptionalsValid = util.isString(input.configuration.intelliSenseMode) && util.isString(input.configuration.standard);
+        } else if (util.isString(input.configuration.compilerPath)) {
+            areOptionalsValid = util.isOptionalString(input.configuration.intelliSenseMode) && util.isOptionalString(input.configuration.standard);
+        }
         return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
             input.configuration &&
+            areOptionalsValid &&
             util.isArrayOfString(input.configuration.includePath) &&
             util.isArrayOfString(input.configuration.defines) &&
-            util.isString(input.configuration.intelliSenseMode) &&
-            util.isString(input.configuration.standard) &&
-            util.isOptionalString(input.configuration.compilerPath) &&
             util.isOptionalArrayOfString(input.configuration.compilerArgs) &&
             util.isOptionalArrayOfString(input.configuration.forcedInclude));
     }
 
-    private sendCustomConfigurations(configs: any): void {
+    private sendCustomConfigurations(configs: any, providerVersion: Version): void {
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -2377,7 +2395,7 @@ export class DefaultClient implements Client {
         }
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
-            if (this.isSourceFileConfigurationItem(item)) {
+            if (this.isSourceFileConfigurationItem(item, providerVersion)) {
                 this.configurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
                 if (settings.loggingLevel === "Debug") {
                     out.appendLine(`  uri: ${item.uri.toString()}`);
@@ -2419,6 +2437,15 @@ export class DefaultClient implements Client {
     private browseConfigurationLogging: string = "";
     private configurationLogging: Map<string, string> = new Map<string, string>();
 
+    private isWorkspaceBrowseConfiguration(input: any): boolean {
+        const areOptionalsValid: boolean = (input.compilerPath === undefined && util.isString(input.standard)) ||
+            (util.isString(input.compilerPath) && util.isOptionalString(input.standard));
+        return areOptionalsValid &&
+        util.isArrayOfString(input.browsePath) &&
+        util.isOptionalString(input.compilerArgs) &&
+        util.isOptionalString(input.windowsSdkVersion);
+    }
+
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder) {
@@ -2448,11 +2475,7 @@ export class DefaultClient implements Client {
             }
 
             sanitized = {...<WorkspaceBrowseConfiguration>config};
-            if (!util.isArrayOfString(sanitized.browsePath) ||
-                !util.isOptionalString(sanitized.compilerPath) ||
-                !util.isOptionalArrayOfString(sanitized.compilerArgs) ||
-                !util.isOptionalString(sanitized.standard) ||
-                !util.isOptionalString(sanitized.windowsSdkVersion)) {
+            if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
                 console.log("Received an invalid browse configuration from configuration provider.");
                 const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
                 if (configValue) {
@@ -2590,6 +2613,7 @@ export class DefaultClient implements Client {
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
+            this.configuration.checkCompileCommands();
         }
     }
 

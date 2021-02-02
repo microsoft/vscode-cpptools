@@ -218,6 +218,6 @@
     "unhandled_target_arg_detected": "Unhandled target argument value detected: {0}",
     "memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit.",
     "failed_to_query_for_standard_version": "Failed to query compiler at path \"{0}\" for default standard versions.  Compiler querying is disabled for this compiler.",
-    "unrecognized_language_standard_version": "Compiler query returned an unrecognized language standard version.  The latest supported version will be used instead."
+    "unrecognized_language_standard_version": "Compiler query returned an unrecognized language standard version.  The latest supported version will be used instead.",
+    "intellisense_process_crash_detected": "IntelliSense process crash detected."
 }
-

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.1.3-master",
+  "version": "1.2.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.49.0"
+    "vscode": "^1.52.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -927,6 +927,34 @@
           "type": "string",
           "enum": [
             "",
+            "macos-clang-x86",
+            "macos-clang-x64",
+            "macos-clang-arm",
+            "macos-clang-arm64",
+            "macos-gcc-x86",
+            "macos-gcc-x64",
+            "macos-gcc-arm",
+            "macos-gcc-arm64",
+            "linux-clang-x86",
+            "linux-clang-x64",
+            "linux-clang-arm",
+            "linux-clang-arm64",
+            "linux-gcc-x86",
+            "linux-gcc-x64",
+            "linux-gcc-arm",
+            "linux-gcc-arm64",
+            "windows-clang-x86",
+            "windows-clang-x64",
+            "windows-clang-arm",
+            "windows-clang-arm64",
+            "windows-gcc-x86",
+            "windows-gcc-x64",
+            "windows-gcc-arm",
+            "windows-gcc-arm64",
+            "windows-msvc-x86",
+            "windows-msvc-x64",
+            "windows-msvc-arm",
+            "windows-msvc-arm64",
             "clang-x86",
             "clang-x64",
             "clang-arm",
@@ -1101,6 +1129,12 @@
           "default": true,
           "markdownDescription": "%c_cpp.configuration.vcpkg.enabled.markdownDescription%",
           "scope": "resource"
+        },
+        "C_Cpp.addNodeAddonIncludePaths": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.description%",
+          "scope": "application"
         },
         "C_Cpp.renameRequiresIdentifier": {
           "type": "boolean",
@@ -1955,6 +1989,23 @@
                 "description": "%c_cpp.debuggers.cppvsdbg.externalConsole.description%",
                 "default": false
               },
+              "console": {
+                "type": "string",
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal",
+                  "newExternalWindow"
+                ],
+                "enumDescriptions": [
+                  "%c_cpp.debuggers.cppvsdbg.console.internalConsole.description%",
+                  "%c_cpp.debuggers.cppvsdbg.console.integratedTerminal.description%",
+                  "%c_cpp.debuggers.cppvsdbg.console.externalTerminal.description%",
+                  "%c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description%"
+                ],
+                "description": "%c_cpp.debuggers.cppvsdbg.console.description%",
+                "default": "externalTerminal"
+              },
               "sourceFileMap": {
                 "type": "object",
                 "description": "%c_cpp.debuggers.sourceFileMap.description%",
@@ -2276,7 +2327,7 @@
           "property.static": [
             "variable.other.property.static"
           ],
-          "member.static": [
+          "method.static": [
             "entity.name.function.member.static"
           ],
           "macro": [
@@ -2352,7 +2403,7 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.49.0",
+    "@types/vscode": "1.52.0",
     "@types/webpack": "^4.39.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
@@ -2361,9 +2412,6 @@
     "@typescript-eslint/parser": "^2.19.2",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
-    "comment-json": "^3.0.3",
-    "editorconfig": "^0.15.3",
-    "escape-string-regexp": "^2.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsdoc": "^21.0.0",
@@ -2378,30 +2426,35 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
-    "https-proxy-agent": "^2.2.4",
-    "minimatch": "^3.0.4",
     "minimist": "^1.2.5",
-    "mkdirp": "^0.5.1",
     "mocha": "^4.0.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
-    "plist": "^3.0.1",
-    "tmp": "^0.1.0",
     "ts-loader": "^6.0.4",
     "tslint": "^5.19.0",
     "typescript": "^3.5.3",
-    "vscode-cpptools": "^4.0.1",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
-    "vscode-extension-telemetry": "^0.1.2",
-    "vscode-languageclient": "^5.2.1",
-    "vscode-nls": "^4.1.1",
     "vscode-nls-dev": "^3.2.6",
     "vscode-test": "^1.3.0",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.7",
+    "xml2js": "^0.4.19"
+  },
+  "dependencies": {
+    "comment-json": "^3.0.3",
+    "editorconfig": "^0.15.3",
+    "escape-string-regexp": "^2.0.0",
+    "https-proxy-agent": "^2.2.4",
+    "minimatch": "^3.0.4",
+    "mkdirp": "^0.5.1",
+    "plist": "^3.0.1",
+    "tmp": "^0.1.0",
+    "vscode-cpptools": "^5.0.0",
+    "vscode-extension-telemetry": "^0.1.2",
+    "vscode-languageclient": "^5.2.1",
+    "vscode-nls": "^4.1.1",
     "which": "^2.0.2",
-    "xml2js": "^0.4.19",
     "yauzl": "^2.10.0"
   },
   "resolutions": {
@@ -2419,7 +2472,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144140",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153757",
       "platforms": [
         "linux"
       ],
@@ -2430,11 +2483,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "B5030E8762BE43D7864536FE8C8A6253036523D9E0C350750D5874963DA42F2F"
+      "integrity": "1C809F5713F3B6F6FF6A1AA0E75D5070D89E0205E6B659D615A0757407D50748"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144141",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153855",
       "platforms": [
         "linux"
       ],
@@ -2445,11 +2498,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "5F0F29B2D59D8453A072D433324C68E0819923AFAC85D0CD1987F7AA275D7516"
+      "integrity": "8B8525039346122A5B7F3B7D6B6925E619A2F911BB53ACC0D7D06AFB4A80E2AB"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143991",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153756",
       "platforms": [
         "linux"
       ],
@@ -2460,11 +2513,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "099A94F440BB570B4CDCA07D5FE813657E8B7CBB3915F64C5C8A681DFBB28D3C"
+      "integrity": "0A1CE4B8DD444FD7DCE1094D53F361D0B8AB20D892DDE790F770936F87405BAC"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143992",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153758",
       "platforms": [
         "darwin"
       ],
@@ -2472,11 +2525,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "AEC6509B1667DE9B0C0BF867BB5A3B79F1F47C1B8D5A728C1FD8CA6E9240CEA7"
+      "integrity": "7253C3B91D3B7087D230CCD21EF16610474542BC884CD4DC0F707F48DE2AAADD"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153759",
       "platforms": [
         "win32"
       ],
@@ -2488,11 +2541,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
+      "integrity": "3614AB57187079BE8E10A9488E2EC4DC5260B14789AA9491FA10F3E75A6AAAE7"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153854",
       "platforms": [
         "win32"
       ],
@@ -2503,11 +2556,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
+      "integrity": "5565BD73EB7E08D209EE765F74164DF84DE2603A57D3A4786442AC68D806768E"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135581",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152861",
       "platforms": [
         "linux"
       ],
@@ -2517,11 +2570,11 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "B8381B87B83EE1AF9088AA6679F2DA013DC23A21D9EC5603C58DEFC323ED9617"
+      "integrity": "B29779E4FE3D03094655FD24CC17B55B41518EDDCCB1E3DF3F4665F9685152E0"
     },
     {
       "description": "ClangFormat (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135579",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152860",
       "platforms": [
         "linux"
       ],
@@ -2531,11 +2584,11 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "F06D3741192FFD7BB96BF9327D9DE1BBF6A9DB9753DA971C727D20D38835C1A9"
+      "integrity": "F1CD21F581715A2C2A3B10C8D33FF81E5CBCD58856AA73CA56A88B5F085EA0D7"
     },
     {
       "description": "ClangFormat (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2143107",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152922",
       "platforms": [
         "linux"
       ],
@@ -2545,29 +2598,60 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "8CE17FA29582759418588CD1B63C91691C944CCED95E45593D4EA31834E20913"
+      "integrity": "97B2A5A274F53FBB37485A383AD379CD556E85413BF843F0F0FD10536A0D705D"
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2135580",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152859",
       "platforms": [
         "darwin"
       ],
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "416D3B814A76E52D943B3372D517D6AADE0AB0BD9FD9921F871C1FB89D7B17B1"
+      "integrity": "7AA436BA25E3404DC658A137188BEC65FF2532D1FEB314ABBBC5EBC9AAF5CCF7"
     },
     {
-      "description": "ClangFormat (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2144203",
+      "description": "ClangFormat (Windows x86)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152921",
       "platforms": [
         "win32"
+      ],
+      "architectures": [
+        "x86"
       ],
       "binaries": [
         "./LLVM/bin/clang-format.exe"
       ],
-      "integrity": "F943ADF0CE7C123C674F62F8F31FF0ADD8C54F974DD25CD01A8A1AA1532A130F"
+      "integrity": "993A65F61F4BF6CA6FEF6F9C1B6EB4341CE63F30A72272CABA65392695764DA7"
+    },
+    {
+      "description": "ClangFormat (Windows x64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152923",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "x64"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format.exe"
+      ],
+      "integrity": "5E271FD44792B3675136A34466F67A876174B7818533CF37486372E43E014E62"
+    },
+    {
+      "description": "ClangFormat (Windows arm64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2152862",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format.exe"
+      ],
+      "integrity": "9944827F70A8C53127B1A7860401923DED2DB7FBAD75E7A8106636891C11F832"
     },
     {
       "description": "Mono Framework Assemblies",
@@ -2663,7 +2747,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2082216",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2153010",
       "platforms": [
         "win32"
       ],
@@ -2674,7 +2758,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "CF1A01AA75275F76800F6BC1D289F2066DCEBCD983376D344ABF6B03FDB8FEA0"
+      "integrity": "52C4234976D527A7BF02EB2E8844F3C605DC4BD1D3847F83C8675CD23967BAB3"
     }
   ]
 }

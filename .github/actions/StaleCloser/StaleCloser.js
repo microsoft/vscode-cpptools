@@ -8,8 +8,8 @@ exports.StaleCloser = void 0;
 const ActionBase_1 = require("../common/ActionBase");
 const utils_1 = require("../common/utils");
 class StaleCloser extends ActionBase_1.ActionBase {
-    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, removeLabels, setMilestoneId, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes) {
-        super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes);
+    constructor(github, closeDays, labels, closeComment, pingDays, pingComment, additionalTeam, addLabels, removeLabels, setMilestoneId, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves) {
+        super(labels, milestoneName, milestoneId, ignoreLabels, ignoreMilestoneNames, ignoreMilestoneIds, minimumVotes, maximumVotes, involves);
         this.github = github;
         this.closeDays = closeDays;
         this.closeComment = closeComment;
