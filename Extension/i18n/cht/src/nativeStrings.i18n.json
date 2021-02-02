@@ -206,5 +206,5 @@
 	"memory_limit_shutting_down_intellisense": "IntelliSense 伺服器即將關機: {0}。記憶體使用量為 {1} MB，超過了 {2} MB 的限制。",
 	"failed_to_query_for_standard_version": "無法查詢位於路徑 \"{0}\" 的編譯器預設標準版本。已停用此編譯器的編譯器查詢。",
 	"unrecognized_language_standard_version": "編譯器查詢傳回無法辨識的語言標準版本。將改用支援的最新版本。",
-	"intellisense_process_crash_detected": "IntelliSense process crash detected."
+	"intellisense_process_crash_detected": "偵測到 IntelliSense 流程損毀。"
 }
