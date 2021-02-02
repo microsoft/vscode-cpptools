@@ -139,7 +139,7 @@
 	"c_cpp.configuration.configurationWarnings.description": "确定在配置提供程序扩展无法提供源文件配置时是否显示弹出通知。",
 	"c_cpp.configuration.intelliSenseCachePath.description": "为 IntelliSense 使用的缓存预编译标头定义文件夹路径。Windows 上的默认缓存路径为 \"%LocalAppData%/Microsoft/vscode-cpptools\"，Linux 上为 \"$XDG_CACHE_HOME/vscode-cpptools/\" (若未定义 XDG_CACHE_HOME，则为 \"$HOME/.cache/vscode-cpptools/\")，Mac 上为 \"$HOME/Library/Caches/vscode-cpptools/\"。如果未指定路径或指定的路径无效，则使用默认路径。",
 	"c_cpp.configuration.intelliSenseCacheSize.description": "缓存的预编译标头的每个工作区硬盘驱动器空间的最大大小(MB)；实际使用量可能在此值上下波动。默认大小为 5120 MB。当大小为 0 时，预编译的标头缓存将被禁用。",
-	"c_cpp.configuration.intelliSenseMemoryLimit.description": "IntelliSense 进程的内存使用限制(MB)。默认限制为 4096 MB，最大限制为 16 GB。当 IntelliSense 进程超出限制时，扩展将关闭并重新启动该进程。",
+	"c_cpp.configuration.intelliSenseMemoryLimit.description": "IntelliSense 进程的内存使用限制(MB)。默认限制为 4096 MB，最大限制为 16 GB。当 IntelliSense 进程超出限制时，扩展将关闭并重新启动改进程。",
 	"c_cpp.configuration.intelliSenseUpdateDelay.description": "控制修改之后到 IntelliSense 开始更新之间的延迟(以毫秒为单位)。",
 	"c_cpp.configuration.default.includePath.description": "在 cpp_properties.json 中未指定 \"includePath\" 时要在配置中使用的值。如果指定了 \"includePath\"，则向数组添加 \"${default}\" 以从此设置插入值。",
 	"c_cpp.configuration.default.defines.description": "未指定 \"defines\" 时要在配置中使用的值，或 \"defines\" 中存在 \"${default}\" 时要插入的值。",

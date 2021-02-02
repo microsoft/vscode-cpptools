@@ -15,6 +15,6 @@
 	"cannot.resolve.compiler.path": "Недопустимые входные данные; не удается разрешить путь компилятора",
 	"path.is.not.a.file": "Путь не является файлом: {0}",
 	"path.is.not.a.directory": "Путь не является каталогом: {0}",
-	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
+	"duplicate.name": "{0} является дубликатом. Имя конфигурации должно быть уникальным.",
 	"cannot.find2": "Не удается найти \"{0}\"."
 }
