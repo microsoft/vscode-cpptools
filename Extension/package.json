@@ -2483,7 +2483,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "916D4F27CBA79A790485CD542A4A7E31B4AB311E04FB91F9D96DE7B5BD4FBFD0"
+      "integrity": "1C809F5713F3B6F6FF6A1AA0E75D5070D89E0205E6B659D615A0757407D50748"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
@@ -2498,7 +2498,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "7241F23E844789E756CE7F17D73E6076A172994546F2125E24355FAB95AD652D"
+      "integrity": "8B8525039346122A5B7F3B7D6B6925E619A2F911BB53ACC0D7D06AFB4A80E2AB"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
@@ -2513,7 +2513,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "AB34A470E2C3E4835A0AA68AE9BFB575AE3999E81522CCB5425B11C3EA774BDD"
+      "integrity": "0A1CE4B8DD444FD7DCE1094D53F361D0B8AB20D892DDE790F770936F87405BAC"
     },
     {
       "description": "C/C++ language components (OS X)",
@@ -2525,7 +2525,7 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "80B5C3396F92F88A0D2F7A187CCE64D9E661904169743EE97D1155C1C397E5BC"
+      "integrity": "7253C3B91D3B7087D230CCD21EF16610474542BC884CD4DC0F707F48DE2AAADD"
     },
     {
       "description": "C/C++ language components (Windows)",
@@ -2541,7 +2541,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "015EF8C9DFFD96EDD0E993770592C48BDF2A40CB87CB95E8FC98187FB121F10B"
+      "integrity": "3614AB57187079BE8E10A9488E2EC4DC5260B14789AA9491FA10F3E75A6AAAE7"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
@@ -2556,7 +2556,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "7FA77651FF011735102D637749A23F6F71E1F43901B51F73478DBC453C1A4B8C"
+      "integrity": "5565BD73EB7E08D209EE765F74164DF84DE2603A57D3A4786442AC68D806768E"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
