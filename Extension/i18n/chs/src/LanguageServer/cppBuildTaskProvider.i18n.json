@@ -8,7 +8,7 @@
 	"compiler_details": "编译器:",
 	"task_generated_by_debugger": "调试器生成的任务。",
 	"starting_build": "正在启动生成...",
-	"build_finished_with_error": "生成已完成，但发生错误",
+	"build_finished_with_error": "生成已完成，但出现错误",
 	"build_finished_with_warnings": "生成已完成，但收到警告",
 	"build finished successfully": "生成已成功完成。"
 }

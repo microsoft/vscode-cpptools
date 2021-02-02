@@ -15,5 +15,6 @@
 	"cannot.resolve.compiler.path": "Neplatný vstup, nedá se přeložit cesta ke kompilátoru.",
 	"path.is.not.a.file": "Cesta není soubor: {0}",
 	"path.is.not.a.directory": "Cesta není adresář: {0}",
+	"duplicate.name": "{0} je duplicitní. Název konfigurace by měl být jedinečný.",
 	"cannot.find2": "Nejde najít {0}."
 }

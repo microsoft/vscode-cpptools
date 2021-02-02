@@ -15,5 +15,6 @@
 	"cannot.resolve.compiler.path": "Ungültige Eingabe, Compilerpfad kann nicht aufgelöst werden.",
 	"path.is.not.a.file": "Der Pfad ist keine Datei: {0}",
 	"path.is.not.a.directory": "Der Pfad ist kein Verzeichnis: {0}",
+	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
 	"cannot.find2": "\"{0}\" wurde nicht gefunden."
 }
