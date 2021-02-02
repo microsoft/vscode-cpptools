@@ -10,14 +10,13 @@ import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as config from '../../../src/LanguageServer/configurations';
 import * as testHelpers from '../testHelpers';
-import { TsRules } from '../../../src/LanguageServer/languageConfig'
 
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
     });
 
-    const defaultRules: TsRules[] = [
+    const defaultRules: vscode.OnEnterRule[] = [
         {   // e.g. /** | */
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             afterText: /^\s*\*\/$/,
@@ -29,7 +28,7 @@ suite("multiline comment setting tests", function(): void {
         },
         {   // e.g.  * ...|
             beforeText: /^\s*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
-            oneLineAboveText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
+            previousLineText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         },
         {   // e.g.  */|
