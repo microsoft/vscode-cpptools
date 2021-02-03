@@ -7,6 +7,8 @@
 	"default.configuration.menuitem": "默认配置",
 	"select.configuration": "选择配置",
 	"cl.exe.not.available": "仅当从 VS 开发人员命令提示符处运行 VS Code 时，{0} 生成和调试才可用。",
+	"miDebuggerPath.not.available": "miDebuggerPath does not exist: {0}. Has a debugger been installed?",
+	"debugger.deprecated.config": "The key '{0}' is deprecated. Please use '{1}' instead.",
 	"debugger.not.available": "类型为“{0}”的调试程序仅在 Windows 上可用。在当前 OS 平台上使用类型“{1}”。",
 	"lldb.framework.install.xcode": "详细信息",
 	"lldb.framework.not.found": "找不到用于 lldb-mi 的 \"LLDB.framework\"。请安装 XCode 或 XCode 命令行工具。",

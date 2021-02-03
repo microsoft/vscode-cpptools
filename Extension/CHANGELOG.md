@@ -1,29 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.2.0-insiders3: January 26, 2021
-### Bug Fixes
-* Fix build tasks errors in single file mode. [#4638](https://github.com/microsoft/vscode-cpptools/issues/4638), [#6764](https://github.com/microsoft/vscode-cpptools/issues/6764)
-* Fix IntelliSense not supporting `__float128` (and `Q` literals) on x64 Linux. [#6574](https://github.com/microsoft/vscode-cpptools/issues/6574)
-* Fix IntelliSense process infinitely restarting after crashing. [#6724](https://github.com/microsoft/vscode-cpptools/issues/6724)
-* Fix not being able to attach to cpptools-srv on Mac (to get crash call stacks). [#6736](https://github.com/microsoft/vscode-cpptools/issues/6736)
-* Fix compiler querying with compilers that do not output `__STD_VERSION__` by default (gcc <= 4.8.x). [#6792](https://github.com/microsoft/vscode-cpptools/issues/6792)
-* Fix document symbols when nested symbols have the same name as a parent. [#6830](https://github.com/microsoft/vscode-cpptools/issues/6830)
-* Fix automatic adding of header files to `files.associations` after `Go to Definition` on a `#include`. [#6845](https://github.com/microsoft/vscode-cpptools/issues/6845)
-
-## Version 1.2.0-insiders2: January 20, 2021
-### Enhancement
-* Add new "console" launch config for cppvsdbg. [PR #6794](https://github.com/microsoft/vscode-cpptools/pull/6794)
-
-### Bug Fixes
-* Fix autocomplete not working with `for` loop variables with C code. [#2946](https://github.com/microsoft/vscode-cpptools/issues/2946)
-* Fix an entry not found error for files in `compile_commands.json` that didn't initially exist. [#6311](https://github.com/microsoft/vscode-cpptools/issues/6311)
-* Fix IntelliSense errors with C++20 std::ranges in gcc/clang modes. [#6342](https://github.com/microsoft/vscode-cpptools/issues/6342)
-* Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
-* Fix IntelliSense errors when "module" is used as a variable name with C++20. [#6719](https://github.com/microsoft/vscode-cpptools/issues/6719)
-* Fix a runtime failure on macOS 10.13 or older. [#6787](https://github.com/microsoft/vscode-cpptools/issues/6787)
-* Fix `Go to Symbol in Workspace`. [#6793](https://github.com/microsoft/vscode-cpptools/issues/6793)
-
-## Version 1.2.0-insiders: January 14, 2021
+## Version 1.2.0: February 2, 2021
 ### New Features
 * Add support for cross-compilation configurations for IntelliSense. For example, `intelliSenseMode` value "linux-gcc-x64" could be used on a Mac host machine. [#1083](https://github.com/microsoft/vscode-cpptools/issues/1083)
 
@@ -36,6 +13,7 @@
 * Add clang-format built for Windows ARM64. [#6494](https://github.com/microsoft/vscode-cpptools/issues/6494)
 * Add support for the `/await` flag with msvc IntelliSense. [#6596](https://github.com/microsoft/vscode-cpptools/issues/6596)
 * Increase document/workspace symbol limit from 1000 to 10000. [#6766](https://github.com/microsoft/vscode-cpptools/issues/6766)
+* Add new "console" launch config for cppvsdbg. [PR #6794](https://github.com/microsoft/vscode-cpptools/pull/6794)
 
 ### Bug Fixes
 * Fix handling of `--sysroot` and `-isysroot` with `compileCommands`. [#1575](https://github.com/microsoft/vscode-cpptools/issues/1575)
@@ -43,6 +21,7 @@
 * Fix IntelliSense involving overflow for unsigned int values. [#2202](https://github.com/microsoft/vscode-cpptools/issues/2202)
 * Fix IntelliSense not switching the language mode after changing C versus C++ `files.associations`. [#2557](https://github.com/microsoft/vscode-cpptools/issues/2557)
 * Fix Switch Header/Source not switching to an existing file in another column if it's not visible. [#2667](https://github.com/microsoft/vscode-cpptools/issues/2667), [#6749](https://github.com/microsoft/vscode-cpptools/issues/6749)
+* Fix autocomplete not working with `for` loop variables with C code. [#2946](https://github.com/microsoft/vscode-cpptools/issues/2946)
 * Fix `#include` completion not sorting _ last. [#3465](https://github.com/microsoft/vscode-cpptools/issues/3465)
 * Fix completion not working for templates in gcc/clang mode. [#3501](https://github.com/microsoft/vscode-cpptools/issues/3501)
 * Fix crash when certain JavaScript files are parsed as C++. [#3858](https://github.com/microsoft/vscode-cpptools/issues/3858)
@@ -51,6 +30,7 @@
 * Fix the Outline view for nested namespaces. [#4456](https://github.com/microsoft/vscode-cpptools/issues/4456)
 * Fix some IntelliSense parsing errors. [#4595](https://github.com/microsoft/vscode-cpptools/issues/4595), [#6362](https://github.com/microsoft/vscode-cpptools/issues/6362), [#6685](https://github.com/microsoft/vscode-cpptools/issues/6685)
 * Fix Outline view with`"**/.*"` in `files.exclude`. [#4602](https://github.com/microsoft/vscode-cpptools/issues/4602)
+* Fix build tasks errors in single file mode. [#4638](https://github.com/microsoft/vscode-cpptools/issues/4638), [#6764](https://github.com/microsoft/vscode-cpptools/issues/6764)
 * Fix the Outline view for nested structs/classes. [#4781](https://github.com/microsoft/vscode-cpptools/issues/4871)
 * Fix `files.exclude` not applying to watched files handlers. [#5141](https://github.com/microsoft/vscode-cpptools/issues/5141)
 * Fix code folding incorrectly matching an inactive `}`. [#5429](https://github.com/microsoft/vscode-cpptools/issues/5429)
@@ -59,9 +39,11 @@
 * Fix `#include` completion to include results for non-standard header file extensions. [#5698](https://github.com/microsoft/vscode-cpptools/issues/5698)
 * Fix clang-format failing due to missing libtinfo5 on Linux ARM/ARM64. [#5958](https://github.com/microsoft/vscode-cpptools/issues/5958)
 * Automatically configure to use a custom configuration provider if available and no other configuration exists. [#6150](https://github.com/microsoft/vscode-cpptools/issues/6150)
-* Fix not being able to attach to cpptools on Mac (to get crash call stacks). [#6151](https://github.com/microsoft/vscode-cpptools/issues/6151)
+* Fix not being able to attach to cpptools and cpptools-srv on Mac (to get crash call stacks). [#6151](https://github.com/microsoft/vscode-cpptools/issues/6151), [#6736](https://github.com/microsoft/vscode-cpptools/issues/6736)
 * Fix IntelliSense crashing with cl.exe with C++20 and span. [#6251](https://github.com/microsoft/vscode-cpptools/issues/6251)
 * Stop querying unsupported compilers. [#6314](https://github.com/microsoft/vscode-cpptools/issues/6314)
+* Fix an entry not found error for files in `compile_commands.json` that didn't initially exist. [#6311](https://github.com/microsoft/vscode-cpptools/issues/6311)
+* Fix IntelliSense errors with C++20 std::ranges in gcc/clang modes. [#6342](https://github.com/microsoft/vscode-cpptools/issues/6342)
 * Add a workaround for a missing compiler path for the `compile_commands.json` generated by Unreal Engine. [#6358](https://github.com/microsoft/vscode-cpptools/issues/6358)
 * Fix IntelliSense crash with coroutines. [#6363](https://github.com/microsoft/vscode-cpptools/issues/6363)
 * Add localized strings for `cppbuild` tasks. [#6436](https://github.com/microsoft/vscode-cpptools/issues/6436)
@@ -71,7 +53,9 @@
 * Fix gcc problem matcher when the column is missing.
   * @guntern [PR #6490](https://github.com/microsoft/vscode-cpptools/pull/6490)
 * Disable Insiders prompt for Codespaces. [#6491](https://github.com/microsoft/vscode-cpptools/issues/6491)
+* Fix `compile_commands.json` not working correctly for `*.C` files. [#6497](https://github.com/microsoft/vscode-cpptools/issues/6497)
 * Show an error message when gdb can't be found when generating a `launch.json` (instead of using an invalid `miDebuggerPath`). [#6511](https://github.com/microsoft/vscode-cpptools/issues/6511)
+* Fix IntelliSense not supporting `__float128` (and `Q` literals) on x64 Linux. [#6574](https://github.com/microsoft/vscode-cpptools/issues/6574)
 * Fix IntelliSense crash with a parenthesized type followed by an initializer list. [#6554](https://github.com/microsoft/vscode-cpptools/issues/6554), [#6624](https://github.com/microsoft/vscode-cpptools/issues/6624)
 * Fix IntelliSense updating after pasting multi-line code. [#6565](https://github.com/microsoft/vscode-cpptools/issues/6565)
 * Use "method" instead of "member" for semantic tokens. [#6569](https://github.com/microsoft/vscode-cpptools/issues/6569)
@@ -80,14 +64,20 @@
 * Stop showing an "unknown error" message after canceling the creation of a `launch.json`. [#6608](https://github.com/microsoft/vscode-cpptools/issues/6608)
 * Fix potential extension activation delay. [#6630](https://github.com/microsoft/vscode-cpptools/issues/6630)
 * Fix the executed command not appearing with cppbuild tasks. [#6647](https://github.com/microsoft/vscode-cpptools/issues/6647)
+* Fix IntelliSense crash on Mac due to IPCH file corruption. [#6673](https://github.com/microsoft/vscode-cpptools/issues/6673)
 * Fix `_Debug` not being defined when `/MDd` or `/MTd` are used. [#6690](https://github.com/microsoft/vscode-cpptools/issues/6690)
 * Fix infinite IntelliSense processing when C++20, gcc mode, and `-fcoroutines` and used. [#6709](https://github.com/microsoft/vscode-cpptools/issues/6709)
 * Allow the extension to run on M1 Macs. [#6713](https://github.com/microsoft/vscode-cpptools/issues/6713)
   * Xiangyi Meng (@xymeng16) [PR #6601](https://github.com/microsoft/vscode-cpptools/pull/6601)
+* Fix IntelliSense errors when "module" is used as a variable name with C++20. [#6719](https://github.com/microsoft/vscode-cpptools/issues/6719)
 * Fix `.` to `->` completion with multiple cursors. [#6720](https://github.com/microsoft/vscode-cpptools/issues/6720)
 * Fix bug with configured cl.exe path not being used to choose appropriate system include paths, or cl.exe not being used at all if it's not also installed via the VS Installer. [#6746](https://github.com/microsoft/vscode-cpptools/issues/6746)
 * Fix bugs with parsing of quotes and escape sequences in compiler args. [#6761](https://github.com/microsoft/vscode-cpptools/issues/6761)
 * Fix the configuration not showing in the status bar when `c_cpp_properties.json` is active. [#6765](https://github.com/microsoft/vscode-cpptools/issues/6765)
+* Fix compiler querying with compilers that do not output `__STD_VERSION__` by default (gcc <= 4.8.x). [#6792](https://github.com/microsoft/vscode-cpptools/issues/6792)
+* Fix document symbols when nested symbols have the same name as a parent. [#6830](https://github.com/microsoft/vscode-cpptools/issues/6830)
+* Fix automatic adding of header files to `files.associations` after `Go to Definition` on a `#include`. [#6845](https://github.com/microsoft/vscode-cpptools/issues/6845)
+* Fix `"Insiders"` `updateChannel` for VS Code - Exploration. [#6875](https://github.com/microsoft/vscode-cpptools/issues/6875)
 * Fix "D" command line warnings not appearing with cl.exe cppbuild build tasks.
 * Fix cl.exe cppbuild tasks when `/nologo` is used (and make /nologo a default arg).
 * Fix a cpptools crash and multiple deadlocks.

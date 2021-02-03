@@ -51,7 +51,7 @@ export class PackageVersion {
     }
 
     public isVsCodeVersionGreaterThan(other: PackageVersion): boolean {
-        return this.isGreaterThan(other, 'insider');
+        return this.isGreaterThan(other, 'insider') || this.isGreaterThan(other, 'exploration');
     }
 
     public isExtensionVersionGreaterThan(other: PackageVersion): boolean {
