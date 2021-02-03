@@ -15,6 +15,6 @@
 	"cannot.resolve.compiler.path": "输入无效，无法解析编译器路径",
 	"path.is.not.a.file": "路径不是文件: {0}",
 	"path.is.not.a.directory": "路径不是目录: {0}",
-	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
+	"duplicate.name": "{0} 重复。配置名称应是唯一的。",
 	"cannot.find2": "无法找到“{0}”。"
 }
