@@ -797,6 +797,16 @@ function onSwitchHeaderSource(): void {
     }
 
     clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName).then((targetFileName: string) => {
+        // If the targetFileName has a path that is a symlink target of a workspace folder,
+        // then replace the RootRealPath with the RootPath (the symlink path).
+        let targetFileNameReplaced: boolean = false;
+        clients.forEach(client => {
+            if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
+                && targetFileName.indexOf(client.RootRealPath) === 0) {
+                targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
+                targetFileNameReplaced = true;
+            }
+        });
         vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
             let foundEditor: boolean = false;
             // If the document is already visible in another column, open it there.
