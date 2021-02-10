@@ -545,6 +545,7 @@ export interface Client {
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
     RootPath: string;
+    RootRealPath: string;
     RootUri?: vscode.Uri;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
@@ -614,6 +615,7 @@ export class DefaultClient implements Client {
     private innerConfiguration?: configs.CppProperties;
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
+    private rootRealPath: string;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
@@ -649,6 +651,9 @@ export class DefaultClient implements Client {
      */
     public get RootPath(): string {
         return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
+    }
+    public get RootRealPath(): string {
+        return this.rootRealPath;
     }
     public get RootUri(): vscode.Uri | undefined {
         return (this.rootFolder) ? this.rootFolder.uri : undefined;
@@ -700,6 +705,7 @@ export class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
+        this.rootRealPath = this.RootPath ? fs.realpathSync(this.RootPath) : "";
         let storagePath: string | undefined;
         if (util.extensionContext) {
             const path: string | undefined = util.extensionContext.storageUri?.fsPath;
@@ -2730,6 +2736,7 @@ class NullClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
     RootPath: string = "/";
+    RootRealPath: string = "/";
     RootUri?: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();

@@ -206,5 +206,5 @@
 	"memory_limit_shutting_down_intellisense": "IntelliSense sunucusu kapatılıyor: {0}. Bellek kullanımı {1} MB olduğundan {2} MB sınırını aştı.",
 	"failed_to_query_for_standard_version": "Varsayılan standart sürümler için \"{0}\" yolundaki derleyici sorgulanamadı. Derleyici sorgulaması bu derleyici için devre dışı bırakıldı.",
 	"unrecognized_language_standard_version": "Derleyici sorgusu, tanınmayan bir dil standardı sürümü döndürdü. Bunun yerine desteklenen en güncel sürüm kullanılacak.",
-	"intellisense_process_crash_detected": "IntelliSense process crash detected."
+	"intellisense_process_crash_detected": "IntelliSense işlem kilitlenmesi saptandı."
 }

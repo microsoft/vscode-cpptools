@@ -30,7 +30,7 @@
 	"compiler.arguments": "たとえば {0}、{1} など、使用されているインクルードや定義を変更するコンパイラ引数です。",
 	"one.argument.per.line": "1 行につき 1 つの引数です。",
 	"intellisense.mode": "IntelliSense モード",
-	"intellisense.mode.description": "The IntelliSense mode to use that maps to a platform and architecture variant of MSVC, gcc, or Clang. If not set or if set to {0}, the extension will choose the default for that platform. Windows defaults to {1}, Linux defaults to {2}, and macOS defaults to {3}. Select a specific IntelliSense mode to override the {4} mode.",
+	"intellisense.mode.description": "The IntelliSense mode to use that maps to a platform and architecture variant of MSVC, gcc, or Clang. If not set or if set to {0}, the extension will choose the default for that platform. Windows defaults to {1}, Linux defaults to {2}, and macOS defaults to {3}. Select a specific IntelliSense mode to override the {4} mode. IntelliSense modes that only specify {5} variants (e.g. {6}) are legacy modes and are converted automatically to the {7} variants based on the host platform.",
 	"include.path": "パスを含める",
 	"include.path.description": "インクルード パスは、ソース ファイルにインクルードされるヘッダー ファイル ({0} など) を含むフォルダーです。インクルードされたヘッダー ファイルを検索する際に IntelliSense エンジンによって使用されるパスの一覧を指定します。これらのパスでの検索は再帰的ではありません。再帰的な検索を示す場合は、{1} を指定します。たとえば、{2} ではすべてのサブディレクトリが検索されますが、{3} はそうではありません。Windows 上に Visual Studio がインストールされている場合、または {4} 設定でコンパイラが指定されている場合は、この一覧にシステム インクルード パスを含める必要はありません。",
 	"one.include.path.per.line": "1 行につき 1 つのインクルード パスです。",
