@@ -1,5 +1,14 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.2.1: February 10, 2021
+### Bug Fixes
+* Fix `Switch Header/Source` in two cases when symlinks are in the path. [#6855](https://github.com/microsoft/vscode-cpptools/issues/6855)
+* Fix clang-format FixNamespaceComments default. [#6894](https://github.com/microsoft/vscode-cpptools/issues/6894)
+* Fix an issue with querying certain compilers for system defines and system includes [#6898](https://github.com/microsoft/vscode-cpptools/issues/6898)
+* Fix an issue preventing detection of default target and default language standard of Cygwin and WSL compilers. [#6902](https://github.com/microsoft/vscode-cpptools/issues/6902)
+* Fix an issue with detection of Apple Clang. [#6916](https://github.com/microsoft/vscode-cpptools/issues/6916)
+* Fix endless memory usage (or a crash) with certain code. [#6940](https://github.com/microsoft/vscode-cpptools/issues/6940)
+
 ## Version 1.2.0: February 2, 2021
 ### New Features
 * Add support for cross-compilation configurations for IntelliSense. For example, `intelliSenseMode` value "linux-gcc-x64" could be used on a Mac host machine. [#1083](https://github.com/microsoft/vscode-cpptools/issues/1083)
