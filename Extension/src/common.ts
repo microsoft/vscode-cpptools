@@ -1274,6 +1274,6 @@ export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceF
     return getUniqueWorkspaceNameHelper(workspaceFolder, true);
 }
 
-export function is_codespaces(): boolean {
+export function isCodespaces(): boolean {
     return !!process.env["CODESPACES"];
 }

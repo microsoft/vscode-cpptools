@@ -608,7 +608,7 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!suggestInsiders.Value) {
         return;
     }
-    if (util.is_codespaces()) {
+    if (util.isCodespaces()) {
         // Do not prompt users of Codespaces to join Insiders.
         return;
     }
