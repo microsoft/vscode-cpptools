@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.2.0-main",
+  "version": "1.2.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2718,7 +2718,7 @@
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116759",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2154927",
       "platforms": [
         "darwin"
       ],
@@ -2727,7 +2727,7 @@
       "binaries": [
         "./debugAdapters/lldb-mi/bin/lldb-mi"
       ],
-      "integrity": "6C2CD2797380DE2F3EA2A991BA4DACE265920922C4E18A80FAC515B30C1D0B99"
+      "integrity": "FA76E76C7D8E5D5CD0CC8E68C6FB70A354750D596DF3CED36ABF78AAD5C562C0"
     },
     {
       "description": "LLDB 3.8.0 (macOS High Sierra and lower)",
