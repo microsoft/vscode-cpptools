@@ -190,7 +190,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = task.detail ? task.detail : definition.command;
             const isCl: boolean = compilerName === "cl.exe";
-            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
+            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${workspaceFolder}";
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {
