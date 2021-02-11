@@ -169,7 +169,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
-            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
+            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${workspaceFolder}";
             const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
