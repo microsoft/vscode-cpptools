@@ -608,8 +608,8 @@ async function suggestInsidersChannel(): Promise<void> {
     if (!suggestInsiders.Value) {
         return;
     }
-    if (vscode.env.uiKind === vscode.UIKind.Web) {
-        // Do not prompt users of Web-based Codespaces to join Insiders.
+    if (util.isCodespaces()) {
+        // Do not prompt users of Codespaces to join Insiders.
         return;
     }
     let buildInfo: BuildInfo | undefined;
@@ -797,6 +797,16 @@ function onSwitchHeaderSource(): void {
     }
 
     clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName).then((targetFileName: string) => {
+        // If the targetFileName has a path that is a symlink target of a workspace folder,
+        // then replace the RootRealPath with the RootPath (the symlink path).
+        let targetFileNameReplaced: boolean = false;
+        clients.forEach(client => {
+            if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
+                && targetFileName.indexOf(client.RootRealPath) === 0) {
+                targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
+                targetFileNameReplaced = true;
+            }
+        });
         vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
             let foundEditor: boolean = false;
             // If the document is already visible in another column, open it there.
