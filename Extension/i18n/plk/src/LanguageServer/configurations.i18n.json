@@ -15,6 +15,6 @@
 	"cannot.resolve.compiler.path": "Nieprawidłowe dane wejściowe, nie można rozpoznać ścieżki kompilatora",
 	"path.is.not.a.file": "Ścieżka nie jest plikiem: {0}",
 	"path.is.not.a.directory": "Ścieżka nie jest katalogiem: {0}",
-	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
+	"duplicate.name": "Element {0} jest duplikatem. Nazwa konfiguracji musi być unikatowa.",
 	"cannot.find2": "Nie można znaleźć elementu „{0}”."
 }

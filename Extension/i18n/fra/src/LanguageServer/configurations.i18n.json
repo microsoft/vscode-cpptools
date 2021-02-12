@@ -15,6 +15,6 @@
 	"cannot.resolve.compiler.path": "Entrée non valide, impossible de résoudre le chemin du compilateur",
 	"path.is.not.a.file": "Le chemin n'est pas un fichier : {0}",
 	"path.is.not.a.directory": "Le chemin n'est pas un répertoire : {0}",
-	"duplicate.name": "{0} is a duplicate. The configuration name should be unique.",
+	"duplicate.name": "{0} est dupliqué. Le nom de configuration doit être unique.",
 	"cannot.find2": "\"{0}\" est introuvable."
 }
