@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.2.1: February 10, 2021
+## Version 1.2.1: February 12, 2021
 ### Bug Fixes
 * Fix `Switch Header/Source` in two cases when symlinks are in the path. [#6855](https://github.com/microsoft/vscode-cpptools/issues/6855)
 * Fix clang-format FixNamespaceComments default. [#6894](https://github.com/microsoft/vscode-cpptools/issues/6894)
@@ -8,6 +8,9 @@
 * Fix an issue preventing detection of default target and default language standard of Cygwin and WSL compilers. [#6902](https://github.com/microsoft/vscode-cpptools/issues/6902)
 * Fix an issue with detection of Apple Clang. [#6916](https://github.com/microsoft/vscode-cpptools/issues/6916)
 * Fix endless memory usage (or a crash) with certain code. [#6940](https://github.com/microsoft/vscode-cpptools/issues/6940)
+* Fix "format after newline" with vcFormat. [#6942](https://github.com/microsoft/vscode-cpptools/issues/6942)
+* Fix compiler querying with -Xclang and -include-pch arguments. [#6944](https://github.com/microsoft/vscode-cpptools/issues/6944)
+* Switch to the signed LLDB-MI on Mac 10.14 or newer with the online vsix. [#6945](https://github.com/microsoft/vscode-cpptools/issues/6945)
 
 ## Version 1.2.0: February 2, 2021
 ### New Features
