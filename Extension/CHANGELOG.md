@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.2.1: February 12, 2021
+## Version 1.2.1: February 16, 2021
 ### Bug Fixes
 * Fix `Switch Header/Source` in two cases when symlinks are in the path. [#6855](https://github.com/microsoft/vscode-cpptools/issues/6855)
 * Fix clang-format FixNamespaceComments default. [#6894](https://github.com/microsoft/vscode-cpptools/issues/6894)
