@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.2.2-insiders: February 17, 2021
+### Bug Fixes
+* Fix for random IntelliSense communication failures on Mac. Potentially fixes: [#6809](https://github.com/microsoft/vscode-cpptools/issues/6809), [#6958](https://github.com/microsoft/vscode-cpptools/issues/6958)
+* Potential fix for an "Unable to start the C/C++ language server" error. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
+
 ## Version 1.2.1: February 16, 2021
 ### Bug Fixes
 * Fix `Switch Header/Source` in two cases when symlinks are in the path. [#6855](https://github.com/microsoft/vscode-cpptools/issues/6855)
