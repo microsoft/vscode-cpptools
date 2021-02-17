@@ -7,6 +7,8 @@
 	"default.configuration.menuitem": "Конфигурация по умолчанию",
 	"select.configuration": "Выберите конфигурацию",
 	"cl.exe.not.available": "Сборку и отладку {0} можно использовать только при запуске VS Code из Командной строки разработчика для VS.",
+	"miDebuggerPath.not.available": "Путь miDebuggerPath не существует: {0}. Установлен ли отладчик?",
+	"debugger.deprecated.config": "Ключ \"{0}\" устарел. Используйте \"{1}\".",
 	"debugger.not.available": "Отладчик типа \"{0}\" доступен только в Windows. Используйте тип \"{1}\" на текущей платформе ОС.",
 	"lldb.framework.install.xcode": "Дополнительные сведения",
 	"lldb.framework.not.found": "Не удается найти \"LLDB.framework\" для lldb-mi. Установите XCode или средства командной строки XCode.",

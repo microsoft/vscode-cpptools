@@ -114,6 +114,8 @@ export class CppBuildTaskProvider implements TaskProvider {
             }
         }
 
+        const isCompilerValid: boolean = userCompilerPath ? await util.checkFileExists(userCompilerPath) : false;
+
         // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
         // Filter them based on the file type to get a reduced list appropriate for the active file.
         const knownCompilerPathsSet: Set<string> = new Set();
@@ -121,8 +123,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (knownCompilers) {
             knownCompilers = knownCompilers.filter(info =>
                 ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
-                userCompilerPathAndArgs &&
-                (path.basename(info.path) !== userCompilerPathAndArgs.compilerName) &&
+                (!isCompilerValid || (userCompilerPathAndArgs &&
+                (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))) &&
                 (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
             knownCompilers.map<void>(info => {
                 knownCompilerPathsSet.add(info.path);
@@ -143,11 +145,8 @@ export class CppBuildTaskProvider implements TaskProvider {
             result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
         }
         // Task for valid user compiler path setting
-        if (userCompilerPath) {
-            const isCompilerValid: boolean = await util.checkFileExists(userCompilerPath);
-            if (isCompilerValid) {
-                result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
-            }
+        if (isCompilerValid && userCompilerPath) {
+            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
         }
         return result;
     }
@@ -170,7 +169,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
-            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
+            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${workspaceFolder}";
             const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,

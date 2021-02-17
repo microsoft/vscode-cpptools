@@ -205,5 +205,6 @@
 	"unhandled_target_arg_detected": "Wykryto nieobsługiwaną docelową wartość argumentu: {0}",
 	"memory_limit_shutting_down_intellisense": "Zamykanie serwera funkcji IntelliSense: {0}. Użycie pamięci to {1} MB i przekroczyło limit wynoszący {2} MB.",
 	"failed_to_query_for_standard_version": "Nie można wykonać zapytań dotyczących kompilatora w ścieżce „{0}” dla domyślnych wersji standardowych. Wykonywanie zapytań dotyczących kompilatora jest wyłączone dla tego kompilatora.",
-	"unrecognized_language_standard_version": "Zapytanie kompilatora zwróciło nierozpoznaną wersję standardu języka. Zamiast tego zostanie użyta najnowsza obsługiwana wersja."
+	"unrecognized_language_standard_version": "Zapytanie kompilatora zwróciło nierozpoznaną wersję standardu języka. Zamiast tego zostanie użyta najnowsza obsługiwana wersja.",
+	"intellisense_process_crash_detected": "Wykryto awarię procesu funkcji IntelliSense."
 }

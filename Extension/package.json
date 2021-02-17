@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.2.0-main",
+  "version": "1.2.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2472,7 +2472,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144140",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2155055",
       "platforms": [
         "linux"
       ],
@@ -2483,11 +2483,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "B5030E8762BE43D7864536FE8C8A6253036523D9E0C350750D5874963DA42F2F"
+      "integrity": "FDF8FA4701541B1452E70E21D0612ABAD0755B4CDA43A22F2F64408295ABE3DE"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144141",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2155056",
       "platforms": [
         "linux"
       ],
@@ -2498,11 +2498,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "5F0F29B2D59D8453A072D433324C68E0819923AFAC85D0CD1987F7AA275D7516"
+      "integrity": "E0D0074697142568720D11A340AB30E31F07A7A4CEDA5E46A2C26E16F5CF1B09"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143991",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2155054",
       "platforms": [
         "linux"
       ],
@@ -2513,11 +2513,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "099A94F440BB570B4CDCA07D5FE813657E8B7CBB3915F64C5C8A681DFBB28D3C"
+      "integrity": "5D7E1813226F1C222CF1E458F30C6BDBCB3ECEDCCCA624A76E1C6A8EDA7DD8AB"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2143992",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2154885",
       "platforms": [
         "darwin"
       ],
@@ -2525,11 +2525,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "AEC6509B1667DE9B0C0BF867BB5A3B79F1F47C1B8D5A728C1FD8CA6E9240CEA7"
+      "integrity": "6F44267C13A946FD3A47B9F697D69104A70817D355CDD75DFEFCA28C234DAEC2"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2155057",
       "platforms": [
         "win32"
       ],
@@ -2541,11 +2541,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
+      "integrity": "68FB052A6F26A6E3287DAF7DBE4B2EDC9AC7EDAC3CFEFA91D709E466E5E97436"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2144139",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2155058",
       "platforms": [
         "win32"
       ],
@@ -2556,7 +2556,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "F67AC16D698FE1F473C857912EBAD38EEB2007E57BF81F7F42CBD01F5B609B94"
+      "integrity": "A9C9EBCFCBB91D8212F912B93CBADFF873126089AF4E74B660EAEB9D91EB0DA7"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2718,7 +2718,7 @@
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116759",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2154927",
       "platforms": [
         "darwin"
       ],
@@ -2727,7 +2727,7 @@
       "binaries": [
         "./debugAdapters/lldb-mi/bin/lldb-mi"
       ],
-      "integrity": "6C2CD2797380DE2F3EA2A991BA4DACE265920922C4E18A80FAC515B30C1D0B99"
+      "integrity": "FA76E76C7D8E5D5CD0CC8E68C6FB70A354750D596DF3CED36ABF78AAD5C562C0"
     },
     {
       "description": "LLDB 3.8.0 (macOS High Sierra and lower)",
