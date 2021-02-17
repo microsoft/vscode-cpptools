@@ -205,5 +205,6 @@
 	"unhandled_target_arg_detected": "Unbehandelter Zielargumentwert erkannt: {0}",
 	"memory_limit_shutting_down_intellisense": "IntelliSense-Server wird heruntergefahren: {0}. Die Arbeitsspeicherauslastung beträgt {1} MB und hat das Limit von {2} MB überschritten.",
 	"failed_to_query_for_standard_version": "Der Compiler im Pfad \"{0}\" konnte nicht nach standardmäßigen Standardversionen abgefragt werden. Die Compilerabfrage ist für diesen Compiler deaktiviert.",
-	"unrecognized_language_standard_version": "Die Compilerabfrage hat eine unbekannte Sprachstandardversion zurückgegeben. Stattdessen wird die neueste unterstützte Version verwendet."
+	"unrecognized_language_standard_version": "Die Compilerabfrage hat eine unbekannte Sprachstandardversion zurückgegeben. Stattdessen wird die neueste unterstützte Version verwendet.",
+	"intellisense_process_crash_detected": "IntelliSense-Prozessabsturz erkannt."
 }
