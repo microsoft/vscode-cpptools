@@ -705,7 +705,7 @@ export class DefaultClient implements Client {
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
-        this.rootRealPath = this.RootPath ? fs.realpathSync(this.RootPath) : "";
+        this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
         let storagePath: string | undefined;
         if (util.extensionContext) {
             const path: string | undefined = util.extensionContext.storageUri?.fsPath;
