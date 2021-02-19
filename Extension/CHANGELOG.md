@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.2.2-insiders2: February 18, 2021
+### Bug Fixes
+* Fix an extension activation failure when a non-existent folder exists in the workspace. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
+* Fix a regression with handling of -isysroot/--sysroot compiler arguments. [#6992](https://github.com/microsoft/vscode-cpptools/issues/6992)
+
 ## Version 1.2.2-insiders: February 17, 2021
 ### Bug Fixes
 * Fix for random IntelliSense communication failures on Mac. Potentially fixes: [#6809](https://github.com/microsoft/vscode-cpptools/issues/6809), [#6958](https://github.com/microsoft/vscode-cpptools/issues/6958)
