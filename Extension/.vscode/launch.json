@@ -98,7 +98,7 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"${workspaceFolder}/test/integrationTests/testAssets/SimpleCppProject",
+				"${workspaceFolder}/test/integrationTests/testAssets/SimpleCppProject/simpleCppProject.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/languageServer/index"
 			],
