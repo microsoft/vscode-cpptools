@@ -2004,7 +2004,7 @@
                   "%c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description%"
                 ],
                 "description": "%c_cpp.debuggers.cppvsdbg.console.description%",
-                "default": "externalTerminal"
+                "default": "internalConsole"
               },
               "sourceFileMap": {
                 "type": "object",
