@@ -44,7 +44,7 @@ function createLaunchString(name: string, type: string, executable: string): str
 "stopAtEntry": false,
 "cwd": "$\{workspaceFolder\}",
 "environment": [],
-"console": "externalTerminal"
+${ type === "cppdbg" ? `"externalConsole": false` : `"console": "externalTerminal"` }
 `;
 }
 
