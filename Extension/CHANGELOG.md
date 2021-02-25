@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.2.2: February 25, 2021
+## Bug Fixes
+* Fix IntelliSense errors with variable length arrays with C Clang mode. [#6500](https://github.com/microsoft/vscode-cpptools/issues/6500)
+* Fix for random IntelliSense communication failures on Mac. [#6809](https://github.com/microsoft/vscode-cpptools/issues/6809), [#6958](https://github.com/microsoft/vscode-cpptools/issues/6958)
+* Fix an extension activation failure when a non-existent folder exists in the workspace. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
+* Fix infinite loops during document symbol processing. [#6988](https://github.com/microsoft/vscode-cpptools/issues/6988), [#7012](https://github.com/microsoft/vscode-cpptools/issues/7012), [#7022](https://github.com/microsoft/vscode-cpptools/issues/7022), [#7025](https://github.com/microsoft/vscode-cpptools/issues/7025)
+* Fix a regression with handling of -isysroot/--sysroot compiler arguments. [#6992](https://github.com/microsoft/vscode-cpptools/issues/6992)
+* Fix issue querying certain compilers, including armclang and arm-poky-linux-musleabi-gcc. [7021](https://github.com/microsoft/vscode-cpptools/issues/7021)
+* Fix invalid "console" property when generating a "cppdbg" task. [#7048](https://github.com/microsoft/vscode-cpptools/issues/7048)
+
 ## Version 1.2.1: February 16, 2021
 ### Bug Fixes
 * Fix `Switch Header/Source` in two cases when symlinks are in the path. [#6855](https://github.com/microsoft/vscode-cpptools/issues/6855)

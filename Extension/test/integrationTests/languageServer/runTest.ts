@@ -12,7 +12,7 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './index');
 
-        const testWorkspace = path.resolve(extensionDevelopmentPath, 'test/integrationTests/testAssets/SimpleCppProject');
+        const testWorkspace = path.resolve(extensionDevelopmentPath, 'test/integrationTests/testAssets/SimpleCppProject/simpleCppProject.code-workspace');
 
         const launchArgs = [ "--disable-extensions", testWorkspace ];
 
