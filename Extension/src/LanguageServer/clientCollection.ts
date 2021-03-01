@@ -23,7 +23,7 @@ export class ClientCollection {
     private defaultClient: cpptools.Client;
     private activeClient: cpptools.Client;
     private activeDocument?: vscode.TextDocument;
-    public timeTelemetryCollector: TimeTelemetryCollector;
+    public timeTelemetryCollector: TimeTelemetryCollector = new TimeTelemetryCollector();
 
     public get ActiveClient(): cpptools.Client { return this.activeClient; }
     public get Names(): ClientKey[] {
@@ -62,8 +62,6 @@ export class ClientCollection {
 
         this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
         this.disposables.push(vscode.workspace.onDidCloseTextDocument(d => this.onDidCloseTextDocument(d)));
-
-        this.timeTelemetryCollector = new TimeTelemetryCollector();
     }
 
     public activeDocumentChanged(document: vscode.TextDocument): void {
