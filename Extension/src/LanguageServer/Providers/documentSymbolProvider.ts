@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest } from '../client';
 import * as util from '../../common';
+import { processDelayedDidOpen } from '../extension';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private client: DefaultClient;
@@ -26,6 +27,9 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         return documentSymbols;
     }
     public async provideDocumentSymbols(document: vscode.TextDocument): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+        if (!this.client.TrackedDocuments.has(document)) {
+            processDelayedDidOpen(document);
+        }
         return this.client.requestWhenReady(() => {
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
