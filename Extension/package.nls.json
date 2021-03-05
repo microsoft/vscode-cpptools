@@ -162,6 +162,7 @@
     "c_cpp.configuration.vcpkg.enabled.markdownDescription": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
     "c_cpp.configuration.addNodeAddonIncludePaths.description": "Add include paths from nan and node-addon-api when they're dependencies.",
     "c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
+    "c_cpp.configuration.autocomplete.addParenthesesAfterFunctionCalls.description": "If true, autocomplete will automatically add ( after function calls, in which case ) may also be added, depending on editor.autoClosingBrackets.",
     "c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "If true, debugger shell command substitution will use obsolete backtick (`).",
     "c_cpp.contributes.views.cppReferencesView.title": "C/C++: Other references results",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",

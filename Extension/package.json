@@ -1157,6 +1157,12 @@
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
+        },
+        "C_Cpp.autocomplete.addParenthesesAfterFunctionCalls": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.autocomplete.addParenthesesAfterFunctionCalls.description%",
+          "scope": "resource"
         }
       }
     },
