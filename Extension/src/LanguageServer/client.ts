@@ -928,8 +928,8 @@ export class DefaultClient implements Client {
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
         const settings_intelliSenseMemoryLimit: (number | undefined)[] = [];
-        const settings_autoComplete: (string | undefined)[] = [];
-        const settings_autoCompleteAddParenthesesAfterFunctionCalls: (boolean | undefined)[] = [];
+        const settings_autocomplete: (string | undefined)[] = [];
+        const settings_autocompleteAddParenthesesAfterFunctionCalls: (boolean | undefined)[] = [];
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const settings_indentBraces: boolean[] = [];
@@ -1082,8 +1082,8 @@ export class DefaultClient implements Client {
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
                 settings_intelliSenseMemoryLimit.push(setting.intelliSenseMemoryLimit);
-                settings_autoComplete.push(setting.autoComplete);
-                settings_autoCompleteAddParenthesesAfterFunctionCalls.push(setting.autoCompleteAddParenthesesAfterFunctionCalls);
+                settings_autocomplete.push(setting.autocomplete);
+                settings_autocompleteAddParenthesesAfterFunctionCalls.push(setting.autocompleteAddParenthesesAfterFunctionCalls);
             }
 
             for (const otherSetting of otherSettings) {
@@ -1213,8 +1213,8 @@ export class DefaultClient implements Client {
                 intelliSenseCacheSize : settings_intelliSenseCacheSize,
                 intelliSenseMemoryLimit : settings_intelliSenseMemoryLimit,
                 intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-                autocomplete: settings_autoComplete,
-                autoCompleteAddParenthesesAfterFunctionCalls: settings_autoCompleteAddParenthesesAfterFunctionCalls,
+                autocomplete: settings_autocomplete,
+                autocompleteAddParenthesesAfterFunctionCalls: settings_autocompleteAddParenthesesAfterFunctionCalls,
                 errorSquiggles: settings_errorSquiggles,
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,

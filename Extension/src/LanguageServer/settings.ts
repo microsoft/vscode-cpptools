@@ -129,8 +129,8 @@ export class CppSettings extends Settings {
     public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
-    public get autoComplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
-    public get autoCompleteAddParenthesesAfterFunctionCalls(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParenthesesAfterFunctionCalls"); }
+    public get autocomplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
+    public get autocompleteAddParenthesesAfterFunctionCalls(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParenthesesAfterFunctionCalls"); }
     public get loggingLevel(): string | undefined { return super.Section.get<string>("loggingLevel"); }
     public get autoAddFileAssociations(): boolean | undefined { return super.Section.get<boolean>("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
