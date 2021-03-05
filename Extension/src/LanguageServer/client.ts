@@ -1198,9 +1198,7 @@ export class DefaultClient implements Client {
                 files: {
                     encoding: settings_filesEncoding
                 },
-                editor: {
-                    autoClosingBrackets: settings_editorAutoClosingBrackets
-                },
+                autoClosingBrackets: settings_editorAutoClosingBrackets,
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
@@ -1301,8 +1299,9 @@ export class DefaultClient implements Client {
                     space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
                 },
+                // These don't "belong" here but the cpptools process looks for them under C_Cpp.
                 tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri),
-                autoClosingBrackets: vscode.workspace.getConfiguration("editor.autoClosingBrackets", this.RootUri)
+                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets
             },
             files: {
                 encoding: otherSettingsFolder.filesEncoding,
