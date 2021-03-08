@@ -130,7 +130,7 @@ export class CppSettings extends Settings {
     public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
     public get autocomplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
-    public get autocompleteAddParenthesesAfterFunctionCalls(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParenthesesAfterFunctionCalls"); }
+    public get autocompleteAddParentheses(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParentheses"); }
     public get loggingLevel(): string | undefined { return super.Section.get<string>("loggingLevel"); }
     public get autoAddFileAssociations(): boolean | undefined { return super.Section.get<boolean>("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
