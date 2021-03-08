@@ -1303,7 +1303,6 @@ export class DefaultClient implements Client {
                 }
             },
             editor: {
-                tabSize: otherSettingsFolder.editorTabSize,
                 autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets
             },
             files: {
