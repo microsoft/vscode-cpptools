@@ -113,6 +113,9 @@ jobs:
         # Set rpath next to the lldb-mi executable LLDB.Framework
         log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugAdapters/lldb-mi/bin/lldb-mi"
 
+        # Add entitlements
+        log_and_exec_cmd "codesign -s - -f --entitlements $(Build.SourcesDirectory)/Build/lldb-mi/debugger-entitlements.plist ./debugAdapters/lldb-mi/bin/lldb-mi"
+
         # Grab NOTICE.TXT
         cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugAdapters/lldb-mi/.
 
