@@ -2466,14 +2466,17 @@
   "resolutions": {
     "https-proxy-agent": "^2.2.4",
     "webpack/acorn": "^6.4.1",
+    "elliptic": "^6.5.4",
     "webpack/terser-webpack-plugin": "^1.4.5",
     "gulp-sourcemaps/acorn": "^5.7.4",
     "eslint/acorn": "^7.1.1",
     "gulp-eslint/acorn": "^7.1.1",
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
+    "lodash": "^4.17.21",
     "mocha/diff": "^3.5.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "y18n": "^5.0.5"
   },
   "runtimeDependencies": [
     {
