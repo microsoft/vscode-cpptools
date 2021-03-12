@@ -915,6 +915,7 @@ export class DefaultClient implements Client {
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        const settings_editorAutoClosingBrackets: (string | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
         const settings_intelliSenseEngineFallback: (string | undefined)[] = [];
         const settings_errorSquiggles: (string | undefined)[] = [];
@@ -927,7 +928,8 @@ export class DefaultClient implements Client {
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
         const settings_intelliSenseMemoryLimit: (number | undefined)[] = [];
-        const settings_autoComplete: (string | undefined)[] = [];
+        const settings_autocomplete: (string | undefined)[] = [];
+        const settings_autocompleteAddParentheses: (boolean | undefined)[] = [];
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const settings_indentBraces: boolean[] = [];
@@ -1080,13 +1082,15 @@ export class DefaultClient implements Client {
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
                 settings_intelliSenseMemoryLimit.push(setting.intelliSenseMemoryLimit);
-                settings_autoComplete.push(setting.autoComplete);
+                settings_autocomplete.push(setting.autocomplete);
+                settings_autocompleteAddParentheses.push(setting.autocompleteAddParentheses);
             }
 
             for (const otherSetting of otherSettings) {
                 settings_filesEncoding.push(otherSetting.filesEncoding);
                 settings_filesExclude.push(otherSetting.filesExclude);
                 settings_searchExclude.push(otherSetting.searchExclude);
+                settings_editorAutoClosingBrackets.push(otherSetting.editorAutoClosingBrackets);
             }
         }
 
@@ -1194,6 +1198,9 @@ export class DefaultClient implements Client {
                 files: {
                     encoding: settings_filesEncoding
                 },
+                editor: {
+                    autoClosingBrackets: settings_editorAutoClosingBrackets
+                },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
@@ -1206,7 +1213,8 @@ export class DefaultClient implements Client {
                 intelliSenseCacheSize : settings_intelliSenseCacheSize,
                 intelliSenseMemoryLimit : settings_intelliSenseMemoryLimit,
                 intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-                autocomplete: settings_autoComplete,
+                autocomplete: settings_autocomplete,
+                autocompleteAddParentheses: settings_autocompleteAddParentheses,
                 errorSquiggles: settings_errorSquiggles,
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,
@@ -1292,8 +1300,10 @@ export class DefaultClient implements Client {
                     },
                     space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
-                },
-                tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
+                }
+            },
+            editor: {
+                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets
             },
             files: {
                 encoding: otherSettingsFolder.filesEncoding,
