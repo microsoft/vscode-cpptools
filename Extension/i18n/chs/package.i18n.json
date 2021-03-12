@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依赖关系管理器] 启用集成服务(https://aka.ms/vcpkg/)。",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "当它们是依赖项时，从 nan 和 node-addon-api 添加 include 路径。",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "如果为 true，则“重命名符号”将需要有效的 C/C++ 标识符。",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "如果为 true，则自动完成功能将在函数调用后自动添加 \"(\"，这种情况下还可以添加 \")\"，具体取决于 \"editor.autoClosingBrackets\" 设置的值。",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "如果为 true，调试程序 shell 命令替换将使用过时的反引号(`)。",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 其他引用结果",
 	"c_cpp.debuggers.pipeTransport.description": "如果存在，这会指示调试程序使用其他可执行文件作为管道来连接到远程计算机，此管道将在 VS Code 和已启用 MI 的调试程序后端可执行文件(如 gdb)之间中继标准输入/输入。",

@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Activez les services d'intégration pour le [gestionnaire de dépendances vcpkg] (https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "Ajoute des chemins include à partir de nan et node-addon-api quand il s'agit de dépendances.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Si la valeur est true, l'opération Renommer le symbole nécessite un identificateur C/C++ valide.",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "Si la valeur est true, l'autocomplétion ajoute automatiquement \"(\" après les appels de fonction. Dans ce cas \")\" peut également être ajouté, en fonction de la valeur du paramètre \"editor.autoClosingBrackets\".",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Si la valeur est true, le remplacement de la commande d'interpréteur de commandes du débogueur utilise un accent grave (`) obsolète.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++ : Autres résultats des références",
 	"c_cpp.debuggers.pipeTransport.description": "Quand ce paramètre est présent, indique au débogueur de se connecter à un ordinateur distant en se servant d'un autre exécutable comme canal de relais d'entrée/de sortie standard entre VS Code et l'exécutable du back-end du débogueur MI (par exemple, gdb).",

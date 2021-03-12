@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Włącz usługi integracji dla elementu [vcpkg dependency manager](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "Dodaj ścieżki dołączania z bibliotek nan i node-addon-api, gdy są one zależnościami.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Jeśli ma wartość true, operacja „Zmień nazwę symbolu” będzie wymagać prawidłowego identyfikatora C/C++.",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "W przypadku podania wartości true Autouzupełnianie będzie automatycznie dodawać znak „(” po wywołaniach funkcji, co może też powodować dodawanie znaku „)” w zależności od ustawienia „editor.autoClosingBrackets”.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Jeśli wartość będzie równa true, podstawianie poleceń powłoki debugera będzie używać przestarzałego grawisa (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: inne wyniki odwołań",
 	"c_cpp.debuggers.pipeTransport.description": "Jeśli jest obecny, zawiera instrukcje dla debugera, aby połączył się z komputerem zdalnym przy użyciu innego pliku wykonywalnego jako potoku, który będzie przekazywał standardowe wejście/wyjście między programem VS Code a plikiem wykonywalnym zaplecza debugera z włączoną obsługą indeksu MI (takim jak gdb).",
