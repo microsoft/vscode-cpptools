@@ -219,5 +219,9 @@
     "memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit.",
     "failed_to_query_for_standard_version": "Failed to query compiler at path \"{0}\" for default standard versions.  Compiler querying is disabled for this compiler.",
     "unrecognized_language_standard_version": "Compiler query returned an unrecognized language standard version.  The latest supported version will be used instead.",
-    "intellisense_process_crash_detected": "IntelliSense process crash detected."
+    "intellisense_process_crash_detected": "IntelliSense process crash detected.",
+    "return_values_label": {
+        "text": "Return values:",
+        "hint": "This label is for the return values description for a function. Usage example: 'Return values: 1 if key is found. 2 if input can't be read. 3 if input is empty.'"
+    }
 }
