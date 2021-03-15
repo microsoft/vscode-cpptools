@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Povolte integrační služby pro [správce závislostí vcpkg](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "Pokud existují závislosti, přidejte cesty pro zahrnuté soubory z nan a node-addon-api.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Když se tato hodnota nastaví na true, operace Přejmenovat symbol bude vyžadovat platný identifikátor C/C++.",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "Pokud je true, automatické dokončování automaticky přidá za volání funkcí znak (. V takovém případě se může přidat i znak ), záleží na hodnotě nastavení editor.autoClosingBrackets.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Když se nastaví na true, nahrazování příkazů shellu ladicího programu bude používat starou verzi obrácené čárky (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: výsledky jiných odkazů",
 	"c_cpp.debuggers.pipeTransport.description": "Pokud je k dispozici, předá ladicímu programu informaci, aby se připojil ke vzdálenému počítači pomocí dalšího spustitelného souboru jako kanál, který bude přenášet standardní vstup a výstup mezi nástrojem VS Code a spustitelným souborem back-endu ladicího programu s podporou MI (třeba gdb).",

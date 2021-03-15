@@ -1157,6 +1157,12 @@
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
+        },
+        "C_Cpp.autocompleteAddParentheses": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
+          "scope": "resource"
         }
       }
     },
@@ -2427,7 +2433,7 @@
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
     "minimist": "^1.2.5",
-    "mocha": "^4.0.0",
+    "mocha": "^5.2.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "ts-loader": "^6.0.4",
@@ -2458,16 +2464,19 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "https-proxy-agent": "^2.2.4",
-    "webpack/acorn": "^6.4.1",
-    "webpack/terser-webpack-plugin": "^1.4.5",
-    "gulp-sourcemaps/acorn": "^5.7.4",
+    "elliptic": "^6.5.4",
     "eslint/acorn": "^7.1.1",
     "gulp-eslint/acorn": "^7.1.1",
+    "gulp-sourcemaps/acorn": "^5.7.4",
+    "https-proxy-agent": "^2.2.4",
+    "lodash": "^4.17.21",
     "**/mkdirp/minimist": "^0.2.1",
+    "node-fetch": "^2.6.1",
+    "plist/xmldom": "^0.5.0",
+    "webpack/acorn": "^6.4.1",
+    "webpack/terser-webpack-plugin": "^1.4.5",
     "yargs-parser": "^15.0.1",
-    "mocha/diff": "^3.5.0",
-    "node-fetch": "^2.6.1"
+    "y18n": "^5.0.5"
   },
   "runtimeDependencies": [
     {

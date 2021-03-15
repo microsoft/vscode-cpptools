@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Abilita i servizi di integrazione per l'[utilità di gestione dipendenze di vcpkg] (https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "Aggiunge percorsi di inclusione da nan e node-addon-api quando sono dipendenze.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Se è true, con 'Rinomina simbolo' sarà richiesto un identificatore C/C++ valido.",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "Se è true, il completamento automatico aggiungerà automaticamente \"(\" dopo le chiamate di funzione. In tal caso potrebbe essere aggiunto anche \")\", a seconda del valore dell'impostazione \"editor.autoClosingBrackets\".",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Se è true, per la sostituzione del comando della shell del debugger verrà usato il carattere backtick obsoleto (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: Risultati altri riferimenti",
 	"c_cpp.debuggers.pipeTransport.description": "Se presente, indica al debugger di connettersi a un computer remoto usando come pipe un altro eseguibile che inoltra l'input/output standard tra VS Code e l'eseguibile back-end del debugger abilitato per MI, ad esempio gdb.",
