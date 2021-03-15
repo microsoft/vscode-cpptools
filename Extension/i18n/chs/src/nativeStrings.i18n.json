@@ -206,5 +206,6 @@
 	"memory_limit_shutting_down_intellisense": "正在关闭 IntelliSense 服务器: {0}。内存使用量为 {1} MB，已超过 {2} MB 的限制。",
 	"failed_to_query_for_standard_version": "未能在路径 \"{0}\" 处查询编译器以获得默认标准版本。已对此编译器禁用编译器查询。",
 	"unrecognized_language_standard_version": "编译器查询返回了无法识别的语言标准版本。将改用受支持的最新版本。",
-	"intellisense_process_crash_detected": "检测到 IntelliSense 进程崩溃。"
+	"intellisense_process_crash_detected": "检测到 IntelliSense 进程崩溃。",
+	"return_values_label": "Return values:"
 }

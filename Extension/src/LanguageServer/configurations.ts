@@ -409,15 +409,23 @@ export class CppProperties {
         if (!error) {
             try {
                 const pathToNode: string = which.sync("node");
-                const nodeAddonMap: { [dependency: string]: string } = {
-                    "nan": `"${pathToNode}" --no-warnings -e "require('nan')"`,
-                    "node-addon-api": `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`
-                };
+                const nodeAddonMap: [string, string][] = [
+                    ["node-addon-api", `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`],
+                    ["nan", `"${pathToNode}" --no-warnings -e "require('nan')"`]
+                ];
+                // Yarn (2) PnP support
+                const pathToYarn: string | null = which.sync("yarn", { nothrow: true });
+                if (pathToYarn && await util.checkDirectoryExists(path.join(rootPath, ".yarn/cache"))) {
+                    nodeAddonMap.push(
+                        ["node-addon-api", `"${pathToYarn}" node --no-warnings -p "require('node-addon-api').include"`],
+                        ["nan", `"${pathToYarn}" node --no-warnings -e "require('nan')"`]
+                    );
+                }
 
-                for (const dep in nodeAddonMap) {
+                for (const [dep, execCmd] of nodeAddonMap) {
                     if (dep in package_json.dependencies) {
-                        const execCmd: string = nodeAddonMap[dep];
-                        let stdout: string = await util.execChildProcess(execCmd, rootPath);
+                        let stdout: string | void = await util.execChildProcess(execCmd, rootPath)
+                            .catch((error) => console.log('readNodeAddonIncludeLocations', error.message));
                         if (!stdout) {
                             continue;
                         }

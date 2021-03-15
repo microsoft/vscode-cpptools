@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg 依存関係マネージャー](https://aka.ms/vcpkg/) の統合サービスを有効にします。",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "依存関係にある場合は、nan および node-addon-api からのインクルード パスを追加します。",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "true の場合、'シンボルの名前変更' には有効な C/C++ 識別子が必要です。",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "true の場合、関数呼び出しの後に \"(\" が自動的に追加されます。その場合は、\"editor.autoClosingBrackets\" 設定の値に応じて、\")\" も追加される場合があります。",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "True の場合、デバッガー シェルのコマンド置換では古いバックティック (') が使用されます。",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: その他の参照結果",
 	"c_cpp.debuggers.pipeTransport.description": "これを指定すると、デバッガーにより、別の実行可能ファイルをパイプとして使用してリモート コンピューターに接続され、VS Code と MI 対応のデバッガー バックエンド実行可能ファイル (gdb など) との間で標準入出力が中継されます。",
