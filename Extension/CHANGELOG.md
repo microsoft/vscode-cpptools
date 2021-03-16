@@ -7,6 +7,7 @@
   * Mestery (@Mesterry) [PR #7123](https://github.com/microsoft/vscode-cpptools/pull/7123)
 
 ## Bug Fixes
+* Fix an issue with stale IntelliSense due to moving or renaming header files. [#3849](https://github.com/microsoft/vscode-cpptools/issues/3849)
 * Fix go to definition on large macros. [#4306](https://github.com/microsoft/vscode-cpptools/issues/4306)
 * Fix size_t and placement new squiggles with clang on Windows. [#6573](https://github.com/microsoft/vscode-cpptools/issues/6573], [#7106](https://github.com/microsoft/vscode-cpptools/issues/7016)
 * Fix an incorrect IntelliSense error squiggle when assigning to std::variant in clang mode. [#6623](https://github.com/microsoft/vscode-cpptools/issues/6623)
