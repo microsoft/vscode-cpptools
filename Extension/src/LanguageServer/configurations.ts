@@ -159,7 +159,10 @@ export class CppProperties {
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
-        this.readNodeAddonIncludeLocations(rootPath);
+        const userSettings: CppSettings = new CppSettings();
+        if (userSettings.addNodeAddonIncludePaths) {
+            this.readNodeAddonIncludeLocations(rootPath);
+        }
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -699,6 +702,7 @@ export class CppProperties {
             return;
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
+        const userSettings: CppSettings = new CppSettings();
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
@@ -706,7 +710,7 @@ export class CppProperties {
             configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
             const origIncludePath: string[] | undefined = configuration.includePath;
-            if (settings.addNodeAddonIncludePaths) {
+            if (userSettings.addNodeAddonIncludePaths) {
                 const includePath: string[] = origIncludePath || [];
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
