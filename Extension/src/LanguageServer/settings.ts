@@ -129,7 +129,8 @@ export class CppSettings extends Settings {
     public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
-    public get autoComplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
+    public get autocomplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
+    public get autocompleteAddParentheses(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParentheses"); }
     public get loggingLevel(): string | undefined { return super.Section.get<string>("loggingLevel"); }
     public get autoAddFileAssociations(): boolean | undefined { return super.Section.get<boolean>("autoAddFileAssociations"); }
     public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
@@ -480,6 +481,7 @@ export class OtherSettings {
     }
 
     public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
+    public get editorAutoClosingBrackets(): string | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<string>("autoClosingBrackets"); }
     public get filesEncoding(): string | undefined { return vscode.workspace.getConfiguration("files", { uri: this.resource, languageId: "cpp" }).get<string>("encoding"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }
     public set filesAssociations(value: any) {

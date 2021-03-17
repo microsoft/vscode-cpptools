@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Hiermit aktivieren Sie Integrationsdienste für den [vcpkg-Abhängigkeits-Manager](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "Fügen Sie Includepfade aus \"nan\" und \"node-addon-api\" hinzu, wenn es sich um Abhängigkeiten handelt.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Bei TRUE ist für \"Symbol umbenennen\" ein gültiger C-/C++-Bezeichner erforderlich.",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "Bei TRUE fügt AutoVervollständigen automatisch \"(\" nach Funktionsaufrufen hinzu. In diesem Fall kann \")\" abhängig vom Wert der Einstellung \"editor.autoClosingBrackets\" ebenfalls hinzugefügt werden.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Bei Festlegung auf TRUE verwendet die Befehlsersetzung der Debugger-Shell obsolete Backtick-Zeichen (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: andere Verweisergebnisse",
 	"c_cpp.debuggers.pipeTransport.description": "Falls angegeben, weist diese Option den Debugger an, eine Verbindung mit einem Remotecomputer mithilfe einer anderen ausführbaren Datei als Pipe herzustellen, die Standardeingaben/-ausgaben zwischen VS Code und der ausführbaren Back-End-Datei für den MI-fähigen Debugger weiterleitet (z. B. gdb).",

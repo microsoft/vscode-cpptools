@@ -167,6 +167,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "[vcpkg bağımlılık yöneticisi](https://aka.ms/vcpkg/) için tümleştirme hizmetlerini etkinleştirin.",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "nan ve node-addon-api bağımlılık olduğunda bunlardan ekleme yolları ekleyin.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "True ise, 'Sembolü Yeniden Adlandır' işlemi için geçerli bir C/C++ tanımlayıcısı gerekir.",
+	"c_cpp.configuration.autocompleteAddParentheses.description": "If true, autocomplete will automatically add \"(\" after function calls, in which case \")\" may also be added, depending on the value of the \"editor.autoClosingBrackets\" setting.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "True ise, hata ayıklayıcı kabuk komut değiştirme eski kesme işaretini (`) kullanır.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: Diğer başvuru sonuçları",
 	"c_cpp.debuggers.pipeTransport.description": "Mevcut olduğunda, hata ayıklayıcısına, VS Code ile MI özellikli hata ayıklayıcısı arka uç yürütülebilir dosyası (gdb gibi) arasında standart giriş/çıkış geçişi sağlayan bir kanal olarak görev yapacak başka bir yürütülebilir dosya aracılığıyla uzak bilgisayara bağlanmasını söyler.",

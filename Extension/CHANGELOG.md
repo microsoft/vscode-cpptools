@@ -1,14 +1,35 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.2.2-insiders2: February 18, 2021
-### Bug Fixes
-* Fix an extension activation failure when a non-existent folder exists in the workspace. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
-* Fix a regression with handling of -isysroot/--sysroot compiler arguments. [#6992](https://github.com/microsoft/vscode-cpptools/issues/6992)
+## Version 1.3.0-insiders: March 17, 2021
+## Enhancements
+* Add parentheses to function calls with autocomplete. [#882](https://github.com/microsoft/vscode-cpptools/issues/882)
+* Add support for nodeAddonIncludes with Yarn PnP.
+  * Mestery (@Mesterry) [PR #7123](https://github.com/microsoft/vscode-cpptools/pull/7123)
 
-## Version 1.2.2-insiders: February 17, 2021
-### Bug Fixes
-* Fix for random IntelliSense communication failures on Mac. Potentially fixes: [#6809](https://github.com/microsoft/vscode-cpptools/issues/6809), [#6958](https://github.com/microsoft/vscode-cpptools/issues/6958)
-* Potential fix for an "Unable to start the C/C++ language server" error. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
+## Bug Fixes
+* Fix an issue with stale IntelliSense due to moving or renaming header files. [#3849](https://github.com/microsoft/vscode-cpptools/issues/3849)
+* Fix go to definition on large macros. [#4306](https://github.com/microsoft/vscode-cpptools/issues/4306)
+* Fix size_t and placement new squiggles with clang on Windows. [#6573](https://github.com/microsoft/vscode-cpptools/issues/6573), [#7106](https://github.com/microsoft/vscode-cpptools/issues/7016)
+* Fix an incorrect IntelliSense error squiggle when assigning to std::variant in clang mode. [#6623](https://github.com/microsoft/vscode-cpptools/issues/6623)
+* Fix incorrect squiggle with range-v3 library. [#6639](https://github.com/microsoft/vscode-cpptools/issues/6639)
+* Fix incorrect squiggle with auto parameters. [#6714](https://github.com/microsoft/vscode-cpptools/issues/6714)
+* Add @retval support to the simplified view of doc comments. [#6816](https://github.com/microsoft/vscode-cpptools/issues/6816)
+* Fix (reimplement) nested document symbols. [#6830](https://github.com/microsoft/vscode-cpptools/issues/6830), [#7023](https://github.com/microsoft/vscode-cpptools/issues/7023), [#7024](https://github.com/microsoft/vscode-cpptools/issues/7024)
+* Fix include completion not working after creating a new header with a non-standard extension until a reload is done. [#6987](https://github.com/microsoft/vscode-cpptools/issues/6987), [#7061](https://github.com/microsoft/vscode-cpptools/issues/7061)
+* Fix endless CPU/memory usage in cpptools-srv when certain templated type aliases are used. [#7085](https://github.com/microsoft/vscode-cpptools/issues/7085)
+* Fix "No symbols found" sometimes occurring when a document first opens. [#7103](https://github.com/microsoft/vscode-cpptools/issues/7103)
+* Fix vcFormat formatting after typing brackets and a newline. [#7125](https://github.com/microsoft/vscode-cpptools/issues/7125)
+* Fix a performance bug after formatting a document. [#7159](https://github.com/microsoft/vscode-cpptools/issues/7159)
+
+## Version 1.2.2: February 25, 2021
+## Bug Fixes
+* Fix IntelliSense errors with variable length arrays with C Clang mode. [#6500](https://github.com/microsoft/vscode-cpptools/issues/6500)
+* Fix for random IntelliSense communication failures on Mac. [#6809](https://github.com/microsoft/vscode-cpptools/issues/6809), [#6958](https://github.com/microsoft/vscode-cpptools/issues/6958)
+* Fix an extension activation failure when a non-existent folder exists in the workspace. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
+* Fix infinite loops during document symbol processing. [#6988](https://github.com/microsoft/vscode-cpptools/issues/6988), [#7012](https://github.com/microsoft/vscode-cpptools/issues/7012), [#7022](https://github.com/microsoft/vscode-cpptools/issues/7022), [#7025](https://github.com/microsoft/vscode-cpptools/issues/7025)
+* Fix a regression with handling of -isysroot/--sysroot compiler arguments. [#6992](https://github.com/microsoft/vscode-cpptools/issues/6992)
+* Fix issue querying certain compilers, including armclang and arm-poky-linux-musleabi-gcc. [7021](https://github.com/microsoft/vscode-cpptools/issues/7021)
+* Fix invalid "console" property when generating a "cppdbg" task. [#7048](https://github.com/microsoft/vscode-cpptools/issues/7048)
 
 ## Version 1.2.1: February 16, 2021
 ### Bug Fixes
