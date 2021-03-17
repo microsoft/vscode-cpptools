@@ -207,5 +207,5 @@
 	"failed_to_query_for_standard_version": "Falha ao consultar compilador no caminho \"{0}\" para as versões padrão. A consulta do compilador está desabilitada para este compilador.",
 	"unrecognized_language_standard_version": "A consulta do compilador retornou uma versão do padrão de linguagem não reconhecida. Nesse caso, será usada a última versão com suporte.",
 	"intellisense_process_crash_detected": "Falha detectada no processo do IntelliSense.",
-	"return_values_label": "Return values:"
+	"return_values_label": "Valores retornados:"
 }
