@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.3.0-insiders: March 17, 2021
+## Version 1.3.0-insiders: March 18, 2021
 ## Enhancements
 * Add parentheses to function calls with autocomplete. [#882](https://github.com/microsoft/vscode-cpptools/issues/882)
 * Add support for nodeAddonIncludes with Yarn PnP.
