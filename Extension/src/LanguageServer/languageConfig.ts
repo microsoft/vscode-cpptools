@@ -215,6 +215,12 @@ function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule {
     };
 }
 
+interface Rules {
+    begin: vscode.OnEnterRule[];
+    continue: vscode.OnEnterRule[];
+    end: vscode.OnEnterRule[];
+}
+
 // When Enter is pressed while the cursor is immediately after the continuation pattern
 function getSLEndRule(comment: CommentPattern): vscode.OnEnterRule {
     const endPattern: string = getSLEndPattern(comment.continue);
@@ -268,12 +274,6 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
         getOutputChannel().appendLine(localize("duplicate.multiline.patterns", "Duplicate multiline comment patterns detected."));
     }
     return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => (e)) };    // Remove any 'undefined' entries
-}
-
-interface Rules {
-    begin: vscode.OnEnterRule[];
-    continue: vscode.OnEnterRule[];
-    end: vscode.OnEnterRule[];
 }
 
 function constructCommentRules(comment: CommentPattern, languageId: string): Rules {
