@@ -227,16 +227,16 @@ function getSLEndRule(comment: CommentPattern): vscode.OnEnterRule {
     };
 }
 
-export function getLanguageConfig(languageId: string): vscode.LanguageConfiguration {
-    const settings: CppSettings = new CppSettings();
-    const patterns: (string | CommentPattern)[] | undefined = settings.commentContinuationPatterns;
-    return getLanguageConfigFromPatterns(languageId, patterns);
-}
-
 interface Rules {
     begin: vscode.OnEnterRule[];
     continue: vscode.OnEnterRule[];
     end: vscode.OnEnterRule[];
+}
+
+export function getLanguageConfig(languageId: string): vscode.LanguageConfiguration {
+    const settings: CppSettings = new CppSettings();
+    const patterns: (string | CommentPattern)[] | undefined = settings.commentContinuationPatterns;
+    return getLanguageConfigFromPatterns(languageId, patterns);
 }
 
 export function getLanguageConfigFromPatterns(languageId: string, patterns?: (string | CommentPattern)[]): vscode.LanguageConfiguration {
