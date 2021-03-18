@@ -207,5 +207,5 @@
 	"failed_to_query_for_standard_version": "Échec de l'interrogation du compilateur sur le chemin \"{0}\" pour les versions normalisées par défaut. L'interrogation du compilateur est désactivée pour ce compilateur.",
 	"unrecognized_language_standard_version": "L'interrogation du compilateur a retourné une version de norme de langage non reconnue. La toute dernière version prise en charge va être utilisée à la place.",
 	"intellisense_process_crash_detected": "Détection d'un plantage du processus IntelliSense.",
-	"return_values_label": "Return values:"
+	"return_values_label": "Valeurs de retour :"
 }
