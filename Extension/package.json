@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.2.0-main",
+  "version": "1.2.2-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -1157,6 +1157,12 @@
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
+        },
+        "C_Cpp.autocompleteAddParentheses": {
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
+          "scope": "resource"
         }
       }
     },
@@ -2004,7 +2010,7 @@
                   "%c_cpp.debuggers.cppvsdbg.console.newExternalWindow.description%"
                 ],
                 "description": "%c_cpp.debuggers.cppvsdbg.console.description%",
-                "default": "externalTerminal"
+                "default": "internalConsole"
               },
               "sourceFileMap": {
                 "type": "object",
@@ -2427,7 +2433,7 @@
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
     "minimist": "^1.2.5",
-    "mocha": "^4.0.0",
+    "mocha": "^5.2.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "ts-loader": "^6.0.4",
@@ -2458,21 +2464,24 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "https-proxy-agent": "^2.2.4",
-    "webpack/acorn": "^6.4.1",
-    "webpack/terser-webpack-plugin": "^1.4.5",
-    "gulp-sourcemaps/acorn": "^5.7.4",
+    "elliptic": "^6.5.4",
     "eslint/acorn": "^7.1.1",
     "gulp-eslint/acorn": "^7.1.1",
+    "gulp-sourcemaps/acorn": "^5.7.4",
+    "https-proxy-agent": "^2.2.4",
+    "lodash": "^4.17.21",
     "**/mkdirp/minimist": "^0.2.1",
+    "node-fetch": "^2.6.1",
+    "plist/xmldom": "^0.5.0",
+    "webpack/acorn": "^6.4.1",
+    "webpack/terser-webpack-plugin": "^1.4.5",
     "yargs-parser": "^15.0.1",
-    "mocha/diff": "^3.5.0",
-    "node-fetch": "^2.6.1"
+    "y18n": "^5.0.5"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2153757",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2156408",
       "platforms": [
         "linux"
       ],
@@ -2483,11 +2492,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "1C809F5713F3B6F6FF6A1AA0E75D5070D89E0205E6B659D615A0757407D50748"
+      "integrity": "81740FC42FDFBEC9AF72EE69B6FC985841E8879DE7197D1859B339BE0418E2C2"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2153855",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2156409",
       "platforms": [
         "linux"
       ],
@@ -2498,11 +2507,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "8B8525039346122A5B7F3B7D6B6925E619A2F911BB53ACC0D7D06AFB4A80E2AB"
+      "integrity": "E12B49A74D9E6D7D43BE7ED88E470B8871E1750392D48B0FCFEED4C7E5C523FB"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2153756",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2156407",
       "platforms": [
         "linux"
       ],
@@ -2513,11 +2522,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "0A1CE4B8DD444FD7DCE1094D53F361D0B8AB20D892DDE790F770936F87405BAC"
+      "integrity": "F84424B48790EAE110F0B4ED35D8DEE2347754C79C9A1879BCE5A93038A249A3"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2153758",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2156301",
       "platforms": [
         "darwin"
       ],
@@ -2525,11 +2534,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "7253C3B91D3B7087D230CCD21EF16610474542BC884CD4DC0F707F48DE2AAADD"
+      "integrity": "448A17E1D7C639C99F0AE47A88705956BA03F8CFA401C0C00CD074945275B513"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2153759",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2156410",
       "platforms": [
         "win32"
       ],
@@ -2541,11 +2550,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "3614AB57187079BE8E10A9488E2EC4DC5260B14789AA9491FA10F3E75A6AAAE7"
+      "integrity": "39B7EA69F9CDC1B2B98DBFD189617640029E6C9CBDFE9BF6789B4E013D6550F4"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2153854",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2156502",
       "platforms": [
         "win32"
       ],
@@ -2556,7 +2565,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "5565BD73EB7E08D209EE765F74164DF84DE2603A57D3A4786442AC68D806768E"
+      "integrity": "30B836279F948CDFD751546E679F459FE2CFD7BD578952AF1A1D8943D5C4A0F6"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2718,7 +2727,7 @@
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2116759",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2154927",
       "platforms": [
         "darwin"
       ],
@@ -2727,7 +2736,7 @@
       "binaries": [
         "./debugAdapters/lldb-mi/bin/lldb-mi"
       ],
-      "integrity": "6C2CD2797380DE2F3EA2A991BA4DACE265920922C4E18A80FAC515B30C1D0B99"
+      "integrity": "FA76E76C7D8E5D5CD0CC8E68C6FB70A354750D596DF3CED36ABF78AAD5C562C0"
     },
     {
       "description": "LLDB 3.8.0 (macOS High Sierra and lower)",

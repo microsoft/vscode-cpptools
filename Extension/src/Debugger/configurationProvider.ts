@@ -182,7 +182,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
 
             newConfig.name = compilerName + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
-            newConfig.console = "externalTerminal";
+            if (newConfig.type === "cppdbg") {
+                newConfig.externalConsole = false;
+            } else {
+                newConfig.console = "externalTerminal";
+            }
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             const isWindows: boolean = platform === 'win32';
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
@@ -190,7 +194,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = task.detail ? task.detail : definition.command;
             const isCl: boolean = compilerName === "cl.exe";
-            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(compilerPath) ? path.dirname(compilerPath) : "${workspaceFolder}";
+            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${workspaceFolder}";
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {

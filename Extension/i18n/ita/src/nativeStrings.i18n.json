@@ -206,5 +206,6 @@
 	"memory_limit_shutting_down_intellisense": "Il server IntelliSense verrà arrestato: {0}. La memoria utilizzata è {1} MB e ha superato il limite di {2} MB.",
 	"failed_to_query_for_standard_version": "Non è stato possibile eseguire una query sul compilatore nel percorso \"{0}\" per le versioni standard predefinite. L'esecuzione di query del compilatore è disabilitata per questo compilatore.",
 	"unrecognized_language_standard_version": "La query del compilatore ha restituito una versione standard del linguaggio non riconosciuta. In alternativa, verrà usata la versione più recente supportata.",
-	"intellisense_process_crash_detected": "IntelliSense process crash detected."
+	"intellisense_process_crash_detected": "È stato rilevato un arresto anomalo del processo IntelliSense.",
+	"return_values_label": "Valori restituiti:"
 }
