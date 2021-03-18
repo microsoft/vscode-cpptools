@@ -28,7 +28,7 @@ suite("multiline comment setting tests", function(): void {
         },
         {   // e.g.  * ...|
             beforeText: /^\s*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
-            previousLineText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
+            previousLineText: /^\s*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         },
         {   // e.g.  */|

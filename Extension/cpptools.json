@@ -4,5 +4,5 @@
     "recursiveIncludes": 100,
     "gotoDefIntelliSense": 100,
     "enhancedColorization": 100,
-    "minimumVSCodeVersion": "1.52.0"
+    "minimumVSCodeVersion": "1.53.0"
 }
