@@ -109,6 +109,7 @@ function getMLSplitRule(comment: CommentPattern): vscode.OnEnterRule | undefined
         return {
             beforeText: new RegExp(beforePattern),
             afterText: new RegExp(getMLSplitAfterPattern()),
+            previousLineText: new RegExp(beforePattern),
             action: {
                 indentAction: vscode.IndentAction.IndentOutdent,
                 appendText: comment.continue ? comment.continue : ''
