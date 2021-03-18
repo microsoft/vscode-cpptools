@@ -215,12 +215,6 @@ function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule {
     };
 }
 
-interface Rules {
-    begin: vscode.OnEnterRule[];
-    continue: vscode.OnEnterRule[];
-    end: vscode.OnEnterRule[];
-}
-
 // When Enter is pressed while the cursor is immediately after the continuation pattern
 function getSLEndRule(comment: CommentPattern): vscode.OnEnterRule {
     const endPattern: string = getSLEndPattern(comment.continue);
@@ -237,6 +231,12 @@ export function getLanguageConfig(languageId: string): vscode.LanguageConfigurat
     const settings: CppSettings = new CppSettings();
     const patterns: (string | CommentPattern)[] | undefined = settings.commentContinuationPatterns;
     return getLanguageConfigFromPatterns(languageId, patterns);
+}
+
+interface Rules {
+    begin: vscode.OnEnterRule[];
+    continue: vscode.OnEnterRule[];
+    end: vscode.OnEnterRule[];
 }
 
 export function getLanguageConfigFromPatterns(languageId: string, patterns?: (string | CommentPattern)[]): vscode.LanguageConfiguration {
