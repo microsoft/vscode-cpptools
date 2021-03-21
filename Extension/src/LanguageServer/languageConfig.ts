@@ -59,16 +59,6 @@ function getMLContinuePattern(insert: string): string | undefined {
     return undefined;
 }
 
-function getMLEndPattern(insert: string): string | undefined {
-    const match: string = escape(insert.trimRight().trimLeft());
-    if (match) {
-        return `^\\s*${match}[^/]*\\*\\/\\s*$`;
-    }
-    // else: if the continuation is just whitespace, don't mess with indentation
-    // since we don't know if this is a continuation line or not.
-    return undefined;
-}
-
 function getMLEmptyEndPattern(insert: string): string | undefined {
     insert = insert.trimRight();
     if (insert !== "") {
@@ -76,7 +66,19 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
             insert = insert.substr(0, insert.length - 1);
         }
         const match: string = escape(insert.trimRight());
-        return `^\\s*${match}\\*\\/\\s*$`;
+        return `^(\\t|[ ])*[ ]${match}\\*\\/\\s*$`;
+        // return `^\\s*${match}\\*\\/\\s*$`;
+    }
+    // else: if the continuation is just whitespace, don't mess with indentation
+    // since we don't know if this is a continuation line or not.
+    return undefined;
+}
+
+function getMLEndPattern(insert: string): string | undefined {
+    const match: string = escape(insert.trimRight().trimLeft());
+    if (match) {
+        return `^(\\t|[ ])*[ ]${match}\\*\\/\\s*$`;
+        // return `^\\s*${match}[^/]*\\*\\/\\s*$`;
     }
     // else: if the continuation is just whitespace, don't mess with indentation
     // since we don't know if this is a continuation line or not.
@@ -109,7 +111,6 @@ function getMLSplitRule(comment: CommentPattern): vscode.OnEnterRule | undefined
         return {
             beforeText: new RegExp(beforePattern),
             afterText: new RegExp(getMLSplitAfterPattern()),
-            previousLineText: new RegExp(beforePattern),
             action: {
                 indentAction: vscode.IndentAction.IndentOutdent,
                 appendText: comment.continue ? comment.continue : ''
@@ -147,16 +148,16 @@ function getMLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | un
                     indentAction: vscode.IndentAction.None,
                     appendText: comment.continue.trimLeft()
                 }
-            }
-        } else {
+            };
+        /* } else {
             return {
                 beforeText: new RegExp(continuePattern),
                 action: {
                     indentAction: vscode.IndentAction.None,
                     appendText: comment.continue.trimLeft()
                 }
-            }            
-        }
+            };
+        }*/
     }
     return undefined;
 }
