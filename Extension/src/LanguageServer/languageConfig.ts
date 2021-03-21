@@ -18,6 +18,12 @@ export interface CommentPattern {
     continue: string;
 }
 
+interface Rules {
+    begin: vscode.OnEnterRule[];
+    continue: vscode.OnEnterRule[];
+    end: vscode.OnEnterRule[];
+}
+
 const escapeChars: RegExp = /[\\\^\$\*\+\?\{\}\(\)\.\!\=\|\[\]\ \/]/;  // characters that should be escaped.
 
 // Insert '\\' in front of regexp escape chars.
@@ -137,37 +143,29 @@ function getMLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule | undef
 
 // When Enter is pressed while the cursor is after the continuation pattern
 function getMLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
-    const continuePattern: string | undefined = getMLContinuePattern(comment.continue);
-    const beginPattern: string | undefined = getMLBeginPattern(comment.begin);
-    if (continuePattern) {
-        if (beginPattern) {
+    const previousLinePattern: string | undefined = getMLBeginPattern(comment.begin);
+    if (previousLinePattern) {
+        const beforePattern: string | undefined = getMLContinuePattern(comment.continue);
+        if (beforePattern) {
             return {
-                beforeText: new RegExp(continuePattern),
-                previousLineText: new RegExp(beginPattern),
+                beforeText: new RegExp(beforePattern),
+                previousLineText: new RegExp(previousLinePattern),
                 action: {
                     indentAction: vscode.IndentAction.None,
                     appendText: comment.continue.trimLeft()
                 }
             };
-        /* } else {
-            return {
-                beforeText: new RegExp(continuePattern),
-                action: {
-                    indentAction: vscode.IndentAction.None,
-                    appendText: comment.continue.trimLeft()
-                }
-            };
-        }*/
+        }
     }
     return undefined;
 }
 
 // When Enter is pressed while the cursor is after '*/' (and '*/' plus leading whitespace is all that is on the line)
 function getMLEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
-    const endPattern: string | undefined = getMLEndPattern(comment.continue);
-    if (endPattern) {
+    const beforePattern: string | undefined = getMLEndPattern(comment.continue);
+    if (beforePattern) {
         return {
-            beforeText: new RegExp(endPattern),
+            beforeText: new RegExp(beforePattern),
             action: {
                 indentAction: vscode.IndentAction.None,
                 removeText: comment.continue.length - comment.continue.trimLeft().length
@@ -179,10 +177,10 @@ function getMLEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
 
 // When Enter is pressed while the cursor is after the continuation pattern and '*/'
 function getMLEmptyEndRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
-    const endPattern: string | undefined = getMLEmptyEndPattern(comment.continue);
-    if (endPattern) {
+    const beforePattern: string | undefined = getMLEmptyEndPattern(comment.continue);
+    if (beforePattern) {
         return {
-            beforeText: new RegExp(endPattern),
+            beforeText: new RegExp(beforePattern),
             action: {
                 indentAction: vscode.IndentAction.None,
                 removeText: comment.continue.length - comment.continue.trimLeft().length
@@ -194,9 +192,9 @@ function getMLEmptyEndRule(comment: CommentPattern): vscode.OnEnterRule | undefi
 
 // When the continue rule is different than the begin rule for single line comments
 function getSLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule {
-    const continuePattern: string = getSLBeginPattern(comment.begin);
+    const beforePattern: string = getSLBeginPattern(comment.begin);
     return {
-        beforeText: new RegExp(continuePattern),
+        beforeText: new RegExp(beforePattern),
         action: {
             indentAction: vscode.IndentAction.None,
             appendText: comment.continue.trimLeft()
@@ -206,9 +204,9 @@ function getSLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule {
 
 // When Enter is pressed while the cursor is after the continuation pattern plus at least one other character.
 function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule {
-    const continuePattern: string = getSLContinuePattern(comment.continue);
+    const beforePattern: string = getSLContinuePattern(comment.continue);
     return {
-        beforeText: new RegExp(continuePattern),
+        beforeText: new RegExp(beforePattern),
         action: {
             indentAction: vscode.IndentAction.None,
             appendText: comment.continue.trimLeft()
@@ -218,20 +216,14 @@ function getSLContinuationRule(comment: CommentPattern): vscode.OnEnterRule {
 
 // When Enter is pressed while the cursor is immediately after the continuation pattern
 function getSLEndRule(comment: CommentPattern): vscode.OnEnterRule {
-    const endPattern: string = getSLEndPattern(comment.continue);
+    const beforePattern: string = getSLEndPattern(comment.continue);
     return {
-        beforeText: new RegExp(endPattern),
+        beforeText: new RegExp(beforePattern),
         action: {
             indentAction: vscode.IndentAction.None,
             removeText: comment.continue.length - comment.continue.trimLeft().length
         }
     };
-}
-
-interface Rules {
-    begin: vscode.OnEnterRule[];
-    continue: vscode.OnEnterRule[];
-    end: vscode.OnEnterRule[];
 }
 
 export function getLanguageConfig(languageId: string): vscode.LanguageConfiguration {
