@@ -89,7 +89,6 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
 function getMLEndPattern(insert: string): string | undefined {
     const match: string = escape(insert.trimRight().trimLeft());
     if (match) {
-        // return `^(\\t|[ ])*${match}\\*\\/\\s*$`;
         return `^(\\t|[ ])*${match}[^/]*\\*\\/\\s*$`;
     }
     // else: if the continuation is just whitespace, don't mess with indentation
