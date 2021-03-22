@@ -27,20 +27,17 @@ suite("multiline comment setting tests", function(): void {
             action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
         },
         {   // e.g.  * ...|
-            // beforeText: /^\s*[ ]\*([ ]([^\*]|\*(?!\/))*)?$/,
-            beforeText: /^(\t|[ ])*[ ]\*([ ]([^\*]|\*(?!\/))*)?$/,
+            beforeText: /^(\t|[ ])*\ \*([ ]([^\*]|\*(?!\/))*)?$/,
             // previousLineText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
             previousLineText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         },
         {   // e.g.  */|
-            // beforeText: /^\s*[ ]\*\/\s*$/,
-            beforeText: /^(\t|[ ])*[ ]\*\/\s*$/,
+            beforeText: /^(\t|[ ])*\ \*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         },
         {   // e.g.  *-----*/|
-            // beforeText: /^\s*[ ]\*[^/]*\*\/\s*$/,
-            beforeText: /^(\t|[ ])*[ ]\*[^/]*\*\/\s*$/,
+            beforeText: /^(\t|[ ])*\ \*[^/]*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }
     ];
