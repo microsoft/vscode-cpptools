@@ -53,6 +53,13 @@ function getMLSplitAfterPattern(): string {
     return "^\\s*\\*\\/$";
 }
 
+function getMLPreviousLinePattern(insert: string): string | undefined {
+    if (insert.startsWith("/*")) {
+        return `(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
+    }
+    return undefined;
+}
+
 function getMLContinuePattern(insert: string): string | undefined {
     if (insert) {
         const match: string = escape(insert.trimRight());
@@ -142,7 +149,7 @@ function getMLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule | undef
 
 // When Enter is pressed while the cursor is after the continuation pattern
 function getMLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
-    const previousLinePattern: string | undefined = getMLBeginPattern(comment.begin);
+    const previousLinePattern: string | undefined = getMLPreviousLinePattern(comment.begin);
     if (previousLinePattern) {
         const beforePattern: string | undefined = getMLContinuePattern(comment.continue);
         if (beforePattern) {
