@@ -58,7 +58,7 @@ function getMLContinuePattern(insert: string): string | undefined {
         const match: string = escape(insert.trimRight());
         if (match) {
             const right: string = escape(insert.substr(insert.trimRight().length));
-            return `^(\t|[ ])*${match}(?!\\/)${right}([^\\*]|\\*(?!\\/))*$`;
+            return `^(\\t|[ ])*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
         }
         // else: if the continuation is just whitespace, vscode already does indentation preservation.
     }
@@ -82,7 +82,8 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
 function getMLEndPattern(insert: string): string | undefined {
     const match: string = escape(insert.trimRight().trimLeft());
     if (match) {
-        return `^(\\t|[ ])*${match}\\*\\/\\s*$`;
+        // return `^(\\t|[ ])*${match}\\*\\/\\s*$`;
+        return `^(\\t|[ ])*${match}[^/]*\\*\\/\\s*$`;
     }
     // else: if the continuation is just whitespace, don't mess with indentation
     // since we don't know if this is a continuation line or not.
@@ -141,7 +142,7 @@ function getMLFirstLineRule(comment: CommentPattern): vscode.OnEnterRule | undef
 
 // When Enter is pressed while the cursor is after the continuation pattern
 function getMLContinuationRule(comment: CommentPattern): vscode.OnEnterRule | undefined {
-    const previousLinePattern: string | undefined = getMLContinuePattern(comment.begin);
+    const previousLinePattern: string | undefined = getMLBeginPattern(comment.begin);
     if (previousLinePattern) {
         const beforePattern: string | undefined = getMLContinuePattern(comment.continue);
         if (beforePattern) {
