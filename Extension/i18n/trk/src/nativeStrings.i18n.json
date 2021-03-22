@@ -207,5 +207,5 @@
 	"failed_to_query_for_standard_version": "Varsayılan standart sürümler için \"{0}\" yolundaki derleyici sorgulanamadı. Derleyici sorgulaması bu derleyici için devre dışı bırakıldı.",
 	"unrecognized_language_standard_version": "Derleyici sorgusu, tanınmayan bir dil standardı sürümü döndürdü. Bunun yerine desteklenen en güncel sürüm kullanılacak.",
 	"intellisense_process_crash_detected": "IntelliSense işlem kilitlenmesi saptandı.",
-	"return_values_label": "Return values:"
+	"return_values_label": "Dönüş değerleri:"
 }
