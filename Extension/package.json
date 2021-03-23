@@ -1160,7 +1160,7 @@
         },
         "C_Cpp.autocompleteAddParentheses": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
           "scope": "resource"
         }
