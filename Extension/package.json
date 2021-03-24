@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.53.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -1160,7 +1160,7 @@
         },
         "C_Cpp.autocompleteAddParentheses": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
           "scope": "resource"
         }
@@ -2409,7 +2409,7 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.52.0",
+    "@types/vscode": "1.53.0",
     "@types/webpack": "^4.39.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",

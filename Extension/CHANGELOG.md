@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.3.0-insiders2: March 25, 2021
+## Bug Fixes
+* Fix a spurious asterisk being inserted on a new line if the previous line starts with an asterisk. [#5733](https://github.com/microsoft/vscode-cpptools/issues/5733)
+* Fix random crashes of cpptools-srv during shutdown. [#7161](https://github.com/microsoft/vscode-cpptools/issues/7161)
+* Change `C_Cpp.autocompleteAddParentheses` to be false by default. [#7199](https://github.com/microsoft/vscode-cpptools/issues/7199)
+* Fix auto add parentheses incorrectly occurring with template methods. [#7203](https://github.com/microsoft/vscode-cpptools/issues/7203)
+* Fix auto adding parentheses incorrectly occurring with type names. [#7209](https://github.com/microsoft/vscode-cpptools/issues/7209)
+
 ## Version 1.3.0-insiders: March 18, 2021
 ## Enhancements
 * Add parentheses to function calls with autocomplete. [#882](https://github.com/microsoft/vscode-cpptools/issues/882)

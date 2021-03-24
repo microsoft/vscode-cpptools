@@ -207,5 +207,5 @@
 	"failed_to_query_for_standard_version": "No se pudo consultar el compilador en la ruta de acceso \"{0}\" para las versiones estándar predeterminadas. La consulta del compilador está deshabilitada para este.",
 	"unrecognized_language_standard_version": "La consulta del compilador devolvió una versión estándar del lenguaje no reconocida. En su lugar se usará la última versión admitida.",
 	"intellisense_process_crash_detected": "Se ha detectado un bloqueo del proceso de IntelliSense.",
-	"return_values_label": "Return values:"
+	"return_values_label": "Valores devueltos:"
 }
