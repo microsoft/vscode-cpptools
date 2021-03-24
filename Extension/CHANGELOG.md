@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.3.0-insiders2: March 24, 2021
+## Version 1.3.0-insiders2: March 25, 2021
 ## Bug Fixes
 * Fix a spurious asterisk being inserted on a new line if the previous line starts with an asterisk. [#5733](https://github.com/microsoft/vscode-cpptools/issues/5733)
 * Fix random crashes of cpptools-srv during shutdown. [#7161](https://github.com/microsoft/vscode-cpptools/issues/7161)
