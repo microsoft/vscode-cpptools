@@ -1,20 +1,25 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 1.3.0-insiders2: March 25, 2021
-## Bug Fixes
+### New Features
+* Add highlighting of matching conditional preprocessor statements. [#2565](https://github.com/microsoft/vscode-cpptools/issues/2565)
+
+### Bug Fixes
 * Fix a spurious asterisk being inserted on a new line if the previous line starts with an asterisk. [#5733](https://github.com/microsoft/vscode-cpptools/issues/5733)
 * Fix random crashes of cpptools-srv during shutdown. [#7161](https://github.com/microsoft/vscode-cpptools/issues/7161)
 * Change `C_Cpp.autocompleteAddParentheses` to be false by default. [#7199](https://github.com/microsoft/vscode-cpptools/issues/7199)
 * Fix auto add parentheses incorrectly occurring with template methods. [#7203](https://github.com/microsoft/vscode-cpptools/issues/7203)
 * Fix auto adding parentheses incorrectly occurring with type names. [#7209](https://github.com/microsoft/vscode-cpptools/issues/7209)
+* Fix a bug with relative "." paths in compile commands. [#7221](https://github.com/microsoft/vscode-cpptools/issues/7221)
+* Fix configuration issues with Unreal Engine projects. [#7222](https://github.com/microsoft/vscode-cpptools/issues/7222)
 
 ## Version 1.3.0-insiders: March 18, 2021
-## Enhancements
+### Enhancements
 * Add parentheses to function calls with autocomplete. [#882](https://github.com/microsoft/vscode-cpptools/issues/882)
 * Add support for nodeAddonIncludes with Yarn PnP.
   * Mestery (@Mesterry) [PR #7123](https://github.com/microsoft/vscode-cpptools/pull/7123)
 
-## Bug Fixes
+### Bug Fixes
 * Fix an issue with stale IntelliSense due to moving or renaming header files. [#3849](https://github.com/microsoft/vscode-cpptools/issues/3849)
 * Fix go to definition on large macros. [#4306](https://github.com/microsoft/vscode-cpptools/issues/4306)
 * Fix size_t and placement new squiggles with clang on Windows. [#6573](https://github.com/microsoft/vscode-cpptools/issues/6573), [#7106](https://github.com/microsoft/vscode-cpptools/issues/7016)
@@ -30,7 +35,7 @@
 * Fix a performance bug after formatting a document. [#7159](https://github.com/microsoft/vscode-cpptools/issues/7159)
 
 ## Version 1.2.2: February 25, 2021
-## Bug Fixes
+### Bug Fixes
 * Fix IntelliSense errors with variable length arrays with C Clang mode. [#6500](https://github.com/microsoft/vscode-cpptools/issues/6500)
 * Fix for random IntelliSense communication failures on Mac. [#6809](https://github.com/microsoft/vscode-cpptools/issues/6809), [#6958](https://github.com/microsoft/vscode-cpptools/issues/6958)
 * Fix an extension activation failure when a non-existent folder exists in the workspace. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
