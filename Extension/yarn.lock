@@ -204,10 +204,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/vscode@1.52.0":
-  version "1.52.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.52.0.tgz#61917968dd403932127fc4004a21fd8d69e4f61c"
-  integrity sha512-Kt3bvWzAvvF/WH9YEcrCICDp0Z7aHhJGhLJ1BxeyNP6yRjonWqWnAIh35/pXAjswAnWOABrYlF7SwXR9+1nnLA==
+"@types/vscode@1.53.0":
+  version "1.53.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.53.0.tgz#47b53717af6562f2ad05171bc9c8500824a3905c"
+  integrity sha512-XjFWbSPOM0EKIT2XhhYm3D3cx3nn3lshMUcWNy1eqefk+oqRuBq8unVb6BYIZqXy9lQZyeUl7eaBCOZWv+LcXQ==
 
 "@types/webpack-sources@*":
   version "0.1.6"
