@@ -20,9 +20,7 @@
             "command": "yarn",
             "args": [
                 "run",
-                "compile",
-                "--loglevel",
-                "silent"
+                "compile"
             ]
         },
         {
@@ -95,9 +93,7 @@
             "command": "yarn",
             "args": [
                 "run",
-                "compile-watch",
-                "--loglevel",
-                "silent"
+                "compile-watch"
             ],
             "problemMatcher": [
                 {
