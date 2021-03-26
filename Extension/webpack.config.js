@@ -54,14 +54,17 @@ const config = {
     }
 }
 
-if (process.argv.includes('--vscode-nls')) {
-	// rewrite nls call when being asked for
-	config.module.rules.unshift({
-		loader: 'vscode-nls-dev/lib/webpack-loader',
-		options: {
-			base: __dirname
-		}
-	})
-}
+module.exports = (env) => {
+    if (env.vscode_nls) {
+        // rewrite nls call when being asked for
+        config.module.rules.unshift({
+            loader: 'vscode-nls-dev/lib/webpack-loader',
+            options: {
+                base: __dirname
+            }
+        })
+    }
+    
+    return config
+  };
 
-module.exports = config;
