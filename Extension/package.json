@@ -2381,9 +2381,9 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production",
+    "compile": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --vscode-nls",
     "compile-dev": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development",
-    "compile-watch": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --watch --info-verbosity verbose",
+    "compile-watch": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --watch --info-verbosity verbose --vscode-nls",
     "compile-dev-watch": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development --watch --info-verbosity verbose",
     "generateOptionsSchema": "node ./tools/prepublish.js && node ./out/tools/generateOptionsSchema.js",
     "generate-native-strings": "node ./tools/prepublish.js && gulp generate-native-strings",
