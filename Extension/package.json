@@ -1269,6 +1269,16 @@
           "light": "assets/ref-ungroup-by-type-light.svg",
           "dark": "assets/ref-ungroup-by-type-dark.svg"
         }
+      },
+      {
+        "command": "C_Cpp.GoToNextPreprocessorConditionalInChain",
+        "title": "%c_cpp.command.GoToNextPreprocessorConditionalInChain.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.GoToPrevPreprocessorConditionalInChain",
+        "title": "%c_cpp.command.GoToPrevPreprocessorConditionalInChain.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
