@@ -223,5 +223,10 @@
     "return_values_label": {
         "text": "Return values:",
         "hint": "This label is for the return values description for a function. Usage example: 'Return values: 1 if key is found. 2 if input can't be read. 3 if input is empty.'"
-    }
+    },
+    "nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
+    "nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
+    "invoking_nvcc": "Invoking nvcc with command line: {0}",
+    "nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
+    "unable_to_locate_forced_include": "Unable to locate forced include: {0}"
 }

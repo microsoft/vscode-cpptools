@@ -441,8 +441,9 @@ function rewriteManifest(): Promise<void> {
     const packageJson: any = util.getRawPackageJson();
 
     packageJson.activationEvents = [
-        "onLanguage:cpp",
         "onLanguage:c",
+        "onLanguage:cpp",
+        "onLanguage:cuda-cpp",
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugActiveFile",

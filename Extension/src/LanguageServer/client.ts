@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands } from './extension';
+import { updateLanguageConfigurations, registerCommands, supportCuda } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -590,7 +590,7 @@ export interface Client {
     handleAddToIncludePathCommand(path: string): void;
     onInterval(): void;
     dispose(): void;
-    addFileAssociations(fileAssociations: string, is_c: boolean): void;
+    addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -623,8 +623,9 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
     private documentSelector: DocumentFilter[] = [
+        { scheme: 'file', language: 'c' },
         { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'c' }
+        { scheme: 'file', language: 'cuda-cpp' }
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
@@ -1112,8 +1113,9 @@ export class DefaultClient implements Client {
 
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
+                { scheme: 'file', language: 'c' },
                 { scheme: 'file', language: 'cpp' },
-                { scheme: 'file', language: 'c' }
+                { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
@@ -1232,7 +1234,8 @@ export class DefaultClient implements Client {
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
-                localizedStrings: localizedStrings
+                localizedStrings: localizedStrings,
+                supportCuda: supportCuda
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
@@ -1412,7 +1415,9 @@ export class DefaultClient implements Client {
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
-            if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
+            if (textDocumentChangeEvent.document.languageId === "c"
+                || textDocumentChangeEvent.document.languageId === "cpp"
+                || textDocumentChangeEvent.document.languageId === "cuda-cpp") {
                 // If any file has changed, we need to abort the current rename operation
                 if (DefaultClient.renamePending) {
                     this.cancelReferences();
@@ -1935,8 +1940,9 @@ export class DefaultClient implements Client {
         const cppSettings: CppSettings = new CppSettings();
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
-            languageStr = languageStr.substr(is_c ? 2 : 1);
-            this.addFileAssociations(languageStr, is_c);
+            const is_cuda: boolean = languageStr.startsWith("cu;");
+            languageStr = languageStr.substr(is_c ? 2 : (is_cuda ? 3 : 1));
+            this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
         }
     }
 
@@ -1965,7 +1971,7 @@ export class DefaultClient implements Client {
             });
 
             // TODO: Handle new associations without a reload.
-            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
+            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
@@ -2014,7 +2020,7 @@ export class DefaultClient implements Client {
      * handle notifications coming from the language server
      */
 
-    public addFileAssociations(fileAssociations: string, is_c: boolean): void {
+    public addFileAssociations(fileAssociations: string, languageId: string): void {
         const settings: OtherSettings = new OtherSettings();
         const assocs: any = settings.filesAssociations;
 
@@ -2046,7 +2052,7 @@ export class DefaultClient implements Client {
                 if (foundGlobMatch) {
                     continue;
                 }
-                assocs[file] = is_c ? "c" : "cpp";
+                assocs[file] = languageId;
                 foundNewAssociation = true;
             }
         }
@@ -2794,6 +2800,6 @@ class NullClient implements Client {
         this.booleanEvent.dispose();
         this.stringEvent.dispose();
     }
-    addFileAssociations(fileAssociations: string, is_c: boolean): void {}
+    addFileAssociations(fileAssociations: string, languageId: string): void {}
     sendDidChangeSettings(settings: any): void {}
 }

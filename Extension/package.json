@@ -92,7 +92,7 @@
       {
         "view": "debug",
         "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
-        "when": "debugStartLanguage == cpp || debugStartLanguage == c"
+        "when": "debugStartLanguage == cpp || debugStartLanguage == c || debugStartLanguage == cuda-cpp"
       }
     ],
     "problemMatchers": [
@@ -1289,7 +1289,8 @@
         "label": "C++ (GDB/LLDB)",
         "languages": [
           "c",
-          "cpp"
+          "cpp",
+          "cuda-cpp"
         ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
@@ -1911,7 +1912,8 @@
         "label": "C++ (Windows)",
         "languages": [
           "c",
-          "cpp"
+          "cpp",
+          "cuda-cpp"
         ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
@@ -2156,6 +2158,9 @@
         "language": "cpp"
       },
       {
+        "language": "cuda-cpp"
+      },
+      {
         "language": "cuda"
       }
     ],
@@ -2190,12 +2195,22 @@
           "group": "other1_navigation@1"
         },
         {
+          "when": "editorLangId == cuda-cpp",
+          "command": "C_Cpp.SwitchHeaderSource",
+          "group": "other1_navigation@1"
+        },
+        {
           "when": "editorLangId == c",
           "command": "workbench.action.gotoSymbol",
           "group": "other1_navigation@3"
         },
         {
           "when": "editorLangId == cpp",
+          "command": "workbench.action.gotoSymbol",
+          "group": "other1_navigation@3"
+        },
+        {
+          "when": "editorLangId == cuda-cpp",
           "command": "workbench.action.gotoSymbol",
           "group": "other1_navigation@3"
         },
@@ -2208,6 +2223,16 @@
           "when": "editorLangId == cpp",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
+        },
+        {
+          "when": "editorLangId == cuda-cpp",
+          "command": "workbench.action.showAllSymbols",
+          "group": "other1_navigation@4"
+        },
+        {
+          "when": "editorLangId == c",
+          "command": "C_Cpp.BuildAndDebugActiveFile",
+          "group": "other2_debug@1"
         },
         {
           "when": "editorLangId == cpp",
@@ -2215,7 +2240,7 @@
           "group": "other2_debug@1"
         },
         {
-          "when": "editorLangId == c",
+          "when": "editorLangId == cuda-cpp",
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other2_debug@1"
         }
@@ -2233,6 +2258,11 @@
     },
     "configurationDefaults": {
       "[cpp]": {
+        "editor.wordBasedSuggestions": false,
+        "editor.suggest.insertMode": "replace",
+        "editor.semanticHighlighting.enabled": true
+      },
+      "[cuda-cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true
