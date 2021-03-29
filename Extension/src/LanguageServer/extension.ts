@@ -152,95 +152,98 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
-    if (realActivationOccurred) {
-        return; // Occurs if multiple delayed commands occur before the real commands are registered.
-    }
-
-    // Activate immediately if an activation event occurred in the previous workspace session.
-    // If onActivationEvent doesn't occur, it won't auto-activate next time.
-    activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
-    if (activatedPreviously.Value) {
-        activatedPreviously.Value = false;
-        realActivation();
-    }
-
-    if (tempCommands.length === 0) { // Only needs to be added once.
-        tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
-    }
-
-    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
-    let cppPropertiesExists: boolean = false;
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
-            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-            if (fs.existsSync(config)) {
-                vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
-                    vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                    cppPropertiesExists = true;
-                });
-            }
+    vscode.languages.getLanguages().then((langs) => {
+        supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
+        if (realActivationOccurred) {
+            return; // Occurs if multiple delayed commands occur before the real commands are registered.
         }
-    }
 
-    // Check if an activation event has already occurred.
-    if (activationEventOccurred) {
-        onActivationEvent();
-        return;
-    }
-
-    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
-
-    vscode.tasks.onDidStartTask(event => {
-        if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
-            telemetry.logLanguageServerEvent('buildTaskStarted');
+        // Activate immediately if an activation event occurred in the previous workspace session.
+        // If onActivationEvent doesn't occur, it won't auto-activate next time.
+        activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
+        if (activatedPreviously.Value) {
+            activatedPreviously.Value = false;
+            realActivation();
         }
-    });
 
-    const selector: vscode.DocumentSelector = [
-        { scheme: 'file', language: 'c' },
-        { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'cuda-cpp' }
-    ];
-    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
-        provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-            if (!await clients.ActiveClient.getVcpkgEnabled()) {
-                return [];
-            }
-
-            // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
-            if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
-                return [];
-            }
-
-            telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
-
-            if (!await clients.ActiveClient.getVcpkgInstalled()) {
-                return [getVcpkgHelpAction()];
-            }
-
-            const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
-            const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
-            return actions;
+        if (tempCommands.length === 0) { // Only needs to be added once.
+            tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
         }
-    });
 
-    if (cppPropertiesExists) {
-        onActivationEvent();
-        return;
-    }
-
-    // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
-    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-        for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
-            const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-            if (document.uri.scheme === "file") {
-                if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
-                    onActivationEvent();
-                    return;
+        // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
+        let cppPropertiesExists: boolean = false;
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+                const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+                if (fs.existsSync(config)) {
+                    vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
+                        vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                        cppPropertiesExists = true;
+                    });
                 }
             }
         }
-    }
+
+        // Check if an activation event has already occurred.
+        if (activationEventOccurred) {
+            onActivationEvent();
+            return;
+        }
+
+        taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
+
+        vscode.tasks.onDidStartTask(event => {
+            if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
+                telemetry.logLanguageServerEvent('buildTaskStarted');
+            }
+        });
+
+        const selector: vscode.DocumentSelector = [
+            { scheme: 'file', language: 'c' },
+            { scheme: 'file', language: 'cpp' },
+            { scheme: 'file', language: 'cuda-cpp' }
+        ];
+        codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
+            provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
+                if (!await clients.ActiveClient.getVcpkgEnabled()) {
+                    return [];
+                }
+
+                // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
+                if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
+                    return [];
+                }
+
+                telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
+
+                if (!await clients.ActiveClient.getVcpkgInstalled()) {
+                    return [getVcpkgHelpAction()];
+                }
+
+                const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
+                const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
+                return actions;
+            }
+        });
+
+        if (cppPropertiesExists) {
+            onActivationEvent();
+            return;
+        }
+
+        // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
+        if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
+            for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
+                const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
+                if (document.uri.scheme === "file") {
+                    if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
+                        onActivationEvent();
+                        return;
+                    }
+                }
+            }
+        }
+    });
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
@@ -285,82 +288,79 @@ function sendActivationTelemetry(): void {
 }
 
 function realActivation(): void {
-    vscode.languages.getLanguages().then((langs) => {
-        supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
-        if (new CppSettings().intelliSenseEngine === "Disabled") {
-            throw new Error(intelliSenseDisabledError);
-        } else {
-            console.log("activating extension");
-            sendActivationTelemetry();
-            const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
-            if (checkForConflictingExtensions.Value) {
-                checkForConflictingExtensions.Value = false;
-                const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
-                    extension.isActive && extension.id === "mitaki28.vscode-clang");
-                if (clangCommandAdapterActive) {
-                    telemetry.logLanguageServerEvent("conflictingExtension");
-                }
+    if (new CppSettings().intelliSenseEngine === "Disabled") {
+        throw new Error(intelliSenseDisabledError);
+    } else {
+        console.log("activating extension");
+        sendActivationTelemetry();
+        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
+        if (checkForConflictingExtensions.Value) {
+            checkForConflictingExtensions.Value = false;
+            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+                extension.isActive && extension.id === "mitaki28.vscode-clang");
+            if (clangCommandAdapterActive) {
+                telemetry.logLanguageServerEvent("conflictingExtension");
             }
         }
+    }
 
-        realActivationOccurred = true;
-        console.log("starting language server");
-        clients = new ClientCollection();
-        ui = getUI();
+    realActivationOccurred = true;
+    console.log("starting language server");
+    clients = new ClientCollection();
+    ui = getUI();
 
-        // Log cold start.
-        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (activeEditor) {
-            clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
-        }
+    // Log cold start.
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (activeEditor) {
+        clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
+    }
 
-        // There may have already been registered CustomConfigurationProviders.
-        // Request for configurations from those providers.
-        clients.forEach(client => {
-            getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
-        });
+    // There may have already been registered CustomConfigurationProviders.
+    // Request for configurations from those providers.
+    clients.forEach(client => {
+        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+    });
 
-        disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-        disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-        ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-        disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
-        disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
-        updateLanguageConfigurations();
+    updateLanguageConfigurations();
 
-        reportMacCrashes();
+    reportMacCrashes();
 
-        const settings: CppSettings = new CppSettings();
+    const settings: CppSettings = new CppSettings();
 
-        vcpkgDbPromise = initVcpkgDatabase();
+    vcpkgDbPromise = initVcpkgDatabase();
 
-        PlatformInformation.GetPlatformInformation().then(info => {
-            // Skip Insiders processing for 32-bit Linux.
-            if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
-                // Skip Insiders processing for unsupported VS Code versions.
-                const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-                const abTestSettings: ABTestSettings = getABTestSettings();
-                const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
-                if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
-                    insiderUpdateEnabled = true;
-                    if (settings.updateChannel === 'Default') {
-                        const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                        if (userVersion.suffix === "insiders") {
-                            checkAndApplyUpdate(settings.updateChannel, false);
-                        } else {
-                            suggestInsidersChannel();
-                        }
-                    } else if (settings.updateChannel === 'Insiders') {
-                        insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+    PlatformInformation.GetPlatformInformation().then(info => {
+        // Skip Insiders processing for 32-bit Linux.
+        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
+            // Skip Insiders processing for unsupported VS Code versions.
+            const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
+            const abTestSettings: ABTestSettings = getABTestSettings();
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
+            if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
+                insiderUpdateEnabled = true;
+                if (settings.updateChannel === 'Default') {
+                    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                    if (userVersion.suffix === "insiders") {
                         checkAndApplyUpdate(settings.updateChannel, false);
+                    } else {
+                        suggestInsidersChannel();
                     }
+                } else if (settings.updateChannel === 'Insiders') {
+                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                    checkAndApplyUpdate(settings.updateChannel, false);
                 }
             }
-        });
+        }
+    });
 
-        clients.ActiveClient.notifyWhenReady(() => {
-            intervalTimer = global.setInterval(onInterval, 2500);
-        });
+    clients.ActiveClient.notifyWhenReady(() => {
+        intervalTimer = global.setInterval(onInterval, 2500);
     });
 }
 
