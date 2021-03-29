@@ -2404,7 +2404,7 @@
     "@octokit/rest": "^16.28.9",
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
-    "@types/mocha": "^5.2.7",
+    "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.0",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
@@ -2427,12 +2427,12 @@
     "gulp-env": "^0.4.0",
     "gulp-eslint": "^6.0.0",
     "gulp-filter": "^6.0.0",
-    "gulp-mocha": "^7.0.1",
+    "gulp-mocha": "^8.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
     "minimist": "^1.2.5",
-    "mocha": "^5.2.0",
+    "mocha": "^8.3.2",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "ts-loader": "^8.1.0",
@@ -2463,7 +2463,6 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "copy-props": "^2.0.5",
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5"
