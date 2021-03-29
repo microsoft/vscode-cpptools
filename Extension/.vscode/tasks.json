@@ -117,10 +117,10 @@
                     "background": {
                         "activeOnStart": true,
                         "beginsPattern": {
-                            "regexp": "Compilation (.*?)starting…"
+                            "regexp": "asset"
                         },
                         "endsPattern": {
-                            "regexp": "Compilation (.*?)finished"
+                            "regexp": "webpack (.*?) compiled (.*?) ms"
                         }
                     }
                 }
@@ -158,10 +158,10 @@
                     "background": {
                         "activeOnStart": true,
                         "beginsPattern": {
-                            "regexp": "Compilation (.*?)starting…"
+                            "regexp": "asset"
                         },
                         "endsPattern": {
-                            "regexp": "Compilation (.*?)finished"
+                            "regexp": "webpack (.*?) compiled (.*?) ms"
                         }
                     }
                 }
