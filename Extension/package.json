@@ -2435,7 +2435,7 @@
     "mocha": "^5.2.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
-    "ts-loader": "^6.0.4",
+    "ts-loader": "^8.1.0",
     "tslint": "^5.19.0",
     "typescript": "^3.5.3",
     "vscode-debugadapter": "^1.35.0",
