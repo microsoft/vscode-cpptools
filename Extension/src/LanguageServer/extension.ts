@@ -35,7 +35,6 @@ import * as which from 'which';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
-export let supportCuda: boolean = false;
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -152,98 +151,95 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
  * activate: set up the extension for language services
  */
 export function activate(activationEventOccurred: boolean): void {
-    vscode.languages.getLanguages().then((langs) => {
-        supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
-        if (realActivationOccurred) {
-            return; // Occurs if multiple delayed commands occur before the real commands are registered.
-        }
+    if (realActivationOccurred) {
+        return; // Occurs if multiple delayed commands occur before the real commands are registered.
+    }
 
-        // Activate immediately if an activation event occurred in the previous workspace session.
-        // If onActivationEvent doesn't occur, it won't auto-activate next time.
-        activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
-        if (activatedPreviously.Value) {
-            activatedPreviously.Value = false;
-            realActivation();
-        }
+    // Activate immediately if an activation event occurred in the previous workspace session.
+    // If onActivationEvent doesn't occur, it won't auto-activate next time.
+    activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
+    if (activatedPreviously.Value) {
+        activatedPreviously.Value = false;
+        realActivation();
+    }
 
-        if (tempCommands.length === 0) { // Only needs to be added once.
-            tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
-        }
+    if (tempCommands.length === 0) { // Only needs to be added once.
+        tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
+    }
 
-        // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
-        let cppPropertiesExists: boolean = false;
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
-                const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-                if (fs.existsSync(config)) {
-                    vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
-                        vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                        cppPropertiesExists = true;
-                    });
-                }
+    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
+    let cppPropertiesExists: boolean = false;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (fs.existsSync(config)) {
+                vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
+                    vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                    cppPropertiesExists = true;
+                });
             }
         }
+    }
 
-        // Check if an activation event has already occurred.
-        if (activationEventOccurred) {
-            onActivationEvent();
-            return;
-        }
+    // Check if an activation event has already occurred.
+    if (activationEventOccurred) {
+        onActivationEvent();
+        return;
+    }
 
-        taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
+    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
-        vscode.tasks.onDidStartTask(event => {
-            if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
-                telemetry.logLanguageServerEvent('buildTaskStarted');
-            }
-        });
-
-        const selector: vscode.DocumentSelector = [
-            { scheme: 'file', language: 'c' },
-            { scheme: 'file', language: 'cpp' },
-            { scheme: 'file', language: 'cuda-cpp' }
-        ];
-        codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
-            provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
-                if (!await clients.ActiveClient.getVcpkgEnabled()) {
-                    return [];
-                }
-
-                // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
-                if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
-                    return [];
-                }
-
-                telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
-
-                if (!await clients.ActiveClient.getVcpkgInstalled()) {
-                    return [getVcpkgHelpAction()];
-                }
-
-                const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
-                const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
-                return actions;
-            }
-        });
-
-        if (cppPropertiesExists) {
-            onActivationEvent();
-            return;
-        }
-
-        // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
-        if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-            for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
-                const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-                if (document.uri.scheme === "file") {
-                    if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
-                        onActivationEvent();
-                        return;
-                    }
-                }
-            }
+    vscode.tasks.onDidStartTask(event => {
+        if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
+            telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
+
+    const selector: vscode.DocumentSelector = [
+        { scheme: 'file', language: 'c' },
+        { scheme: 'file', language: 'cpp' },
+        { scheme: 'file', language: 'cuda-cpp' }
+    ];
+    codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
+        provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
+            if (!await clients.ActiveClient.getVcpkgEnabled()) {
+                return [];
+            }
+
+            // Generate vcpkg install/help commands if the incoming doc/range is a missing include error
+            if (!context.diagnostics.some(isMissingIncludeDiagnostic)) {
+                return [];
+            }
+
+            telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
+
+            if (!await clients.ActiveClient.getVcpkgInstalled()) {
+                return [getVcpkgHelpAction()];
+            }
+
+            const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
+            const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
+            return actions;
+        }
+    });
+
+    if (cppPropertiesExists) {
+        onActivationEvent();
+        return;
+    }
+
+    // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
+    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
+            const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
+            if (document.uri.scheme === "file") {
+                if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
+                    onActivationEvent();
+                    return;
+                }
+            }
+        }
+    }
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {

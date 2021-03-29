@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands, supportCuda } from './extension';
+import { updateLanguageConfigurations, registerCommands } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -1235,7 +1235,7 @@ export class DefaultClient implements Client {
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
                 localizedStrings: localizedStrings,
-                supportCuda: supportCuda
+                supportCuda: util.supportCuda
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {

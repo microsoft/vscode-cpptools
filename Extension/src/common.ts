@@ -26,6 +26,7 @@ import * as jsonc from 'comment-json';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseJson: string = localize("failed.to.parse.json", "Failed to parse json file, possibly due to comments or trailing commas.");
+export let supportCuda: boolean = false;
 
 export type Mutable<T> = {
     // eslint-disable-next-line @typescript-eslint/array-type
@@ -1276,4 +1277,9 @@ export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceF
 
 export function isCodespaces(): boolean {
     return !!process.env["CODESPACES"];
+}
+
+export async function checkCuda(): Promise<void> {
+    const langs: string[] = await vscode.languages.getLanguages();
+    supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
 }
