@@ -431,7 +431,7 @@ interface IntelliSenseSetup {
     uri: string;
 }
 
-interface GoToNextPrevPreprocessorConditionalInChainParams {
+interface GoToDirectiveInGroupParams {
     uri: string;
     position: Position;
     next: boolean;
@@ -450,7 +450,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
-const GoToNextPrevPreprocessorConditionalInChainRequest: RequestType<GoToNextPrevPreprocessorConditionalInChainParams, Position | undefined, void, void> = new RequestType<GoToNextPrevPreprocessorConditionalInChainParams, Position | undefined, void, void>('cpptools/goToNextPrevPreprocessorConditionalInChain');
+const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -595,7 +595,7 @@ export interface Client {
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
-    handleGoToNextPrevPreprocessorConditionalInChain(next: boolean): void;
+    handleGoToDirectiveInGroup(next: boolean): void;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, is_c: boolean): void;
@@ -2631,16 +2631,16 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
-    public handleGoToNextPrevPreprocessorConditionalInChain(next: boolean): void {
+    public handleGoToDirectiveInGroup(next: boolean): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
-            const params: GoToNextPrevPreprocessorConditionalInChainParams = {
+            const params: GoToDirectiveInGroupParams = {
                 uri: editor.document.uri.toString(),
                 position: editor.selection.active,
                 next: next
             };
 
-            this.languageClient.sendRequest(GoToNextPrevPreprocessorConditionalInChainRequest, params)
+            this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params)
                 .then((response) => {
                     if (response) {
                         const p: vscode.Position = new vscode.Position(response.line, response.character);
@@ -2823,7 +2823,7 @@ class NullClient implements Client {
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void { }
-    handleGoToNextPrevPreprocessorConditionalInChain(next: boolean): void {}
+    handleGoToDirectiveInGroup(next: boolean): void {}
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();

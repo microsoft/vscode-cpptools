@@ -772,8 +772,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextPreprocessorConditionalInChain', onGoToNextPreprocessorConditionalInChain));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevPreprocessorConditionalInChain', onGoToPrevPreprocessorConditionalInChain));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -911,14 +911,14 @@ function onGenerateEditorConfig(): void {
     }
 }
 
-function onGoToNextPreprocessorConditionalInChain(): void {
+function onGoToNextDirectiveInGroup(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleGoToNextPrevPreprocessorConditionalInChain(true));
+    selectClient().then(client => client.handleGoToDirectiveInGroup(true));
 }
 
-function onGoToPrevPreprocessorConditionalInChain(): void {
+function onGoToPrevDirectiveInGroup(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleGoToNextPrevPreprocessorConditionalInChain(false));
+    selectClient().then(client => client.handleGoToDirectiveInGroup(false));
 }
 
 function onAddToIncludePath(path: string): void {

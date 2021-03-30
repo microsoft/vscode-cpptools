@@ -1271,13 +1271,13 @@
         }
       },
       {
-        "command": "C_Cpp.GoToNextPreprocessorConditionalInChain",
-        "title": "%c_cpp.command.GoToNextPreprocessorConditionalInChain.title%",
+        "command": "C_Cpp.GoToNextDirectiveInGroup",
+        "title": "%c_cpp.command.GoToNextDirectiveInGroup.title%",
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.GoToPrevPreprocessorConditionalInChain",
-        "title": "%c_cpp.command.GoToPrevPreprocessorConditionalInChain.title%",
+        "command": "C_Cpp.GoToPrevDirectiveInGroup",
+        "title": "%c_cpp.command.GoToPrevDirectiveInGroup.title%",
         "category": "C/C++"
       }
     ],
