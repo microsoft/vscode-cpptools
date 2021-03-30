@@ -431,6 +431,12 @@ interface IntelliSenseSetup {
     uri: string;
 }
 
+interface GoToNextPrevPreprocessorConditionalInChainParams {
+    uri: string;
+    position: Position;
+    next: boolean;
+};
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -444,6 +450,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+const GoToNextPrevPreprocessorConditionalInChainRequest: RequestType<GoToNextPrevPreprocessorConditionalInChainParams, Position | undefined, void, void> = new RequestType<GoToNextPrevPreprocessorConditionalInChainParams, Position | undefined, void, void>('cpptools/goToNextPrevPreprocessorConditionalInChain');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -588,6 +595,7 @@ export interface Client {
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
+    handleGoToNextPrevPreprocessorConditionalInChain(next: boolean): void;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, is_c: boolean): void;
@@ -2623,6 +2631,32 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
+    public handleGoToNextPrevPreprocessorConditionalInChain(next: boolean): void {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            const params: GoToNextPrevPreprocessorConditionalInChainParams = {
+                uri: editor.document.uri.toString(),
+                position: editor.selection.active,
+                next: next
+            };
+
+            this.languageClient.sendRequest(GoToNextPrevPreprocessorConditionalInChainRequest, params)
+                .then((response) => {
+                    if (response) {
+                        const p: vscode.Position = new vscode.Position(response.line, response.character);
+                        const r: vscode.Range = new vscode.Range(p, p);
+
+                        // Check if still the active document.
+                        const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+                        if (currentEditor && editor.document.uri === currentEditor.document.uri) {
+                            currentEditor.selection =  new vscode.Selection(r.start, r.end);
+                            currentEditor.revealRange(r);
+                        }
+                    }
+                });
+        }
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
@@ -2788,7 +2822,8 @@ class NullClient implements Client {
     handleConfigurationEditCommand(): void {}
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}
-    handleAddToIncludePathCommand(path: string): void {}
+    handleAddToIncludePathCommand(path: string): void { }
+    handleGoToNextPrevPreprocessorConditionalInChain(next: boolean): void {}
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();
