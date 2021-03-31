@@ -92,7 +92,7 @@
       {
         "view": "debug",
         "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
-        "when": "debugStartLanguage == cpp || debugStartLanguage == c"
+        "when": "debugStartLanguage == cpp || debugStartLanguage == c || debugStartLanguage == cuda-cpp"
       }
     ],
     "problemMatchers": [
@@ -1285,12 +1285,7 @@
       {
         "command": "C_Cpp.SwitchHeaderSource",
         "key": "Alt+O",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.SwitchHeaderSource",
-        "key": "Alt+O",
-        "when": "editorTextFocus && editorLangId == 'c'"
+        "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus"
       }
     ],
     "debuggers": [
@@ -1299,7 +1294,8 @@
         "label": "C++ (GDB/LLDB)",
         "languages": [
           "c",
-          "cpp"
+          "cpp",
+          "cuda-cpp"
         ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
@@ -1921,7 +1917,8 @@
         "label": "C++ (Windows)",
         "languages": [
           "c",
-          "cpp"
+          "cpp",
+          "cuda-cpp"
         ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
@@ -2166,6 +2163,9 @@
         "language": "cpp"
       },
       {
+        "language": "cuda-cpp"
+      },
+      {
         "language": "cuda"
       }
     ],
@@ -2190,42 +2190,22 @@
       ],
       "editor/context": [
         {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.SwitchHeaderSource",
           "group": "other1_navigation@1"
         },
         {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.SwitchHeaderSource",
-          "group": "other1_navigation@1"
-        },
-        {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.gotoSymbol",
           "group": "other1_navigation@3"
         },
         {
-          "when": "editorLangId == cpp",
-          "command": "workbench.action.gotoSymbol",
-          "group": "other1_navigation@3"
-        },
-        {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
         },
         {
-          "when": "editorLangId == cpp",
-          "command": "workbench.action.showAllSymbols",
-          "group": "other1_navigation@4"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2_debug@1"
-        },
-        {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other2_debug@1"
         }
@@ -2243,6 +2223,11 @@
     },
     "configurationDefaults": {
       "[cpp]": {
+        "editor.wordBasedSuggestions": false,
+        "editor.suggest.insertMode": "replace",
+        "editor.semanticHighlighting.enabled": true
+      },
+      "[cuda-cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true

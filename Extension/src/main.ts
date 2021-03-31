@@ -34,6 +34,8 @@ let reloadMessageShown: boolean = false;
 const disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    await util.checkCuda();
+
     let errMsg: string = "";
     const arch: string = os.arch();
     if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'ia32' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
@@ -441,8 +443,9 @@ function rewriteManifest(): Promise<void> {
     const packageJson: any = util.getRawPackageJson();
 
     packageJson.activationEvents = [
-        "onLanguage:cpp",
         "onLanguage:c",
+        "onLanguage:cpp",
+        "onLanguage:cuda-cpp",
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugActiveFile",
