@@ -1269,6 +1269,16 @@
           "light": "assets/ref-ungroup-by-type-light.svg",
           "dark": "assets/ref-ungroup-by-type-dark.svg"
         }
+      },
+      {
+        "command": "C_Cpp.GoToNextDirectiveInGroup",
+        "title": "%c_cpp.command.GoToNextDirectiveInGroup.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.GoToPrevDirectiveInGroup",
+        "title": "%c_cpp.command.GoToPrevDirectiveInGroup.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [

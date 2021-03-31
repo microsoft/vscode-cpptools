@@ -462,6 +462,8 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
         "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
         "onCommand:C_Cpp.GenerateEditorConfig",
+        "onCommand:C_Cpp.GoToNextDirectiveInGroup",
+        "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
         "onDebugInitialConfigurations",
         "onDebugResolve:cppdbg",
         "onDebugResolve:cppvsdbg",

@@ -772,6 +772,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -907,6 +909,16 @@ function onGenerateEditorConfig(): void {
     } else {
         selectClient().then(client => generateEditorConfig(client.RootUri));
     }
+}
+
+function onGoToNextDirectiveInGroup(): void {
+    onActivationEvent();
+    selectClient().then(client => client.handleGoToDirectiveInGroup(true));
+}
+
+function onGoToPrevDirectiveInGroup(): void {
+    onActivationEvent();
+    selectClient().then(client => client.handleGoToDirectiveInGroup(false));
 }
 
 function onAddToIncludePath(path: string): void {
