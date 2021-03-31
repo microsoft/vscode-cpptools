@@ -2190,22 +2190,22 @@
       ],
       "editor/context": [
         {
-          "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.SwitchHeaderSource",
           "group": "other1_navigation@1"
         },
         {
-          "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.gotoSymbol",
           "group": "other1_navigation@3"
         },
         {
-          "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
         },
         {
-          "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other2_debug@1"
         }
