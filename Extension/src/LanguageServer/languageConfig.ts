@@ -55,7 +55,7 @@ function getMLSplitAfterPattern(): string {
 
 function getMLPreviousLinePattern(insert: string): string | undefined {
     if (insert.startsWith("/*")) {
-        return `\\A(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
+        return `(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
     }
     return undefined;
 }
