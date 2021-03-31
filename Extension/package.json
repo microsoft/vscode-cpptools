@@ -1285,7 +1285,7 @@
       {
         "command": "C_Cpp.SwitchHeaderSource",
         "key": "Alt+O",
-        "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus",
+        "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus"
       }
     ],
     "debuggers": [
