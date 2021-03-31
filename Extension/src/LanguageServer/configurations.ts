@@ -1813,10 +1813,11 @@ export class CppProperties {
 
     public checkCompileCommands(): void {
         // Check for changes in case of file watcher failure.
-        const compileCommandsFile: string | undefined = this.CurrentConfiguration?.compileCommands;
-        if (!compileCommandsFile) {
+        const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
+        if (!compileCommands) {
             return;
         }
+        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands, os.platform() === "win32");
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
