@@ -5,7 +5,7 @@
 * Add commands for navigating to matching preprocessor directives in conditional groups. [#7256](https://github.com/microsoft/vscode-cpptools/pull/7256)
 
 ### Bug Fixes
-* Fix detection of bitness for compilers targetting esp32. [#7034](https://github.com/microsoft/vscode-cpptools/issues/7034)
+* Fix detection of bitness for compilers targeting esp32. [#7034](https://github.com/microsoft/vscode-cpptools/issues/7034)
 * Fix comment continuations. [PR #7238](https://github.com/microsoft/vscode-cpptools/pull/7238)
 * Fix bug when `${workspaceFolder}` is used in `compileCommands`. [#7241](https://github.com/microsoft/vscode-cpptools/issues/7241)
   * Aleksa Pavlovic (@aleksa2808) [PR #7242](https://github.com/microsoft/vscode-cpptools/pull/7242)
