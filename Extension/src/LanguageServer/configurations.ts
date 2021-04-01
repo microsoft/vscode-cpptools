@@ -1163,6 +1163,10 @@ export class CppProperties {
             this.configurationJson.configurations.forEach(e => {
                 if ((<any>e).knownCompilers) {
                     delete (<any>e).knownCompilers;
+                    delete (<any>e).compilerPathIsExplicit;
+                    delete (<any>e).cStandardIsExplicit;
+                    delete (<any>e).cppStandardIsExplicit;
+                    delete (<any>e).intelliSenseModeIsExplicit;
                     dirty = true;
                 }
             });
