@@ -47,7 +47,7 @@ Let us know what you think of the extension by taking the quick survey.
 
 ## Offline installation
 
-The extension has platform-specific binary dependencies, therefore installation via the Marketplace requires an Internet connection in order to download additional dependencies. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our platform-specific packages and install them by running VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases.
+The extension has platform-specific binary dependencies, therefore installation via the Marketplace requires an Internet connection in order to download additional dependencies. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our platform-specific packages and install them by running VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases. Expand the "Assets" section to see the releases for a given version.
 
  Package | Platform
 :--- | :---
