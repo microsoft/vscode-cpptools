@@ -104,17 +104,15 @@ export class PackageManager {
         tmp.setGracefulCleanup();
     }
 
-    public DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
-        return this.GetPackages()
-            .then((packages) => {
-                let count: number = 1;
-                return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.DownloadPackage(pkg);
-                    progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
-                    count += 1;
-                    return p;
-                });
-            });
+    public async DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
+        const packages: IPackage[] = await this.GetPackages();
+        let count: number = 1;
+        return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
+            const p: Promise<void> = this.DownloadPackage(pkg);
+            progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
+            count += 1;
+            return p;
+        });
     }
 
     public InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
