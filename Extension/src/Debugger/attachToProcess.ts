@@ -25,14 +25,13 @@ export interface AttachItemsProvider {
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
-    public ShowAttachEntries(): Promise<string | undefined> {
-        return util.isExtensionReady().then(ready => {
-            if (!ready) {
-                util.displayExtensionNotReadyPrompt();
-            } else {
-                return showQuickPick(() => this.attachItemsProvider.getAttachItems());
-            }
-        });
+    public async ShowAttachEntries(): Promise<string | undefined> {
+        const ready: boolean = await util.isExtensionReady();
+        if (!ready) {
+            util.displayExtensionNotReadyPrompt();
+        } else {
+            return showQuickPick(() => this.attachItemsProvider.getAttachItems());
+        }
     }
 }
 
@@ -131,51 +130,49 @@ export class RemoteAttachPicker {
         `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
-    private getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
+    private async getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
         // Do not add any quoting in execCommand.
         const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
-        return util.execChildProcess(execCommand, undefined, this._channel).then(output => {
-            // OS will be on first line
-            // Processes will follow if listed
-            const lines: string[] = output.split(/\r?\n/);
+        const output: string = await util.execChildProcess(execCommand, undefined, this._channel);
+        // OS will be on first line
+        // Processes will follow if listed
+        const lines: string[] = output.split(/\r?\n/);
+        if (lines.length === 0) {
+            return Promise.reject<AttachItem[]>(new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes.")));
+        } else {
+            const remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
-            if (lines.length === 0) {
-                return Promise.reject<AttachItem[]>(new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes.")));
+            if (remoteOS !== "Linux" && remoteOS !== "Darwin") {
+                return Promise.reject<AttachItem[]>(new Error(`Operating system "${remoteOS}" not supported.`));
+            }
+
+            // Only got OS from uname
+            if (lines.length === 1) {
+                return Promise.reject<AttachItem[]>(new Error(localize("no.process.list", "Transport attach could not obtain processes list.")));
             } else {
-                const remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
-
-                if (remoteOS !== "Linux" && remoteOS !== "Darwin") {
-                    return Promise.reject<AttachItem[]>(new Error(`Operating system "${remoteOS}" not supported.`));
-                }
-
-                // Only got OS from uname
-                if (lines.length === 1) {
-                    return Promise.reject<AttachItem[]>(new Error(localize("no.process.list", "Transport attach could not obtain processes list.")));
-                } else {
-                    const processes: string[] = lines.slice(1);
-                    return PsProcessParser.ParseProcessFromPsArray(processes)
-                        .sort((a, b) => {
-                            if (a.name === undefined) {
-                                if (b.name === undefined) {
-                                    return 0;
-                                }
-                                return 1;
-                            }
+                const processes: string[] = lines.slice(1);
+                return PsProcessParser.ParseProcessFromPsArray(processes)
+                    .sort((a, b) => {
+                        if (a.name === undefined) {
                             if (b.name === undefined) {
-                                return -1;
-                            }
-                            const aLower: string = a.name.toLowerCase();
-                            const bLower: string = b.name.toLowerCase();
-                            if (aLower === bLower) {
                                 return 0;
                             }
-                            return aLower < bLower ? -1 : 1;
-                        })
-                        .map(p => p.toAttachItem());
-                }
+                            return 1;
+                        }
+                        if (b.name === undefined) {
+                            return -1;
+                        }
+                        const aLower: string = a.name.toLowerCase();
+                        const bLower: string = b.name.toLowerCase();
+                        if (aLower === bLower) {
+                            return 0;
+                        }
+                        return aLower < bLower ? -1 : 1;
+                    })
+                    .map(p => p.toAttachItem());
             }
-        });
+        }
     }
 
     private static createArgumentList(args: string[]): string {
