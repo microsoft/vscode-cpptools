@@ -55,7 +55,7 @@ function getMLSplitAfterPattern(): string {
 
 function getMLPreviousLinePattern(insert: string): string | undefined {
     if (insert.startsWith("/*")) {
-        return `\\A(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
+        return `(?=^(\\s*(\\/\\*\\*|\\*)).*)(?=(?!(\\s*\\*\\/)))`;
     }
     return undefined;
 }
@@ -275,7 +275,7 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
 }
 
 function constructCommentRules(comment: CommentPattern, languageId: string): Rules {
-    if (comment?.begin?.startsWith('/*') && (languageId === 'c' || languageId === 'cpp')) {
+    if (comment?.begin?.startsWith('/*') && (languageId === 'c' || languageId === 'cpp' || languageId === 'cuda-cpp')) {
         const mlBegin1: vscode.OnEnterRule | undefined = getMLSplitRule(comment);
         if (!mlBegin1) {
             throw new Error("Failure in constructCommentRules() - mlBegin1");
@@ -301,7 +301,7 @@ function constructCommentRules(comment: CommentPattern, languageId: string): Rul
             continue: [ mlContinue ],
             end: [ mlEnd1, mlEnd2 ]
         };
-    } else if (comment?.begin?.startsWith('//') && languageId === 'cpp') {
+    } else if (comment?.begin?.startsWith('//') && (languageId === 'cpp' || languageId === 'cuda-cpp')) {
         const slContinue: vscode.OnEnterRule = getSLContinuationRule(comment);
         const slEnd: vscode.OnEnterRule = getSLEndRule(comment);
         if (comment.begin !== comment.continue) {

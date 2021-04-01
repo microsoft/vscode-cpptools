@@ -521,7 +521,10 @@ export class CppProperties {
         const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
 
-        const isValid: boolean = (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") === configuration.intelliSenseMode.includes("msvc");
+        const isValid: boolean = ((compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe" || compilerPathAndArgs.compilerName.toLowerCase() === "cl") === configuration.intelliSenseMode.includes("msvc")
+            // We can't necessarily determine what host compiler nvcc will use, without parsing command line args (i.e. for -ccbin)
+            // to determine if the user has set it to something other than the default. So, we don't squiggle IntelliSenseMode when using nvcc.
+            || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc.exe") || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc"));
         if (isValid) {
             return "";
         } else {
@@ -1240,9 +1243,10 @@ export class CppProperties {
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
-        if (resolvedCompilerPath &&
+        if (resolvedCompilerPath
             // Don't error cl.exe paths because it could be for an older preview build.
-            compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe") {
+            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
+            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl") {
             resolvedCompilerPath = resolvedCompilerPath.trim();
 
             // Error when the compiler's path has spaces without quotes but args are used.
@@ -1813,10 +1817,11 @@ export class CppProperties {
 
     public checkCompileCommands(): void {
         // Check for changes in case of file watcher failure.
-        const compileCommandsFile: string | undefined = this.CurrentConfiguration?.compileCommands;
-        if (!compileCommandsFile) {
+        const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
+        if (!compileCommands) {
             return;
         }
+        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands, os.platform() === "win32");
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {

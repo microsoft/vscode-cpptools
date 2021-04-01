@@ -68,7 +68,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         // Don't offer tasks for header files.
         const fileExtLower: string = fileExt.toLowerCase();
-        const isHeader: boolean = !fileExt || [".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
+        const isHeader: boolean = !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
         if (isHeader) {
             return emptyTasks;
         }
@@ -80,7 +80,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             fileIsCpp = true;
             fileIsC = true;
         } else {
-            fileIsCpp = [".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+            fileIsCpp = [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
             fileIsC = fileExtLower === ".c";
         }
         if (!(fileIsCpp || fileIsC)) {
