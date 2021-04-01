@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.3.0-insiders3: April 1, 2021
+### New Features
+* Add commands for navigating to matching preprocessor directives in conditional groups. [#7256](https://github.com/microsoft/vscode-cpptools/pull/7256)
+
+### Bug Fixes
+* Fix detection of bitness for compilers targetting esp32. [#7034](https://github.com/microsoft/vscode-cpptools/issues/7034)
+* Fix comment continuations. [PR #7238](https://github.com/microsoft/vscode-cpptools/pull/7238)
+* Fix bug when `${workspaceFolder}` is used in `compileCommands`. [#7241](https://github.com/microsoft/vscode-cpptools/issues/7241)
+  * Aleksa Pavlovic (@aleksa2808) [PR #7242](https://github.com/microsoft/vscode-cpptools/pull/7242)
+
 ## Version 1.3.0-insiders2: March 25, 2021
 ### New Features
 * Add highlighting of matching conditional preprocessor statements. [#2565](https://github.com/microsoft/vscode-cpptools/issues/2565)
