@@ -124,6 +124,7 @@ export class PackageManager {
             count += 1;
             return p;
         });
+
     }
 
     private GetIncrement(curStep: number, totalSteps: number): number {
@@ -134,15 +135,12 @@ export class PackageManager {
         return (curStep !== totalSteps) ? increment : maxIncrement - (totalSteps - 1) * increment;
     }
 
-    public GetPackages(): Promise<IPackage[]> {
-        return this.GetPackageList()
-            .then((list) =>
-                list.filter((value, index, array) =>
-                    ArchitecturesMatch(value, this.platformInfo) &&
-                        PlatformsMatch(value, this.platformInfo) &&
-                        VersionsMatch(value, this.platformInfo)
-                )
-            );
+    public async GetPackages(): Promise<IPackage[]> {
+        const list: IPackage[] = await this.GetPackageList();
+        return list.filter((value, index, array) => ArchitecturesMatch(value, this.platformInfo) &&
+            PlatformsMatch(value, this.platformInfo) &&
+            VersionsMatch(value, this.platformInfo)
+        );
     }
 
     /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
