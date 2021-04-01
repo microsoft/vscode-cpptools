@@ -154,42 +154,38 @@ export interface BuildInfo {
  * does not need to update, resolves to undefined.
  */
 export async function getTargetBuildInfo(updateChannel: string, isFromSettingsChange: boolean): Promise<BuildInfo | undefined> {
-    return getReleaseJson()
-        .then(builds => {
-            if (!builds || builds.length === 0) {
-                return undefined;
-            }
+    const builds: Build[] | undefined = await getReleaseJson();
+    if (!builds || builds.length === 0) {
+        return undefined;
+    }
 
-            const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
-            if (targetBuild === undefined) {
-                // no action
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
-            } else if (userVersion.isExtensionVersionGreaterThan(new PackageVersion(targetBuild.name))) {
-                // downgrade
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "newVersion": targetBuild.name });
-            } else {
-                // upgrade
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "newVersion": targetBuild.name });
-            }
-            return targetBuild;
-        })
-        .then(async build => {
-            if (!build) {
-                return Promise.resolve(undefined);
-            }
-            try {
-                const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-                const vsixName: string = vsixNameForPlatform(platformInfo);
-                const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
-                if (!downloadUrl) {
-                    return undefined;
-                }
-                return { downloadUrl: downloadUrl, name: build.name };
-            } catch (error) {
-                return Promise.reject(error);
-            }
-        });
+    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
+    if (targetBuild === undefined) {
+        // no action
+        telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
+    } else if (userVersion.isExtensionVersionGreaterThan(new PackageVersion(targetBuild.name))) {
+        // downgrade
+        telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "newVersion": targetBuild.name });
+    } else {
+        // upgrade
+        telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "newVersion": targetBuild.name });
+    }
+
+    if (!targetBuild) {
+        return undefined;
+    }
+    try {
+        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+        const vsixName: string = vsixNameForPlatform(platformInfo);
+        const downloadUrl: string = getVsixDownloadUrl(targetBuild, vsixName);
+        if (!downloadUrl) {
+            return undefined;
+        }
+        return { downloadUrl: downloadUrl, name: targetBuild.name };
+    } catch (error) {
+        return Promise.reject(error);
+    }
 }
 
 /**
