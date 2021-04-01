@@ -173,7 +173,7 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
     }
 
     if (!targetBuild) {
-        return undefined;
+        return Promise.resolve(undefined);
     }
     try {
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
