@@ -89,7 +89,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
     // characters. 50 was chosen because that's the maximum length of a "label" in the
     // QuickPick UI in VSCode.
 
-    protected getInternalProcessEntries(): Promise<Process[]> {
+    protected async getInternalProcessEntries(): Promise<Process[]> {
         let processCmd: string = '';
         switch (os.platform()) {
             case 'darwin':
@@ -101,7 +101,8 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
             default:
                 return Promise.reject<Process[]>(new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform())));
         }
-        return execChildProcess(processCmd, undefined).then(processes => PsProcessParser.ParseProcessFromPs(processes));
+        const processes: string = await execChildProcess(processCmd, undefined);
+        return PsProcessParser.ParseProcessFromPs(processes);
     }
 }
 
