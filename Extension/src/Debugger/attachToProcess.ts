@@ -89,17 +89,15 @@ export class RemoteAttachPicker {
 
             const pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
-            return this.getRemoteOSAndProcesses(pipeCmd)
-                .then(processes => {
-                    const attachPickOptions: vscode.QuickPickOptions = {
-                        matchOnDetail: true,
-                        matchOnDescription: true,
-                        placeHolder: localize("select.process.attach", "Select the process to attach to")
-                    };
+            const processes: AttachItem[]= await this.getRemoteOSAndProcesses(pipeCmd);
+            const attachPickOptions: vscode.QuickPickOptions = {
+                matchOnDetail: true,
+                matchOnDescription: true,
+                placeHolder: localize("select.process.attach", "Select the process to attach to")
+            };
 
-                    return vscode.window.showQuickPick(processes, attachPickOptions)
-                        .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
-                });
+            return vscode.window.showQuickPick(processes, attachPickOptions)
+                .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
         }
     }
 
