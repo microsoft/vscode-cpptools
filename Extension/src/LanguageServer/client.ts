@@ -431,6 +431,12 @@ interface IntelliSenseSetup {
     uri: string;
 }
 
+interface GoToDirectiveInGroupParams {
+    uri: string;
+    position: Position;
+    next: boolean;
+};
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -444,6 +450,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -588,9 +595,10 @@ export interface Client {
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
+    handleGoToDirectiveInGroup(next: boolean): void;
     onInterval(): void;
     dispose(): void;
-    addFileAssociations(fileAssociations: string, is_c: boolean): void;
+    addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -623,8 +631,9 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
     private documentSelector: DocumentFilter[] = [
+        { scheme: 'file', language: 'c' },
         { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'c' }
+        { scheme: 'file', language: 'cuda-cpp' }
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
@@ -1112,8 +1121,9 @@ export class DefaultClient implements Client {
 
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
+                { scheme: 'file', language: 'c' },
                 { scheme: 'file', language: 'cpp' },
-                { scheme: 'file', language: 'c' }
+                { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
@@ -1232,7 +1242,8 @@ export class DefaultClient implements Client {
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
-                localizedStrings: localizedStrings
+                localizedStrings: localizedStrings,
+                supportCuda: util.supportCuda
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
@@ -1412,7 +1423,9 @@ export class DefaultClient implements Client {
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
-            if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
+            if (textDocumentChangeEvent.document.languageId === "c"
+                || textDocumentChangeEvent.document.languageId === "cpp"
+                || textDocumentChangeEvent.document.languageId === "cuda-cpp") {
                 // If any file has changed, we need to abort the current rename operation
                 if (DefaultClient.renamePending) {
                     this.cancelReferences();
@@ -1935,8 +1948,9 @@ export class DefaultClient implements Client {
         const cppSettings: CppSettings = new CppSettings();
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
-            languageStr = languageStr.substr(is_c ? 2 : 1);
-            this.addFileAssociations(languageStr, is_c);
+            const is_cuda: boolean = languageStr.startsWith("cu;");
+            languageStr = languageStr.substr(is_c ? 2 : (is_cuda ? 3 : 1));
+            this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
         }
     }
 
@@ -1965,7 +1979,7 @@ export class DefaultClient implements Client {
             });
 
             // TODO: Handle new associations without a reload.
-            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
+            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
@@ -2014,7 +2028,7 @@ export class DefaultClient implements Client {
      * handle notifications coming from the language server
      */
 
-    public addFileAssociations(fileAssociations: string, is_c: boolean): void {
+    public addFileAssociations(fileAssociations: string, languageId: string): void {
         const settings: OtherSettings = new OtherSettings();
         const assocs: any = settings.filesAssociations;
 
@@ -2046,7 +2060,7 @@ export class DefaultClient implements Client {
                 if (foundGlobMatch) {
                     continue;
                 }
-                assocs[file] = is_c ? "c" : "cpp";
+                assocs[file] = languageId;
                 foundNewAssociation = true;
             }
         }
@@ -2623,6 +2637,32 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
+    public handleGoToDirectiveInGroup(next: boolean): void {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            const params: GoToDirectiveInGroupParams = {
+                uri: editor.document.uri.toString(),
+                position: editor.selection.active,
+                next: next
+            };
+
+            this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params)
+                .then((response) => {
+                    if (response) {
+                        const p: vscode.Position = new vscode.Position(response.line, response.character);
+                        const r: vscode.Range = new vscode.Range(p, p);
+
+                        // Check if still the active document.
+                        const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+                        if (currentEditor && editor.document.uri === currentEditor.document.uri) {
+                            currentEditor.selection =  new vscode.Selection(r.start, r.end);
+                            currentEditor.revealRange(r);
+                        }
+                    }
+                });
+        }
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenReady calls.
@@ -2788,12 +2828,13 @@ class NullClient implements Client {
     handleConfigurationEditCommand(): void {}
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}
-    handleAddToIncludePathCommand(path: string): void {}
+    handleAddToIncludePathCommand(path: string): void { }
+    handleGoToDirectiveInGroup(next: boolean): void {}
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();
         this.stringEvent.dispose();
     }
-    addFileAssociations(fileAssociations: string, is_c: boolean): void {}
+    addFileAssociations(fileAssociations: string, languageId: string): void {}
     sendDidChangeSettings(settings: any): void {}
 }
