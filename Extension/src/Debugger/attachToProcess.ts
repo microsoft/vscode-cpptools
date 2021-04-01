@@ -43,66 +43,65 @@ export class RemoteAttachPicker {
 
     private _channel: vscode.OutputChannel;
 
-    public ShowAttachEntries(config: any): Promise<string | undefined> {
-        return util.isExtensionReady().then(ready => {
-            if (!ready) {
-                util.displayExtensionNotReadyPrompt();
-            } else {
-                this._channel.clear();
+    public async ShowAttachEntries(config: any): Promise<string | undefined> {
+        const ready: boolean = await util.isExtensionReady();
+        if (!ready) {
+            util.displayExtensionNotReadyPrompt();
+        } else {
+            this._channel.clear();
 
-                const pipeTransport: any = config ? config.pipeTransport : undefined;
+            const pipeTransport: any = config ? config.pipeTransport : undefined;
 
-                if (!pipeTransport) {
-                    return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
-                }
-
-                let pipeProgram: string | undefined;
-
-                if (os.platform() === 'win32' &&
-                    pipeTransport.pipeProgram &&
-                    !fs.existsSync(pipeTransport.pipeProgram)) {
-                    const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
-                    const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
-
-                    // Check for pipeProgram
-                    if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
-                        pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
-                    }
-
-                    // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-                    if (!pipeProgram && config.pipeTransport.pipeCwd) {
-                        const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                        const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-
-                        if (!fs.existsSync(newPipeProgramStr)) {
-                            pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
-                        }
-                    }
-                }
-
-                if (!pipeProgram) {
-                    pipeProgram = pipeTransport.pipeProgram;
-                }
-
-                const pipeArgs: string[] = pipeTransport.pipeArgs;
-
-                const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
-
-                const pipeCmd: string = `"${pipeProgram}" ${argList}`;
-
-                return this.getRemoteOSAndProcesses(pipeCmd)
-                    .then(processes => {
-                        const attachPickOptions: vscode.QuickPickOptions = {
-                            matchOnDetail: true,
-                            matchOnDescription: true,
-                            placeHolder: localize("select.process.attach", "Select the process to attach to")
-                        };
-
-                        return vscode.window.showQuickPick(processes, attachPickOptions)
-                            .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
-                    });
+            if (!pipeTransport) {
+                return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
             }
-        });
+
+            let pipeProgram: string | undefined;
+
+            if (os.platform() === 'win32' &&
+                pipeTransport.pipeProgram &&
+                !fs.existsSync(pipeTransport.pipeProgram)) {
+                const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
+                const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
+
+                // Check for pipeProgram
+                if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
+                    pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
+                }
+
+                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+                if (!pipeProgram && config.pipeTransport.pipeCwd) {
+                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+
+                    if (!fs.existsSync(newPipeProgramStr)) {
+                        pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
+                    }
+                }
+            }
+
+            if (!pipeProgram) {
+                pipeProgram = pipeTransport.pipeProgram;
+            }
+
+            const pipeArgs: string[] = pipeTransport.pipeArgs;
+
+            const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
+
+            const pipeCmd: string = `"${pipeProgram}" ${argList}`;
+
+            return this.getRemoteOSAndProcesses(pipeCmd)
+                .then(processes => {
+                    const attachPickOptions: vscode.QuickPickOptions = {
+                        matchOnDetail: true,
+                        matchOnDescription: true,
+                        placeHolder: localize("select.process.attach", "Select the process to attach to")
+                    };
+
+                    return vscode.window.showQuickPick(processes, attachPickOptions)
+                        .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
+                });
+        }
     }
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
