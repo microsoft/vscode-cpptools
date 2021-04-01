@@ -25,7 +25,7 @@ export function GetOSName(processPlatform: string | undefined): string | undefin
 export class PlatformInformation {
     constructor(public platform: string, public architecture: string, public distribution?: LinuxDistribution, public version?: string) { }
 
-    public static GetPlatformInformation(): Promise<PlatformInformation> {
+    public static async GetPlatformInformation(): Promise<PlatformInformation> {
         const platform: string = os.platform();
         const architecture: string = PlatformInformation.GetArchitecture();
         let distributionPromise: Promise<LinuxDistribution | undefined> = Promise.resolve<LinuxDistribution | undefined>(undefined);
@@ -47,10 +47,8 @@ export class PlatformInformation {
                 throw new Error(localize("unknown.os.platform", "Unknown OS platform"));
         }
 
-        return Promise.all([distributionPromise, versionPromise])
-            .then(([distro, version]) =>
-                new PlatformInformation(platform, architecture, distro, version)
-            );
+        const [distro, version] = await Promise.all([distributionPromise, versionPromise]);
+        return new PlatformInformation(platform, architecture, distro, version);
     }
 
     public static GetArchitecture(): string {
