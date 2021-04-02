@@ -331,29 +331,28 @@ function realActivation(): void {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    PlatformInformation.GetPlatformInformation().then(info => {
-        // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
-            // Skip Insiders processing for unsupported VS Code versions.
-            const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            const abTestSettings: ABTestSettings = getABTestSettings();
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
-            if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
-                insiderUpdateEnabled = true;
-                if (settings.updateChannel === 'Default') {
-                    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                    if (userVersion.suffix === "insiders") {
-                        checkAndApplyUpdate(settings.updateChannel, false);
-                    } else {
-                        suggestInsidersChannel();
-                    }
-                } else if (settings.updateChannel === 'Insiders') {
-                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    // Skip Insiders processing for 32-bit Linux.
+    if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
+        // Skip Insiders processing for unsupported VS Code versions.
+        const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
+        const abTestSettings: ABTestSettings = getABTestSettings();
+        const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
+        if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
+            insiderUpdateEnabled = true;
+            if (settings.updateChannel === 'Default') {
+                const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                if (userVersion.suffix === "insiders") {
                     checkAndApplyUpdate(settings.updateChannel, false);
+                } else {
+                    suggestInsidersChannel();
                 }
+            } else if (settings.updateChannel === 'Insiders') {
+                insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                checkAndApplyUpdate(settings.updateChannel, false);
             }
         }
-    });
+    }
 
     clients.ActiveClient.notifyWhenReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
@@ -487,7 +486,7 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-function installVsix(vsixLocation: string): Thenable<void> {
+async function installVsix(vsixLocation: string): Promise<Thenable<void>> {
     const userVersion: PackageVersion = new PackageVersion(vscode.version);
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
@@ -498,72 +497,58 @@ function installVsix(vsixLocation: string): Thenable<void> {
 
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
-    return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
-        const vsCodeScriptPath: string | undefined = function(platformInfo): string | undefined {
-            if (platformInfo.platform === 'win32') {
-                const vsCodeBinName: string = path.basename(process.execPath);
-                let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
-                if (vsCodeBinName === 'Code - Insiders.exe') {
-                    cmdFile = 'code-insiders.cmd';
-                } else if (vsCodeBinName === 'Code - Exploration.exe') {
-                    cmdFile = 'code-exploration.cmd';
-                } else {
-                    cmdFile = 'code.cmd';
-                }
-                const vsCodeExeDir: string = path.dirname(process.execPath);
-                return path.join(vsCodeExeDir, 'bin', cmdFile);
-            } else if (platformInfo.platform === 'darwin') {
-                return path.join(process.execPath, '..', '..', '..', '..', '..',
-                    'Resources', 'app', 'bin', 'code');
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const vsCodeScriptPath: string | undefined = function(platformInfo): string | undefined {
+        if (platformInfo.platform === 'win32') {
+            const vsCodeBinName: string = path.basename(process.execPath);
+            let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
+            if (vsCodeBinName === 'Code - Insiders.exe') {
+                cmdFile = 'code-insiders.cmd';
+            } else if (vsCodeBinName === 'Code - Exploration.exe') {
+                cmdFile = 'code-exploration.cmd';
             } else {
-                const vsCodeBinName: string = path.basename(process.execPath);
-                try {
-                    return which.sync(vsCodeBinName);
-                } catch (error) {
-                    return undefined;
-                }
+                cmdFile = 'code.cmd';
             }
-        }(platformInfo);
-        if (!vsCodeScriptPath) {
-            return Promise.reject(new Error('Failed to find VS Code script'));
+            const vsCodeExeDir: string = path.dirname(process.execPath);
+            return path.join(vsCodeExeDir, 'bin', cmdFile);
+        } else if (platformInfo.platform === 'darwin') {
+            return path.join(process.execPath, '..', '..', '..', '..', '..',
+                'Resources', 'app', 'bin', 'code');
+        } else {
+            const vsCodeBinName: string = path.basename(process.execPath);
+            try {
+                return which.sync(vsCodeBinName);
+            } catch (error) {
+                return undefined;
+            }
         }
+    }(platformInfo);
+    if (!vsCodeScriptPath) {
+        return Promise.reject(new Error('Failed to find VS Code script'));
+    }
 
-        // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
-        const oldVersion: PackageVersion = new PackageVersion('1.27.2');
-        if (userVersion.isVsCodeVersionGreaterThan(oldVersion)) {
-            return new Promise<void>((resolve, reject) => {
-                let process: ChildProcess;
-                try {
-                    process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
-
-                    // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                    const timer: NodeJS.Timer = global.setTimeout(() => {
-                        process.kill();
-                        reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-                    }, 30000);
-
-                    process.on('exit', (code: number) => {
-                        clearInterval(timer);
-                        if (code !== 0) {
-                            reject(new Error(`VS Code script exited with error code ${code}`));
-                        } else {
-                            resolve();
-                        }
-                    });
-                    if (process.pid === undefined) {
-                        throw new Error();
-                    }
-                } catch (error) {
-                    reject(new Error('Failed to launch VS Code script process for installation'));
-                    return;
-                }
-            });
-        }
-
+    // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
+    const oldVersion: PackageVersion = new PackageVersion('1.27.2');
+    if (userVersion.isVsCodeVersionGreaterThan(oldVersion)) {
         return new Promise<void>((resolve, reject) => {
             let process: ChildProcess;
             try {
-                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+
+                // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+                const timer: NodeJS.Timer = global.setTimeout(() => {
+                    process.kill();
+                    reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+                }, 30000);
+
+                process.on('exit', (code: number) => {
+                    clearInterval(timer);
+                    if (code !== 0) {
+                        reject(new Error(`VS Code script exited with error code ${code}`));
+                    } else {
+                        resolve();
+                    }
+                });
                 if (process.pid === undefined) {
                     throw new Error();
                 }
@@ -571,35 +556,48 @@ function installVsix(vsixLocation: string): Thenable<void> {
                 reject(new Error('Failed to launch VS Code script process for installation'));
                 return;
             }
+        });
+    }
 
-            // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-            const timer: NodeJS.Timer = global.setTimeout(() => {
-                process.kill();
-                reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-            }, 30000);
+    return new Promise<void>((resolve, reject) => {
+        let process: ChildProcess;
+        try {
+            process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            if (process.pid === undefined) {
+                throw new Error();
+            }
+        } catch (error) {
+            reject(new Error('Failed to launch VS Code script process for installation'));
+            return;
+        }
 
-            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
-            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
-            let sentOverride: boolean = false;
-            const stdout: Readable | null = process.stdout;
-            if (!stdout) {
+        // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+        const timer: NodeJS.Timer = global.setTimeout(() => {
+            process.kill();
+            reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
+        }, 30000);
+
+        // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
+        // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+        let sentOverride: boolean = false;
+        const stdout: Readable | null = process.stdout;
+        if (!stdout) {
+            reject(new Error("Failed to communicate with VS Code script process for installation"));
+            return;
+        }
+        stdout.on('data', () => {
+            if (sentOverride) {
+                return;
+            }
+            const stdin: Writable | null = process.stdin;
+            if (!stdin) {
                 reject(new Error("Failed to communicate with VS Code script process for installation"));
                 return;
             }
-            stdout.on('data', () => {
-                if (sentOverride) {
-                    return;
-                }
-                const stdin: Writable | null = process.stdin;
-                if (!stdin) {
-                    reject(new Error("Failed to communicate with VS Code script process for installation"));
-                    return;
-                }
-                stdin.write('0\n');
-                sentOverride = true;
-                clearInterval(timer);
-                resolve();
-            });
+            stdin.write('0\n');
+            sentOverride = true;
+            clearInterval(timer);
+            resolve();
         });
     });
 }
