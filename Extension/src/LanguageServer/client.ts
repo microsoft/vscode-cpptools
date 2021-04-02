@@ -749,8 +749,9 @@ export class DefaultClient implements Client {
             ui.bind(this);
 
             // requests/notifications are deferred until this.languageClient is set.
-            this.queueBlockingTask(() => languageClient.onReady().then(
-                () => {
+            this.queueBlockingTask(async () => {
+                await languageClient.onReady();
+                try {
                     const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
                     this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
                     this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
@@ -869,14 +870,14 @@ export class DefaultClient implements Client {
                     } else {
                         this.configuration.CompilerDefaults = compilerDefaults;
                     }
-                },
-                (err) => {
+                } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
                     if (!failureMessageShown) {
                         failureMessageShown = true;
                         vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
                     }
-                }));
+                }
+            });
         } catch (err) {
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!failureMessageShown) {
