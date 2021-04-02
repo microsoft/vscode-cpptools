@@ -207,5 +207,10 @@
 	"failed_to_query_for_standard_version": "기본 표준 버전에 대해 경로 \"{0}\"에서 컴파일러를 쿼리하지 못했습니다. 이 컴파일러에 대해서는 컴파일러 쿼리를 사용할 수 없습니다.",
 	"unrecognized_language_standard_version": "컴파일러 쿼리에서 인식할 수 없는 언어 표준 버전을 반환했습니다. 지원되는 최신 버전이 대신 사용됩니다.",
 	"intellisense_process_crash_detected": "IntelliSense 프로세스 크래시가 감지되었습니다.",
-	"return_values_label": "반환 값:"
+	"return_values_label": "반환 값:",
+	"nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
+	"nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
+	"invoking_nvcc": "Invoking nvcc with command line: {0}",
+	"nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
+	"unable_to_locate_forced_include": "Unable to locate forced include: {0}"
 }

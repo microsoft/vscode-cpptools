@@ -207,5 +207,10 @@
 	"failed_to_query_for_standard_version": "Не удалось запросить компилятор по пути \"{0}\" для стандартных версий по умолчанию. Запросы для этого компилятора отключены.",
 	"unrecognized_language_standard_version": "Проба компилятора возвратила нераспознанную версию стандарта языка. Вместо этого будет использоваться последняя поддерживаемая версия.",
 	"intellisense_process_crash_detected": "Обнаружен сбой процесса IntelliSense.",
-	"return_values_label": "Возвращаемые значения:"
+	"return_values_label": "Возвращаемые значения:",
+	"nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
+	"nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
+	"invoking_nvcc": "Invoking nvcc with command line: {0}",
+	"nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
+	"unable_to_locate_forced_include": "Unable to locate forced include: {0}"
 }
