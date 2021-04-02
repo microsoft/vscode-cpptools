@@ -1161,8 +1161,24 @@ export class CppProperties {
             }
 
             this.configurationJson.configurations.forEach(e => {
-                if ((<any>e).knownCompilers) {
+                if ((<any>e).knownCompilers !== undefined) {
                     delete (<any>e).knownCompilers;
+                    dirty = true;
+                }
+                if ((<any>e).compilerPathIsExplicit !== undefined) {
+                    delete (<any>e).compilerPathIsExplicit;
+                    dirty = true;
+                }
+                if ((<any>e).cStandardIsExplicit !== undefined) {
+                    delete (<any>e).cStandardIsExplicit;
+                    dirty = true;
+                }
+                if ((<any>e).cppStandardIsExplicit !== undefined) {
+                    delete (<any>e).cppStandardIsExplicit;
+                    dirty = true;
+                }
+                if ((<any>e).intelliSenseModeIsExplicit !== undefined) {
+                    delete (<any>e).intelliSenseModeIsExplicit;
                     dirty = true;
                 }
             });
