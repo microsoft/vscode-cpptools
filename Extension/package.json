@@ -2524,21 +2524,6 @@
       "integrity": "448A17E1D7C639C99F0AE47A88705956BA03F8CFA401C0C00CD074945275B513"
     },
     {
-      "description": "C/C++ language components (OS X ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156301",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ],
-      "integrity": "448A17E1D7C639C99F0AE47A88705956BA03F8CFA401C0C00CD074945275B513"
-    },
-    {
       "description": "C/C++ language components (Windows)",
       "url": "https://go.microsoft.com/fwlink/?linkid=2156410",
       "platforms": [
@@ -2619,20 +2604,6 @@
       ],
       "architectures": [
         "x64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format.darwin"
-      ],
-      "integrity": "7AA436BA25E3404DC658A137188BEC65FF2532D1FEB314ABBBC5EBC9AAF5CCF7"
-    },
-    {
-      "description": "ClangFormat (OS X ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152859",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "arm64"
       ],
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
