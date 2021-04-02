@@ -402,9 +402,12 @@ export class CppProperties {
     private async readNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         let error: Error | undefined;
         let pdjFound: boolean = false;
-        const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8")
-            .then(pdj => {pdjFound = true; return JSON.parse(pdj); })
-            .catch(e => (error = e));
+        const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8");
+        try {
+            pdjFound = true; return JSON.parse(package_json);
+        } catch (err) {
+            error = err;
+        }
 
         if (!error) {
             try {
@@ -884,21 +887,19 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            console.assert(this.propertiesFile);
-            if (onBeforeOpen) {
-                onBeforeOpen();
+    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): Promise<void> {
+        await this.ensurePropertiesFile();
+        console.assert(this.propertiesFile);
+        if (onBeforeOpen) {
+            onBeforeOpen();
+        }
+        // Directly open the json file
+        if (this.propertiesFile) {
+            const document: vscode.TextDocument = await vscode.workspace.openTextDocument(this.propertiesFile);
+            if (showDocument) {
+                showDocument(document);
             }
-            // Directly open the json file
-            if (this.propertiesFile) {
-                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                    if (showDocument) {
-                        showDocument(document);
-                    }
-                });
-            }
-        });
+        }
     }
 
     private ensureSettingsPanelInitlialized(): void {
@@ -915,58 +916,56 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            if (this.propertiesFile) {
-                if (onBeforeOpen) {
-                    onBeforeOpen();
-                }
-                if (this.parsePropertiesFile()) {
-                    this.ensureSettingsPanelInitlialized();
-                    if (this.settingsPanel) {
-                        const configNames: string[] | undefined = this.ConfigurationNames;
-                        if (configNames && this.configurationJson) {
-                            // Use the active configuration as the default selected configuration to load on UI editor
-                            this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
-                            this.settingsPanel.createOrShow(configNames,
-                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                        }
-                    }
-                } else {
-                    // Parse failed, open json file
-                    vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                        if (showDocument) {
-                            showDocument(document);
-                        }
-                    });
-                }
+    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): Promise<void> {
+        await this.ensurePropertiesFile();
+        if (this.propertiesFile) {
+            if (onBeforeOpen) {
+                onBeforeOpen();
             }
-        });
+            if (this.parsePropertiesFile()) {
+                this.ensureSettingsPanelInitlialized();
+                if (this.settingsPanel) {
+                    const configNames: string[] | undefined = this.ConfigurationNames;
+                    if (configNames && this.configurationJson) {
+                        // Use the active configuration as the default selected configuration to load on UI editor
+                        this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
+                        this.settingsPanel.createOrShow(configNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                    }
+                }
+            } else {
+                // Parse failed, open json file
+                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+                    if (showDocument) {
+                        showDocument(document);
+                    }
+                });
+            }
+        }
     }
 
-    private onSettingsPanelActivated(): void {
+    private async onSettingsPanelActivated(): Promise<void> {
         if (this.configurationJson) {
-            this.ensurePropertiesFile().then(() => {
-                if (this.propertiesFile) {
-                    if (this.parsePropertiesFile()) {
-                        const configNames: string[] | undefined = this.ConfigurationNames;
-                        if (configNames && this.settingsPanel && this.configurationJson) {
-                            // The settings UI became visible or active.
-                            // Ensure settingsPanel has copy of latest current configuration
-                            if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
-                                this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
-                            }
-                            this.settingsPanel.updateConfigUI(configNames,
-                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                        } else {
-                            // Parse failed, open json file
-                            vscode.workspace.openTextDocument(this.propertiesFile);
+            await this.ensurePropertiesFile();
+            if (this.propertiesFile) {
+                if (this.parsePropertiesFile()) {
+                    const configNames: string[] | undefined = this.ConfigurationNames;
+                    if (configNames && this.settingsPanel && this.configurationJson) {
+                        // The settings UI became visible or active.
+                        // Ensure settingsPanel has copy of latest current configuration
+                        if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
+                            this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
+                        this.settingsPanel.updateConfigUI(configNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                    } else {
+                        // Parse failed, open json file
+                        vscode.workspace.openTextDocument(this.propertiesFile);
                     }
                 }
-            });
+            }
         }
     }
 
