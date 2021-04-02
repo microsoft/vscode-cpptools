@@ -15,7 +15,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
 
     public provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         return new Promise<vscode.TextEdit[]>((resolve, reject) => {
-            this.client.notifyWhenReady(() => {
+            this.client.notifyWhenReady(async () => {
                 const filePath: string = document.uri.fsPath;
                 const configCallBack = (editorConfigSettings: any | undefined) => {
                     const params: FormatParams = {
@@ -53,7 +53,8 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
                 } else {
                     const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
                     if (!editorConfigSettings) {
-                        editorConfig.parse(filePath).then(configCallBack);
+                        await editorConfig.parse(filePath);
+                        configCallBack(undefined);
                     } else {
                         cachedEditorConfigSettings.set(filePath, editorConfigSettings);
                         configCallBack(editorConfigSettings);
