@@ -40,7 +40,7 @@ export class UI {
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
-    private configurationUIPromise?: Thenable<ConfigurationResult>;
+    private configurationUIPromise?: Promise<ConfigurationResult>;
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
@@ -191,7 +191,7 @@ export class UI {
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
     }
 
-    public showConfigurations(configurationNames: string[]): Thenable<number> {
+    public async showConfigurations(configurationNames: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.a.configuration", "Select a Configuration...");
 
@@ -202,11 +202,11 @@ export class UI {
         items.push({ label: localize("edit.configuration.ui", "Edit Configurations (UI)"), description: "", index: configurationNames.length });
         items.push({ label: localize("edit.configuration.json", "Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
 
-        return vscode.window.showQuickPick(items, options)
-            .then(selection => (selection) ? selection.index : -1);
+        const selection: IndexableQuickPickItem | undefined  = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.index : -1;
     }
 
-    public showConfigurationProviders(currentProvider?: string): Thenable<string | undefined> {
+    public async showConfigurationProviders(currentProvider?: string): Promise<string | undefined> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.configuration.provider", "Select a Configuration Provider...");
         const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
@@ -221,11 +221,11 @@ export class UI {
         });
         items.push({ label: `(${localize("none", "none")})`, description: localize("disable.configuration.provider", "Disable the active configuration provider, if applicable."), key: "" });
 
-        return vscode.window.showQuickPick(items, options)
-            .then(selection => (selection) ? selection.key : undefined);
+        const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.key : undefined;
     }
 
-    public showCompileCommands(paths: string[]): Thenable<number> {
+    public async showCompileCommands(paths: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.compile.commands", "Select a compile_commands.json...");
 
@@ -234,22 +234,22 @@ export class UI {
             items.push({label: paths[i], description: "", index: i});
         }
 
-        return vscode.window.showQuickPick(items, options)
-            .then(selection => (selection) ? selection.index : -1);
+        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.index : -1;
     }
 
-    public showWorkspaces(workspaceNames: { name: string; key: string }[]): Thenable<string> {
+    public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.workspace", "Select a workspace folder...");
 
         const items: KeyedQuickPickItem[] = [];
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
 
-        return vscode.window.showQuickPick(items, options)
-            .then(selection => (selection) ? selection.key : "");
+        const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.key : "";
     }
 
-    public showParsingCommands(): Thenable<number> {
+    public async showParsingCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.parsing.command", "Select a parsing command...");
 
@@ -259,29 +259,28 @@ export class UI {
         } else {
             items.push({ label: localize("pause.parsing", "Pause Parsing"), description: "", index: 0 });
         }
-
-        return vscode.window.showQuickPick(items, options)
-            .then(selection => (selection) ? selection.index : -1);
+        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.index : -1;
     }
 
-    public showConfigureIncludePathMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+    public showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
         setTimeout(() => {
             this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
         }, 10000);
     }
 
-    public showConfigureCompileCommandsMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+    public showConfigureCompileCommandsMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
         setTimeout(() => {
             this.showConfigurationPrompt(ConfigurationPriority.CompileCommands, prompt, onSkip);
         }, 5000);
     }
 
-    public showConfigureCustomProviderMessage(prompt: () => Thenable<boolean>, onSkip: () => void): void {
+    public showConfigureCustomProviderMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
         this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
     }
 
-    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
-        const showPrompt: () => Thenable<ConfigurationResult> = async () => {
+    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Promise<boolean>, onSkip: () => void): void {
+        const showPrompt: () => Promise<ConfigurationResult> = async () => {
             const configured: boolean = await prompt();
             return Promise.resolve({
                 priority: priority,
