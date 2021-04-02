@@ -745,29 +745,27 @@ export function isExecutable(file: string): Promise<boolean> {
 }
 
 export function allowExecution(file: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
         if (process.platform !== 'win32') {
-            checkFileExists(file).then((exists: boolean) => {
-                if (exists) {
-                    isExecutable(file).then((isExec: boolean) => {
-                        if (isExec) {
-                            resolve();
-                        } else {
-                            fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
-                                if (err) {
-                                    reject(err);
-                                    return;
-                                }
-                                resolve();
-                            });
-                        }
-                    });
-                } else {
-                    getOutputChannelLogger().appendLine("");
-                    getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
+            const exists: boolean = await checkFileExists(file);
+            if (exists) {
+                const isExec: boolean = await isExecutable(file);
+                if (isExec) {
                     resolve();
+                } else {
+                    fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        resolve();
+                    });
                 }
-            });
+            } else {
+                getOutputChannelLogger().appendLine("");
+                getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
+                resolve();
+            }
         } else {
             resolve();
         }
