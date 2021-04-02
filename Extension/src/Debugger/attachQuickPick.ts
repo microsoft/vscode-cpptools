@@ -44,8 +44,9 @@ export async function showQuickPick(getAttachItems: () => Promise<AttachItem[]>)
 
         const disposables: vscode.Disposable[] = [];
 
-        quickPick.onDidTriggerButton(button => {
-            getAttachItems().then(processEntries => quickPick.items = processEntries);
+        quickPick.onDidTriggerButton(async button => {
+            const processEntries: AttachItem[] = await getAttachItems();
+            quickPick.items = processEntries;
         }, undefined, disposables);
 
         quickPick.onDidAccept(() => {
