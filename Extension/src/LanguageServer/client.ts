@@ -2609,15 +2609,13 @@ export class DefaultClient implements Client {
     }
 
     public handleShowParsingCommands(): void {
-        this.notifyWhenReady(() => {
-            ui.showParsingCommands()
-                .then((index: number) => {
-                    if (index === 0) {
-                        this.pauseParsing();
-                    } else if (index === 1) {
-                        this.resumeParsing();
-                    }
-                });
+        this.notifyWhenReady(async () => {
+            const index: number = await ui.showParsingCommands();
+            if (index === 0) {
+                this.pauseParsing();
+            } else if (index === 1) {
+                this.resumeParsing();
+            }
         });
     }
 
