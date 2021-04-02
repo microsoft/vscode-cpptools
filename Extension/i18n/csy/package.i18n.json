@@ -23,6 +23,8 @@
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Zkopírovat příkaz pro instalaci vcpkg do schránky",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Navštívit stránku nápovědy k vcpkg",
 	"c_cpp.command.generateEditorConfig.title": "Vygenerovat obsah EditorConfig z nastavení formátu VC",
+	"c_cpp.command.GoToNextDirectiveInGroup.title": "Go to next preprocessor directive in conditional group",
+	"c_cpp.command.GoToPrevDirectiveInGroup.title": "Go to previous preprocessor directive in conditional group",
 	"c_cpp.configuration.formatting.description": "Nakonfiguruje nástroj formátování textu.",
 	"c_cpp.configuration.formatting.clangFormat.description": "K formátování kódu se použije clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "K formátování kódu se použije nástroj formátování textu Visual C++.",

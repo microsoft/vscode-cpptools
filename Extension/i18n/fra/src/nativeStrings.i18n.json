@@ -207,5 +207,10 @@
 	"failed_to_query_for_standard_version": "Échec de l'interrogation du compilateur sur le chemin \"{0}\" pour les versions normalisées par défaut. L'interrogation du compilateur est désactivée pour ce compilateur.",
 	"unrecognized_language_standard_version": "L'interrogation du compilateur a retourné une version de norme de langage non reconnue. La toute dernière version prise en charge va être utilisée à la place.",
 	"intellisense_process_crash_detected": "Détection d'un plantage du processus IntelliSense.",
-	"return_values_label": "Valeurs de retour :"
+	"return_values_label": "Valeurs de retour :",
+	"nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
+	"nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
+	"invoking_nvcc": "Invoking nvcc with command line: {0}",
+	"nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
+	"unable_to_locate_forced_include": "Unable to locate forced include: {0}"
 }
