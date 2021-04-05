@@ -780,7 +780,7 @@ export function registerCommands(): void {
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
-function onSwitchHeaderSource(): void {
+async function onSwitchHeaderSource(): Promise<void> {
     onActivationEvent();
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
@@ -798,31 +798,29 @@ function onSwitchHeaderSource(): void {
         rootPath = path.dirname(fileName); // When switching without a folder open.
     }
 
-    clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName).then((targetFileName: string) => {
-        // If the targetFileName has a path that is a symlink target of a workspace folder,
-        // then replace the RootRealPath with the RootPath (the symlink path).
-        let targetFileNameReplaced: boolean = false;
-        clients.forEach(client => {
-            if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-                && targetFileName.indexOf(client.RootRealPath) === 0) {
-                targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
-                targetFileNameReplaced = true;
+    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName);
+    // If the targetFileName has a path that is a symlink target of a workspace folder,
+    // then replace the RootRealPath with the RootPath (the symlink path).
+    let targetFileNameReplaced: boolean = false;
+    clients.forEach(client => {
+        if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
+            && targetFileName.indexOf(client.RootRealPath) === 0) {
+            targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
+            targetFileNameReplaced = true;
+        }
+    });
+    vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
+        let foundEditor: boolean = false;
+        // If the document is already visible in another column, open it there.
+        vscode.window.visibleTextEditors.forEach((editor, index, array) => {
+            if (editor.document === document && !foundEditor) {
+                foundEditor = true;
+                vscode.window.showTextDocument(document, editor.viewColumn);
             }
         });
-        vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
-            let foundEditor: boolean = false;
-            // If the document is already visible in another column, open it there.
-            vscode.window.visibleTextEditors.forEach((editor, index, array) => {
-                if (editor.document === document && !foundEditor) {
-                    foundEditor = true;
-                    vscode.window.showTextDocument(document, editor.viewColumn);
-                }
-            });
-
-            if (!foundEditor) {
-                vscode.window.showTextDocument(document);
-            }
-        });
+        if (!foundEditor) {
+            vscode.window.showTextDocument(document);
+        }
     });
 }
 
@@ -830,21 +828,20 @@ function onSwitchHeaderSource(): void {
  * Allow the user to select a workspace when multiple workspaces exist and get the corresponding Client back.
  * The resulting client is used to handle some command that was previously invoked.
  */
-function selectClient(): Thenable<Client> {
+async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
         return Promise.resolve(clients.ActiveClient);
     } else {
-        return ui.showWorkspaces(clients.Names).then(key => {
-            if (key !== "") {
-                const client: Client | undefined = clients.get(key);
-                if (client) {
-                    return client;
-                } else {
-                    console.assert("client not found");
-                }
+        const key: string = await ui.showWorkspaces(clients.Names);
+        if (key !== "") {
+            const client: Client | undefined = clients.get(key);
+            if (client) {
+                return Promise.resolve<Client>(client);
+            } else {
+                console.assert("client not found");
             }
-            return Promise.reject<Client>(localize("client.not.found", "client not found"));
-        });
+        }
+        return Promise.reject<Client>(localize("client.not.found", "client not found"));
     }
 }
 
@@ -864,61 +861,82 @@ function onSelectConfiguration(): void {
     }
 }
 
-function onSelectConfigurationProvider(): void {
+async function onSelectConfigurationProvider(): Promise<void> {
     onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
     } else {
-        selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
+        try {
+            const client: Client = await selectClient();
+            client.handleConfigurationProviderSelectCommand();
+        } catch (err) {}
     }
 }
 
-function onEditConfigurationJSON(): void {
+async function onEditConfigurationJSON(): Promise<void> {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
+        try {
+            const client: Client = await selectClient();
+            client.handleConfigurationEditJSONCommand();
+        } catch (err) {}
     }
 }
 
-function onEditConfigurationUI(): void {
+async function onEditConfigurationUI(): Promise<void> {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
+        try {
+            const client: Client = await selectClient();
+            client.handleConfigurationEditUICommand();
+        } catch (err) {}
     }
 }
 
-function onEditConfiguration(): void {
+async function onEditConfiguration(): Promise<void> {
     onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        try {
+            const client: Client = await selectClient();
+            client.handleConfigurationEditCommand();
+        } catch (err) {}
     }
 }
 
-function onGenerateEditorConfig(): void {
+async function onGenerateEditorConfig(): Promise<void> {
     onActivationEvent();
     if (!isFolderOpen()) {
         generateEditorConfig();
     } else {
-        selectClient().then(client => generateEditorConfig(client.RootUri));
+        try {
+            const client: Client = await selectClient();
+            generateEditorConfig(client.RootUri);
+        } catch (err) {}
     }
 }
 
-function onGoToNextDirectiveInGroup(): void {
+async function onGoToNextDirectiveInGroup(): Promise<void> {
     onActivationEvent();
-    selectClient().then(client => client.handleGoToDirectiveInGroup(true));
+    try {
+        const client: Client = await selectClient();
+        client.handleGoToDirectiveInGroup(true);
+    } catch (err) {}
 }
 
-function onGoToPrevDirectiveInGroup(): void {
+async function onGoToPrevDirectiveInGroup(): Promise<void> {
     onActivationEvent();
-    selectClient().then(client => client.handleGoToDirectiveInGroup(false));
+    try {
+        const client: Client = await selectClient();
+        client.handleGoToDirectiveInGroup(false);
+    } catch (err) {}
 }
 
 function onAddToIncludePath(path: string): void {
