@@ -308,7 +308,7 @@ interface Location {
     range: Range;
 }
 
-interface LocalizeSymbolInformation {
+export interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
     location: Location;
