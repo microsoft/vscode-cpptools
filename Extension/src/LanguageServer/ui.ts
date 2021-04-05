@@ -279,7 +279,7 @@ export class UI {
         this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
     }
 
-    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Promise<boolean>, onSkip: () => void): void {
+    private async showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Promise<boolean>, onSkip: () => void): Promise<void> {
         const showPrompt: () => Promise<ConfigurationResult> = async () => {
             const configured: boolean = await prompt();
             return Promise.resolve({
@@ -289,14 +289,15 @@ export class UI {
         };
 
         if (this.configurationUIPromise) {
-            this.configurationUIPromise = this.configurationUIPromise.then(result => {
+            const result: ConfigurationResult = await this.configurationUIPromise;
+            this.configurationUIPromise = new Promise<ConfigurationResult>((resolve, reject) =>{
                 if (priority > result.priority) {
-                    return showPrompt();
+                    reject(showPrompt());
                 } else if (!result.configured) {
-                    return showPrompt();
+                    reject(showPrompt());
                 }
                 onSkip();
-                return Promise.resolve({
+                resolve({
                     priority: result.priority,
                     configured: true
                 });
