@@ -275,7 +275,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
      *
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    async resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.ProviderResult<vscode.DebugConfiguration>> {
         // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
         if (!config || !config.type) {
             return null;
@@ -339,13 +339,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 const moreInfoButton: string = localize("lldb.framework.install.xcode", "More Info");
                 const LLDBFrameworkMissingMessage: string = localize("lldb.framework.not.found", "Unable to locate 'LLDB.framework' for lldb-mi. Please install XCode or XCode Command Line Tools.");
 
-                vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton)
-                    .then(value => {
-                        if (value === moreInfoButton) {
-                            const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
-                            vscode.env.openExternal(vscode.Uri.parse(helpURL));
-                        }
-                    });
+                const value: string | undefined = await vscode.window.showErrorMessage(LLDBFrameworkMissingMessage, moreInfoButton);
+                if (value === moreInfoButton) {
+                    const helpURL: string = "https://aka.ms/vscode-cpptools/LLDBFrameworkNotFound";
+                    vscode.env.openExternal(vscode.Uri.parse(helpURL));
+                }
 
                 return undefined;
             }
