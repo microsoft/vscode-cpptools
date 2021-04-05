@@ -552,7 +552,7 @@ function mapWrapToEditorConfig(value: string | undefined): string {
     return "never";
 }
 
-function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): void {
+async function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): Promise<void> {
     // Set up a map of setting names and values. Parse through the document line-by-line, looking for
     // existing occurrences to replace. Replaced occurrences are removed from the map. If any remain when
     // done, they are added as a new section at the end of the file. The file is opened with unsaved
@@ -687,21 +687,33 @@ function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.
         const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
         edits.insert(document.uri, lastPosition, remainingSettingsText);
     }
-    vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
+    await vscode.workspace.applyEdit(edits);
+    vscode.window.showTextDocument(document);
 }
 
-export function generateEditorConfig(rootUri?: vscode.Uri): void {
+export async function generateEditorConfig(rootUri?: vscode.Uri): Promise<void> {
+    let document: vscode.TextDocument;
     if (rootUri !== undefined) {
         // If a folder is open and '.editorconfig' exists at the root, use that.
         const uri: vscode.Uri = vscode.Uri.joinPath(rootUri, ".editorconfig");
         const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         edits.createFile(uri, { ignoreIfExists: true, overwrite: false });
-        vscode.workspace.applyEdit(edits).then(() => {
-            vscode.workspace.openTextDocument(uri).then(
-                (document) => populateEditorConfig(rootUri, document),
-                () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
-        }, () => vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document)));
+
+        try {
+            await vscode.workspace.applyEdit(edits);
+            try {
+                document = await vscode.workspace.openTextDocument(uri);
+                populateEditorConfig(rootUri, document);
+            } finally {
+                document = await vscode.workspace.openTextDocument(uri);
+                populateEditorConfig(rootUri, document);
+            }
+        } finally {
+            document = await vscode.workspace.openTextDocument(uri);
+            populateEditorConfig(rootUri, document);
+        }
     } else {
-        vscode.workspace.openTextDocument().then((document) => populateEditorConfig(rootUri, document));
+        document = await vscode.workspace.openTextDocument();
+        populateEditorConfig(rootUri, document);
     }
 }
