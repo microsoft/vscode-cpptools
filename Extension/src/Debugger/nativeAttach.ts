@@ -99,7 +99,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
                 processCmd = PsProcessParser.psLinuxCommand;
                 break;
             default:
-                return Promise.reject<Process[]>(new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform())));
+                throw new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform()));
         }
         const processes: string = await execChildProcess(processCmd, undefined);
         return PsProcessParser.ParseProcessFromPs(processes);

@@ -52,7 +52,7 @@ export class RemoteAttachPicker {
             const pipeTransport: any = config ? config.pipeTransport : undefined;
 
             if (!pipeTransport) {
-                return Promise.reject<string>(new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport")));
+                throw new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport"));
             }
 
             let pipeProgram: string | undefined;
@@ -98,9 +98,9 @@ export class RemoteAttachPicker {
 
             const item: AttachItem | undefined = await vscode.window.showQuickPick(processes, attachPickOptions);
             if (item) {
-                return Promise.resolve(item.id);
+                return item.id;
             } else {
-                return Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected.")));
+                throw new Error((localize("process.not.selected", "Process not selected.")));
             }
 
         }
@@ -142,17 +142,17 @@ export class RemoteAttachPicker {
         // Processes will follow if listed
         const lines: string[] = output.split(/\r?\n/);
         if (lines.length === 0) {
-            return Promise.reject<AttachItem[]>(new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes.")));
+            throw new Error(localize("pipe.failed", "Pipe transport failed to get OS and processes."));
         } else {
             const remoteOS: string = lines[0].replace(/[\r\n]+/g, '');
 
             if (remoteOS !== "Linux" && remoteOS !== "Darwin") {
-                return Promise.reject<AttachItem[]>(new Error(`Operating system "${remoteOS}" not supported.`));
+                throw new Error(`Operating system "${remoteOS}" not supported.`);
             }
 
             // Only got OS from uname
             if (lines.length === 1) {
-                return Promise.reject<AttachItem[]>(new Error(localize("no.process.list", "Transport attach could not obtain processes list.")));
+                throw new Error(localize("no.process.list", "Transport attach could not obtain processes list."));
             } else {
                 const processes: string[] = lines.slice(1);
                 return PsProcessParser.ParseProcessFromPsArray(processes)

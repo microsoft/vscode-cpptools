@@ -173,19 +173,16 @@ export async function getTargetBuildInfo(updateChannel: string, isFromSettingsCh
     }
 
     if (!targetBuild) {
-        return Promise.resolve(undefined);
+        return undefined;
     }
-    try {
-        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-        const vsixName: string = vsixNameForPlatform(platformInfo);
-        const downloadUrl: string = getVsixDownloadUrl(targetBuild, vsixName);
-        if (!downloadUrl) {
-            return undefined;
-        }
-        return { downloadUrl: downloadUrl, name: targetBuild.name };
-    } catch (error) {
-        return Promise.reject(error);
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const vsixName: string = vsixNameForPlatform(platformInfo);
+    const downloadUrl: string = getVsixDownloadUrl(targetBuild, vsixName);
+    if (!downloadUrl) {
+        return undefined;
     }
+    return { downloadUrl: downloadUrl, name: targetBuild.name };
+
 }
 
 /**
@@ -265,7 +262,7 @@ async function getRateLimit(): Promise<RateLimit | undefined> {
             }
         });
     if (!data) {
-        return Promise.resolve(undefined);
+        return undefined;
     }
 
     let rateLimit: any;
@@ -276,7 +273,7 @@ async function getRateLimit(): Promise<RateLimit | undefined> {
     }
 
     if (isRateLimit(rateLimit)) {
-        return Promise.resolve(rateLimit);
+        return rateLimit;
     } else {
         throw new Error('Rate limit JSON is not of type RateLimit');
     }
@@ -308,7 +305,7 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
             }
         });
     if (!data) {
-        return Promise.resolve(undefined);
+        return undefined;
     }
 
     // Parse the file

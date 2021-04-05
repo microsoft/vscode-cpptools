@@ -522,7 +522,7 @@ async function installVsix(vsixLocation: string): Promise<Thenable<void>> {
         }
     }(platformInfo);
     if (!vsCodeScriptPath) {
-        return Promise.reject(new Error('Failed to find VS Code script'));
+        throw new Error('Failed to find VS Code script');
     }
 
     // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
@@ -827,18 +827,18 @@ async function onSwitchHeaderSource(): Promise<void> {
  */
 async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
-        return Promise.resolve(clients.ActiveClient);
+        return clients.ActiveClient;
     } else {
         const key: string = await ui.showWorkspaces(clients.Names);
         if (key !== "") {
             const client: Client | undefined = clients.get(key);
             if (client) {
-                return Promise.resolve<Client>(client);
+                return client;
             } else {
                 console.assert("client not found");
             }
         }
-        return Promise.reject<Client>(localize("client.not.found", "client not found"));
+        throw new Error (localize("client.not.found", "client not found"));
     }
 }
 

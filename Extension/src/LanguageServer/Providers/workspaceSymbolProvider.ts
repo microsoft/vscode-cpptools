@@ -37,6 +37,6 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
             );
             resultSymbols.push(vscodeSymbol);
         });
-        return Promise.resolve(resultSymbols);
+        return resultSymbols;
     }
 }
