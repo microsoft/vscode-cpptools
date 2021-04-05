@@ -254,28 +254,29 @@ function isRateLimit(input: any): input is RateLimit {
 
 async function getRateLimit(): Promise<RateLimit | undefined> {
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-    const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
-        .catch((error) => {
-            if (error && error.code && error.code !== "ENOENT") {
-                // Only throw if the user is connected to the Internet.
-                throw new Error('Failed to download rate limit JSON');
-            }
-        });
-    if (!data) {
-        return undefined;
-    }
-
-    let rateLimit: any;
     try {
-        rateLimit = JSON.parse(data);
-    } catch (error) {
-        throw new Error('Failed to parse rate limit JSON');
-    }
+        const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header);
+        if (!data) {
+            return undefined;
+        }
+        let rateLimit: any;
+        try {
+            rateLimit = JSON.parse(data);
+        } catch (error) {
+            throw new Error('Failed to parse rate limit JSON');
+        }
 
-    if (isRateLimit(rateLimit)) {
-        return rateLimit;
-    } else {
-        throw new Error('Rate limit JSON is not of type RateLimit');
+        if (isRateLimit(rateLimit)) {
+            return rateLimit;
+        } else {
+            throw new Error('Rate limit JSON is not of type RateLimit');
+        }
+
+    } catch (err) {
+        if (err && err.code && err.code !== "ENOENT") {
+            // Only throw if the user is connected to the Internet.
+            throw new Error('Failed to download rate limit JSON');
+        }
     }
 }
 
@@ -297,30 +298,32 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
     const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
 
-    const data: string = await util.downloadFileToStr(releaseUrl, header)
-        .catch((error) => {
-            if (error && error.code && error.code !== "ENOENT") {
-                // Only throw if the user is connected to the Internet.
-                throw new Error('Failed to download release JSON');
-            }
-        });
-    if (!data) {
-        return undefined;
-    }
-
-    // Parse the file
-    let releaseJson: any;
+    let data: string;
     try {
-        releaseJson = JSON.parse(data);
-    } catch (error) {
-        throw new Error('Failed to parse release JSON');
-    }
+        data = await util.downloadFileToStr(releaseUrl, header);
+        if (!data) {
+            return undefined;
+        }
 
-    // Find the latest released builds.
-    const builds: Build[] = getArrayOfBuilds(releaseJson);
-    if (!builds || builds.length === 0) {
-        throw new Error('Release JSON is not of type Build[]');
-    } else {
-        return builds;
+        // Parse the file
+        let releaseJson: any;
+        try {
+            releaseJson = JSON.parse(data);
+        } catch (error) {
+            throw new Error('Failed to parse release JSON');
+        }
+
+        // Find the latest released builds.
+        const builds: Build[] = getArrayOfBuilds(releaseJson);
+        if (!builds || builds.length === 0) {
+            throw new Error('Release JSON is not of type Build[]');
+        } else {
+            return builds;
+        }
+    } catch (err) {
+        if (err && err.code && err.code !== "ENOENT") {
+            // Only throw if the user is connected to the Internet.
+            throw new Error('Failed to download release JSON');
+        }
     }
 }

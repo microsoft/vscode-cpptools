@@ -427,34 +427,36 @@ export class CppProperties {
 
                 for (const [dep, execCmd] of nodeAddonMap) {
                     if (dep in package_json.dependencies) {
-                        let stdout: string | void = await util.execChildProcess(execCmd, rootPath)
-                            .catch((error) => console.log('readNodeAddonIncludeLocations', error.message));
-                        if (!stdout) {
-                            continue;
-                        }
-
-                        // cleanup newlines
-                        if (stdout[stdout.length - 1] === "\n") {
-                            stdout = stdout.slice(0, -1);
-                        }
-                        // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
-                        if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
-                            stdout = stdout.slice(1, -1);
-                        }
-
-                        // at this time both node-addon-api and nan return their own directory so this test is not really
-                        // needed. but it does future proof the code.
-                        if (!await util.checkDirectoryExists(stdout)) {
-                            // nan returns a path relative to rootPath causing the previous check to fail because this code
-                            // is executing in vscode's working directory.
-                            stdout = path.join(rootPath, stdout);
-                            if (!await util.checkDirectoryExists(stdout)) {
-                                error = new Error(`${dep} directory ${stdout} doesn't exist`);
-                                stdout = '';
+                        try {
+                            let stdout: string | void = await util.execChildProcess(execCmd, rootPath);
+                            if (!stdout) {
+                                continue;
                             }
-                        }
-                        if (stdout) {
-                            this.nodeAddonIncludes.push(stdout);
+                            // cleanup newlines
+                            if (stdout[stdout.length - 1] === "\n") {
+                                stdout = stdout.slice(0, -1);
+                            }
+                            // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                            if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                                stdout = stdout.slice(1, -1);
+                            }
+
+                            // at this time both node-addon-api and nan return their own directory so this test is not really
+                            // needed. but it does future proof the code.
+                            if (!await util.checkDirectoryExists(stdout)) {
+                                // nan returns a path relative to rootPath causing the previous check to fail because this code
+                                // is executing in vscode's working directory.
+                                stdout = path.join(rootPath, stdout);
+                                if (!await util.checkDirectoryExists(stdout)) {
+                                    error = new Error(`${dep} directory ${stdout} doesn't exist`);
+                                    stdout = '';
+                                }
+                            }
+                            if (stdout) {
+                                this.nodeAddonIncludes.push(stdout);
+                            }
+                        } catch (err) {
+                            console.log('readNodeAddonIncludeLocations', err.message)
                         }
                     }
                 }
