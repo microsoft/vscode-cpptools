@@ -76,55 +76,55 @@ export function initialize(context: vscode.ExtensionContext): void {
 
         const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail }));
 
-        vscode.window.showQuickPick(items, { placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.configuration", "Select a configuration")) }).then(async selection => {
-            if (!selection) {
-                return; // User canceled it.
+        const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {
+            placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.configuration", "Select a configuration")) });
+        if (!selection) {
+            return; // User canceled it.
+        }
+        if (selection.label.startsWith("cl.exe")) {
+            if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
+                vscode.window.showErrorMessage(localize("cl.exe.not.available", '{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.', "cl.exe"));
+                return;
             }
-            if (selection.label.startsWith("cl.exe")) {
-                if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-                    vscode.window.showErrorMessage(localize("cl.exe.not.available", '{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.', "cl.exe"));
-                    return;
-                }
-            }
-            if (selection.configuration.preLaunchTask) {
-                if (folder) {
-                    try {
-                        await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
-                        Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                    } catch (e) {
-                        if (e && e.message === util.failedToParseJson) {
-                            vscode.window.showErrorMessage(util.failedToParseJson);
-                        }
-                        return Promise.resolve();
+        }
+        if (selection.configuration.preLaunchTask) {
+            if (folder) {
+                try {
+                    await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+                } catch (e) {
+                    if (e && e.message === util.failedToParseJson) {
+                        vscode.window.showErrorMessage(util.failedToParseJson);
                     }
-                } else {
                     return Promise.resolve();
-                    // TODO uncomment this when single file mode works correctly.
-                    // const buildTasks: vscode.Task[] = await getBuildTasks(true);
-                    // const task: vscode.Task = buildTasks.find(task => task.name === selection.configuration.preLaunchTask);
-                    // await vscode.tasks.executeTask(task);
-                    // delete selection.configuration.preLaunchTask;
                 }
+            } else {
+                return Promise.resolve();
+                // TODO uncomment this when single file mode works correctly.
+                // const buildTasks: vscode.Task[] = await getBuildTasks(true);
+                // const task: vscode.Task = buildTasks.find(task => task.name === selection.configuration.preLaunchTask);
+                // await vscode.tasks.executeTask(task);
+                // delete selection.configuration.preLaunchTask;
             }
+        }
 
-            // Attempt to use the user's (possibly) modified configuration before using the generated one.
+        // Attempt to use the user's (possibly) modified configuration before using the generated one.
+        try {
+            await cppBuildTaskProvider.ensureDebugConfigExists(selection.configuration.name);
             try {
-                await cppBuildTaskProvider.ensureDebugConfigExists(selection.configuration.name);
-                try {
-                    await vscode.debug.startDebugging(folder, selection.configuration.name);
-                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-                } catch (e) {
-                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                }
+                await vscode.debug.startDebugging(folder, selection.configuration.name);
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
             } catch (e) {
-                try {
-                    vscode.debug.startDebugging(folder, selection.configuration);
-                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-                } catch (e) {
-                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                }
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
             }
-        });
+        } catch (e) {
+            try {
+                vscode.debug.startDebugging(folder, selection.configuration);
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+            } catch (e) {
+                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+            }
+        }
     }));
 
     configurationProvider.getConfigurationSnippets();
