@@ -144,6 +144,7 @@ export class CppSettings extends Settings {
     public get vcpkgEnabled(): boolean | undefined { return super.Section.get<boolean>("vcpkg.enabled"); }
     public get addNodeAddonIncludePaths(): boolean | undefined { return super.Section.get<boolean>("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean | undefined { return super.Section.get<boolean>("renameRequiresIdentifier"); }
+    public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("files.exclude"); }
     public get defaultIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.includePath"); }
     public get defaultDefines(): string[] | undefined { return super.Section.get<string[]>("default.defines"); }
     public get defaultMacFrameworkPath(): string[] | undefined { return super.Section.get<string[]>("default.macFrameworkPath"); }

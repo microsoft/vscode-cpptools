@@ -23,6 +23,8 @@
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copier la commande vcpkg install dans le Presse-papiers",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visiter la page d'aide de vcpkg",
 	"c_cpp.command.generateEditorConfig.title": "Générer le contenu d'EditorConfig à partir des paramètres de format VC",
+	"c_cpp.command.GoToNextDirectiveInGroup.title": "Go to next preprocessor directive in conditional group",
+	"c_cpp.command.GoToPrevDirectiveInGroup.title": "Go to previous preprocessor directive in conditional group",
 	"c_cpp.configuration.formatting.description": "Configure le moteur de mise en forme",
 	"c_cpp.configuration.formatting.clangFormat.description": "clang-format est utilisé pour la mise en forme du code.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Le moteur de mise en forme de Visual C++ est utilisé pour la mise en forme du code.",

@@ -923,7 +923,7 @@ async function onGenerateEditorConfig(): Promise<void> {
 async function onGoToNextDirectiveInGroup(): Promise<void> {
     onActivationEvent();
     try {
-        const client: Client = await selectClient();
+        const client: Client = await getActiveClient();
         client.handleGoToDirectiveInGroup(true);
     } catch (err) {}
 }
@@ -931,7 +931,7 @@ async function onGoToNextDirectiveInGroup(): Promise<void> {
 async function onGoToPrevDirectiveInGroup(): Promise<void> {
     onActivationEvent();
     try {
-        const client: Client = await selectClient();
+        const client: Client = await getActiveClient();
         client.handleGoToDirectiveInGroup(false);
     } catch (err) {}
 }

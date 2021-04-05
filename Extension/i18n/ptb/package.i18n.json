@@ -23,6 +23,8 @@
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "Copiar o comando de instalação vcpkg para a área de transferência",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "Visite a página de ajuda do vcpkg",
 	"c_cpp.command.generateEditorConfig.title": "Gerar o conteúdo do EditorConfig por meio das configurações de Formato do VC",
+	"c_cpp.command.GoToNextDirectiveInGroup.title": "Go to next preprocessor directive in conditional group",
+	"c_cpp.command.GoToPrevDirectiveInGroup.title": "Go to previous preprocessor directive in conditional group",
 	"c_cpp.configuration.formatting.description": "Configura o mecanismo de formatação",
 	"c_cpp.configuration.formatting.clangFormat.description": "O clang-format será usado para formatar o código.",
 	"c_cpp.configuration.formatting.vcFormat.description": "O mecanismo de formatação Visual C++ será usado para formatar o código.",

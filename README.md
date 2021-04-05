@@ -54,7 +54,8 @@ The extension has platform-specific binary dependencies, therefore installation 
 `cpptools-linux.vsix` | Linux 64-bit
 `cpptools-linux-armhf.vsix` | Linux ARM 32-bit
 `cpptools-linux-aarch64.vsix` | Linux ARM 64-bit
-`cpptools-osx.vsix` | macOS
+`cpptools-osx.vsix` | macOS 64-bit
+`cpptools-osx-arm64.vsix` | macOS ARM64
 `cpptools-win32.vsix` | Windows 64-bit & 32-bit
 `cpptools-win-arm64.vsix` | Windows ARM64
 `cpptools-linux32.vsix` | Linux 32-bit ([available up to version 0.27.0](https://github.com/microsoft/vscode-cpptools/issues/5346))
