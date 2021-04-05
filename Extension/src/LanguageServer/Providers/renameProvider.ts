@@ -23,7 +23,7 @@ export class RenameProvider implements vscode.RenameProvider {
         if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
             vscode.window.showErrorMessage(localize("invalid.identifier.for.rename", "Invalid identifier provided for the Rename Symbol operation."));
             const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-            return Promise.resolve(workspaceEdit);
+            return workspaceEdit;
         }
         // Normally, VS Code considers rename to be an atomic operation.
         // If the user clicks anywhere in the document, it attempts to cancel it.

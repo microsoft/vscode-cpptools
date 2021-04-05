@@ -36,7 +36,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             };
             const symbols: LocalizeDocumentSymbol[] = await this.client.languageClient.sendRequest(GetDocumentSymbolRequest, params);
             const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
-            return Promise.resolve(resultSymbols);
+            return resultSymbols;
         });
     }
 }

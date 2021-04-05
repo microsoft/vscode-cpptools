@@ -1491,7 +1491,7 @@ export class DefaultClient implements Client {
                                 onRegistered();
                                 ask.Value = false;
                                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                return Promise.resolve(true);
+                                return true;
                             }
                             case dontAllow: {
                                 ask.Value = false;
@@ -1501,7 +1501,7 @@ export class DefaultClient implements Client {
                                 break;
                             }
                         }
-                        return Promise.reject(false);
+                        return false;
                     },
                     () => ask.Value = false);
                 }
@@ -1672,16 +1672,16 @@ export class DefaultClient implements Client {
         const providerId: string | undefined = this.configurationProvider;
         if (!providerId) {
             onFinished();
-            return Promise.resolve();
+            return;
         }
         const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
         if (!provider) {
             onFinished();
-            return Promise.resolve();
+            return;
         }
         if (!provider.isReady) {
             onFinished();
-            return Promise.reject(`${this.configurationProvider} is not ready`);
+            throw new Error(`${this.configurationProvider} is not ready`);
         }
         return this.queueBlockingTask(async () => {
             const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
@@ -1697,7 +1697,7 @@ export class DefaultClient implements Client {
             if (!response.candidates || response.candidates.length === 0) {
                 // If we didn't receive any candidates, no configuration is needed.
                 onFinished();
-                return Promise.resolve();
+                return;
             }
 
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
@@ -1852,16 +1852,16 @@ export class DefaultClient implements Client {
                 // We don't want the queue to stall because of a rejected promise.
                 try {
                     await pendingTask.getPromise();
-                    return Promise.resolve(nextTask());
+                    return nextTask();
                 } catch (err) {
-                    return Promise.reject(nextTask());
+                    return nextTask();
                 }
             } else {
                 pendingTask = undefined;
-                return Promise.resolve(nextTask());
+                return nextTask();
             }
         } else {
-            return Promise.reject(localize("unsupported.client", "Unsupported client"));
+            throw new Error(localize("unsupported.client", "Unsupported client"));
         }
     }
 
@@ -1875,7 +1875,7 @@ export class DefaultClient implements Client {
             pendingTask = new util.BlockingTask<T>(task, pendingTask);
             return pendingTask.getPromise();
         } else {
-            return Promise.reject(localize("unsupported.client", "Unsupported client"));
+            throw new Error (localize("unsupported.client", "Unsupported client"));
         }
     }
 
@@ -2241,20 +2241,20 @@ export class DefaultClient implements Client {
                     if (params.paths.length > 1) {
                         const index: number = await ui.showCompileCommands(params.paths);
                         if (index < 0) {
-                            return Promise.reject(false);
+                            return false;
                         }
                         this.configuration.setCompileCommands(params.paths[index]);
                     } else {
                         this.configuration.setCompileCommands(params.paths[0]);
                     }
-                    return Promise.resolve(true);
+                    return true;
                 case askLater:
                     break;
                 case no:
                     ask.Value = false;
                     break;
             }
-            return Promise.reject(false);
+            return false;
         },
         () => ask.Value = false);
     }
