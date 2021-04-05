@@ -384,7 +384,7 @@ interface SemanticToken {
     modifiers?: number;
 }
 
-interface GetSemanticTokensResult {
+export interface GetSemanticTokensResult {
     fileVersion: number;
     canceled: boolean;
     tokens: SemanticToken[];
