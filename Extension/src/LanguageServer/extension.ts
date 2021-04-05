@@ -150,7 +150,7 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
 /**
  * activate: set up the extension for language services
  */
-export function activate(activationEventOccurred: boolean): void {
+export async function activate(activationEventOccurred: boolean): Promise<void> {
     if (realActivationOccurred) {
         return; // Occurs if multiple delayed commands occur before the real commands are registered.
     }
@@ -173,10 +173,9 @@ export function activate(activationEventOccurred: boolean): void {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (fs.existsSync(config)) {
-                vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
-                    vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                    cppPropertiesExists = true;
-                });
+                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
+                vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                cppPropertiesExists = true;
             }
         }
     }
@@ -283,7 +282,7 @@ function sendActivationTelemetry(): void {
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
 
-function realActivation(): void {
+async function realActivation(): Promise<void> {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
@@ -429,7 +428,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
-export function processDelayedDidOpen(document: vscode.TextDocument): void {
+export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<void> {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
@@ -454,9 +453,8 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, "cpp");
                         client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
-                        vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                            finishDidOpen(newDoc);
-                        });
+                        const newDoc: vscode.TextDocument = await vscode.languages.setTextDocumentLanguage(document, "cpp");
+                        finishDidOpen(newDoc);
                         languageChanged = true;
                     }
                 }
@@ -809,19 +807,18 @@ async function onSwitchHeaderSource(): Promise<void> {
             targetFileNameReplaced = true;
         }
     });
-    vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
-        let foundEditor: boolean = false;
-        // If the document is already visible in another column, open it there.
-        vscode.window.visibleTextEditors.forEach((editor, index, array) => {
-            if (editor.document === document && !foundEditor) {
-                foundEditor = true;
-                vscode.window.showTextDocument(document, editor.viewColumn);
-            }
-        });
-        if (!foundEditor) {
-            vscode.window.showTextDocument(document);
+    const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+    let foundEditor: boolean = false;
+    // If the document is already visible in another column, open it there.
+    vscode.window.visibleTextEditors.forEach((editor, index, array) => {
+        if (editor.document === document && !foundEditor) {
+            foundEditor = true;
+            vscode.window.showTextDocument(document, editor.viewColumn);
         }
     });
+    if (!foundEditor) {
+        vscode.window.showTextDocument(document);
+    }
 }
 
 /**
