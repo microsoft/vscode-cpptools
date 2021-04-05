@@ -96,8 +96,13 @@ export class RemoteAttachPicker {
                 placeHolder: localize("select.process.attach", "Select the process to attach to")
             };
 
-            return vscode.window.showQuickPick(processes, attachPickOptions)
-                .then(item => item ? item.id : Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected."))));
+            const item: AttachItem | undefined = await vscode.window.showQuickPick(processes, attachPickOptions);
+            if (item) {
+                return Promise.resolve(item.id);
+            } else {
+                return Promise.reject<string>(new Error(localize("process.not.selected", "Process not selected.")));
+            }
+
         }
     }
 
