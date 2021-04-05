@@ -84,29 +84,26 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         const vsixName: string = vsixNameForPlatform(platformInfo);
         errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
         const downloadLink: string = localize("download.button", "Go to Download Page");
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
-            }
-        });
+        const selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
+        if (selection && selection === downloadLink) {
+            vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+        }
     } else if (!(await util.checkInstallBinariesExist())) {
         errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
         const reload: string = localize("remove.extension", "Attempt to Repair");
-        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
-            if (value === reload) {
-                await util.removeInstallLockFile();
-                vscode.commands.executeCommand("workbench.action.reloadWindow");
-            }
-        });
+        const selection: string | undefined = await vscode.window.showErrorMessage(errMsg, reload);
+        if (selection === reload) {
+            await util.removeInstallLockFile();
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
     } else if (!(await util.checkInstallJsonsExist())) {
         // Check the Json files to declare if the extension has been installed successfully.
         errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
         const downloadLink: string = localize("download.button", "Go to Download Page");
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
-            }
-        });
+        const selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
+        if (selection === downloadLink) {
+            vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+        }
     }
 
     return cppTools;
@@ -263,7 +260,7 @@ function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolea
            !VersionsMatch(pkg, info);
 }
 
-function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
+async function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
     const promises: Thenable<void>[] = [];
     const packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
@@ -272,10 +269,10 @@ function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void>
             p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
         }
     });
-    return Promise.all(promises).then(() => { });
+    await Promise.all(promises);
 }
 
-function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
+async function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
     const promises: Thenable<void>[] = [];
     const packages: IPackage[] = util.packageJson["runtimeDependencies"];
     const logger: Logger = getOutputChannelLogger();
@@ -292,7 +289,7 @@ function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
             });
         }
     });
-    return Promise.all(promises).then(() => { });
+    await Promise.all(promises);
 }
 
 function removeUnnecessaryFile(): Promise<void> {
