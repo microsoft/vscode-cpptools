@@ -176,16 +176,18 @@ export async function isExtensionReady(): Promise<boolean> {
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
-export function displayExtensionNotReadyPrompt(): void {
+export async function displayExtensionNotReadyPrompt(): Promise<void> {
 
     if (!isExtensionNotReadyPromptDisplayed) {
         isExtensionNotReadyPromptDisplayed = true;
         showOutputChannel();
 
-        getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
-            () => { isExtensionNotReadyPromptDisplayed = false; },
-            () => { isExtensionNotReadyPromptDisplayed = false; }
-        );
+        try {
+            await getOutputChannelLogger().showInformationMessage(extensionNotReadyString);
+        } finally {
+            isExtensionNotReadyPromptDisplayed = false;
+        }
+
     }
 }
 
@@ -819,13 +821,12 @@ export function promptForReloadWindowDueToSettingsChange(): void {
     promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
-export function promptReloadWindow(message: string): void {
+export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
-        if (value === reload) {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-    });
+    const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+    if (value === reload) {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
