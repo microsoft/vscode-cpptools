@@ -922,6 +922,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
+        const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_editorAutoClosingBrackets: (string | undefined)[] = [];
@@ -1093,6 +1094,7 @@ export class DefaultClient implements Client {
                 settings_intelliSenseMemoryLimit.push(setting.intelliSenseMemoryLimit);
                 settings_autocomplete.push(setting.autocomplete);
                 settings_autocompleteAddParentheses.push(setting.autocompleteAddParentheses);
+                settings_cppFilesExclude.push(setting.filesExclude);
             }
 
             for (const otherSetting of otherSettings) {
@@ -1212,6 +1214,7 @@ export class DefaultClient implements Client {
                     autoClosingBrackets: settings_editorAutoClosingBrackets
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
+                cpp_exclude_files: settings_cppFilesExclude,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
@@ -1301,6 +1304,9 @@ export class DefaultClient implements Client {
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
+                files: {
+                    exclude: vscode.workspace.getConfiguration("C_Cpp.files.exclude", this.RootUri)
+                },
                 vcFormat: {
                     ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
