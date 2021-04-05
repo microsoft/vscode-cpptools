@@ -23,7 +23,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
     /* tslint:enable */
 
     return {
-        didOpen: (document, sendMessage) => {
+        didOpen: async (document, sendMessage) => {
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
@@ -53,9 +53,8 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                                 const mappingString: string = fileName + "@" + document.uri.fsPath;
                                 me.addFileAssociations(mappingString, "cpp");
                                 me.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
-                                vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                                    finishDidOpen(newDoc);
-                                });
+                                const newDoc: vscode.TextDocument = await vscode.languages.setTextDocumentLanguage(document, "cpp");
+                                finishDidOpen(newDoc);
                                 languageChanged = true;
                             }
                         }
