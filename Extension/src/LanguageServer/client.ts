@@ -770,7 +770,7 @@ export class DefaultClient implements Client {
                         }
 
                         public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
-                            return this.client.requestWhenReady(() => {
+                            return this.client.requestWhenReady(async () => {
                                 let r: Range;
                                 if (range instanceof vscode.Selection) {
                                     if (range.active.isBefore(range.anchor)) {
@@ -787,26 +787,24 @@ export class DefaultClient implements Client {
                                     uri: document.uri.toString()
                                 };
 
-                                return this.client.languageClient.sendRequest(GetCodeActionsRequest, params)
-                                    .then((commands) => {
-                                        const resultCodeActions: vscode.CodeAction[] = [];
+                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params);
+                                const resultCodeActions: vscode.CodeAction[] = [];
 
-                                        // Convert to vscode.CodeAction array
-                                        commands.forEach((command) => {
-                                            const title: string = util.getLocalizedString(command.localizeStringParams);
-                                            const vscodeCodeAction: vscode.CodeAction = {
-                                                title: title,
-                                                command: {
-                                                    title: title,
-                                                    command: command.command,
-                                                    arguments: command.arguments
-                                                }
-                                            };
-                                            resultCodeActions.push(vscodeCodeAction);
-                                        });
+                                // Convert to vscode.CodeAction array
+                                commands.forEach((command) => {
+                                    const title: string = util.getLocalizedString(command.localizeStringParams);
+                                    const vscodeCodeAction: vscode.CodeAction = {
+                                        title: title,
+                                        command: {
+                                            title: title,
+                                            command: command.command,
+                                            arguments: command.arguments
+                                        }
+                                    };
+                                    resultCodeActions.push(vscodeCodeAction);
+                                });
 
-                                        return resultCodeActions;
-                                    });
+                                return resultCodeActions;
                             });
                         }
                     }
@@ -834,39 +832,37 @@ export class DefaultClient implements Client {
 
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
-                        return languageClient.sendRequest(QueryCompilerDefaultsRequest, {}).then((inputCompilerDefaults: configs.CompilerDefaults) => {
-                            compilerDefaults = inputCompilerDefaults;
-                            this.configuration.CompilerDefaults = compilerDefaults;
+                        const inputCompilerDefaults: configs.CompilerDefaults = await languageClient.sendRequest(QueryCompilerDefaultsRequest, {});
+                        compilerDefaults = inputCompilerDefaults;
+                        this.configuration.CompilerDefaults = compilerDefaults;
 
-                            // Only register file watchers, providers, and the real commands after the extension has finished initializing,
-                            // e.g. prevents empty c_cpp_properties.json from generation.
-                            registerCommands();
+                        // Only register file watchers, providers, and the real commands after the extension has finished initializing,
+                        // e.g. prevents empty c_cpp_properties.json from generation.
+                        registerCommands();
 
-                            this.registerFileWatcher();
+                        this.registerFileWatcher();
 
-                            this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
-                            this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
-                            this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                            this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
-                            this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
-                            const settings: CppSettings = new CppSettings();
-                            if (settings.formattingEngine !== "Disabled") {
-                                this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
-                                this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                                this.onTypeFormattingProviderDisposable  = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
-                            }
-                            if (settings.codeFolding) {
-                                this.codeFoldingProvider = new FoldingRangeProvider(this);
-                                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
-                            }
-                            if (settings.enhancedColorization && this.semanticTokensLegend) {
-                                this.semanticTokensProvider = new SemanticTokensProvider(this);
-                                this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
-                            }
-
-                            // Listen for messages from the language server.
-                            this.registerNotifications();
-                        });
+                        this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
+                        this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
+                        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
+                        const settings: CppSettings = new CppSettings();
+                        if (settings.formattingEngine !== "Disabled") {
+                            this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
+                            this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                            this.onTypeFormattingProviderDisposable  = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                        }
+                        if (settings.codeFolding) {
+                            this.codeFoldingProvider = new FoldingRangeProvider(this);
+                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
+                        }
+                        if (settings.enhancedColorization && this.semanticTokensLegend) {
+                            this.semanticTokensProvider = new SemanticTokensProvider(this);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
+                        }
+                        // Listen for messages from the language server.
+                        this.registerNotifications();
                     } else {
                         this.configuration.CompilerDefaults = compilerDefaults;
                     }
@@ -1481,34 +1477,31 @@ export class DefaultClient implements Client {
                     ask.Value = true;
                 }
                 if (ask.Value) {
-                    ui.showConfigureCustomProviderMessage(() => {
+                    ui.showConfigureCustomProviderMessage(async () => {
                         const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
                             ? localize("provider.configure.folder", "{0} would like to configure IntelliSense for the '{1}' folder.", provider.name, this.Name)
                             : localize("provider.configure.this.folder", "{0} would like to configure IntelliSense for this folder.", provider.name);
                         const allow: string = localize("allow.button", "Allow");
                         const dontAllow: string = localize("dont.allow.button", "Don't Allow");
                         const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-
-                        return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(result => {
-                            switch (result) {
-                                case allow: {
-                                    this.configuration.updateCustomConfigurationProvider(provider.extensionId).then(() => {
-                                        onRegistered();
-                                        ask.Value = false;
-                                        telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                    });
-                                    return true;
-                                }
-                                case dontAllow: {
-                                    ask.Value = false;
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
+                        const result: string | undefined = await vscode.window.showInformationMessage(message, allow, dontAllow, askLater);
+                        switch (result) {
+                            case allow: {
+                                await  this.configuration.updateCustomConfigurationProvider(provider.extensionId);
+                                onRegistered();
+                                ask.Value = false;
+                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                                return Promise.resolve(true);
                             }
-                            return false;
-                        });
+                            case dontAllow: {
+                                ask.Value = false;
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                        return Promise.reject(false);
                     },
                     () => ask.Value = false);
                 }
@@ -1545,8 +1538,8 @@ export class DefaultClient implements Client {
         });
     }
 
-    public updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
-        return this.notifyWhenReady(() => {
+    public async updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
+        return this.notifyWhenReady(async () => {
             if (!this.configurationProvider) {
                 return;
             }
@@ -1573,7 +1566,8 @@ export class DefaultClient implements Client {
             // Initiate request for custom configuration.
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
-            task().then(async config => {
+            try {
+                const config: WorkspaceBrowseConfiguration | null = await task();
                 if (!config) {
                     return;
                 }
@@ -1594,14 +1588,14 @@ export class DefaultClient implements Client {
                         this.resumeParsing();
                     }
                 }
-            }, () => {
+            } finally {
                 if (!hasCompleted) {
                     hasCompleted = true;
                     if (currentProvider.version >= Version.v2) {
                         this.resumeParsing();
                     }
                 }
-            });
+            }
 
             // Set up a timeout to use previously received configuration and resume parsing if the provider times out
             global.setTimeout(async () => {
@@ -1622,7 +1616,7 @@ export class DefaultClient implements Client {
     }
 
     public async logDiagnostics(): Promise<void> {
-        const response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
+        const response: GetDiagnosticsResult = await this.requestWhenReady(async () => await this.languageClient.sendRequest(GetDiagnosticsRequest, null));
         if (!diagnosticsChannel) {
             diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
             workspaceDisposables.push(diagnosticsChannel);
@@ -1729,43 +1723,41 @@ export class DefaultClient implements Client {
                     }
                 }
             };
-            return this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource).then(
-                (configs?: SourceFileConfigurationItem[] | null) => {
-                    if (configs && configs.length > 0) {
-                        this.sendCustomConfigurations(configs, provider.version);
-                    }
+            const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            try {
+                if (configs && configs.length > 0) {
+                    this.sendCustomConfigurations(configs, provider.version);
+                }
+                onFinished();
+            } catch (err) {
+                if (requestFile) {
                     onFinished();
-                },
-                (err) => {
-                    if (requestFile) {
-                        onFinished();
+                    return;
+                }
+                const settings: CppSettings = new CppSettings(this.RootUri);
+                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                    const dismiss: string = localize("dismiss.button", "Dismiss");
+                    const disable: string = localize("diable.warnings.button", "Disable Warnings");
+                    const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
+                    if (!configName) {
                         return;
                     }
-                    const settings: CppSettings = new CppSettings(this.RootUri);
-                    if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
-                        const dismiss: string = localize("dismiss.button", "Dismiss");
-                        const disable: string = localize("diable.warnings.button", "Disable Warnings");
-                        const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
-                        if (!configName) {
-                            return;
-                        }
-                        let message: string = localize("unable.to.provide.configuraiton",
-                            "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                            providerName, docUri.fsPath, configName);
-                        if (err) {
-                            message += ` (${err})`;
-                        }
-
-                        vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
-                            switch (response) {
-                                case disable: {
-                                    settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
-                                    break;
-                                }
-                            }
-                        });
+                    let message: string = localize("unable.to.provide.configuraiton",
+                        "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
+                        providerName, docUri.fsPath, configName);
+                    if (err) {
+                        message += ` (${err})`;
                     }
-                });
+
+                    const response: string | undefined = await vscode.window.showInformationMessage(message, dismiss, disable);
+                    switch (response) {
+                        case disable: {
+                            settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                            break;
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -1845,9 +1837,9 @@ export class DefaultClient implements Client {
      * before attempting to send messages or operate on the client.
      */
 
-    public queueTask<T>(task: () => Thenable<T>): Thenable<T> {
+    public async queueTask<T>(task: () => Promise<T>): Promise<T> {
         if (this.isSupported) {
-            const nextTask: () => Thenable<T> = async () => {
+            const nextTask: () => Promise<T> = async () => {
                 try {
                     return await task();
                 } catch (err) {
@@ -1858,10 +1850,15 @@ export class DefaultClient implements Client {
 
             if (pendingTask && !pendingTask.Done) {
                 // We don't want the queue to stall because of a rejected promise.
-                return pendingTask.getPromise().then(nextTask, nextTask);
+                try {
+                    await pendingTask.getPromise();
+                    return Promise.resolve(nextTask());
+                } catch (err) {
+                    return Promise.reject(nextTask());
+                }
             } else {
                 pendingTask = undefined;
-                return nextTask();
+                return Promise.resolve(nextTask());
             }
         } else {
             return Promise.reject(localize("unsupported.client", "Unsupported client"));
@@ -1882,7 +1879,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Thenable<T> {
+    private async callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
         const timeout: () => Promise<T> = () => new Promise<T>((resolve, reject) => {
@@ -1894,7 +1891,7 @@ export class DefaultClient implements Client {
                 reject(localize("timed.out", "Timed out in {0}ms.", ms));
             }, ms);
         });
-
+        
         // Returns a race between our timeout and the passed in promise
         return Promise.race([task(), timeout()]).then(
             (result: any) => {
@@ -1907,12 +1904,12 @@ export class DefaultClient implements Client {
             });
     }
 
-    public requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
+    public requestWhenReady<T>(request: () => Promise<T>): Promise<T> {
         return this.queueTask(request);
     }
 
-    public notifyWhenReady<T>(notify: () => T): Thenable<T> {
-        const task: () => Thenable<T> = () => new Promise<T>(resolve => {
+    public notifyWhenReady<T>(notify: () => T): Promise<T> {
+        const task: () => Promise<T> = () => new Promise<T>(resolve => {
             resolve(notify());
         });
         return this.queueTask(task);
@@ -2111,39 +2108,37 @@ export class DefaultClient implements Client {
                 if (!client.configuration.CurrentConfiguration?.configurationProvider) {
                     const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
                     if (showIntelliSenseFallbackMessage.Value) {
-                        ui.showConfigureIncludePathMessage(() => {
+                        ui.showConfigureIncludePathMessage(async () => {
                             const configJSON: string = localize("configure.json.button", "Configure (JSON)");
                             const configUI: string = localize("configure.ui.button", "Configure (UI)");
                             const dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
                             const fallbackMsg: string = client.configuration.VcpkgInstalled ?
                                 localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
                                 localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
-                            return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then((value) => {
-                                switch (value) {
-                                    case configJSON:
-                                        vscode.commands.getCommands(true).then((commands: string[]) => {
-                                            if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                                vscode.commands.executeCommand("workbench.action.problems.focus");
-                                            }
-                                        });
-                                        client.handleConfigurationEditJSONCommand();
-                                        telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
-                                        break;
-                                    case configUI:
-                                        vscode.commands.getCommands(true).then((commands: string[]) => {
-                                            if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                                vscode.commands.executeCommand("workbench.action.problems.focus");
-                                            }
-                                        });
-                                        client.handleConfigurationEditUICommand();
-                                        telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
-                                        break;
-                                    case dontShowAgain:
-                                        showIntelliSenseFallbackMessage.Value = false;
-                                        break;
-                                }
-                                return true;
-                            });
+                            const value: string | undefined = await vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain);
+                            let commands: string[];
+                            switch (value) {
+                                case configJSON:
+                                    commands = await vscode.commands.getCommands(true);
+                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                        vscode.commands.executeCommand("workbench.action.problems.focus");
+                                    }
+                                    client.handleConfigurationEditJSONCommand();
+                                    telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
+                                    break;
+                                case configUI:
+                                    commands = await vscode.commands.getCommands(true);
+                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                        vscode.commands.executeCommand("workbench.action.problems.focus");
+                                    }
+                                    client.handleConfigurationEditUICommand();
+                                    telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
+                                    break;
+                                case dontShowAgain:
+                                    showIntelliSenseFallbackMessage.Value = false;
+                                    break;
+                            }
+                            return Promise.resolve(true);
                         },
                         () => showIntelliSenseFallbackMessage.Value = false);
                     }
@@ -2236,31 +2231,30 @@ export class DefaultClient implements Client {
             ? localize("auto-configure.intellisense.folder", "Would you like to use {0} to auto-configure IntelliSense for the '{1}' folder?", compileCommandStr, client.Name)
             : localize("auto-configure.intellisense.this.folder", "Would you like to use {0} to auto-configure IntelliSense for this folder?", compileCommandStr);
 
-        ui.showConfigureCompileCommandsMessage(() => {
+        ui.showConfigureCompileCommandsMessage(async () => {
             const yes: string = localize("yes.button", "Yes");
             const no: string = localize("no.button", "No");
             const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-            return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
-                switch (value) {
-                    case yes:
-                        if (params.paths.length > 1) {
-                            const index: number = await ui.showCompileCommands(params.paths);
-                            if (index < 0) {
-                                return false;
-                            }
-                            this.configuration.setCompileCommands(params.paths[index]);
-                        } else {
-                            this.configuration.setCompileCommands(params.paths[0]);
+            const value: string | undefined = await vscode.window.showInformationMessage(message, yes, no, askLater);
+            switch (value) {
+                case yes:
+                    if (params.paths.length > 1) {
+                        const index: number = await ui.showCompileCommands(params.paths);
+                        if (index < 0) {
+                            return Promise.reject(false);
                         }
-                        return true;
-                    case askLater:
-                        break;
-                    case no:
-                        ask.Value = false;
-                        break;
-                }
-                return false;
-            });
+                        this.configuration.setCompileCommands(params.paths[index]);
+                    } else {
+                        this.configuration.setCompileCommands(params.paths[0]);
+                    }
+                    return Promise.resolve(true);
+                case askLater:
+                    break;
+                case no:
+                    ask.Value = false;
+                    break;
+            }
+            return Promise.reject(false);
         },
         () => ask.Value = false);
     }
@@ -2273,7 +2267,7 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootPath
         };
-        return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        return this.requestWhenReady(async () => await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
     /**
@@ -2571,41 +2565,35 @@ export class DefaultClient implements Client {
      * command handlers
      */
     public handleConfigurationSelectCommand(): void {
-        this.notifyWhenReady(() => {
+        this.notifyWhenReady(async () => {
             const configNames: string[] | undefined = this.configuration.ConfigurationNames;
             if (configNames) {
-                ui.showConfigurations(configNames)
-                    .then((index: number) => {
-                        if (index < 0) {
-                            return;
-                        }
-                        this.configuration.select(index);
-                    });
+                const index: number = await ui.showConfigurations(configNames);
+                if (index < 0) {
+                    return;
+                }
+                this.configuration.select(index);
             }
         });
     }
 
     public handleConfigurationProviderSelectCommand(): void {
-        this.notifyWhenReady(() => {
-            ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider)
-                .then(extensionId => {
-                    if (extensionId === undefined) {
-                        // operation was canceled.
-                        return;
-                    }
-                    this.configuration.updateCustomConfigurationProvider(extensionId)
-                        .then(() => {
-                            if (extensionId) {
-                                const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(extensionId);
-                                this.updateCustomBrowseConfiguration(provider);
-                                this.updateCustomConfigurations(provider);
-                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
-                            } else {
-                                this.clearCustomConfigurations();
-                                this.clearCustomBrowseConfiguration();
-                            }
-                        });
-                });
+        this.notifyWhenReady(async () => {
+            const extensionId: string | undefined = await ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider);
+            if (extensionId === undefined) {
+                // operation was canceled.
+                return;
+            }
+            await this.configuration.updateCustomConfigurationProvider(extensionId);
+            if (extensionId) {
+                const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(extensionId);
+                this.updateCustomBrowseConfiguration(provider);
+                this.updateCustomConfigurations(provider);
+                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
+            } else {
+                this.clearCustomConfigurations();
+                this.clearCustomBrowseConfiguration();
+            }
         });
     }
 
@@ -2636,7 +2624,7 @@ export class DefaultClient implements Client {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
-    public handleGoToDirectiveInGroup(next: boolean): void {
+    public async handleGoToDirectiveInGroup(next: boolean): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
             const params: GoToDirectiveInGroupParams = {
@@ -2645,20 +2633,18 @@ export class DefaultClient implements Client {
                 next: next
             };
 
-            this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params)
-                .then((response) => {
-                    if (response) {
-                        const p: vscode.Position = new vscode.Position(response.line, response.character);
-                        const r: vscode.Range = new vscode.Range(p, p);
+            const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
+            if (response) {
+                const p: vscode.Position = new vscode.Position(response.line, response.character);
+                const r: vscode.Range = new vscode.Range(p, p);
 
-                        // Check if still the active document.
-                        const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-                        if (currentEditor && editor.document.uri === currentEditor.document.uri) {
-                            currentEditor.selection =  new vscode.Selection(r.start, r.end);
-                            currentEditor.revealRange(r);
-                        }
-                    }
-                });
+                // Check if still the active document.
+                const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+                if (currentEditor && editor.document.uri === currentEditor.document.uri) {
+                    currentEditor.selection =  new vscode.Selection(r.start, r.end);
+                    currentEditor.revealRange(r);
+                }
+            }
         }
     }
 
