@@ -17,7 +17,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
         return new Promise<vscode.TextEdit[]>((resolve, reject) => {
             this.client.notifyWhenReady(() => {
                 const filePath: string = document.uri.fsPath;
-                const configCallBack = (editorConfigSettings: any | undefined) => {
+                const configCallBack = async (editorConfigSettings: any | undefined) => {
                     const params: FormatParams = {
                         settings: { ...editorConfigSettings },
                         uri: document.uri.toString(),
@@ -35,17 +35,15 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
                             }
                         }
                     };
-                    return this.client.languageClient.sendRequest(FormatOnTypeRequest, params)
-                        .then((textEdits) => {
-                            const result: vscode.TextEdit[] = [];
-                            textEdits.forEach((textEdit) => {
-                                result.push({
-                                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
-                                    newText: textEdit.newText
-                                });
-                            });
-                            resolve(result);
+                    const textEdits = await this.client.languageClient.sendRequest(FormatOnTypeRequest, params);
+                    const result: vscode.TextEdit[] = [];
+                    textEdits.forEach((textEdit) => {
+                        result.push({
+                            range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
+                            newText: textEdit.newText
                         });
+                    });
+                    resolve(result);
                 };
                 const settings: CppSettings = new CppSettings();
                 if (settings.formattingEngine !== "vcFormat") {

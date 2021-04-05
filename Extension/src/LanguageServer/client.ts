@@ -362,7 +362,7 @@ interface FoldingRange {
     range: Range;
 }
 
-interface GetFoldingRangesResult {
+export interface GetFoldingRangesResult {
     canceled: boolean;
     ranges: FoldingRange[];
 }
