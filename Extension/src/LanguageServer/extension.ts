@@ -915,12 +915,14 @@ function onGenerateEditorConfig(): void {
 
 function onGoToNextDirectiveInGroup(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleGoToDirectiveInGroup(true));
+    const client: Client = getActiveClient();
+    client.handleGoToDirectiveInGroup(true);
 }
 
 function onGoToPrevDirectiveInGroup(): void {
     onActivationEvent();
-    selectClient().then(client => client.handleGoToDirectiveInGroup(false));
+    const client: Client = getActiveClient();
+    client.handleGoToDirectiveInGroup(false);
 }
 
 function onAddToIncludePath(path: string): void {
