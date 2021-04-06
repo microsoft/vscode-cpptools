@@ -243,6 +243,32 @@ export class CppProperties {
         vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
             if (e.document.uri.fsPath === settingsPath) {
                 this.handleConfigurationChange();
+            } else {
+                // For multi-root, the "onDidSaveTextDocument" will be received once for each project folder.
+                // To avoid misleading telemetry (for CMake retention), if there is more than one folder
+                // in the workspace folders array, consider only the first notification received.
+                if (!vscode.workspace.workspaceFolders || this.configFolder.startsWith(vscode.workspace.workspaceFolders[0].uri.fsPath)) {
+                    let fileType: string | undefined;
+                    const documentPath = e.document.uri.fsPath.toLowerCase();
+                    if (documentPath.endsWith("cmakelists.txt")) {
+                        fileType = "CMakeLists";
+                    } else if (documentPath.endsWith("cmakecache.txt")) {
+                        fileType = "CMakeCache";
+                    } else if (documentPath.endsWith(".cmake")) {
+                        fileType = ".cmake";
+                    }
+
+                    if (fileType) {
+                        // We consider the changed cmake file as outside if it is not found in any
+                        // of the projects folders.
+                        const outside = vscode.workspace.workspaceFolders?.find(folder => {
+                            return documentPath.startsWith(folder.uri.fsPath.toLowerCase());
+                        }) === undefined;
+                        telemetry.logLanguageServerEvent("cmakeFileWrite",
+                                                         {filetype: fileType,
+                                                          outside: outside.toString()});
+                    }
+               }
             }
         });
 
