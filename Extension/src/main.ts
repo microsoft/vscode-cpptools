@@ -91,7 +91,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     }
 
     // Check the main binaries files to declare if the extension has been installed successfully.
-    if (process.platform !== installedPlatformAndArchitecture.platform || arch !== installedPlatformAndArchitecture.architecture) {
+    if (process.platform !== installedPlatformAndArchitecture.platform
+        || (arch !== installedPlatformAndArchitecture.architecture && (arch !== "x64" && installedPlatformAndArchitecture.architecture !== 'x86' && process.platform !== "win32"))) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
@@ -99,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         if (installedPlatformAndArchitecture.platform === 'darwin' && installedPlatformAndArchitecture.architecture === "x64" && arch === "arm64") {
             if (promptForMacArchictureMismatch.Value) {
                 // Display a message specifically referring the user to the ARM64 Mac build on ARM64 Mac.
-                errMsg = localize("native.binaries.mismatch.osx", "This {0} version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the \"{1}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), vsixName);
+                errMsg = localize("native.binaries.mismatch.osx", "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.");
                 promptForMacArchictureMismatch.Value = false;
                 vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
                     if (selection === downloadLink) {
