@@ -417,21 +417,18 @@ export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
     return new HttpsProxyAgent(proxyOptions);
 }
 
-/** Creates a file if it doesn't exist */
-function touchFile(file: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.writeFile(file, "", (err) => {
-            if (err) {
-                reject(err);
-            }
+export interface InstallLockContents {
+    platform: string;
+    architecture: string;
+};
 
-            resolve();
-        });
-    });
-}
-
-export function touchInstallLockFile(): Promise<void> {
-    return touchFile(getInstallLockPath());
+export function touchInstallLockFile(info: PlatformInformation): Promise<void> {
+    const installLockObject: InstallLockContents = {
+        platform: info.platform,
+        architecture: info.architecture
+    };
+    const content: string = JSON.stringify(installLockObject);
+    return writeFileText(getInstallLockPath(), content);
 }
 
 export function touchExtensionFolder(): Promise<void> {
@@ -501,20 +498,6 @@ export function readDir(dirPath: string): Promise<string[]> {
 /** Test whether the lock file exists.*/
 export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
-}
-
-/** Get the platform that the installed binaries belong to.*/
-export function getInstalledBinaryPlatform(): string | undefined {
-    // the LLVM/bin folder is utilized to identify the platform
-    let installedPlatform: string | undefined;
-    if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
-        installedPlatform = "win32";
-    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
-        installedPlatform = "darwin";
-    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
-        installedPlatform = "linux";
-    }
-    return installedPlatform;
 }
 
 /** Check if the core binaries exists in extension's installation folder */
