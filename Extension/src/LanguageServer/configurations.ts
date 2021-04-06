@@ -249,7 +249,7 @@ export class CppProperties {
                 // in the workspace folders array, consider only the first notification received.
                 if (!vscode.workspace.workspaceFolders || this.configFolder.startsWith(vscode.workspace.workspaceFolders[0].uri.fsPath)) {
                     let fileType: string | undefined;
-                    const documentPath = e.document.uri.fsPath.toLowerCase();
+                    const documentPath: string = e.document.uri.fsPath.toLowerCase();
                     if (documentPath.endsWith("cmakelists.txt")) {
                         fileType = "CMakeLists";
                     } else if (documentPath.endsWith("cmakecache.txt")) {
@@ -261,14 +261,15 @@ export class CppProperties {
                     if (fileType) {
                         // We consider the changed cmake file as outside if it is not found in any
                         // of the projects folders.
-                        const outside = vscode.workspace.workspaceFolders?.find(folder => {
-                            return documentPath.startsWith(folder.uri.fsPath.toLowerCase());
-                        }) === undefined;
+                        const outside: boolean = vscode.workspace.workspaceFolders?.find(folder =>
+                            documentPath.startsWith(folder.uri.fsPath.toLowerCase())) === undefined;
                         telemetry.logLanguageServerEvent("cmakeFileWrite",
-                                                         {filetype: fileType,
-                                                          outside: outside.toString()});
+                            {
+                                filetype: fileType,
+                                outside: outside.toString()
+                            });
                     }
-               }
+                }
             }
         });
 
