@@ -252,9 +252,12 @@ export class CppProperties {
             // is not the same workspace folder of the modified document.
             // Exception: if the document does not belong to any of the folders in this workspace,
             // getWorkspaceFolder will return null and we report this as "outside".
+            // Even in this case make sure we send the telemetry information only once,
+            // not for each notifying folder.
             const savedDocWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(doc.uri);
             const notifyingWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(settingsPath));
-            if (!savedDocWorkspaceFolder || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
+            if ((!savedDocWorkspaceFolder && vscode.workspace.workspaceFolders && notifyingWorkspaceFolder === vscode.workspace.workspaceFolders[0])
+               || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
                 let fileType: string | undefined;
                 const documentPath: string = doc.uri.fsPath.toLowerCase();
                 if (documentPath.endsWith("cmakelists.txt")) {
