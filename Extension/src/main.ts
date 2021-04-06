@@ -79,7 +79,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     // Read archictures of binaries from install.lock
     const fileContents: string = await util.readFileText(util.getInstallLockPath());
-    const installedPlatformAndArchitecture: util.InstallLockContents = <util.InstallLockContents>JSON.parse(fileContents);
+    let installedPlatformAndArchitecture: util.InstallLockContents;
+    // Just in case we're debugging with an existing install.lock that is empty, assume current platform if empty.
+    if (fileContents.length === 0) {
+        installedPlatformAndArchitecture = {
+            platform: process.platform,
+            architecture: arch
+        };
+    } else {
+        installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
+    }
 
     // Check the main binaries files to declare if the extension has been installed successfully.
     if (process.platform !== installedPlatformAndArchitecture.platform || arch !== installedPlatformAndArchitecture.architecture) {
