@@ -92,7 +92,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     // Check the main binaries files to declare if the extension has been installed successfully.
     if (process.platform !== installedPlatformAndArchitecture.platform
-        || (arch !== installedPlatformAndArchitecture.architecture && (arch !== "x64" && installedPlatformAndArchitecture.architecture !== 'x86' && process.platform !== "win32"))) {
+        || (arch !== installedPlatformAndArchitecture.architecture && (arch !== "x64" || installedPlatformAndArchitecture.architecture !== 'x86' || process.platform !== "win32"))) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
