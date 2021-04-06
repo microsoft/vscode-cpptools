@@ -208,9 +208,9 @@
 	"unrecognized_language_standard_version": "Zapytanie kompilatora zwróciło nierozpoznaną wersję standardu języka. Zamiast tego zostanie użyta najnowsza obsługiwana wersja.",
 	"intellisense_process_crash_detected": "Wykryto awarię procesu funkcji IntelliSense.",
 	"return_values_label": "Wartości zwracane:",
-	"nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
-	"nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
-	"invoking_nvcc": "Invoking nvcc with command line: {0}",
-	"nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
-	"unable_to_locate_forced_include": "Unable to locate forced include: {0}"
+	"nvcc_compiler_not_found": "Nie można zlokalizować kompilatora nvcc: {0}",
+	"nvcc_host_compiler_not_found": "Nie można zlokalizować kompilatora hosta nvcc: {0}",
+	"invoking_nvcc": "Wywoływanie narzędzia nvcc za pomocą wiersza polecenia: {0}",
+	"nvcc_host_compile_command_not_found": "Nie można znaleźć polecenia kompilacji hosta w danych wyjściowych narzędzia nvcc.",
+	"unable_to_locate_forced_include": "Nie można zlokalizować wymuszonego dołączenia: {0}"
 }

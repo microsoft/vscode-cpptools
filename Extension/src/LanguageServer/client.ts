@@ -922,6 +922,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
+        const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_editorAutoClosingBrackets: (string | undefined)[] = [];
@@ -1093,6 +1094,7 @@ export class DefaultClient implements Client {
                 settings_intelliSenseMemoryLimit.push(setting.intelliSenseMemoryLimit);
                 settings_autocomplete.push(setting.autocomplete);
                 settings_autocompleteAddParentheses.push(setting.autocompleteAddParentheses);
+                settings_cppFilesExclude.push(setting.filesExclude);
             }
 
             for (const otherSetting of otherSettings) {
@@ -1212,6 +1214,7 @@ export class DefaultClient implements Client {
                     autoClosingBrackets: settings_editorAutoClosingBrackets
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
+                cpp_exclude_files: settings_cppFilesExclude,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
@@ -1301,6 +1304,9 @@ export class DefaultClient implements Client {
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
+                files: {
+                    exclude: vscode.workspace.getConfiguration("C_Cpp.files.exclude", this.RootUri)
+                },
                 vcFormat: {
                     ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
@@ -2395,11 +2401,11 @@ export class DefaultClient implements Client {
     }
 
     private isSourceFileConfigurationItem(input: any, providerVersion: Version): input is SourceFileConfigurationItem {
-        // IntelliSenseMode and standard are optional for version 5+. However, they are required when compilerPath is not defined.
+        // IntelliSenseMode and standard are optional for version 5+.
         let areOptionalsValid: boolean = false;
-        if (providerVersion < Version.v5 || input.configuration.compilerPath === undefined) {
+        if (providerVersion < Version.v5) {
             areOptionalsValid = util.isString(input.configuration.intelliSenseMode) && util.isString(input.configuration.standard);
-        } else if (util.isString(input.configuration.compilerPath)) {
+        } else {
             areOptionalsValid = util.isOptionalString(input.configuration.intelliSenseMode) && util.isOptionalString(input.configuration.standard);
         }
         return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
@@ -2468,12 +2474,11 @@ export class DefaultClient implements Client {
     private configurationLogging: Map<string, string> = new Map<string, string>();
 
     private isWorkspaceBrowseConfiguration(input: any): boolean {
-        const areOptionalsValid: boolean = (input.compilerPath === undefined && util.isString(input.standard)) ||
-            (util.isString(input.compilerPath) && util.isOptionalString(input.standard));
-        return areOptionalsValid &&
-        util.isArrayOfString(input.browsePath) &&
-        util.isOptionalString(input.compilerArgs) &&
-        util.isOptionalString(input.windowsSdkVersion);
+        return util.isArrayOfString(input.browsePath) &&
+            util.isOptionalString(input.compilerPath) &&
+            util.isOptionalString(input.standard) &&
+            util.isOptionalString(input.compilerArgs) &&
+            util.isOptionalString(input.windowsSdkVersion);
     }
 
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
