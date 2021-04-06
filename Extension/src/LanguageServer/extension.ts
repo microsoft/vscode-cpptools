@@ -484,7 +484,7 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-async function installVsix(vsixLocation: string): Promise<Thenable<void>> {
+async function installVsix(vsixLocation: string): Promise<void> {
     const userVersion: PackageVersion = new PackageVersion(vscode.version);
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
@@ -527,76 +527,67 @@ async function installVsix(vsixLocation: string): Promise<Thenable<void>> {
 
     // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
     const oldVersion: PackageVersion = new PackageVersion('1.27.2');
+    let process: ChildProcess;
     if (userVersion.isVsCodeVersionGreaterThan(oldVersion)) {
-        return new Promise<void>((resolve, reject) => {
-            let process: ChildProcess;
-            try {
-                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
-
-                // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                const timer: NodeJS.Timer = global.setTimeout(() => {
-                    process.kill();
-                    reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-                }, 30000);
-
-                process.on('exit', (code: number) => {
-                    clearInterval(timer);
-                    if (code !== 0) {
-                        reject(new Error(`VS Code script exited with error code ${code}`));
-                    } else {
-                        resolve();
-                    }
-                });
-                if (process.pid === undefined) {
-                    throw new Error();
-                }
-            } catch (error) {
-                reject(new Error('Failed to launch VS Code script process for installation'));
-                return;
-            }
-        });
-    }
-
-    return new Promise<void>((resolve, reject) => {
-        let process: ChildProcess;
         try {
-            process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+            process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
+
+            // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+            const timer: NodeJS.Timer = global.setTimeout(() => {
+                process.kill();
+                throw new Error('Failed to receive response from VS Code script process for installation within 30s.');
+            }, 30000);
+
+            process.on('exit', (code: number) => {
+                clearInterval(timer);
+                if (code !== 0) {
+                    throw new Error(`VS Code script exited with error code ${code}`);
+                } else {
+                    return;
+                }
+            });
             if (process.pid === undefined) {
                 throw new Error();
             }
         } catch (error) {
-            reject(new Error('Failed to launch VS Code script process for installation'));
+            throw new Error('Failed to launch VS Code script process for installation');
+        }
+    }
+
+    try {
+        process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
+        if (process.pid === undefined) {
+            throw new Error();
+        }
+    } catch (error) {
+        throw new Error('Failed to launch VS Code script process for installation');
+    }
+
+    // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
+    const timer: NodeJS.Timer = global.setTimeout(() => {
+        process.kill();
+        throw new Error('Failed to receive response from VS Code script process for installation within 30s.');
+    }, 30000);
+
+    // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
+    // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
+    let sentOverride: boolean = false;
+    const stdout: Readable | null = process.stdout;
+    if (!stdout) {
+        throw new Error("Failed to communicate with VS Code script process for installation");
+    }
+    stdout.on('data', () => {
+        if (sentOverride) {
             return;
         }
-
-        // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-        const timer: NodeJS.Timer = global.setTimeout(() => {
-            process.kill();
-            reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-        }, 30000);
-
-        // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
-        // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
-        let sentOverride: boolean = false;
-        const stdout: Readable | null = process.stdout;
-        if (!stdout) {
-            reject(new Error("Failed to communicate with VS Code script process for installation"));
-            return;
+        const stdin: Writable | null = process.stdin;
+        if (!stdin) {
+            throw new Error("Failed to communicate with VS Code script process for installation");
         }
-        stdout.on('data', () => {
-            if (sentOverride) {
-                return;
-            }
-            const stdin: Writable | null = process.stdin;
-            if (!stdin) {
-                reject(new Error("Failed to communicate with VS Code script process for installation"));
-                return;
-            }
-            stdin.write('0\n');
-            sentOverride = true;
-            clearInterval(timer);
-            resolve();
-        });
+        stdin.write('0\n');
+        sentOverride = true;
+        clearInterval(timer);
+        return;
     });
 }
 
