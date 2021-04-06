@@ -1163,6 +1163,33 @@
           "default": false,
           "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
           "scope": "resource"
+        },
+        "C_Cpp.files.exclude": {
+          "type": "object",
+          "markdownDescription": "%c_cpp.configuration.filesExclude.description%",
+          "default": {
+            "**/.vscode": true
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "description": "%c_cpp.configuration.filesExcludeBoolean.description%"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "when": {
+                    "type": "string",
+                    "pattern": "\\w*\\$\\(basename\\)\\w*",
+                    "default": "$(basename).ext",
+                    "description": "%c_cpp.configuration.filesExcludeWhen.description%"
+                  }
+                }
+              }
+            ]
+          },
+          "scope": "resource"
         }
       }
     },

@@ -23,6 +23,8 @@
 	"c_cpp.command.vcpkgClipboardInstallSuggested.title": "vcpkg-Installationsbefehl in Zwischenablage kopieren",
 	"c_cpp.command.vcpkgOnlineHelpSuggested.title": "vcpkg-Hilfeseite aufrufen",
 	"c_cpp.command.generateEditorConfig.title": "EditorConfig-Inhalte aus VC-Formateinstellungen generieren",
+	"c_cpp.command.GoToNextDirectiveInGroup.title": "Go to next preprocessor directive in conditional group",
+	"c_cpp.command.GoToPrevDirectiveInGroup.title": "Go to previous preprocessor directive in conditional group",
 	"c_cpp.configuration.formatting.description": "Konfiguriert das Formatierungsmodul.",
 	"c_cpp.configuration.formatting.clangFormat.description": "Zum Formatieren von Code wird \"clang-format\" verwendet.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Das Visual C++-Formatierungsmodul wird zum Formatieren von Code verwendet.",
