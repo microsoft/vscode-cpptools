@@ -12,8 +12,8 @@
 * Fix directory iteration to check files.exclude and symlinks and use less memory. [#3123](https://github.com/microsoft/vscode-cpptools/issues/3123), [#4206](https://github.com/microsoft/vscode-cpptools/issues/4206), [#6864](https://github.com/microsoft/vscode-cpptools/issues/6864)
 * Fix bug with placement new on Windows with gcc mode. [#6246](https://github.com/microsoft/vscode-cpptools/issues/6246)
 * Fix `GoToNextDirectiveInGroup` command for multiroot. [#7283](https://github.com/microsoft/vscode-cpptools/issues/7283)
-* Fix field requirements for custom configurations. [#7295](https://github.com/microsoft/vscode-cpptools/pull/7295)
-* Fix integrity hash checking of downloaded packages for the extension. [#7300](https://github.com/microsoft/vscode-cpptools/pull/7300)
+* Fix field requirements for custom configurations. [PR #7295](https://github.com/microsoft/vscode-cpptools/pull/7295)
+* Fix integrity hash checking of downloaded packages for the extension. [PR #7300](https://github.com/microsoft/vscode-cpptools/pull/7300)
 
 ## Version 1.3.0-insiders3: April 1, 2021
 ### New Features
