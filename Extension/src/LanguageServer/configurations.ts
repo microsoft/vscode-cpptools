@@ -251,7 +251,7 @@ export class CppProperties {
             // To avoid misleading telemetry (for CMake retention) skip if the notifying folder
             // is not the same workspace folder of the modified document.
             // Exception: if the document does not belong to any of the folders in this workspace,
-            // getWorkspaceFolder will return null and we report this as "outside".
+            // getWorkspaceFolder will return undefined and we report this as "outside".
             // Even in this case make sure we send the telemetry information only once,
             // not for each notifying folder.
             const savedDocWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(doc.uri);
