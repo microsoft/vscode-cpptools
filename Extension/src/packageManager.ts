@@ -33,7 +33,7 @@ export function isValidPackage(buffer: Buffer, integrity: string): boolean {
         return (value === integrity.toUpperCase());
     }
     // No integrity has been specified
-    return true;
+    return false;
 }
 
 export interface IPackage {
