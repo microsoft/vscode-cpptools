@@ -1,5 +1,20 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.3.0-insiders4: April 6, 2021
+### New Features
+* Add native language service binaries for ARM64 Mac. [#6595](https://github.com/microsoft/vscode-cpptools/issues/6595)
+
+### Enhancements
+* Add auto-closing of include completion brackets. [#7054](https://github.com/microsoft/vscode-cpptools/issues/7054)
+* Add a `C_Cpp.files.exclude` setting, which is identical to `files.exclude` except items aren't excluded from the Explorer view. [PR #7285](https://github.com/microsoft/vscode-cpptools/pull/7285)
+
+### Bug Fixes
+* Fix directory iteration to check files.exclude and symlinks and use less memory. [#3123](https://github.com/microsoft/vscode-cpptools/issues/3123), [#4206](https://github.com/microsoft/vscode-cpptools/issues/4206), [#6864](https://github.com/microsoft/vscode-cpptools/issues/6864)
+* Fix bug with placement new on Windows with gcc mode. [#6246](https://github.com/microsoft/vscode-cpptools/issues/6246)
+* Fix `GoToNextDirectiveInGroup` command for multiroot. [#7283](https://github.com/microsoft/vscode-cpptools/issues/7283)
+* Fix field requirements for custom configurations. [PR #7295](https://github.com/microsoft/vscode-cpptools/pull/7295)
+* Fix integrity hash checking of downloaded packages for the extension. [PR #7300](https://github.com/microsoft/vscode-cpptools/pull/7300)
+
 ## Version 1.3.0-insiders3: April 1, 2021
 ### New Features
 * Add commands for navigating to matching preprocessor directives in conditional groups. [#7256](https://github.com/microsoft/vscode-cpptools/pull/7256)
