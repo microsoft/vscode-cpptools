@@ -2477,7 +2477,7 @@ export class DefaultClient implements Client {
         return util.isArrayOfString(input.browsePath) &&
             util.isOptionalString(input.compilerPath) &&
             util.isOptionalString(input.standard) &&
-            util.isOptionalString(input.compilerArgs) &&
+            util.isOptionalArrayOfString(input.compilerArgs) &&
             util.isOptionalString(input.windowsSdkVersion);
     }
 
