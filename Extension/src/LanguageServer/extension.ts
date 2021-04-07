@@ -496,7 +496,7 @@ async function installVsix(vsixLocation: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    let vsCodeScriptPath = (platformInfo: any): string => {
+    const vsCodeScriptPath = (platformInfo: any): string => {
         if (platformInfo.platform === 'win32') {
             const vsCodeBinName: string = path.basename(process.execPath);
             let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
@@ -516,7 +516,7 @@ async function installVsix(vsixLocation: string): Promise<void> {
             const vsCodeBinName: string = path.basename(process.execPath);
             return which.sync(vsCodeBinName);
         }
-    }
+    };
 
     try {
         vsCodeScriptPath(platformInfo);
@@ -550,8 +550,7 @@ async function installVsix(vsixLocation: string): Promise<void> {
         } catch (error) {
             throw new Error('Failed to launch VS Code script process for installation');
         }
-    }
-    else {
+    } else {
         let process: ChildProcess;
         try {
             process = spawn(vsCodeScriptPath(platformInfo), ['--install-extension', vsixLocation]);

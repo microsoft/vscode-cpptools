@@ -290,7 +290,7 @@ export class UI {
 
         if (this.configurationUIPromise) {
             const result: ConfigurationResult = await this.configurationUIPromise;
-            this.configurationUIPromise = new Promise<ConfigurationResult>((resolve, reject) =>{
+            this.configurationUIPromise = new Promise<ConfigurationResult>((resolve, reject) => {
                 if (priority > result.priority) {
                     reject(showPrompt());
                 } else if (!result.configured) {

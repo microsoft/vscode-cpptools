@@ -1622,7 +1622,7 @@ export class DefaultClient implements Client {
     }
 
     public async logDiagnostics(): Promise<void> {
-        const response: GetDiagnosticsResult = await this.requestWhenReady(async () => await this.languageClient.sendRequest(GetDiagnosticsRequest, null));
+        const response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
         if (!diagnosticsChannel) {
             diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
             workspaceDisposables.push(diagnosticsChannel);
@@ -1843,7 +1843,7 @@ export class DefaultClient implements Client {
      * before attempting to send messages or operate on the client.
      */
 
-    public async queueTask<T>(task: () => Promise<T>): Promise<T> {
+    public async queueTask<T>(task: () => Thenable<T>): Promise<T> {
         if (this.isSupported) {
             const nextTask: () => Promise<T> = async () => {
                 try {
@@ -1897,7 +1897,7 @@ export class DefaultClient implements Client {
                 reject(localize("timed.out", "Timed out in {0}ms.", ms));
             }, ms);
         });
-        
+
         // Returns a race between our timeout and the passed in promise
         return Promise.race([task(), timeout()]).then(
             (result: any) => {
@@ -1910,7 +1910,7 @@ export class DefaultClient implements Client {
             });
     }
 
-    public requestWhenReady<T>(request: () => Promise<T>): Promise<T> {
+    public requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
         return this.queueTask(request);
     }
 
@@ -2273,7 +2273,7 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootPath
         };
-        return this.requestWhenReady(async () => await this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
     /**

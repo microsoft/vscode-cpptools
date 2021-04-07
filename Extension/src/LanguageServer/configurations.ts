@@ -456,7 +456,7 @@ export class CppProperties {
                                 this.nodeAddonIncludes.push(stdout);
                             }
                         } catch (err) {
-                            console.log('readNodeAddonIncludeLocations', err.message)
+                            console.log('readNodeAddonIncludeLocations', err.message);
                         }
                     }
                 }

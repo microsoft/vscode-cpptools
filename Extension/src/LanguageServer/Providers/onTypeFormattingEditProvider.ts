@@ -35,7 +35,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
                             }
                         }
                     };
-                    const textEdits = await this.client.languageClient.sendRequest(FormatOnTypeRequest, params);
+                    const textEdits: any[] = await this.client.languageClient.sendRequest(FormatOnTypeRequest, params);
                     const result: vscode.TextEdit[] = [];
                     textEdits.forEach((textEdit) => {
                         result.push({
