@@ -79,15 +79,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     // Read archictures of binaries from install.lock
     const fileContents: string = await util.readFileText(util.getInstallLockPath());
-    let installedPlatformAndArchitecture: util.InstallLockContents;
-    // Just in case we're debugging with an existing install.lock that is empty, assume current platform if empty.
-    if (fileContents.length === 0) {
-        installedPlatformAndArchitecture = {
-            platform: process.platform,
-            architecture: arch
-        };
-    } else {
-        installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
+    // Assume current platform if install.lock is empty.
+    let installedPlatformAndArchitecture: util.InstallLockContents = {
+        platform: process.platform,
+        architecture: arch
+    };
+    if (fileContents.length !== 0) {
+        try {
+            installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
+        } catch (error) {
+            // If the contents of install.lock are corrupted, treat as if it's empty.
+        }
     }
 
     // Check the main binaries files to declare if the extension has been installed successfully.
@@ -110,7 +112,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         } else {
             // Reset the persistent boolean tracking whether to warn the user of architecture mismatch on OSX.
             promptForMacArchictureMismatch.Value = true;
-            errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), vsixName);
+            errMsg = localize("native.binaries.not.supported", "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), installedPlatformAndArchitecture.architecture, vsixName);
             const selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
             if (selection === downloadLink) {
                 vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
