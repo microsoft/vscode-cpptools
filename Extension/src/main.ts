@@ -113,7 +113,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         } else {
             // Reset the persistent boolean tracking whether to warn the user of architecture mismatch on OSX.
             promptForMacArchictureMismatch.Value = true;
-            errMsg = localize("native.binaries.not.supported", "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), arch, vsixName);
+            errMsg = localize("native.binaries.not.supported", "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), installedPlatformAndArchitecture.architecture, vsixName);
             vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
                 if (selection === downloadLink) {
                     vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
