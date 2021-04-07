@@ -194,7 +194,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             }
         }
 
-        const scope: TaskScope = TaskScope.Workspace;
+        const scope: WorkspaceFolder | TaskScope = folder? folder : TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
