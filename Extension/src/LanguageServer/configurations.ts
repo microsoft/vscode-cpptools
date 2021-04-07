@@ -246,6 +246,40 @@ export class CppProperties {
             }
         });
 
+        vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
+            // For multi-root, the "onDidSaveTextDocument" will be received once for each project folder.
+            // To avoid misleading telemetry (for CMake retention) skip if the notifying folder
+            // is not the same workspace folder of the modified document.
+            // Exception: if the document does not belong to any of the folders in this workspace,
+            // getWorkspaceFolder will return undefined and we report this as "outside".
+            // Even in this case make sure we send the telemetry information only once,
+            // not for each notifying folder.
+            const savedDocWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(doc.uri);
+            const notifyingWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(settingsPath));
+            if ((!savedDocWorkspaceFolder && vscode.workspace.workspaceFolders && notifyingWorkspaceFolder === vscode.workspace.workspaceFolders[0])
+               || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
+                let fileType: string | undefined;
+                const documentPath: string = doc.uri.fsPath.toLowerCase();
+                if (documentPath.endsWith("cmakelists.txt")) {
+                    fileType = "CMakeLists";
+                } else if (documentPath.endsWith("cmakecache.txt")) {
+                    fileType = "CMakeCache";
+                } else if (documentPath.endsWith(".cmake")) {
+                    fileType = ".cmake";
+                }
+
+                if (fileType) {
+                    // We consider the changed cmake file as outside if it is not found in any
+                    // of the projects folders.
+                    telemetry.logLanguageServerEvent("cmakeFileWrite",
+                        {
+                            filetype: fileType,
+                            outside: (savedDocWorkspaceFolder === undefined).toString()
+                        });
+                }
+            }
+        });
+
         this.handleConfigurationChange();
     }
 
