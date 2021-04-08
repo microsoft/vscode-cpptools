@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.3.0-insiders5: April 8, 2021
+### Bug Fixes
+* Display integer values for char and unsigned char on hover instead of character symbols. [#1552](https://github.com/microsoft/vscode-cpptools/issues/1552)
+* Fix a crash (and other bugs) caused by resolving symlinks when processing recursive includes. [#7306](https://github.com/microsoft/vscode-cpptools/issues/7306)
+* Fix bug preventing successful validation and receipt of browse configurations from custom configuration providers. [PR# 7131](https://github.com/microsoft/vscode-cpptools/pull/7313)
+* Fix a potential crash on shutdown and when editing at the end of a document.
+
 ## Version 1.3.0-insiders4: April 6, 2021
 ### New Features
 * Add native language service binaries for ARM64 Mac. [#6595](https://github.com/microsoft/vscode-cpptools/issues/6595)
