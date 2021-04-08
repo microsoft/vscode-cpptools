@@ -79,15 +79,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     // Read archictures of binaries from install.lock
     const fileContents: string = await util.readFileText(util.getInstallLockPath());
-    let installedPlatformAndArchitecture: util.InstallLockContents;
-    // Just in case we're debugging with an existing install.lock that is empty, assume current platform if empty.
-    if (fileContents.length === 0) {
-        installedPlatformAndArchitecture = {
-            platform: process.platform,
-            architecture: arch
-        };
-    } else {
-        installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
+    // Assume current platform if install.lock is empty.
+    let installedPlatformAndArchitecture: util.InstallLockContents = {
+        platform: process.platform,
+        architecture: arch
+    };
+    if (fileContents.length !== 0) {
+        try {
+            installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
+        } catch (error) {
+            // If the contents of install.lock are corrupted, treat as if it's empty.
+        }
     }
 
     // Check the main binaries files to declare if the extension has been installed successfully.
@@ -100,7 +102,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         if (installedPlatformAndArchitecture.platform === 'darwin' && installedPlatformAndArchitecture.architecture === "x64" && arch === "arm64") {
             if (promptForMacArchictureMismatch.Value) {
                 // Display a message specifically referring the user to the ARM64 Mac build on ARM64 Mac.
-                errMsg = localize("native.binaries.mismatch.osx", "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.");
+                errMsg = localize("native.binaries.mismatch.osx", "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.");
                 promptForMacArchictureMismatch.Value = false;
                 vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
                     if (selection === downloadLink) {
@@ -111,7 +113,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         } else {
             // Reset the persistent boolean tracking whether to warn the user of architecture mismatch on OSX.
             promptForMacArchictureMismatch.Value = true;
-            errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), vsixName);
+            errMsg = localize("native.binaries.not.supported", "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), installedPlatformAndArchitecture.architecture, vsixName);
             vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
                 if (selection === downloadLink) {
                     vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
