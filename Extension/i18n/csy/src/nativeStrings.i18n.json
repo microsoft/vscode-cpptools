@@ -208,9 +208,9 @@
 	"unrecognized_language_standard_version": "Dotaz na kompilátor vrátil nerozpoznanou standardní verzi jazyka. Místo ní se použije nejnovější podporovaná verze.",
 	"intellisense_process_crash_detected": "Zjistilo se chybové ukončení procesu IntelliSense.",
 	"return_values_label": "Návratové hodnoty:",
-	"nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
-	"nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
-	"invoking_nvcc": "Invoking nvcc with command line: {0}",
-	"nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
-	"unable_to_locate_forced_include": "Unable to locate forced include: {0}"
+	"nvcc_compiler_not_found": "Nepovedlo se najít kompilátor nvcc: {0}",
+	"nvcc_host_compiler_not_found": "Nepovedlo se najít kompilátor hostitele nvcc: {0}",
+	"invoking_nvcc": "Volá se nvcc pomocí příkazového řádku: {0}",
+	"nvcc_host_compile_command_not_found": "Ve výstupu nástroje nvcc se nepovedlo najít příkaz pro kompilaci hostitele.",
+	"unable_to_locate_forced_include": "Nepovedlo se najít vynuceně zahrnované soubory: {0}"
 }
