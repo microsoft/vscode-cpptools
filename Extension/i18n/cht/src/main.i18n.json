@@ -8,7 +8,7 @@
 	"apline.containers.not.supported": "不支援 Alpine 容器。",
 	"download.button": "前往 &#91;下載&#92; 頁面",
 	"native.binaries.mismatch.osx": "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
-	"native.binaries.not.supported": "此 {0} 版延伸模組與您的 OS 不相容。請下載並安裝 \"{1}\" 版本的延伸模組。",
+	"native.binaries.not.supported": "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.",
 	"extension.installation.failed": "無法成功安裝 C/C++ 延伸模組。您必須修復或重新安裝 C/C++ 語言功能的延伸模組，才可正常運作。",
 	"remove.extension": "嘗試修復",
 	"jason.files.missing": "無法成功安裝 C/C++ 延伸模組。您必須重新安裝 C/C++ 語言功能的延伸模組，才可正常運作。",

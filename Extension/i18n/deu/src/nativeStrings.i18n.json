@@ -208,9 +208,9 @@
 	"unrecognized_language_standard_version": "Die Compilerabfrage hat eine unbekannte Sprachstandardversion zurückgegeben. Stattdessen wird die neueste unterstützte Version verwendet.",
 	"intellisense_process_crash_detected": "IntelliSense-Prozessabsturz erkannt.",
 	"return_values_label": "Rückgabewerte:",
-	"nvcc_compiler_not_found": "Unable to locate nvcc compiler: {0}",
-	"nvcc_host_compiler_not_found": "Unable to locate nvcc host compiler: {0}",
-	"invoking_nvcc": "Invoking nvcc with command line: {0}",
-	"nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
-	"unable_to_locate_forced_include": "Unable to locate forced include: {0}"
+	"nvcc_compiler_not_found": "Der nvcc-Compiler wurde nicht gefunden: {0}",
+	"nvcc_host_compiler_not_found": "Der nvcc-Hostcompiler wurde nicht gefunden: {0}",
+	"invoking_nvcc": "nvcc wird über Befehlszeile aufgerufen: {0}",
+	"nvcc_host_compile_command_not_found": "Der Hostkompilierbefehl wurde in der Ausgabe von nvcc nicht gefunden.",
+	"unable_to_locate_forced_include": "Erzwungene Includedatei wurde nicht gefunden: {0}"
 }
