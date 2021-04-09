@@ -53,6 +53,13 @@ Bug type: Language Service
 
 
 **Additional context**
-<!-- Call Stacks:
+<!--
+Providing call stacks:
 For bugs like crashes, deadlocks, infinite loops, etc. that we are not able to repro and for which the call stack may be useful, please attach a debugger and/or create a dmp and provide the call stacks. Windows binaries have symbols available in VS Code by setting your "symbolSearchPath" to "https://msdl.microsoft.com/download/symbols".
+
+Instructions for attaching debugger to language service process:
+https://github.com/microsoft/vscode-cpptools/wiki/Attaching-debugger-to-cpptools-or-cpptools%E2%80%90srv.
+
+Performance analysis:
+For a performance issue see instructions at https://github.com/microsoft/vscode-cpptools/wiki/Troubleshooting-Performance-Issues.
 -->
