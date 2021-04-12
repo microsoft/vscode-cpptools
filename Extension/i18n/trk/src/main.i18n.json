@@ -7,7 +7,7 @@
 	"architecture.not.supported": "{0} mimarisi desteklemiyor.",
 	"apline.containers.not.supported": "Alpine kapsayıcıları desteklenmiyor.",
 	"download.button": "İndirmeler Sayfasına Git",
-	"native.binaries.mismatch.osx": "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
+	"native.binaries.mismatch.osx": "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
 	"native.binaries.not.supported": "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.",
 	"extension.installation.failed": "C/C++ uzantısı başarıyla yüklenemedi. C/C++ dil özelliklerinin düzgün çalışması için uzantıyı onarmanız veya yeniden yüklemeniz gerekir.",
 	"remove.extension": "Onarmayı Dene",
