@@ -16,7 +16,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export function GetOSName(processPlatform: string | undefined): string | undefined {
     switch (processPlatform) {
         case "win32": return "Windows";
-        case "darwin": return "MacOS";
+        case "darwin": return "macOS";
         case "linux": return "Linux";
         default: return undefined;
     }

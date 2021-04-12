@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.3.0-insiders5: April 8, 2021
+### Bug Fixes
+* Display integer values for char and unsigned char on hover instead of character symbols. [#1552](https://github.com/microsoft/vscode-cpptools/issues/1552)
+* Fix a crash (and other bugs) caused by resolving symlinks when processing recursive includes. [#7306](https://github.com/microsoft/vscode-cpptools/issues/7306)
+* Fix bug preventing successful validation and receipt of browse configurations from custom configuration providers. [PR# 7131](https://github.com/microsoft/vscode-cpptools/pull/7313)
+* Fix a potential crash on shutdown and when editing at the end of a document.
+
 ## Version 1.3.0-insiders4: April 6, 2021
 ### New Features
 * Add native language service binaries for ARM64 Mac. [#6595](https://github.com/microsoft/vscode-cpptools/issues/6595)
@@ -492,7 +499,7 @@
 ## Version 0.26.2: December 2, 2019
 ### Enhancements
 * Reworked how a source file is selected for TU creation when opening a header file. [#2856](https://github.com/microsoft/vscode-cpptools/issues/2856)
-* Updated the default value of the `C_Cpp.intelliSenseCachePath` setting to a path under `XDG_CACHE_HOME` on Linux, or `~/Library/Cache` on MacOS. [#3979](https://github.com/microsoft/vscode-cpptools/issues/3979)
+* Updated the default value of the `C_Cpp.intelliSenseCachePath` setting to a path under `XDG_CACHE_HOME` on Linux, or `~/Library/Cache` on macOS. [#3979](https://github.com/microsoft/vscode-cpptools/issues/3979)
 * Reset memory usage of the IntelliSense process if it grows beyond a threshold. [#4119](https://github.com/microsoft/vscode-cpptools/issues/4119)
 * Add validation that the new symbol name provided to 'Rename Symbol' is a valid identifier. Add the setting `C_Cpp.renameRequiresIdentifier` to allow that verification to be disabled. [#4409](https://github.com/microsoft/vscode-cpptools/issues/4409)
 * Enable setting of breakpoints in CUDA sources.

@@ -734,7 +734,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-base64-js 1.3.1 - MIT
+base64-js 1.5.1 - MIT
 https://github.com/beatgammit/base64-js
 
 Copyright (c) 2014 Jameson Little
@@ -1375,7 +1375,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-plist 3.0.1 - MIT
+plist 3.0.2 - MIT
 https://github.com/TooTallNate/node-plist#readme
 
 Copyright (c) 2010-2017 Nathan Rajlich <nathan@tootallnate.net>
