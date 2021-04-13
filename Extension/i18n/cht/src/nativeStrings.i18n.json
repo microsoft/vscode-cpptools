@@ -206,5 +206,11 @@
 	"memory_limit_shutting_down_intellisense": "IntelliSense 伺服器即將關機: {0}。記憶體使用量為 {1} MB，超過了 {2} MB 的限制。",
 	"failed_to_query_for_standard_version": "無法查詢位於路徑 \"{0}\" 的編譯器預設標準版本。已停用此編譯器的編譯器查詢。",
 	"unrecognized_language_standard_version": "編譯器查詢傳回無法辨識的語言標準版本。將改用支援的最新版本。",
-	"intellisense_process_crash_detected": "偵測到 IntelliSense 流程損毀。"
+	"intellisense_process_crash_detected": "偵測到 IntelliSense 流程損毀。",
+	"return_values_label": "傳回值:",
+	"nvcc_compiler_not_found": "找不到 nvcc 編譯器: {0}",
+	"nvcc_host_compiler_not_found": "找不到 nvcc 主機編譯器: {0}",
+	"invoking_nvcc": "正在使用命令列 {0} 叫用 nvcc",
+	"nvcc_host_compile_command_not_found": "在 nvcc 的輸出中找不到主機編譯命令。",
+	"unable_to_locate_forced_include": "找不到強制的 include: {0}"
 }

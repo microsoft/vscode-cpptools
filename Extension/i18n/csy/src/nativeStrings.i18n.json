@@ -206,5 +206,11 @@
 	"memory_limit_shutting_down_intellisense": "Vypíná se server technologie IntelliSense: {0}. Využití paměti je {1} MB a překročilo limit {2} MB.",
 	"failed_to_query_for_standard_version": "Nepovedlo se dotázat kompilátor na cestě {0} na výchozí standardní verze. Dotazování je pro tento kompilátor zakázané.",
 	"unrecognized_language_standard_version": "Dotaz na kompilátor vrátil nerozpoznanou standardní verzi jazyka. Místo ní se použije nejnovější podporovaná verze.",
-	"intellisense_process_crash_detected": "Zjistilo se chybové ukončení procesu IntelliSense."
+	"intellisense_process_crash_detected": "Zjistilo se chybové ukončení procesu IntelliSense.",
+	"return_values_label": "Návratové hodnoty:",
+	"nvcc_compiler_not_found": "Nepovedlo se najít kompilátor nvcc: {0}",
+	"nvcc_host_compiler_not_found": "Nepovedlo se najít kompilátor hostitele nvcc: {0}",
+	"invoking_nvcc": "Volá se nvcc pomocí příkazového řádku: {0}",
+	"nvcc_host_compile_command_not_found": "Ve výstupu nástroje nvcc se nepovedlo najít příkaz pro kompilaci hostitele.",
+	"unable_to_locate_forced_include": "Nepovedlo se najít vynuceně zahrnované soubory: {0}"
 }

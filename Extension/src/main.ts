@@ -34,6 +34,8 @@ let reloadMessageShown: boolean = false;
 const disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
+    await util.checkCuda();
+
     let errMsg: string = "";
     const arch: string = os.arch();
     if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'ia32' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
@@ -73,38 +75,73 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     await processRuntimeDependencies();
 
-    const installedPlatform: string | undefined = util.getInstalledBinaryPlatform();
+    const promptForMacArchictureMismatch: PersistentState<boolean> = new PersistentState<boolean>("CPP.promptForMacArchictureMismatch", true);
+
+    // Read archictures of binaries from install.lock
+    const fileContents: string = await util.readFileText(util.getInstallLockPath());
+    // Assume current platform if install.lock is empty.
+    let installedPlatformAndArchitecture: util.InstallLockContents = {
+        platform: process.platform,
+        architecture: arch
+    };
+    if (fileContents.length !== 0) {
+        try {
+            installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
+        } catch (error) {
+            // If the contents of install.lock are corrupted, treat as if it's empty.
+        }
+    }
 
     // Check the main binaries files to declare if the extension has been installed successfully.
-    if (installedPlatform && process.platform !== installedPlatform) {
+    if (process.platform !== installedPlatformAndArchitecture.platform
+        || (arch !== installedPlatformAndArchitecture.architecture && (arch !== "x64" || installedPlatformAndArchitecture.architecture !== 'x86' || process.platform !== "win32"))) {
         // Check if the correct offline/insiders vsix is installed on the correct platform.
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
         const vsixName: string = vsixNameForPlatform(platformInfo);
-        errMsg = localize("native.binaries.not.supported", "This {0} version of the extension is incompatible with your OS. Please download and install the \"{1}\" version of the extension.", GetOSName(installedPlatform), vsixName);
         const downloadLink: string = localize("download.button", "Go to Download Page");
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+        if (installedPlatformAndArchitecture.platform === 'darwin' && installedPlatformAndArchitecture.architecture === "x64" && arch === "arm64") {
+            if (promptForMacArchictureMismatch.Value) {
+                // Display a message specifically referring the user to the ARM64 Mac build on ARM64 Mac.
+                errMsg = localize("native.binaries.mismatch.osx", "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.");
+                promptForMacArchictureMismatch.Value = false;
+                vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+                    if (selection === downloadLink) {
+                        vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+                    }
+                });
             }
-        });
-    } else if (!(await util.checkInstallBinariesExist())) {
-        errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
-        const reload: string = localize("remove.extension", "Attempt to Repair");
-        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
-            if (value === reload) {
-                await util.removeInstallLockFile();
-                vscode.commands.executeCommand("workbench.action.reloadWindow");
-            }
-        });
-    } else if (!(await util.checkInstallJsonsExist())) {
-        // Check the Json files to declare if the extension has been installed successfully.
-        errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
-        const downloadLink: string = localize("download.button", "Go to Download Page");
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
-            }
-        });
+        } else {
+            // Reset the persistent boolean tracking whether to warn the user of architecture mismatch on OSX.
+            promptForMacArchictureMismatch.Value = true;
+            errMsg = localize("native.binaries.not.supported", "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), installedPlatformAndArchitecture.architecture, vsixName);
+            vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+                if (selection === downloadLink) {
+                    vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+                }
+            });
+        }
+    } else {
+        // Reset the persistent boolean tracking whether to warn the user of architecture mismatch on OSX.
+        promptForMacArchictureMismatch.Value = true;
+        if (!(await util.checkInstallBinariesExist())) {
+            errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
+            const reload: string = localize("remove.extension", "Attempt to Repair");
+            vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
+                if (value === reload) {
+                    await util.removeInstallLockFile();
+                    vscode.commands.executeCommand("workbench.action.reloadWindow");
+                }
+            });
+        } else if (!(await util.checkInstallJsonsExist())) {
+            // Check the Json files to declare if the extension has been installed successfully.
+            errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
+            const downloadLink: string = localize("download.button", "Go to Download Page");
+            vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
+                if (selection === downloadLink) {
+                    vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+                }
+            });
+        }
     }
 
     return cppTools;
@@ -217,7 +254,7 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
     await rewriteManifest();
 
     setInstallationStage('touchInstallLockFile');
-    await touchInstallLockFile();
+    await touchInstallLockFile(info);
 
     setInstallationStage('postInstall');
     await postInstall(info);
@@ -309,8 +346,8 @@ function removeUnnecessaryFile(): Promise<void> {
     return Promise.resolve();
 }
 
-function touchInstallLockFile(): Promise<void> {
-    return util.touchInstallLockFile();
+function touchInstallLockFile(info: PlatformInformation): Promise<void> {
+    return util.touchInstallLockFile(info);
 }
 
 function handleError(error: any): void {
@@ -441,8 +478,9 @@ function rewriteManifest(): Promise<void> {
     const packageJson: any = util.getRawPackageJson();
 
     packageJson.activationEvents = [
-        "onLanguage:cpp",
         "onLanguage:c",
+        "onLanguage:cpp",
+        "onLanguage:cuda-cpp",
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugActiveFile",
@@ -460,8 +498,10 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.LogDiagnostics",
         "onCommand:C_Cpp.RescanWorkspace",
         "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
-        "onCommand:C_Cpp.VcpkgClipboardOnlineHelpSuggested",
+        "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
         "onCommand:C_Cpp.GenerateEditorConfig",
+        "onCommand:C_Cpp.GoToNextDirectiveInGroup",
+        "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
         "onDebugInitialConfigurations",
         "onDebugResolve:cppdbg",
         "onDebugResolve:cppvsdbg",

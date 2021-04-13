@@ -26,6 +26,7 @@ import * as jsonc from 'comment-json';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseJson: string = localize("failed.to.parse.json", "Failed to parse json file, possibly due to comments or trailing commas.");
+export let supportCuda: boolean = false;
 
 export type Mutable<T> = {
     // eslint-disable-next-line @typescript-eslint/array-type
@@ -88,7 +89,7 @@ export async function getRawJson(path: string | undefined): Promise<any> {
 
 export function fileIsCOrCppSource(file: string): boolean {
     const fileExtLower: string = path.extname(file).toLowerCase();
-    return [".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
+    return ["cu", ".C", ".c", ".cpp", ".cc", ".cxx", ".mm", ".ino", ".inl"].some(ext => fileExtLower === ext);
 }
 
 export function isEditorFileCpp(file: string): boolean {
@@ -416,21 +417,18 @@ export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
     return new HttpsProxyAgent(proxyOptions);
 }
 
-/** Creates a file if it doesn't exist */
-function touchFile(file: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.writeFile(file, "", (err) => {
-            if (err) {
-                reject(err);
-            }
+export interface InstallLockContents {
+    platform: string;
+    architecture: string;
+};
 
-            resolve();
-        });
-    });
-}
-
-export function touchInstallLockFile(): Promise<void> {
-    return touchFile(getInstallLockPath());
+export function touchInstallLockFile(info: PlatformInformation): Promise<void> {
+    const installLockObject: InstallLockContents = {
+        platform: info.platform,
+        architecture: info.architecture
+    };
+    const content: string = JSON.stringify(installLockObject);
+    return writeFileText(getInstallLockPath(), content);
 }
 
 export function touchExtensionFolder(): Promise<void> {
@@ -500,20 +498,6 @@ export function readDir(dirPath: string): Promise<string[]> {
 /** Test whether the lock file exists.*/
 export function checkInstallLockFile(): Promise<boolean> {
     return checkFileExists(getInstallLockPath());
-}
-
-/** Get the platform that the installed binaries belong to.*/
-export function getInstalledBinaryPlatform(): string | undefined {
-    // the LLVM/bin folder is utilized to identify the platform
-    let installedPlatform: string | undefined;
-    if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.exe"))) {
-        installedPlatform = "win32";
-    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format.darwin"))) {
-        installedPlatform = "darwin";
-    } else if (checkFileExistsSync(path.join(extensionPath, "LLVM/bin/clang-format"))) {
-        installedPlatform = "linux";
-    }
-    return installedPlatform;
 }
 
 /** Check if the core binaries exists in extension's installation folder */
@@ -974,8 +958,8 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
     let additionalArgs: string[] = [];
 
     if (compilerPath) {
-        if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")) {
-            compilerName = path.basename(compilerPath);
+        if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
+            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {            compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
             const endQuote: number = compilerPath.substr(1).search("\"") + 1;
@@ -1276,4 +1260,9 @@ export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceF
 
 export function isCodespaces(): boolean {
     return !!process.env["CODESPACES"];
+}
+
+export async function checkCuda(): Promise<void> {
+    const langs: string[] = await vscode.languages.getLanguages();
+    supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
 }

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.2.2-main",
+  "version": "1.3.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.53.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -92,7 +92,7 @@
       {
         "view": "debug",
         "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
-        "when": "debugStartLanguage == cpp || debugStartLanguage == c"
+        "when": "debugStartLanguage == cpp || debugStartLanguage == c || debugStartLanguage == cuda-cpp"
       }
     ],
     "problemMatchers": [
@@ -1157,6 +1157,39 @@
           "default": "Enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
+        },
+        "C_Cpp.autocompleteAddParentheses": {
+          "type": "boolean",
+          "default": false,
+          "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.files.exclude": {
+          "type": "object",
+          "markdownDescription": "%c_cpp.configuration.filesExclude.description%",
+          "default": {
+            "**/.vscode": true
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "description": "%c_cpp.configuration.filesExcludeBoolean.description%"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "when": {
+                    "type": "string",
+                    "pattern": "\\w*\\$\\(basename\\)\\w*",
+                    "default": "$(basename).ext",
+                    "description": "%c_cpp.configuration.filesExcludeWhen.description%"
+                  }
+                }
+              }
+            ]
+          },
+          "scope": "resource"
         }
       }
     },
@@ -1263,18 +1296,23 @@
           "light": "assets/ref-ungroup-by-type-light.svg",
           "dark": "assets/ref-ungroup-by-type-dark.svg"
         }
+      },
+      {
+        "command": "C_Cpp.GoToNextDirectiveInGroup",
+        "title": "%c_cpp.command.GoToNextDirectiveInGroup.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.GoToPrevDirectiveInGroup",
+        "title": "%c_cpp.command.GoToPrevDirectiveInGroup.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
       {
         "command": "C_Cpp.SwitchHeaderSource",
         "key": "Alt+O",
-        "when": "editorTextFocus && editorLangId == 'cpp'"
-      },
-      {
-        "command": "C_Cpp.SwitchHeaderSource",
-        "key": "Alt+O",
-        "when": "editorTextFocus && editorLangId == 'c'"
+        "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus"
       }
     ],
     "debuggers": [
@@ -1283,7 +1321,8 @@
         "label": "C++ (GDB/LLDB)",
         "languages": [
           "c",
-          "cpp"
+          "cpp",
+          "cuda-cpp"
         ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
@@ -1905,7 +1944,8 @@
         "label": "C++ (Windows)",
         "languages": [
           "c",
-          "cpp"
+          "cpp",
+          "cuda-cpp"
         ],
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
@@ -2150,6 +2190,9 @@
         "language": "cpp"
       },
       {
+        "language": "cuda-cpp"
+      },
+      {
         "language": "cuda"
       }
     ],
@@ -2174,42 +2217,22 @@
       ],
       "editor/context": [
         {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.SwitchHeaderSource",
           "group": "other1_navigation@1"
         },
         {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.SwitchHeaderSource",
-          "group": "other1_navigation@1"
-        },
-        {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.gotoSymbol",
           "group": "other1_navigation@3"
         },
         {
-          "when": "editorLangId == cpp",
-          "command": "workbench.action.gotoSymbol",
-          "group": "other1_navigation@3"
-        },
-        {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
         },
         {
-          "when": "editorLangId == cpp",
-          "command": "workbench.action.showAllSymbols",
-          "group": "other1_navigation@4"
-        },
-        {
-          "when": "editorLangId == cpp",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2_debug@1"
-        },
-        {
-          "when": "editorLangId == c",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other2_debug@1"
         }
@@ -2227,6 +2250,11 @@
     },
     "configurationDefaults": {
       "[cpp]": {
+        "editor.wordBasedSuggestions": false,
+        "editor.suggest.insertMode": "replace",
+        "editor.semanticHighlighting.enabled": true
+      },
+      "[cuda-cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true
@@ -2375,10 +2403,10 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --vscode-nls",
+    "compile": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls",
     "compile-dev": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development",
-    "compile-watch": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --vscode-nls --watch --info-verbosity verbose",
-    "compile-dev-watch": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development --watch --info-verbosity verbose",
+    "compile-watch": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls --watch --progress",
+    "compile-dev-watch": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development --watch --progress",
     "generateOptionsSchema": "node ./tools/prepublish.js && node ./out/tools/generateOptionsSchema.js",
     "generate-native-strings": "node ./tools/prepublish.js && gulp generate-native-strings",
     "translations-export": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-export",
@@ -2398,13 +2426,12 @@
     "@octokit/rest": "^16.28.9",
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
-    "@types/mocha": "^5.2.7",
+    "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.0",
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.52.0",
-    "@types/webpack": "^4.39.0",
+    "@types/vscode": "1.53.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
@@ -2422,23 +2449,23 @@
     "gulp-env": "^0.4.0",
     "gulp-eslint": "^6.0.0",
     "gulp-filter": "^6.0.0",
-    "gulp-mocha": "^7.0.1",
+    "gulp-mocha": "^8.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
     "minimist": "^1.2.5",
-    "mocha": "^4.0.0",
+    "mocha": "^8.3.2",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
-    "ts-loader": "^6.0.4",
+    "ts-loader": "^8.1.0",
     "tslint": "^5.19.0",
     "typescript": "^3.5.3",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-nls-dev": "^3.2.6",
     "vscode-test": "^1.3.0",
-    "webpack": "^4.42.0",
-    "webpack-cli": "^3.3.7",
+    "webpack": "^5.28.0",
+    "webpack-cli": "^4.5.0",
     "xml2js": "^0.4.19"
   },
   "dependencies": {
@@ -2448,7 +2475,7 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "plist": "^3.0.1",
+    "plist": "^3.0.2",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^5.0.0",
     "vscode-extension-telemetry": "^0.1.2",
@@ -2458,21 +2485,14 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "https-proxy-agent": "^2.2.4",
-    "webpack/acorn": "^6.4.1",
-    "webpack/terser-webpack-plugin": "^1.4.5",
-    "gulp-sourcemaps/acorn": "^5.7.4",
-    "eslint/acorn": "^7.1.1",
-    "gulp-eslint/acorn": "^7.1.1",
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
-    "mocha/diff": "^3.5.0",
-    "node-fetch": "^2.6.1"
+    "y18n": "^5.0.5"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156408",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2161011",
       "platforms": [
         "linux"
       ],
@@ -2483,11 +2503,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "81740FC42FDFBEC9AF72EE69B6FC985841E8879DE7197D1859B339BE0418E2C2"
+      "integrity": "7C43AA78021C5DB8F6DE9751EC8435D2BE1137CAC861801CDFADAA4B48A42AC3"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156409",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160914",
       "platforms": [
         "linux"
       ],
@@ -2498,11 +2518,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "E12B49A74D9E6D7D43BE7ED88E470B8871E1750392D48B0FCFEED4C7E5C523FB"
+      "integrity": "ED83E6E0F5784323CDF42BA1EF57CDFFBF2A81D468B08C8ECF126A2D042343F2"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156407",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160915",
       "platforms": [
         "linux"
       ],
@@ -2513,23 +2533,41 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "F84424B48790EAE110F0B4ED35D8DEE2347754C79C9A1879BCE5A93038A249A3"
+      "integrity": "52DD114FF466FA3542D7F98F12716E4296712986CA4908B18DCC039209B8D2CC"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156301",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2161012",
       "platforms": [
         "darwin"
+      ],
+      "architectures": [
+        "x64"
       ],
       "binaries": [
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "448A17E1D7C639C99F0AE47A88705956BA03F8CFA401C0C00CD074945275B513"
+      "integrity": "53654F3D21C5D470D3C05EA48CFB7AB3CB197344049DC55AEB07374AFECD1587"
+    },
+    {
+      "description": "C/C++ language components (OS X ARM64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160918",
+      "platforms": [
+        "darwin"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ],
+      "integrity": "E00370987D321E5AB58894B95F1545B52F59ED8E548BE1CBC8393F8B63562BDE"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156410",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160913",
       "platforms": [
         "win32"
       ],
@@ -2541,11 +2579,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "39B7EA69F9CDC1B2B98DBFD189617640029E6C9CBDFE9BF6789B4E013D6550F4"
+      "integrity": "970504DB40E0B54E48075C1FBCE0F34AB674DE3F1CCAD51FFA04689513CC8013"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156502",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160916",
       "platforms": [
         "win32"
       ],
@@ -2556,7 +2594,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "30B836279F948CDFD751546E679F459FE2CFD7BD578952AF1A1D8943D5C4A0F6"
+      "integrity": "E85CF0C80B64F940F73E158966749C0A95D122907170CACECDCBB118986D0E57"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2606,10 +2644,27 @@
       "platforms": [
         "darwin"
       ],
+      "architectures": [
+        "x64"
+      ],
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
       "integrity": "7AA436BA25E3404DC658A137188BEC65FF2532D1FEB314ABBBC5EBC9AAF5CCF7"
+    },
+    {
+      "description": "ClangFormat (OS X arm64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2160917",
+      "platforms": [
+        "darwin"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format.darwin"
+      ],
+      "integrity": "BF5357714856AC08A69FAD4231C9EFBE47E97497D8E227E1506FCAA1C89D11E0"
     },
     {
       "description": "ClangFormat (Windows x86)",

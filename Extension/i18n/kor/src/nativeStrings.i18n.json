@@ -206,5 +206,11 @@
 	"memory_limit_shutting_down_intellisense": "IntelliSense 서버 {0}을(를) 종료하는 중입니다. 메모리 사용량이 {1}MB이며 {2}MB 한도를 초과했습니다.",
 	"failed_to_query_for_standard_version": "기본 표준 버전에 대해 경로 \"{0}\"에서 컴파일러를 쿼리하지 못했습니다. 이 컴파일러에 대해서는 컴파일러 쿼리를 사용할 수 없습니다.",
 	"unrecognized_language_standard_version": "컴파일러 쿼리에서 인식할 수 없는 언어 표준 버전을 반환했습니다. 지원되는 최신 버전이 대신 사용됩니다.",
-	"intellisense_process_crash_detected": "IntelliSense 프로세스 크래시가 감지되었습니다."
+	"intellisense_process_crash_detected": "IntelliSense 프로세스 크래시가 감지되었습니다.",
+	"return_values_label": "반환 값:",
+	"nvcc_compiler_not_found": "nvcc 컴파일러를 찾을 수 없음: {0}",
+	"nvcc_host_compiler_not_found": "nvcc 호스트 컴파일러를 찾을 수 없음: {0}",
+	"invoking_nvcc": "명령줄 {0}을(를) 사용하여 nvcc를 호출하는 중",
+	"nvcc_host_compile_command_not_found": "nvcc의 출력에서 호스트 컴파일 명령을 찾을 수 없습니다.",
+	"unable_to_locate_forced_include": "강제 포함을 찾을 수 없음: {0}"
 }

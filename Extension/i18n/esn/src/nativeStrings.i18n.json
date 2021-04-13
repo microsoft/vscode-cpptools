@@ -206,5 +206,11 @@
 	"memory_limit_shutting_down_intellisense": "Cerrando el servidor de IntelliSense: {0}. El uso de la memoria es de {1} MB y ha superado el límite de {2} MB.",
 	"failed_to_query_for_standard_version": "No se pudo consultar el compilador en la ruta de acceso \"{0}\" para las versiones estándar predeterminadas. La consulta del compilador está deshabilitada para este.",
 	"unrecognized_language_standard_version": "La consulta del compilador devolvió una versión estándar del lenguaje no reconocida. En su lugar se usará la última versión admitida.",
-	"intellisense_process_crash_detected": "Se ha detectado un bloqueo del proceso de IntelliSense."
+	"intellisense_process_crash_detected": "Se ha detectado un bloqueo del proceso de IntelliSense.",
+	"return_values_label": "Valores devueltos:",
+	"nvcc_compiler_not_found": "No se encuentra el compilador de nvcc: {0}",
+	"nvcc_host_compiler_not_found": "No se encuentra el compilador host nvcc: {0}",
+	"invoking_nvcc": "Invocando nvcc con la línea de comandos: {0}",
+	"nvcc_host_compile_command_not_found": "No se encuentra el comando de compilación del host en la salida de nvcc.",
+	"unable_to_locate_forced_include": "No se encuentra la inclusión forzada: {0}"
 }

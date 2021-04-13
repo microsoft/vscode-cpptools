@@ -51,7 +51,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                             if (cppSettings.autoAddFileAssociations) {
                                 const fileName: string = path.basename(document.uri.fsPath);
                                 const mappingString: string = fileName + "@" + document.uri.fsPath;
-                                me.addFileAssociations(mappingString, false);
+                                me.addFileAssociations(mappingString, "cpp");
                                 me.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
                                 vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
                                     finishDidOpen(newDoc);

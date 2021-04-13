@@ -159,7 +159,10 @@ export class CppProperties {
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
         this.buildVcpkgIncludePath();
-        this.readNodeAddonIncludeLocations(rootPath);
+        const userSettings: CppSettings = new CppSettings();
+        if (userSettings.addNodeAddonIncludePaths) {
+            this.readNodeAddonIncludeLocations(rootPath);
+        }
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
@@ -240,6 +243,40 @@ export class CppProperties {
         vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
             if (e.document.uri.fsPath === settingsPath) {
                 this.handleConfigurationChange();
+            }
+        });
+
+        vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
+            // For multi-root, the "onDidSaveTextDocument" will be received once for each project folder.
+            // To avoid misleading telemetry (for CMake retention) skip if the notifying folder
+            // is not the same workspace folder of the modified document.
+            // Exception: if the document does not belong to any of the folders in this workspace,
+            // getWorkspaceFolder will return undefined and we report this as "outside".
+            // Even in this case make sure we send the telemetry information only once,
+            // not for each notifying folder.
+            const savedDocWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(doc.uri);
+            const notifyingWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(settingsPath));
+            if ((!savedDocWorkspaceFolder && vscode.workspace.workspaceFolders && notifyingWorkspaceFolder === vscode.workspace.workspaceFolders[0])
+               || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
+                let fileType: string | undefined;
+                const documentPath: string = doc.uri.fsPath.toLowerCase();
+                if (documentPath.endsWith("cmakelists.txt")) {
+                    fileType = "CMakeLists";
+                } else if (documentPath.endsWith("cmakecache.txt")) {
+                    fileType = "CMakeCache";
+                } else if (documentPath.endsWith(".cmake")) {
+                    fileType = ".cmake";
+                }
+
+                if (fileType) {
+                    // We consider the changed cmake file as outside if it is not found in any
+                    // of the projects folders.
+                    telemetry.logLanguageServerEvent("cmakeFileWrite",
+                        {
+                            filetype: fileType,
+                            outside: (savedDocWorkspaceFolder === undefined).toString()
+                        });
+                }
             }
         });
 
@@ -406,15 +443,23 @@ export class CppProperties {
         if (!error) {
             try {
                 const pathToNode: string = which.sync("node");
-                const nodeAddonMap: { [dependency: string]: string } = {
-                    "nan": `"${pathToNode}" --no-warnings -e "require('nan')"`,
-                    "node-addon-api": `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`
-                };
+                const nodeAddonMap: [string, string][] = [
+                    ["node-addon-api", `"${pathToNode}" --no-warnings -p "require('node-addon-api').include"`],
+                    ["nan", `"${pathToNode}" --no-warnings -e "require('nan')"`]
+                ];
+                // Yarn (2) PnP support
+                const pathToYarn: string | null = which.sync("yarn", { nothrow: true });
+                if (pathToYarn && await util.checkDirectoryExists(path.join(rootPath, ".yarn/cache"))) {
+                    nodeAddonMap.push(
+                        ["node-addon-api", `"${pathToYarn}" node --no-warnings -p "require('node-addon-api').include"`],
+                        ["nan", `"${pathToYarn}" node --no-warnings -e "require('nan')"`]
+                    );
+                }
 
-                for (const dep in nodeAddonMap) {
+                for (const [dep, execCmd] of nodeAddonMap) {
                     if (dep in package_json.dependencies) {
-                        const execCmd: string = nodeAddonMap[dep];
-                        let stdout: string = await util.execChildProcess(execCmd, rootPath);
+                        let stdout: string | void = await util.execChildProcess(execCmd, rootPath)
+                            .catch((error) => console.log('readNodeAddonIncludeLocations', error.message));
                         if (!stdout) {
                             continue;
                         }
@@ -510,7 +555,10 @@ export class CppProperties {
         const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
 
-        const isValid: boolean = (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") === configuration.intelliSenseMode.includes("msvc");
+        const isValid: boolean = ((compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe" || compilerPathAndArgs.compilerName.toLowerCase() === "cl") === configuration.intelliSenseMode.includes("msvc")
+            // We can't necessarily determine what host compiler nvcc will use, without parsing command line args (i.e. for -ccbin)
+            // to determine if the user has set it to something other than the default. So, we don't squiggle IntelliSenseMode when using nvcc.
+            || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc.exe") || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc"));
         if (isValid) {
             return "";
         } else {
@@ -691,6 +739,7 @@ export class CppProperties {
             return;
         }
         const settings: CppSettings = new CppSettings(this.rootUri);
+        const userSettings: CppSettings = new CppSettings();
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
@@ -698,7 +747,7 @@ export class CppProperties {
             configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
             const origIncludePath: string[] | undefined = configuration.includePath;
-            if (settings.addNodeAddonIncludePaths) {
+            if (userSettings.addNodeAddonIncludePaths) {
                 const includePath: string[] = origIncludePath || [];
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
@@ -1146,8 +1195,24 @@ export class CppProperties {
             }
 
             this.configurationJson.configurations.forEach(e => {
-                if ((<any>e).knownCompilers) {
+                if ((<any>e).knownCompilers !== undefined) {
                     delete (<any>e).knownCompilers;
+                    dirty = true;
+                }
+                if ((<any>e).compilerPathIsExplicit !== undefined) {
+                    delete (<any>e).compilerPathIsExplicit;
+                    dirty = true;
+                }
+                if ((<any>e).cStandardIsExplicit !== undefined) {
+                    delete (<any>e).cStandardIsExplicit;
+                    dirty = true;
+                }
+                if ((<any>e).cppStandardIsExplicit !== undefined) {
+                    delete (<any>e).cppStandardIsExplicit;
+                    dirty = true;
+                }
+                if ((<any>e).intelliSenseModeIsExplicit !== undefined) {
+                    delete (<any>e).intelliSenseModeIsExplicit;
                     dirty = true;
                 }
             });
@@ -1228,9 +1293,10 @@ export class CppProperties {
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
-        if (resolvedCompilerPath &&
+        if (resolvedCompilerPath
             // Don't error cl.exe paths because it could be for an older preview build.
-            compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe") {
+            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
+            && compilerPathAndArgs.compilerName.toLowerCase() !== "cl") {
             resolvedCompilerPath = resolvedCompilerPath.trim();
 
             // Error when the compiler's path has spaces without quotes but args are used.
@@ -1801,10 +1867,11 @@ export class CppProperties {
 
     public checkCompileCommands(): void {
         // Check for changes in case of file watcher failure.
-        const compileCommandsFile: string | undefined = this.CurrentConfiguration?.compileCommands;
-        if (!compileCommandsFile) {
+        const compileCommands: string | undefined = this.CurrentConfiguration?.compileCommands;
+        if (!compileCommands) {
             return;
         }
+        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands, os.platform() === "win32");
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
