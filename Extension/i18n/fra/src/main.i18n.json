@@ -7,7 +7,7 @@
 	"architecture.not.supported": "L'architecture {0} n'est pas prise en charge. ",
 	"apline.containers.not.supported": "Les conteneurs Alpine ne sont pas pris en charge.",
 	"download.button": "Accéder à la page de téléchargement",
-	"native.binaries.mismatch.osx": "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
+	"native.binaries.mismatch.osx": "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
 	"native.binaries.not.supported": "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.",
 	"extension.installation.failed": "Échec de l'installation de l'extension C/C++. Vous devez réparer ou réinstaller l'extension pour que les fonctionnalités du langage C/C++ fonctionnent correctement.",
 	"remove.extension": "Tentative de réparation",
