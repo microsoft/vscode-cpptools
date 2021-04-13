@@ -1620,14 +1620,14 @@ export class CppProperties {
             let compilerMessage: string | undefined;
             const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
             // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
-            if (compilerPathAndArgs.compilerName.toLowerCase() != "cl.exe" && compilerPathAndArgs.compilerPath != undefined ) {
+            if (compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe" && compilerPathAndArgs.compilerPath !== undefined) {
                 // Squiggle when the compiler's path has spaces without quotes but args are used.
                 compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
                     && !compilerPath.startsWith('"')
                     && compilerPathAndArgs.compilerPath.includes(" ");
                 compilerPath = compilerPathAndArgs.compilerPath;
                 // Don't squiggle if compiler path is resolving with environment path.
-                if (compilerPathNeedsQuotes || !compilerPath || !which.sync(compilerPath, {nothrow: true})) {
+                if (compilerPathNeedsQuotes || !compilerPath || !which.sync(compilerPath, { nothrow: true })) {
                     if (compilerPathNeedsQuotes) {
                         compilerMessage = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                         newSquiggleMetrics.CompilerPathMissingQuotes++;
@@ -1640,7 +1640,7 @@ export class CppProperties {
             const isWSL: boolean = isWindows && compilerPath.startsWith("/");
             let compilerPathExists: boolean = true;
             if (this.rootUri) {
-                let checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, true);
+                const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, true);
                 compilerPathExists = checkPathExists.pathExists;
                 compilerPath = checkPathExists.path;
             }
@@ -1648,11 +1648,11 @@ export class CppProperties {
                 compilerMessage = localize('cannot.find2', "Cannot find \"{0}\".", compilerPath);
                 newSquiggleMetrics.PathNonExistent++;
             }
-            if (compilerMessage){
+            if (compilerMessage) {
                 const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                     new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart),
                         document.positionAt(curTextStartOffset + compilerPathEnd)),
-                        compilerMessage, vscode.DiagnosticSeverity.Warning);
+                    compilerMessage, vscode.DiagnosticSeverity.Warning);
                 diagnostics.push(diagnostic);
             }
 
@@ -1676,7 +1676,7 @@ export class CppProperties {
                 }
                 let pathExists: boolean = true;
                 if (this.rootUri) {
-                    let checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, false);
+                    const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, false);
                     pathExists = checkPathExists.pathExists;
                     resolvedPath = checkPathExists.path;
                 }
@@ -1704,7 +1704,7 @@ export class CppProperties {
                     for (const curMatch of configMatches) {
                         curOffset = curText.substr(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
-                        if (curOffset >= compilerPathStart && curOffset <= compilerPathEnd){
+                        if (curOffset >= compilerPathStart && curOffset <= compilerPathEnd) {
                             continue;
                         }
                         let message: string;
@@ -1724,7 +1724,7 @@ export class CppProperties {
                                 if (util.checkDirectoryExistsSync(resolvedPath)) {
                                     continue;
                                 }
-                                message =  localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
+                                message = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
                                 newSquiggleMetrics.PathNotADirectory++;
                             }
                         }
