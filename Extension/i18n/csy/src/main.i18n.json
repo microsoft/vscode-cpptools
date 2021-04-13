@@ -7,7 +7,7 @@
 	"architecture.not.supported": "Architektura {0} se nepodporuje. ",
 	"apline.containers.not.supported": "Kontejnery Alpine se nepodporují.",
 	"download.button": "Přejít na stránku stahování",
-	"native.binaries.mismatch.osx": "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
+	"native.binaries.mismatch.osx": "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
 	"native.binaries.not.supported": "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.",
 	"extension.installation.failed": "Nepovedlo se úspěšně nainstalovat rozšíření jazyka C/C++. Aby rozšíření pro funkce jazyka C/C++ fungovalo správně, bude nutné ho opravit nebo přeinstalovat.",
 	"remove.extension": "Pokusit se o opravu",
