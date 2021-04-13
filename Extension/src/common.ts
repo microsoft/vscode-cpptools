@@ -487,7 +487,7 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
 }
 
 /** Test whether a relative path exists */
-export function checkPathExistsSync(path: string, relativePath: string, isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean, path: string } {
+export function checkPathExistsSync(path: string, relativePath: string, isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
     let pathExists: boolean = true;
     const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
     if (!fs.existsSync(path)) {
