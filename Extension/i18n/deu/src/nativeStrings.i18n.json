@@ -206,5 +206,11 @@
 	"memory_limit_shutting_down_intellisense": "IntelliSense-Server wird heruntergefahren: {0}. Die Arbeitsspeicherauslastung beträgt {1} MB und hat das Limit von {2} MB überschritten.",
 	"failed_to_query_for_standard_version": "Der Compiler im Pfad \"{0}\" konnte nicht nach standardmäßigen Standardversionen abgefragt werden. Die Compilerabfrage ist für diesen Compiler deaktiviert.",
 	"unrecognized_language_standard_version": "Die Compilerabfrage hat eine unbekannte Sprachstandardversion zurückgegeben. Stattdessen wird die neueste unterstützte Version verwendet.",
-	"intellisense_process_crash_detected": "IntelliSense-Prozessabsturz erkannt."
+	"intellisense_process_crash_detected": "IntelliSense-Prozessabsturz erkannt.",
+	"return_values_label": "Rückgabewerte:",
+	"nvcc_compiler_not_found": "Der nvcc-Compiler wurde nicht gefunden: {0}",
+	"nvcc_host_compiler_not_found": "Der nvcc-Hostcompiler wurde nicht gefunden: {0}",
+	"invoking_nvcc": "nvcc wird über Befehlszeile aufgerufen: {0}",
+	"nvcc_host_compile_command_not_found": "Der Hostkompilierbefehl wurde in der Ausgabe von nvcc nicht gefunden.",
+	"unable_to_locate_forced_include": "Erzwungene Includedatei wurde nicht gefunden: {0}"
 }

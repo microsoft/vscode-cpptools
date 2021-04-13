@@ -196,8 +196,9 @@ export function activate(activationEventOccurred: boolean): void {
     });
 
     const selector: vscode.DocumentSelector = [
+        { scheme: 'file', language: 'c' },
         { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'c' }
+        { scheme: 'file', language: 'cuda-cpp' }
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
@@ -227,12 +228,12 @@ export function activate(activationEventOccurred: boolean): void {
         return;
     }
 
-    // handle "onLanguage:cpp" and "onLanguage:c" activation events.
+    // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
     if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
         for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
             const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
             if (document.uri.scheme === "file") {
-                if (document.languageId === "cpp" || document.languageId === "c") {
+                if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
                     onActivationEvent();
                     return;
                 }
@@ -242,7 +243,7 @@ export function activate(activationEventOccurred: boolean): void {
 }
 
 function onDidOpenTextDocument(document: vscode.TextDocument): void {
-    if (document.languageId === "c" || document.languageId === "cpp") {
+    if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
         onActivationEvent();
     }
 }
@@ -365,6 +366,7 @@ export function updateLanguageConfigurations(): void {
 
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('c', getLanguageConfig('c')));
     languageConfigurations.push(vscode.languages.setLanguageConfiguration('cpp', getLanguageConfig('cpp')));
+    languageConfigurations.push(vscode.languages.setLanguageConfiguration('cuda-cpp', getLanguageConfig('cuda-cpp')));
 }
 
 /**
@@ -401,7 +403,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     }
 
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c")) {
+    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
@@ -451,7 +453,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                     if (cppSettings.autoAddFileAssociations) {
                         const fileName: string = path.basename(document.uri.fsPath);
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
-                        client.addFileAssociations(mappingString, false);
+                        client.addFileAssociations(mappingString, "cpp");
                         client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
                         vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
                             finishDidOpen(newDoc);
@@ -470,7 +472,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
-        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp")) {
+        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
             processDelayedDidOpen(editor.document);
         }
     });
@@ -772,6 +774,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -785,7 +789,7 @@ function onSwitchHeaderSource(): void {
         return;
     }
 
-    if (activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "c") {
+    if (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp") {
         return;
     }
 
@@ -907,6 +911,18 @@ function onGenerateEditorConfig(): void {
     } else {
         selectClient().then(client => generateEditorConfig(client.RootUri));
     }
+}
+
+function onGoToNextDirectiveInGroup(): void {
+    onActivationEvent();
+    const client: Client = getActiveClient();
+    client.handleGoToDirectiveInGroup(true);
+}
+
+function onGoToPrevDirectiveInGroup(): void {
+    onActivationEvent();
+    const client: Client = getActiveClient();
+    client.handleGoToDirectiveInGroup(false);
 }
 
 function onAddToIncludePath(path: string): void {

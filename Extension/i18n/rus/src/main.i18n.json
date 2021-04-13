@@ -6,8 +6,9 @@
 {
 	"architecture.not.supported": "Архитектура {0} не поддерживается. ",
 	"apline.containers.not.supported": "Контейнеры Alpine не поддерживаются.",
-	"native.binaries.not.supported": "Версия расширения для {0} не совместима с вашей ОС. Скачайте и установите версию расширения \"{1}\".",
 	"download.button": "Перейти к странице скачивания",
+	"native.binaries.mismatch.osx": "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.",
+	"native.binaries.not.supported": "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.",
 	"extension.installation.failed": "Установить расширение C/C++ не удалось. Исправьте или переустановите расширение функций языка C/C++ для корректной работы.",
 	"remove.extension": "Попытка исправления",
 	"jason.files.missing": "Установить расширение C/C++ не удалось. Переустановите расширение функций языка C/C++ для корректной работы.",

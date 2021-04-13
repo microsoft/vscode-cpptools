@@ -16,26 +16,27 @@ suite("multiline comment setting tests", function(): void {
         await testHelpers.activateCppExtension();
     });
 
-    const defaultRules: vscode.OnEnterRule[] = [
-        {
+    const defaultMLRules: vscode.OnEnterRule[] = [
+        {   // e.g. /** | */
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             afterText: /^\s*\*\/$/,
             action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
         },
-        {
+        {   // e.g. /** ...|
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
         },
-        {
-            beforeText: /^\s*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+        {   // e.g.  * ...|
+            beforeText: /^(\t|[ ])*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+            previousLineText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         },
-        {
-            beforeText: /^\s*\*\/\s*$/,
+        {   // e.g.  */|
+            beforeText: /^(\t|[ ])*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         },
-        {
-            beforeText: /^\s*\*[^/]*\*\/\s*$/,
+        {   // e.g.  *-----*/|
+            beforeText: /^(\t|[ ])*\*[^/]*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }
     ];
@@ -52,27 +53,27 @@ suite("multiline comment setting tests", function(): void {
 
     test("Check the default OnEnterRules for C", () => {
         const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('c', [ "/**" ]).onEnterRules;
-        assert.deepEqual(rules, defaultRules);
+        assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Check for removal of single line comment continuations for C", () => {
         const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('c', [ "/**", "///" ]).onEnterRules;
-        assert.deepEqual(rules, defaultRules);
+        assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Check the default OnEnterRules for C++", () => {
         const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "/**" ]).onEnterRules;
-        assert.deepEqual(rules, defaultRules);
+        assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Make sure duplicate rules are removed", () => {
         const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "/**", { begin: "/**", continue: " * " }, "/**" ]).onEnterRules;
-        assert.deepEqual(rules, defaultRules);
+        assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Check single line rules for C++", () => {
         const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "///" ]).onEnterRules;
-        assert.deepEqual(rules, defaultSLRules);
+        assert.deepStrictEqual(rules, defaultSLRules);
     });
 
 });

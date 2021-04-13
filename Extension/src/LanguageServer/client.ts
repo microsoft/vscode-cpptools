@@ -431,6 +431,12 @@ interface IntelliSenseSetup {
     uri: string;
 }
 
+interface GoToDirectiveInGroupParams {
+    uri: string;
+    position: Position;
+    next: boolean;
+};
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -444,6 +450,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -588,9 +595,10 @@ export interface Client {
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
+    handleGoToDirectiveInGroup(next: boolean): void;
     onInterval(): void;
     dispose(): void;
-    addFileAssociations(fileAssociations: string, is_c: boolean): void;
+    addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -623,8 +631,9 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private configurationProvider?: string;
     private documentSelector: DocumentFilter[] = [
+        { scheme: 'file', language: 'c' },
         { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'c' }
+        { scheme: 'file', language: 'cuda-cpp' }
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
@@ -913,8 +922,10 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
+        const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        const settings_editorAutoClosingBrackets: (string | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
         const settings_intelliSenseEngineFallback: (string | undefined)[] = [];
         const settings_errorSquiggles: (string | undefined)[] = [];
@@ -927,7 +938,8 @@ export class DefaultClient implements Client {
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
         const settings_intelliSenseMemoryLimit: (number | undefined)[] = [];
-        const settings_autoComplete: (string | undefined)[] = [];
+        const settings_autocomplete: (string | undefined)[] = [];
+        const settings_autocompleteAddParentheses: (boolean | undefined)[] = [];
         const workspaceSettings: CppSettings = new CppSettings();
         const workspaceOtherSettings: OtherSettings = new OtherSettings();
         const settings_indentBraces: boolean[] = [];
@@ -1080,13 +1092,16 @@ export class DefaultClient implements Client {
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
                 settings_intelliSenseMemoryLimit.push(setting.intelliSenseMemoryLimit);
-                settings_autoComplete.push(setting.autoComplete);
+                settings_autocomplete.push(setting.autocomplete);
+                settings_autocompleteAddParentheses.push(setting.autocompleteAddParentheses);
+                settings_cppFilesExclude.push(setting.filesExclude);
             }
 
             for (const otherSetting of otherSettings) {
                 settings_filesEncoding.push(otherSetting.filesEncoding);
                 settings_filesExclude.push(otherSetting.filesExclude);
                 settings_searchExclude.push(otherSetting.searchExclude);
+                settings_editorAutoClosingBrackets.push(otherSetting.editorAutoClosingBrackets);
             }
         }
 
@@ -1108,8 +1123,9 @@ export class DefaultClient implements Client {
 
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
+                { scheme: 'file', language: 'c' },
                 { scheme: 'file', language: 'cpp' },
-                { scheme: 'file', language: 'c' }
+                { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
@@ -1194,7 +1210,11 @@ export class DefaultClient implements Client {
                 files: {
                     encoding: settings_filesEncoding
                 },
+                editor: {
+                    autoClosingBrackets: settings_editorAutoClosingBrackets
+                },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
+                cpp_exclude_files: settings_cppFilesExclude,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
                 associations: workspaceOtherSettings.filesAssociations,
@@ -1206,7 +1226,8 @@ export class DefaultClient implements Client {
                 intelliSenseCacheSize : settings_intelliSenseCacheSize,
                 intelliSenseMemoryLimit : settings_intelliSenseMemoryLimit,
                 intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-                autocomplete: settings_autoComplete,
+                autocomplete: settings_autocomplete,
+                autocompleteAddParentheses: settings_autocompleteAddParentheses,
                 errorSquiggles: settings_errorSquiggles,
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,
@@ -1224,7 +1245,8 @@ export class DefaultClient implements Client {
                 gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
-                localizedStrings: localizedStrings
+                localizedStrings: localizedStrings,
+                supportCuda: util.supportCuda
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
@@ -1282,6 +1304,9 @@ export class DefaultClient implements Client {
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
+                files: {
+                    exclude: vscode.workspace.getConfiguration("C_Cpp.files.exclude", this.RootUri)
+                },
                 vcFormat: {
                     ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),
@@ -1292,8 +1317,10 @@ export class DefaultClient implements Client {
                     },
                     space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
-                },
-                tabSize: vscode.workspace.getConfiguration("editor.tabSize", this.RootUri)
+                }
+            },
+            editor: {
+                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets
             },
             files: {
                 encoding: otherSettingsFolder.filesEncoding,
@@ -1402,7 +1429,9 @@ export class DefaultClient implements Client {
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (textDocumentChangeEvent.document.uri.scheme === "file") {
-            if (textDocumentChangeEvent.document.languageId === "cpp" || textDocumentChangeEvent.document.languageId === "c") {
+            if (textDocumentChangeEvent.document.languageId === "c"
+                || textDocumentChangeEvent.document.languageId === "cpp"
+                || textDocumentChangeEvent.document.languageId === "cuda-cpp") {
                 // If any file has changed, we need to abort the current rename operation
                 if (DefaultClient.renamePending) {
                     this.cancelReferences();
@@ -1925,8 +1954,9 @@ export class DefaultClient implements Client {
         const cppSettings: CppSettings = new CppSettings();
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
-            languageStr = languageStr.substr(is_c ? 2 : 1);
-            this.addFileAssociations(languageStr, is_c);
+            const is_cuda: boolean = languageStr.startsWith("cu;");
+            languageStr = languageStr.substr(is_c ? 2 : (is_cuda ? 3 : 1));
+            this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
         }
     }
 
@@ -1955,7 +1985,7 @@ export class DefaultClient implements Client {
             });
 
             // TODO: Handle new associations without a reload.
-            this.associations_for_did_change = new Set<string>(["c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
+            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
@@ -2004,7 +2034,7 @@ export class DefaultClient implements Client {
      * handle notifications coming from the language server
      */
 
-    public addFileAssociations(fileAssociations: string, is_c: boolean): void {
+    public addFileAssociations(fileAssociations: string, languageId: string): void {
         const settings: OtherSettings = new OtherSettings();
         const assocs: any = settings.filesAssociations;
 
@@ -2036,7 +2066,7 @@ export class DefaultClient implements Client {
                 if (foundGlobMatch) {
                     continue;
                 }
-                assocs[file] = is_c ? "c" : "cpp";
+                assocs[file] = languageId;
                 foundNewAssociation = true;
             }
         }
@@ -2371,11 +2401,11 @@ export class DefaultClient implements Client {
     }
 
     private isSourceFileConfigurationItem(input: any, providerVersion: Version): input is SourceFileConfigurationItem {
-        // IntelliSenseMode and standard are optional for version 5+. However, they are required when compilerPath is not defined.
+        // IntelliSenseMode and standard are optional for version 5+.
         let areOptionalsValid: boolean = false;
-        if (providerVersion < Version.v5 || input.configuration.compilerPath === undefined) {
+        if (providerVersion < Version.v5) {
             areOptionalsValid = util.isString(input.configuration.intelliSenseMode) && util.isString(input.configuration.standard);
-        } else if (util.isString(input.configuration.compilerPath)) {
+        } else {
             areOptionalsValid = util.isOptionalString(input.configuration.intelliSenseMode) && util.isOptionalString(input.configuration.standard);
         }
         return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
@@ -2444,12 +2474,11 @@ export class DefaultClient implements Client {
     private configurationLogging: Map<string, string> = new Map<string, string>();
 
     private isWorkspaceBrowseConfiguration(input: any): boolean {
-        const areOptionalsValid: boolean = (input.compilerPath === undefined && util.isString(input.standard)) ||
-            (util.isString(input.compilerPath) && util.isOptionalString(input.standard));
-        return areOptionalsValid &&
-        util.isArrayOfString(input.browsePath) &&
-        util.isOptionalString(input.compilerArgs) &&
-        util.isOptionalString(input.windowsSdkVersion);
+        return util.isArrayOfString(input.browsePath) &&
+            util.isOptionalString(input.compilerPath) &&
+            util.isOptionalString(input.standard) &&
+            util.isOptionalArrayOfString(input.compilerArgs) &&
+            util.isOptionalString(input.windowsSdkVersion);
     }
 
     private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
@@ -2611,6 +2640,32 @@ export class DefaultClient implements Client {
 
     public handleAddToIncludePathCommand(path: string): void {
         this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
+    }
+
+    public handleGoToDirectiveInGroup(next: boolean): void {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            const params: GoToDirectiveInGroupParams = {
+                uri: editor.document.uri.toString(),
+                position: editor.selection.active,
+                next: next
+            };
+
+            this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params)
+                .then((response) => {
+                    if (response) {
+                        const p: vscode.Position = new vscode.Position(response.line, response.character);
+                        const r: vscode.Range = new vscode.Range(p, p);
+
+                        // Check if still the active document.
+                        const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+                        if (currentEditor && editor.document.uri === currentEditor.document.uri) {
+                            currentEditor.selection =  new vscode.Selection(r.start, r.end);
+                            currentEditor.revealRange(r);
+                        }
+                    }
+                });
+        }
     }
 
     public onInterval(): void {
@@ -2778,12 +2833,13 @@ class NullClient implements Client {
     handleConfigurationEditCommand(): void {}
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}
-    handleAddToIncludePathCommand(path: string): void {}
+    handleAddToIncludePathCommand(path: string): void { }
+    handleGoToDirectiveInGroup(next: boolean): void {}
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();
         this.stringEvent.dispose();
     }
-    addFileAssociations(fileAssociations: string, is_c: boolean): void {}
+    addFileAssociations(fileAssociations: string, languageId: string): void {}
     sendDidChangeSettings(settings: any): void {}
 }
