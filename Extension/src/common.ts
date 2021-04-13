@@ -486,6 +486,32 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
     return false;
 }
 
+/** Test whether a relative path exists */
+export function checkPathExistsSync(path: string, relativePath: string, isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean, path: string } {
+    let pathExists: boolean = true;
+    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
+    if (!fs.existsSync(path)) {
+        if (existsWithExeAdded(path)) {
+            path += ".exe";
+        } else if (!relativePath) {
+            pathExists = false;
+        } else {
+            // Check again for a relative path.
+            relativePath = relativePath + path;
+            if (!fs.existsSync(relativePath)) {
+                if (existsWithExeAdded(path)) {
+                    path += ".exe";
+                } else {
+                    pathExists = false;
+                }
+            } else {
+                path = relativePath;
+            }
+        }
+    }
+    return { pathExists, path };
+}
+
 /** Read the files in a directory */
 export function readDir(dirPath: string): Promise<string[]> {
     return new Promise((resolve) => {
