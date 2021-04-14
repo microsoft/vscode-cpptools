@@ -32,7 +32,7 @@ export interface AttachItem extends vscode.QuickPickItem {
 
 export async function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Promise<string | undefined> {
     const processEntries: AttachItem[] = await getAttachItems();
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<string | undefined>((resolve, reject) => {
         const quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
         quickPick.title = localize("attach.to.process", "Attach to process");
         quickPick.canSelectMany = false;
