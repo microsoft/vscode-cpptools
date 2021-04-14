@@ -173,9 +173,9 @@ export function activate(activationEventOccurred: boolean): void {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (fs.existsSync(config)) {
+                cppPropertiesExists = true;
                 vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
                     vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                    cppPropertiesExists = true;
                 });
             }
         }
