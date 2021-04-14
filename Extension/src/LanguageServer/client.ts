@@ -2449,7 +2449,7 @@ export class DefaultClient implements Client {
                     configuration: itemConfig
                 });
             } else {
-                console.warn("discarding invalid SourceFileConfigurationItem: " + item);
+                console.warn("discarding invalid SourceFileConfigurationItem: " + JSON.stringify(item));
             }
         });
 
@@ -2506,7 +2506,7 @@ export class DefaultClient implements Client {
 
             sanitized = {...<WorkspaceBrowseConfiguration>config};
             if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
-                console.log("Received an invalid browse configuration from configuration provider.");
+                console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
                 const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
                 if (configValue) {
                     sanitized = configValue;

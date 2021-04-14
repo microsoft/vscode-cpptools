@@ -6,8 +6,9 @@
 {
 	"architecture.not.supported": "Die Architektur \"{0}\" wird nicht unterstützt. ",
 	"apline.containers.not.supported": "Alpine-Container werden nicht unterstützt.",
-	"native.binaries.not.supported": "Diese Version für {0} der Erweiterung ist nicht mit Ihrem Betriebssystem kompatibel. Laden Sie Version {1} der Erweiterung herunter, und installieren Sie sie.",
 	"download.button": "Gehe zu Downloadseite",
+	"native.binaries.mismatch.osx": "Die macOS Intel-Version der Erweiterung wurde installiert.  Da Sie sich auf einem Apple Silicon Mac befinden, empfehlen wir die Installation der Apple Silicon-Version der Erweiterung.",
+	"native.binaries.not.supported": "Diese Version {0} {1} der Erweiterung ist nicht mit Ihrem Betriebssystem kompatibel. Laden Sie Version \"{2}\" der Erweiterung herunter, und installieren Sie sie.",
 	"extension.installation.failed": "Die C/C++-Erweiterung konnte nicht erfolgreich installiert werden. Sie müssen die Erweiterung für C/C++-Sprachfeatures reparieren oder neu installieren, damit die Erweiterung ordnungsgemäß funktioniert.",
 	"remove.extension": "Reparaturversuch",
 	"jason.files.missing": "Die C/C++-Erweiterung konnte nicht erfolgreich installiert werden. Sie müssen die Erweiterung für C/C++-Sprachfeatures neu installieren, damit die Erweiterung ordnungsgemäß funktioniert.",

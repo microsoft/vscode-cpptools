@@ -6,8 +6,9 @@
 {
 	"architecture.not.supported": "Architektura {0} nie jest obsługiwana.",
 	"apline.containers.not.supported": "Kontenery Alpine nie są obsługiwane.",
-	"native.binaries.not.supported": "Ta wersja {0} rozszerzenia jest niezgodna z systemem operacyjnym. Pobierz i zainstaluj wersję rozszerzenia „{1}”.",
 	"download.button": "Przejdź do strony pobierania",
+	"native.binaries.mismatch.osx": "Zainstalowano wersję rozszerzenia systemu macOS Intel.  Zalecamy zainstalowanie wersji rozszerzania systemu Apple Silicon Mac, ponieważ używasz wersji systemu Apple Silicon Mac.",
+	"native.binaries.not.supported": "Ta wersja rozszerzenia systemu {0} {1} jest niezgodna z Twoim systemem operacyjnym. Pobierz i zainstaluj wersję rozszerzenia „{2}”.",
 	"extension.installation.failed": "Nie można pomyślnie zainstalować rozszerzenia języka C/C++. Aby umożliwić poprawne działanie, należy naprawić lub zainstalować ponownie rozszerzenie dla funkcji języka C/C++.",
 	"remove.extension": "Spróbuj naprawić",
 	"jason.files.missing": "Nie można pomyślnie zainstalować rozszerzenia języka C/C++. Aby umożliwić poprawne działanie, należy zainstalować ponownie rozszerzenie dla funkcji języka C/C++.",

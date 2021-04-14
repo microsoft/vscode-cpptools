@@ -6,8 +6,9 @@
 {
 	"architecture.not.supported": "体系结构 {0} 不受支持。",
 	"apline.containers.not.supported": "Alpine 容器不受支持。",
-	"native.binaries.not.supported": "扩展的此 {0} 版本与你的 OS 不兼容。请下载并安装扩展的“{1}”版本。",
 	"download.button": "转到下载页",
+	"native.binaries.mismatch.osx": "MacOS Intel 版本的扩展已安装。 由于你使用的是 Apple Silicon Mac，我们建议你安装 Apple Silicon 版本的扩展。",
+	"native.binaries.not.supported": "此 {0} {1} 版本的扩展与你的 OS 不兼容，请下载并安装 \"{2}\" 版本的扩展。",
 	"extension.installation.failed": "C/C++ 扩展安装失败。为使函数正常工作，需要修复或重新安装 C/C++ 语言功能的扩展。",
 	"remove.extension": "尝试修复",
 	"jason.files.missing": "C/C++ 扩展安装失败。为使函数正常工作，需要重新安装 C/C++ 语言功能的扩展。",

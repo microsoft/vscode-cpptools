@@ -102,7 +102,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         if (installedPlatformAndArchitecture.platform === 'darwin' && installedPlatformAndArchitecture.architecture === "x64" && arch === "arm64") {
             if (promptForMacArchictureMismatch.Value) {
                 // Display a message specifically referring the user to the ARM64 Mac build on ARM64 Mac.
-                errMsg = localize("native.binaries.mismatch.osx", "This Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.");
+                errMsg = localize("native.binaries.mismatch.osx", "The macOS Intel version of the extension has been installed.  Since you are on an Apple Silicon Mac, we recommend installing the Apple Silicon version of the extension.");
                 promptForMacArchictureMismatch.Value = false;
                 const selection: string | undefined = await vscode.window.showErrorMessage(errMsg, downloadLink);
                 if (selection === downloadLink) {
