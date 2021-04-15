@@ -37,8 +37,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     await util.checkCuda();
 
     let errMsg: string = "";
-    const arch: string = os.arch();
-    if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'ia32' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
+    const arch: string = PlatformInformation.GetArchitecture();
+    if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(arch));
     } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
         errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
