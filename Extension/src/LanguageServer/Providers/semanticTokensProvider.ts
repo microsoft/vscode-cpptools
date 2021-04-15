@@ -17,38 +17,36 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     }
 
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-        return new Promise<vscode.SemanticTokens>((resolve, reject) => {
-            this.client.notifyWhenReady(async () => {
-                const uriString: string = document.uri.toString();
-                // First check the token cache to see if we already have results for that file and version
-                const cache: [number, vscode.SemanticTokens] | undefined = this.tokenCaches.get(uriString);
-                if (cache && cache[0] === document.version) {
-                    resolve(cache[1]);
+        return this.client.notifyWhenReady(async () => {
+            const uriString: string = document.uri.toString();
+            // First check the token cache to see if we already have results for that file and version
+            const cache: [number, vscode.SemanticTokens] | undefined = this.tokenCaches.get(uriString);
+            if (cache && cache[0] === document.version) {
+                return cache[1];
+            } else {
+                token.onCancellationRequested(_e => this.client.abortRequest(id));
+                const id: number = ++DefaultClient.abortRequestId;
+                const params: GetSemanticTokensParams = {
+                    id: id,
+                    uri: uriString
+                };
+                const tokensResult: GetSemanticTokensResult = await this.client.languageClient.sendRequest(GetSemanticTokensRequest, params);
+                if (tokensResult.canceled) {
+                    throw new Error('');
                 } else {
-                    const id: number = ++DefaultClient.abortRequestId;
-                    const params: GetSemanticTokensParams = {
-                        id: id,
-                        uri: uriString
-                    };
-                    const tokensResult: GetSemanticTokensResult = await this.client.languageClient.sendRequest(GetSemanticTokensRequest, params);
-                    if (tokensResult.canceled) {
-                        reject();
+                    if (tokensResult.fileVersion !== openFileVersions.get(uriString)) {
+                        throw new Error('');
                     } else {
-                        if (tokensResult.fileVersion !== openFileVersions.get(uriString)) {
-                            reject();
-                        } else {
-                            const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
-                            tokensResult.tokens.forEach((token) => {
-                                builder.push(token.line, token.character, token.length, token.type, token.modifiers);
-                            });
-                            const tokens: vscode.SemanticTokens = builder.build();
-                            this.tokenCaches.set(uriString, [tokensResult.fileVersion, tokens]);
-                            resolve(tokens);
-                        }
+                        const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
+                        tokensResult.tokens.forEach((token) => {
+                            builder.push(token.line, token.character, token.length, token.type, token.modifiers);
+                        });
+                        const tokens: vscode.SemanticTokens = builder.build();
+                        this.tokenCaches.set(uriString, [tokensResult.fileVersion, tokens]);
+                        return tokens;
                     }
-                    token.onCancellationRequested(e => this.client.abortRequest(id));
                 }
-            });
+            }
         });
     }
 
