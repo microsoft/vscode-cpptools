@@ -1572,8 +1572,7 @@ export class DefaultClient implements Client {
             // Initiate request for custom configuration.
             // Resume parsing on either resolve or reject, only if parsing was not resumed due to timeout
             let hasCompleted: boolean = false;
-            try {
-                const config: WorkspaceBrowseConfiguration | null = await task();
+            task().then(async config => {
                 if (!config) {
                     return;
                 }
@@ -1594,14 +1593,14 @@ export class DefaultClient implements Client {
                         this.resumeParsing();
                     }
                 }
-            } finally {
+            }, () => {
                 if (!hasCompleted) {
                     hasCompleted = true;
                     if (currentProvider.version >= Version.v2) {
                         this.resumeParsing();
                     }
                 }
-            }
+            });
 
             // Set up a timeout to use previously received configuration and resume parsing if the provider times out
             global.setTimeout(async () => {
@@ -1858,8 +1857,7 @@ export class DefaultClient implements Client {
                 // We don't want the queue to stall because of a rejected promise.
                 try {
                     await pendingTask.getPromise();
-                    return nextTask();
-                } catch (err) {
+                } finally {
                     return nextTask();
                 }
             } else {
@@ -1885,7 +1883,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private async callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
+    private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
         let timer: NodeJS.Timer;
         // Create a promise that rejects in <ms> milliseconds
         const timeout: () => Promise<T> = () => new Promise<T>((resolve, reject) => {
