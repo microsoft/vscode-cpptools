@@ -13,44 +13,42 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         this.client = client;
         this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
-    provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
+    async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
         token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
         const id: number = ++DefaultClient.abortRequestId;
         const params: GetFoldingRangesParams = {
             id: id,
             uri: document.uri.toString()
         };
-        return new Promise<vscode.FoldingRange[]>((resolve, reject) => {
-            this.client.notifyWhenReady(async () => {
-                const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
-                if (ranges.canceled) {
-                    reject();
-                } else {
-                    const result: vscode.FoldingRange[] = [];
-                    ranges.ranges.forEach((r) => {
-                        const foldingRange: vscode.FoldingRange = {
-                            start: r.range.start.line,
-                            end: r.range.end.line
-                        };
-                        switch (r.kind) {
-                            case FoldingRangeKind.Comment:
-                                foldingRange.kind = vscode.FoldingRangeKind.Comment;
-                                break;
-                            case FoldingRangeKind.Imports:
-                                foldingRange.kind = vscode.FoldingRangeKind.Imports;
-                                break;
-                            case FoldingRangeKind.Region:
-                                foldingRange.kind = vscode.FoldingRangeKind.Region;
-                                break;
-                            default:
-                                break;
-                        }
-                        result.push(foldingRange);
-                    });
-                    resolve(result);
-                }
+        return this.client.notifyWhenReady(async () => {
+            const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
+            if (ranges.canceled) {
+                throw new Error('');
+            } else {
                 token.onCancellationRequested(e => this.client.abortRequest(id));
-            });
+                const result: vscode.FoldingRange[] = [];
+                ranges.ranges.forEach((r) => {
+                    const foldingRange: vscode.FoldingRange = {
+                        start: r.range.start.line,
+                        end: r.range.end.line
+                    };
+                    switch (r.kind) {
+                        case FoldingRangeKind.Comment:
+                            foldingRange.kind = vscode.FoldingRangeKind.Comment;
+                            break;
+                        case FoldingRangeKind.Imports:
+                            foldingRange.kind = vscode.FoldingRangeKind.Imports;
+                            break;
+                        case FoldingRangeKind.Region:
+                            foldingRange.kind = vscode.FoldingRangeKind.Region;
+                            break;
+                        default:
+                            break;
+                    }
+                    result.push(foldingRange);
+                });
+                return result;
+            }
         });
     }
 
