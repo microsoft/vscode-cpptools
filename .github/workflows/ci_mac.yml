@@ -21,6 +21,12 @@ jobs:
       - name: Install Dependencies
         run: yarn install
         working-directory: Extension
+        continueOnError: true
+
+      - name: Install Dependencies
+        run: yarn install
+        working-directory: Extension
+        timeoutInMinutes: 10
 
       - name: Generate hashes for runtime dependency packages
         run: yarn run generatePackageHashes
