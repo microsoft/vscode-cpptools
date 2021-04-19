@@ -1449,7 +1449,7 @@ export class CppProperties {
         return errorMsg;
     }
 
-    private async handleSquiggles(): Promise<void> {
+    private handleSquiggles(): void {
         if (!this.propertiesFile) {
             return;
         }
@@ -1466,325 +1466,325 @@ export class CppProperties {
             this.diagnosticCollection.clear();
             return;
         }
-        const document: vscode.TextDocument = await vscode.workspace.openTextDocument(this.propertiesFile);
-        const diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
+        vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
+            const diagnostics: vscode.Diagnostic[] = new Array<vscode.Diagnostic>();
 
-        // Get the text of the current configuration.
-        let curText: string = document.getText();
+            // Get the text of the current configuration.
+            let curText: string = document.getText();
 
-        // Replace all \<escape character> with \\<character>, except for \"
-        // Otherwise, the JSON.parse result will have the \<escape character> missing.
-        const configurationsText: string = util.escapeForSquiggles(curText);
-        const configurations: ConfigurationJson = jsonc.parse(configurationsText);
-        const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
+            // Replace all \<escape character> with \\<character>, except for \"
+            // Otherwise, the JSON.parse result will have the \<escape character> missing.
+            const configurationsText: string = util.escapeForSquiggles(curText);
+            const configurations: ConfigurationJson = jsonc.parse(configurationsText);
+            const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
-        let curTextStartOffset: number = 0;
-        if (!currentConfiguration.name) {
-            return;
-        }
-
-        // Get env text
-        let envText: string = "";
-        const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
-        const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
-        envText = curText.substr(envStart, envEnd);
-        const envTextStartOffSet: number = envStart + 1;
-
-        // Check if all config names are unique.
-        let allConfigText: string = curText;
-        let allConfigTextOffset: number = envTextStartOffSet;
-        const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*".*"`);
-        let configStart: number = allConfigText.search(new RegExp(nameRegex));
-        let configNameStart: number;
-        let configNameEnd: number;
-        let configName: string;
-        const configNames: Map<string, vscode.Range[]> = new Map<string, []>();
-        let dupErrorMsg: string;
-        while (configStart !== -1) {
-            allConfigText = allConfigText.substr(configStart);
-            allConfigTextOffset += configStart;
-            configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
-            configNameEnd = allConfigText.indexOf('"', configNameStart);
-            configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
-            const newRange: vscode.Range = new vscode.Range(0, allConfigTextOffset + configNameStart, 0, allConfigTextOffset + configNameEnd);
-            const allRanges: vscode.Range[] | undefined = configNames.get(configName);
-            if (allRanges) {
-                allRanges.push(newRange);
-                configNames.set(configName, allRanges);
-            } else {
-                configNames.set(configName, [newRange]);
-            }
-            allConfigText = allConfigText.substr(configNameEnd + 1);
-            allConfigTextOffset += configNameEnd + 1;
-            configStart = allConfigText.search(new RegExp(nameRegex));
-        }
-        for (const [configName, allRanges] of configNames) {
-            if (allRanges && allRanges.length > 1) {
-                dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
-                allRanges.forEach(nameRange => {
-                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(nameRange.start.character),
-                            document.positionAt(nameRange.end.character)),
-                        dupErrorMsg, vscode.DiagnosticSeverity.Warning);
-                    diagnostics.push(diagnostic);
-                });
-            }
-        }
-
-        // Get current config text
-        configStart = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
-        if (configStart === -1) {
-            telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
-            return;
-        }
-        curTextStartOffset = configStart + 1;
-        curText = curText.substr(curTextStartOffset); // Remove earlier configs.
-        const nameEnd: number = curText.indexOf(":");
-        curTextStartOffset += nameEnd + 1;
-        curText = curText.substr(nameEnd + 1);
-        const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
-        if (nextNameStart !== -1) {
-            curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
-            const nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
-            if (nextNameStart2 === -1) {
-                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
+            let curTextStartOffset: number = 0;
+            if (!currentConfiguration.name) {
                 return;
             }
-            curText = curText.substr(0, nextNameStart2);
-        }
-        if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
-            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
-        }
-        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
-        const isWindows: boolean = os.platform() === 'win32';
 
-        // TODO: Add other squiggles.
+            // Get env text
+            let envText: string = "";
+            const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
+            const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
+            envText = curText.substr(envStart, envEnd);
+            const envTextStartOffSet: number = envStart + 1;
 
-        // Check if intelliSenseMode and compilerPath are compatible
-        if (isWindows) {
-            // cl.exe is only available on Windows
-            const intelliSenseModeStart: number = curText.search(/\s*\"intelliSenseMode\"\s*:\s*\"/);
-            if (intelliSenseModeStart !== -1) {
-                const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
-                const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
-
-                const intelliSenseModeError: string = this.validateIntelliSenseMode(currentConfiguration);
-                if (intelliSenseModeError.length > 0) {
-                    const message: string = intelliSenseModeError;
-                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
-                            document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
-                        message, vscode.DiagnosticSeverity.Warning);
-                    diagnostics.push(diagnostic);
-                    newSquiggleMetrics.CompilerModeMismatch++;
+            // Check if all config names are unique.
+            let allConfigText: string = curText;
+            let allConfigTextOffset: number = envTextStartOffSet;
+            const nameRegex: RegExp = new RegExp(`{\\s*"name"\\s*:\\s*".*"`);
+            let configStart: number = allConfigText.search(new RegExp(nameRegex));
+            let configNameStart: number;
+            let configNameEnd: number;
+            let configName: string;
+            const configNames: Map<string, vscode.Range[]> = new Map<string, []>();
+            let dupErrorMsg: string;
+            while (configStart !== -1) {
+                allConfigText = allConfigText.substr(configStart);
+                allConfigTextOffset += configStart;
+                configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
+                configNameEnd = allConfigText.indexOf('"', configNameStart);
+                configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
+                const newRange: vscode.Range = new vscode.Range(0, allConfigTextOffset + configNameStart, 0, allConfigTextOffset + configNameEnd);
+                const allRanges: vscode.Range[] | undefined = configNames.get(configName);
+                if (allRanges) {
+                    allRanges.push(newRange);
+                    configNames.set(configName, allRanges);
+                } else {
+                    configNames.set(configName, [newRange]);
+                }
+                allConfigText = allConfigText.substr(configNameEnd + 1);
+                allConfigTextOffset += configNameEnd + 1;
+                configStart = allConfigText.search(new RegExp(nameRegex));
+            }
+            for (const [configName, allRanges] of configNames) {
+                if (allRanges && allRanges.length > 1) {
+                    dupErrorMsg = localize('duplicate.name', "{0} is a duplicate. The configuration name should be unique.", configName);
+                    allRanges.forEach(nameRange => {
+                        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(nameRange.start.character),
+                                document.positionAt(nameRange.end.character)),
+                            dupErrorMsg, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    });
                 }
             }
-        }
 
-        // Check for path-related squiggles.
-        let paths: string[] = [];
-        for (const pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-            currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
-            if (pathArray) {
-                for (const curPath of pathArray) {
-                    paths.push(`${curPath}`);
+            // Get current config text
+            configStart = curText.search(new RegExp(`{\\s*"name"\\s*:\\s*"${escapeStringRegExp(currentConfiguration.name)}"`));
+            if (configStart === -1) {
+                telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "config name not first" });
+                return;
+            }
+            curTextStartOffset = configStart + 1;
+            curText = curText.substr(curTextStartOffset); // Remove earlier configs.
+            const nameEnd: number = curText.indexOf(":");
+            curTextStartOffset += nameEnd + 1;
+            curText = curText.substr(nameEnd + 1);
+            const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
+            if (nextNameStart !== -1) {
+                curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
+                const nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
+                if (nextNameStart2 === -1) {
+                    telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
+                    return;
+                }
+                curText = curText.substr(0, nextNameStart2);
+            }
+            if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
+                this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
+            }
+            const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+            const isWindows: boolean = os.platform() === 'win32';
+
+            // TODO: Add other squiggles.
+
+            // Check if intelliSenseMode and compilerPath are compatible
+            if (isWindows) {
+                // cl.exe is only available on Windows
+                const intelliSenseModeStart: number = curText.search(/\s*\"intelliSenseMode\"\s*:\s*\"/);
+                if (intelliSenseModeStart !== -1) {
+                    const intelliSenseModeValueStart: number = curText.indexOf('"', curText.indexOf(":", intelliSenseModeStart));
+                    const intelliSenseModeValueEnd: number = intelliSenseModeStart === -1 ? -1 : curText.indexOf('"', intelliSenseModeValueStart + 1) + 1;
+
+                    const intelliSenseModeError: string = this.validateIntelliSenseMode(currentConfiguration);
+                    if (intelliSenseModeError.length > 0) {
+                        const message: string = intelliSenseModeError;
+                        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(curTextStartOffset + intelliSenseModeValueStart),
+                                document.positionAt(curTextStartOffset + intelliSenseModeValueEnd)),
+                            message, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                        newSquiggleMetrics.CompilerModeMismatch++;
+                    }
                 }
             }
-        }
-        if (currentConfiguration.compileCommands) {
-            paths.push(`${currentConfiguration.compileCommands}`);
-        }
 
-        if (currentConfiguration.compilerPath) {
-            // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
-            paths.push(`${currentConfiguration.compilerPath}`);
-        }
-
-        // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
-
-        // Get the start/end for properties that are file-only.
-        const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
-        const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
-        const compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
-        const compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
-        const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
-        const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
-
-        const processedPaths: Set<string> = new Set<string>();
-
-        // Validate paths
-        for (const curPath of paths) {
-            if (processedPaths.has(curPath)) {
-                // Avoid duplicate squiggles for the same line.
-                // Squiggles for the same path on different lines are already handled below.
-                continue;
-            }
-            processedPaths.add(curPath);
-            const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
-            // Resolve special path cases.
-            if (curPath === "${default}") {
-                // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
-                continue;
-            }
-
-            let resolvedPath: string = this.resolvePath(curPath, isWindows);
-            if (!resolvedPath) {
-                continue;
-            }
-
-            let compilerPathNeedsQuotes: boolean = false;
-            if (isCompilerPath) {
-                resolvedPath = resolvedPath.trim();
-                const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
-                if (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") {
-                    continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
+            // Check for path-related squiggles.
+            let paths: string[] = [];
+            for (const pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
+                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
+                if (pathArray) {
+                    for (const curPath of pathArray) {
+                        paths.push(`${curPath}`);
+                    }
                 }
-                if (compilerPathAndArgs.compilerPath === undefined) {
+            }
+            if (currentConfiguration.compileCommands) {
+                paths.push(`${currentConfiguration.compileCommands}`);
+            }
+
+            if (currentConfiguration.compilerPath) {
+                // Unlike other cases, compilerPath may not start or end with " due to trimming of whitespace and the possibility of compiler args.
+                paths.push(`${currentConfiguration.compilerPath}`);
+            }
+
+            // Resolve and split any environment variables
+            paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
+
+            // Get the start/end for properties that are file-only.
+            const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
+            const forcedeIncludeEnd: number = forcedIncludeStart === -1 ? -1 : curText.indexOf("]", forcedIncludeStart);
+            const compileCommandsStart: number = curText.search(/\s*\"compileCommands\"\s*:\s*\"/);
+            const compileCommandsEnd: number = compileCommandsStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compileCommandsStart)) + 1);
+            const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
+            const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', curText.indexOf('"', curText.indexOf(":", compilerPathStart)) + 1) + 1;
+
+            const processedPaths: Set<string> = new Set<string>();
+
+            // Validate paths
+            for (const curPath of paths) {
+                if (processedPaths.has(curPath)) {
+                    // Avoid duplicate squiggles for the same line.
+                    // Squiggles for the same path on different lines are already handled below.
                     continue;
                 }
-                // Squiggle when the compiler's path has spaces without quotes but args are used.
-                compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
-                    && !resolvedPath.startsWith('"')
-                    && compilerPathAndArgs.compilerPath.includes(" ");
-                resolvedPath = compilerPathAndArgs.compilerPath;
-
-                if (!compilerPathNeedsQuotes && which.sync(resolvedPath, {nothrow: true})) {
-                    continue; // Don't squiggle if compiler path is resolving with environment path.
+                processedPaths.add(curPath);
+                const isCompilerPath: boolean = curPath === currentConfiguration.compilerPath;
+                // Resolve special path cases.
+                if (curPath === "${default}") {
+                    // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
+                    continue;
                 }
-            }
 
-            const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
-            let pathExists: boolean = true;
-            const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
-            if (!fs.existsSync(resolvedPath)) {
-                if (existsWithExeAdded(resolvedPath)) {
-                    resolvedPath += ".exe";
-                } else if (!this.rootUri) {
-                    pathExists = false;
-                } else {
-                    // Check again for a relative path.
-                    const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
-                    if (!fs.existsSync(relativePath)) {
-                        if (existsWithExeAdded(resolvedPath)) {
-                            resolvedPath += ".exe";
-                        } else {
-                            pathExists = false;
-                        }
-                    } else {
-                        resolvedPath = relativePath;
+                let resolvedPath: string = this.resolvePath(curPath, isWindows);
+                if (!resolvedPath) {
+                    continue;
+                }
+
+                let compilerPathNeedsQuotes: boolean = false;
+                if (isCompilerPath) {
+                    resolvedPath = resolvedPath.trim();
+                    const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedPath);
+                    if (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe") {
+                        continue; // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
+                    }
+                    if (compilerPathAndArgs.compilerPath === undefined) {
+                        continue;
+                    }
+                    // Squiggle when the compiler's path has spaces without quotes but args are used.
+                    compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
+                        && !resolvedPath.startsWith('"')
+                        && compilerPathAndArgs.compilerPath.includes(" ");
+                    resolvedPath = compilerPathAndArgs.compilerPath;
+
+                    if (!compilerPathNeedsQuotes && which.sync(resolvedPath, {nothrow: true})) {
+                        continue; // Don't squiggle if compiler path is resolving with environment path.
                     }
                 }
-            }
 
-            // Normalize path separators.
-            if (path.sep === "/") {
-                resolvedPath = resolvedPath.replace(/\\/g, path.sep);
-            } else {
-                resolvedPath = resolvedPath.replace(/\//g, path.sep);
-            }
-
-            // Iterate through the text and apply squiggles.
-
-            // Escape the path string for literal use in a regular expression
-            // Need to escape any quotes to match the original text
-            let escapedPath: string = curPath.replace(/\"/g, '\\\"');
-            escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-            // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
-            // and extend that pattern to the next quote before and next quote after it.
-            const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
-            const configMatches: string[] | null = curText.match(pattern);
-            if (configMatches) {
-                let curOffset: number = 0;
-                let endOffset: number = 0;
-                for (const curMatch of configMatches) {
-                    curOffset = curText.substr(endOffset).search(pattern) + endOffset;
-                    endOffset = curOffset + curMatch.length;
-                    let message: string;
-                    if (!pathExists) {
-                        message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
-                        newSquiggleMetrics.PathNonExistent++;
+                const isWSL: boolean = isWindows && resolvedPath.startsWith("/");
+                let pathExists: boolean = true;
+                const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
+                if (!fs.existsSync(resolvedPath)) {
+                    if (existsWithExeAdded(resolvedPath)) {
+                        resolvedPath += ".exe";
+                    } else if (!this.rootUri) {
+                        pathExists = false;
                     } else {
-                        // Check for file versus path mismatches.
-                        if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
-                            (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
-                            if (compilerPathNeedsQuotes) {
-                                message = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
-                                newSquiggleMetrics.CompilerPathMissingQuotes++;
+                        // Check again for a relative path.
+                        const relativePath: string = this.rootUri.fsPath + path.sep + resolvedPath;
+                        if (!fs.existsSync(relativePath)) {
+                            if (existsWithExeAdded(resolvedPath)) {
+                                resolvedPath += ".exe";
                             } else {
-                                if (util.checkFileExistsSync(resolvedPath)) {
-                                    continue;
-                                }
-                                message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
-                                newSquiggleMetrics.PathNotAFile++;
+                                pathExists = false;
                             }
                         } else {
-                            if (util.checkDirectoryExistsSync(resolvedPath)) {
-                                continue;
-                            }
-                            message =  localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
-                            newSquiggleMetrics.PathNotADirectory++;
+                            resolvedPath = relativePath;
                         }
                     }
-                    const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                        new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
-                            document.positionAt(curTextStartOffset + endOffset)),
-                        message, vscode.DiagnosticSeverity.Warning);
-                    diagnostics.push(diagnostic);
                 }
-            } else if (envText) {
-                const envMatches: string[] | null = envText.match(pattern);
-                if (envMatches) {
+
+                // Normalize path separators.
+                if (path.sep === "/") {
+                    resolvedPath = resolvedPath.replace(/\\/g, path.sep);
+                } else {
+                    resolvedPath = resolvedPath.replace(/\//g, path.sep);
+                }
+
+                // Iterate through the text and apply squiggles.
+
+                // Escape the path string for literal use in a regular expression
+                // Need to escape any quotes to match the original text
+                let escapedPath: string = curPath.replace(/\"/g, '\\\"');
+                escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+                // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
+                // and extend that pattern to the next quote before and next quote after it.
+                const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
+                const configMatches: string[] | null = curText.match(pattern);
+                if (configMatches) {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
-                    for (const curMatch of envMatches) {
-                        curOffset = envText.substr(endOffset).search(pattern) + endOffset;
+                    for (const curMatch of configMatches) {
+                        curOffset = curText.substr(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
                             message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
-                            const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
-                                new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
-                                    document.positionAt(envTextStartOffSet + endOffset)),
-                                message, vscode.DiagnosticSeverity.Warning);
-                            diagnostics.push(diagnostic);
+                        } else {
+                            // Check for file versus path mismatches.
+                            if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
+                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd) ||
+                                (curOffset >= compilerPathStart && curOffset <= compilerPathEnd)) {
+                                if (compilerPathNeedsQuotes) {
+                                    message = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
+                                    newSquiggleMetrics.CompilerPathMissingQuotes++;
+                                } else {
+                                    if (util.checkFileExistsSync(resolvedPath)) {
+                                        continue;
+                                    }
+                                    message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
+                                    newSquiggleMetrics.PathNotAFile++;
+                                }
+                            } else {
+                                if (util.checkDirectoryExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+                                message =  localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
+                                newSquiggleMetrics.PathNotADirectory++;
+                            }
+                        }
+                        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                            new vscode.Range(document.positionAt(curTextStartOffset + curOffset),
+                                document.positionAt(curTextStartOffset + endOffset)),
+                            message, vscode.DiagnosticSeverity.Warning);
+                        diagnostics.push(diagnostic);
+                    }
+                } else if (envText) {
+                    const envMatches: string[] | null = envText.match(pattern);
+                    if (envMatches) {
+                        let curOffset: number = 0;
+                        let endOffset: number = 0;
+                        for (const curMatch of envMatches) {
+                            curOffset = envText.substr(endOffset).search(pattern) + endOffset;
+                            endOffset = curOffset + curMatch.length;
+                            let message: string;
+                            if (!pathExists) {
+                                message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                                newSquiggleMetrics.PathNonExistent++;
+                                const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                                    new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
+                                        document.positionAt(envTextStartOffSet + endOffset)),
+                                    message, vscode.DiagnosticSeverity.Warning);
+                                diagnostics.push(diagnostic);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (diagnostics.length !== 0) {
-            this.diagnosticCollection.set(document.uri, diagnostics);
-        } else {
-            this.diagnosticCollection.clear();
-        }
+            if (diagnostics.length !== 0) {
+                this.diagnosticCollection.set(document.uri, diagnostics);
+            } else {
+                this.diagnosticCollection.clear();
+            }
 
-        // Send telemetry on squiggle changes.
-        const changedSquiggleMetrics: { [key: string]: number } = {};
-        if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNonExistent) {
-            changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
-        }
-        if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotAFile) {
-            changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
-        }
-        if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotADirectory) {
-            changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
-        }
-        if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerPathMissingQuotes) {
-            changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
-        }
-        if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerModeMismatch) {
-            changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
-        }
-        if (Object.keys(changedSquiggleMetrics).length > 0) {
-            telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
-        }
-        this.prevSquiggleMetrics.set(currentConfiguration.name, newSquiggleMetrics);
-
+            // Send telemetry on squiggle changes.
+            const changedSquiggleMetrics: { [key: string]: number } = {};
+            if (newSquiggleMetrics.PathNonExistent !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNonExistent) {
+                changedSquiggleMetrics.PathNonExistent = newSquiggleMetrics.PathNonExistent;
+            }
+            if (newSquiggleMetrics.PathNotAFile !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotAFile) {
+                changedSquiggleMetrics.PathNotAFile = newSquiggleMetrics.PathNotAFile;
+            }
+            if (newSquiggleMetrics.PathNotADirectory !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.PathNotADirectory) {
+                changedSquiggleMetrics.PathNotADirectory = newSquiggleMetrics.PathNotADirectory;
+            }
+            if (newSquiggleMetrics.CompilerPathMissingQuotes !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerPathMissingQuotes) {
+                changedSquiggleMetrics.CompilerPathMissingQuotes = newSquiggleMetrics.CompilerPathMissingQuotes;
+            }
+            if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerModeMismatch) {
+                changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
+            }
+            if (Object.keys(changedSquiggleMetrics).length > 0) {
+                telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
+            }
+            this.prevSquiggleMetrics.set(currentConfiguration.name, newSquiggleMetrics);
+        });
     }
 
     private updateToVersion2(): void {

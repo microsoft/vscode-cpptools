@@ -282,7 +282,7 @@ function sendActivationTelemetry(): void {
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
 
-async function realActivation(): Promise<void> {
+function realActivation(): void {
     if (new CppSettings().intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
@@ -330,29 +330,29 @@ async function realActivation(): Promise<void> {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    // Skip Insiders processing for 32-bit Linux.
-    if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
-        // Skip Insiders processing for unsupported VS Code versions.
-        const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-        const abTestSettings: ABTestSettings = getABTestSettings();
-        const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
-        if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
-            insiderUpdateEnabled = true;
-            if (settings.updateChannel === 'Default') {
-                const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                if (userVersion.suffix === "insiders") {
+    PlatformInformation.GetPlatformInformation().then(info => {
+        // Skip Insiders processing for 32-bit Linux.
+        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
+            // Skip Insiders processing for unsupported VS Code versions.
+            const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
+            const abTestSettings: ABTestSettings = getABTestSettings();
+            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
+            if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
+                insiderUpdateEnabled = true;
+                if (settings.updateChannel === 'Default') {
+                    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                    if (userVersion.suffix === "insiders") {
+                        checkAndApplyUpdate(settings.updateChannel, false);
+                    } else {
+                        suggestInsidersChannel();
+                    }
+                } else if (settings.updateChannel === 'Insiders') {
+                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
                     checkAndApplyUpdate(settings.updateChannel, false);
-                } else {
-                    suggestInsidersChannel();
                 }
-            } else if (settings.updateChannel === 'Insiders') {
-                insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
-                checkAndApplyUpdate(settings.updateChannel, false);
             }
         }
-    }
-
+    });
     clients.ActiveClient.notifyWhenReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
@@ -428,7 +428,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
-export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<void> {
+export function processDelayedDidOpen(document: vscode.TextDocument): void {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
@@ -453,8 +453,9 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, "cpp");
                         client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
-                        const newDoc: vscode.TextDocument = await vscode.languages.setTextDocumentLanguage(document, "cpp");
-                        finishDidOpen(newDoc);
+                        vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                            finishDidOpen(newDoc);
+                        });
                         languageChanged = true;
                     }
                 }
@@ -848,82 +849,63 @@ function onSelectConfiguration(): void {
     }
 }
 
-async function onSelectConfigurationProvider(): Promise<void> {
+function onSelectConfigurationProvider(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
     } else {
-        try {
-            const client: Client = await selectClient();
-            client.handleConfigurationProviderSelectCommand();
-        } catch (err) {}
+        selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
     }
 }
 
-async function onEditConfigurationJSON(): Promise<void> {
+function onEditConfigurationJSON(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        try {
-            const client: Client = await selectClient();
-            client.handleConfigurationEditJSONCommand();
-        } catch (err) {}
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
     }
 }
 
-async function onEditConfigurationUI(): Promise<void> {
+function onEditConfigurationUI(): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        try {
-            const client: Client = await selectClient();
-            client.handleConfigurationEditUICommand();
-        } catch (err) {}
+        selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
     }
 }
 
-async function onEditConfiguration(): Promise<void> {
+function onEditConfiguration(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        try {
-            const client: Client = await selectClient();
-            client.handleConfigurationEditCommand();
-        } catch (err) {}
+        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
     }
 }
 
-async function onGenerateEditorConfig(): Promise<void> {
+function onGenerateEditorConfig(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
         generateEditorConfig();
     } else {
-        try {
-            const client: Client = await selectClient();
-            generateEditorConfig(client.RootUri);
-        } catch (err) {}
+        selectClient().then(client => generateEditorConfig(client.RootUri));
     }
 }
 
-async function onGoToNextDirectiveInGroup(): Promise<void> {
+function onGoToNextDirectiveInGroup(): void {
     onActivationEvent();
-    try {
-        const client: Client = await getActiveClient();
-        client.handleGoToDirectiveInGroup(true);
-    } catch (err) {}
+    const client: Client = getActiveClient();
+    client.handleGoToDirectiveInGroup(true);
 }
 
-async function onGoToPrevDirectiveInGroup(): Promise<void> {
+function onGoToPrevDirectiveInGroup(): void {
     onActivationEvent();
-    try {
-        const client: Client = await getActiveClient();
-        client.handleGoToDirectiveInGroup(false);
-    } catch (err) {}
+    const client: Client = getActiveClient();
+    client.handleGoToDirectiveInGroup(false);
 }
 
 function onAddToIncludePath(path: string): void {

@@ -553,7 +553,7 @@ function mapWrapToEditorConfig(value: string | undefined): string {
     return "never";
 }
 
-async function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): Promise<void> {
+function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): void {
     // Set up a map of setting names and values. Parse through the document line-by-line, looking for
     // existing occurrences to replace. Replaced occurrences are removed from the map. If any remain when
     // done, they are added as a new section at the end of the file. The file is opened with unsaved
@@ -688,8 +688,10 @@ async function populateEditorConfig(rootUri: vscode.Uri | undefined, document: v
         const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
         edits.insert(document.uri, lastPosition, remainingSettingsText);
     }
-    await vscode.workspace.applyEdit(edits);
-    vscode.window.showTextDocument(document);
+    (async () => { 
+        await vscode.workspace.applyEdit(edits);
+        vscode.window.showTextDocument(document);
+    })();
 }
 
 export async function generateEditorConfig(rootUri?: vscode.Uri): Promise<void> {
@@ -702,13 +704,6 @@ export async function generateEditorConfig(rootUri?: vscode.Uri): Promise<void> 
 
         try {
             await vscode.workspace.applyEdit(edits);
-            try {
-                document = await vscode.workspace.openTextDocument(uri);
-                populateEditorConfig(rootUri, document);
-            } finally {
-                document = await vscode.workspace.openTextDocument(uri);
-                populateEditorConfig(rootUri, document);
-            }
         } finally {
             document = await vscode.workspace.openTextDocument(uri);
             populateEditorConfig(rootUri, document);

@@ -804,12 +804,14 @@ export function promptForReloadWindowDueToSettingsChange(): void {
     promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
-export async function promptReloadWindow(message: string): Promise<void> {
+export function promptReloadWindow(message: string): void {
     const reload: string = localize("reload.string", "Reload");
-    const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
-    if (value === reload) {
-        vscode.commands.executeCommand("workbench.action.reloadWindow");
-    }
+    (async () => { 
+        const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+        if (value === reload) {
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
+    })();
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
