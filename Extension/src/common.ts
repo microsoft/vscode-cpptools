@@ -729,32 +729,29 @@ export function isExecutable(file: string): Promise<boolean> {
     });
 }
 
-export function allowExecution(file: string): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
+export async function allowExecution(file: string): Promise<void> {
         if (process.platform !== 'win32') {
             const exists: boolean = await checkFileExists(file);
             if (exists) {
                 const isExec: boolean = await isExecutable(file);
                 if (isExec) {
-                    resolve();
+                    return;
                 } else {
                     fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
                         if (err) {
-                            reject(err);
-                            return;
+                            throw new Error(err.message);
                         }
-                        resolve();
+                        return;
                     });
                 }
             } else {
                 getOutputChannelLogger().appendLine("");
                 getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
-                resolve();
+                return;
             }
         } else {
-            resolve();
+            return;
         }
-    });
 }
 
 export function removePotentialPII(str: string): string {
