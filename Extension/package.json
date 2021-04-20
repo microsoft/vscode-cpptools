@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.2.2-main",
+  "version": "1.3.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2492,7 +2492,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156408",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2161011",
       "platforms": [
         "linux"
       ],
@@ -2503,11 +2503,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "81740FC42FDFBEC9AF72EE69B6FC985841E8879DE7197D1859B339BE0418E2C2"
+      "integrity": "7C43AA78021C5DB8F6DE9751EC8435D2BE1137CAC861801CDFADAA4B48A42AC3"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156409",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160914",
       "platforms": [
         "linux"
       ],
@@ -2518,11 +2518,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "E12B49A74D9E6D7D43BE7ED88E470B8871E1750392D48B0FCFEED4C7E5C523FB"
+      "integrity": "ED83E6E0F5784323CDF42BA1EF57CDFFBF2A81D468B08C8ECF126A2D042343F2"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156407",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160915",
       "platforms": [
         "linux"
       ],
@@ -2533,23 +2533,41 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "F84424B48790EAE110F0B4ED35D8DEE2347754C79C9A1879BCE5A93038A249A3"
+      "integrity": "52DD114FF466FA3542D7F98F12716E4296712986CA4908B18DCC039209B8D2CC"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156301",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2161012",
       "platforms": [
         "darwin"
+      ],
+      "architectures": [
+        "x64"
       ],
       "binaries": [
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "448A17E1D7C639C99F0AE47A88705956BA03F8CFA401C0C00CD074945275B513"
+      "integrity": "53654F3D21C5D470D3C05EA48CFB7AB3CB197344049DC55AEB07374AFECD1587"
+    },
+    {
+      "description": "C/C++ language components (OS X ARM64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160918",
+      "platforms": [
+        "darwin"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./bin/cpptools",
+        "./bin/cpptools-srv"
+      ],
+      "integrity": "E00370987D321E5AB58894B95F1545B52F59ED8E548BE1CBC8393F8B63562BDE"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156410",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160913",
       "platforms": [
         "win32"
       ],
@@ -2561,11 +2579,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "39B7EA69F9CDC1B2B98DBFD189617640029E6C9CBDFE9BF6789B4E013D6550F4"
+      "integrity": "970504DB40E0B54E48075C1FBCE0F34AB674DE3F1CCAD51FFA04689513CC8013"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2156502",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2160916",
       "platforms": [
         "win32"
       ],
@@ -2576,7 +2594,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "30B836279F948CDFD751546E679F459FE2CFD7BD578952AF1A1D8943D5C4A0F6"
+      "integrity": "E85CF0C80B64F940F73E158966749C0A95D122907170CACECDCBB118986D0E57"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2626,10 +2644,27 @@
       "platforms": [
         "darwin"
       ],
+      "architectures": [
+        "x64"
+      ],
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
       "integrity": "7AA436BA25E3404DC658A137188BEC65FF2532D1FEB314ABBBC5EBC9AAF5CCF7"
+    },
+    {
+      "description": "ClangFormat (OS X arm64)",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2160917",
+      "platforms": [
+        "darwin"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./LLVM/bin/clang-format.darwin"
+      ],
+      "integrity": "BF5357714856AC08A69FAD4231C9EFBE47E97497D8E227E1506FCAA1C89D11E0"
     },
     {
       "description": "ClangFormat (Windows x86)",

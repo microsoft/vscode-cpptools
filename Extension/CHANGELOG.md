@@ -1,70 +1,55 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.3.0-insiders5: April 8, 2021
+## Version 1.3.1: April 19, 2021
 ### Bug Fixes
-* Display integer values for char and unsigned char on hover instead of character symbols. [#1552](https://github.com/microsoft/vscode-cpptools/issues/1552)
-* Fix a crash (and other bugs) caused by resolving symlinks when processing recursive includes. [#7306](https://github.com/microsoft/vscode-cpptools/issues/7306)
-* Fix bug preventing successful validation and receipt of browse configurations from custom configuration providers. [PR# 7131](https://github.com/microsoft/vscode-cpptools/pull/7313)
-* Fix a potential crash on shutdown and when editing at the end of a document.
+* Fix extension not activating when `/.vscode/c_cpp_properties.json` exists but no C/C++ file is open. [#7344](https://github.com/microsoft/vscode-cpptools/issues/7344)
+* Fix logging for an invalid provider configuration.
+  * Yonggang Luo (@lygstate) [PR #7350](https://github.com/microsoft/vscode-cpptools/pull/7350)
+* Fix extension activation with 32-bit Windows. [#7368](https://github.com/microsoft/vscode-cpptools/issues/7368)
 
-## Version 1.3.0-insiders4: April 6, 2021
+## Version 1.3.0: April 13, 2021
 ### New Features
+* Add language service support for CUDA.
+* Add highlighting of matching conditional preprocessor statements. [#2565](https://github.com/microsoft/vscode-cpptools/issues/2565)
+* Add commands for navigating to matching preprocessor directives in conditional groups. [#4779](https://github.com/microsoft/vscode-cpptools/issues/4779)
 * Add native language service binaries for ARM64 Mac. [#6595](https://github.com/microsoft/vscode-cpptools/issues/6595)
 
 ### Enhancements
+* Add parentheses to function calls when `C_Cpp.autocompleteAddParentheses` is `true`. [#882](https://github.com/microsoft/vscode-cpptools/issues/882)
+* Add @retval support to the simplified view of doc comments. [#6816](https://github.com/microsoft/vscode-cpptools/issues/6816)
 * Add auto-closing of include completion brackets. [#7054](https://github.com/microsoft/vscode-cpptools/issues/7054)
+* Add support for nodeAddonIncludes with Yarn PnP.
+  * Mestery (@Mesterry) [PR #7123](https://github.com/microsoft/vscode-cpptools/pull/7123)
 * Add a `C_Cpp.files.exclude` setting, which is identical to `files.exclude` except items aren't excluded from the Explorer view. [PR #7285](https://github.com/microsoft/vscode-cpptools/pull/7285)
 
 ### Bug Fixes
+* Display integer values for char and unsigned char on hover instead of character symbols. [#1552](https://github.com/microsoft/vscode-cpptools/issues/1552)
 * Fix directory iteration to check files.exclude and symlinks and use less memory. [#3123](https://github.com/microsoft/vscode-cpptools/issues/3123), [#4206](https://github.com/microsoft/vscode-cpptools/issues/4206), [#6864](https://github.com/microsoft/vscode-cpptools/issues/6864)
-* Fix bug with placement new on Windows with gcc mode. [#6246](https://github.com/microsoft/vscode-cpptools/issues/6246)
-* Fix `GoToNextDirectiveInGroup` command for multiroot. [#7283](https://github.com/microsoft/vscode-cpptools/issues/7283)
-* Fix field requirements for custom configurations. [PR #7295](https://github.com/microsoft/vscode-cpptools/pull/7295)
-* Fix integrity hash checking of downloaded packages for the extension. [PR #7300](https://github.com/microsoft/vscode-cpptools/pull/7300)
-
-## Version 1.3.0-insiders3: April 1, 2021
-### New Features
-* Add commands for navigating to matching preprocessor directives in conditional groups. [#7256](https://github.com/microsoft/vscode-cpptools/pull/7256)
-
-### Bug Fixes
-* Fix detection of bitness for compilers targeting esp32. [#7034](https://github.com/microsoft/vscode-cpptools/issues/7034)
-* Fix comment continuations. [PR #7238](https://github.com/microsoft/vscode-cpptools/pull/7238)
-* Fix bug when `${workspaceFolder}` is used in `compileCommands`. [#7241](https://github.com/microsoft/vscode-cpptools/issues/7241)
-  * Aleksa Pavlovic (@aleksa2808) [PR #7242](https://github.com/microsoft/vscode-cpptools/pull/7242)
-
-## Version 1.3.0-insiders2: March 25, 2021
-### New Features
-* Add highlighting of matching conditional preprocessor statements. [#2565](https://github.com/microsoft/vscode-cpptools/issues/2565)
-
-### Bug Fixes
-* Fix a spurious asterisk being inserted on a new line if the previous line starts with an asterisk. [#5733](https://github.com/microsoft/vscode-cpptools/issues/5733)
-* Fix random crashes of cpptools-srv during shutdown. [#7161](https://github.com/microsoft/vscode-cpptools/issues/7161)
-* Change `C_Cpp.autocompleteAddParentheses` to be false by default. [#7199](https://github.com/microsoft/vscode-cpptools/issues/7199)
-* Fix auto add parentheses incorrectly occurring with template methods. [#7203](https://github.com/microsoft/vscode-cpptools/issues/7203)
-* Fix auto adding parentheses incorrectly occurring with type names. [#7209](https://github.com/microsoft/vscode-cpptools/issues/7209)
-* Fix a bug with relative "." paths in compile commands. [#7221](https://github.com/microsoft/vscode-cpptools/issues/7221)
-* Fix configuration issues with Unreal Engine projects. [#7222](https://github.com/microsoft/vscode-cpptools/issues/7222)
-
-## Version 1.3.0-insiders: March 18, 2021
-### Enhancements
-* Add parentheses to function calls with autocomplete. [#882](https://github.com/microsoft/vscode-cpptools/issues/882)
-* Add support for nodeAddonIncludes with Yarn PnP.
-  * Mestery (@Mesterry) [PR #7123](https://github.com/microsoft/vscode-cpptools/pull/7123)
-
-### Bug Fixes
 * Fix an issue with stale IntelliSense due to moving or renaming header files. [#3849](https://github.com/microsoft/vscode-cpptools/issues/3849)
 * Fix go to definition on large macros. [#4306](https://github.com/microsoft/vscode-cpptools/issues/4306)
+* Fix a spurious asterisk being inserted on a new line if the previous line starts with an asterisk. [#5733](https://github.com/microsoft/vscode-cpptools/issues/5733)
+* Fix bug with placement new on Windows with gcc mode. [#6246](https://github.com/microsoft/vscode-cpptools/issues/6246)
 * Fix size_t and placement new squiggles with clang on Windows. [#6573](https://github.com/microsoft/vscode-cpptools/issues/6573), [#7106](https://github.com/microsoft/vscode-cpptools/issues/7016)
 * Fix an incorrect IntelliSense error squiggle when assigning to std::variant in clang mode. [#6623](https://github.com/microsoft/vscode-cpptools/issues/6623)
 * Fix incorrect squiggle with range-v3 library. [#6639](https://github.com/microsoft/vscode-cpptools/issues/6639)
 * Fix incorrect squiggle with auto parameters. [#6714](https://github.com/microsoft/vscode-cpptools/issues/6714)
-* Add @retval support to the simplified view of doc comments. [#6816](https://github.com/microsoft/vscode-cpptools/issues/6816)
 * Fix (reimplement) nested document symbols. [#6830](https://github.com/microsoft/vscode-cpptools/issues/6830), [#7023](https://github.com/microsoft/vscode-cpptools/issues/7023), [#7024](https://github.com/microsoft/vscode-cpptools/issues/7024)
+* Fix detection of bitness for compilers targeting esp32. [#7034](https://github.com/microsoft/vscode-cpptools/issues/7034)
 * Fix include completion not working after creating a new header with a non-standard extension until a reload is done. [#6987](https://github.com/microsoft/vscode-cpptools/issues/6987), [#7061](https://github.com/microsoft/vscode-cpptools/issues/7061)
 * Fix endless CPU/memory usage in cpptools-srv when certain templated type aliases are used. [#7085](https://github.com/microsoft/vscode-cpptools/issues/7085)
 * Fix "No symbols found" sometimes occurring when a document first opens. [#7103](https://github.com/microsoft/vscode-cpptools/issues/7103)
 * Fix vcFormat formatting after typing brackets and a newline. [#7125](https://github.com/microsoft/vscode-cpptools/issues/7125)
 * Fix a performance bug after formatting a document. [#7159](https://github.com/microsoft/vscode-cpptools/issues/7159)
+* Fix random crashes of cpptools-srv during shutdown. [#7161](https://github.com/microsoft/vscode-cpptools/issues/7161)
+* Fix a bug with relative "." paths in compile commands. [#7221](https://github.com/microsoft/vscode-cpptools/issues/7221)
+* Fix configuration issues with Unreal Engine projects. [#7222](https://github.com/microsoft/vscode-cpptools/issues/7222)
+* Fix bug when `${workspaceFolder}` is used in `compileCommands`. [#7241](https://github.com/microsoft/vscode-cpptools/issues/7241)
+  * Aleksa Pavlovic (@aleksa2808) [PR #7242](https://github.com/microsoft/vscode-cpptools/pull/7242)
+* Fix field requirements for custom configurations. [PR #7295](https://github.com/microsoft/vscode-cpptools/pull/7295)
+* Fix integrity hash checking of downloaded packages for the extension. [PR #7300](https://github.com/microsoft/vscode-cpptools/pull/7300)
+* Fix a bug preventing successful validation and receipt of browse configurations from custom configuration providers. [PR# 7131](https://github.com/microsoft/vscode-cpptools/pull/7313)
+* Fix a potential crash when editing at the end of a document.
+* Fix "Configure Task" selection to show root folder names for multiroot workspace [PR #7315](https://github.com/microsoft/vscode-cpptools/pull/7315)
 
 ## Version 1.2.2: February 25, 2021
 ### Bug Fixes
