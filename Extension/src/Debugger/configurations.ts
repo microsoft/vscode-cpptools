@@ -42,7 +42,7 @@ function createLaunchString(name: string, type: string, executable: string): str
 "program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/\"/g, "\\\"")}",
 "args": [],
 "stopAtEntry": false,
-"cwd": "$\{workspaceFolder\}",
+"cwd": "$\{fileDirname\}",
 "environment": [],
 ${ type === "cppdbg" ? `"externalConsole": false` : `"console": "externalTerminal"` }
 `;
