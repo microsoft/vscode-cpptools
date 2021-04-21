@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.3.1: April 19, 2021
+### Bug Fixes
+* Fix extension not activating when `/.vscode/c_cpp_properties.json` exists but no C/C++ file is open. [#7344](https://github.com/microsoft/vscode-cpptools/issues/7344)
+* Fix logging for an invalid provider configuration.
+  * Yonggang Luo (@lygstate) [PR #7350](https://github.com/microsoft/vscode-cpptools/pull/7350)
+* Fix extension activation with 32-bit Windows. [#7368](https://github.com/microsoft/vscode-cpptools/issues/7368)
+
 ## Version 1.3.0: April 13, 2021
 ### New Features
 * Add language service support for CUDA.
