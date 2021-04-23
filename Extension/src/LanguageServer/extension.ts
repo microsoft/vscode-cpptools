@@ -60,49 +60,50 @@ let vcpkgDbPromise: Promise<vcpkgDatabase>;
 function initVcpkgDatabase(): Promise<vcpkgDatabase> {
     return new Promise((resolve, reject) => {
         yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err? : Error, zipfile?: yauzl.ZipFile) => {
+            // Resolves with an empty database instead of rejecting on failure.
+            const database: vcpkgDatabase = {};
             if (err || !zipfile) {
-                resolve({});
+                resolve(database);
                 return;
             }
-            zipfile.readEntry();
-            let dbFound: boolean = false;
+            // Waits until the input file is closed before resolving.
+            zipfile.on('close', () => {
+                resolve(database);
+            });
             zipfile.on('entry', entry => {
-                if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
-                    return;
-                }
-                dbFound = true;
-                zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
-                    if (err || !stream) {
-                        resolve({});
-                        return;
-                    }
-                    const database: vcpkgDatabase = {};
-                    const reader: rd.ReadLine = rd.createInterface(stream);
-                    reader.on('line', (lineText: string) => {
-                        const portFilePair: string[] = lineText.split(':');
-                        if (portFilePair.length !== 2) {
+                if (entry.fileName === 'VCPkgHeadersDatabase.txt') {
+                    zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
+                        if (err || !stream) {
+                            zipfile.close();
                             return;
                         }
+                        const reader: rd.ReadLine = rd.createInterface(stream);
+                        reader.on('line', (lineText: string) => {
+                            const portFilePair: string[] = lineText.split(':');
+                            if (portFilePair.length !== 2) {
+                                return;
+                            }
 
-                        const portName: string = portFilePair[0];
-                        const relativeHeader: string = portFilePair[1];
+                            const portName: string = portFilePair[0];
+                            const relativeHeader: string = portFilePair[1];
 
-                        if (!database[relativeHeader]) {
-                            database[relativeHeader] = [];
-                        }
+                            if (!database[relativeHeader]) {
+                                database[relativeHeader] = [];
+                            }
 
-                        database[relativeHeader].push(portName);
+                            database[relativeHeader].push(portName);
+                        });
+                        reader.on('close', () => {
+                            // We found the one file we wanted.
+                            // It's OK to close instead of progressing through more files in the zip.
+                            zipfile.close();
+                        });
                     });
-                    reader.on('close', () => {
-                        resolve(database);
-                    });
-                });
-            });
-            zipfile.on('end', () => {
-                if (!dbFound) {
-                    resolve({});
+                } else {
+                    zipfile.readEntry();
                 }
             });
+            zipfile.readEntry();
         });
     });
 }
