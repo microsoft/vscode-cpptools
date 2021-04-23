@@ -26,8 +26,8 @@
       "replace": "--using_directory\n$1"
     },
     {
-      "match": "^/dE--header_only_fallback",
-      "replace": "--header_only_fallback"
+      "match": "^/dE--(.*)",
+      "replace": "--$1"
     }
   ]
 }
