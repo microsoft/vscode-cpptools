@@ -442,6 +442,8 @@ export class PackageManager {
                                         writeStream.on('close', async () => {
                                             // Remove .tmp extension from the file, if there was no error.
                                             // Otherwise, delete it.
+                                            // Don't move on to the next entry, if we've already called reject(), in
+                                            // which case zipfile.close() will already have been called.
                                             if (!pendingError) {
                                                 try {
                                                     await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
@@ -450,18 +452,15 @@ export class PackageManager {
                                                     zipfile.close();
                                                     return;
                                                 }
+                                                // Wait until output is done writing before reading the next zip entry.
+                                                // Otherwise, it's possible to try to launch the .exe before it is done being created.
+                                                zipfile.readEntry();
                                             } else {
                                                 try {
                                                     await util.unlinkAsync(absoluteEntryTempFile);
                                                 } catch (err) {
                                                     // Ignore failure to delete temp file.  We already have an error to return.
                                                 }
-                                            }
-                                            // Don't move on to the next entry, if we've already called reject().
-                                            if (!pendingError) {
-                                                // Wait until output is done writing before reading the next zip entry.
-                                                // Otherwise, it's possible to try to launch the .exe before it is done being created.
-                                                zipfile.readEntry();
                                             }
                                         });
 
