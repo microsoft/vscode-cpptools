@@ -497,7 +497,7 @@ async function installVsix(vsixLocation: string): Promise<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const vsCodeScriptPath = (platformInfo: any): string => {
+    const getVsCodeScriptPath = (platformInfo: any): string => {
         if (platformInfo.platform === 'win32') {
             const vsCodeBinName: string = path.basename(process.execPath);
             let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
@@ -518,9 +518,9 @@ async function installVsix(vsixLocation: string): Promise<void> {
             return which.sync(vsCodeBinName);
         }
     };
-
+    let vsCodeScriptPath: string;
     try {
-        vsCodeScriptPath(platformInfo);
+        vsCodeScriptPath = getVsCodeScriptPath(platformInfo);
     } catch (err) {
         throw new Error('Failed to find VS Code script');
     }
@@ -530,7 +530,7 @@ async function installVsix(vsixLocation: string): Promise<void> {
     if (userVersion.isVsCodeVersionGreaterThan(oldVersion)) {
         let process: ChildProcess;
         try {
-            process = spawn(vsCodeScriptPath(platformInfo), ['--install-extension', vsixLocation, '--force']);
+            process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
             // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
             const timer: NodeJS.Timer = global.setTimeout(() => {
                 process.kill();
@@ -554,7 +554,7 @@ async function installVsix(vsixLocation: string): Promise<void> {
     } else {
         let process: ChildProcess;
         try {
-            process = spawn(vsCodeScriptPath(platformInfo), ['--install-extension', vsixLocation]);
+            process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
             if (process.pid === undefined) {
                 throw new Error();
             }

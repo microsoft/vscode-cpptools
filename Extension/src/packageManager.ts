@@ -107,22 +107,19 @@ export class PackageManager {
     public async DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         const packages: IPackage[] = await this.GetPackages();
         let count: number = 1;
-        return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-            const p: Promise<void> = this.DownloadPackage(pkg);
+        return this.BuildPromiseChain(packages, async (pkg): Promise<void> => {
             progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
             count += 1;
-            return p;
+            return await this.DownloadPackage(pkg);
         });
     }
 
     public async InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         const packages: IPackage[] = await this.GetPackages();
         let count: number = 1;
-        return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-            const p: Promise<void> = this.InstallPackage(pkg);
+        return this.BuildPromiseChain(packages, async (pkg): Promise<void> => {
             progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
-            count += 1;
-            return p;
+            return await this.InstallPackage(pkg);
         });
 
     }
@@ -350,7 +347,7 @@ export class PackageManager {
         });
     }
 
-    private async InstallPackage(pkg: IPackage): Promise<void> {
+    private InstallPackage(pkg: IPackage): Promise<void> {
         this.AppendLineChannel(localize("installing.package", "Installing package '{0}'", pkg.description));
 
         return new Promise<void>((resolve, reject) => {
@@ -370,7 +367,7 @@ export class PackageManager {
 
                 zipfile.readEntry();
 
-                zipfile.on('entry', async (entry: yauzl.Entry) => {
+                zipfile.on('entry', (entry: yauzl.Entry) => {
                     const absoluteEntryPath: string = util.getExtensionFilePath(entry.fileName);
 
                     if (entry.fileName.endsWith("/")) {
@@ -383,69 +380,72 @@ export class PackageManager {
                             zipfile.readEntry();
                         });
                     } else {
-                        const exists: boolean = await util.checkFileExists(absoluteEntryPath);
-                        if (!exists) {
-                            // File - extract it
-                            zipfile.openReadStream(entry, (err, readStream: Readable | undefined) => {
-                                if (err || !readStream) {
-                                    return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
-                                }
-
-                                readStream.on('error', (err) =>
-                                    reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err)));
-
-                                mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
-                                    if (err) {
-                                        return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
+                        util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
+                            if (!exists) {
+                                // File - extract it
+                                zipfile.openReadStream(entry, (err, readStream: Readable | undefined) => {
+                                    if (err || !readStream) {
+                                        return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
                                     }
 
-                                    // Create as a .tmp file to avoid partially unzipped files
-                                    // counting as completed files.
-                                    const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
-                                    if (fs.existsSync(absoluteEntryTempFile)) {
-                                        try {
-                                            await util.unlinkAsync(absoluteEntryTempFile);
-                                        } catch (err) {
-                                            return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
-                                        }
-                                    }
+                                    readStream.on('error', (err) =>
+                                        reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err)));
 
-                                    // Make sure executable files have correct permissions when extracted
-                                    const fileMode: number = (this.platformInfo.platform !== "win32" && pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
-                                    const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
-
-                                    writeStream.on('close', async () => {
-                                        try {
-                                            // Remove .tmp extension from the file.
-                                            await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
-                                        } catch (err) {
-                                            return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                    mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
+                                        if (err) {
+                                            return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
                                         }
-                                        // Wait till output is done writing before reading the next zip entry.
-                                        // Otherwise, it's possible to try to launch the .exe before it is done being created.
-                                        zipfile.readEntry();
+
+                                        // Create as a .tmp file to avoid partially unzipped files
+                                        // counting as completed files.
+                                        const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
+                                        if (fs.existsSync(absoluteEntryTempFile)) {
+                                            try {
+                                                await util.unlinkAsync(absoluteEntryTempFile);
+                                            } catch (err) {
+                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                            }
+                                        }
+
+                                        // Make sure executable files have correct permissions when extracted
+                                        const fileMode: number = (this.platformInfo.platform !== "win32" && pkg.binaries && pkg.binaries.indexOf(absoluteEntryPath) !== -1) ? 0o755 : 0o664;
+                                        const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
+
+                                        writeStream.on('close', async () => {
+                                            try {
+                                                // Remove .tmp extension from the file.
+                                                await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
+                                            } catch (err) {
+                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                            }
+                                            // Wait till output is done writing before reading the next zip entry.
+                                            // Otherwise, it's possible to try to launch the .exe before it is done being created.
+                                            zipfile.readEntry();
+                                        });
+
+                                        writeStream.on('error', (err) =>
+                                            reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err)));
+
+                                        readStream.pipe(writeStream);
                                     });
-
-                                    writeStream.on('error', (err) =>
-                                        reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err)));
-
-                                    readStream.pipe(writeStream);
                                 });
-                            });
-                        } else {
-                            // Skip the message for text files, because there is a duplicate text file unzipped.
-                            if (path.extname(absoluteEntryPath) !== ".txt") {
-                                this.AppendLineChannel(localize("file.already.exists", "Warning: File '{0}' already exists and was not updated.", absoluteEntryPath));
+                            } else {
+                                // Skip the message for text files, because there is a duplicate text file unzipped.
+                                if (path.extname(absoluteEntryPath) !== ".txt") {
+                                    this.AppendLineChannel(localize("file.already.exists", "Warning: File '{0}' already exists and was not updated.", absoluteEntryPath));
+                                }
+                                zipfile.readEntry();
                             }
-                            zipfile.readEntry();
-                        }
+                        });
                     }
                 });
             });
+        }).then(() => {
+            // Clean up temp file
+            pkg.tmpFile.removeCallback();
         });
-        // Clean up temp file
-        pkg.tmpFile.removeCallback();
     }
+
     private AppendChannel(text: string): void {
         if (this.outputChannel) {
             this.outputChannel.append(text);

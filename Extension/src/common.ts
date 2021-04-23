@@ -729,29 +729,39 @@ export function isExecutable(file: string): Promise<boolean> {
     });
 }
 
-export async function allowExecution(file: string): Promise<void> {
+export function allowExecution(file: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
         if (process.platform !== 'win32') {
-            const exists: boolean = await checkFileExists(file);
-            if (exists) {
-                const isExec: boolean = await isExecutable(file);
-                if (isExec) {
-                    return;
-                } else {
-                    fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
-                        if (err) {
-                            throw new Error(err.message);
+            checkFileExists(file).then((exists: boolean) => {
+                if (exists) {
+                    isExecutable(file).then((isExec: boolean) => {
+                        if (isExec) {
+                            resolve();
+                        } else {
+                            chmodAsync(file, '755');
                         }
-                        return;
                     });
+                } else {
+                    getOutputChannelLogger().appendLine("");
+                    getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
+                    resolve();
                 }
-            } else {
-                getOutputChannelLogger().appendLine("");
-                getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
-                return;
-            }
+            });
         } else {
-            return;
+            resolve();
         }
+    });
+}
+
+export async function chmodAsync(path: fs.PathLike, mode: fs.Mode): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.chmod(path, mode, (err: NodeJS.ErrnoException | null) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
+    });
 }
 
 export function removePotentialPII(str: string): string {
@@ -803,12 +813,11 @@ export function promptForReloadWindowDueToSettingsChange(): void {
 
 export function promptReloadWindow(message: string): void {
     const reload: string = localize("reload.string", "Reload");
-    (async () => { 
-        const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
         if (value === reload) {
             vscode.commands.executeCommand("workbench.action.reloadWindow");
         }
-    })();
+    });
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {

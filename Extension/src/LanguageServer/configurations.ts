@@ -438,7 +438,8 @@ export class CppProperties {
         let pdjFound: boolean = false;
         const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8");
         try {
-            pdjFound = true; return JSON.parse(package_json);
+            pdjFound = true;
+            return JSON.parse(package_json);
         } catch (err) {
             error = err;
         }

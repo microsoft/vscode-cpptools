@@ -688,10 +688,7 @@ function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.
         const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
         edits.insert(document.uri, lastPosition, remainingSettingsText);
     }
-    (async () => { 
-        await vscode.workspace.applyEdit(edits);
-        vscode.window.showTextDocument(document);
-    })();
+    vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
 }
 
 export async function generateEditorConfig(rootUri?: vscode.Uri): Promise<void> {

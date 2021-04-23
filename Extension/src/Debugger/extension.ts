@@ -96,10 +96,10 @@ export function initialize(context: vscode.ExtensionContext): void {
                     if (e && e.message === util.failedToParseJson) {
                         vscode.window.showErrorMessage(util.failedToParseJson);
                     }
-                    return Promise.resolve();
+                    return;
                 }
             } else {
-                return Promise.resolve();
+                return;
                 // TODO uncomment this when single file mode works correctly.
                 // const buildTasks: vscode.Task[] = await getBuildTasks(true);
                 // const task: vscode.Task = buildTasks.find(task => task.name === selection.configuration.preLaunchTask);
