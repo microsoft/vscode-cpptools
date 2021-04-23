@@ -71,37 +71,37 @@ function initVcpkgDatabase(): Promise<vcpkgDatabase> {
                 resolve(database);
             });
             zipfile.on('entry', entry => {
-                if (entry.fileName === 'VCPkgHeadersDatabase.txt') {
-                    zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
-                        if (err || !stream) {
-                            zipfile.close();
+                if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
+                    zipfile.readEntry();
+                    return;
+                }
+                zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
+                    if (err || !stream) {
+                        zipfile.close();
+                        return;
+                    }
+                    const reader: rd.ReadLine = rd.createInterface(stream);
+                    reader.on('line', (lineText: string) => {
+                        const portFilePair: string[] = lineText.split(':');
+                        if (portFilePair.length !== 2) {
                             return;
                         }
-                        const reader: rd.ReadLine = rd.createInterface(stream);
-                        reader.on('line', (lineText: string) => {
-                            const portFilePair: string[] = lineText.split(':');
-                            if (portFilePair.length !== 2) {
-                                return;
-                            }
 
-                            const portName: string = portFilePair[0];
-                            const relativeHeader: string = portFilePair[1];
+                        const portName: string = portFilePair[0];
+                        const relativeHeader: string = portFilePair[1];
 
-                            if (!database[relativeHeader]) {
-                                database[relativeHeader] = [];
-                            }
+                        if (!database[relativeHeader]) {
+                            database[relativeHeader] = [];
+                        }
 
-                            database[relativeHeader].push(portName);
-                        });
-                        reader.on('close', () => {
-                            // We found the one file we wanted.
-                            // It's OK to close instead of progressing through more files in the zip.
-                            zipfile.close();
-                        });
+                        database[relativeHeader].push(portName);
                     });
-                } else {
-                    zipfile.readEntry();
-                }
+                    reader.on('close', () => {
+                        // We found the one file we wanted.
+                        // It's OK to close instead of progressing through more files in the zip.
+                        zipfile.close();
+                    });
+                });
             });
             zipfile.readEntry();
         });
