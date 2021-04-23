@@ -355,17 +355,31 @@ export class PackageManager {
                 return reject(new PackageManagerError('Downloaded file unavailable', localize("downloaded.unavailable", 'Downloaded file unavailable'), 'InstallPackage', pkg));
             }
 
-            yauzl.fromFd(pkg.tmpFile.fd, { lazyEntries: true }, (err, zipfile) => {
+            yauzl.fromFd(pkg.tmpFile.fd, { lazyEntries: true, autoClose: true }, (err, zipfile) => {
                 if (err || !zipfile) {
                     return reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err));
                 }
 
                 // setup zip file events
-                zipfile.on('end', resolve);
 
-                zipfile.on('error', err => reject(new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code)));
+                // Keep track of any error that occurs, but don't resolve or reject the promise until the file is closed.
+                let pendingError: Error | undefined;
+                zipfile.on('close', () => {
+                    if (!pendingError) {
+                        resolve();
+                    } else {
+                        reject(pendingError);
+                    }
+                });
 
-                zipfile.readEntry();
+                zipfile.on('error', err => {
+                    // Don't call reject() a second time.
+                    // Errors can also arise from readStream and writeStream.
+                    if (!pendingError) {
+                        pendingError = new PackageManagerError('Zip file error', localize("zip.file.error", 'Zip file error'), 'InstallPackage', pkg, err, err.code);
+                        zipfile.close();
+                    }
+                });
 
                 zipfile.on('entry', (entry: yauzl.Entry) => {
                     const absoluteEntryPath: string = util.getExtensionFilePath(entry.fileName);
@@ -374,7 +388,9 @@ export class PackageManager {
                         // Directory - create it
                         mkdirp(absoluteEntryPath, { mode: 0o775 }, (err) => {
                             if (err) {
-                                return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
+                                pendingError = new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code);
+                                zipfile.close();
+                                return;
                             }
 
                             zipfile.readEntry();
@@ -385,25 +401,28 @@ export class PackageManager {
                                 // File - extract it
                                 zipfile.openReadStream(entry, (err, readStream: Readable | undefined) => {
                                     if (err || !readStream) {
-                                        return reject(new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err));
+                                        pendingError = new PackageManagerError('Error reading zip stream', localize("zip.stream.error", 'Error reading zip stream'), 'InstallPackage', pkg, err);
+                                        zipfile.close();
+                                        return;
                                     }
-
-                                    readStream.on('error', (err) =>
-                                        reject(new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err)));
 
                                     mkdirp(path.dirname(absoluteEntryPath), { mode: 0o775 }, async (err) => {
                                         if (err) {
-                                            return reject(new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code));
+                                            pendingError = new PackageManagerError('Error creating directory', localize("create.directory.error", 'Error creating directory'), 'InstallPackage', pkg, err, err.code);
+                                            zipfile.close();
+                                            return;
                                         }
 
                                         // Create as a .tmp file to avoid partially unzipped files
                                         // counting as completed files.
                                         const absoluteEntryTempFile: string = absoluteEntryPath + ".tmp";
-                                        if (fs.existsSync(absoluteEntryTempFile)) {
+                                        if (await util.checkFileExists(absoluteEntryTempFile)) {
                                             try {
                                                 await util.unlinkAsync(absoluteEntryTempFile);
                                             } catch (err) {
-                                                return reject(new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                                pendingError = new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err);
+                                                zipfile.close();
+                                                return;
                                             }
                                         }
 
@@ -412,19 +431,45 @@ export class PackageManager {
                                         const writeStream: fs.WriteStream = fs.createWriteStream(absoluteEntryTempFile, { mode: fileMode });
 
                                         writeStream.on('close', async () => {
-                                            try {
-                                                // Remove .tmp extension from the file.
-                                                await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
-                                            } catch (err) {
-                                                return reject(new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err));
+                                            // Remove .tmp extension from the file, if there was no error.
+                                            // Otherwise, delete it.
+                                            // Don't move on to the next entry, if we've already called reject(), in
+                                            // which case zipfile.close() will already have been called.
+                                            if (!pendingError) {
+                                                try {
+                                                    await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
+                                                } catch (err) {
+                                                    pendingError = new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err);
+                                                    zipfile.close();
+                                                    return;
+                                                }
+                                                // Wait until output is done writing before reading the next zip entry.
+                                                // Otherwise, it's possible to try to launch the .exe before it is done being created.
+                                                zipfile.readEntry();
+                                            } else {
+                                                try {
+                                                    await util.unlinkAsync(absoluteEntryTempFile);
+                                                } catch (err) {
+                                                    // Ignore failure to delete temp file.  We already have an error to return.
+                                                }
                                             }
-                                            // Wait till output is done writing before reading the next zip entry.
-                                            // Otherwise, it's possible to try to launch the .exe before it is done being created.
-                                            zipfile.readEntry();
                                         });
 
-                                        writeStream.on('error', (err) =>
-                                            reject(new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err)));
+                                        readStream.on('error', (err) => {
+                                            // Don't call reject() a second time.
+                                            if (!pendingError) {
+                                                pendingError = new PackageManagerError('Error in readStream', localize("read.stream.error", 'Error in read stream'), 'InstallPackage', pkg, err);
+                                                zipfile.close();
+                                            }
+                                        });
+
+                                        writeStream.on('error', (err) => {
+                                            // Don't call reject() a second time.
+                                            if (!pendingError) {
+                                                pendingError = new PackageManagerError('Error in writeStream', localize("write.stream.error", 'Error in write stream'), 'InstallPackage', pkg, err);
+                                                zipfile.close();
+                                            }
+                                        });
 
                                         readStream.pipe(writeStream);
                                     });
@@ -439,6 +484,8 @@ export class PackageManager {
                         });
                     }
                 });
+
+                zipfile.readEntry();
             });
         }).then(() => {
             // Clean up temp file
