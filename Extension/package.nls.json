@@ -203,7 +203,7 @@
     "c_cpp.debuggers.cppdbg.visualizerFile.description": ".natvis file to be used when debugging this process. This option is not compatible with GDB pretty printing. Please also see \"showDisplayString\" if using this setting.",
     "c_cpp.debuggers.cppvsdbg.visualizerFile.description": ".natvis file to be used when debugging this process.",
     "c_cpp.debuggers.showDisplayString.description": "When a visualizerFile is specified, showDisplayString will enable the display string. Turning this option on can cause slower performance during debugging.",
-    "c_cpp.debuggers.environment.description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"squid\", \"value\": \"clam\" } ].",
+    "c_cpp.debuggers.environment.description": "Environment variables to add to the environment for the program. Example: [ { \"name\": \"config\", \"value\": \"Debug\" } ], not [ { \"config\": \"Debug\" } ].",
     "c_cpp.debuggers.envFile.description": "Absolute path to a file containing environment variable definitions. This file has key value pairs separated by an equals sign per line. E.g. KEY=VALUE",
     "c_cpp.debuggers.additionalSOLibSearchPath.description": "Semicolon separated list of directories to use to search for .so files. Example: \"c:\\dir1;c:\\dir2\".",
     "c_cpp.debuggers.MIMode.description": "Indicates the console debugger that the MIDebugEngine will connect to. Allowed values are \"gdb\" \"lldb\".",
