@@ -303,9 +303,8 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
     const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
 
-    let data: string;
     try {
-        data = await util.downloadFileToStr(releaseUrl, header);
+        const data: string = await util.downloadFileToStr(releaseUrl, header);
         if (!data) {
             return undefined;
         }

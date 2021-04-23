@@ -110,7 +110,8 @@ export class PackageManager {
         return this.BuildPromiseChain(packages, async (pkg): Promise<void> => {
             progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
             count += 1;
-            return await this.DownloadPackage(pkg);
+            await this.DownloadPackage(pkg);
+            return;
         });
     }
 
@@ -119,7 +120,9 @@ export class PackageManager {
         let count: number = 1;
         return this.BuildPromiseChain(packages, async (pkg): Promise<void> => {
             progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
-            return await this.InstallPackage(pkg);
+            count += 1;
+            await this.InstallPackage(pkg);
+            return;
         });
 
     }

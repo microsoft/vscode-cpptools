@@ -1857,7 +1857,8 @@ export class DefaultClient implements Client {
                 // We don't want the queue to stall because of a rejected promise.
                 try {
                     await pendingTask.getPromise();
-                } finally {
+                    return nextTask();
+                } catch (e) {
                     return nextTask();
                 }
             } else {

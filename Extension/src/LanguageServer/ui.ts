@@ -30,7 +30,7 @@ enum ConfigurationPriority {
     CustomProvider = 3,
 }
 
-interface ConfigurationResult {
+interface ConfigurationStatus {
     configured: boolean;
     priority: ConfigurationPriority;
 }
@@ -40,7 +40,7 @@ export class UI {
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
-    private configurationUIPromise?: Promise<ConfigurationResult>;
+    private curConfigurationStatus?: ConfigurationStatus;
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
@@ -280,29 +280,16 @@ export class UI {
     }
 
     private async showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): Promise<void> {
-        const showPrompt: () => Promise<ConfigurationResult> = async () => {
-            const configured: boolean = await prompt();
-            return Promise.resolve({
-                priority: priority,
-                configured: configured
-            });
-        };
-
-        if (this.configurationUIPromise) {
-            const result: ConfigurationResult = await this.configurationUIPromise;
-            if (priority > result.priority || !result.configured) {
-                this.configurationUIPromise = showPrompt();
-            }
-            this.configurationUIPromise = new Promise<ConfigurationResult>((resolve, reject) => {
+        if (this.curConfigurationStatus) {
+            if (priority <= this.curConfigurationStatus.priority && this.curConfigurationStatus.configured) {
                 onSkip();
-                resolve({
-                    priority: result.priority,
-                    configured: true
-                });
-            });
-        } else {
-            this.configurationUIPromise = showPrompt();
+                return;
+            }
         }
+        this.curConfigurationStatus = {
+            priority: priority,
+            configured: await prompt()
+        };
     }
 
     public dispose(): void {
