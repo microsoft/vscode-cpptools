@@ -619,22 +619,24 @@ async function suggestInsidersChannel(): Promise<void> {
     const yes: string = localize("yes.button", "Yes");
     const askLater: string = localize("ask.me.later.button", "Ask Me Later");
     const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
-    const selection: string | undefined = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
-    switch (selection) {
-        case yes:
-            // Cache buildInfo.
-            buildInfoCache = buildInfo;
-            // It will call onDidChangeSettings.
-            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
-            break;
-        case dontShowAgain:
-            suggestInsiders.Value = false;
-            break;
-        case askLater:
-            break;
-        default:
-            break;
-    }
+    vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain).then((selection) => {
+        switch (selection) {
+            case yes:
+                // Cache buildInfo.
+                buildInfoCache = buildInfo;
+                // It will call onDidChangeSettings.
+                vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
+                break;
+            case dontShowAgain:
+                suggestInsiders.Value = false;
+                break;
+            case askLater:
+                break;
+            default:
+                break;
+        }
+    });
+
 }
 
 async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
