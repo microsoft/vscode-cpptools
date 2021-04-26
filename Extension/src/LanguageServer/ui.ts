@@ -40,7 +40,7 @@ export class UI {
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
-    private curConfigurationStatus?: ConfigurationStatus;
+    private curConfigurationStatus?: Promise<ConfigurationStatus>;
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
 
     constructor() {
@@ -279,17 +279,31 @@ export class UI {
         this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
     }
 
-    private async showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): Promise<void> {
-        if (this.curConfigurationStatus) {
-            if (priority <= this.curConfigurationStatus.priority && this.curConfigurationStatus.configured) {
-                onSkip();
-                return;
-            }
-        }
-        this.curConfigurationStatus = {
-            priority: priority,
-            configured: await prompt()
+    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
+        const showPrompt: () => Promise<ConfigurationStatus> = async () => {
+            const configured: boolean = await prompt();
+            return Promise.resolve({
+                priority: priority,
+                configured: configured
+            });
         };
+
+        if (this.curConfigurationStatus) {
+            this.curConfigurationStatus = this.curConfigurationStatus.then(result => {
+                if (priority > result.priority) {
+                    return showPrompt();
+                } else if (!result.configured) {
+                    return showPrompt();
+                }
+                onSkip();
+                return Promise.resolve({
+                    priority: result.priority,
+                    configured: true
+                });
+            });
+        } else {
+            this.curConfigurationStatus = showPrompt();
+        }
     }
 
     public dispose(): void {

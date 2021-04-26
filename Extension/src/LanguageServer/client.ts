@@ -1490,26 +1490,27 @@ export class DefaultClient implements Client {
                         const allow: string = localize("allow.button", "Allow");
                         const dontAllow: string = localize("dont.allow.button", "Don't Allow");
                         const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-                        const result: string | undefined = await vscode.window.showInformationMessage(message, allow, dontAllow, askLater);
-                        switch (result) {
-                            case allow: {
-                                await  this.configuration.updateCustomConfigurationProvider(provider.extensionId);
-                                onRegistered();
-                                ask.Value = false;
-                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                return true;
+                        return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(async result => {
+                            switch (result) {
+                                case allow: {
+                                    await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
+                                    onRegistered();
+                                    ask.Value = false;
+                                    telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                                    return true;
+                                }
+                                case dontAllow: {
+                                    ask.Value = false;
+                                    break;
+                                }
+                                default: {
+                                    break;
+                                }
                             }
-                            case dontAllow: {
-                                ask.Value = false;
-                                break;
-                            }
-                            default: {
-                                break;
-                            }
-                        }
-                        return false;
+                            return false;
+                        });
                     },
-                    () => ask.Value = false);
+                        () => ask.Value = false);
                 }
             } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 onRegistered();
@@ -1754,13 +1755,14 @@ export class DefaultClient implements Client {
                         message += ` (${err})`;
                     }
 
-                    const response: string | undefined = await vscode.window.showInformationMessage(message, dismiss, disable);
-                    switch (response) {
-                        case disable: {
-                            settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
-                            break;
+                    vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
+                        switch (response) {
+                            case disable: {
+                                settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                                break;
+                            }
                         }
-                    }
+                    });
                 }
             }
         });
@@ -2120,32 +2122,33 @@ export class DefaultClient implements Client {
                             const fallbackMsg: string = client.configuration.VcpkgInstalled ?
                                 localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
                                 localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
-                            const value: string | undefined = await vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain);
-                            let commands: string[];
-                            switch (value) {
-                                case configJSON:
-                                    commands = await vscode.commands.getCommands(true);
-                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                        vscode.commands.executeCommand("workbench.action.problems.focus");
-                                    }
-                                    client.handleConfigurationEditJSONCommand();
-                                    telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
-                                    break;
-                                case configUI:
-                                    commands = await vscode.commands.getCommands(true);
-                                    if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                        vscode.commands.executeCommand("workbench.action.problems.focus");
-                                    }
-                                    client.handleConfigurationEditUICommand();
-                                    telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
-                                    break;
-                                case dontShowAgain:
-                                    showIntelliSenseFallbackMessage.Value = false;
-                                    break;
-                            }
-                            return Promise.resolve(true);
+                            return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then(async (value) => {
+                                let commands: string[];
+                                switch (value) {
+                                    case configJSON:
+                                        commands = await vscode.commands.getCommands(true);
+                                        if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                            vscode.commands.executeCommand("workbench.action.problems.focus");
+                                        }
+                                        client.handleConfigurationEditJSONCommand();
+                                        telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
+                                        break;
+                                    case configUI:
+                                        commands = await vscode.commands.getCommands(true);
+                                        if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                            vscode.commands.executeCommand("workbench.action.problems.focus");
+                                        }
+                                        client.handleConfigurationEditUICommand();
+                                        telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
+                                        break;
+                                    case dontShowAgain:
+                                        showIntelliSenseFallbackMessage.Value = false;
+                                        break;
+                                }
+                                return true;
+                            });
                         },
-                        () => showIntelliSenseFallbackMessage.Value = false);
+                            () => showIntelliSenseFallbackMessage.Value = false);
                     }
                 }
             }
@@ -2240,26 +2243,27 @@ export class DefaultClient implements Client {
             const yes: string = localize("yes.button", "Yes");
             const no: string = localize("no.button", "No");
             const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-            const value: string | undefined = await vscode.window.showInformationMessage(message, yes, no, askLater);
-            switch (value) {
-                case yes:
-                    if (params.paths.length > 1) {
-                        const index: number = await ui.showCompileCommands(params.paths);
-                        if (index < 0) {
-                            return false;
+            return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
+                switch (value) {
+                    case yes:
+                        if (params.paths.length > 1) {
+                            const index: number = await ui.showCompileCommands(params.paths);
+                            if (index < 0) {
+                                return false;
+                            }
+                            this.configuration.setCompileCommands(params.paths[index]);
+                        } else {
+                            this.configuration.setCompileCommands(params.paths[0]);
                         }
-                        this.configuration.setCompileCommands(params.paths[index]);
-                    } else {
-                        this.configuration.setCompileCommands(params.paths[0]);
-                    }
-                    return true;
-                case askLater:
-                    break;
-                case no:
-                    ask.Value = false;
-                    break;
-            }
-            return false;
+                        return true;
+                    case askLater:
+                        break;
+                    case no:
+                        ask.Value = false;
+                        break;
+                }
+                return false;
+            });
         },
         () => ask.Value = false);
     }
