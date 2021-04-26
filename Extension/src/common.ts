@@ -176,18 +176,16 @@ export async function isExtensionReady(): Promise<boolean> {
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
-export async function displayExtensionNotReadyPrompt(): Promise<void> {
+export function displayExtensionNotReadyPrompt(): void {
 
     if (!isExtensionNotReadyPromptDisplayed) {
         isExtensionNotReadyPromptDisplayed = true;
         showOutputChannel();
 
-        try {
-            await getOutputChannelLogger().showInformationMessage(extensionNotReadyString);
-        } finally {
-            isExtensionNotReadyPromptDisplayed = false;
-        }
-
+        getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
+            () => { isExtensionNotReadyPromptDisplayed = false; },
+            () => { isExtensionNotReadyPromptDisplayed = false; }
+        );
     }
 }
 
