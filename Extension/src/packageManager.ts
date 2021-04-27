@@ -107,22 +107,20 @@ export class PackageManager {
     public async DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         const packages: IPackage[] = await this.GetPackages();
         let count: number = 1;
-        return this.BuildPromiseChain(packages, async (pkg): Promise<void> => {
+        return util.sequentialResolve(packages, async (pkg): Promise<void> => {
             progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
             count += 1;
             await this.DownloadPackage(pkg);
-            return;
         });
     }
 
     public async InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
         const packages: IPackage[] = await this.GetPackages();
         let count: number = 1;
-        return this.BuildPromiseChain(packages, async (pkg): Promise<void> => {
+        return util.sequentialResolve(packages, async (pkg): Promise<void> => {
             progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
             count += 1;
             await this.InstallPackage(pkg);
-            return;
         });
 
     }
@@ -141,19 +139,6 @@ export class PackageManager {
             PlatformsMatch(value, this.platformInfo) &&
             VersionsMatch(value, this.platformInfo)
         );
-    }
-
-    /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
-     *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
-     */
-    private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (item: TItem) => Promise<TPromise>): Promise<TPromise | null> {
-        let promiseChain: Promise<TPromise | null> = Promise.resolve<TPromise | null>(null);
-
-        for (const item of items) {
-            promiseChain = promiseChain.then(() => promiseBuilder(item));
-        }
-
-        return promiseChain;
     }
 
     private GetPackageList(): Promise<IPackage[]> {

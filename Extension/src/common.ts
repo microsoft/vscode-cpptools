@@ -1288,3 +1288,11 @@ export async function checkCuda(): Promise<void> {
     const langs: string[] = await vscode.languages.getLanguages();
     supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
 }
+
+// Sequentially Resolve Promises.
+export async function sequentialResolve(items: any[], promiseBuilder: (item: any) => Promise<any>): Promise<void> {
+    return items.reduce(async (previousPromise, nextItem) => {
+        await previousPromise;
+        return promiseBuilder(nextItem);
+    }, Promise.resolve());
+}
