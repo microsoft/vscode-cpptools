@@ -842,7 +842,7 @@ async function selectClient(): Promise<Client> {
                 console.assert("client not found");
             }
         }
-        throw new Error (localize("client.not.found", "client not found"));
+        throw new Error(localize("client.not.found", "client not found"));
     }
 }
 

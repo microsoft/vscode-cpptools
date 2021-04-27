@@ -26,8 +26,7 @@ export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
     public async ShowAttachEntries(): Promise<string | undefined> {
-        const ready: boolean = await util.isExtensionReady();
-        if (!ready) {
+        if (!await util.isExtensionReady()) {
             util.displayExtensionNotReadyPrompt();
         } else {
             return showQuickPick(() => this.attachItemsProvider.getAttachItems());
@@ -43,8 +42,7 @@ export class RemoteAttachPicker {
     private _channel: vscode.OutputChannel;
 
     public async ShowAttachEntries(config: any): Promise<string | undefined> {
-        const ready: boolean = await util.isExtensionReady();
-        if (!ready) {
+        if (!await util.isExtensionReady()) {
             util.displayExtensionNotReadyPrompt();
         } else {
             this._channel.clear();
