@@ -2569,48 +2569,45 @@ export class DefaultClient implements Client {
     /**
      * command handlers
      */
-    public handleConfigurationSelectCommand(): void {
-        this.notifyWhenReady(async () => {
-            const configNames: string[] | undefined = this.configuration.ConfigurationNames;
-            if (configNames) {
-                const index: number = await ui.showConfigurations(configNames);
-                if (index < 0) {
-                    return;
-                }
-                this.configuration.select(index);
-            }
-        });
-    }
-
-    public handleConfigurationProviderSelectCommand(): void {
-        this.notifyWhenReady(async () => {
-            const extensionId: string | undefined = await ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider);
-            if (extensionId === undefined) {
-                // operation was canceled.
+    public async handleConfigurationSelectCommand(): Promise<void> {
+        await this.notifyWhenReady(() => { });
+        const configNames: string[] | undefined = this.configuration.ConfigurationNames;
+        if (configNames) {
+            const index: number = await ui.showConfigurations(configNames);
+            if (index < 0) {
                 return;
             }
-            await this.configuration.updateCustomConfigurationProvider(extensionId);
-            if (extensionId) {
-                const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(extensionId);
-                this.updateCustomBrowseConfiguration(provider);
-                this.updateCustomConfigurations(provider);
-                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
-            } else {
-                this.clearCustomConfigurations();
-                this.clearCustomBrowseConfiguration();
-            }
-        });
+            this.configuration.select(index);
+        }
     }
 
-    public handleShowParsingCommands(): void {
-        this.notifyWhenReady(async () => {
-            const index: number = await ui.showParsingCommands();
-            if (index === 0) {
-                this.pauseParsing();
-            } else if (index === 1) {
-                this.resumeParsing();
-            }
-        });
+    public async handleConfigurationProviderSelectCommand(): Promise<void> {
+        await this.notifyWhenReady(() => { });
+        const extensionId: string | undefined = await ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider);
+        if (extensionId === undefined) {
+            // operation was canceled.
+            return;
+        }
+        await this.configuration.updateCustomConfigurationProvider(extensionId);
+        if (extensionId) {
+            const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(extensionId);
+            this.updateCustomBrowseConfiguration(provider);
+            this.updateCustomConfigurations(provider);
+            telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": extensionId });
+        } else {
+            this.clearCustomConfigurations();
+            this.clearCustomBrowseConfiguration();
+        }
+    }
+
+    public async handleShowParsingCommands(): Promise<void> {
+        await this.notifyWhenReady(() => { });
+        const index: number = await ui.showParsingCommands();
+        if (index === 0) {
+            this.pauseParsing();
+        } else if (index === 1) {
+            this.resumeParsing();
+        }
     }
 
     public handleConfigurationEditCommand(): void {
