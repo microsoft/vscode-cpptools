@@ -436,10 +436,10 @@ export class CppProperties {
     private async readNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         let error: Error | undefined;
         let pdjFound: boolean = false;
-        const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8");
+        let packageJson: any;
         try {
+            packageJson = JSON.parse(await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8"));
             pdjFound = true;
-            return JSON.parse(package_json);
         } catch (err) {
             error = err;
         }
@@ -461,7 +461,7 @@ export class CppProperties {
                 }
 
                 for (const [dep, execCmd] of nodeAddonMap) {
-                    if (dep in package_json.dependencies) {
+                    if (dep in packageJson.dependencies) {
                         try {
                             let stdout: string | void = await util.execChildProcess(execCmd, rootPath);
                             if (!stdout) {
