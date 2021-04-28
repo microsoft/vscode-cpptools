@@ -1290,7 +1290,7 @@ export async function checkCuda(): Promise<void> {
 }
 
 // Sequentially Resolve Promises.
-export async function sequentialResolve(items: any[], promiseBuilder: (item: any) => Promise<any>): Promise<void> {
+export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Promise<void>): Promise<void> {
     return items.reduce(async (previousPromise, nextItem) => {
         await previousPromise;
         return promiseBuilder(nextItem);
