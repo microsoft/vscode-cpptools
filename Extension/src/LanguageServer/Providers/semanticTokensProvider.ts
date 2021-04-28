@@ -32,10 +32,10 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
                 };
                 const tokensResult: GetSemanticTokensResult = await this.client.languageClient.sendRequest(GetSemanticTokensRequest, params);
                 if (tokensResult.canceled) {
-                    throw new Error('');
+                    throw new Error('Requst for providing semantic tokens is cancelled.');
                 } else {
                     if (tokensResult.fileVersion !== openFileVersions.get(uriString)) {
-                        throw new Error('');
+                        throw new Error('The semantic token are not related to the current version of the document.');
                     } else {
                         const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
                         tokensResult.tokens.forEach((token) => {
