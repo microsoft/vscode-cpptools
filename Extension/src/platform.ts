@@ -29,8 +29,7 @@ export class PlatformInformation {
         const platform: string = os.platform();
         const architecture: string = PlatformInformation.GetArchitecture();
         let distribution: LinuxDistribution | undefined;
-        let version: string | undefined;        
-
+        let version: string | undefined;
         switch (platform) {
             case "win32":
                 break;

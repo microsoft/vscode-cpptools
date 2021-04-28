@@ -1509,8 +1509,7 @@ export class DefaultClient implements Client {
                             }
                             return false;
                         });
-                    },
-                        () => ask.Value = false);
+                    }, () => ask.Value = false);
                 }
             } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 onRegistered();
