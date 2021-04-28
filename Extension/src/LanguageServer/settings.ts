@@ -693,20 +693,19 @@ function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.
 
 export async function generateEditorConfig(rootUri?: vscode.Uri): Promise<void> {
     let document: vscode.TextDocument;
-    if (rootUri !== undefined) {
+    if (rootUri) {
         // If a folder is open and '.editorconfig' exists at the root, use that.
         const uri: vscode.Uri = vscode.Uri.joinPath(rootUri, ".editorconfig");
         const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         edits.createFile(uri, { ignoreIfExists: true, overwrite: false });
-
         try {
             await vscode.workspace.applyEdit(edits);
-        } finally {
             document = await vscode.workspace.openTextDocument(uri);
-            populateEditorConfig(rootUri, document);
+        } catch (e) {
+            document = await vscode.workspace.openTextDocument();
         }
     } else {
         document = await vscode.workspace.openTextDocument();
-        populateEditorConfig(rootUri, document);
     }
+    populateEditorConfig(rootUri, document);
 }
