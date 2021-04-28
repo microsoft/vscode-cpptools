@@ -1545,8 +1545,8 @@ export class DefaultClient implements Client {
         });
     }
 
-    public async updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
-        return this.notifyWhenReady(async () => {
+    public updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
+        return this.notifyWhenReady(() => {
             if (!this.configurationProvider) {
                 return;
             }
@@ -1859,8 +1859,7 @@ export class DefaultClient implements Client {
                 // We don't want the queue to stall because of a rejected promise.
                 try {
                     await pendingTask.getPromise();
-                    return nextTask();
-                } catch (e) {
+                } finally {
                     return nextTask();
                 }
             } else {
@@ -1877,7 +1876,7 @@ export class DefaultClient implements Client {
      * during language client startup and for custom configuration providers.
      * @param task The task that blocks all future tasks
      */
-    private queueBlockingTask<T>(task: () => Thenable<T>): Thenable<T> {
+    private async queueBlockingTask<T>(task: () => Thenable<T>): Promise<T> {
         if (this.isSupported) {
             pendingTask = new util.BlockingTask<T>(task, pendingTask);
             return pendingTask.getPromise();
@@ -2147,8 +2146,7 @@ export class DefaultClient implements Client {
                                 }
                                 return true;
                             });
-                        },
-                            () => showIntelliSenseFallbackMessage.Value = false);
+                        }, () => showIntelliSenseFallbackMessage.Value = false);
                     }
                 }
             }
