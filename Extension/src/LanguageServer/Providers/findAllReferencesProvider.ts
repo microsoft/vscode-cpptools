@@ -14,69 +14,68 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     }
     public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
         return new Promise<vscode.Location[]>((resolve, reject) => {
-            const callback: () => void = () => {
+            const callback: () => Promise<void> = async () => {
                 const params: FindAllReferencesParams = {
                     position: Position.create(position.line, position.character),
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
                 DefaultClient.referencesParams = params;
-                this.client.notifyWhenReady(() => {
-                    // The current request is represented by referencesParams.  If a request detects
-                    // referencesParams does not match the object used when creating the request, abort it.
-                    if (params !== DefaultClient.referencesParams) {
-                        // Complete with nothing instead of rejecting, to avoid an error message from VS Code
-                        const locations: vscode.Location[] = [];
-                        resolve(locations);
-                        return;
-                    }
-                    DefaultClient.referencesRequestPending = true;
-                    // Register a single-fire handler for the reply.
-                    const resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult | null, doResolve: boolean) => {
-                        DefaultClient.referencesRequestPending = false;
-                        const locations: vscode.Location[] = [];
-                        if (result) {
-                            result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
-                                if (referenceInfo.type === refs.ReferenceType.Confirmed) {
-                                    const uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
-                                    const range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
-                                    locations.push(new vscode.Location(uri, range));
-                                }
-                            });
-                        }
-                        // If references were canceled while in a preview state, there is not an outstanding promise.
-                        if (doResolve) {
-                            resolve(locations);
-                        }
-                        if (DefaultClient.referencesPendingCancellations.length > 0) {
-                            while (DefaultClient.referencesPendingCancellations.length > 1) {
-                                const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                                DefaultClient.referencesPendingCancellations.pop();
-                                pendingCancel.reject();
+                await this.client.notifyWhenReady(() => { });
+                // The current request is represented by referencesParams.  If a request detects
+                // referencesParams does not match the object used when creating the request, abort it.
+                if (params !== DefaultClient.referencesParams) {
+                    // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                    const locations: vscode.Location[] = [];
+                    resolve(locations);
+                    return;
+                }
+                DefaultClient.referencesRequestPending = true;
+                // Register a single-fire handler for the reply.
+                const resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult | null, doResolve: boolean) => {
+                    DefaultClient.referencesRequestPending = false;
+                    const locations: vscode.Location[] = [];
+                    if (result) {
+                        result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
+                            if (referenceInfo.type === refs.ReferenceType.Confirmed) {
+                                const uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                                const range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character, referenceInfo.position.line, referenceInfo.position.character + result.text.length);
+                                locations.push(new vscode.Location(uri, range));
                             }
+                        });
+                    }
+                    // If references were canceled while in a preview state, there is not an outstanding promise.
+                    if (doResolve) {
+                        resolve(locations);
+                    }
+                    if (DefaultClient.referencesPendingCancellations.length > 0) {
+                        while (DefaultClient.referencesPendingCancellations.length > 1) {
                             const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
                             DefaultClient.referencesPendingCancellations.pop();
-                            pendingCancel.callback();
+                            pendingCancel.reject();
                         }
-                    };
-                    if (!workspaceReferences.referencesRefreshPending) {
-                        workspaceReferences.setResultsCallback(resultCallback);
-                        workspaceReferences.startFindAllReferences(params);
-                    } else {
-                        // We are responding to a refresh (preview or final result)
-                        workspaceReferences.referencesRefreshPending = false;
-                        if (workspaceReferences.lastResults) {
-                            // This is a final result
-                            const lastResults: refs.ReferencesResult = workspaceReferences.lastResults;
-                            workspaceReferences.lastResults = null;
-                            resultCallback(lastResults, true);
-                        } else {
-                            // This is a preview (2nd or later preview)
-                            workspaceReferences.referencesRequestPending = true;
-                            workspaceReferences.setResultsCallback(resultCallback);
-                            this.client.languageClient.sendNotification(RequestReferencesNotification, false);
-                        }
+                        const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
+                        DefaultClient.referencesPendingCancellations.pop();
+                        pendingCancel.callback();
                     }
-                });
+                };
+                if (!workspaceReferences.referencesRefreshPending) {
+                    workspaceReferences.setResultsCallback(resultCallback);
+                    workspaceReferences.startFindAllReferences(params);
+                } else {
+                    // We are responding to a refresh (preview or final result)
+                    workspaceReferences.referencesRefreshPending = false;
+                    if (workspaceReferences.lastResults) {
+                        // This is a final result
+                        const lastResults: refs.ReferencesResult = workspaceReferences.lastResults;
+                        workspaceReferences.lastResults = null;
+                        resultCallback(lastResults, true);
+                    } else {
+                        // This is a preview (2nd or later preview)
+                        workspaceReferences.referencesRequestPending = true;
+                        workspaceReferences.setResultsCallback(resultCallback);
+                        this.client.languageClient.sendNotification(RequestReferencesNotification, false);
+                    }
+                }
                 token.onCancellationRequested(e => {
                     if (params === DefaultClient.referencesParams) {
                         this.client.cancelReferences();

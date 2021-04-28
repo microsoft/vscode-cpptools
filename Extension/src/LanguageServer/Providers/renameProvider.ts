@@ -33,67 +33,66 @@ export class RenameProvider implements vscode.RenameProvider {
         DefaultClient.renamePending = true;
         ++DefaultClient.renameRequestsPending;
         return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
-            const callback: () => void = () => {
+            const callback: () => Promise<void> = async () => {
                 const params: RenameParams = {
                     newName: newName,
                     position: Position.create(position.line, position.character),
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
                 DefaultClient.referencesParams = params;
-                this.client.notifyWhenReady(() => {
-                    // The current request is represented by referencesParams.  If a request detects
-                    // referencesParams does not match the object used when creating the request, abort it.
-                    if (params !== DefaultClient.referencesParams) {
-                        if (--DefaultClient.renameRequestsPending === 0) {
-                            DefaultClient.renamePending = false;
-                        }
-
-                        // Complete with nothing instead of rejecting, to avoid an error message from VS Code
-                        const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        resolve(workspaceEdit);
-                        return;
+                await this.client.notifyWhenReady(() => { });
+                // The current request is represented by referencesParams.  If a request detects
+                // referencesParams does not match the object used when creating the request, abort it.
+                if (params !== DefaultClient.referencesParams) {
+                    if (--DefaultClient.renameRequestsPending === 0) {
+                        DefaultClient.renamePending = false;
                     }
-                    DefaultClient.referencesRequestPending = true;
-                    workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult | null, doResolve: boolean) => {
-                        DefaultClient.referencesRequestPending = false;
-                        --DefaultClient.renameRequestsPending;
-                        const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                        const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
-                        if (cancelling) {
-                            while (DefaultClient.referencesPendingCancellations.length > 1) {
-                                const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                                DefaultClient.referencesPendingCancellations.pop();
-                                pendingCancel.reject();
-                            }
+
+                    // Complete with nothing instead of rejecting, to avoid an error message from VS Code
+                    const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                    resolve(workspaceEdit);
+                    return;
+                }
+                DefaultClient.referencesRequestPending = true;
+                workspaceReferences.setResultsCallback((referencesResult: refs.ReferencesResult | null, doResolve: boolean) => {
+                    DefaultClient.referencesRequestPending = false;
+                    --DefaultClient.renameRequestsPending;
+                    const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                    const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
+                    if (cancelling) {
+                        while (DefaultClient.referencesPendingCancellations.length > 1) {
                             const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
                             DefaultClient.referencesPendingCancellations.pop();
-                            pendingCancel.callback();
-                        } else {
-                            if (DefaultClient.renameRequestsPending === 0) {
-                                DefaultClient.renamePending = false;
-                            }
-                            // If rename UI was canceled, we will get a null result.
-                            // If null, return an empty list to avoid Rename failure dialog.
-                            if (referencesResult) {
-                                for (const reference of referencesResult.referenceInfos) {
-                                    const uri: vscode.Uri = vscode.Uri.file(reference.file);
-                                    const range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
-                                    const metadata: vscode.WorkspaceEditEntryMetadata = {
-                                        needsConfirmation: reference.type !== refs.ReferenceType.Confirmed,
-                                        label: refs.getReferenceTagString(reference.type, false, true),
-                                        iconPath: refs.getReferenceItemIconPath(reference.type, false)
-                                    };
-                                    workspaceEdit.replace(uri, range, newName, metadata);
-                                }
+                            pendingCancel.reject();
+                        }
+                        const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
+                        DefaultClient.referencesPendingCancellations.pop();
+                        pendingCancel.callback();
+                    } else {
+                        if (DefaultClient.renameRequestsPending === 0) {
+                            DefaultClient.renamePending = false;
+                        }
+                        // If rename UI was canceled, we will get a null result.
+                        // If null, return an empty list to avoid Rename failure dialog.
+                        if (referencesResult) {
+                            for (const reference of referencesResult.referenceInfos) {
+                                const uri: vscode.Uri = vscode.Uri.file(reference.file);
+                                const range: vscode.Range = new vscode.Range(reference.position.line, reference.position.character, reference.position.line, reference.position.character + referencesResult.text.length);
+                                const metadata: vscode.WorkspaceEditEntryMetadata = {
+                                    needsConfirmation: reference.type !== refs.ReferenceType.Confirmed,
+                                    label: refs.getReferenceTagString(reference.type, false, true),
+                                    iconPath: refs.getReferenceItemIconPath(reference.type, false)
+                                };
+                                workspaceEdit.replace(uri, range, newName, metadata);
                             }
                         }
-                        if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
-                            vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
-                        }
-                        resolve(workspaceEdit);
-                    });
-                    workspaceReferences.startRename(params);
+                    }
+                    if (referencesResult && (referencesResult.referenceInfos === null || referencesResult.referenceInfos.length === 0)) {
+                        vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
+                    }
+                    resolve(workspaceEdit);
                 });
+                workspaceReferences.startRename(params);
             };
 
             if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
