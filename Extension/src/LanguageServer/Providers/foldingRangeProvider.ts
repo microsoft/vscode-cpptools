@@ -21,11 +21,11 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             uri: document.uri.toString()
         };
         return this.client.notifyWhenReady(async () => {
+            token.onCancellationRequested(e => this.client.abortRequest(id));
             const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
             if (ranges.canceled) {
-                throw new Error('');
+                throw new Error('Requst for providing folding ranges is cancelled.');
             } else {
-                token.onCancellationRequested(e => this.client.abortRequest(id));
                 const result: vscode.FoldingRange[] = [];
                 ranges.ranges.forEach((r) => {
                     const foldingRange: vscode.FoldingRange = {
