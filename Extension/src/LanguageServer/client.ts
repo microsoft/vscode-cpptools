@@ -110,6 +110,10 @@ function logLocalized(params: LocalizeStringParams): void {
     log(output);
 }
 
+/** Note: We should not await on the following functions,
+ * or any funstion that returns a promise acquired from them,
+ * vscode.window.showInformationMessage, vscode.window.showWarningMessage, vscode.window.showErrorMessage
+*/
 function showMessageWindow(params: ShowMessageWindowParams): void {
     const message: string = util.getLocalizedString(params.localizeStringParams);
     switch (params.type) {
