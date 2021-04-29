@@ -1859,18 +1859,15 @@ export class DefaultClient implements Client {
                     throw err;
                 }
             };
-
             if (pendingTask && !pendingTask.Done) {
                 // We don't want the queue to stall because of a rejected promise.
                 try {
                     await pendingTask.getPromise();
-                } finally {
-                    return nextTask();
-                }
+                } catch (e) { }
             } else {
                 pendingTask = undefined;
-                return nextTask();
             }
+            return nextTask();
         } else {
             throw new Error(localize("unsupported.client", "Unsupported client"));
         }

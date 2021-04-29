@@ -32,6 +32,7 @@ export interface AttachItem extends vscode.QuickPickItem {
 
 // We should not await on this function.
 export async function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Promise<string | undefined> {
+    const processEntries: AttachItem[] = await getAttachItems();
     return new Promise<string | undefined>((resolve, reject) => {
         const quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();
         quickPick.title = localize("attach.to.process", "Attach to process");
@@ -40,6 +41,7 @@ export async function showQuickPick(getAttachItems: () => Promise<AttachItem[]>)
         quickPick.matchOnDetail = true;
         quickPick.placeholder = localize("select.process.attach", "Select the process to attach to");
         quickPick.buttons = [new RefreshButton()];
+        quickPick.items = processEntries;
         const disposables: vscode.Disposable[] = [];
 
         quickPick.onDidTriggerButton(async () => { quickPick.items = await getAttachItems(); }, undefined, disposables);
