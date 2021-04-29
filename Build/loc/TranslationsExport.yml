@@ -16,8 +16,9 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-- name: Generate XLF to export
-  run: cd ./Extension && yarn run translations-export && cd ..
+- task: CmdLine@2
+  inputs:
+    script: 'cd ./Extension && yarn run translations-export && cd ..'
 
 - task: OneLocBuild@1
   env:
