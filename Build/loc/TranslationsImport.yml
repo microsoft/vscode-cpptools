@@ -24,4 +24,4 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) && cd popd'
+    script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/VSCodeExt && cd popd'

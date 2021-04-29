@@ -15,9 +15,10 @@ let repoName = process.argv[3];
 let locProjectName = process.argv[4];
 let authUser = process.argv[5];
 let authToken = process.argv[6];
+let locRepoPath = process.argv[7];
 
 if (!repoOwner || !repoName || !locProjectName || !authUser || !authToken) {
-    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token`);
+    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token loc_repo_path`);
     return;
 }
 
@@ -26,6 +27,7 @@ console.log(`repoName=${repoName}`);
 console.log(`locProjectName=${locProjectName}`);
 console.log(`authUser=${authUser}`);
 console.log(`authToken=${authToken}`);
+console.log(`locRepoPath=${locRepoPath}`);
 
 function hasBranch(branchName) {
     console.log(`Checking for existance of branch "${branchName}" (git branch --list ${branchName})`);
@@ -66,21 +68,15 @@ function sleep(ms) {
 console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
-console.log("Looking for latest localization drop");
-let latestTxt = fs.readFileSync("\\\\simpleloc\\drops\\Drops\\vscode-extensions_2432\\Latest.txt")
-let exp = /Build No:\s*(.*)(?!=\n)/gm;
-let match = exp.exec(latestTxt.toString());
-let versionString = match[1];
-
-console.log("Copying XLF files to vscode-translations-import directory");
-let rootSourcePath = `\\\\simpleloc\\drops\\Drops\\vscode-extensions_2432\\${versionString}\\Localization\\locdrop\\bin`; 
-let directories = fs.readdirSync(rootSourcePath);
+let rootSourcePath = `${locRepoPath}\\Src\\VSCodeExt`;
+let directories = fs.readdirSync(rootSourcePath, { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
 directories.forEach(folderName => {
-    let sourcePath = `${rootSourcePath}\\${folderName}\\Projects\\Src\\vscode-extensions\\vscode-${locProjectName}.${folderName}.xlf`;
+    let sourcePath = `${rootSourcePath}\\${folderName}\\vscode-cpptools.xlf`;
     let destinationPath = `../vscode-translations-import/${folderName}/vscode-extensions/vscode-${locProjectName}.xlf`;
-    console.log(`Copying "${sourcePath}$" to "${destinationPath}"`);
+    console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
     fs.copySync(sourcePath, destinationPath);
 });
+
 
 console.log("Import translations into i18n directory");
 cp.execSync("npm run translations-import");
