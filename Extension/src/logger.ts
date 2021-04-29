@@ -34,7 +34,7 @@ export class Logger {
         }
     }
 
-    // This function is not intended to have a top-level await.
+    // We should not await on this function.
     public showInformationMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
@@ -44,7 +44,7 @@ export class Logger {
         return vscode.window.showInformationMessage(message, ...items);
     }
 
-    // This function is not intended to have a top-level await.
+    // We should not await on this function.
     public showWarningMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
@@ -54,7 +54,7 @@ export class Logger {
         return vscode.window.showWarningMessage(message, ...items);
     }
 
-    // This function is not intended to have a top-level await.
+    // We should not await on this function.
     public showErrorMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 

@@ -30,6 +30,7 @@ export interface AttachItem extends vscode.QuickPickItem {
     id?: string;
 }
 
+// We should not await on this function.
 export async function showQuickPick(getAttachItems: () => Promise<AttachItem[]>): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve, reject) => {
         const quickPick: vscode.QuickPick<AttachItem> = vscode.window.createQuickPick<AttachItem>();

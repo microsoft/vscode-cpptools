@@ -8,7 +8,6 @@ import { AttachItem, showQuickPick } from './attachQuickPick';
 import { CppSettings } from '../LanguageServer/settings';
 
 import * as debugUtils from './utils';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as util from '../common';
@@ -25,6 +24,7 @@ export interface AttachItemsProvider {
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
+    // We should not await on this function.
     public async ShowAttachEntries(): Promise<string | undefined> {
         if (!await util.isExtensionReady()) {
             util.displayExtensionNotReadyPrompt();
