@@ -40,7 +40,7 @@ export class RenameProvider implements vscode.RenameProvider {
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
                 DefaultClient.referencesParams = params;
-                await this.client.notifyWhenReady(() => { });
+                await this.client.awaitUntilLanguageClientReady();
                 // The current request is represented by referencesParams.  If a request detects
                 // referencesParams does not match the object used when creating the request, abort it.
                 if (params !== DefaultClient.referencesParams) {

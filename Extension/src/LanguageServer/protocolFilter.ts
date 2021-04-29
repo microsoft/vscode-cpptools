@@ -14,7 +14,7 @@ import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension'
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
-    const defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenReady(() => callback(data)); };
+    const defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenLanguageClientReady(() => callback(data)); };
     // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
     const invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
     const invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
@@ -37,7 +37,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                         me.TrackedDocuments.add(document);
                         const finishDidOpen = (doc: vscode.TextDocument) => {
                             me.provideCustomConfiguration(doc.uri, undefined);
-                            me.notifyWhenReady(() => {
+                            me.notifyWhenLanguageClientReady(() => {
                                 sendMessage(doc);
                                 me.onDidOpenTextDocument(doc);
                                 if (editor && editor === vscode.window.activeTextEditor) {
@@ -79,7 +79,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                 processDelayedDidOpen(textDocumentChangeEvent.document);
             }
             me.onDidChangeTextDocument(textDocumentChangeEvent);
-            me.notifyWhenReady(() => sendMessage(textDocumentChangeEvent));
+            me.notifyWhenLanguageClientReady(() => sendMessage(textDocumentChangeEvent));
         },
         willSave: defaultHandler,
         willSaveWaitUntil: (event, sendMessage) => {
@@ -95,7 +95,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
-                me.notifyWhenReady(() => sendMessage(document));
+                me.notifyWhenLanguageClientReady(() => sendMessage(document));
             }
         },
 

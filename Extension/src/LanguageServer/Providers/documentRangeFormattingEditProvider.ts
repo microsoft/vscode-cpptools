@@ -14,7 +14,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
     }
 
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
-        await this.client.notifyWhenReady(() => { });
+        await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {

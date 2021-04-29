@@ -354,7 +354,7 @@ function realActivation(): void {
             }
         }
     });
-    clients.ActiveClient.notifyWhenReady(() => {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
 }
@@ -440,7 +440,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 client.TrackedDocuments.add(document);
                 const finishDidOpen = (doc: vscode.TextDocument) => {
                     client.provideCustomConfiguration(doc.uri, undefined);
-                    client.notifyWhenReady(() => {
+                    client.notifyWhenLanguageClientReady(() => {
                         client.takeOwnership(doc);
                         client.onDidOpenTextDocument(doc);
                     });

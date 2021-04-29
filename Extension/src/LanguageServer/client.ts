@@ -578,7 +578,8 @@ export interface Client {
     takeOwnership(document: vscode.TextDocument): void;
     queueTask<T>(task: () => Thenable<T>): Thenable<T>;
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
-    notifyWhenReady(notify: () => void): void;
+    notifyWhenLanguageClientReady(notify: () => void): void;
+    awaitUntilLanguageClientReady(): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): void;
     activate(): void;
@@ -709,7 +710,8 @@ export class DefaultClient implements Client {
      * All public methods on this class must be guarded by the "pendingTask" promise. Requests and notifications received before the task is
      * complete are executed after this promise is resolved.
      * @see requestWhenReady<T>(request)
-     * @see notifyWhenReady(notify)
+     * @see notifyWhenLanguageClientReady(notify)
+     * @see awaitUntilLanguageClientReady()
      */
 
     constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
@@ -1335,7 +1337,7 @@ export class DefaultClient implements Client {
 
     public sendDidChangeSettings(settings: any): void {
         // Send settings json to native side
-        this.notifyWhenReady(() => {
+        this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
         });
     }
@@ -1343,7 +1345,7 @@ export class DefaultClient implements Client {
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } {
         this.sendAllSettings();
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
-        this.notifyWhenReady(() => {
+        this.notifyWhenLanguageClientReady(() => {
             if (Object.keys(changedSettings).length > 0) {
                 if (isFirstClient) {
                     if (changedSettings["commentContinuationPatterns"]) {
@@ -1465,7 +1467,7 @@ export class DefaultClient implements Client {
                 this.pauseParsing();
             }
         };
-        return this.notifyWhenReady(() => {
+        return this.notifyWhenLanguageClientReady(() => {
             if (this.registeredProviders.includes(provider)) {
                 return; // Prevent duplicate processing.
             }
@@ -1522,7 +1524,7 @@ export class DefaultClient implements Client {
     }
 
     public updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> {
-        return this.notifyWhenReady(() => {
+        return this.notifyWhenLanguageClientReady(() => {
             if (!this.configurationProvider) {
                 this.clearCustomConfigurations();
                 return;
@@ -1545,7 +1547,7 @@ export class DefaultClient implements Client {
     }
 
     public updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
-        return this.notifyWhenReady(() => {
+        return this.notifyWhenLanguageClientReady(() => {
             if (!this.configurationProvider) {
                 return;
             }
@@ -1665,7 +1667,7 @@ export class DefaultClient implements Client {
     }
 
     public async rescanFolder(): Promise<void> {
-        await this.notifyWhenReady(() => this.languageClient.sendNotification(RescanFolderNotification));
+        await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
@@ -1834,7 +1836,7 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
         this.trackedDocuments.add(document);
     }
 
@@ -1913,9 +1915,16 @@ export class DefaultClient implements Client {
         return this.queueTask(request);
     }
 
-    public notifyWhenReady<T>(notify: () => T): Promise<T> {
+    public notifyWhenLanguageClientReady<T>(notify: () => T): Promise<T> {
         const task: () => Promise<T> = () => new Promise<T>(resolve => {
             resolve(notify());
+        });
+        return this.queueTask(task);
+    }
+
+    public awaitUntilLanguageClientReady(): Thenable<void> {
+        const task: () => Thenable<void> = () => new Promise<void>(resolve => {
+            resolve();
         });
         return this.queueTask(task);
     }
@@ -2280,7 +2289,7 @@ export class DefaultClient implements Client {
      * notifications to the language server
      */
     public activeDocumentChanged(document: vscode.TextDocument): void {
-        this.notifyWhenReady(() => {
+        this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
     }
@@ -2294,13 +2303,13 @@ export class DefaultClient implements Client {
     }
 
     public selectionChanged(selection: Range): void {
-        this.notifyWhenReady(() => {
+        this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
         });
     }
 
     public resetDatabase(): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ResetDatabaseNotification));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResetDatabaseNotification));
     }
 
     /**
@@ -2311,11 +2320,11 @@ export class DefaultClient implements Client {
     }
 
     public pauseParsing(): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(PauseParsingNotification));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(PauseParsingNotification));
     }
 
     public resumeParsing(): void {
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
     private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
@@ -2376,7 +2385,7 @@ export class DefaultClient implements Client {
             currentConfiguration: index,
             workspaceFolderUri: this.RootPath
         };
-        this.notifyWhenReady(() => {
+        this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ChangeSelectedSettingNotification, params);
             let configName: string = "";
             if (this.configuration.ConfigurationNames) {
@@ -2392,7 +2401,7 @@ export class DefaultClient implements Client {
             uri: vscode.Uri.file(path).toString(),
             workspaceFolderUri: this.RootPath
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ChangeCompileCommandsNotification, params));
     }
 
     private isSourceFileConfigurationItem(input: any, providerVersion: Version): input is SourceFileConfigurationItem {
@@ -2555,7 +2564,7 @@ export class DefaultClient implements Client {
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification, params));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ClearCustomConfigurationsNotification, params));
     }
 
     private clearCustomBrowseConfiguration(): void {
@@ -2563,14 +2572,14 @@ export class DefaultClient implements Client {
         const params: WorkspaceFolderParams = {
             workspaceFolderUri: this.RootPath
         };
-        this.notifyWhenReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification, params));
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ClearCustomBrowseConfigurationNotification, params));
     }
 
     /**
      * command handlers
      */
     public async handleConfigurationSelectCommand(): Promise<void> {
-        await this.notifyWhenReady(() => { });
+        await this.awaitUntilLanguageClientReady();
         const configNames: string[] | undefined = this.configuration.ConfigurationNames;
         if (configNames) {
             const index: number = await ui.showConfigurations(configNames);
@@ -2582,7 +2591,7 @@ export class DefaultClient implements Client {
     }
 
     public async handleConfigurationProviderSelectCommand(): Promise<void> {
-        await this.notifyWhenReady(() => { });
+        await this.awaitUntilLanguageClientReady();
         const extensionId: string | undefined = await ui.showConfigurationProviders(this.configuration.CurrentConfigurationProvider);
         if (extensionId === undefined) {
             // operation was canceled.
@@ -2601,7 +2610,7 @@ export class DefaultClient implements Client {
     }
 
     public async handleShowParsingCommands(): Promise<void> {
-        await this.notifyWhenReady(() => { });
+        await this.awaitUntilLanguageClientReady();
         const index: number = await ui.showParsingCommands();
         if (index === 0) {
             this.pauseParsing();
@@ -2611,19 +2620,19 @@ export class DefaultClient implements Client {
     }
 
     public handleConfigurationEditCommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument));
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument));
     }
 
     public handleConfigurationEditJSONCommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument));
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument));
     }
 
     public handleConfigurationEditUICommand(): void {
-        this.notifyWhenReady(() => this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument));
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument));
     }
 
     public handleAddToIncludePathCommand(path: string): void {
-        this.notifyWhenReady(() => this.configuration.addToIncludePathCommand(path));
+        this.notifyWhenLanguageClientReady(() => this.configuration.addToIncludePathCommand(path));
     }
 
     public async handleGoToDirectiveInGroup(next: boolean): Promise<void> {
@@ -2652,7 +2661,7 @@ export class DefaultClient implements Client {
 
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
-        // Don't queue them up with this.notifyWhenReady calls.
+        // Don't queue them up with this.notifyWhenLanguageClientReady calls.
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             this.languageClient.sendNotification(IntervalTimerNotification);
             this.configuration.checkCppProperties();
@@ -2691,7 +2700,7 @@ export class DefaultClient implements Client {
     }
 
     public handleReferencesIcon(): void {
-        this.notifyWhenReady(() => {
+        this.notifyWhenLanguageClientReady(() => {
             const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
             if (!cancelling) {
                 workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
@@ -2799,7 +2808,8 @@ class NullClient implements Client {
     takeOwnership(document: vscode.TextDocument): void {}
     queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
-    notifyWhenReady(notify: () => void): void {}
+    notifyWhenLanguageClientReady(notify: () => void): void {}
+    awaitUntilLanguageClientReady(): void {}
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): void {}
     activate(): void {}

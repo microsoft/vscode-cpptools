@@ -20,7 +20,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             id: id,
             uri: document.uri.toString()
         };
-        await this.client.notifyWhenReady(() => { });
+        await this.client.awaitUntilLanguageClientReady();
         token.onCancellationRequested(e => this.client.abortRequest(id));
         const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
         if (ranges.canceled) {

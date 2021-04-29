@@ -414,7 +414,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 
     // If there is a download failure, we shouldn't continue activating the extension in some broken state.
     if (!installSuccess) {
-        throw new Error("Failed installing dependencies");
+        throw new Error(localize("failed.installing.dependencies", "Failed installing dependencies"));
     } else {
         // Notify users if debugging may not be supported on their OS.
         util.checkDistro(info);
