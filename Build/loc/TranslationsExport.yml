@@ -27,9 +27,6 @@ steps:
     locProj: 'Build/loc/LocProject.json'
     outDir: '$(Build.ArtifactStagingDirectory)'
     isCreatePrSelected: false
-    prSourceBranchPrefix: 'locfiles'
-    packageSourceAuth: 'patAuth'
-    patVariable: '$(OneLocBuildPat)'
 
 - task: PublishBuildArtifacts@1
   inputs:
