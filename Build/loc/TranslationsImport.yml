@@ -1,0 +1,27 @@
+# ==================================================================================
+# Pipeline for VsCodeExtension-Localization build definition
+# Runs OneLocBuild task to localize xlf file
+#
+# Triggered only by daily schedule
+# ==================================================================================
+
+resources:
+  repositories:
+  - repository: self
+    clean: true
+
+trigger: none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+
+# sources go in $(Build.SourcesDirectory)/$(RepositoryName)
+- checkout: self
+
+- checkout: git://ceapex.visualstudio.com/CEINTL/_git/VSCodeExt
+
+- task: CmdLine@2
+  inputs:
+    script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) && cd popd'
