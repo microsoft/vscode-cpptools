@@ -21,10 +21,10 @@ steps:
 - checkout: self
 
 #Because multi-check cannot span organizations (or between GitHub and Azure DevOps), manually clone the loc repo using a pat.
-- task: Check out Loc repo using PAT@2
+- task: CmdLine@2
   inputs:
     script: 'pushd && cd $(Build.SourcesDirectory) && git clone https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
 
-- task: Run translations_auto_pr.js@2
+- task: CmdLine@2
   inputs:
     script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/VSCodeExt && popd'
