@@ -57,12 +57,12 @@ export class RemoteAttachPicker {
 
             if (os.platform() === 'win32' &&
                 pipeTransport.pipeProgram &&
-                !fs.existsSync(pipeTransport.pipeProgram)) {
+                !await util.checkFileExists(pipeTransport.pipeProgram)) {
                 const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
                 const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
 
                 // Check for pipeProgram
-                if (!fs.existsSync(config.pipeTransport.pipeProgram)) {
+                if (!await util.checkFileExists(config.pipeTransport.pipeProgram)) {
                     pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
                 }
 
@@ -71,7 +71,7 @@ export class RemoteAttachPicker {
                     const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
                     const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
 
-                    if (!fs.existsSync(newPipeProgramStr)) {
+                    if (!await util.checkFileExists(newPipeProgramStr)) {
                         pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
                     }
                 }

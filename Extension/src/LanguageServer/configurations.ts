@@ -1079,11 +1079,11 @@ export class CppProperties {
     }
 
     private async ensurePropertiesFile(): Promise<void> {
-        if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
+        if (this.propertiesFile && await util.checkFileExists(this.propertiesFile.fsPath)) {
             return;
         } else {
             try {
-                if  (!fs.existsSync(this.configFolder)) {
+                if  (!await util.checkFileExists(this.configFolder)) {
                     fs.mkdirSync(this.configFolder);
                 }
 

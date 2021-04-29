@@ -119,7 +119,7 @@ export function initialize(context: vscode.ExtensionContext): void {
             }
         } catch (e) {
             try {
-                vscode.debug.startDebugging(folder, selection.configuration);
+                await vscode.debug.startDebugging(folder, selection.configuration);
                 Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
             } catch (e) {
                 Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
