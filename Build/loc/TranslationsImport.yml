@@ -1,6 +1,6 @@
 # ==================================================================================
 # Pipeline for VsCodeExtension-Localization build definition
-# Runs OneLocBuild task to localize xlf file
+# Gets translated files from VSCodeExt and creates a PR for vscode-cpptools
 #
 # Triggered only by daily schedule
 # ==================================================================================
@@ -20,7 +20,7 @@ steps:
 # sources go in $(Build.SourcesDirectory)/$(RepositoryName)
 - checkout: self
 
-- checkout: git://ceapex.visualstudio.com/CEINTL/_git/VSCodeExt
+- checkout: git://ceapex/VSCodeExt
 
 - task: CmdLine@2
   inputs:
