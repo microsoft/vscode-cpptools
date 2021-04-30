@@ -7,7 +7,6 @@
 	"architecture.not.supported": "{0} 아키텍처는 지원되지 않습니다. ",
 	"apline.containers.not.supported": "Alpine 컨테이너는 지원되지 않습니다.",
 	"download.button": "다운로드 페이지로 이동",
-	"native.binaries.mismatch.osx": "macOS Intel 버전의 확장이 설치되었습니다. Apple Silicon Mac을 사용 중이므로 Apple Silicon 버전의 확장을 설치하는 것이 좋습니다.",
 	"native.binaries.not.supported": "이 확장의 {0} {1} 버전은 OS와 호환되지 않습니다. 확장의 \"{2}\" 버전을 다운로드하여 설치하세요.",
 	"extension.installation.failed": "C/C++ 확장을 설치하지 못했습니다. C/C++ 언어 기능이 제대로 작동하려면 확장을 복구하거나 다시 설치해야 합니다.",
 	"remove.extension": "복구 시도",
