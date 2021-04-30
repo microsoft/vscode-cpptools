@@ -17,7 +17,7 @@ pool:
 
 steps:
 - checkout: self
-  path: $(Build.SourcesDirectory)/vscode-cpptools
+  path: vscode-cpptools
 
 #Because multi-check cannot span organizations (or between GitHub and Azure DevOps), manually clone the loc repo using a pat.
 - task: CmdLine@2
