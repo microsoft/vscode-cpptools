@@ -9,6 +9,9 @@ resources:
   repositories:
   - repository: self
     clean: true
+  - repository: vscode-cpptools-api
+    type: github
+    name: microsoft/vscode-cpptools-api
 
 trigger: none
 
@@ -17,7 +20,14 @@ pool:
 
 steps:
 - checkout: self
-- checkout: https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt
+
+# HACK: Clone vscode-cpptools-api as well, just to cause DevOps to give us a common parent directory we can manually clone the Loc repo into
+
+- checkout: vscode-cpptools-api
+
+- task: CmdLine@2
+  inputs:
+    script: 'pushd && cd $(Build.SourcesDirectory) && git clone https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
 
 - task: CmdLine@2
   inputs:
