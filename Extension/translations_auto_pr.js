@@ -15,10 +15,12 @@ let repoName = process.argv[3];
 let locProjectName = process.argv[4];
 let authUser = process.argv[5];
 let authToken = process.argv[6];
-let locRepoPath = process.argv[7];
+let userFullName = process.argv[7];
+let userEmail = process.argv[8];
+let locRepoPath = process.argv[9];
 
 if (!repoOwner || !repoName || !locProjectName || !authUser || !authToken) {
-    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token loc_repo_path`);
+    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token user_full_name user_email loc_repo_path`);
     return;
 }
 
@@ -111,13 +113,20 @@ if (!hasAnyChanges()) {
     return;
 }
 
-// Commit changes files.
-console.log(`Commiting changes (git commit -m "${commitComment}")`);
-cp.execSync(`git commit -m "${commitComment}"`);
+// Set up user and permissions(Never run this locally)
+console.log(`Setting user name to: ${userFullName}`);
+cp.execSync(`git config user.name ${userFullName}`);
+
+console.log(`Setting user email to: ${userEmail}`);
+cp.execSync(`git config user.email ${userEmail}`);
 
 console.log(`Configuring git with permission to push and to create pull requests (git remote remove origin && git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
 cp.execSync('git remote remove origin');
 cp.execSync(`git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
+
+// Commit changed files.
+console.log(`Commiting changes (git commit -m "${commitComment}")`);
+cp.execSync(`git commit -m "${commitComment}"`);
 
 console.log(`pushing to remove branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
