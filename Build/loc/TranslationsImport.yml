@@ -5,12 +5,6 @@
 # Triggered only by daily schedule
 # ==================================================================================
 
-resources:
-  repositories:
-  - repository: self
-    clean: true
-  - repository: github://microsoft/vscode-cpptools-api
-
 trigger: none
 
 pool:
@@ -18,9 +12,7 @@ pool:
 
 steps:
 - checkout: self
-
 # HACK: Clone vscode-cpptools-api as well, just to cause DevOps to give us a common parent directory we can manually clone the Loc repo into
-
 - checkout:  github://microsoft/vscode-cpptools-api
 
 - task: CmdLine@2
