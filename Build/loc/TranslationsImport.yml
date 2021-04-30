@@ -21,5 +21,10 @@ steps:
 
 - task: CmdLine@2
   inputs:
+    script: 'cd Extension && yarn install'
+    workingDirectory: '$(Build.SourcesDirectory)'
+
+- task: CmdLine@2
+  inputs:
     script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/../VSCodeExt'
     workingDirectory: '$(Build.SourcesDirectory)'
