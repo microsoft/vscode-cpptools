@@ -17,12 +17,7 @@ pool:
 
 steps:
 - checkout: self
-- checkout: git://CEINTL/VSCodeExt
-
-#Because multi-check cannot span organizations (or between GitHub and Azure DevOps), manually clone the loc repo using a pat.
-- task: CmdLine@2
-  inputs:
-    script: 'pushd && cd $(Build.SourcesDirectory) && git clone https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
+- checkout: https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt
 
 - task: CmdLine@2
   inputs:
