@@ -1627,7 +1627,7 @@ export class CppProperties {
                     && compilerPathAndArgs.compilerPath.includes(" ");
                 compilerPath = compilerPathAndArgs.compilerPath;
                 // Don't squiggle if compiler path is resolving with environment path.
-                if (compilerPathNeedsQuotes || !compilerPath || !which.sync(compilerPath, { nothrow: true })) {
+                if (compilerPathNeedsQuotes || (compilerPath && !which.sync(compilerPath, { nothrow: true }))) {
                     if (compilerPathNeedsQuotes) {
                         compilerMessage = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                         newSquiggleMetrics.CompilerPathMissingQuotes++;
