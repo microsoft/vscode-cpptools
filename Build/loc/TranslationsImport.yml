@@ -16,8 +16,8 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'pushd && cd .. && git clone https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
+    script: 'pushd && cd .. && git clone --progress --verbose https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
 
 - task: CmdLine@2
   inputs:
-    script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/../VSCodeExt && popd'
+    script: 'pushd && cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/../VSCodeExt && popd'
