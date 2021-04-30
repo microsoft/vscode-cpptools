@@ -2598,7 +2598,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152861",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162325",
       "platforms": [
         "linux"
       ],
@@ -2612,7 +2612,7 @@
     },
     {
       "description": "ClangFormat (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152860",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162327",
       "platforms": [
         "linux"
       ],
@@ -2626,7 +2626,7 @@
     },
     {
       "description": "ClangFormat (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152922",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162412",
       "platforms": [
         "linux"
       ],
@@ -2640,7 +2640,7 @@
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152859",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162416",
       "platforms": [
         "darwin"
       ],
@@ -2654,7 +2654,7 @@
     },
     {
       "description": "ClangFormat (OS X arm64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2160917",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162413",
       "platforms": [
         "darwin"
       ],
@@ -2668,7 +2668,7 @@
     },
     {
       "description": "ClangFormat (Windows x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152921",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162326",
       "platforms": [
         "win32"
       ],
@@ -2682,7 +2682,7 @@
     },
     {
       "description": "ClangFormat (Windows x64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152923",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162415",
       "platforms": [
         "win32"
       ],
@@ -2696,7 +2696,7 @@
     },
     {
       "description": "ClangFormat (Windows arm64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152862",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162414",
       "platforms": [
         "win32"
       ],
