@@ -9,6 +9,8 @@ resources:
   repositories:
   - repository: self
     clean: true
+ - repository: VSCodeExt
+    type: git
 
 trigger: none
 
@@ -17,7 +19,7 @@ pool:
 
 steps:
 - checkout: self
-  path: vscode-cpptools
+- checkout: git://CEINTL/VSCodeExt
 
 #Because multi-check cannot span organizations (or between GitHub and Azure DevOps), manually clone the loc repo using a pat.
 - task: CmdLine@2
