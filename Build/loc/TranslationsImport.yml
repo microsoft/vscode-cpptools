@@ -12,13 +12,12 @@ pool:
 
 steps:
 - checkout: self
-# HACK: Clone vscode-cmake-tools as well, just to cause DevOps to give us a common parent directory we can manually clone the Loc repo into
-- checkout: github://microsoft/vscode-cmake-tools
+  path: s/vscode-cpptools
 
 - task: CmdLine@2
   inputs:
-    script: 'pushd && cd $(Build.SourcesDirectory) && git clone https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
+    script: 'pushd && cd .. && git clone https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt && popd'
 
 - task: CmdLine@2
   inputs:
-    script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/VSCodeExt && popd'
+    script: 'pushd && cd $(Build.SourcesDirectory)/vscode-cpptools/Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) $(Build.SourcesDirectory)/../VSCodeExt && popd'
