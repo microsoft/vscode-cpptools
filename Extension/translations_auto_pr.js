@@ -114,11 +114,11 @@ if (!hasAnyChanges()) {
 }
 
 // Set up user and permissions(Never run this locally)
-console.log(`Setting local user name to: ${userFullName}`);
-cp.execSync(`git config --local user.name ${userFullName}`);
+console.log(`Setting local user name to: "${userFullName}"`);
+cp.execSync(`git config --local user.name "${userFullName}"`);
 
-console.log(`Setting local user email to: ${userEmail}`);
-cp.execSync(`git config --local user.email ${userEmail}`);
+console.log(`Setting local user email to: "${userEmail}"`);
+cp.execSync(`git config --local user.email "${userEmail}"`);
 
 console.log(`Configuring git with permission to push and to create pull requests (git remote remove origin && git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
 cp.execSync('git remote remove origin');
