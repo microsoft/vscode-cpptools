@@ -16,9 +16,8 @@ pool:
   vmImage: 'windows-latest'
 
 steps:
-
-# sources go in $(Build.SourcesDirectory)/$(RepositoryName)
 - checkout: self
+  path: $(Build.SourcesDirectory)/vscode-cpptools
 
 #Because multi-check cannot span organizations (or between GitHub and Azure DevOps), manually clone the loc repo using a pat.
 - task: CmdLine@2
