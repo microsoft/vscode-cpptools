@@ -9,9 +9,6 @@ resources:
   repositories:
   - repository: self
     clean: true
-  - repository: vscode-cpptools-api
-    type: github
-    name: microsoft/vscode-cpptools-api
 
 trigger: none
 
@@ -23,7 +20,7 @@ steps:
 
 # HACK: Clone vscode-cpptools-api as well, just to cause DevOps to give us a common parent directory we can manually clone the Loc repo into
 
-- checkout: vscode-cpptools-api
+- checkout:  github://microsoft/vscode-cpptools-api
 
 - task: CmdLine@2
   inputs:
