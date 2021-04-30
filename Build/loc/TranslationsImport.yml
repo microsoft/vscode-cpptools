@@ -9,8 +9,6 @@ resources:
   repositories:
   - repository: self
     clean: true
- - repository: VSCodeExt
-    type: git
 
 trigger: none
 
