@@ -1680,6 +1680,28 @@
                     "default": ""
                   }
                 }
+              },
+              "stopAtConnect": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.stopAtConnect.description%",
+                "default": false
+              },
+              "hardwareBreakpoints": {
+                "description": "%c_cpp.debuggers.hardwareBreakpoints.description%",
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "require": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.hardwareBreakpoints.require.description%",
+                    "default": false
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "%c_cpp.debuggers.hardwareBreakpoints.limit.description%",
+                    "default": 0
+                  }
+                }
               }
             }
           },
