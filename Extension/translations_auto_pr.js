@@ -19,7 +19,7 @@ let userFullName = process.argv[7];
 let userEmail = process.argv[8];
 let locRepoPath = process.argv[9];
 
-if (!repoOwner || !repoName || !locProjectName || !authUser || !authToken) {
+if (!repoOwner || !repoName || !locProjectName || !authUser || !authToken || !userFullName || !userEmail || !locRepoPath) {
     console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token user_full_name user_email loc_repo_path`);
     return;
 }
@@ -79,7 +79,6 @@ directories.forEach(folderName => {
     fs.copySync(sourcePath, destinationPath);
 });
 
-
 console.log("Import translations into i18n directory");
 cp.execSync("npm run translations-import");
 
@@ -113,12 +112,14 @@ if (!hasAnyChanges()) {
     return;
 }
 
-// Set up user and permissions(Never run this locally)
+// Set up user and permissions
 console.log(`Setting local user name to: "${userFullName}"`);
-cp.execSync(`git config --local user.name "${userFullName}"`);
+var savedGetCommitterName = process.env.GIT_COMMITTER_NAME;
+process.env.GIT_COMMITTER_NAME = "${userFullName}";
 
 console.log(`Setting local user email to: "${userEmail}"`);
-cp.execSync(`git config --local user.email "${userEmail}"`);
+var savedGetCommitterEmail = process.env.GIT_COMMITTER_EMAIL;
+process.env.GIT_COMMITTER_EMAIL = "${userEmail}";
 
 console.log(`Configuring git with permission to push and to create pull requests (git remote remove origin && git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
 cp.execSync('git remote remove origin');
@@ -127,6 +128,12 @@ cp.execSync(`git remote add origin https://${authUser}:${authToken}@github.com/$
 // Commit changed files.
 console.log(`Commiting changes (git commit -m "${commitComment}")`);
 cp.execSync(`git commit -m "${commitComment}"`);
+
+console.log(`Reverting GIT_COMMITTER_NAME"`);
+process.env.GIT_COMMITTER_NAME = savedGetCommitterName;
+
+console.log(`Reverting GIT_COMMITTER_EMAIL"`);
+process.env.GIT_COMMITTER_EMAIL = savedGetCommitterEmail;
 
 console.log(`pushing to remove branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);

@@ -19,7 +19,7 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'git clone --progress --verbose https://$(OneLocBuildPat)@ceapex.visualstudio.com/CEINTL/_git/VSCodeExt ..\VSCodeExt'
+    script: 'git clone $(LocRepoUri) ..\VSCodeExt'
     workingDirectory: '$(Build.SourcesDirectory)'
 
 - task: CmdLine@2
