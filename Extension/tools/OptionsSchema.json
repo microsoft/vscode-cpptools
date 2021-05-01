@@ -176,6 +176,23 @@
         }
       }
     },
+    "HardwareBreakpoints": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.hardwareBreakpoints.description%",
+      "default": {},
+      "properties": {
+        "require": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.hardwareBreakpoints.require.description%",
+          "default": false
+        },
+        "limit": {
+          "type": "integer",
+          "description": "%c_cpp.debuggers.hardwareBreakpoints.limit.description%",
+          "default": 0
+        }
+      }
+    },
     "CppdbgLaunchOptions": {
       "type": "object",
       "default": {},
@@ -360,6 +377,16 @@
         "symbolLoadInfo": {
           "$ref": "#/definitions/SymbolLoadInfo",
           "description": "%c_cpp.debuggers.symbolLoadInfo.description%"
+        },
+        "stopAtConnect": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.stopAtConnect.description%",
+          "default": false
+        },
+        "hardwareBreakpoints": {
+          "$ref": "#/definitions/HardwareBreakpoints",
+          "description": "%c_cpp.debuggers.hardwareBreakpoints.description%",
+          "default": {}
         }
       }
     },

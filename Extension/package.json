@@ -1680,6 +1680,28 @@
                     "default": ""
                   }
                 }
+              },
+              "stopAtConnect": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.stopAtConnect.description%",
+                "default": false
+              },
+              "hardwareBreakpoints": {
+                "description": "%c_cpp.debuggers.hardwareBreakpoints.description%",
+                "default": {},
+                "type": "object",
+                "properties": {
+                  "require": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.hardwareBreakpoints.require.description%",
+                    "default": false
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "%c_cpp.debuggers.hardwareBreakpoints.limit.description%",
+                    "default": 0
+                  }
+                }
               }
             }
           },
@@ -2598,7 +2620,7 @@
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152861",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162325",
       "platforms": [
         "linux"
       ],
@@ -2608,11 +2630,11 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "B29779E4FE3D03094655FD24CC17B55B41518EDDCCB1E3DF3F4665F9685152E0"
+      "integrity": "3F10BAD92274A07DB5DE0FD922C0CEDA034DECDB9E73DC477DD43CF30B500A7B"
     },
     {
       "description": "ClangFormat (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152860",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162327",
       "platforms": [
         "linux"
       ],
@@ -2622,11 +2644,11 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "F1CD21F581715A2C2A3B10C8D33FF81E5CBCD58856AA73CA56A88B5F085EA0D7"
+      "integrity": "1098291D78FB3E9411C445218BE14D1A96E7242E0B70549DA499C6551D8CA538"
     },
     {
       "description": "ClangFormat (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152922",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162412",
       "platforms": [
         "linux"
       ],
@@ -2636,11 +2658,11 @@
       "binaries": [
         "./LLVM/bin/clang-format"
       ],
-      "integrity": "97B2A5A274F53FBB37485A383AD379CD556E85413BF843F0F0FD10536A0D705D"
+      "integrity": "CD5578A21C8D515D15C0611621E44C03DE4E667EFB4EE1A0DE18B08FD9B96794"
     },
     {
       "description": "ClangFormat (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152859",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162416",
       "platforms": [
         "darwin"
       ],
@@ -2650,11 +2672,11 @@
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "7AA436BA25E3404DC658A137188BEC65FF2532D1FEB314ABBBC5EBC9AAF5CCF7"
+      "integrity": "62A2ECB43511129F920D87BAE9230A803B54712038BCCB485F8F10B84B1A2000"
     },
     {
       "description": "ClangFormat (OS X arm64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2160917",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162413",
       "platforms": [
         "darwin"
       ],
@@ -2664,11 +2686,11 @@
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "BF5357714856AC08A69FAD4231C9EFBE47E97497D8E227E1506FCAA1C89D11E0"
+      "integrity": "90AD3B05EC9C0A706C440B99AC39000F97EFE8BBAB9A000834E18F8112468147"
     },
     {
       "description": "ClangFormat (Windows x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152921",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162326",
       "platforms": [
         "win32"
       ],
@@ -2678,11 +2700,11 @@
       "binaries": [
         "./LLVM/bin/clang-format.exe"
       ],
-      "integrity": "993A65F61F4BF6CA6FEF6F9C1B6EB4341CE63F30A72272CABA65392695764DA7"
+      "integrity": "928AF7C36F0E148537D8DF4D7AEEAD8A18DF9E4CA5C8BF23E49776EFBE078453"
     },
     {
       "description": "ClangFormat (Windows x64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152923",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162415",
       "platforms": [
         "win32"
       ],
@@ -2692,11 +2714,11 @@
       "binaries": [
         "./LLVM/bin/clang-format.exe"
       ],
-      "integrity": "5E271FD44792B3675136A34466F67A876174B7818533CF37486372E43E014E62"
+      "integrity": "7977B82D6BD88C1AEB5071146EDCB45976D1EA66E312EEF9156957CAD0702F35"
     },
     {
       "description": "ClangFormat (Windows arm64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2152862",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2162414",
       "platforms": [
         "win32"
       ],
@@ -2706,7 +2728,7 @@
       "binaries": [
         "./LLVM/bin/clang-format.exe"
       ],
-      "integrity": "9944827F70A8C53127B1A7860401923DED2DB7FBAD75E7A8106636891C11F832"
+      "integrity": "6756365C82B5BD90C6A40C13CF8E3599E4A1DB50628111FFDB3A76FF85256BA4"
     },
     {
       "description": "Mono Framework Assemblies",
