@@ -4,6 +4,7 @@ const fs = require("fs-extra");
 const cp = require("child_process");
 const Octokit = require('@octokit/rest')
 const path = require('path');
+const parseGitConfig = require('parse-git-config');
 
 const branchName = 'localization';
 const mergeTo = 'main';
@@ -113,13 +114,35 @@ if (!hasAnyChanges()) {
 }
 
 // Set up user and permissions
+
+// Save existing user name and email, in case already set.
+var existingUserName;
+var existingUserEmail;
+var gitConfigPath = path.resolve(process.cwd(), '../.git/config');
+var config = parseGitConfig.sync({ path: gitConfigPath });
+
+if (typeof config === 'object' && config.hasOwnProperty('user')) {
+    existingUserName = config.user.name;
+    existingUserEmail = config.user.email;
+}
+if (existingUserName === undefined) {
+    console.log(`Existing user name: undefined`);
+} else {
+    console.log(`Existing user name: "${existingUserName}"`);
+    cp.execSync(`git config --local --unset user.name`);
+}
+if (existingUserEmail === undefined) {
+    console.log(`Existing user email: undefined`);
+} else {
+    console.log(`Existing user email: "${existingUserEmail}"`);
+    cp.execSync(`git config --local --unset user.email`);
+}
+
 console.log(`Setting local user name to: "${userFullName}"`);
-var savedGetCommitterName = process.env.GIT_COMMITTER_NAME;
-process.env.GIT_COMMITTER_NAME = "${userFullName}";
+cp.execSync(`git config --local user.name "${userFullName}"`);
 
 console.log(`Setting local user email to: "${userEmail}"`);
-var savedGetCommitterEmail = process.env.GIT_COMMITTER_EMAIL;
-process.env.GIT_COMMITTER_EMAIL = "${userEmail}";
+cp.execSync(`git config --local user.email "${userEmail}"`);
 
 console.log(`Configuring git with permission to push and to create pull requests (git remote remove origin && git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
 cp.execSync('git remote remove origin');
@@ -129,11 +152,21 @@ cp.execSync(`git remote add origin https://${authUser}:${authToken}@github.com/$
 console.log(`Commiting changes (git commit -m "${commitComment}")`);
 cp.execSync(`git commit -m "${commitComment}"`);
 
-console.log(`Reverting GIT_COMMITTER_NAME"`);
-process.env.GIT_COMMITTER_NAME = savedGetCommitterName;
+if (existingUserName === undefined) {
+    console.log(`Restoring original user name: undefined`);
+    cp.execSync(`git config --local --unset user.name`);
+} else {
+    console.log(`Restoring original user name: "${existingUserName}"`);
+    cp.execSync(`git config --local user.name "${existingUserName}"`);
+}
 
-console.log(`Reverting GIT_COMMITTER_EMAIL"`);
-process.env.GIT_COMMITTER_EMAIL = savedGetCommitterEmail;
+if (existingUserEmail === undefined) {
+    console.log(`Restoring original user email: undefined`);
+    cp.execSync(`git config --local --unset user.email`);
+} else {
+    console.log(`Restoring original user email: "${existingUserEmail}"`);
+    cp.execSync(`git config --local user.email "${existingUserEmail}"`);
+}
 
 console.log(`pushing to remove branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
