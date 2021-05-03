@@ -40,8 +40,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const arch: string = PlatformInformation.GetArchitecture();
     if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(arch));
-    } else if (process.platform === 'linux' && fs.existsSync('/etc/alpine-release')) {
-        errMsg = localize("alpine.containers.not.supported", "Alpine containers are not supported.");
+    } else if (process.platform === 'linux' && await util.checkFileExists('/etc/alpine-release')) {
+        errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
     }
     if (errMsg) {
         vscode.window.showErrorMessage(errMsg);
@@ -162,7 +162,7 @@ async function processRuntimeDependencies(): Promise<void> {
             // For macOS and if a user has upgraded their OS, check to see if we are on Mojave or later
             // and that the debugAdapters/lldb-mi folder exists. This will force a online install to get the correct binaries.
             if (!highSierraOrLowerRegex.test(info.version) &&
-                !fs.existsSync(lldbMiFolderPath)) {
+                !await util.checkFileExists(lldbMiFolderPath)) {
 
                 forceOnlineInstall = true;
 
@@ -284,7 +284,7 @@ function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolea
            !VersionsMatch(pkg, info);
 }
 
-function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
+async function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
     const promises: Thenable<void>[] = [];
     const packages: IPackage[] = util.packageJson["runtimeDependencies"];
     packages.forEach(p => {
@@ -293,10 +293,10 @@ function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void>
             p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
         }
     });
-    return Promise.all(promises).then(() => { });
+    await Promise.all(promises);
 }
 
-function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
+async function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
     const promises: Thenable<void>[] = [];
     const packages: IPackage[] = util.packageJson["runtimeDependencies"];
     const logger: Logger = getOutputChannelLogger();
@@ -313,7 +313,7 @@ function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
             });
         }
     });
-    return Promise.all(promises).then(() => { });
+    await Promise.all(promises);
 }
 
 function removeUnnecessaryFile(): Promise<void> {
@@ -414,7 +414,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 
     // If there is a download failure, we shouldn't continue activating the extension in some broken state.
     if (!installSuccess) {
-        return Promise.reject<void>("");
+        throw new Error(localize("failed.installing.dependencies", "Failed installing dependencies"));
     } else {
         // Notify users if debugging may not be supported on their OS.
         util.checkDistro(info);

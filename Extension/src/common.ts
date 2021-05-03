@@ -753,33 +753,29 @@ export function isExecutable(file: string): Promise<boolean> {
     });
 }
 
-export function allowExecution(file: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        if (process.platform !== 'win32') {
-            checkFileExists(file).then((exists: boolean) => {
-                if (exists) {
-                    isExecutable(file).then((isExec: boolean) => {
-                        if (isExec) {
-                            resolve();
-                        } else {
-                            fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
-                                if (err) {
-                                    reject(err);
-                                    return;
-                                }
-                                resolve();
-                            });
-                        }
-                    });
-                } else {
-                    getOutputChannelLogger().appendLine("");
-                    getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
-                    resolve();
-                }
-            });
+export async function allowExecution(file: string): Promise<void> {
+    if (process.platform !== 'win32') {
+        const exists: boolean = await checkFileExists(file);
+        if (exists) {
+            const isExec: boolean = await isExecutable(file);
+            if (!isExec) {
+                await chmodAsync(file, '755');
+            }
         } else {
-            resolve();
+            getOutputChannelLogger().appendLine("");
+            getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
         }
+    }
+}
+
+export async function chmodAsync(path: fs.PathLike, mode: fs.Mode): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.chmod(path, mode, (err: NodeJS.ErrnoException | null) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
     });
 }
 
@@ -1291,4 +1287,12 @@ export function isCodespaces(): boolean {
 export async function checkCuda(): Promise<void> {
     const langs: string[] = await vscode.languages.getLanguages();
     supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
+}
+
+// Sequentially Resolve Promises.
+export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Promise<void>): Promise<void> {
+    return items.reduce(async (previousPromise, nextItem) => {
+        await previousPromise;
+        return promiseBuilder(nextItem);
+    }, Promise.resolve());
 }

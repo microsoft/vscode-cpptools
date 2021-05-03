@@ -33,21 +33,19 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-        return util.isExtensionReady().then(ready => {
-            if (ready) {
-                let command: string = path.join(this.context.extensionPath, './debugAdapters/OpenDebugAD7');
+    async createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
+        if (await util.isExtensionReady()) {
+            let command: string = path.join(this.context.extensionPath, './debugAdapters/OpenDebugAD7');
 
-                // Windows has the exe in debugAdapters/bin.
-                if (os.platform() === 'win32') {
-                    command = path.join(this.context.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
-                }
-
-                return new vscode.DebugAdapterExecutable(command, []);
-            } else {
-                throw new Error(util.extensionNotReadyString);
+            // Windows has the exe in debugAdapters/bin.
+            if (os.platform() === 'win32') {
+                command = path.join(this.context.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
             }
-        });
+
+            return new vscode.DebugAdapterExecutable(command, []);
+        } else {
+            throw new Error(util.extensionNotReadyString);
+        }
     }
 }
 
@@ -58,21 +56,19 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    async createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
         if (os.platform() !== 'win32') {
             vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not avaliable for non-Windows machines.", "cppvsdbg"));
             return null;
         } else {
-            return util.isExtensionReady().then(ready => {
-                if (ready) {
-                    return new vscode.DebugAdapterExecutable(
-                        path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
-                        ['--interpreter=vscode']
-                    );
-                } else {
-                    throw new Error(util.extensionNotReadyString);
-                }
-            });
+            if (await util.isExtensionReady()) {
+                return new vscode.DebugAdapterExecutable(
+                    path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
+                    ['--interpreter=vscode']
+                );
+            } else {
+                throw new Error(util.extensionNotReadyString);
+            }
         }
     }
 }

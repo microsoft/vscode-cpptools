@@ -38,30 +38,29 @@ export class NativeAttachItemsProviderFactory {
 abstract class NativeAttachItemsProvider implements AttachItemsProvider {
     protected abstract getInternalProcessEntries(): Promise<Process[]>;
 
-    getAttachItems(): Promise<AttachItem[]> {
-        return this.getInternalProcessEntries().then(processEntries => {
-            // localeCompare is significantly slower than < and > (2000 ms vs 80 ms for 10,000 elements)
-            // We can change to localeCompare if this becomes an issue
-            processEntries.sort((a, b) => {
-                if (a.name === undefined) {
-                    if (b.name === undefined) {
-                        return 0;
-                    }
-                    return 1;
-                }
+    async getAttachItems(): Promise<AttachItem[]> {
+        const processEntries: Process[] = await this.getInternalProcessEntries();
+        // localeCompare is significantly slower than < and > (2000 ms vs 80 ms for 10,000 elements)
+        // We can change to localeCompare if this becomes an issue
+        processEntries.sort((a, b) => {
+            if (a.name === undefined) {
                 if (b.name === undefined) {
-                    return -1;
-                }
-                const aLower: string = a.name.toLowerCase();
-                const bLower: string = b.name.toLowerCase();
-                if (aLower === bLower) {
                     return 0;
                 }
-                return aLower < bLower ? -1 : 1;
-            });
-            const attachItems: AttachItem[] = processEntries.map(p => p.toAttachItem());
-            return attachItems;
+                return 1;
+            }
+            if (b.name === undefined) {
+                return -1;
+            }
+            const aLower: string = a.name.toLowerCase();
+            const bLower: string = b.name.toLowerCase();
+            if (aLower === bLower) {
+                return 0;
+            }
+            return aLower < bLower ? -1 : 1;
         });
+        const attachItems: AttachItem[] = processEntries.map(p => p.toAttachItem());
+        return attachItems;
     }
 }
 
@@ -90,7 +89,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
     // characters. 50 was chosen because that's the maximum length of a "label" in the
     // QuickPick UI in VSCode.
 
-    protected getInternalProcessEntries(): Promise<Process[]> {
+    protected async getInternalProcessEntries(): Promise<Process[]> {
         let processCmd: string = '';
         switch (os.platform()) {
             case 'darwin':
@@ -100,9 +99,10 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
                 processCmd = PsProcessParser.psLinuxCommand;
                 break;
             default:
-                return Promise.reject<Process[]>(new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform())));
+                throw new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform()));
         }
-        return execChildProcess(processCmd, undefined).then(processes => PsProcessParser.ParseProcessFromPs(processes));
+        const processes: string = await execChildProcess(processCmd, undefined);
+        return PsProcessParser.ParseProcessFromPs(processes);
     }
 }
 
@@ -198,9 +198,10 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
     // |            887 |       746 |
     // |           1308 |      1132 |
 
-    protected getInternalProcessEntries(): Promise<Process[]> {
+    protected async getInternalProcessEntries(): Promise<Process[]> {
         const wmicCommand: string = 'wmic process get Name,ProcessId,CommandLine /FORMAT:list';
-        return execChildProcess(wmicCommand, undefined).then(processes => WmicProcessParser.ParseProcessFromWmic(processes));
+        const processes: string = await execChildProcess(wmicCommand, undefined);
+        return WmicProcessParser.ParseProcessFromWmic(processes);
     }
 }
 
