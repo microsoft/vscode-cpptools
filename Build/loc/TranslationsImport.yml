@@ -29,5 +29,5 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) "cpptools service account" cpptools@microsoft.com $(Build.SourcesDirectory)/../VSCodeExt'
+    script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools cpptools csigs $(csigsPat) csigs csigs@users.noreply.github.com $(Build.SourcesDirectory)/../VSCodeExt'
     workingDirectory: '$(Build.SourcesDirectory)'
