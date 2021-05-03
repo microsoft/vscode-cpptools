@@ -436,9 +436,13 @@ export class CppProperties {
     private async readNodeAddonIncludeLocations(rootPath: string): Promise<void> {
         let error: Error | undefined;
         let pdjFound: boolean = false;
-        const package_json: any = await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8")
-            .then(pdj => {pdjFound = true; return JSON.parse(pdj); })
-            .catch(e => (error = e));
+        let packageJson: any;
+        try {
+            packageJson = JSON.parse(await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8"));
+            pdjFound = true;
+        } catch (err) {
+            error = err;
+        }
 
         if (!error) {
             try {
@@ -457,35 +461,37 @@ export class CppProperties {
                 }
 
                 for (const [dep, execCmd] of nodeAddonMap) {
-                    if (dep in package_json.dependencies) {
-                        let stdout: string | void = await util.execChildProcess(execCmd, rootPath)
-                            .catch((error) => console.log('readNodeAddonIncludeLocations', error.message));
-                        if (!stdout) {
-                            continue;
-                        }
-
-                        // cleanup newlines
-                        if (stdout[stdout.length - 1] === "\n") {
-                            stdout = stdout.slice(0, -1);
-                        }
-                        // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
-                        if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
-                            stdout = stdout.slice(1, -1);
-                        }
-
-                        // at this time both node-addon-api and nan return their own directory so this test is not really
-                        // needed. but it does future proof the code.
-                        if (!await util.checkDirectoryExists(stdout)) {
-                            // nan returns a path relative to rootPath causing the previous check to fail because this code
-                            // is executing in vscode's working directory.
-                            stdout = path.join(rootPath, stdout);
-                            if (!await util.checkDirectoryExists(stdout)) {
-                                error = new Error(`${dep} directory ${stdout} doesn't exist`);
-                                stdout = '';
+                    if (dep in packageJson.dependencies) {
+                        try {
+                            let stdout: string | void = await util.execChildProcess(execCmd, rootPath);
+                            if (!stdout) {
+                                continue;
                             }
-                        }
-                        if (stdout) {
-                            this.nodeAddonIncludes.push(stdout);
+                            // cleanup newlines
+                            if (stdout[stdout.length - 1] === "\n") {
+                                stdout = stdout.slice(0, -1);
+                            }
+                            // node-addon-api returns a quoted string, e.g., '"/home/user/dir/node_modules/node-addon-api"'.
+                            if (stdout[0] === "\"" && stdout[stdout.length - 1] === "\"") {
+                                stdout = stdout.slice(1, -1);
+                            }
+
+                            // at this time both node-addon-api and nan return their own directory so this test is not really
+                            // needed. but it does future proof the code.
+                            if (!await util.checkDirectoryExists(stdout)) {
+                                // nan returns a path relative to rootPath causing the previous check to fail because this code
+                                // is executing in vscode's working directory.
+                                stdout = path.join(rootPath, stdout);
+                                if (!await util.checkDirectoryExists(stdout)) {
+                                    error = new Error(`${dep} directory ${stdout} doesn't exist`);
+                                    stdout = '';
+                                }
+                            }
+                            if (stdout) {
+                                this.nodeAddonIncludes.push(stdout);
+                            }
+                        } catch (err) {
+                            console.log('readNodeAddonIncludeLocations', err.message);
                         }
                     }
                 }
@@ -918,21 +924,19 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            console.assert(this.propertiesFile);
-            if (onBeforeOpen) {
-                onBeforeOpen();
+    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): Promise<void> {
+        await this.ensurePropertiesFile();
+        console.assert(this.propertiesFile);
+        if (onBeforeOpen) {
+            onBeforeOpen();
+        }
+        // Directly open the json file
+        if (this.propertiesFile) {
+            const document: vscode.TextDocument = await vscode.workspace.openTextDocument(this.propertiesFile);
+            if (showDocument) {
+                showDocument(document);
             }
-            // Directly open the json file
-            if (this.propertiesFile) {
-                vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                    if (showDocument) {
-                        showDocument(document);
-                    }
-                });
-            }
-        });
+        }
     }
 
     private ensureSettingsPanelInitlialized(): void {
@@ -949,58 +953,55 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
-        this.ensurePropertiesFile().then(() => {
-            if (this.propertiesFile) {
-                if (onBeforeOpen) {
-                    onBeforeOpen();
-                }
-                if (this.parsePropertiesFile()) {
-                    this.ensureSettingsPanelInitlialized();
-                    if (this.settingsPanel) {
-                        const configNames: string[] | undefined = this.ConfigurationNames;
-                        if (configNames && this.configurationJson) {
-                            // Use the active configuration as the default selected configuration to load on UI editor
-                            this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
-                            this.settingsPanel.createOrShow(configNames,
-                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                        }
+    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): Promise<void> {
+        await this.ensurePropertiesFile();
+        if (this.propertiesFile) {
+            if (onBeforeOpen) {
+                onBeforeOpen();
+            }
+            if (this.parsePropertiesFile()) {
+                this.ensureSettingsPanelInitlialized();
+                if (this.settingsPanel) {
+                    const configNames: string[] | undefined = this.ConfigurationNames;
+                    if (configNames && this.configurationJson) {
+                        // Use the active configuration as the default selected configuration to load on UI editor
+                        this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
+                        this.settingsPanel.createOrShow(configNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                     }
-                } else {
-                    // Parse failed, open json file
-                    vscode.workspace.openTextDocument(this.propertiesFile).then((document: vscode.TextDocument) => {
-                        if (showDocument) {
-                            showDocument(document);
-                        }
-                    });
+                }
+            } else {
+                // Parse failed, open json file
+                const document: vscode.TextDocument = await vscode.workspace.openTextDocument(this.propertiesFile);
+                if (showDocument) {
+                    showDocument(document);
                 }
             }
-        });
+        }
     }
 
-    private onSettingsPanelActivated(): void {
+    private async onSettingsPanelActivated(): Promise<void> {
         if (this.configurationJson) {
-            this.ensurePropertiesFile().then(() => {
-                if (this.propertiesFile) {
-                    if (this.parsePropertiesFile()) {
-                        const configNames: string[] | undefined = this.ConfigurationNames;
-                        if (configNames && this.settingsPanel && this.configurationJson) {
-                            // The settings UI became visible or active.
-                            // Ensure settingsPanel has copy of latest current configuration
-                            if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
-                                this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
-                            }
-                            this.settingsPanel.updateConfigUI(configNames,
-                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                        } else {
-                            // Parse failed, open json file
-                            vscode.workspace.openTextDocument(this.propertiesFile);
+            await this.ensurePropertiesFile();
+            if (this.propertiesFile) {
+                if (this.parsePropertiesFile()) {
+                    const configNames: string[] | undefined = this.ConfigurationNames;
+                    if (configNames && this.settingsPanel && this.configurationJson) {
+                        // The settings UI became visible or active.
+                        // Ensure settingsPanel has copy of latest current configuration
+                        if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
+                            this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
+                        this.settingsPanel.updateConfigUI(configNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                    } else {
+                        // Parse failed, open json file
+                        vscode.workspace.openTextDocument(this.propertiesFile);
                     }
                 }
-            });
+            }
         }
     }
 
@@ -1078,11 +1079,11 @@ export class CppProperties {
     }
 
     private async ensurePropertiesFile(): Promise<void> {
-        if (this.propertiesFile && fs.existsSync(this.propertiesFile.fsPath)) {
+        if (this.propertiesFile && await util.checkFileExists(this.propertiesFile.fsPath)) {
             return;
         } else {
             try {
-                if  (!fs.existsSync(this.configFolder)) {
+                if  (!await util.checkFileExists(this.configFolder)) {
                     fs.mkdirSync(this.configFolder);
                 }
 

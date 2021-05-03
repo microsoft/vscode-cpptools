@@ -151,7 +151,7 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
 /**
  * activate: set up the extension for language services
  */
-export function activate(activationEventOccurred: boolean): void {
+export async function activate(activationEventOccurred: boolean): Promise<void> {
     if (realActivationOccurred) {
         return; // Occurs if multiple delayed commands occur before the real commands are registered.
     }
@@ -173,11 +173,10 @@ export function activate(activationEventOccurred: boolean): void {
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-            if (fs.existsSync(config)) {
+            if (await util.checkFileExists(config)) {
                 cppPropertiesExists = true;
-                vscode.workspace.openTextDocument(config).then((doc: vscode.TextDocument) => {
-                    vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-                });
+                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
+                vscode.languages.setTextDocumentLanguage(doc, "jsonc");
             }
         }
     }
@@ -355,8 +354,7 @@ function realActivation(): void {
             }
         }
     });
-
-    clients.ActiveClient.notifyWhenReady(() => {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
 }
@@ -442,7 +440,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 client.TrackedDocuments.add(document);
                 const finishDidOpen = (doc: vscode.TextDocument) => {
                     client.provideCustomConfiguration(doc.uri, undefined);
-                    client.notifyWhenReady(() => {
+                    client.notifyWhenLanguageClientReady(() => {
                         client.takeOwnership(doc);
                         client.onDidOpenTextDocument(doc);
                     });
@@ -488,7 +486,7 @@ function onInterval(): void {
  * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
  * @param updateChannel The user's updateChannel setting.
  */
-function installVsix(vsixLocation: string): Thenable<void> {
+async function installVsix(vsixLocation: string): Promise<void> {
     const userVersion: PackageVersion = new PackageVersion(vscode.version);
 
     // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
@@ -500,7 +498,7 @@ function installVsix(vsixLocation: string): Thenable<void> {
     // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
     // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
     return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
-        const vsCodeScriptPath: string | undefined = function(platformInfo): string | undefined {
+        const getVsCodeScriptPath = (platformInfo: any): string => {
             if (platformInfo.platform === 'win32') {
                 const vsCodeBinName: string = path.basename(process.execPath);
                 let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
@@ -518,14 +516,13 @@ function installVsix(vsixLocation: string): Thenable<void> {
                     'Resources', 'app', 'bin', 'code');
             } else {
                 const vsCodeBinName: string = path.basename(process.execPath);
-                try {
-                    return which.sync(vsCodeBinName);
-                } catch (error) {
-                    return undefined;
-                }
+                return which.sync(vsCodeBinName);
             }
-        }(platformInfo);
-        if (!vsCodeScriptPath) {
+        };
+        let vsCodeScriptPath: string;
+        try {
+            vsCodeScriptPath = getVsCodeScriptPath(platformInfo);
+        } catch (err) {
             return Promise.reject(new Error('Failed to find VS Code script'));
         }
 
@@ -632,22 +629,24 @@ async function suggestInsidersChannel(): Promise<void> {
     const yes: string = localize("yes.button", "Yes");
     const askLater: string = localize("ask.me.later.button", "Ask Me Later");
     const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
-    const selection: string | undefined = await vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain);
-    switch (selection) {
-        case yes:
-            // Cache buildInfo.
-            buildInfoCache = buildInfo;
-            // It will call onDidChangeSettings.
-            vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
-            break;
-        case dontShowAgain:
-            suggestInsiders.Value = false;
-            break;
-        case askLater:
-            break;
-        default:
-            break;
-    }
+    vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain).then((selection) => {
+        switch (selection) {
+            case yes:
+                // Cache buildInfo.
+                buildInfoCache = buildInfo;
+                // It will call onDidChangeSettings.
+                vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
+                break;
+            case dontShowAgain:
+                suggestInsiders.Value = false;
+                break;
+            case askLater:
+                break;
+            default:
+                break;
+        }
+    });
+
 }
 
 async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
@@ -783,7 +782,7 @@ export function registerCommands(): void {
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
-function onSwitchHeaderSource(): void {
+async function onSwitchHeaderSource(): Promise<void> {
     onActivationEvent();
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
@@ -801,53 +800,49 @@ function onSwitchHeaderSource(): void {
         rootPath = path.dirname(fileName); // When switching without a folder open.
     }
 
-    clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName).then((targetFileName: string) => {
-        // If the targetFileName has a path that is a symlink target of a workspace folder,
-        // then replace the RootRealPath with the RootPath (the symlink path).
-        let targetFileNameReplaced: boolean = false;
-        clients.forEach(client => {
-            if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-                && targetFileName.indexOf(client.RootRealPath) === 0) {
-                targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
-                targetFileNameReplaced = true;
-            }
-        });
-        vscode.workspace.openTextDocument(targetFileName).then((document: vscode.TextDocument) => {
-            let foundEditor: boolean = false;
-            // If the document is already visible in another column, open it there.
-            vscode.window.visibleTextEditors.forEach((editor, index, array) => {
-                if (editor.document === document && !foundEditor) {
-                    foundEditor = true;
-                    vscode.window.showTextDocument(document, editor.viewColumn);
-                }
-            });
-
-            if (!foundEditor) {
-                vscode.window.showTextDocument(document);
-            }
-        });
+    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName);
+    // If the targetFileName has a path that is a symlink target of a workspace folder,
+    // then replace the RootRealPath with the RootPath (the symlink path).
+    let targetFileNameReplaced: boolean = false;
+    clients.forEach(client => {
+        if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
+            && targetFileName.indexOf(client.RootRealPath) === 0) {
+            targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
+            targetFileNameReplaced = true;
+        }
     });
+    const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+    let foundEditor: boolean = false;
+    // If the document is already visible in another column, open it there.
+    vscode.window.visibleTextEditors.forEach((editor, index, array) => {
+        if (editor.document === document && !foundEditor) {
+            foundEditor = true;
+            vscode.window.showTextDocument(document, editor.viewColumn);
+        }
+    });
+    if (!foundEditor) {
+        vscode.window.showTextDocument(document);
+    }
 }
 
 /**
  * Allow the user to select a workspace when multiple workspaces exist and get the corresponding Client back.
  * The resulting client is used to handle some command that was previously invoked.
  */
-function selectClient(): Thenable<Client> {
+async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
-        return Promise.resolve(clients.ActiveClient);
+        return clients.ActiveClient;
     } else {
-        return ui.showWorkspaces(clients.Names).then(key => {
-            if (key !== "") {
-                const client: Client | undefined = clients.get(key);
-                if (client) {
-                    return client;
-                } else {
-                    console.assert("client not found");
-                }
+        const key: string = await ui.showWorkspaces(clients.Names);
+        if (key !== "") {
+            const client: Client | undefined = clients.get(key);
+            if (client) {
+                return client;
+            } else {
+                console.assert("client not found");
             }
-            return Promise.reject<Client>(localize("client.not.found", "client not found"));
-        });
+        }
+        throw new Error(localize("client.not.found", "client not found"));
     }
 }
 

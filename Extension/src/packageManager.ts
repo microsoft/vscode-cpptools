@@ -104,30 +104,25 @@ export class PackageManager {
         tmp.setGracefulCleanup();
     }
 
-    public DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
-        return this.GetPackages()
-            .then((packages) => {
-                let count: number = 1;
-                return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.DownloadPackage(pkg);
-                    progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
-                    count += 1;
-                    return p;
-                });
-            });
+    public async DownloadPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
+        const packages: IPackage[] = await this.GetPackages();
+        let count: number = 1;
+        return util.sequentialResolve(packages, async (pkg): Promise<void> => {
+            progress.report({ message: localize("downloading.progress.description", "Downloading {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
+            count += 1;
+            await this.DownloadPackage(pkg);
+        });
     }
 
-    public InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
-        return this.GetPackages()
-            .then((packages) => {
-                let count: number = 1;
-                return this.BuildPromiseChain(packages, (pkg): Promise<void> => {
-                    const p: Promise<void> = this.InstallPackage(pkg);
-                    progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
-                    count += 1;
-                    return p;
-                });
-            });
+    public async InstallPackages(progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void | null> {
+        const packages: IPackage[] = await this.GetPackages();
+        let count: number = 1;
+        return util.sequentialResolve(packages, async (pkg): Promise<void> => {
+            progress.report({ message: localize("installing.progress.description", "Installing {0}", pkg.description), increment: this.GetIncrement(count, packages.length) });
+            count += 1;
+            await this.InstallPackage(pkg);
+        });
+
     }
 
     private GetIncrement(curStep: number, totalSteps: number): number {
@@ -138,28 +133,12 @@ export class PackageManager {
         return (curStep !== totalSteps) ? increment : maxIncrement - (totalSteps - 1) * increment;
     }
 
-    public GetPackages(): Promise<IPackage[]> {
-        return this.GetPackageList()
-            .then((list) =>
-                list.filter((value, index, array) =>
-                    ArchitecturesMatch(value, this.platformInfo) &&
-                        PlatformsMatch(value, this.platformInfo) &&
-                        VersionsMatch(value, this.platformInfo)
-                )
-            );
-    }
-
-    /** Builds a chain of promises by calling the promiseBuilder function once per item in the list.
-     *  Like Promise.all, but runs the promises in sequence rather than simultaneously.
-     */
-    private BuildPromiseChain<TItem, TPromise>(items: TItem[], promiseBuilder: (item: TItem) => Promise<TPromise>): Promise<TPromise | null> {
-        let promiseChain: Promise<TPromise | null> = Promise.resolve<TPromise | null>(null);
-
-        for (const item of items) {
-            promiseChain = promiseChain.then(() => promiseBuilder(item));
-        }
-
-        return promiseChain;
+    public async GetPackages(): Promise<IPackage[]> {
+        const list: IPackage[] = await this.GetPackageList();
+        return list.filter((value, index, array) => ArchitecturesMatch(value, this.platformInfo) &&
+            PlatformsMatch(value, this.platformInfo) &&
+            VersionsMatch(value, this.platformInfo)
+        );
     }
 
     private GetPackageList(): Promise<IPackage[]> {
