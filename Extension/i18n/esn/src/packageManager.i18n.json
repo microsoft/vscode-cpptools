@@ -26,9 +26,9 @@
 	"zip.file.error": "Error de archivo ZIP",
 	"create.directory.error": "Error al crear el directorio",
 	"zip.stream.error": "Error al leer la secuencia ZIP",
-	"read.stream.error": "Error en la secuencia de lectura",
 	"unlink.error": "Error al desvincular el archivo {0}",
 	"rename.error": "Error al cambiar el nombre del archivo {0}",
+	"read.stream.error": "Error en la secuencia de lectura",
 	"write.stream.error": "Error en la secuencia de escritura",
 	"file.already.exists": "Advertencia: El archivo \"{0}\" ya existe y no se ha actualizado."
 }

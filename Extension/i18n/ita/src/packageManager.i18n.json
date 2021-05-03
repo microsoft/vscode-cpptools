@@ -26,9 +26,9 @@
 	"zip.file.error": "Errore del file ZIP",
 	"create.directory.error": "Si è verificato un errore durante la creazione della directory",
 	"zip.stream.error": "Si è verificato un errore durante la lettura del flusso ZIP",
-	"read.stream.error": "Si è verificato un errore durante la lettura del flusso",
 	"unlink.error": "Si è verificato durante lo scollegamento del file {0}",
 	"rename.error": "Si è verificato durante la ridenominazione del file {0}",
+	"read.stream.error": "Si è verificato un errore durante la lettura del flusso",
 	"write.stream.error": "Si è verificato un errore durante la scrittura del flusso",
 	"file.already.exists": "Avviso: il file '{0}' esiste già e non è stato aggiornato."
 }

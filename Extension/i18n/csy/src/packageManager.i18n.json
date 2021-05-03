@@ -26,9 +26,9 @@
 	"zip.file.error": "Chyba souboru ZIP",
 	"create.directory.error": "Při vytváření adresáře došlo k chybě.",
 	"zip.stream.error": "Chyba při čtení streamu ZIP",
-	"read.stream.error": "Ve streamu pro čtení došlo k chybě.",
 	"unlink.error": "Při rušení propojení souboru {0} došlo k chybě.",
 	"rename.error": "Při přejmenování souboru {0} došlo k chybě.",
+	"read.stream.error": "Ve streamu pro čtení došlo k chybě.",
 	"write.stream.error": "Ve streamu pro zápis došlo k chybě.",
 	"file.already.exists": "Upozornění: Soubor {0} už existuje a neaktualizoval se."
 }

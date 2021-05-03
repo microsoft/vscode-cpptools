@@ -26,9 +26,9 @@
 	"zip.file.error": "Zip 파일 오류",
 	"create.directory.error": "디렉터리를 만드는 동안 오류가 발생했습니다.",
 	"zip.stream.error": "zip 스트림을 읽는 동안 오류가 발생했습니다.",
-	"read.stream.error": "읽기 스트림의 오류",
 	"unlink.error": "{0} 파일의 연결을 해제하는 동안 오류가 발생했습니다.",
 	"rename.error": "{0} 파일의 이름을 바꾸는 동안 오류가 발생했습니다.",
+	"read.stream.error": "읽기 스트림의 오류",
 	"write.stream.error": "쓰기 스트림의 오류",
 	"file.already.exists": "경고: '{0}' 파일이 이미 있으므로 업데이트되지 않았습니다."
 }
