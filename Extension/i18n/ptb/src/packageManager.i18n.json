@@ -26,9 +26,9 @@
 	"zip.file.error": "Erro no arquivo zip",
 	"create.directory.error": "Erro ao criar o diretório",
 	"zip.stream.error": "Erro ao ler o fluxo zip",
-	"read.stream.error": "Erro no fluxo de leitura",
 	"unlink.error": "Erro ao desvincular o arquivo {0}",
 	"rename.error": "Erro ao renomear o arquivo {0}",
+	"read.stream.error": "Erro no fluxo de leitura",
 	"write.stream.error": "Erro no fluxo de gravação",
 	"file.already.exists": "Aviso: o arquivo '{0}' já existe e não foi atualizado."
 }

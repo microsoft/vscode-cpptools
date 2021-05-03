@@ -26,9 +26,9 @@
 	"zip.file.error": "Fehler in ZIP-Datei.",
 	"create.directory.error": "Fehler beim Erstellen des Verzeichnisses.",
 	"zip.stream.error": "Fehler beim Lesen des ZIP-Datenstroms.",
-	"read.stream.error": "Fehler im Lesedatenstrom.",
 	"unlink.error": "Fehler beim Aufheben der Verknüpfung für die Datei \"{0}\".",
 	"rename.error": "Fehler beim Umbenennen der Datei\"{0}\".",
+	"read.stream.error": "Fehler im Lesedatenstrom.",
 	"write.stream.error": "Fehler im Schreibdatenstrom.",
 	"file.already.exists": "Warnung: Die Datei \"{0}\" ist bereits vorhanden und wurde nicht aktualisiert."
 }
