@@ -1,8 +1,6 @@
 # ==================================================================================
 # Pipeline for VsCodeExtension-Localization build definition
 # Runs OneLocBuild task to localize xlf file
-#
-# Triggered only by daily schedule
 # ==================================================================================
 
 resources:
