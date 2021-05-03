@@ -2477,6 +2477,7 @@
     "http-proxy-agent": "^2.1.0",
     "minimist": "^1.2.5",
     "mocha": "^8.3.2",
+    "parse-git-config": "^3.0.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
     "ts-loader": "^8.1.0",

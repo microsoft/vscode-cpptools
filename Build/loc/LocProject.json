@@ -1,0 +1,13 @@
+{
+    "Projects": [
+        {
+            "LanguangeSet": "VS_Main_Languages",
+            "LocItems": [
+                {
+                    "SourceFile": "vscode-extensions-localization-export\\vscode-extensions\\vscode-cpptools.xlf",
+                    "Languages": "cs;de;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant"
+                }
+            ]
+        }
+    ]
+}
