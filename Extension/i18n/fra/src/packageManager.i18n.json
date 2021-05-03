@@ -26,9 +26,9 @@
 	"zip.file.error": "Erreur du fichier zip",
 	"create.directory.error": "Erreur de création du répertoire",
 	"zip.stream.error": "Erreur de lecture du flux zip",
-	"read.stream.error": "Erreur du flux de lecture",
 	"unlink.error": "Erreur de dissociation du fichier {0}",
 	"rename.error": "Erreur de renommage du fichier {0}",
+	"read.stream.error": "Erreur du flux de lecture",
 	"write.stream.error": "Erreur du flux d'écriture",
 	"file.already.exists": "Avertissement : Le fichier '{0}' existe déjà et n'a pas été mis à jour."
 }
