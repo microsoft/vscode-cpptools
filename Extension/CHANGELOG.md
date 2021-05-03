@@ -464,7 +464,7 @@
 * Fix `compile_commands.json` prompt appearing when a configuration provider is used. [#3972](https://github.com/microsoft/vscode-cpptools/issues/3972)
 * Improve IntelliSense performance with range-v3. [#4414](https://github.com/microsoft/vscode-cpptools/issues/4414)
 * Fix template members not being nested under the template type in the Outline view. [#4466](https://github.com/microsoft/vscode-cpptools/issues/4466)
-* Fix an issue in which failure to invoke a compiler could result in a hang on Linux and Mac. [#4627](https://github.com/microsoft/vscode-cpptools/issues/4627)
+* Fix an issue in which failure to invoke a compiler could result in a loss of functionality on Linux and Mac. [#4627](https://github.com/microsoft/vscode-cpptools/issues/4627)
 * Fix custom configurations sometimes not being applied to headers. [#4649](https://github.com/microsoft/vscode-cpptools/issues/4649)
 * Fix headers opening into header-only TU's instead of TU's for candidate source files. [#4696](https://github.com/microsoft/vscode-cpptools/issues/4696)
 * Fix the missing description of `C_Cpp.clang_format_style`.
@@ -495,7 +495,7 @@
 * Fix child process creation when the Windows code page is set to a language with non-ASCII characters and there are non-ASCII characters in the extension's install path. [#1560](https://github.com/microsoft/vscode-cpptools/issues/1560)
 * Fix path canonicalization of UNC paths to avoid duplicate files opening with different casing. [#2528](https://github.com/microsoft/vscode-cpptools/issues/2528), [#3980](https://github.com/microsoft/vscode-cpptools/issues/3980)
 * Fix header opening without IntelliSense due to creation of a TU from a source file that includes the header in an inactive region. [#4320](https://github.com/microsoft/vscode-cpptools/issues/4320)
-* Fix a hang in the extension process that can occur when using a scope named 'interface'. [#4470](https://github.com/microsoft/vscode-cpptools/issues/4470)
+* Fix an infinite loop in the extension process that can occur when using a scope named 'interface'. [#4470](https://github.com/microsoft/vscode-cpptools/issues/4470)
 * Fix an issue with the Rename UI that could cause the rename to not be applied. [#4504](https://github.com/microsoft/vscode-cpptools/issues/4504)
 * Show an error message when a Rename fails due to the symbol not being found. [#4510](https://github.com/microsoft/vscode-cpptools/issues/4510)
 * Fix `launch.json` creation due to localized strings containing quotes. [#4526](https://github.com/microsoft/vscode-cpptools/issues/4526)
@@ -512,7 +512,7 @@
 ### Bug Fixes
 * Fix `launch.json` creation when using non-English display languages. [#4464](https://github.com/microsoft/vscode-cpptools/issues/4464)
 * Fix CHS translation. [#4422](https://github.com/microsoft/vscode-cpptools/issues/4422)
-* Fix debugging hang when Windows 10 Beta Unicode (UTF-8) support is enabled. [#1527](https://github.com/microsoft/vscode-cpptools/issues/1527)
+* Fix debugging not working when Windows 10 Beta Unicode (UTF-8) support is enabled. [#1527](https://github.com/microsoft/vscode-cpptools/issues/1527)
 
 ## Version 0.26.0: October 15, 2019
 ### New Features
@@ -918,7 +918,7 @@
 * Fix `Go to Definition` bug (missing symbols outside the workspace). [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
 * Fix incorrect hover in enum definitions. [#2286](https://github.com/Microsoft/vscode-cpptools/issues/2286)
 * Add a setting to silence configuration provider warnings. [#2292](https://github.com/Microsoft/vscode-cpptools/issues/2292)
-* Fix debugging async Visual C++ causing debugger to hang.
+* Fix debugging async Visual C++ causing the debugger to stop functioning.
 * Fix `main` snippet.
 
 ## Version 0.17.6: July 2, 2018
@@ -1186,8 +1186,8 @@
 * Add `Edit Configurations...` command to the `Select a Configuration...` dropdown.
 * Update Microsoft Visual C++ debugger to Visual Studio 2017 released components.
   * Fix issue with showing wrong thread. [#550](https://github.com/Microsoft/vscode-cpptools/issues/550)
-  * Fix issue with binaries compiled with /FASTLINK causing debugger to hang. [#484](https://github.com/Microsoft/vscode-cpptools/issues/484)
-* Fix issue in MinGW/Cygwin debugging where stop debugging causes VS Code to hang. [PR Microsoft/MIEngine#636](https://github.com/Microsoft/MIEngine/pull/636)
+  * Fix issue with binaries compiled with /FASTLINK causing the debugger to stop functioning. [#484](https://github.com/Microsoft/vscode-cpptools/issues/484)
+* Fix issue in MinGW/Cygwin debugging where stop debugging causes VS Code to stop functioning. [PR Microsoft/MIEngine#636](https://github.com/Microsoft/MIEngine/pull/636)
 
 ## Version 0.12.0: June 26, 2017
 * The default IntelliSense engine now provides semantic-aware autocomplete suggestions for `.`, `->`, and `::` operators. [#13](https://github.com/Microsoft/vscode-cpptools/issues/13)
