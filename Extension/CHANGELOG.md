@@ -918,7 +918,7 @@
 * Fix `Go to Definition` bug (missing symbols outside the workspace). [#2281](https://github.com/Microsoft/vscode-cpptools/issues/2281)
 * Fix incorrect hover in enum definitions. [#2286](https://github.com/Microsoft/vscode-cpptools/issues/2286)
 * Add a setting to silence configuration provider warnings. [#2292](https://github.com/Microsoft/vscode-cpptools/issues/2292)
-* Fix debugging async Visual C++ causing the debugger to stop functioning.
+* Fix debugging async Visual C++ causing the debugger to stop responding.
 * Fix `main` snippet.
 
 ## Version 0.17.6: July 2, 2018
@@ -1186,8 +1186,8 @@
 * Add `Edit Configurations...` command to the `Select a Configuration...` dropdown.
 * Update Microsoft Visual C++ debugger to Visual Studio 2017 released components.
   * Fix issue with showing wrong thread. [#550](https://github.com/Microsoft/vscode-cpptools/issues/550)
-  * Fix issue with binaries compiled with /FASTLINK causing the debugger to stop functioning. [#484](https://github.com/Microsoft/vscode-cpptools/issues/484)
-* Fix issue in MinGW/Cygwin debugging where stop debugging causes VS Code to stop functioning. [PR Microsoft/MIEngine#636](https://github.com/Microsoft/MIEngine/pull/636)
+  * Fix issue with binaries compiled with /FASTLINK causing the debugger to stop responding. [#484](https://github.com/Microsoft/vscode-cpptools/issues/484)
+* Fix issue in MinGW/Cygwin debugging where stop debugging causes VS Code to stop responding. [PR Microsoft/MIEngine#636](https://github.com/Microsoft/MIEngine/pull/636)
 
 ## Version 0.12.0: June 26, 2017
 * The default IntelliSense engine now provides semantic-aware autocomplete suggestions for `.`, `->`, and `::` operators. [#13](https://github.com/Microsoft/vscode-cpptools/issues/13)
