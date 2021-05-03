@@ -12,8 +12,6 @@ resources:
 
 trigger: none
 pr: none
-schedules:
-- cron: "0 7 * * *"
 
 pool:
   vmImage: 'windows-latest'
