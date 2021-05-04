@@ -32,7 +32,7 @@ steps:
     isCreatePrSelected: false
     prSourceBranchPrefix: 'locfiles'
     packageSourceAuth: 'patAuth'
-    patVariable: '$(OneLocBuildPat)'
+    patVariable: '$(csigsPat)'
 
 - task: CmdLine@2
   inputs:
