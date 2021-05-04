@@ -81,7 +81,7 @@ function sleep(ms) {
 console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
-let directories = { "cs", "de", "es", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-Hans", "zh-Hant" };
+let directories = [ "cs", "de", "es", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-Hans", "zh-Hant" ];
 directories.forEach(languageId => {
     let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
     let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
