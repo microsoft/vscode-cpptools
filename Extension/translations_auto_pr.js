@@ -81,15 +81,12 @@ function sleep(ms) {
 console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
-let directories = fs.readdirSync(locRootPath, { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+let directories = { "cs", "de", "es", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-Hans", "zh-Hant" };
 directories.forEach(languageId => {
-    if (languageId !== "en")
-    {
-        let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
-        let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
-        console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
-        fs.copySync(sourcePath, destinationPath);
-    }
+    let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
+    let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
+    console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
+    fs.copySync(sourcePath, destinationPath);
 });
 
 console.log("Import translations into i18n directory");
