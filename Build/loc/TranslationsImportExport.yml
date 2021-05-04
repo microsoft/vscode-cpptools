@@ -36,7 +36,7 @@ steps:
 
 - task: CmdLine@2
   inputs:
-    script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools $(csigsPat) csigs csigs@users.noreply.github.com "$(Build.ArtifactStagingDirectory)/loc" vscode-extensions-localization-export/vscode-extensions && cd ..'
+    script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools csigs $(csigsPat) csigs csigs@users.noreply.github.com "$(Build.ArtifactStagingDirectory)/loc" vscode-extensions-localization-export/vscode-extensions && cd ..'
 
 - task: PublishBuildArtifacts@1
   inputs:
