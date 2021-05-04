@@ -33,9 +33,9 @@ if (!repoOwner || !repoName || !authUser || !authToken || !userFullName || !user
 
 console.log(`repoOwner=${repoOwner}`);
 console.log(`repoName=${repoName}`);
-console.log(`authToken=${authToken}`
-console.log(`user_full_name=${user_full_name}`););
-console.log(`user_email=${user_email}`););
+console.log(`authToken=${authToken}`);
+console.log(`user_full_name=${user_full_name}`);
+console.log(`user_email=${user_email}`);
 console.log(`locRootPath=${locRootPath}`);
 console.log(`locSubPath=${locSubPath}`);
 
