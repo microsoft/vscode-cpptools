@@ -83,10 +83,13 @@ sleep(10000);
 
 let directories = fs.readdirSync(locRootPath, { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
 directories.forEach(languageId => {
-    let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
-    let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
-    console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
-    fs.copySync(sourcePath, destinationPath);
+    if (languageId !== "en")
+    {
+        let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
+        let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
+        console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
+        fs.copySync(sourcePath, destinationPath);
+    }
 });
 
 console.log("Import translations into i18n directory");
