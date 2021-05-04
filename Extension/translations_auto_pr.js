@@ -13,17 +13,19 @@ const pullRequestTitle = '[Auto] Localization - Translated Strings';
 
 let repoOwner = process.argv[2];
 let repoName = process.argv[3];
-let authToken = process.argv[4];
-let userFullName = process.argv[5];
-let userEmail = process.argv[6];
-let locRootPath = process.argv[7];
-let locSubPath = process.argv[8];
+let authUser = process.argv[4];
+let authToken = process.argv[5];
+let userFullName = process.argv[6];
+let userEmail = process.argv[7];
+let locRootPath = process.argv[8];
+let locSubPath = process.argv[9];
 
 if (!repoOwner || !repoName || !authUser || !authToken || !userFullName || !userEmail || !locRootPath || !locSubPath) {
     console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name auth_token user_full_name user_email loc_root_path loc_sub_path`);
     console.error(`   repo_owner - The owner of the repo on GitHub.  i.e. microsoft`);
     console.error(`   repo_name - The name of the repo on GitHub.  i.e. vscode-cpptools`);
-    console.error(`   auth_token - The PAT of an account with permission to post a pull request against the GitHub repo.`);
+    console.error(`   auth_user - User account wiith permission to post a pull request against the GitHub repo.`);
+    console.error(`   auth_token - A PAT associated with auth_user.`);
     console.error(`   user_full_name - A full name to associate with a git commit. (This is replaced by the PR account if commit is squashed.)`);
     console.error(`   user_email - An email to associate with a git commit. (This is replaced by the PR account if commit is squashed.)`);
     console.error(`   loc_root_path - The path to the folder with language-specific directories (containing localized xlf files).`);
@@ -33,6 +35,7 @@ if (!repoOwner || !repoName || !authUser || !authToken || !userFullName || !user
 
 console.log(`repoOwner=${repoOwner}`);
 console.log(`repoName=${repoName}`);
+console.log(`authUser=${authUser}`);
 console.log(`authToken=${authToken}`);
 console.log(`user_full_name=${user_full_name}`);
 console.log(`user_email=${user_email}`);
