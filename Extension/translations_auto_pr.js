@@ -37,8 +37,8 @@ console.log(`repoOwner=${repoOwner}`);
 console.log(`repoName=${repoName}`);
 console.log(`authUser=${authUser}`);
 console.log(`authToken=${authToken}`);
-console.log(`user_full_name=${user_full_name}`);
-console.log(`user_email=${user_email}`);
+console.log(`userFullName=${userFullName}`);
+console.log(`userEmail=${userEmail}`);
 console.log(`locRootPath=${locRootPath}`);
 console.log(`locSubPath=${locSubPath}`);
 
