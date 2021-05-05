@@ -60,7 +60,10 @@ function hasAnyChanges() {
     let lines = output.toString().split("\n");
     let anyChanges = false;
     lines.forEach(line => {
-        anyChanges = anyChanges || (line != '');
+        if (line != '') {
+            console.log("Change detected: " + line);
+            anyChanges = true;
+        }
     });
     
     return anyChanges;
