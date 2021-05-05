@@ -124,7 +124,7 @@
             }
           },
           {
-            "id": "install.cmake.tools",
+            "id": "watch.tutorials",
             "title": "Lean back and get started",
             "description": "Watch this series of short and practical videos about setting up C++ IntelliSense, building, and debugging C++ projects. [Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
