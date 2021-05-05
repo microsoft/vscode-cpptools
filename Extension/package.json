@@ -51,7 +51,7 @@
           {
             "id": "verify.compiler.mac",
             "title": "Verify you have a C++ compiler installed",
-            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:tbd)",
+            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isMac",
             "media": {
               "altText": "",
@@ -61,7 +61,7 @@
           {
             "id": "verify.compiler.linux",
             "title": "Verify you have a C++ compiler installed",
-            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:tbd)",
+            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isLinux",
             "media": {
               "altText": "",
@@ -71,7 +71,7 @@
           {
             "id": "verify.compiler.windows",
             "title": "Verify you have a C++ compiler installed",
-            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:tbd)",
+            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isWindows",
             "media": {
               "altText": "",

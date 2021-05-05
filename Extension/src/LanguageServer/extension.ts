@@ -776,6 +776,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -919,6 +920,12 @@ function onGoToPrevDirectiveInGroup(): void {
     onActivationEvent();
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(false);
+}
+
+function onCheckForCompiler(): void {
+    onActivationEvent();
+    const client: Client = getActiveClient();
+    client.handleCheckForCompiler();
 }
 
 function onAddToIncludePath(path: string): void {

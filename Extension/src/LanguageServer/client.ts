@@ -601,6 +601,7 @@ export interface Client {
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): void;
+    handleCheckForCompiler(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -2660,6 +2661,21 @@ export class DefaultClient implements Client {
         }
     }
 
+    public async handleCheckForCompiler(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
+        if (!compilers || compilers.length === 0) {
+            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found"), { modal: true });
+        } else {
+            const header: string = localize("compilers.found", "C++ compiler(s) were found:");
+            let message: string = header + "\n";
+            compilers.forEach(compiler => {
+                message += "\n" + compiler.path;
+            });
+            vscode.window.showInformationMessage(message, { modal: true });
+        }
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
@@ -2828,6 +2844,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): void {}
+    handleCheckForCompiler(): Promise<void> {}
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();
