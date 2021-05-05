@@ -64,7 +64,7 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
             if (await util.isExtensionReady()) {
                 return new vscode.DebugAdapterExecutable(
                     path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
-                    ['--interpreter=vscode']
+                    ['--interpreter=vscode', '--extConfigDir=%USERPROFILE%\\.cppvsdbg\\extensions']
                 );
             } else {
                 throw new Error(util.extensionNotReadyString);
