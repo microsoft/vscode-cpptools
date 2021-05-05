@@ -33,6 +33,8 @@ steps:
     prSourceBranchPrefix: 'locfiles'
     packageSourceAuth: 'patAuth'
     patVariable: '$(OneLocBuildPat)'
+    LclSource: lclFilesfromPackage
+    LclPackageId: 'LCL-JUNO-PROD-VCPP'
 
 - task: CmdLine@2
   inputs:
