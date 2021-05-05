@@ -19,7 +19,14 @@ module.exports = {
     "rules": {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": "error",
-        "@typescript-eslint/class-name-casing": "error",
+        "camelcase": "off",
+        "@typescript-eslint/naming-convention": [
+            "error",
+            {
+                "selector": "typeLike",
+                "format": ["PascalCase"]
+            }
+        ],
         "@typescript-eslint/indent": "error",
         "@typescript-eslint/member-delimiter-style": [
             "error",
@@ -71,7 +78,7 @@ module.exports = {
         "no-fallthrough": "error",
         "no-invalid-this": "error",
         "no-irregular-whitespace": "error",
-        "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0}],
+        "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
         "no-new-wrappers": "error",
         "no-redeclare": "error",
         "no-return-await": "error",
