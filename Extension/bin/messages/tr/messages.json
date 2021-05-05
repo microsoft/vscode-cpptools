@@ -3350,7 +3350,7 @@
   "herhangi bir türde modül dosyası",
   "modül dosyası okunamıyor",
   "char8_t türü geçerli seçeneklerle desteklenmediği için yerleşik işlev kullanılamıyor",
-  "C++20 eş yordamları etkinleştirilirse --ms_await komut satırı seçeneği belirtilemez",
+  null,
   "varsayılan toplama öğesi başlatma için açık oluşturucu %nod için standart olmayan kullanım",
   "memcpy benzeri iç öğenin kaynağı veya hedefi bir nesneye işaret etmiyor",
   "memcpy benzeri iç öğe, temsili olarak farklı %t1 ve %t2 türlerini kopyalamaya çalışıyor",
@@ -3373,5 +3373,14 @@
   "__is_signed şu andan itibaren bir anahtar sözcük değil",
   "dizi boyutu sabit bir işaretsiz tamsayı değerine sahip olmalıdır",
   "%sq IFC dosyasının sürümü desteklenmiyor: %d1.%d2",
-  "modüller bu modda etkin değil"
+  "modüller bu modda etkin değil",
+  "'import', modül adında kullanılamaz.",
+  "Modül adında 'module' kullanılmasına izin verilmez",
+  "%sq, içeri aktarma yönergesinde kullanıldığında makro olamaz",
+  null,
+  "%n sabit listesi türü değil",
+  "%no2 numaralandırıcısı %n1 ile çakışıyor",
+  "%no numaralandırıcısı bu %p kapsamında zaten bildirildi",
+  "'throw ()' belirtimi C++ 20 ve üzeri sürümlerin bir parçası değil",
+  "üst bilgi birimi eşlemesindeki giriş sayısı '%s' ile eşleşiyor:"
 ]

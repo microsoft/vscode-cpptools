@@ -3350,7 +3350,7 @@
   "dowolny rodzaj pliku modułu",
   "nie można odczytać pliku modułu",
   "wbudowana funkcja jest niedostępna, ponieważ typ char8_t nie jest obsługiwany z bieżącymi opcjami",
-  "nie można określić opcji wiersza polecenia --ms_await, jeśli włączono koprocedury języka C++20",
+  null,
   "niestandardowe użycie konstruktora jawnego %nod dla domyślnej inicjalizacji elementu agregacji",
   "element źródłowy lub docelowy funkcji wewnętrznej podobnej do memcpy nie wskazuje obiektu",
   "Funkcja wewnętrzna podobna do memcpy próbuje skopiować reprezentacyjnie odrębne typy %t1 i %t2",
@@ -3373,5 +3373,14 @@
   "Od tego punktu __is_signed nie jest już słowem kluczowym",
   "wymiar tablicy musi mieć stałą wartość całkowitą bez znaku",
   "Plik IFC %sq ma nieobsługiwaną wersję %d1.%d2",
-  "moduły nie są włączone w tym trybie"
+  "moduły nie są włączone w tym trybie",
+  "Ciąg „import” nie jest dozwolony w nazwie modułu",
+  "Ciąg „module” nie jest dozwolony w nazwie modułu",
+  "Element %sq nie może być makrem, gdy jest używany w dyrektywie importu",
+  null,
+  "Element %n nie jest typem wyliczenia",
+  "moduł wyliczający %no2 powoduje konflikt z elementem %n1",
+  "moduł wyliczający %no został już zadeklarowany w tym zakresie %p",
+  "Specyfikacja „throw()” nie jest częścią języka C++20 i nowszych",
+  "więcej niż wpis na mapie jednostek nagłówka pasuje do „%s”"
 ]
