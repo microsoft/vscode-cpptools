@@ -82,6 +82,7 @@
             "id": "open.project",
             "title": "Open your project",
             "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Open Folder...](command:workbench.action.files.openFolder)",
+            "when": "workspaceFolderCount == 0",
             "media": {
               "altText": "",
               "path": ""
