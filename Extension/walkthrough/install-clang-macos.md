@@ -1,10 +1,13 @@
-Clang may already be installed on your Mac. To verify that it is, open a macOS Terminal window and enter the following command:
+# Install a C++ compiler on macOS
+
+If you're doing C++ development for macOS, we recommend installing the Clang compiler. All you need to do is run the following command in a Terminal window to install the command line developer tools:
+
+```bash
+xcode-select --install
+```
+
+Then, to verify that clang is installed, run the following command in a Terminal window:
 
 ```bash
 clang --version
 ```
-
-1. If Clang isn't installed, enter the following command to install the command line developer tools:
-
-```bash
-xcode-select --install
