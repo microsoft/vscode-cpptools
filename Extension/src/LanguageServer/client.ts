@@ -2665,13 +2665,14 @@ export class DefaultClient implements Client {
         await this.awaitUntilLanguageClientReady();
         const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
         if (!compilers || compilers.length === 0) {
-            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found"), { modal: true });
+            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system."), { modal: true });
         } else {
             const header: string = localize("compilers.found", "C++ compiler(s) were found:");
             let message: string = header + "\n";
             compilers.forEach(compiler => {
                 message += "\n" + compiler.path;
             });
+            message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration")
             vscode.window.showInformationMessage(message, { modal: true });
         }
     }
