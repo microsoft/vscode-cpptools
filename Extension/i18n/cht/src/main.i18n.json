@@ -16,5 +16,6 @@
 	"rename.failed.delete.manually": "錯誤: fs.rename 失敗，\"{0}\"。請手動刪除 {1} 以啟用偵錯。",
 	"failed.at.stage": "在階段 {0} 失敗",
 	"failed.at.stage2": "如果在離線環境中作業，或重複看到此錯誤，請嘗試下載具備 {0} 所有預先內含之相依性的延伸模組版本，然後在 VS Code 中使用 \"Install from VSIX\" 命令加以安裝。",
-	"finished.installing.dependencies": "已完成安裝相依性"
+	"finished.installing.dependencies": "已完成安裝相依性",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }
