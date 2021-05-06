@@ -24,7 +24,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         token.onCancellationRequested(e => this.client.abortRequest(id));
         const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
         if (ranges.canceled) {
-            throw new Error('Request for providing folding ranges is cancelled.');
+            throw new vscode.CancellationError();
         } else {
             const result: vscode.FoldingRange[] = [];
             ranges.ranges.forEach((r) => {
