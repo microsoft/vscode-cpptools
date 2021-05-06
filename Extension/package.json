@@ -54,7 +54,7 @@
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isMac",
             "media": {
-              "altText": "",
+              "altText": "markdown file with instructions for isntalling Clang on macOS",
               "path": "walkthrough/install-clang-macos.md"
             }
           },
@@ -64,7 +64,7 @@
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isLinux",
             "media": {
-              "altText": "",
+              "altText": "markdown file with instructions for installing GCC on Linux",
               "path": "walkthrough/install-gcc-linux.md"
             }
           },
@@ -74,7 +74,7 @@
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isWindows",
             "media": {
-              "altText": "",
+              "altText": "markdown file with instructions for installing MSVC on Windows",
               "path": "walkthrough/install-compiler-windows.md"
             }
           },
@@ -84,8 +84,8 @@
             "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Open Folder...](command:workbench.action.files.openFolder)",
             "when": "workspaceFolderCount == 0",
             "media": {
-              "altText": "",
-              "path": ""
+              "altText": "screenshot that shows a C++ project opened in the file Explorer",
+              "path": "walkthrough/cpp-folder-explorer.PNG"
             }
           },
           {
@@ -93,8 +93,8 @@
             "title": "Configure C++ IntelliSense",
             "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration...](command:C_Cpp.ConfigurationEditUI)",
             "media": {
-              "altText": "",
-              "path": ""
+              "altText": "screenshot that shows IntelliSense configurations UI with important settings highlighted",
+              "path": "walkthrough/intellisense-settings.png"
             }
           },
           {
@@ -111,8 +111,8 @@
             "title": "Run and debug your C++ project",
             "description": "Create a debug configuration for your project. \n[Run and debug...](command:workbench.view.debug)",
             "media": {
-              "altText": "",
-              "path": ""
+              "altText": "screenshot that shows the run and debug button in the run and debug pane",
+              "path": "walkthrough/run-and-debug-button.png"
             }
           },
           {
@@ -120,8 +120,8 @@
             "title": "Install CMake Tools",
             "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools...](command:tbd)",
             "media": {
-              "altText": "",
-              "path": ""
+              "altText": "screenshot of CMake Tools extension page",
+              "path": "walkthrough/cmake-tools-extension.PNG"
             }
           },
           {
@@ -129,8 +129,8 @@
             "title": "Lean back and get started",
             "description": "Watch this series of short and practical videos about setting up C++ IntelliSense, building, and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
-              "altText": "",
-              "path": ""
+              "altText": "screenshot with preview of video tutorial and play button",
+              "path": "walkthrough/getting-started-video.PNG"
             }
           }
         ]
