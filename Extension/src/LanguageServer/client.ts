@@ -2844,7 +2844,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
-    handleCheckForCompiler(): Promise<void> {}
+    handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();
