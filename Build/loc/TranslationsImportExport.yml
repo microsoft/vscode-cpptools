@@ -10,6 +10,12 @@ resources:
 
 trigger: none
 pr: none
+schedules:
+- cron: "0 7 * * *"
+  displayName: Daily 7 AM
+  branches:
+    include:
+    - main
 
 pool:
   vmImage: 'windows-latest'
