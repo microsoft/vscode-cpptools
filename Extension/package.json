@@ -2510,7 +2510,8 @@
   "resolutions": {
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
-    "y18n": "^5.0.5"
+    "y18n": "^5.0.5",
+    "hosted-git-info": "^3.0.8"
   },
   "runtimeDependencies": [
     {
