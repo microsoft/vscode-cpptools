@@ -8,8 +8,8 @@
 * Add `stopAtConnect` and `hardwareBreakpoints` launch options [PR #7449](https://github.com/microsoft/vscode-cpptools/pull/7449) 
   * `stopAtConnect` stops the debugger on connection to a remote target [PR MIEngine#1109](https://github.com/microsoft/MIEngine/pull/1109)
   * `hardwareBreakpoints` controls usage and number of remote hardware breakpoints [PR MIEngine#1128](https://github.com/microsoft/MIEngine/pull/1128)
-* Adds support for loading Concord extensions to the cppvsdbg debug adapter (see [documentation](https://github.com/microsoft/ConcordExtensibilitySamples/wiki/Support-for-VS-Code-cppvsdbg-Scenarios) for more information)
-* Adds support for exception conditions to cppvsdbg (see [documentation](https://aka.ms/VSCode-Cpp-ExceptionSettings) for more information)
+* Add support for loading Concord extensions to the cppvsdbg debug adapter (see [documentation](https://github.com/microsoft/ConcordExtensibilitySamples/wiki/Support-for-VS-Code-cppvsdbg-Scenarios) for more information)
+* Add support for exception conditions to cppvsdbg (see [documentation](https://aka.ms/VSCode-Cpp-ExceptionSettings) for more information)
 
 ### Bug Fixes
 * Fix IntelliSense configuration with cl.exe compiler args `/external:I`, `/Zc:preprocessor`, and others. [#4980](https://github.com/microsoft/vscode-cpptools/issues/4980), [#6531](https://github.com/microsoft/vscode-cpptools/issues/6531), [#7259](https://github.com/microsoft/vscode-cpptools/issues/7259)
@@ -18,9 +18,8 @@
 * Fix files.exclude ending with `/folder/**` not excluding `/folder`. [#7331](https://github.com/microsoft/vscode-cpptools/issues/7331)
 * Fix VS Code UI freezing when hovering over very large literals. [#7334](https://github.com/microsoft/vscode-cpptools/issues/7334)
 * Fix clang-format formatting bug when new lines are removed. [#7360](https://github.com/microsoft/vscode-cpptools/issues/7360)
-* Change default cwd in launch.json to "${fileDirname}. [#7362](https://github.com/microsoft/vscode-cpptools/issues/7362)
+* Change default cwd in launch.json to `${fileDirname}`. [#7362](https://github.com/microsoft/vscode-cpptools/issues/7362)
   * Syed Ahmad (@HackintoshwithUbuntu) [PR #7363](https://github.com/microsoft/vscode-cpptools/pull/7363)
-* Fix extension activation with 32-bit Windows. [#7368](https://github.com/microsoft/vscode-cpptools/issues/7368)
 * Fix a crash on Linux with a `/**` includePath.
 * Fix the compile commands entry not being used when -Werror is used. [#7388](https://github.com/microsoft/vscode-cpptools/issues/7388)
 * Fix some potential race conditions during vsix installation. [#7405](https://github.com/microsoft/vscode-cpptools/issues/7405)
