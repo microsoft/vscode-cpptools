@@ -580,7 +580,7 @@ export interface Client {
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): void;
-    queueTask<T>(task: () => Thenable<T>): Thenable<T>;
+    queueTask<T>(task: () => Thenable<T>): Promise<T>;
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     notifyWhenLanguageClientReady(notify: () => void): void;
     awaitUntilLanguageClientReady(): void;
@@ -592,15 +592,15 @@ export interface Client {
     deactivate(): void;
     pauseParsing(): void;
     resumeParsing(): void;
-    handleConfigurationSelectCommand(): void;
-    handleConfigurationProviderSelectCommand(): void;
-    handleShowParsingCommands(): void;
+    handleConfigurationSelectCommand(): Promise<void>;
+    handleConfigurationProviderSelectCommand(): Promise<void>;
+    handleShowParsingCommands(): Promise<void>;
     handleReferencesIcon(): void;
     handleConfigurationEditCommand(): void;
     handleConfigurationEditJSONCommand(): void;
     handleConfigurationEditUICommand(): void;
     handleAddToIncludePathCommand(path: string): void;
-    handleGoToDirectiveInGroup(next: boolean): void;
+    handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -2807,7 +2807,7 @@ class NullClient implements Client {
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): void {}
-    queueTask<T>(task: () => Thenable<T>): Thenable<T> { return task(); }
+    queueTask<T>(task: () => Thenable<T>): Promise<T> { return Promise.resolve(task()); }
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
     notifyWhenLanguageClientReady(notify: () => void): void {}
     awaitUntilLanguageClientReady(): void {}
@@ -2819,15 +2819,15 @@ class NullClient implements Client {
     deactivate(): void {}
     pauseParsing(): void {}
     resumeParsing(): void {}
-    handleConfigurationSelectCommand(): void {}
-    handleConfigurationProviderSelectCommand(): void {}
-    handleShowParsingCommands(): void {}
+    handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
+    handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
+    handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void {}
     handleConfigurationEditCommand(): void {}
     handleConfigurationEditJSONCommand(): void {}
     handleConfigurationEditUICommand(): void {}
     handleAddToIncludePathCommand(path: string): void { }
-    handleGoToDirectiveInGroup(next: boolean): void {}
+    handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();
