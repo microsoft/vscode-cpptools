@@ -384,7 +384,7 @@ export class PackageManager {
                             zipfile.readEntry();
                         });
                     } else {
-                        util.checkDirectoryExists(absoluteEntryPath).then((exists: boolean) => {
+                        util.checkFileExists(absoluteEntryPath).then((exists: boolean) => {
                             if (!exists) {
                                 // File - extract it
                                 zipfile.openReadStream(entry, (err, readStream: Readable | undefined) => {
