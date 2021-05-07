@@ -2667,12 +2667,12 @@ export class DefaultClient implements Client {
         if (!compilers || compilers.length === 0) {
             vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system."), { modal: true });
         } else {
-            const header: string = localize("compilers.found", "C++ compiler(s) were found:");
+            const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system:");
             let message: string = header + "\n";
             compilers.forEach(compiler => {
                 message += "\n" + compiler.path;
             });
-            message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration")
+            message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.")
             vscode.window.showInformationMessage(message, { modal: true });
         }
     }
