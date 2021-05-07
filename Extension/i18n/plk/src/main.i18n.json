@@ -16,5 +16,6 @@
 	"rename.failed.delete.manually": "BŁĄD: wystąpił błąd funkcji fs.rename: „{0}”. Usuń element {1} ręcznie, aby włączyć debugowanie.",
 	"failed.at.stage": "Niepowodzenie na etapie: {0}",
 	"failed.at.stage2": "Jeśli pracujesz w środowisku offline lub często widzisz ten błąd, spróbuj pobrać wersję rozszerzenia ze wszystkimi zależnościami wstępnie uwzględnionymi ze strony {0}, a następnie użyj polecenia „Install from VSIX” (Zainstaluj z VSIX) w programie VS Code, aby ją zainstalować.",
-	"finished.installing.dependencies": "Zakończono instalowanie zależności"
+	"finished.installing.dependencies": "Zakończono instalowanie zależności",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }

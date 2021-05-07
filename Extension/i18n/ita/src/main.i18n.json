@@ -16,5 +16,6 @@
 	"rename.failed.delete.manually": "ERRORE: fs.rename non riuscito con \"{0}\". Per abilitare il debug, eliminare manualmente {1}.",
 	"failed.at.stage": "Errore nella fase: {0}",
 	"failed.at.stage2": "Se si lavora in un ambiente offline o questo errore viene visualizzato ripetutamente, provare a scaricare una versione dell'estensione con tutte le dipendenze già incluse da {0}, quindi usare il comando \"Installa da VSIX\" in VS Code per installarla.",
-	"finished.installing.dependencies": "L'installazione delle dipendenze è stata completata"
+	"finished.installing.dependencies": "L'installazione delle dipendenze è stata completata",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }
