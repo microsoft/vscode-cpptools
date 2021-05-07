@@ -1,0 +1,37 @@
+# ==================================================================================
+# Pipeline for VsCodeExtension-Localization build definition
+# Runs OneLocBuild task to localize xlf file
+# ==================================================================================
+
+resources:
+  repositories:
+  - repository: self
+    clean: true
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: CmdLine@2
+  inputs:
+    script: 'cd ./Extension && yarn run translations-export && cd ..'
+
+- task: OneLocBuild@1
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  inputs:
+    locProj: 'Build/loc/LocProject.json'
+    outDir: '$(Build.ArtifactStagingDirectory)'
+    isCreatePrSelected: false
+    prSourceBranchPrefix: 'locfiles'
+    packageSourceAuth: 'patAuth'
+    patVariable: '$(OneLocBuildPat)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'

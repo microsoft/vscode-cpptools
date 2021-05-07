@@ -169,7 +169,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
-            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${workspaceFolder}";
+            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
             const options: cp.ExecOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
@@ -194,7 +194,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             }
         }
 
-        const scope: TaskScope = TaskScope.Workspace;
+        const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
