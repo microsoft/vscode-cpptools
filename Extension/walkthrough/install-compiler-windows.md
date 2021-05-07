@@ -15,7 +15,7 @@ If you're doing C++ development for Windows, we recommend installing the Microso
 
 >**Note**: You can use the C++ toolset from Visual Studio Build Tools along with Visual Studio Code to compile, build, and verify any C++ codebase as long as you also have a valid Visual Studio license (either Community, Pro, or Enterprise) that you are actively using to develop that C++ codebase.
 
-### Check your Microsoft Visual C++ installation
+## Check your Microsoft Visual C++ installation
 
 To use MSVC from a command line or VS Code, you must run from a **Developer Command Prompt for Visual Studio**. An ordinary shell such as PowerShell, Bash, or the Windows command prompt does not have the necessary path environment variables set.
 

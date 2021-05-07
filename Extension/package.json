@@ -94,7 +94,11 @@
             "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration...](command:C_Cpp.ConfigurationEditUI)",
             "media": {
               "altText": "screenshot that shows IntelliSense configurations UI with important settings highlighted",
-              "path": "walkthrough/intellisense-settings.png"
+              "path": {
+                "light": "walkthrough/intellisense-config-light.png",
+                "dark": "walkthrough/intellisense-config-dark.png",
+                "hc": "walkthrough/intellisense-config-hc.png"
+              }
             }
           },
           {
@@ -103,7 +107,11 @@
             "description": "Create a default build task for your project. \n[Configure Default Build Task...](command:workbench.action.tasks.configureTaskRunner)",
             "media": {
               "altText": "",
-              "path": ""
+              "path": {
+                "light": "walkthrough/select-build-task-light.png",
+                "dark": "walkthrough/select-build-task-dark.png",
+                "hc": "walkthrough/select-build-task-hc.png"
+              }
             }
           },
           {
@@ -112,7 +120,11 @@
             "description": "Create a debug configuration for your project. \n[Run and debug...](command:workbench.view.debug)",
             "media": {
               "altText": "screenshot that shows the run and debug button in the run and debug pane",
-              "path": "walkthrough/run-and-debug-button.png"
+              "path": {
+                "light": "walkthrough/run-and-debug-light.png",
+                "dark": "walkthrough/run-and-debug-dark.png",
+                "hc": "walkthrough/run-and-debug-hc.png"
+              }
             }
           },
           {
@@ -121,7 +133,11 @@
             "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools...](command:tbd)",
             "media": {
               "altText": "screenshot of CMake Tools extension page",
-              "path": "walkthrough/cmake-tools-extension.PNG"
+              "path":{
+                "light": "walkthrough/cmake-tools-light.png",
+                "dark": "walkthrough/cmake-tools-dark.png",
+                "hc": "walkthrough/cmake-tools-hc.png"
+              }
             }
           },
           {
