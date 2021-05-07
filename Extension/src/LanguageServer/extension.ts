@@ -173,7 +173,7 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-            if (await util.checkFileExists(config)) {
+            if (await util.checkDirectoryExists(config)) {
                 cppPropertiesExists = true;
                 const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
                 vscode.languages.setTextDocumentLanguage(doc, "jsonc");
