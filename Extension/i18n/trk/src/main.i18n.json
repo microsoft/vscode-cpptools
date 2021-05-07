@@ -16,5 +16,6 @@
 	"rename.failed.delete.manually": "HATA: fs.rename, \"{0}\" ile başarısız oldu. Hata ayıklamayı etkinleştirmek için {1} dosyasını kendiniz silin.",
 	"failed.at.stage": "Şu aşamada başarısız oldu: {0}",
 	"failed.at.stage2": "Çevrimdışı bir ortamda çalışıyorsanız veya bu hatayı sürekli olarak görüyorsanız uzantının önceden eklenmiş tüm bağımlılıklara sahip bir sürümünü {0} adresinden indirmeyi deneyin ve sonra VS Code'da \"VSIX'ten yükle\" komutunu kullanarak uzantıyı yükleyin.",
-	"finished.installing.dependencies": "Bağımlılıkların yüklenmesi tamamlandı"
+	"finished.installing.dependencies": "Bağımlılıkların yüklenmesi tamamlandı",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }

@@ -16,5 +16,6 @@
 	"rename.failed.delete.manually": "CHYBA: Operace fs.rename neproběhla úspěšně s chybou {0}. Pokud chcete povolit ladění, odstraňte {1} ručně.",
 	"failed.at.stage": "Chyba ve fázi: {0}",
 	"failed.at.stage2": "Pokud pracujete v offline prostředí nebo se vám tato chyba zobrazuje opakovaně, zkuste si z {0} stáhnout verzi rozšíření, která už má všechny závislosti předem zahrnuté, a pak ji nainstalujte v nástroji VS Code pomocí příkazu Nainstalovat z VSIX.",
-	"finished.installing.dependencies": "Dokončila se instalace závislostí."
+	"finished.installing.dependencies": "Dokončila se instalace závislostí.",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }

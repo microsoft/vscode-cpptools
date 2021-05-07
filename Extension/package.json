@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.3.1-main",
+  "version": "1.4.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2620,7 +2620,8 @@
   "resolutions": {
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
-    "y18n": "^5.0.5"
+    "y18n": "^5.0.5",
+    "hosted-git-info": "^3.0.8"
   },
   "runtimeDependencies": [
     {

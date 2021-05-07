@@ -13,24 +13,33 @@ const pullRequestTitle = '[Auto] Localization - Translated Strings';
 
 let repoOwner = process.argv[2];
 let repoName = process.argv[3];
-let locProjectName = process.argv[4];
-let authUser = process.argv[5];
-let authToken = process.argv[6];
-let userFullName = process.argv[7];
-let userEmail = process.argv[8];
-let locRepoPath = process.argv[9];
+let authUser = process.argv[4];
+let authToken = process.argv[5];
+let userFullName = process.argv[6];
+let userEmail = process.argv[7];
+let locRootPath = process.argv[8];
+let locSubPath = process.argv[9];
 
-if (!repoOwner || !repoName || !locProjectName || !authUser || !authToken || !userFullName || !userEmail || !locRepoPath) {
-    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token user_full_name user_email loc_repo_path`);
+if (!repoOwner || !repoName || !authUser || !authToken || !userFullName || !userEmail || !locRootPath || !locSubPath) {
+    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name auth_token user_full_name user_email loc_root_path loc_sub_path`);
+    console.error(`   repo_owner - The owner of the repo on GitHub.  i.e. microsoft`);
+    console.error(`   repo_name - The name of the repo on GitHub.  i.e. vscode-cpptools`);
+    console.error(`   auth_user - User account wiith permission to post a pull request against the GitHub repo.`);
+    console.error(`   auth_token - A PAT associated with auth_user.`);
+    console.error(`   user_full_name - A full name to associate with a git commit. (This is replaced by the PR account if commit is squashed.)`);
+    console.error(`   user_email - An email to associate with a git commit. (This is replaced by the PR account if commit is squashed.)`);
+    console.error(`   loc_root_path - The path to the folder with language-specific directories (containing localized xlf files).`);
+    console.error(`   loc_sub_path - A sub-path after the language-specific directory, where the xlf to import is located.  This should not include the name of the xlf file to import.)`);
     return;
 }
 
 console.log(`repoOwner=${repoOwner}`);
 console.log(`repoName=${repoName}`);
-console.log(`locProjectName=${locProjectName}`);
 console.log(`authUser=${authUser}`);
-console.log(`authToken=${authToken}`);
-console.log(`locRepoPath=${locRepoPath}`);
+console.log(`userFullName=${userFullName}`);
+console.log(`userEmail=${userEmail}`);
+console.log(`locRootPath=${locRootPath}`);
+console.log(`locSubPath=${locSubPath}`);
 
 function hasBranch(branchName) {
     console.log(`Checking for existance of branch "${branchName}" (git branch --list ${branchName})`);
@@ -50,7 +59,10 @@ function hasAnyChanges() {
     let lines = output.toString().split("\n");
     let anyChanges = false;
     lines.forEach(line => {
-        anyChanges = anyChanges || (line != '');
+        if (line != '') {
+            console.log("Change detected: " + line);
+            anyChanges = true;
+        }
     });
     
     return anyChanges;
@@ -71,11 +83,10 @@ function sleep(ms) {
 console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
-let rootSourcePath = `${locRepoPath}\\Src\\VSCodeExt`;
-let directories = fs.readdirSync(rootSourcePath, { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
-directories.forEach(folderName => {
-    let sourcePath = `${rootSourcePath}\\${folderName}\\vscode-cpptools.xlf`;
-    let destinationPath = `../vscode-translations-import/${folderName}/vscode-extensions/vscode-${locProjectName}.xlf`;
+let directories = [ "cs", "de", "es", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-Hans", "zh-Hant" ];
+directories.forEach(languageId => {
+    let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
+    let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
     console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
     fs.copySync(sourcePath, destinationPath);
 });
@@ -172,10 +183,7 @@ console.log(`pushing to remove branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
 
 console.log("Checking if there is already a pull request...");
-const octokit = new Octokit({auth: {
-    username: authUser,
-    password: authToken}
-});
+const octokit = new Octokit.Octokit({auth: authToken});
 octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     let alreadyHasPullRequest = false;
     if (data) {
