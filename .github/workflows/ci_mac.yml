@@ -19,7 +19,7 @@ jobs:
           node-version: 14.16.x
 
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --network-timeout 100000
         working-directory: Extension
 
       - name: Generate hashes for runtime dependency packages
