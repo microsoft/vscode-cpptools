@@ -40,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const arch: string = PlatformInformation.GetArchitecture();
     if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(arch));
-    } else if (process.platform === 'linux' && await util.checkFileExists('/etc/alpine-release')) {
+    } else if (process.platform === 'linux' && await util.checkDirectoryExists('/etc/alpine-release')) {
         errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
     }
     if (errMsg) {
@@ -163,7 +163,7 @@ async function processRuntimeDependencies(): Promise<void> {
             // For macOS and if a user has upgraded their OS, check to see if we are on Mojave or later
             // and that the debugAdapters/lldb-mi folder exists. This will force a online install to get the correct binaries.
             if (!highSierraOrLowerRegex.test(info.version) &&
-                !await util.checkFileExists(lldbMiFolderPath)) {
+                !await util.checkDirectoryExists(lldbMiFolderPath)) {
 
                 forceOnlineInstall = true;
 
