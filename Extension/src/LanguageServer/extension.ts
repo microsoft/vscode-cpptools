@@ -55,13 +55,13 @@ let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
-type vcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
-let vcpkgDbPromise: Promise<vcpkgDatabase>;
-function initVcpkgDatabase(): Promise<vcpkgDatabase> {
+type VcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
+let vcpkgDbPromise: Promise<VcpkgDatabase>;
+function initVcpkgDatabase(): Promise<VcpkgDatabase> {
     return new Promise((resolve, reject) => {
-        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err? : Error, zipfile?: yauzl.ZipFile) => {
+        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err?: Error, zipfile?: yauzl.ZipFile) => {
             // Resolves with an empty database instead of rejecting on failure.
-            const database: vcpkgDatabase = {};
+            const database: VcpkgDatabase = {};
             if (err || !zipfile) {
                 resolve(database);
                 return;
@@ -133,7 +133,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
 
     let portsWithHeader: string[] | undefined;
-    const vcpkgDb: vcpkgDatabase = await vcpkgDbPromise;
+    const vcpkgDb: VcpkgDatabase = await vcpkgDbPromise;
     if (vcpkgDb) {
         portsWithHeader = vcpkgDb[missingHeader];
     }
