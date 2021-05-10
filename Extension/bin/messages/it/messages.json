@@ -3350,7 +3350,7 @@
   "qualsiasi tipo di modulo",
   "non è possibile leggere il file del modulo",
   "la funzione predefinita non è disponibile perché il tipo char8_t non è supportato con le opzioni correnti",
-  "non è possibile specificare l'opzione della riga di comando --ms_await se le coroutine di C++20 sono abilitate",
+  null,
   "uso non standard del costruttore esplicito %nod per l'inizializzazione dell'elemento di aggregazione predefinito",
   "l'origine o la destinazione dell'intrinseco simile a memcpy non punta a un oggetto",
   "l'intrinseco simile a memcpy prova a copiare i tipi distinti dal punto di vista della rappresentazione %t1 e %t2",
@@ -3373,5 +3373,14 @@
   "__is_signed non è più una parola chiave a partire da questo punto",
   "una dimensione di matrice deve avere un valore intero senza segno costante",
   "il file IFC %sq ha una versione %d1.%d2 non supportata",
-  "i moduli non sono abilitati in questa modalità"
+  "i moduli non sono abilitati in questa modalità",
+  "Il nome di un modulo non può contenere 'import'",
+  "Il nome di un modulo non può contenere 'module'",
+  "%sq non può essere una macro se usata in una direttiva di importazione",
+  null,
+  "%n non è un tipo di enumerazione",
+  "l'enumeratore %no2 è in conflitto con %n1",
+  "l'enumeratore %no è già stato dichiarato in questo ambito %p",
+  "la specifica 'throw()' non fa parte di C++20 e versioni successive",
+  "più di una voce nel mapping dell'unità intestazione corrisponde a '%s'"
 ]

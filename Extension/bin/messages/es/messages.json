@@ -3350,7 +3350,7 @@
   "cualquier tipo de archivo de módulo",
   "no se puede leer el archivo de módulo",
   "la función integrada no está disponible porque no se admite el tipo char8_t con las opciones actuales",
-  "no se puede especificar la opción de línea de comandos --ms_await si están habilitadas las corrutinas de C++ 20",
+  null,
   "uso no estándar de %nod de constructor explícito para la inicialización predeterminada del elemento de agregado",
   "el origen o el destino del intento intrínseco de tipo memcpy no apunta a un objeto",
   "intentos intrínsecos de tipo memcpy para copiar los tipos %t1 y %t2 diferentes de forma representativa",
@@ -3373,5 +3373,14 @@
   "__is_signed ya no es una palabra clave a partir de este punto",
   "una dimensión de matriz debe tener un valor entero sin signo constante",
   "El archivo IFC %sq tiene la versión no compatible %d1.%d2",
-  "los módulos no están habilitados en este modo"
+  "los módulos no están habilitados en este modo",
+  "No se permite \"import\" en un nombre de módulo",
+  "No se permite usar \"módulo\" en un nombre de módulo",
+  "%sq no puede ser una macro cuando se use en una directiva import",
+  null,
+  "%n no es un tipo de enumeración",
+  "el enumerador %no2 entra en conflicto con %n1",
+  "el enumerador %no ya se ha declarado en el ámbito %p",
+  "la especificación \"throw()\" no forma parte de C++20 y versiones posteriores",
+  "más que la entrada en el mapa de la unidad del encabezado coincide con \"%s\""
 ]
