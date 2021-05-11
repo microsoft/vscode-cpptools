@@ -596,9 +596,9 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
     handleReferencesIcon(): void;
-    handleConfigurationEditCommand(): void;
-    handleConfigurationEditJSONCommand(): void;
-    handleConfigurationEditUICommand(): void;
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
@@ -2621,16 +2621,16 @@ export class DefaultClient implements Client {
         }
     }
 
-    public handleConfigurationEditCommand(): void {
-        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument));
+    public handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
 
-    public handleConfigurationEditJSONCommand(): void {
-        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument));
+    public handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
 
-    public handleConfigurationEditUICommand(): void {
-        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument));
+    public handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
 
     public handleAddToIncludePathCommand(path: string): void {
@@ -2841,9 +2841,9 @@ class NullClient implements Client {
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void {}
-    handleConfigurationEditCommand(): void {}
-    handleConfigurationEditJSONCommand(): void {}
-    handleConfigurationEditUICommand(): void {}
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void {}
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void {}
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void {}
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }

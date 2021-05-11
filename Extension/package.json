@@ -91,7 +91,7 @@
           {
             "id": "setup.intellisense",
             "title": "Configure C++ IntelliSense",
-            "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration...](command:C_Cpp.ConfigurationEditUI)",
+            "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration...](command:C_Cpp.ConfigurationEditUI?-2)",
             "media": {
               "altText": "screenshot that shows IntelliSense configurations UI with important settings highlighted",
               "path": {
@@ -133,7 +133,7 @@
             "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools...](command:tbd)",
             "media": {
               "altText": "screenshot of CMake Tools extension page",
-              "path":{
+              "path": {
                 "light": "walkthrough/cmake-tools-light.png",
                 "dark": "walkthrough/cmake-tools-dark.png",
                 "hc": "walkthrough/cmake-tools-hc.png"
