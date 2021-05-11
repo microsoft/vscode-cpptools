@@ -23,6 +23,6 @@ To open the Developer Command Prompt for VS, start typing 'developer' in the Win
 
 ![Developer Command Prompt](developer-cmd-prompt-menu.png)
 
-You can test that you have the C++ compiler, `cl.exe`, installed correctly by typing 'cl' and you should see a copyright message with the version and basic usage description.
+You can test that you have the C++ compiler (`cl.exe`) by typing 'cl' into the Developer Command Prompt for VS.
 
 ![Checking cl.exe installation](check-cl-exe.png)
