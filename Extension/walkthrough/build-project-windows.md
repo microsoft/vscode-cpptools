@@ -1,4 +1,4 @@
-# Build your C++ project with MSVC (cl.exe) on Windows
+# Build your C++ file with MSVC (cl.exe) on Windows
 
 1. Open the C++ source file that you want to build. Make sure this file is active (currently displayed) in the editor.
 

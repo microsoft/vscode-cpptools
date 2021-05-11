@@ -16,5 +16,5 @@ If you're doing C++ development for Linux, we recommend installing the GCC compi
 3. Verify GCC is installed by running the following command.
 
     ```bash
-    gcc -v
+    gcc --version
     ```

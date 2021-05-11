@@ -1,4 +1,4 @@
-# Run and debug your C++ project on Windows
+# Run and debug your C++ file on Windows
 
 1. Open the C++ source file that you want to run and debug. Make sure this file is active (currently displayed) in the editor.
 

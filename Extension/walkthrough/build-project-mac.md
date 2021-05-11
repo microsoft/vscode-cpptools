@@ -1,4 +1,4 @@
-# Build your C++ project with Clang on macOS
+# Build your C++ file with Clang on macOS
 
 1. Open the C++ source file that you want to build. Make sure this file is active (currently displayed) in the editor.
 

@@ -1,4 +1,4 @@
-# Run and debug your C++ project on Linux
+# Run and debug your C++ file on Linux
 
 1. Open the C++ source file that you want to run and debug. Make sure this file is active (currently displayed) in the editor.
 
