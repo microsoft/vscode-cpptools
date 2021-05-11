@@ -42,7 +42,7 @@ console.log(`locRootPath=${locRootPath}`);
 console.log(`locSubPath=${locSubPath}`);
 
 function hasBranch(branchName) {
-    console.log(`Checking for existance of branch "${branchName}" (git branch --list ${branchName})`);
+    console.log(`Checking for existence of branch "${branchName}" (git branch --list ${branchName})`);
     let output = cp.execSync(`git branch --list ${branchName}`);
     let lines = output.toString().split("\n");
     let found = false;

@@ -1084,7 +1084,7 @@ export class CppProperties {
             return;
         } else {
             try {
-                if  (!await util.checkFileExists(this.configFolder)) {
+                if  (!await util.checkDirectoryExists(this.configFolder)) {
                     fs.mkdirSync(this.configFolder);
                 }
 
