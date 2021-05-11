@@ -54,7 +54,7 @@
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isMac",
             "media": {
-              "altText": "markdown file with instructions for isntalling Clang on macOS",
+              "altText": "markdown file with instructions for installing Clang on macOS",
               "path": "walkthrough/install-clang-macos.md"
             }
           },
