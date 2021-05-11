@@ -13,7 +13,7 @@ If you're doing C++ development for Linux, we recommend installing the GCC compi
     ```bash
     sudo apt-get install build-essential gdb
 
-3. Verify GCC is installed by running the following command.
+3. Verify GCC is installed by running the following command. You should see a copyright message with the version and basic usage description.
 
     ```bash
     gcc --version

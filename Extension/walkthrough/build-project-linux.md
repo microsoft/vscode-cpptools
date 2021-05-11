@@ -10,4 +10,4 @@
 
 4. To run the build task, press `Ctrl+Shift+B` or from the **Terminal** main menu choose **Run Build Task.**
 
-    > Note: Make sure your C++ source file is active (currently displayed) in the editor when running the build task, because the build task builds the active file.
+    > **Note**: Make sure your C++ source file is active (currently displayed) in the editor when running the build task, because the build task builds the active file.
