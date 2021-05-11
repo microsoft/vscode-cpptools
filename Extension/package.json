@@ -81,7 +81,7 @@
           {
             "id": "open.project",
             "title": "Open your project",
-            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Open Folder...](command:workbench.action.files.openFolder)",
+            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Open Folder](command:workbench.action.files.openFolder)",
             "when": "workspaceFolderCount == 0",
             "media": {
               "altText": "screenshot that shows a C++ project opened in the file Explorer",
@@ -91,7 +91,7 @@
           {
             "id": "setup.intellisense",
             "title": "Configure C++ IntelliSense",
-            "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration...](command:C_Cpp.ConfigurationEditUI?-2)",
+            "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
             "media": {
               "altText": "screenshot that shows IntelliSense configurations UI with important settings highlighted",
               "path": {
@@ -164,7 +164,7 @@
           {
             "id": "install.cmake.tools",
             "title": "Install CMake Tools",
-            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools...](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
+            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
             "media": {
               "altText": "screenshot of CMake Tools extension page",
               "path": {

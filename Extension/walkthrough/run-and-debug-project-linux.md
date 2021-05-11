@@ -10,4 +10,4 @@
 
 4. To start a debugging session, Press `F5` or from the main menu choose **Run > Start Debugging**.
 
-    - Note: Make sure your C++ source file is active (currently displayed) in the editor when you start a debugging session.
+    > **Note**: Make sure your C++ source file is active (currently displayed) in the editor when you start a debugging session.
