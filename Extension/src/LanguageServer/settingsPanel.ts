@@ -83,11 +83,7 @@ export class SettingsPanel {
     }
 
     public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, errors: config.ConfigurationErrors, viewColumn?: vscode.ViewColumn): void {
-        const column: vscode.ViewColumn | undefined = viewColumn !== undefined
-            ? viewColumn
-            : vscode.window.activeTextEditor
-                ? vscode.window.activeTextEditor.viewColumn
-                : undefined;
+        const column: vscode.ViewColumn | undefined = viewColumn ?? vscode.window.activeTextEditor?.viewColumn;
 
         // Show existing panel
         if (this.panel) {
