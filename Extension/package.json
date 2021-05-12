@@ -53,6 +53,9 @@
             "title": "Install a C++ compiler",
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isMac",
+            "doneOn": {
+              "command": "C_Cpp.CheckForCompiler"
+            },
             "media": {
               "altText": "markdown file with instructions for installing Clang on macOS",
               "path": "walkthrough/install-clang-macos.md"
@@ -63,6 +66,9 @@
             "title": "Install a C++ compiler",
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isLinux",
+            "doneOn": {
+              "command": "C_Cpp.CheckForCompiler"
+            },
             "media": {
               "altText": "markdown file with instructions for installing GCC on Linux",
               "path": "walkthrough/install-gcc-linux.md"
@@ -73,6 +79,9 @@
             "title": "Install a C++ compiler",
             "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isWindows",
+            "doneOn": {
+              "command": "C_Cpp.CheckForCompiler"
+            },
             "media": {
               "altText": "markdown file with instructions for installing MSVC on Windows",
               "path": "walkthrough/install-compiler-windows.md"
@@ -83,6 +92,9 @@
             "title": "Open your project",
             "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Open Folder](command:workbench.action.files.openFolder)",
             "when": "workspaceFolderCount == 0",
+            "doneOn": {
+              "command": "workbench.action.files.openFolder"
+            },
             "media": {
               "altText": "screenshot that shows a C++ project opened in the file Explorer",
               "path": "walkthrough/cpp-folder-explorer.PNG"
@@ -92,6 +104,9 @@
             "id": "setup.intellisense",
             "title": "Configure C++ IntelliSense",
             "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
+            "doneOn": {
+              "command": "C_Cpp.ConfigurationEditUI"
+            },
             "media": {
               "altText": "screenshot that shows IntelliSense configurations UI with important settings highlighted",
               "path": {
@@ -165,6 +180,9 @@
             "id": "install.cmake.tools",
             "title": "Install CMake Tools",
             "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
+            "doneOn": {
+              "command": "workbench.extensions.installExtension"
+            },
             "media": {
               "altText": "screenshot of CMake Tools extension page",
               "path": {
