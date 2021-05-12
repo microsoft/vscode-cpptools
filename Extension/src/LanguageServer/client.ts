@@ -2673,7 +2673,9 @@ export class DefaultClient implements Client {
             compilers.forEach(compiler => {
                 message += "\n" + compiler.path;
             });
-            message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
+            if (compilers.length > 1) {
+                message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
+            }
             vscode.window.showInformationMessage(message, { modal: true });
         }
     }
