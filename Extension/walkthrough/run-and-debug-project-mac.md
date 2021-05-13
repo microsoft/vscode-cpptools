@@ -8,6 +8,6 @@
 
     ![Dropdown showing C++ debug configurations for Clang on macOS](clang-build-and-debug-active-file.png)
 
-4. To start a debugging session, Press `F5` or from the main menu choose **Run > Start Debugging**.
+4. To start a debugging session, press `F5` or from the main menu choose **Run > Start Debugging**.
 
     > **Note**: Make sure your C++ source file is active (currently displayed and selected) in the editor when you start a debugging session.

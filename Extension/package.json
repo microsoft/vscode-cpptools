@@ -142,7 +142,7 @@
             "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_build-helloworldcpp)",
             "when": "isWindows",
             "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on MSVC with Windows.",
+              "altText": "A markdown file with instructions for configuring the default build task on Windows with MSVC.",
               "path": "walkthrough/build-project-windows.md"
             }
           },
