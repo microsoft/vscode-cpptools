@@ -2670,8 +2670,13 @@ export class DefaultClient implements Client {
         } else {
             const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system:");
             let message: string = header + "\n";
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            let pathSeparator: string | undefined = settings.preferredPathSeparator;
             compilers.forEach(compiler => {
-                message += "\n" + compiler.path;
+                if (pathSeparator !== "Forward Slash")
+                    message += "\n" + compiler.path.replace(/\//g, '\\');
+                else
+                    message += "\n" + compiler.path.replace(/\\/g, '/');
             });
             if (compilers.length > 1) {
                 message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
