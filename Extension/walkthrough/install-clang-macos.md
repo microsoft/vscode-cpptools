@@ -6,7 +6,7 @@ If you're doing C++ development for macOS, we recommend installing the Clang com
 xcode-select --install
 ```
 
-Then, to verify that clang is installed, run the following command in a Terminal window. You should see a copyright message with the version and basic usage description.
+Then, to verify that clang is installed, run the following command in a Terminal window. You should see a message with information about the version of Clang you're using.
 
 ```bash
 clang --version

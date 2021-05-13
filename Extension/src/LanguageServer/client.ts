@@ -2666,7 +2666,7 @@ export class DefaultClient implements Client {
         const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
         if (!compilers || compilers.length === 0) {
             const compilerName: string = process.platform === "win32" ? "MSVC" : (process.platform === "darwin" ? "Clang" : "GCC");
-            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. Install {0} using the instructions in the editor.", compilerName), { modal: true });
+            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.", compilerName), { modal: true });
         } else {
             const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system:");
             let message: string = header + "\n";

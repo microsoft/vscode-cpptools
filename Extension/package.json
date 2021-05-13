@@ -46,58 +46,58 @@
       {
         "id": "cppWelcome",
         "title": "Get Started with C++ Development",
-        "description": "Your first steps to set up powerful C++ tools in a lightweight, performant editor!",
+        "description": "Dive into VS Code's rich C++ development experience.",
         "steps": [
           {
             "id": "verify.compiler.mac",
             "title": "Install a C++ compiler",
-            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. [Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isMac",
             "doneOn": {
               "command": "C_Cpp.CheckForCompiler"
             },
             "media": {
-              "altText": "markdown file with instructions for installing Clang on macOS",
+              "altText": "A markdown file with instructions for installing Clang on macOS.",
               "path": "walkthrough/install-clang-macos.md"
             }
           },
           {
             "id": "verify.compiler.linux",
             "title": "Install a C++ compiler",
-            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isLinux",
             "doneOn": {
               "command": "C_Cpp.CheckForCompiler"
             },
             "media": {
-              "altText": "markdown file with instructions for installing GCC on Linux",
+              "altText": "A markdown file with instructions for installing GCC on Linux.",
               "path": "walkthrough/install-gcc-linux.md"
             }
           },
           {
             "id": "verify.compiler.windows",
             "title": "Install a C++ compiler",
-            "description": "The C++ extension uses the C++ compiler on your computer to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "isWindows",
             "doneOn": {
               "command": "C_Cpp.CheckForCompiler"
             },
             "media": {
-              "altText": "markdown file with instructions for installing MSVC on Windows",
+              "altText": "A markdown file with instructions for installing MSVC on Windows.",
               "path": "walkthrough/install-compiler-windows.md"
             }
           },
           {
             "id": "open.project",
-            "title": "Open your project",
-            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Open Folder](command:workbench.action.files.openFolder)",
+            "title": "Open your project folder",
+            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Pick a folder](command:workbench.action.files.openFolder)",
             "when": "workspaceFolderCount == 0",
             "doneOn": {
               "command": "workbench.action.files.openFolder"
             },
             "media": {
-              "altText": "screenshot that shows a C++ project opened in the file Explorer",
-              "path": "walkthrough/cpp-folder-explorer.PNG"
+              "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
+              "path": "walkthrough/cpp-folder-explorer.png"
             }
           },
           {
@@ -108,7 +108,7 @@
               "command": "C_Cpp.ConfigurationEditUI"
             },
             "media": {
-              "altText": "screenshot that shows IntelliSense configurations UI with important settings highlighted",
+              "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
               "path": {
                 "light": "walkthrough/intellisense-config-light.png",
                 "dark": "walkthrough/intellisense-config-dark.png",
@@ -122,7 +122,7 @@
             "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_build-helloworldcpp)",
             "when": "isMac",
             "media": {
-              "altText": "markdown file with instructions for configuring default build task on Mac with Clang",
+              "altText": "A markdown file with instructions for configuring the default build task on Mac with Clang.",
               "path": "walkthrough/build-project-mac.md"
             }
           },
@@ -132,7 +132,7 @@
             "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_build-helloworldcpp)",
             "when": "isLinux",
             "media": {
-              "altText": "markdown file with instructions for configuring default build task on Linux with GCC",
+              "altText": "A markdown file with instructions for configuring the default build task on Linux with GCC.",
               "path": "walkthrough/build-project-linux.md"
             }
           },
@@ -142,7 +142,7 @@
             "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_build-helloworldcpp)",
             "when": "isWindows",
             "media": {
-              "altText": "markdown file with instructions for configuring default build task on MSVC with Windows",
+              "altText": "A markdown file with instructions for configuring the default build task on MSVC with Windows.",
               "path": "walkthrough/build-project-windows.md"
             }
           },
@@ -152,7 +152,7 @@
             "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "when": "isMac",
             "media": {
-              "altText": "markdown file with instructions for starting a debugging session on macOS",
+              "altText": "A markdown file with instructions for starting a debugging session on macOS.",
               "path": "walkthrough/run-and-debug-project-mac.md"
             }
           },
@@ -162,7 +162,7 @@
             "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "when": "isLinux",
             "media": {
-              "altText": "markdown file with instructions for starting a debugging session on Linux",
+              "altText": "A markdown file with instructions for starting a debugging session on Linux.",
               "path": "walkthrough/run-and-debug-project-linux.md"
             }
           },
@@ -172,19 +172,19 @@
             "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "when": "isWindows",
             "media": {
-              "altText": "markdown file with instructions for starting a debugging session on Windows",
+              "altText": "A markdown file with instructions for starting a debugging session on Windows.",
               "path": "walkthrough/run-and-debug-project-windows.md"
             }
           },
           {
             "id": "install.cmake.tools",
             "title": "Install CMake Tools",
-            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
+            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug your CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
             "doneOn": {
               "command": "workbench.extensions.installExtension"
             },
             "media": {
-              "altText": "screenshot of CMake Tools extension page",
+              "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
               "path": {
                 "light": "walkthrough/cmake-tools-light.png",
                 "dark": "walkthrough/cmake-tools-dark.png",
@@ -195,10 +195,10 @@
           {
             "id": "watch.tutorials",
             "title": "Lean back and get started",
-            "description": "Watch this series of short and practical videos about setting up C++ IntelliSense, building, and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
+            "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
-              "altText": "screenshot with preview of video tutorial and play button",
-              "path": "walkthrough/getting-started-video.PNG"
+              "altText": "A screenshot with a preview of the video tutorial and a play button.",
+              "path": "walkthrough/getting-started-video.png"
             }
           }
         ]

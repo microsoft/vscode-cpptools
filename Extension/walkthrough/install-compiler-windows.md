@@ -15,4 +15,4 @@ If you're doing C++ development for Windows, we recommend installing the Microso
    ![Developer Command Prompt](developer-cmd-prompt-menu.png)
 
 
-   >**Note**: To use MSVC from the command line or VS Code, you must run from a **Developer Command Prompt for VS**. An ordinary shell such as PowerShell, Bash, or the Windows command prompt does not have the necessary path environment variables set
+   >**Note**: To use MSVC from the command line or VS Code, you must run from a **Developer Command Prompt for VS**. An ordinary shell such as PowerShell, Bash, or the Windows command prompt does not have the necessary path environment variables set.
