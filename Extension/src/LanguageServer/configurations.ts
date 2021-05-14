@@ -996,8 +996,8 @@ export class CppProperties {
                         setTimeout(() => {
                             if (this.settingsPanel && this.configurationJson) {
                                 this.settingsPanel.updateConfigUI(configNames,
-                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                                    this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                                    this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                             }
                         },
                         500); // Need some delay or the UI can randomly be blank, particularly in the remote scenario.
