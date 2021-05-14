@@ -55,7 +55,7 @@
             "when": "isMac",
             "media": {
               "altText": "A markdown file with instructions for installing Clang on macOS.",
-              "path": "walkthrough/install-clang-macos.md"
+              "path": "walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
@@ -65,7 +65,7 @@
             "when": "isLinux",
             "media": {
               "altText": "A markdown file with instructions for installing GCC on Linux.",
-              "path": "walkthrough/install-gcc-linux.md"
+              "path": "walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
@@ -75,7 +75,7 @@
             "when": "isWindows",
             "media": {
               "altText": "A markdown file with instructions for installing MSVC on Windows.",
-              "path": "walkthrough/install-compiler-windows.md"
+              "path": "walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
@@ -85,7 +85,11 @@
             "when": "workspaceFolderCount == 0",
             "media": {
               "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
-              "path": "walkthrough/cpp-folder-explorer.png"
+              "path": {
+                "light": "walkthrough/images/cpp-folder-explorer-light.png",
+                "dark": "walkthrough/images/cpp-folder-explorer-dark.png",
+                "hc": "walkthrough/images/cpp-folder-explorer-hc.png"
+              }
             }
           },
           {
@@ -95,9 +99,9 @@
             "media": {
               "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
               "path": {
-                "light": "walkthrough/intellisense-config-light.png",
-                "dark": "walkthrough/intellisense-config-dark.png",
-                "hc": "walkthrough/intellisense-config-hc.png"
+                "light": "walkthrough/images/intellisense-config-light.png",
+                "dark": "walkthrough/images/intellisense-config-dark.png",
+                "hc": "walkthrough/images/intellisense-config-hc.png"
               }
             }
           },
@@ -107,8 +111,8 @@
             "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_build-helloworldcpp)",
             "when": "isMac",
             "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on Mac with Clang.",
-              "path": "walkthrough/build-project-mac.md"
+              "altText": "A markdown file with instructions for configuring the default build task on macOS with Clang.",
+              "path": "walkthrough/buildtask/build-project-mac.md"
             }
           },
           {
@@ -118,7 +122,7 @@
             "when": "isLinux",
             "media": {
               "altText": "A markdown file with instructions for configuring the default build task on Linux with GCC.",
-              "path": "walkthrough/build-project-linux.md"
+              "path": "walkthrough/buildtask/build-project-linux.md"
             }
           },
           {
@@ -128,7 +132,7 @@
             "when": "isWindows",
             "media": {
               "altText": "A markdown file with instructions for configuring the default build task on Windows with MSVC.",
-              "path": "walkthrough/build-project-windows.md"
+              "path": "walkthrough/buildtask/build-project-windows.md"
             }
           },
           {
@@ -138,7 +142,7 @@
             "when": "isMac",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on macOS.",
-              "path": "walkthrough/run-and-debug-project-mac.md"
+              "path": "walkthrough/debugconfig/run-and-debug-project-mac.md"
             }
           },
           {
@@ -148,7 +152,7 @@
             "when": "isLinux",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Linux.",
-              "path": "walkthrough/run-and-debug-project-linux.md"
+              "path": "walkthrough/debugconfig/run-and-debug-project-linux.md"
             }
           },
           {
@@ -158,7 +162,7 @@
             "when": "isWindows",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Windows.",
-              "path": "walkthrough/run-and-debug-project-windows.md"
+              "path": "walkthrough/debugconfig/run-and-debug-project-windows.md"
             }
           },
           {
@@ -171,9 +175,9 @@
             "media": {
               "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
               "path": {
-                "light": "walkthrough/cmake-tools-light.png",
-                "dark": "walkthrough/cmake-tools-dark.png",
-                "hc": "walkthrough/cmake-tools-hc.png"
+                "light": "walkthrough/images/cmake-tools-light.png",
+                "dark": "walkthrough/images/cmake-tools-dark.png",
+                "hc": "walkthrough/images/cmake-tools-hc.png"
               }
             }
           },
@@ -183,7 +187,7 @@
             "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
               "altText": "A screenshot with a preview of the video tutorial and a play button.",
-              "path": "walkthrough/getting-started-video.png"
+              "path": "walkthrough/images/getting-started-video.png"
             }
           }
         ]
