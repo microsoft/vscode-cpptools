@@ -993,9 +993,14 @@ export class CppProperties {
                         if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
                             this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
-                        this.settingsPanel.updateConfigUI(configNames,
-                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                        setTimeout(() => {
+                            if (this.settingsPanel && this.configurationJson) {
+                                this.settingsPanel.updateConfigUI(configNames,
+                                    this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                                    this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                            }
+                        },
+                        500); // Need some delay or the UI can randomly be blank, particularly in the remote scenario.
                     } else {
                         // Parse failed, open json file
                         vscode.workspace.openTextDocument(this.propertiesFile);
