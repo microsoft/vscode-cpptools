@@ -914,17 +914,17 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): void {
+    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): void {
         const otherSettings: OtherSettings = new OtherSettings(this.rootUri);
         if (otherSettings.settingsEditor === "ui") {
-            this.handleConfigurationEditUICommand(onBeforeOpen, showDocument);
+            this.handleConfigurationEditUICommand(onBeforeOpen, showDocument, viewColumn);
         } else {
-            this.handleConfigurationEditJSONCommand(onBeforeOpen, showDocument);
+            this.handleConfigurationEditJSONCommand(onBeforeOpen, showDocument, viewColumn);
         }
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): Promise<void> {
+    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): Promise<void> {
         await this.ensurePropertiesFile();
         console.assert(this.propertiesFile);
         if (onBeforeOpen) {
@@ -934,7 +934,7 @@ export class CppProperties {
         if (this.propertiesFile) {
             const document: vscode.TextDocument = await vscode.workspace.openTextDocument(this.propertiesFile);
             if (showDocument) {
-                showDocument(document);
+                showDocument(document, viewColumn);
             }
         }
     }
@@ -953,7 +953,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument) => void): Promise<void> {
+    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): Promise<void> {
         await this.ensurePropertiesFile();
         if (this.propertiesFile) {
             if (onBeforeOpen) {
@@ -968,14 +968,15 @@ export class CppProperties {
                         this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         this.settingsPanel.createOrShow(configNames,
                             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex),
+                            viewColumn);
                     }
                 }
             } else {
                 // Parse failed, open json file
                 const document: vscode.TextDocument = await vscode.workspace.openTextDocument(this.propertiesFile);
                 if (showDocument) {
-                    showDocument(document);
+                    showDocument(document, viewColumn);
                 }
             }
         }
@@ -993,9 +994,14 @@ export class CppProperties {
                         if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
                             this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
-                        this.settingsPanel.updateConfigUI(configNames,
-                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                        setTimeout(() => {
+                            if (this.settingsPanel && this.configurationJson) {
+                                this.settingsPanel.updateConfigUI(configNames,
+                                    this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                                    this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                            }
+                        },
+                        500); // Need some delay or the UI can randomly be blank, particularly in the remote scenario.
                     } else {
                         // Parse failed, open json file
                         vscode.workspace.openTextDocument(this.propertiesFile);

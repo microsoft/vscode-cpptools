@@ -489,6 +489,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.GenerateEditorConfig",
         "onCommand:C_Cpp.GoToNextDirectiveInGroup",
         "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
+        "onCommand:C_Cpp.CheckForCompiler",
         "onDebugInitialConfigurations",
         "onDebugResolve:cppdbg",
         "onDebugResolve:cppvsdbg",

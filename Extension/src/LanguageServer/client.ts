@@ -596,11 +596,12 @@ export interface Client {
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
     handleReferencesIcon(): void;
-    handleConfigurationEditCommand(): void;
-    handleConfigurationEditJSONCommand(): void;
-    handleConfigurationEditUICommand(): void;
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
+    handleCheckForCompiler(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -2620,16 +2621,16 @@ export class DefaultClient implements Client {
         }
     }
 
-    public handleConfigurationEditCommand(): void {
-        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument));
+    public handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
 
-    public handleConfigurationEditJSONCommand(): void {
-        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument));
+    public handleConfigurationEditJSONCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditJSONCommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
 
-    public handleConfigurationEditUICommand(): void {
-        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument));
+    public handleConfigurationEditUICommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
+        this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditUICommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
 
     public handleAddToIncludePathCommand(path: string): void {
@@ -2657,6 +2658,31 @@ export class DefaultClient implements Client {
                     currentEditor.revealRange(r);
                 }
             }
+        }
+    }
+
+    public async handleCheckForCompiler(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
+        if (!compilers || compilers.length === 0) {
+            const compilerName: string = process.platform === "win32" ? "MSVC" : (process.platform === "darwin" ? "Clang" : "GCC");
+            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.", compilerName), { modal: true });
+        } else {
+            const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system:");
+            let message: string = header + "\n";
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            const pathSeparator: string | undefined = settings.preferredPathSeparator;
+            compilers.forEach(compiler => {
+                if (pathSeparator !== "Forward Slash") {
+                    message += "\n" + compiler.path.replace(/\//g, '\\');
+                } else {
+                    message += "\n" + compiler.path.replace(/\\/g, '/');
+                }
+            });
+            if (compilers.length > 1) {
+                message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
+            }
+            vscode.window.showInformationMessage(message, { modal: true });
         }
     }
 
@@ -2823,11 +2849,12 @@ class NullClient implements Client {
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void {}
-    handleConfigurationEditCommand(): void {}
-    handleConfigurationEditJSONCommand(): void {}
-    handleConfigurationEditUICommand(): void {}
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void {}
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void {}
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void {}
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
+    handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     onInterval(): void {}
     dispose(): void {
         this.booleanEvent.dispose();

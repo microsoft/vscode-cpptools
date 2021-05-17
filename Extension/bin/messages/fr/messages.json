@@ -3350,7 +3350,7 @@
   "n'importe quel genre de fichier de module",
   "impossible de lire le fichier de module",
   "la fonction intégrée n'est pas disponible, car le type char8_t n'est pas pris en charge avec les options actuelles",
-  "l'option de ligne de commande --ms_await ne peut pas être spécifiée si les coroutines C++20 sont activées",
+  null,
   "utilisation non standard du constructeur explicite %nod pour l'initialisation de l'élément d'agrégation par défaut",
   "la source ou la destination de l'intrinsèque de type memcpy ne pointe pas vers un objet",
   "l'intrinsèque de type memcpy tente de copier les types représentatifs distincts %t1 et %t2",
@@ -3373,5 +3373,14 @@
   "__is_signed n'est plus un mot clé à partir de ce point",
   "une dimension de tableau doit avoir une valeur d'entier non signé constante",
   "le fichier IFC %sq a une version non prise en charge : %d1.%d2",
-  "les modules ne sont pas activés dans ce mode"
+  "les modules ne sont pas activés dans ce mode",
+  "'import' n'est pas autorisé dans un nom de module",
+  "'module' n'est pas autorisé dans un nom de module",
+  "%sq ne peut pas être une macro quand il est utilisé dans une directive import",
+  null,
+  "%n n'est pas un type énumération",
+  "l'énumérateur %no2 est en conflit avec %n1",
+  "l'énumérateur %no a déjà été déclaré dans cette étendue %p",
+  "la spécification 'throw()' ne fait pas partie de C++20 ni des versions ultérieures",
+  "plusieurs entrées dans le mappage d'unité d'en-tête correspondent à '%s'"
 ]
