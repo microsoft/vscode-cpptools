@@ -35,7 +35,8 @@ class TemporaryCommandRegistrar {
         "C_Cpp.RescanWorkspace",
         "C_Cpp.GenerateEditorConfig",
         "C_Cpp.VcpkgClipboardInstallSuggested",
-        "C_Cpp.VcpkgOnlineHelpSuggested"
+        "C_Cpp.VcpkgOnlineHelpSuggested",
+        "C_Cpp.CheckForCompiler"
     ];
 
     constructor() {

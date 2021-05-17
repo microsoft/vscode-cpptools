@@ -49,6 +49,157 @@
   ],
   "main": "./dist/main",
   "contributes": {
+    "walkthroughs": [
+      {
+        "id": "cppWelcome",
+        "title": "Get Started with C++ Development",
+        "description": "Dive into VS Code's rich C++ development experience.",
+        "steps": [
+          {
+            "id": "verify.compiler.mac",
+            "title": "Install a C++ compiler",
+            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "when": "isMac",
+            "media": {
+              "altText": "A markdown file with instructions for installing Clang on macOS.",
+              "path": "walkthrough/installcompiler/install-clang-macos.md"
+            }
+          },
+          {
+            "id": "verify.compiler.linux",
+            "title": "Install a C++ compiler",
+            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "when": "isLinux",
+            "media": {
+              "altText": "A markdown file with instructions for installing GCC on Linux.",
+              "path": "walkthrough/installcompiler/install-gcc-linux.md"
+            }
+          },
+          {
+            "id": "verify.compiler.windows",
+            "title": "Install a C++ compiler",
+            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "when": "isWindows",
+            "media": {
+              "altText": "A markdown file with instructions for installing MSVC on Windows.",
+              "path": "walkthrough/installcompiler/install-compiler-windows.md"
+            }
+          },
+          {
+            "id": "open.project",
+            "title": "Open your project folder",
+            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Pick a folder](command:workbench.action.files.openFolder)",
+            "when": "workspaceFolderCount == 0",
+            "media": {
+              "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
+              "path": {
+                "light": "walkthrough/images/cpp-folder-explorer-light.png",
+                "dark": "walkthrough/images/cpp-folder-explorer-dark.png",
+                "hc": "walkthrough/images/cpp-folder-explorer-hc.png"
+              }
+            }
+          },
+          {
+            "id": "setup.intellisense",
+            "title": "Configure C++ IntelliSense",
+            "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
+            "media": {
+              "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
+              "path": {
+                "light": "walkthrough/images/intellisense-config-light.png",
+                "dark": "walkthrough/images/intellisense-config-dark.png",
+                "hc": "walkthrough/images/intellisense-config-hc.png"
+              }
+            }
+          },
+          {
+            "id": "build.project.mac",
+            "title": "Build your C++ file",
+            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_build-helloworldcpp)",
+            "when": "isMac",
+            "media": {
+              "altText": "A markdown file with instructions for configuring the default build task on macOS with Clang.",
+              "path": "walkthrough/buildtask/build-project-mac.md"
+            }
+          },
+          {
+            "id": "build.project.linux",
+            "title": "Build your C++ file",
+            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_build-helloworldcpp)",
+            "when": "isLinux",
+            "media": {
+              "altText": "A markdown file with instructions for configuring the default build task on Linux with GCC.",
+              "path": "walkthrough/buildtask/build-project-linux.md"
+            }
+          },
+          {
+            "id": "build.project.windows",
+            "title": "Build your C++ file",
+            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_build-helloworldcpp)",
+            "when": "isWindows",
+            "media": {
+              "altText": "A markdown file with instructions for configuring the default build task on Windows with MSVC.",
+              "path": "walkthrough/buildtask/build-project-windows.md"
+            }
+          },
+          {
+            "id": "run.project.mac",
+            "title": "Run and debug your C++ file",
+            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
+            "when": "isMac",
+            "media": {
+              "altText": "A markdown file with instructions for starting a debugging session on macOS.",
+              "path": "walkthrough/debugconfig/run-and-debug-project-mac.md"
+            }
+          },
+          {
+            "id": "run.project.linux",
+            "title": "Run and debug your C++ file",
+            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "when": "isLinux",
+            "media": {
+              "altText": "A markdown file with instructions for starting a debugging session on Linux.",
+              "path": "walkthrough/debugconfig/run-and-debug-project-linux.md"
+            }
+          },
+          {
+            "id": "run.project.windows",
+            "title": "Run and debug your C++ file",
+            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
+            "when": "isWindows",
+            "media": {
+              "altText": "A markdown file with instructions for starting a debugging session on Windows.",
+              "path": "walkthrough/debugconfig/run-and-debug-project-windows.md"
+            }
+          },
+          {
+            "id": "install.cmake.tools",
+            "title": "Install CMake Tools",
+            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug your CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
+            "completionEvents": [
+              "extensionInstalled:ms-vscode.cmake-tools"
+            ],
+            "media": {
+              "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
+              "path": {
+                "light": "walkthrough/images/cmake-tools-light.png",
+                "dark": "walkthrough/images/cmake-tools-dark.png",
+                "hc": "walkthrough/images/cmake-tools-hc.png"
+              }
+            }
+          },
+          {
+            "id": "watch.tutorials",
+            "title": "Lean back and get started",
+            "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
+            "media": {
+              "altText": "A screenshot with a preview of the video tutorial and a play button.",
+              "path": "walkthrough/images/getting-started-video.png"
+            }
+          }
+        ]
+      }
+    ],
     "taskDefinitions": [
       {
         "type": "cppbuild",
