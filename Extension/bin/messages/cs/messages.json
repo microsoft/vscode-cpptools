@@ -3350,7 +3350,7 @@
   "libovolný druh souboru modulu",
   "nejde přečíst soubor modulu",
   "předdefinovaná funkce není k dispozici, protože typ char8_t se nepodporuje s aktuálními možnostmi",
-  "možnost příkazového řádku --ms_await nejde zadat, pokud jsou povolené korutiny C++20",
+  null,
   "nestandardní použití explicitního konstruktoru %nod pro inicializaci výchozího agregačního elementu",
   "zdroj nebo cíl vnitřní funkce memcpy-like neukazuje na objekt",
   "vnitřní funkce memcpy-like se pokouší o kopírování reprezentačně odlišných typů %t1 a %t2",
@@ -3373,5 +3373,14 @@
   "__is_signed už není klíčové slovo.",
   "Rozměr pole musí mít konstantní celočíselnou hodnotu bez znaménka.",
   "Soubor IFC %sq má nepodporovanou verzi %d1.%d2.",
-  "Moduly se v tomto režimu nepovolily."
+  "Moduly se v tomto režimu nepovolily.",
+  "Název modulu nesmí obsahovat slovo import.",
+  "Název modulu nesmí obsahovat slovo module.",
+  "Když se %sq používá v direktivě import, nemůže to být makro.",
+  null,
+  "%n není výčtový typ.",
+  "Enumerátor %no2 je v konfliktu s %n1.",
+  "Enumerátor %no se už v tomto oboru %p deklaroval.",
+  "specifikace throw() není součástí standardu C++20 a novějších",
+  "více než jedna položka v mapě jednotky hlavičky odpovídá %s"
 ]
