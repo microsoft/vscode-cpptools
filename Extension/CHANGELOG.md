@@ -28,6 +28,7 @@
 * Add support for exception conditions to cppvsdbg (see [documentation](https://aka.ms/VSCode-Cpp-ExceptionSettings) for more information)
 
 ### Bug Fixes
+* Fix IntelliSense errors with designated initializers. [#3491](https://github.com/microsoft/vscode-cpptools/issues/3491), [#5500](https://github.com/microsoft/vscode-cpptools/issues/5550)
 * Fix IntelliSense configuration with cl.exe compiler args `/external:I`, `/Zc:preprocessor`, and others. [#4980](https://github.com/microsoft/vscode-cpptools/issues/4980), [#6531](https://github.com/microsoft/vscode-cpptools/issues/6531), [#7259](https://github.com/microsoft/vscode-cpptools/issues/7259)
 * Fix provider failed error logging. [#5487](https://github.com/microsoft/vscode-cpptools/issues/5487)
 * Fix -idirafter directories being included too early. [#7129](https://github.com/microsoft/vscode-cpptools/issues/7129)
@@ -37,9 +38,9 @@
 * Fix clang-format formatting bug when new lines are removed. [#7360](https://github.com/microsoft/vscode-cpptools/issues/7360)
 * Change default cwd in launch.json to `${fileDirname}`. [#7362](https://github.com/microsoft/vscode-cpptools/issues/7362)
   * Syed Ahmad (@HackintoshwithUbuntu) [PR #7363](https://github.com/microsoft/vscode-cpptools/pull/7363)
-* Fix a crash on Linux with a `/**` includePath.
 * Fix the compile commands entry not being used when -Werror is used. [#7388](https://github.com/microsoft/vscode-cpptools/issues/7388)
 * Fix some potential race conditions during vsix installation. [#7405](https://github.com/microsoft/vscode-cpptools/issues/7405)
+* Fix a crash on Linux with a `/**` includePath.
 
 ## Version 1.3.1: April 19, 2021
 ### Bug Fixes
