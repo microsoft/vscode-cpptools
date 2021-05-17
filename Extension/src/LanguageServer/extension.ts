@@ -776,6 +776,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -871,32 +872,32 @@ function onSelectConfigurationProvider(): void {
     }
 }
 
-function onEditConfigurationJSON(): void {
+function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditJSONCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(viewColumn), rejected => {});
     }
 }
 
-function onEditConfigurationUI(): void {
+function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditUICommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditUICommand(viewColumn), rejected => {});
     }
 }
 
-function onEditConfiguration(): void {
+function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(), rejected => {});
+        selectClient().then(client => client.handleConfigurationEditCommand(viewColumn), rejected => {});
     }
 }
 
@@ -919,6 +920,12 @@ function onGoToPrevDirectiveInGroup(): void {
     onActivationEvent();
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(false);
+}
+
+function onCheckForCompiler(): void {
+    onActivationEvent();
+    const client: Client = getActiveClient();
+    client.handleCheckForCompiler();
 }
 
 function onAddToIncludePath(path: string): void {
