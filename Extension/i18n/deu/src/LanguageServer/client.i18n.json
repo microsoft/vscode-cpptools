@@ -33,5 +33,8 @@
 	"yes.button": "Ja",
 	"no.button": "Nein",
 	"configurations.received": "Benutzerdefinierte Konfigurationen empfangen:",
-	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}"
+	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}",
+	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
+	"compilers.found": "We found the following C++ compiler(s) on your system:",
+	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
 }

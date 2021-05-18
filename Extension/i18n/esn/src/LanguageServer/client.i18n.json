@@ -33,5 +33,8 @@
 	"yes.button": "Sí",
 	"no.button": "No",
 	"configurations.received": "Configuraciones personalizadas recibidas:",
-	"browse.configuration.received": "Configuración de exploración personalizada recibida: {0}"
+	"browse.configuration.received": "Configuración de exploración personalizada recibida: {0}",
+	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
+	"compilers.found": "We found the following C++ compiler(s) on your system:",
+	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
 }
