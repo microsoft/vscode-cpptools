@@ -106,39 +106,9 @@
             }
           },
           {
-            "id": "build.project.mac",
-            "title": "Build your C++ file",
-            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_build-helloworldcpp)",
-            "when": "isMac",
-            "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on macOS with Clang.",
-              "path": "walkthrough/buildtask/build-project-mac.md"
-            }
-          },
-          {
-            "id": "build.project.linux",
-            "title": "Build your C++ file",
-            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_build-helloworldcpp)",
-            "when": "isLinux",
-            "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on Linux with GCC.",
-              "path": "walkthrough/buildtask/build-project-linux.md"
-            }
-          },
-          {
-            "id": "build.project.windows",
-            "title": "Build your C++ file",
-            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_build-helloworldcpp)",
-            "when": "isWindows",
-            "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on Windows with MSVC.",
-              "path": "walkthrough/buildtask/build-project-windows.md"
-            }
-          },
-          {
             "id": "run.project.mac",
             "title": "Run and debug your C++ file",
-            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
+            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "when": "isMac",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on macOS.",
@@ -148,7 +118,7 @@
           {
             "id": "run.project.linux",
             "title": "Run and debug your C++ file",
-            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "when": "isLinux",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Linux.",
@@ -158,7 +128,7 @@
           {
             "id": "run.project.windows",
             "title": "Run and debug your C++ file",
-            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
+            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "when": "isWindows",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Windows.",
