@@ -33,5 +33,8 @@
 	"yes.button": "예",
 	"no.button": "아니요",
 	"configurations.received": "사용자 지정 구성이 수신됨:",
-	"browse.configuration.received": "사용자 지정 찾아보기 구성이 수신됨: {0}"
+	"browse.configuration.received": "사용자 지정 찾아보기 구성이 수신됨: {0}",
+	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
+	"compilers.found": "We found the following C++ compiler(s) on your system:",
+	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
 }

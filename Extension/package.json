@@ -37,6 +37,13 @@
     "Linters",
     "Snippets"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "%c_cpp.capabilities.untrustedWorkspaces.description%"
+    },
+    "virtualWorkspaces": false
+  },
   "activationEvents": [
     "*"
   ],

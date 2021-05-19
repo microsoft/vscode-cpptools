@@ -33,5 +33,8 @@
 	"yes.button": "是",
 	"no.button": "否",
 	"configurations.received": "已收到自定义配置:",
-	"browse.configuration.received": "已收到自定义浏览配置: {0}"
+	"browse.configuration.received": "已收到自定义浏览配置: {0}",
+	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
+	"compilers.found": "We found the following C++ compiler(s) on your system:",
+	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
 }
