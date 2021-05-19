@@ -1204,12 +1204,14 @@ export class CppProperties {
                 }
             }
 
-            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                if ((<any>this.configurationJson.configurations[i]).knownCompilers !== undefined) {
-                    delete (<any>this.configurationJson.configurations[i]).knownCompilers;
+            this.configurationJson.configurations.forEach(e => {
+                if ((<any>e).knownCompilers !== undefined) {
+                    delete (<any>e).knownCompilers;
                     dirty = true;
-                    break;
                 }
+            });
+
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
                 if (this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined) {
                     dirty = true;
                     break;
