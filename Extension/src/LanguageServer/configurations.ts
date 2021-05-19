@@ -766,17 +766,18 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            configuration.intelliSenseModeIsExplicit = true;
-            configuration.cStandardIsExplicit = true;
-            configuration.cppStandardIsExplicit = true;
-            configuration.compilerPathIsExplicit = true;
+            configuration.intelliSenseModeIsExplicit = configuration.intelliSenseModeIsExplicit || settings.defaultIntelliSenseMode !== "";
+            configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
+            configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
+            configuration.compilerPathIsExplicit = false;
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
+                configuration.compilerPathIsExplicit = configuration.compilerPath !== undefined;
                 if (configuration.compilerPath === undefined) {
-                    configuration.compilerPathIsExplicit = false;
                     if (!!this.defaultCompilerPath) {
+                        // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
                         configuration.compilerPath = this.defaultCompilerPath;
                         if (!configuration.cStandard && !!this.defaultCStandard) {
                             configuration.cStandard = this.defaultCStandard;
@@ -809,8 +810,10 @@ export class CppProperties {
                 }
                 if (configuration.compilerPath === null) {
                     configuration.compilerPath = undefined;
+                    configuration.compilerPathIsExplicit = true;
                 } else if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
+                    configuration.compilerPathIsExplicit = true;
                 }
             }
 
@@ -1201,28 +1204,29 @@ export class CppProperties {
                 }
             }
 
-            this.configurationJson.configurations.forEach(e => {
-                if ((<any>e).knownCompilers !== undefined) {
-                    delete (<any>e).knownCompilers;
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                if ((<any>this.configurationJson.configurations[i]).knownCompilers !== undefined) {
+                    delete (<any>this.configurationJson.configurations[i]).knownCompilers;
                     dirty = true;
+                    break;
                 }
-                if ((<any>e).compilerPathIsExplicit !== undefined) {
-                    delete (<any>e).compilerPathIsExplicit;
+                if (this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined) {
                     dirty = true;
+                    break;
                 }
-                if ((<any>e).cStandardIsExplicit !== undefined) {
-                    delete (<any>e).cStandardIsExplicit;
+                if (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined) {
                     dirty = true;
+                    break;
                 }
-                if ((<any>e).cppStandardIsExplicit !== undefined) {
-                    delete (<any>e).cppStandardIsExplicit;
+                if (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined) {
                     dirty = true;
+                    break;
                 }
-                if ((<any>e).intelliSenseModeIsExplicit !== undefined) {
-                    delete (<any>e).intelliSenseModeIsExplicit;
+                if (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined) {
                     dirty = true;
+                    break;
                 }
-            });
+            }
 
             if (dirty) {
                 try {
@@ -1233,6 +1237,13 @@ export class CppProperties {
                     success = false;
                 }
             }
+
+            this.configurationJson.configurations.forEach(e => {
+                e.compilerPathIsExplicit = e.compilerPath !== undefined;
+                e.cStandardIsExplicit = e.cStandard !== undefined;
+                e.cppStandardIsExplicit = e.cppStandard !== undefined;
+                e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
+            });
 
         } catch (err) {
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
@@ -1847,6 +1858,23 @@ export class CppProperties {
     }
 
     private writeToJson(): void {
+        if (this.configurationJson) {
+            this.configurationJson.configurations.forEach(e => {
+                if (e.compilerPathIsExplicit !== undefined) {
+                    delete e.compilerPathIsExplicit;
+                }
+                if (e.cStandardIsExplicit !== undefined) {
+                    delete e.cStandardIsExplicit;
+                }
+                if (e.cppStandardIsExplicit !== undefined) {
+                    delete e.cppStandardIsExplicit;
+                }
+                if (e.intelliSenseModeIsExplicit !== undefined) {
+                    delete e.intelliSenseModeIsExplicit;
+                }
+            });
+        }
+
         console.assert(this.propertiesFile);
         if (this.propertiesFile) {
             fs.writeFileSync(this.propertiesFile.fsPath, jsonc.stringify(this.configurationJson, null, 4));
