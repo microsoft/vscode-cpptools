@@ -33,9 +33,9 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                 name = name + ' (' + suffix + ')';
             } else {
                 if (symbol.scope === SymbolScope.Private) {
-                    name = name + "(private)";
+                    name = name + " (private)";
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    name = name + "(protected)";
+                    name = name + " (protected)";
                 }
             }
             const range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
