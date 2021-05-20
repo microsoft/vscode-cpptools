@@ -1859,19 +1859,19 @@ export class CppProperties {
 
         if (this.configurationJson) {
             this.configurationJson.configurations.forEach(e => {
-                savedCompilerPathIsExplicit.push(e.compilerPathIsExplicit !== undefined);
+                savedCompilerPathIsExplicit.push(!!e.compilerPathIsExplicit);
                 if (e.compilerPathIsExplicit !== undefined) {
                     delete e.compilerPathIsExplicit;
                 }
-                savedCStandardIsExplicit.push(e.cStandardIsExplicit !== undefined);
+                savedCStandardIsExplicit.push(!!e.cStandardIsExplicit);
                 if (e.cStandardIsExplicit !== undefined) {
                     delete e.cStandardIsExplicit;
                 }
-                savedCppStandardIsExplicit.push(e.cppStandardIsExplicit !== undefined);
+                savedCppStandardIsExplicit.push(!!e.cppStandardIsExplicit);
                 if (e.cppStandardIsExplicit !== undefined) {
                     delete e.cppStandardIsExplicit;
                 }
-                savedIntelliSenseModeIsExplicit.push(e.intelliSenseModeIsExplicit !== undefined);
+                savedIntelliSenseModeIsExplicit.push(!!e.intelliSenseModeIsExplicit);
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
                 }
