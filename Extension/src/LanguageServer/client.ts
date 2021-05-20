@@ -1258,7 +1258,8 @@ export class DefaultClient implements Client {
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
                 localizedStrings: localizedStrings,
-                supportCuda: util.supportCuda
+                supportCuda: util.supportCuda,
+                packageVersion: util.packageJson.version
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
