@@ -1212,19 +1212,10 @@ export class CppProperties {
             });
 
             for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-                if (this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined) {
-                    dirty = true;
-                    break;
-                }
-                if (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined) {
-                    dirty = true;
-                    break;
-                }
-                if (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined) {
-                    dirty = true;
-                    break;
-                }
-                if (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined) {
+                if ((this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)) {
                     dirty = true;
                     break;
                 }
