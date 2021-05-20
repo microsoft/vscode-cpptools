@@ -30,9 +30,9 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
             let name: string = symbol.name;
             if (suffix.length) {
                 if (symbol.scope === SymbolScope.Private) {
-                    suffix = "private" + localize("c.cpp.workspacesymbolscope.separator", ", ") + suffix;
+                    suffix = localize("c.cpp.symbolscope.separator", "{0}, {1}", "private", suffix);
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    suffix = "protected" + localize("c.cpp.workspacesymbolscope.separator", ", ") + suffix;
+                    suffix = localize("c.cpp.symbolscope.separator", "{0}, {1}", "protected", suffix);
                 }
                 name = name + ' (' + suffix + ')';
             } else {

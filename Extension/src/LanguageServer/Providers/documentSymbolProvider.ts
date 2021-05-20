@@ -22,9 +22,17 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             symbols.forEach((symbol) => {
                 let detail: string = util.getLocalizedString(symbol.detail);
                 if (symbol.scope === SymbolScope.Private) {
-                    detail = "private" + (detail.length === 0 ? "" : localize("c.cpp.documentsymbolscope.separator", ", ")) + detail;
+                    if (detail.length === 0) {
+                        detail = "private";
+                    } else {
+                        detail = localize("c.cpp.symbolscope.separator", "{0}, {1}", "private", detail);
+                    }
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    detail = "protected" + (detail.length === 0 ? "" : localize("c.cpp.documentsymbolscope.separator", ", ")) + detail;
+                    if (detail.length === 0) {
+                        detail = "protected";
+                    } else {
+                        detail = localize("c.cpp.symbolscope.separator", "{0}, {1}", "protected", detail);
+                    }
                 }
                 const r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
                 const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
