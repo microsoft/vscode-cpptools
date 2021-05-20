@@ -257,19 +257,19 @@ export function isUri(input: any): input is vscode.Uri {
 }
 
 export function isString(input: any): input is string {
-    return typeof(input) === "string";
+    return typeof (input) === "string";
 }
 
 export function isNumber(input: any): input is number {
-    return typeof(input) === "number";
+    return typeof (input) === "number";
 }
 
 export function isBoolean(input: any): input is boolean {
-    return typeof(input) === "boolean";
+    return typeof (input) === "boolean";
 }
 
 export function isObject(input: any): input is object {
-    return typeof(input) === "object";
+    return typeof (input) === "object";
 }
 
 export function isArray(input: any): input is any[] {
@@ -288,7 +288,7 @@ export function isOptionalArrayOfString(input: any): input is string[] | undefin
     return input === undefined || isArrayOfString(input);
 }
 
-export function resolveCachePath(input: string | undefined, additionalEnvironment: {[key: string]: string | string[]}): string {
+export function resolveCachePath(input: string | undefined, additionalEnvironment: { [key: string]: string | string[] }): string {
     let resolvedPath: string = "";
     if (!input) {
         // If no path is set, return empty string to language service process, where it will set the default path as
@@ -301,7 +301,7 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function resolveVariables(input: string | undefined, additionalEnvironment?: {[key: string]: string | string[]}): string {
+export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string {
     if (!input) {
         return "";
     }
@@ -981,7 +981,8 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
 
     if (compilerPath) {
         if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {            compilerName = path.basename(compilerPath);
+            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {
+            compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
             const endQuote: number = compilerPath.substr(1).search("\"") + 1;
@@ -1049,7 +1050,7 @@ export function escapeForSquiggles(s: string): string {
                 newResults += "\\";
             }
             lastWasBackslash = false;
-            lastBackslashWasEscaped  = false;
+            lastBackslashWasEscaped = false;
             newResults += s[i];
         }
     }
@@ -1140,6 +1141,13 @@ export function getLocalizedString(params: LocalizeStringParams): string {
         text = lookupString(params.stringId, params.stringArgs);
     }
     return indent + text;
+}
+
+export function getLocalizedSymbolScope(scope: string, detail: string): string {
+    return localize({
+        key: "c.cpp.symbolscope.separator", comment:
+            ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized verison of \"declaration\""]
+    }, "{0}, {1}", scope, detail);
 }
 
 function decodeUCS16(input: string): number[] {
