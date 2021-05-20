@@ -18,9 +18,9 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             symbols.forEach((symbol) => {
                 let detail: string = util.getLocalizedString(symbol.detail);
                 if (symbol.scope === SymbolScope.Private) {
-                    detail = "private: " + detail;
+                    detail = "private" + (detail.length === 0 ? "" : ": ") + detail;
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    detail = "protected: " + detail;
+                    detail = "protected" + (detail.length === 0 ? "" : ": ") + detail;
                 }
                 const r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
                 const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
