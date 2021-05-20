@@ -5,6 +5,10 @@
 import * as vscode from 'vscode';
 import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope } from '../client';
 import * as util from '../../common';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
     private client: DefaultClient;
@@ -26,9 +30,9 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
             let name: string = symbol.name;
             if (suffix.length) {
                 if (symbol.scope === SymbolScope.Private) {
-                    suffix = "private: " + suffix;
+                    suffix = "private" + localize("c.cpp.workspacesymbolscope.separator", ", ") + suffix;
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    suffix = "protected: " + suffix;
+                    suffix = "protected" + localize("c.cpp.workspacesymbolscope.separator", ", ") + suffix;
                 }
                 name = name + ' (' + suffix + ')';
             } else {

@@ -6,6 +6,10 @@ import * as vscode from 'vscode';
 import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
 import * as util from '../../common';
 import { processDelayedDidOpen } from '../extension';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private client: DefaultClient;
@@ -18,9 +22,9 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             symbols.forEach((symbol) => {
                 let detail: string = util.getLocalizedString(symbol.detail);
                 if (symbol.scope === SymbolScope.Private) {
-                    detail = "private" + (detail.length === 0 ? "" : ": ") + detail;
+                    detail = "private" + (detail.length === 0 ? "" : localize("c.cpp.documentsymbolscope.separator", ", ")) + detail;
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    detail = "protected" + (detail.length === 0 ? "" : ": ") + detail;
+                    detail = "protected" + (detail.length === 0 ? "" : localize("c.cpp.documentsymbolscope.separator", ", ")) + detail;
                 }
                 const r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
                 const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
