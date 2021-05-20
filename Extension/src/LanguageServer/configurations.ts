@@ -1851,17 +1851,27 @@ export class CppProperties {
     }
 
     private writeToJson(): void {
+        // Set aside IsExplicit values, and restore them after writing.
+        const savedCompilerPathIsExplicit: boolean[] = [];
+        const savedCStandardIsExplicit: boolean[] = [];
+        const savedCppStandardIsExplicit: boolean[] = [];
+        const savedIntelliSenseModeIsExplicit: boolean[] = [];
+
         if (this.configurationJson) {
             this.configurationJson.configurations.forEach(e => {
+                savedCompilerPathIsExplicit.push(e.compilerPathIsExplicit !== undefined);
                 if (e.compilerPathIsExplicit !== undefined) {
                     delete e.compilerPathIsExplicit;
                 }
+                savedCStandardIsExplicit.push(e.cStandardIsExplicit !== undefined);
                 if (e.cStandardIsExplicit !== undefined) {
                     delete e.cStandardIsExplicit;
                 }
+                savedCppStandardIsExplicit.push(e.cppStandardIsExplicit !== undefined);
                 if (e.cppStandardIsExplicit !== undefined) {
                     delete e.cppStandardIsExplicit;
                 }
+                savedIntelliSenseModeIsExplicit.push(e.intelliSenseModeIsExplicit !== undefined);
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
                 }
@@ -1871,6 +1881,15 @@ export class CppProperties {
         console.assert(this.propertiesFile);
         if (this.propertiesFile) {
             fs.writeFileSync(this.propertiesFile.fsPath, jsonc.stringify(this.configurationJson, null, 4));
+        }
+
+        if (this.configurationJson) {
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                this.configurationJson.configurations[i].compilerPathIsExplicit = savedCompilerPathIsExplicit[i];
+                this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
+                this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
+                this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
+            }
         }
     }
 
