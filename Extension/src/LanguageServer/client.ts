@@ -2332,7 +2332,11 @@ export class DefaultClient implements Client {
 
     private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
 
-    private onConfigurationsChanged(configurations: configs.Configuration[]): void {
+    private onConfigurationsChanged(cppProperties: configs.CppProperties): void {
+        if (!cppProperties.Configurations) {
+            return;
+        }
+        const configurations: configs.Configuration[] = cppProperties.Configurations;
         const params: CppPropertiesParams = {
             configurations: configurations,
             currentConfiguration: this.configuration.CurrentConfigurationIndex,
@@ -2346,28 +2350,19 @@ export class DefaultClient implements Client {
             c.compilerPath = compilerPathAndArgs.compilerPath;
             c.compilerArgs = compilerPathAndArgs.additionalArgs;
         });
-        let sendLastCustomBrowseConfiguration: boolean = false;
-        const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
-        if (!rootFolder) {
-            this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
-        } else {
-            const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
-            const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, rootFolder);
+        this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
+        const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined = cppProperties.LastCustomBrowseConfigurationProviderId;
+        const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined = cppProperties.LastCustomBrowseConfiguration;
+        if (!!lastCustomBrowseConfigurationProviderId && !!lastCustomBrowseConfiguration) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
                 // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
                 // Should only execute on launch, for the initial delivery of configurations
-                if (isSameProviderExtensionId(lastCustomBrowseConfigurationProviderId.Value, configurations[params.currentConfiguration].configurationProvider)) {
-                    if (lastCustomBrowseConfiguration.Value) {
-                        sendLastCustomBrowseConfiguration = true;
-                        params.isReady = false;
-                    }
+                if (lastCustomBrowseConfiguration.Value) {
+                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
+                    params.isReady = false;
                 }
                 this.doneInitialCustomBrowseConfigurationCheck = true;
-            }
-            this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
-            if (sendLastCustomBrowseConfiguration) {
-                this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
             }
         }
         const configName: string | undefined = configurations[params.currentConfiguration].name ?? "";
