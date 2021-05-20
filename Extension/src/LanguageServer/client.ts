@@ -297,10 +297,17 @@ export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
     query: string;
 }
 
+export enum SymbolScope {
+    Public = 0,
+    Protected = 1,
+    Private = 2
+}
+
 export interface LocalizeDocumentSymbol {
     name: string;
     detail: LocalizeStringParams;
     kind: vscode.SymbolKind;
+    scope: SymbolScope;
     range: Range;
     selectionRange: Range;
     children: LocalizeDocumentSymbol[];
@@ -315,6 +322,7 @@ interface Location {
 export interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
+    scope: SymbolScope;
     location: Location;
     containerName: string;
     suffix: LocalizeStringParams;
