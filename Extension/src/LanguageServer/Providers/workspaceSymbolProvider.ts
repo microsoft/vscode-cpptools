@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation } from '../client';
+import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope } from '../client';
 import * as util from '../../common';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
@@ -22,9 +22,14 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 
         // Convert to vscode.Command array
         symbols.forEach((symbol) => {
-            const suffix: string = util.getLocalizedString(symbol.suffix);
+            let suffix: string = util.getLocalizedString(symbol.suffix);
             let name: string = symbol.name;
             if (suffix.length) {
+                if (symbol.scope === SymbolScope.Private) {
+                    suffix = "private: " + suffix;
+                } else if (symbol.scope === SymbolScope.Protected) {
+                    suffix = "protected: " + suffix;
+                }
                 name = name + ' (' + suffix + ')';
             }
             const range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
