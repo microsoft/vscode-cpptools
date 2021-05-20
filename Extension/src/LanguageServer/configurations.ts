@@ -881,7 +881,7 @@ export class CppProperties {
                         }
                     } else if (this.lastCustomBrowseConfigurationProviderId !== undefined
                         && !!this.lastCustomBrowseConfigurationProviderId.Value) {
-                        // Use the last configure provider we received a browse config from as the provider ID.
+                        // Use the last configuration provider we received a browse config from as the provider ID.
                         configuration.configurationProvider = this.lastCustomBrowseConfigurationProviderId.Value;
                     }
                 } else if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
