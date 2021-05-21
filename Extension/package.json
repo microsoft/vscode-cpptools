@@ -2832,7 +2832,7 @@
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "62A2ECB43511129F920D87BAE9230A803B54712038BCCB485F8F10B84B1A2000"
+      "integrity": "AEB24D394118EAD87087DCC651F2EE329FC335ECE88ED6C8C2A9E93ED60DFECD"
     },
     {
       "description": "ClangFormat (OS X arm64)",
@@ -2846,7 +2846,7 @@
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "90AD3B05EC9C0A706C440B99AC39000F97EFE8BBAB9A000834E18F8112468147"
+      "integrity": "AE5507F54562B9DA99E3F8318E25C93BD38AD2FBF4238ADF1C152ECFB0C10FA9"
     },
     {
       "description": "ClangFormat (Windows x86)",
