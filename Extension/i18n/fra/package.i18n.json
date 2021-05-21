@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "Vérification supplémentaire des frères d'un fichier correspondant. Utilisez $(basename) comme variable pour le nom de fichier correspondant.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Si la valeur est true, le remplacement de la commande d'interpréteur de commandes du débogueur utilise un accent grave (`) obsolète.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++ : Autres résultats des références",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "Quand ce paramètre est présent, indique au débogueur de se connecter à un ordinateur distant en se servant d'un autre exécutable comme canal de relais d'entrée/de sortie standard entre VS Code et l'exécutable du back-end du débogueur MI (par exemple, gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "entrez le chemin complet du nom du programme de canal, par exemple '/usr/bin/ssh'",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Chemin complet du débogueur sur la machine cible, par exemple /usr/bin/gdb.",

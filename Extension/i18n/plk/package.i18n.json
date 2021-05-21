@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "Dodatkowe sprawdzenie elementów równorzędnych pasującego pliku. Użyj ciągu $(basename) jako zmiennej dla nazwy pasującego pliku.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Jeśli wartość będzie równa true, podstawianie poleceń powłoki debugera będzie używać przestarzałego grawisa (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: inne wyniki odwołań",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "Jeśli jest obecny, zawiera instrukcje dla debugera, aby połączył się z komputerem zdalnym przy użyciu innego pliku wykonywalnego jako potoku, który będzie przekazywał standardowe wejście/wyjście między programem VS Code a plikiem wykonywalnym zaplecza debugera z włączoną obsługą indeksu MI (takim jak gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "wprowadź w pełni kwalifikowaną ścieżkę na potrzeby nazwy programu potoku, na przykład „/usr/bin/ssh”",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Pełna ścieżka do debugera na komputerze docelowym, na przykład /usr/bin/gdb.",

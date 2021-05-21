@@ -12,5 +12,6 @@
 	"warning.debugging.not.tested": "警告: 尚未为此平台测试调试。",
 	"reload.workspace.for.changes": "重新加载工作区以使设置更改生效。",
 	"reload.string": "重新加载",
-	"invalid.download.location.received": "接收的下载位置无效"
+	"invalid.download.location.received": "接收的下载位置无效",
+	"c.cpp.symbolscope.separator": "{0}, {1}"
 }

@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "Eşleşen bir dosyanın eşdüzey öğeleri üzerinde ek denetim. Eşleşen dosya adı için değişken olarak $(basename) kullanın.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "True ise, hata ayıklayıcı kabuk komut değiştirme eski kesme işaretini (`) kullanır.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: Diğer başvuru sonuçları",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "Mevcut olduğunda, hata ayıklayıcısına, VS Code ile MI özellikli hata ayıklayıcısı arka uç yürütülebilir dosyası (gdb gibi) arasında standart giriş/çıkış geçişi sağlayan bir kanal olarak görev yapacak başka bir yürütülebilir dosya aracılığıyla uzak bilgisayara bağlanmasını söyler.",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Kanal program adı için tam yolu girin, örneğin '/usr/bin/ssh'",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Hedef makinedeki hata ayıklayıcısının tam yolu. Örneğin: /usr/bin/gdb.",
