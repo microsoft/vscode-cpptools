@@ -1146,7 +1146,7 @@ export function getLocalizedString(params: LocalizeStringParams): string {
 export function getLocalizedSymbolScope(scope: string, detail: string): string {
     return localize({
         key: "c.cpp.symbolscope.separator", comment:
-            ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized verison of \"declaration\""]
+            ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized version of \"declaration\""]
     }, "{0}, {1}", scope, detail);
 }
 
