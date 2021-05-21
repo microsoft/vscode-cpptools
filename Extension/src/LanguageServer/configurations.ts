@@ -870,7 +870,7 @@ export class CppProperties {
                     && settings.defaultIntelliSenseMode === ""
                     && settings.defaultConfigurationProvider === "";
 
-                // Only keep a cached custom browse config if there is an emptry configuration,
+                // Only keep a cached custom browse config if there is an empty configuration,
                 // or if a specified provider ID has not changed.
                 let keepCachedBrowseConfig: boolean = true;
                 if (hasEmptyConfiguration) {
