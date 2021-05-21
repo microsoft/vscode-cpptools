@@ -213,7 +213,7 @@
     "c_cpp.debuggers.miDebuggerArgs.description": "Additional arguments for the MI debugger (such as gdb).",
     "c_cpp.debuggers.miDebuggerServerAddress.description": "Network address of the MI Debugger Server to connect to (example: localhost:1234).",
     "c_cpp.debuggers.stopAtEntry.description": "Optional parameter. If true, the debugger should stop at the entrypoint of the target. If processId is passed, has no effect.",
-    "c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjuction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
+    "c_cpp.debuggers.debugServerPath.description": "Optional full path to debug server to launch. Defaults to null. It is used in conjunction of either \"miDebugServerAddress\" or your own server with a \"customSetupCommand\" that runs \"-target-select remote <server:port>\"`.",
     "c_cpp.debuggers.debugServerArgs.description": "Optional debug server args. Defaults to null.",
     "c_cpp.debuggers.serverStarted.description": "Optional server-started pattern to look for in the debug server output. Defaults to null.",
     "c_cpp.debuggers.filterStdout.description": "Search stdout stream for server-started pattern and log stdout to debug output. Defaults to true.",
