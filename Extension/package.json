@@ -249,7 +249,7 @@
     "viewsWelcome": [
       {
         "view": "debug",
-        "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
+        "contents": "%c_cpp.contributes.viewsWelcome.contents%",
         "when": "debugStartLanguage == cpp || debugStartLanguage == c || debugStartLanguage == cuda-cpp"
       }
     ],
