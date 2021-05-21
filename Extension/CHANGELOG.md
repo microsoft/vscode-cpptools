@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 1.4.0-insiders3: May 24, 2021
-### Enhancement
+### Enhancements
 * Add `private` or `protected` scope labels to class symbols. [#7120](https://github.com/microsoft/vscode-cpptools/issues/7120)
 * Improvements to the C++ "Getting Started" walkthrough. [PR #7554](https://github.com/microsoft/vscode-cpptools/pull/7554)
 
