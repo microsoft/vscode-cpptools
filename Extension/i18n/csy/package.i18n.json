@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "Další kontrola položek na stejné úrovni u odpovídajícího souboru. Jako proměnnou názvu odpovídajícího souboru použijte $(basename).",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Když se nastaví na true, nahrazování příkazů shellu ladicího programu bude používat starou verzi obrácené čárky (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: výsledky jiných odkazů",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "Pokud je k dispozici, předá ladicímu programu informaci, aby se připojil ke vzdálenému počítači pomocí dalšího spustitelného souboru jako kanál, který bude přenášet standardní vstup a výstup mezi nástrojem VS Code a spustitelným souborem back-endu ladicího programu s podporou MI (třeba gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "zadejte plně kvalifikovanou cestu názvu programu kanálu, třeba /usr/bin/ssh",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Úplná cesta k ladicímu programu na cílovém počítači, například /usr/bin/gdb",
