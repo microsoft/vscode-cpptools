@@ -113,39 +113,9 @@
             }
           },
           {
-            "id": "build.project.mac",
-            "title": "Build your C++ file",
-            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_build-helloworldcpp)",
-            "when": "isMac",
-            "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on macOS with Clang.",
-              "path": "walkthrough/buildtask/build-project-mac.md"
-            }
-          },
-          {
-            "id": "build.project.linux",
-            "title": "Build your C++ file",
-            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_build-helloworldcpp)",
-            "when": "isLinux",
-            "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on Linux with GCC.",
-              "path": "walkthrough/buildtask/build-project-linux.md"
-            }
-          },
-          {
-            "id": "build.project.windows",
-            "title": "Build your C++ file",
-            "description": "Create a default build task for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_build-helloworldcpp)",
-            "when": "isWindows",
-            "media": {
-              "altText": "A markdown file with instructions for configuring the default build task on Windows with MSVC.",
-              "path": "walkthrough/buildtask/build-project-windows.md"
-            }
-          },
-          {
             "id": "run.project.mac",
             "title": "Run and debug your C++ file",
-            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
+            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "when": "isMac",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on macOS.",
@@ -155,7 +125,7 @@
           {
             "id": "run.project.linux",
             "title": "Run and debug your C++ file",
-            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "when": "isLinux",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Linux.",
@@ -165,7 +135,7 @@
           {
             "id": "run.project.windows",
             "title": "Run and debug your C++ file",
-            "description": "Create a debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
+            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "when": "isWindows",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Windows.",
@@ -249,7 +219,7 @@
     "viewsWelcome": [
       {
         "view": "debug",
-        "contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
+        "contents": "%c_cpp.contributes.viewsWelcome.contents%",
         "when": "debugStartLanguage == cpp || debugStartLanguage == c || debugStartLanguage == cuda-cpp"
       }
     ],
@@ -2832,7 +2802,7 @@
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "62A2ECB43511129F920D87BAE9230A803B54712038BCCB485F8F10B84B1A2000"
+      "integrity": "AEB24D394118EAD87087DCC651F2EE329FC335ECE88ED6C8C2A9E93ED60DFECD"
     },
     {
       "description": "ClangFormat (OS X arm64)",
@@ -2846,7 +2816,7 @@
       "binaries": [
         "./LLVM/bin/clang-format.darwin"
       ],
-      "integrity": "90AD3B05EC9C0A706C440B99AC39000F97EFE8BBAB9A000834E18F8112468147"
+      "integrity": "AE5507F54562B9DA99E3F8318E25C93BD38AD2FBF4238ADF1C152ECFB0C10FA9"
     },
     {
       "description": "ClangFormat (Windows x86)",

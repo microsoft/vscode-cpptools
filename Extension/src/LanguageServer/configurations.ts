@@ -20,6 +20,7 @@ import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
+import { WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -138,13 +139,15 @@ export class CppProperties {
     private defaultCustomConfigurationVariables?: { [key: string]: string };
     private readonly configurationGlobPattern: string = "c_cpp_properties.json";
     private disposables: vscode.Disposable[] = [];
-    private configurationsChanged = new vscode.EventEmitter<Configuration[]>();
+    private configurationsChanged = new vscode.EventEmitter<CppProperties>();
     private selectionChanged = new vscode.EventEmitter<number>();
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private rootfs: string | null = null;
     private settingsPanel?: SettingsPanel;
+    private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
+    private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -155,6 +158,8 @@ export class CppProperties {
         const rootPath: string = rootUri ? rootUri.fsPath : "";
         if (workspaceFolder) {
             this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
+            this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
+            this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
         }
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
@@ -166,13 +171,16 @@ export class CppProperties {
         this.disposables.push(vscode.Disposable.from(this.configurationsChanged, this.selectionChanged, this.compileCommandsChanged));
     }
 
-    public get ConfigurationsChanged(): vscode.Event<Configuration[]> { return this.configurationsChanged.event; }
+    public get ConfigurationsChanged(): vscode.Event<CppProperties> { return this.configurationsChanged.event; }
     public get SelectionChanged(): vscode.Event<number> { return this.selectionChanged.event; }
     public get CompileCommandsChanged(): vscode.Event<string> { return this.compileCommandsChanged.event; }
     public get Configurations(): Configuration[] | undefined { return this.configurationJson ? this.configurationJson.configurations : undefined; }
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex === undefined ? 0 : this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration | undefined { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : undefined; }
     public get KnownCompiler(): KnownCompiler[] | undefined { return this.knownCompilers; }
+
+    public get LastCustomBrowseConfiguration(): PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined { return this.lastCustomBrowseConfiguration; }
+    public get LastCustomBrowseConfigurationProviderId(): PersistentFolderState<string | undefined> | undefined { return this.lastCustomBrowseConfigurationProviderId; }
 
     public get CurrentConfigurationProvider(): string | undefined {
         if (this.CurrentConfiguration?.configurationProvider) {
@@ -289,7 +297,7 @@ export class CppProperties {
 
     private onConfigurationsChanged(): void {
         if (this.Configurations) {
-            this.configurationsChanged.fire(this.Configurations);
+            this.configurationsChanged.fire(this);
         }
     }
 
@@ -766,17 +774,18 @@ export class CppProperties {
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
             configuration.cppStandard = this.updateConfigurationString(configuration.cppStandard, settings.defaultCppStandard, env);
             configuration.intelliSenseMode = this.updateConfigurationString(configuration.intelliSenseMode, settings.defaultIntelliSenseMode, env);
-            configuration.intelliSenseModeIsExplicit = true;
-            configuration.cStandardIsExplicit = true;
-            configuration.cppStandardIsExplicit = true;
-            configuration.compilerPathIsExplicit = true;
+            configuration.intelliSenseModeIsExplicit = configuration.intelliSenseModeIsExplicit || settings.defaultIntelliSenseMode !== "";
+            configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
+            configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
+            configuration.compilerPathIsExplicit = false;
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
+                configuration.compilerPathIsExplicit = configuration.compilerPath !== undefined;
                 if (configuration.compilerPath === undefined) {
-                    configuration.compilerPathIsExplicit = false;
                     if (!!this.defaultCompilerPath) {
+                        // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
                         configuration.compilerPath = this.defaultCompilerPath;
                         if (!configuration.cStandard && !!this.defaultCStandard) {
                             configuration.cStandard = this.defaultCStandard;
@@ -809,8 +818,10 @@ export class CppProperties {
                 }
                 if (configuration.compilerPath === null) {
                     configuration.compilerPath = undefined;
+                    configuration.compilerPathIsExplicit = true;
                 } else if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
+                    configuration.compilerPathIsExplicit = true;
                 }
             }
 
@@ -840,25 +851,45 @@ export class CppProperties {
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
             configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
 
-            // If there is no c_cpp_properties.json, there are no relevant C_Cpp.default.* settings set,
-            // and there is only 1 registered custom config provider, default to using that provider.
-            const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
-            if (providers.size === 1
-                && !this.propertiesFile
-                && !settings.defaultCompilerPath
-                && settings.defaultCompilerPath !== ""
-                && !settings.defaultIncludePath
-                && !settings.defaultDefines
-                && !settings.defaultMacFrameworkPath
-                && settings.defaultWindowsSdkVersion === ""
-                && !settings.defaultForcedInclude
-                && settings.defaultCompileCommands === ""
-                && !settings.defaultCompilerArgs
-                && settings.defaultCStandard === ""
-                && settings.defaultCppStandard === ""
-                && settings.defaultIntelliSenseMode === ""
-                && settings.defaultConfigurationProvider === "") {
-                providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
+            if (i === this.CurrentConfigurationIndex) {
+                // If there is no c_cpp_properties.json, there are no relevant C_Cpp.default.* settings set,
+                // and there is only 1 registered custom config provider, default to using that provider.
+                const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
+                const hasEmptyConfiguration: boolean = !this.propertiesFile
+                    && !settings.defaultCompilerPath
+                    && settings.defaultCompilerPath !== ""
+                    && !settings.defaultIncludePath
+                    && !settings.defaultDefines
+                    && !settings.defaultMacFrameworkPath
+                    && settings.defaultWindowsSdkVersion === ""
+                    && !settings.defaultForcedInclude
+                    && settings.defaultCompileCommands === ""
+                    && !settings.defaultCompilerArgs
+                    && settings.defaultCStandard === ""
+                    && settings.defaultCppStandard === ""
+                    && settings.defaultIntelliSenseMode === ""
+                    && settings.defaultConfigurationProvider === "";
+
+                // Only keep a cached custom browse config if there is an emptry configuration,
+                // or if a specified provider ID has not changed.
+                let keepCachedBrowseConfig: boolean = true;
+                if (hasEmptyConfiguration) {
+                    if (providers.size === 1) {
+                        providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
+                        if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
+                            keepCachedBrowseConfig = configuration.configurationProvider === this.lastCustomBrowseConfigurationProviderId.Value;
+                        }
+                    } else if (this.lastCustomBrowseConfigurationProviderId !== undefined
+                        && !!this.lastCustomBrowseConfigurationProviderId.Value) {
+                        // Use the last configuration provider we received a browse config from as the provider ID.
+                        configuration.configurationProvider = this.lastCustomBrowseConfigurationProviderId.Value;
+                    }
+                } else if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
+                    keepCachedBrowseConfig = configuration.configurationProvider === this.lastCustomBrowseConfigurationProviderId.Value;
+                }
+                if (!keepCachedBrowseConfig && this.lastCustomBrowseConfiguration !== undefined) {
+                    this.lastCustomBrowseConfiguration.Value = undefined;
+                }
             }
         }
 
@@ -1206,23 +1237,17 @@ export class CppProperties {
                     delete (<any>e).knownCompilers;
                     dirty = true;
                 }
-                if ((<any>e).compilerPathIsExplicit !== undefined) {
-                    delete (<any>e).compilerPathIsExplicit;
-                    dirty = true;
-                }
-                if ((<any>e).cStandardIsExplicit !== undefined) {
-                    delete (<any>e).cStandardIsExplicit;
-                    dirty = true;
-                }
-                if ((<any>e).cppStandardIsExplicit !== undefined) {
-                    delete (<any>e).cppStandardIsExplicit;
-                    dirty = true;
-                }
-                if ((<any>e).intelliSenseModeIsExplicit !== undefined) {
-                    delete (<any>e).intelliSenseModeIsExplicit;
-                    dirty = true;
-                }
             });
+
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                if ((this.configurationJson.configurations[i].compilerPathIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].cStandardIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].cppStandardIsExplicit !== undefined)
+                    || (this.configurationJson.configurations[i].intelliSenseModeIsExplicit !== undefined)) {
+                    dirty = true;
+                    break;
+                }
+            }
 
             if (dirty) {
                 try {
@@ -1233,6 +1258,13 @@ export class CppProperties {
                     success = false;
                 }
             }
+
+            this.configurationJson.configurations.forEach(e => {
+                e.compilerPathIsExplicit = e.compilerPath !== undefined;
+                e.cStandardIsExplicit = e.cStandard !== undefined;
+                e.cppStandardIsExplicit = e.cppStandard !== undefined;
+                e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
+            });
 
         } catch (err) {
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
@@ -1847,9 +1879,45 @@ export class CppProperties {
     }
 
     private writeToJson(): void {
+        // Set aside IsExplicit values, and restore them after writing.
+        const savedCompilerPathIsExplicit: boolean[] = [];
+        const savedCStandardIsExplicit: boolean[] = [];
+        const savedCppStandardIsExplicit: boolean[] = [];
+        const savedIntelliSenseModeIsExplicit: boolean[] = [];
+
+        if (this.configurationJson) {
+            this.configurationJson.configurations.forEach(e => {
+                savedCompilerPathIsExplicit.push(!!e.compilerPathIsExplicit);
+                if (e.compilerPathIsExplicit !== undefined) {
+                    delete e.compilerPathIsExplicit;
+                }
+                savedCStandardIsExplicit.push(!!e.cStandardIsExplicit);
+                if (e.cStandardIsExplicit !== undefined) {
+                    delete e.cStandardIsExplicit;
+                }
+                savedCppStandardIsExplicit.push(!!e.cppStandardIsExplicit);
+                if (e.cppStandardIsExplicit !== undefined) {
+                    delete e.cppStandardIsExplicit;
+                }
+                savedIntelliSenseModeIsExplicit.push(!!e.intelliSenseModeIsExplicit);
+                if (e.intelliSenseModeIsExplicit !== undefined) {
+                    delete e.intelliSenseModeIsExplicit;
+                }
+            });
+        }
+
         console.assert(this.propertiesFile);
         if (this.propertiesFile) {
             fs.writeFileSync(this.propertiesFile.fsPath, jsonc.stringify(this.configurationJson, null, 4));
+        }
+
+        if (this.configurationJson) {
+            for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
+                this.configurationJson.configurations[i].compilerPathIsExplicit = savedCompilerPathIsExplicit[i];
+                this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
+                this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
+                this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
+            }
         }
     }
 
