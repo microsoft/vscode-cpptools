@@ -59,7 +59,7 @@
             "id": "verify.compiler.mac",
             "title": "Install a C++ compiler",
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
-            "when": "isMac",
+            "when": "WorkspacePlatform == mac",
             "media": {
               "altText": "A markdown file with instructions for installing Clang on macOS.",
               "path": "walkthrough/installcompiler/install-clang-macos.md"
@@ -69,7 +69,7 @@
             "id": "verify.compiler.linux",
             "title": "Install a C++ compiler",
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
-            "when": "isLinux",
+            "when": "WorkspacePlatform == linux",
             "media": {
               "altText": "A markdown file with instructions for installing GCC on Linux.",
               "path": "walkthrough/installcompiler/install-gcc-linux.md"
@@ -79,7 +79,7 @@
             "id": "verify.compiler.windows",
             "title": "Install a C++ compiler",
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
-            "when": "isWindows",
+            "when": "WorkspacePlatform == windows",
             "media": {
               "altText": "A markdown file with instructions for installing MSVC on Windows.",
               "path": "walkthrough/installcompiler/install-compiler-windows.md"
@@ -116,7 +116,7 @@
             "id": "run.project.mac",
             "title": "Run and debug your C++ file",
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
-            "when": "isMac",
+            "when": "WorkspacePlatform == mac",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on macOS.",
               "path": "walkthrough/debugconfig/run-and-debug-project-mac.md"
@@ -126,7 +126,7 @@
             "id": "run.project.linux",
             "title": "Run and debug your C++ file",
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
-            "when": "isLinux",
+            "when": "WorkspacePlatform == linux",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Linux.",
               "path": "walkthrough/debugconfig/run-and-debug-project-linux.md"
@@ -136,7 +136,7 @@
             "id": "run.project.windows",
             "title": "Run and debug your C++ file",
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
-            "when": "isWindows",
+            "when": "WorkspacePlatform == windows",
             "media": {
               "altText": "A markdown file with instructions for starting a debugging session on Windows.",
               "path": "walkthrough/debugconfig/run-and-debug-project-windows.md"
