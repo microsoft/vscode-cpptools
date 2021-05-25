@@ -616,7 +616,7 @@ async function suggestInsidersChannel(): Promise<void> {
 
     const suggestInsidersCount: PersistentState<number> = new PersistentState<number>("CPP.suggestInsidersCount", 0);
 
-    if (suggestInsidersCount.Value < 20) {
+    if (suggestInsidersCount.Value < 10) {
         suggestInsidersCount.Value = suggestInsidersCount.Value + 1;
         return;
     }
