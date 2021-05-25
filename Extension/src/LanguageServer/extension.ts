@@ -603,15 +603,24 @@ async function installVsix(vsixLocation: string): Promise<void> {
 }
 
 async function suggestInsidersChannel(): Promise<void> {
+    if (util.isCodespaces()) {
+        // Do not prompt users of Codespaces to join Insiders.
+        return;
+    }
+
     const suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
 
     if (!suggestInsiders.Value) {
         return;
     }
-    if (util.isCodespaces()) {
-        // Do not prompt users of Codespaces to join Insiders.
+
+    const suggestInsidersCount: PersistentState<number> = new PersistentState<number>("CPP.suggestInsidersCount", 0);
+
+    if (suggestInsidersCount.Value < 20) {
+        suggestInsidersCount.Value = suggestInsidersCount.Value + 1;
         return;
     }
+
     let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders", false);
