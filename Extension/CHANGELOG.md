@@ -17,7 +17,6 @@
 * Fix clang-format failure on macOS 10.13 or older. [#7561](https://github.com/microsoft/vscode-cpptools/issues/7561)
 * Prevent 'Configuration Warnings' output when a custom configuration provider omits optional fields.
 * Prevent 'Configuration Warnings' caused by corrections to auto-detected default configuration values.
-* Fix a random IntelliSense process crash on shutdown.
 
 ## Version 1.4.0-insiders2: May 17, 2021
 ### New Features
