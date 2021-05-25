@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "对匹配文件的同级文件的其他检查。使用 $(basename) 作为匹配文件名的变量。",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "如果为 true，调试程序 shell 命令替换将使用过时的反引号(`)。",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 其他引用结果",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "如果存在，这会指示调试程序使用其他可执行文件作为管道来连接到远程计算机，此管道将在 VS Code 和已启用 MI 的调试程序后端可执行文件(如 gdb)之间中继标准输入/输入。",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "输入管道程序名称的完全限定路径，例如 \"/usr/bin/ssh\"",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "目标计算机上调试程序的完整路径，例如 /usr/bin/gdb。",

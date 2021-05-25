@@ -12,5 +12,6 @@
 	"warning.debugging.not.tested": "Avertissement : Le débogage n'a pas été testé pour cette plateforme.",
 	"reload.workspace.for.changes": "Rechargez l'espace de travail pour appliquer les changements des paramètres.",
 	"reload.string": "Recharger",
-	"invalid.download.location.received": "Emplacement de téléchargement reçu non valide"
+	"invalid.download.location.received": "Emplacement de téléchargement reçu non valide",
+	"c.cpp.symbolscope.separator": "{0}, {1}"
 }

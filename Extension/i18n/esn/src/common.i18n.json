@@ -12,5 +12,6 @@
 	"warning.debugging.not.tested": "Advertencia: La depuración no se ha probado para esta plataforma.",
 	"reload.workspace.for.changes": "Recargue el área de trabajo para que el cambio de configuración surta efecto.",
 	"reload.string": "Volver a cargar",
-	"invalid.download.location.received": "Se ha recibido una ubicación de descarga no válida."
+	"invalid.download.location.received": "Se ha recibido una ubicación de descarga no válida.",
+	"c.cpp.symbolscope.separator": "{0}, {1}"
 }

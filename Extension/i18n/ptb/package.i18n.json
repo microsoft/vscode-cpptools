@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "Verificação adicional nos irmãos de um arquivo correspondente. Use $(basename) como variável para o nome do arquivo correspondente.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Se esta configuração for true, a substituição do comando do shell do depurador usará o acento grave obsoleto (`).",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: outros resultados de referências",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "Quando presente, isso instrui o depurador a conectar-se a um computador remoto usando outro executável como um pipe que retransmitirá a entrada/saída padrão entre o VS Code e o executável do back-end do depurador habilitado para MI (como gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "insira o caminho totalmente qualificado para o nome do programa do pipe, por exemplo '/usr/bin/ssh'",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "O caminho completo para o depurador no computador de destino, por exemplo, /usr/bin/gdb.",
