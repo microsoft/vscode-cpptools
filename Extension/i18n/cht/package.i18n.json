@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "在相符檔案同層級上額外的檢查。請使用 $(basename) 作為相符檔案名稱的變數。",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "若為 true，偵錯工具殼層命令替代將會使用已淘汰的反引號 (`)。",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: 其他參考結果",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "出現時，會指示偵錯工具使用另一個可執行檔來連線至遠端電腦，該管道會在 VS Code 與 MI 啟用偵錯工具後端可執行檔之間傳送標準輸入/輸出 (例如 gdb)。",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "輸入管道程式名稱的完整路徑，例如 '/usr/bin/ssh'",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "目標機器的偵錯工具完整路徑，例如 /use/bin/gdb。",

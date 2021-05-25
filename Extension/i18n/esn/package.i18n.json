@@ -176,6 +176,7 @@
 	"c_cpp.configuration.filesExcludeWhen.description": "Comprobación adicional de los elementos del mismo nivel de un archivo coincidente. Use $(nombreBase) como variable para el nombre de archivo que coincide.",
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "Si es true, la sustitución de comandos del shell del depurador usará la marca de comilla simple (') obsoleta.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: resultados de otras referencias",
+	"c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
 	"c_cpp.debuggers.pipeTransport.description": "Cuando se especifica, indica al depurador que se conecte a un equipo remoto usando otro archivo ejecutable como canalización que retransmitirá la entrada o la salida estándar entre VS Code y el archivo ejecutable del back-end del depurador habilitado para MI (por ejemplo, gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Escriba la ruta de acceso completa para el nombre del programa de canalización; por ejemplo, \"/usr/bin/ssh\".",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Ruta de acceso completa al depurador en la máquina de destino. Por ejemplo, /usr/bin/gdb.",
