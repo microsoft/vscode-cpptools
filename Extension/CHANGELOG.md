@@ -1,16 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.4.0-insiders3: May 24, 2021
+## Version 1.4.0-insiders3: May 25, 2021
 ### Enhancements
 * Add `private` or `protected` scope labels to class symbols. [#7120](https://github.com/microsoft/vscode-cpptools/issues/7120)
 * Improvements to the C++ "Getting Started" walkthrough. [PR #7554](https://github.com/microsoft/vscode-cpptools/pull/7554)
 
 ### Bug Fixes
+* Switch to showing no document symbols instead of random symbols for `files.exclude`'d documents. [#5142](https://github.com/microsoft/vscode-cpptools/issues/5142)
 * Fix bitness detection for compilers targeting esp32. [#7034](https://github.com/microsoft/vscode-cpptools/issues/7034)
 * Fix issue with cpptools process lingering when no longer needed.  [#7262](https://github.com/microsoft/vscode-cpptools/issues/7262)
+* Fix typos.
+  * jogo- (@jogo-) [PR #7509](https://github.com/microsoft/vscode-cpptools/pull/7509), [PR #7568](https://github.com/microsoft/vscode-cpptools/pull/7568), [PR #7573](https://github.com/microsoft/vscode-cpptools/pull/7573)
 * Fix enabling of the `ms_extensions` flag for clang on Windows. [#7529](https://github.com/microsoft/vscode-cpptools/issues/7529)
 * Fix `autocompleteAddParentheses` with no argument const/non-const overloads and deduction guides. [#7540](https://github.com/microsoft/vscode-cpptools/issues/7540), [#7541](https://github.com/microsoft/vscode-cpptools/issues/7541)
+* Fix the browse configuration not being preserved when the configuration provider is auto-detected. [#7542](https://github.com/microsoft/vscode-cpptools/issues/7542)
 * Fix clang-format failure on macOS 10.13 or older. [#7561](https://github.com/microsoft/vscode-cpptools/issues/7561)
+* Fix the walkthrough for remote targets. [PR #7582](https://github.com/microsoft/vscode-cpptools/pull/7582)
 * Prevent 'Configuration Warnings' output when a custom configuration provider omits optional fields.
 * Prevent 'Configuration Warnings' caused by corrections to auto-detected default configuration values.
 
@@ -22,12 +27,13 @@
 ### Bug Fixes
 * Fix an incorrect IntelliSense error with object initialization. [#3212](https://github.com/microsoft/vscode-cpptools/issues/3212)
 * Fix macros getting undefined when duplicate `#include` are used. [#5182](https://github.com/microsoft/vscode-cpptools/issues/5182), [#7270](https://github.com/microsoft/vscode-cpptools/issues/7270)
-* Fix IntelliSense crash with `#pragma GCC target`. [#6698](https://github.com/microsoft/vscode-cpptools/issues/6698), [#7377](https://github.com/microsoft/vscode-cpptools/issues/7377)
+* Fix an IntelliSense crash with `#pragma GCC target`. [#6698](https://github.com/microsoft/vscode-cpptools/issues/6698), [#7377](https://github.com/microsoft/vscode-cpptools/issues/7377)
 * Fix completion at the end of a file. [#7472](https://github.com/microsoft/vscode-cpptools/issues/7472)
 * Fix completion of constructors. [#7505](https://github.com/microsoft/vscode-cpptools/issues/7505)
-* Fix IntelliSense crash with the arrow library. [#7518](https://github.com/microsoft/vscode-cpptools/issues/7518)
+* Fix an IntelliSense crash with the arrow library. [#7518](https://github.com/microsoft/vscode-cpptools/issues/7518)
 * Fix the configuration UI randomly being blank (more frequently when remote). [#7523](https://github.com/microsoft/vscode-cpptools/issues/7523)
 * Fix IntelliSense mode switching from `linux` to `macos` if `__unix__` is defined but `__linux__` is not. [#7525](https://github.com/microsoft/vscode-cpptools/issues/7525)
+* Fix an IntelliSense crash with std::ranges::unique. [#7576](https://github.com/microsoft/vscode-cpptools/issues/7576)
 * Reduce IntelliSense memory and CPU usage in certain scenarios.
 
 ## Version 1.4.0-insiders: May 10, 2021
