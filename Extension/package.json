@@ -159,7 +159,8 @@
             "title": "Lean back and get started",
             "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
-              "markdown": "walkthrough/images/getting-started-video.png"
+              "altText": "A screenshot with a preview of the video tutorial and a play button.",
+              "image": "walkthrough/images/getting-started-video.png"
             }
           }
         ]
