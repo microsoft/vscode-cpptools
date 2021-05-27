@@ -26,9 +26,9 @@
 	"zip.file.error": "Ошибка в ZIP-файле",
 	"create.directory.error": "Ошибка при создании каталога",
 	"zip.stream.error": "Ошибка при чтении потока zip",
-	"read.stream.error": "Ошибка в потоке чтения",
 	"unlink.error": "Ошибка при удалении связи файла {0}",
 	"rename.error": "Ошибка при переименовании файла {0}",
+	"read.stream.error": "Ошибка в потоке чтения",
 	"write.stream.error": "Ошибка в потоке записи",
 	"file.already.exists": "Предупреждение: файл \"{0}\" уже существует и не был обновлен."
 }

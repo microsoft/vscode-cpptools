@@ -7,7 +7,6 @@
 	"architecture.not.supported": "アーキテクチャ {0} はサポートされていません。",
 	"apline.containers.not.supported": "Alpine コンテナーはサポートされていません。",
 	"download.button": "ダウンロード ページへ移動",
-	"native.binaries.mismatch.osx": "MacOS Intel 版の拡張機能がインストールされました。Apple Silicon Mac を使用しているため、拡張機能の Apple Silicon バージョンをインストールすることをお勧めします。",
 	"native.binaries.not.supported": "この {0} {1} バージョンの拡張機能は、お使いの OS と互換性がありません。拡張機能の \"{2}\" バージョンをダウンロードしてインストールしてください。",
 	"extension.installation.failed": "C/C++ の拡張機能を正常にインストールできませんでした。正常に機能させるには、C/C++ 言語機能の拡張機能を修復または再インストールする必要があります。",
 	"remove.extension": "修復の試行",
@@ -17,5 +16,6 @@
 	"rename.failed.delete.manually": "エラー: fs.rename が、\"{0}\" により失敗しました。{1} を手動で削除し、デバッグを有効にしてください。",
 	"failed.at.stage": "以下のステージで失敗しました: {0}",
 	"failed.at.stage2": "オフライン環境で作業している場合、またはこのエラーが繰り返し表示される場合は、すべての依存関係が事前インクルードされている拡張機能のバージョンを {0} からダウンロードしてみてください。その後、VS Code で \"Install from VSIX\" コマンドを使用してインストールしてください。",
-	"finished.installing.dependencies": "依存関係のインストールが完了しました"
+	"finished.installing.dependencies": "依存関係のインストールが完了しました",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }

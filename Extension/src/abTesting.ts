@@ -99,21 +99,20 @@ export class ABTestSettings {
         }
     }
 
-    private downloadCpptoolsJsonPkgAsync(): Promise<void> {
+    private async downloadCpptoolsJsonPkgAsync(): Promise<void> {
         let hasError: boolean = false;
         const telemetryProperties: { [key: string]: string } = {};
         const localConfigPath: string = util.getExtensionFilePath(localConfigFile);
         // Download the latest cpptools.json.
-        return util.downloadFileToDestination("https://go.microsoft.com/fwlink/?linkid=2097702", localConfigPath)
-            .catch((error) => {
-                // More specific error info is not likely to be helpful, and we get detailed download data from the initial install.
-                hasError = true;
-            })
-            .then(() => {
-                this.updateSettings();
-                telemetryProperties['success'] = (!hasError).toString();
-                Telemetry.logDebuggerEvent("cpptoolsJsonDownload", telemetryProperties);
-            });
+        try {
+            await util.downloadFileToDestination("https://go.microsoft.com/fwlink/?linkid=2097702", localConfigPath);
+        } catch (error) {
+            // More specific error info is not likely to be helpful, and we get detailed download data from the initial install.
+            hasError = true;
+        }
+        this.updateSettings();
+        telemetryProperties['success'] = (!hasError).toString();
+        Telemetry.logDebuggerEvent("cpptoolsJsonDownload", telemetryProperties);
     }
 }
 

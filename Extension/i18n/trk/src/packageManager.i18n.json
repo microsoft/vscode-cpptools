@@ -26,9 +26,9 @@
 	"zip.file.error": "Zip dosyası hatası",
 	"create.directory.error": "Dizin oluşturulurken hata oluştu",
 	"zip.stream.error": "Zip akışı okuma hatası",
-	"read.stream.error": "Akış okunurken hata",
 	"unlink.error": "{0} dosyasının bağlantısı kaldırılırken hata oluştu",
 	"rename.error": "{0} dosyası yeniden adlandırılırken hata oluştu",
+	"read.stream.error": "Akış okunurken hata",
 	"write.stream.error": "Akışa yazılırken hata",
 	"file.already.exists": "Uyarı: '{0}' dosyası zaten var ve güncelleştirilmedi."
 }

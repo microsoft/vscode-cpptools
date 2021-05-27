@@ -83,7 +83,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
             try {
                 await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                 if (selection.configuration.miDebuggerPath) {
-                    if (!fs.existsSync(selection.configuration.miDebuggerPath)) {
+                    if (!await util.checkFileExists(selection.configuration.miDebuggerPath)) {
                         vscode.window.showErrorMessage(localize("miDebuggerPath.not.available", "miDebuggerPath does not exist: {0}. Has a debugger been installed?", selection.configuration.miDebuggerPath));
                         throw new Error();
                     }
@@ -194,7 +194,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = task.detail ? task.detail : definition.command;
             const isCl: boolean = compilerName === "cl.exe";
-            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${workspaceFolder}";
+            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
                 if (platform === "darwin") {

@@ -1,0 +1,55 @@
+# ==================================================================================
+# Pipeline for VsCodeExtension-Localization build definition
+# Runs OneLocBuild task to localize xlf file
+# ==================================================================================
+
+resources:
+  repositories:
+  - repository: self
+    clean: true
+
+trigger: none
+pr: none
+schedules:
+- cron: "0 7 * * *"
+  displayName: Daily 7 AM
+  branches:
+    include:
+    - main
+  always: true
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: CmdLine@2
+  inputs:
+    script: 'cd Extension && yarn install'
+
+- task: CmdLine@2
+  inputs:
+    script: 'cd ./Extension && yarn run translations-export && cd ..'
+
+- task: OneLocBuild@2
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  inputs:
+    locProj: 'Build/loc/LocProject.json'
+    outDir: '$(Build.ArtifactStagingDirectory)'
+    isCreatePrSelected: false
+    prSourceBranchPrefix: 'locfiles'
+    packageSourceAuth: 'patAuth'
+    patVariable: '$(OneLocBuildPat)'
+    LclSource: lclFilesfromPackage
+    LclPackageId: 'LCL-JUNO-PROD-VCPP'
+    lsBuildXLocPackageVersion: '7.0.30510'
+
+- task: CmdLine@2
+  inputs:
+    script: 'cd Extension && node ./translations_auto_pr.js microsoft vscode-cpptools csigs $(csigsPat) csigs csigs@users.noreply.github.com "$(Build.ArtifactStagingDirectory)/loc" vscode-extensions-localization-export/vscode-extensions && cd ..'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'

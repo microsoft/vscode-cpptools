@@ -257,19 +257,19 @@ export function isUri(input: any): input is vscode.Uri {
 }
 
 export function isString(input: any): input is string {
-    return typeof(input) === "string";
+    return typeof (input) === "string";
 }
 
 export function isNumber(input: any): input is number {
-    return typeof(input) === "number";
+    return typeof (input) === "number";
 }
 
 export function isBoolean(input: any): input is boolean {
-    return typeof(input) === "boolean";
+    return typeof (input) === "boolean";
 }
 
 export function isObject(input: any): input is object {
-    return typeof(input) === "object";
+    return typeof (input) === "object";
 }
 
 export function isArray(input: any): input is any[] {
@@ -288,7 +288,7 @@ export function isOptionalArrayOfString(input: any): input is string[] | undefin
     return input === undefined || isArrayOfString(input);
 }
 
-export function resolveCachePath(input: string | undefined, additionalEnvironment: {[key: string]: string | string[]}): string {
+export function resolveCachePath(input: string | undefined, additionalEnvironment: { [key: string]: string | string[] }): string {
     let resolvedPath: string = "";
     if (!input) {
         // If no path is set, return empty string to language service process, where it will set the default path as
@@ -301,7 +301,7 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function resolveVariables(input: string | undefined, additionalEnvironment?: {[key: string]: string | string[]}): string {
+export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string {
     if (!input) {
         return "";
     }
@@ -484,6 +484,32 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
     } catch (e) {
     }
     return false;
+}
+
+/** Test whether a relative path exists */
+export function checkPathExistsSync(path: string, relativePath: string, isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
+    let pathExists: boolean = true;
+    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
+    if (!fs.existsSync(path)) {
+        if (existsWithExeAdded(path)) {
+            path += ".exe";
+        } else if (!relativePath) {
+            pathExists = false;
+        } else {
+            // Check again for a relative path.
+            relativePath = relativePath + path;
+            if (!fs.existsSync(relativePath)) {
+                if (existsWithExeAdded(path)) {
+                    path += ".exe";
+                } else {
+                    pathExists = false;
+                }
+            } else {
+                path = relativePath;
+            }
+        }
+    }
+    return { pathExists, path };
 }
 
 /** Read the files in a directory */
@@ -727,33 +753,29 @@ export function isExecutable(file: string): Promise<boolean> {
     });
 }
 
-export function allowExecution(file: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        if (process.platform !== 'win32') {
-            checkFileExists(file).then((exists: boolean) => {
-                if (exists) {
-                    isExecutable(file).then((isExec: boolean) => {
-                        if (isExec) {
-                            resolve();
-                        } else {
-                            fs.chmod(file, '755', (err: NodeJS.ErrnoException | null) => {
-                                if (err) {
-                                    reject(err);
-                                    return;
-                                }
-                                resolve();
-                            });
-                        }
-                    });
-                } else {
-                    getOutputChannelLogger().appendLine("");
-                    getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
-                    resolve();
-                }
-            });
+export async function allowExecution(file: string): Promise<void> {
+    if (process.platform !== 'win32') {
+        const exists: boolean = await checkFileExists(file);
+        if (exists) {
+            const isExec: boolean = await isExecutable(file);
+            if (!isExec) {
+                await chmodAsync(file, '755');
+            }
         } else {
-            resolve();
+            getOutputChannelLogger().appendLine("");
+            getOutputChannelLogger().appendLine(localize("warning.file.missing", "Warning: Expected file {0} is missing.", file));
         }
+    }
+}
+
+export async function chmodAsync(path: fs.PathLike, mode: fs.Mode): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        fs.chmod(path, mode, (err: NodeJS.ErrnoException | null) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve();
+        });
     });
 }
 
@@ -959,7 +981,8 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
 
     if (compilerPath) {
         if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {            compilerName = path.basename(compilerPath);
+            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {
+            compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
             const endQuote: number = compilerPath.substr(1).search("\"") + 1;
@@ -1027,7 +1050,7 @@ export function escapeForSquiggles(s: string): string {
                 newResults += "\\";
             }
             lastWasBackslash = false;
-            lastBackslashWasEscaped  = false;
+            lastBackslashWasEscaped = false;
             newResults += s[i];
         }
     }
@@ -1118,6 +1141,13 @@ export function getLocalizedString(params: LocalizeStringParams): string {
         text = lookupString(params.stringId, params.stringArgs);
     }
     return indent + text;
+}
+
+export function getLocalizedSymbolScope(scope: string, detail: string): string {
+    return localize({
+        key: "c.cpp.symbolscope.separator", comment:
+            ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized version of \"declaration\""]
+    }, "{0}, {1}", scope, detail);
 }
 
 function decodeUCS16(input: string): number[] {
@@ -1265,4 +1295,12 @@ export function isCodespaces(): boolean {
 export async function checkCuda(): Promise<void> {
     const langs: string[] = await vscode.languages.getLanguages();
     supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
+}
+
+// Sequentially Resolve Promises.
+export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Promise<void>): Promise<void> {
+    return items.reduce(async (previousPromise, nextItem) => {
+        await previousPromise;
+        return promiseBuilder(nextItem);
+    }, Promise.resolve());
 }

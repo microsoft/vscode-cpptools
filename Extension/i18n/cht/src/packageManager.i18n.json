@@ -26,9 +26,9 @@
 	"zip.file.error": "Zip 檔案錯誤",
 	"create.directory.error": "建立目錄時發生錯誤",
 	"zip.stream.error": "讀取 zip 串流時發生錯誤",
-	"read.stream.error": "讀取串流中發生錯誤",
 	"unlink.error": "將檔案 {0} 取消連結時發生錯誤",
 	"rename.error": "重新命名檔案 {0} 時發生錯誤",
+	"read.stream.error": "讀取串流中發生錯誤",
 	"write.stream.error": "寫入串流中發生錯誤",
 	"file.already.exists": "警告: 檔案 '{0}' 已經存在但未更新。"
 }
