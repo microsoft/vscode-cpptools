@@ -54,6 +54,8 @@
         "id": "cppWelcome",
         "title": "Get Started with C++ Development",
         "description": "Dive into VS Code's rich C++ development experience.",
+        "primary": true,
+        "when": "false",
         "steps": [
           {
             "id": "verify.compiler.mac",
@@ -2639,7 +2641,7 @@
     "**/mkdirp/minimist": "^0.2.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "hosted-git-info": "^3.0.8", 
+    "hosted-git-info": "^3.0.8",
     "browserslist": "^4.16.6"
   },
   "runtimeDependencies": [
