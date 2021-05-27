@@ -63,8 +63,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == mac",
             "media": {
-              "altText": "A markdown file with instructions for installing Clang on macOS.",
-              "path": "walkthrough/installcompiler/install-clang-macos.md"
+              "markdown": "walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
@@ -73,8 +72,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == linux",
             "media": {
-              "altText": "A markdown file with instructions for installing GCC on Linux.",
-              "path": "walkthrough/installcompiler/install-gcc-linux.md"
+              "markdown": "walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
@@ -83,8 +81,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == windows",
             "media": {
-              "altText": "A markdown file with instructions for installing MSVC on Windows.",
-              "path": "walkthrough/installcompiler/install-compiler-windows.md"
+              "markdown": "walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
@@ -94,7 +91,7 @@
             "when": "workspaceFolderCount == 0",
             "media": {
               "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
-              "path": {
+              "image": {
                 "light": "walkthrough/images/cpp-folder-explorer-light.png",
                 "dark": "walkthrough/images/cpp-folder-explorer-dark.png",
                 "hc": "walkthrough/images/cpp-folder-explorer-hc.png"
@@ -107,7 +104,7 @@
             "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
             "media": {
               "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
-              "path": {
+              "image": {
                 "light": "walkthrough/images/intellisense-config-light.png",
                 "dark": "walkthrough/images/intellisense-config-dark.png",
                 "hc": "walkthrough/images/intellisense-config-hc.png"
@@ -120,8 +117,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "when": "workspacePlatform == mac",
             "media": {
-              "altText": "A markdown file with instructions for starting a debugging session on macOS.",
-              "path": "walkthrough/debugconfig/run-and-debug-project-mac.md"
+              "markdown": "walkthrough/debugconfig/run-and-debug-project-mac.md"
             }
           },
           {
@@ -130,8 +126,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "when": "workspacePlatform == linux",
             "media": {
-              "altText": "A markdown file with instructions for starting a debugging session on Linux.",
-              "path": "walkthrough/debugconfig/run-and-debug-project-linux.md"
+              "markdown": "walkthrough/debugconfig/run-and-debug-project-linux.md"
             }
           },
           {
@@ -140,8 +135,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "when": "workspacePlatform == windows",
             "media": {
-              "altText": "A markdown file with instructions for starting a debugging session on Windows.",
-              "path": "walkthrough/debugconfig/run-and-debug-project-windows.md"
+              "markdown": "walkthrough/debugconfig/run-and-debug-project-windows.md"
             }
           },
           {
@@ -153,7 +147,7 @@
             ],
             "media": {
               "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
-              "path": {
+              "image": {
                 "light": "walkthrough/images/cmake-tools-light.png",
                 "dark": "walkthrough/images/cmake-tools-dark.png",
                 "hc": "walkthrough/images/cmake-tools-hc.png"
@@ -165,8 +159,7 @@
             "title": "Lean back and get started",
             "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
-              "altText": "A screenshot with a preview of the video tutorial and a play button.",
-              "path": "walkthrough/images/getting-started-video.png"
+              "markdown": "walkthrough/images/getting-started-video.png"
             }
           }
         ]
@@ -2647,7 +2640,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2161011",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2164295",
       "platforms": [
         "linux"
       ],
@@ -2658,11 +2651,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "7C43AA78021C5DB8F6DE9751EC8435D2BE1137CAC861801CDFADAA4B48A42AC3"
+      "integrity": "2E6E25B3B9C10ECC25A5B523C413182D185F13492602CF92896C658E6959CBFA"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2160914",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2164297",
       "platforms": [
         "linux"
       ],
@@ -2673,11 +2666,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "ED83E6E0F5784323CDF42BA1EF57CDFFBF2A81D468B08C8ECF126A2D042343F2"
+      "integrity": "25F5776247184254D49B9FCC25D0D018AECF1D8930FC517F25C9FCC0A9E650AC"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2160915",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2165100",
       "platforms": [
         "linux"
       ],
@@ -2688,11 +2681,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "52DD114FF466FA3542D7F98F12716E4296712986CA4908B18DCC039209B8D2CC"
+      "integrity": "186614524A13EC75BF68798861818D25CE82FDE293C57B725C11F62B0694EC55"
     },
     {
       "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2161012",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2164296",
       "platforms": [
         "darwin"
       ],
@@ -2703,11 +2696,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "53654F3D21C5D470D3C05EA48CFB7AB3CB197344049DC55AEB07374AFECD1587"
+      "integrity": "8E19E1BDD95FCC80F74529E6B5C24AB761F7D84B92CF44C33DAE38A8F11F6FB5"
     },
     {
       "description": "C/C++ language components (OS X ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2160918",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2164187",
       "platforms": [
         "darwin"
       ],
@@ -2718,11 +2711,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "E00370987D321E5AB58894B95F1545B52F59ED8E548BE1CBC8393F8B63562BDE"
+      "integrity": "1225791C05E0DBD708D0EE9598ACBC94B742E25C7CAE92C5C89791AF924D4B96"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2160913",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2164298",
       "platforms": [
         "win32"
       ],
@@ -2734,11 +2727,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "970504DB40E0B54E48075C1FBCE0F34AB674DE3F1CCAD51FFA04689513CC8013"
+      "integrity": "8D9E008B789D13DF4175795400E9402D43D199846CEC1DC4DD1F319B4C0D5492"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2160916",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2165101",
       "platforms": [
         "win32"
       ],
@@ -2749,7 +2742,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "E85CF0C80B64F940F73E158966749C0A95D122907170CACECDCBB118986D0E57"
+      "integrity": "4B94A64721FE8D0E1F93AACBA1190A9DC00DF7225E20BF628AC57BEC6301AA7D"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
