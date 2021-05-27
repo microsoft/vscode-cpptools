@@ -26,9 +26,9 @@
 	"zip.file.error": "Błąd pliku ZIP",
 	"create.directory.error": "Błąd tworzenia katalogu",
 	"zip.stream.error": "Błąd odczytu strumienia ZIP",
-	"read.stream.error": "Błąd w strumieniu odczytu",
 	"unlink.error": "Błąd podczas odłączania pliku {0}",
 	"rename.error": "Błąd podczas zmieniania nazwy pliku {0}",
+	"read.stream.error": "Błąd w strumieniu odczytu",
 	"write.stream.error": "Błąd w strumieniu zapisu",
 	"file.already.exists": "Ostrzeżenie: plik „{0}” już istnieje i nie został zaktualizowany."
 }

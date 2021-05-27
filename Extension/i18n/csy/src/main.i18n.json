@@ -7,7 +7,6 @@
 	"architecture.not.supported": "Architektura {0} se nepodporuje. ",
 	"apline.containers.not.supported": "Kontejnery Alpine se nepodporují.",
 	"download.button": "Přejít na stránku stahování",
-	"native.binaries.mismatch.osx": "Verze rozšíření macOSu pro Intel se nainstalovala. Vzhledem k tomu, že používáte Apple Silicon Mac, doporučujeme nainstalovat verzi rozšíření Apple Silicon.",
 	"native.binaries.not.supported": "Tato verze rozšíření pro {0} {1} není kompatibilní s vaším operačním systémem. Stáhněte a nainstalujte si prosím verzi rozšíření {2}.",
 	"extension.installation.failed": "Nepovedlo se úspěšně nainstalovat rozšíření jazyka C/C++. Aby rozšíření pro funkce jazyka C/C++ fungovalo správně, bude nutné ho opravit nebo přeinstalovat.",
 	"remove.extension": "Pokusit se o opravu",
@@ -17,5 +16,6 @@
 	"rename.failed.delete.manually": "CHYBA: Operace fs.rename neproběhla úspěšně s chybou {0}. Pokud chcete povolit ladění, odstraňte {1} ručně.",
 	"failed.at.stage": "Chyba ve fázi: {0}",
 	"failed.at.stage2": "Pokud pracujete v offline prostředí nebo se vám tato chyba zobrazuje opakovaně, zkuste si z {0} stáhnout verzi rozšíření, která už má všechny závislosti předem zahrnuté, a pak ji nainstalujte v nástroji VS Code pomocí příkazu Nainstalovat z VSIX.",
-	"finished.installing.dependencies": "Dokončila se instalace závislostí."
+	"finished.installing.dependencies": "Dokončila se instalace závislostí.",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }

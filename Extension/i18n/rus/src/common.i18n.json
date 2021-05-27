@@ -12,5 +12,6 @@
 	"warning.debugging.not.tested": "Предупреждение: отладка не тестировалась на этой платформе.",
 	"reload.workspace.for.changes": "Перезагрузите рабочую область, чтобы изменения параметров вступили в силу.",
 	"reload.string": "Перезагрузить",
-	"invalid.download.location.received": "Получено недопустимое расположение скачивания"
+	"invalid.download.location.received": "Получено недопустимое расположение скачивания",
+	"c.cpp.symbolscope.separator": "{0}, {1}"
 }

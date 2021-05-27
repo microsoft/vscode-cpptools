@@ -34,6 +34,7 @@ export class Logger {
         }
     }
 
+    // We should not await on this function.
     public showInformationMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
@@ -43,6 +44,7 @@ export class Logger {
         return vscode.window.showInformationMessage(message, ...items);
     }
 
+    // We should not await on this function.
     public showWarningMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 
@@ -52,6 +54,7 @@ export class Logger {
         return vscode.window.showWarningMessage(message, ...items);
     }
 
+    // We should not await on this function.
     public showErrorMessage(message: string, items?: string[]): Thenable<string | undefined> {
         this.appendLine(message);
 

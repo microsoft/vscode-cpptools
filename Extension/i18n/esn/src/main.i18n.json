@@ -7,7 +7,6 @@
 	"architecture.not.supported": "La arquitectura {0} no se admite. ",
 	"apline.containers.not.supported": "Los contenedores de Alpine no se admiten.",
 	"download.button": "Ir a la página de descarga",
-	"native.binaries.mismatch.osx": "Se ha instalado la versión de Intel de macOS de la extensión.  Como se trata de un equipo multiusuario de Apple Silicon, se recomienda instalar la versión de Apple Silicon de la extensión.",
 	"native.binaries.not.supported": "La versión para {0} {1} de la extensión no es compatible con el sistema operativo. Descargue la versión \"{2}\" de la extensión e instálela.",
 	"extension.installation.failed": "Error de instalación de la extensión de C/C++. Tendrá que reparar o reinstalar la extensión para que las características del lenguaje C/C++ funcionen correctamente.",
 	"remove.extension": "Intentar reparar",
@@ -17,5 +16,6 @@
 	"rename.failed.delete.manually": "ERROR: No se puedo ejecutar fs.rename con \"{0}\". Elimine {1} manualmente para habilitar la depuración.",
 	"failed.at.stage": "Error en la fase: {0}",
 	"failed.at.stage2": "Si trabaja en un entorno sin conexión o este error se repite, pruebe a descargar una versión de la extensión con todas las dependencias previamente incluidas de {0} y, a continuación, use el comando \"Instalar desde VSIX\" en VS Code para instalarla.",
-	"finished.installing.dependencies": "Ha finalizado la instalación de dependencias"
+	"finished.installing.dependencies": "Ha finalizado la instalación de dependencias",
+	"failed.installing.dependencies": "Failed installing dependencies"
 }

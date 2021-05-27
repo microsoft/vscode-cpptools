@@ -26,9 +26,9 @@
 	"zip.file.error": "Zip 文件错误",
 	"create.directory.error": "创建目录时出错",
 	"zip.stream.error": "读取 zip 流时出错",
-	"read.stream.error": "“读取”流中出错",
 	"unlink.error": "取消链接文件 {0} 时出错",
 	"rename.error": "重命名文件 {0} 时出错",
+	"read.stream.error": "“读取”流中出错",
 	"write.stream.error": "“写入”流中出错",
 	"file.already.exists": "警告: 文件“{0}”已存在，但未更新。"
 }

@@ -159,42 +159,35 @@ export interface BuildInfo {
  * does not need to update, resolves to undefined.
  */
 export async function getTargetBuildInfo(updateChannel: string, isFromSettingsChange: boolean): Promise<BuildInfo | undefined> {
-    return getReleaseJson()
-        .then(builds => {
-            if (!builds || builds.length === 0) {
-                return undefined;
-            }
+    const builds: Build[] | undefined = await getReleaseJson();
+    if (!builds || builds.length === 0) {
+        return undefined;
+    }
 
-            const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-            const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
-            if (targetBuild === undefined) {
-                // no action
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
-            } else if (userVersion.isExtensionVersionGreaterThan(new PackageVersion(targetBuild.name))) {
-                // downgrade
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "newVersion": targetBuild.name });
-            } else {
-                // upgrade
-                telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "newVersion": targetBuild.name });
-            }
-            return targetBuild;
-        })
-        .then(async build => {
-            if (!build) {
-                return Promise.resolve(undefined);
-            }
-            try {
-                const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-                const vsixName: string = vsixNameForPlatform(platformInfo);
-                const downloadUrl: string = getVsixDownloadUrl(build, vsixName);
-                if (!downloadUrl) {
-                    return undefined;
-                }
-                return { downloadUrl: downloadUrl, name: build.name };
-            } catch (error) {
-                return Promise.reject(error);
-            }
-        });
+    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+    const targetBuild: Build | undefined = getTargetBuild(builds, userVersion, updateChannel, isFromSettingsChange);
+    if (targetBuild === undefined) {
+        // no action
+        telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "none" });
+    } else if (userVersion.isExtensionVersionGreaterThan(new PackageVersion(targetBuild.name))) {
+        // downgrade
+        telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "downgrade", "newVersion": targetBuild.name });
+    } else {
+        // upgrade
+        telemetry.logLanguageServerEvent("UpgradeCheck", { "action": "upgrade", "newVersion": targetBuild.name });
+    }
+
+    if (!targetBuild) {
+        return undefined;
+    }
+    const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    const vsixName: string = vsixNameForPlatform(platformInfo);
+    const downloadUrl: string = getVsixDownloadUrl(targetBuild, vsixName);
+    if (!downloadUrl) {
+        return undefined;
+    }
+    return { downloadUrl: downloadUrl, name: targetBuild.name };
+
 }
 
 /**
@@ -266,28 +259,29 @@ function isRateLimit(input: any): input is RateLimit {
 
 async function getRateLimit(): Promise<RateLimit | undefined> {
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
-    const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header)
-        .catch((error) => {
-            if (error && error.code && error.code !== "ENOENT") {
-                // Only throw if the user is connected to the Internet.
-                throw new Error('Failed to download rate limit JSON');
-            }
-        });
-    if (!data) {
-        return Promise.resolve(undefined);
-    }
-
-    let rateLimit: any;
     try {
-        rateLimit = JSON.parse(data);
-    } catch (error) {
-        throw new Error('Failed to parse rate limit JSON');
-    }
+        const data: string = await util.downloadFileToStr('https://api.github.com/rate_limit', header);
+        if (!data) {
+            return undefined;
+        }
+        let rateLimit: any;
+        try {
+            rateLimit = JSON.parse(data);
+        } catch (error) {
+            throw new Error('Failed to parse rate limit JSON');
+        }
 
-    if (isRateLimit(rateLimit)) {
-        return Promise.resolve(rateLimit);
-    } else {
-        throw new Error('Rate limit JSON is not of type RateLimit');
+        if (isRateLimit(rateLimit)) {
+            return rateLimit;
+        } else {
+            throw new Error('Rate limit JSON is not of type RateLimit');
+        }
+
+    } catch (err) {
+        if (err && err.code && err.code !== "ENOENT") {
+            // Only throw if the user is connected to the Internet.
+            throw new Error('Failed to download rate limit JSON');
+        }
     }
 }
 
@@ -309,30 +303,31 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
     const releaseUrl: string = 'https://api.github.com/repos/Microsoft/vscode-cpptools/releases';
     const header: OutgoingHttpHeaders = { 'User-Agent': 'vscode-cpptools' };
 
-    const data: string = await util.downloadFileToStr(releaseUrl, header)
-        .catch((error) => {
-            if (error && error.code && error.code !== "ENOENT") {
-                // Only throw if the user is connected to the Internet.
-                throw new Error('Failed to download release JSON');
-            }
-        });
-    if (!data) {
-        return Promise.resolve(undefined);
-    }
-
-    // Parse the file
-    let releaseJson: any;
     try {
-        releaseJson = JSON.parse(data);
-    } catch (error) {
-        throw new Error('Failed to parse release JSON');
-    }
+        const data: string = await util.downloadFileToStr(releaseUrl, header);
+        if (!data) {
+            return undefined;
+        }
 
-    // Find the latest released builds.
-    const builds: Build[] = getArrayOfBuilds(releaseJson);
-    if (!builds || builds.length === 0) {
-        throw new Error('Release JSON is not of type Build[]');
-    } else {
-        return builds;
+        // Parse the file
+        let releaseJson: any;
+        try {
+            releaseJson = JSON.parse(data);
+        } catch (error) {
+            throw new Error('Failed to parse release JSON');
+        }
+
+        // Find the latest released builds.
+        const builds: Build[] = getArrayOfBuilds(releaseJson);
+        if (!builds || builds.length === 0) {
+            throw new Error('Release JSON is not of type Build[]');
+        } else {
+            return builds;
+        }
+    } catch (err) {
+        if (err && err.code && err.code !== "ENOENT") {
+            // Only throw if the user is connected to the Internet.
+            throw new Error('Failed to download release JSON');
+        }
     }
 }

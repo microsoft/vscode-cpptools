@@ -33,5 +33,8 @@
 	"yes.button": "Evet",
 	"no.button": "Hayır",
 	"configurations.received": "Alınan özel yapılandırmalar:",
-	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}"
+	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}",
+	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
+	"compilers.found": "We found the following C++ compiler(s) on your system:",
+	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
 }

@@ -4,6 +4,7 @@ const fs = require("fs-extra");
 const cp = require("child_process");
 const Octokit = require('@octokit/rest')
 const path = require('path');
+const parseGitConfig = require('parse-git-config');
 
 const branchName = 'localization';
 const mergeTo = 'main';
@@ -12,23 +13,36 @@ const pullRequestTitle = '[Auto] Localization - Translated Strings';
 
 let repoOwner = process.argv[2];
 let repoName = process.argv[3];
-let locProjectName = process.argv[4];
-let authUser = process.argv[5];
-let authToken = process.argv[6];
+let authUser = process.argv[4];
+let authToken = process.argv[5];
+let userFullName = process.argv[6];
+let userEmail = process.argv[7];
+let locRootPath = process.argv[8];
+let locSubPath = process.argv[9];
 
-if (!repoOwner || !repoName || !locProjectName || !authUser || !authToken) {
-    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name loc_project_name auth_user auth_token`);
+if (!repoOwner || !repoName || !authUser || !authToken || !userFullName || !userEmail || !locRootPath || !locSubPath) {
+    console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} repo_owner repo_name auth_token user_full_name user_email loc_root_path loc_sub_path`);
+    console.error(`   repo_owner - The owner of the repo on GitHub.  i.e. microsoft`);
+    console.error(`   repo_name - The name of the repo on GitHub.  i.e. vscode-cpptools`);
+    console.error(`   auth_user - User account wiith permission to post a pull request against the GitHub repo.`);
+    console.error(`   auth_token - A PAT associated with auth_user.`);
+    console.error(`   user_full_name - A full name to associate with a git commit. (This is replaced by the PR account if commit is squashed.)`);
+    console.error(`   user_email - An email to associate with a git commit. (This is replaced by the PR account if commit is squashed.)`);
+    console.error(`   loc_root_path - The path to the folder with language-specific directories (containing localized xlf files).`);
+    console.error(`   loc_sub_path - A sub-path after the language-specific directory, where the xlf to import is located.  This should not include the name of the xlf file to import.)`);
     return;
 }
 
 console.log(`repoOwner=${repoOwner}`);
 console.log(`repoName=${repoName}`);
-console.log(`locProjectName=${locProjectName}`);
 console.log(`authUser=${authUser}`);
-console.log(`authToken=${authToken}`);
+console.log(`userFullName=${userFullName}`);
+console.log(`userEmail=${userEmail}`);
+console.log(`locRootPath=${locRootPath}`);
+console.log(`locSubPath=${locSubPath}`);
 
 function hasBranch(branchName) {
-    console.log(`Checking for existance of branch "${branchName}" (git branch --list ${branchName})`);
+    console.log(`Checking for existence of branch "${branchName}" (git branch --list ${branchName})`);
     let output = cp.execSync(`git branch --list ${branchName}`);
     let lines = output.toString().split("\n");
     let found = false;
@@ -45,7 +59,10 @@ function hasAnyChanges() {
     let lines = output.toString().split("\n");
     let anyChanges = false;
     lines.forEach(line => {
-        anyChanges = anyChanges || (line != '');
+        if (line != '') {
+            console.log("Change detected: " + line);
+            anyChanges = true;
+        }
     });
     
     return anyChanges;
@@ -66,19 +83,11 @@ function sleep(ms) {
 console.log("This script is potentially DESTRUCTIVE!  Cancel now, or it will proceed in 10 seconds.");
 sleep(10000);
 
-console.log("Looking for latest localization drop");
-let latestTxt = fs.readFileSync("\\\\simpleloc\\drops\\Drops\\vscode-extensions_2432\\Latest.txt")
-let exp = /Build No:\s*(.*)(?!=\n)/gm;
-let match = exp.exec(latestTxt.toString());
-let versionString = match[1];
-
-console.log("Copying XLF files to vscode-translations-import directory");
-let rootSourcePath = `\\\\simpleloc\\drops\\Drops\\vscode-extensions_2432\\${versionString}\\Localization\\locdrop\\bin`; 
-let directories = fs.readdirSync(rootSourcePath);
-directories.forEach(folderName => {
-    let sourcePath = `${rootSourcePath}\\${folderName}\\Projects\\Src\\vscode-extensions\\vscode-${locProjectName}.${folderName}.xlf`;
-    let destinationPath = `../vscode-translations-import/${folderName}/vscode-extensions/vscode-${locProjectName}.xlf`;
-    console.log(`Copying "${sourcePath}$" to "${destinationPath}"`);
+let directories = [ "cs", "de", "es", "fr", "it", "ja", "ko", "pl", "pt-BR", "ru", "tr", "zh-Hans", "zh-Hant" ];
+directories.forEach(languageId => {
+    let sourcePath = `${locRootPath}\\${languageId}\\${locSubPath}\\${repoName}.${languageId}.xlf`;
+    let destinationPath = `../vscode-translations-import/${languageId}/vscode-extensions/${repoName}.xlf`;
+    console.log(`Copying "${sourcePath}" to "${destinationPath}"`);
     fs.copySync(sourcePath, destinationPath);
 });
 
@@ -115,22 +124,66 @@ if (!hasAnyChanges()) {
     return;
 }
 
-// Commit changes files.
-console.log(`Commiting changes (git commit -m "${commitComment}")`);
-cp.execSync(`git commit -m "${commitComment}"`);
+// Set up user and permissions
+
+// Save existing user name and email, in case already set.
+var existingUserName;
+var existingUserEmail;
+var gitConfigPath = path.resolve(process.cwd(), '../.git/config');
+var config = parseGitConfig.sync({ path: gitConfigPath });
+
+if (typeof config === 'object' && config.hasOwnProperty('user')) {
+    existingUserName = config.user.name;
+    existingUserEmail = config.user.email;
+}
+if (existingUserName === undefined) {
+    console.log(`Existing user name: undefined`);
+} else {
+    console.log(`Existing user name: "${existingUserName}"`);
+    cp.execSync(`git config --local --unset user.name`);
+}
+if (existingUserEmail === undefined) {
+    console.log(`Existing user email: undefined`);
+} else {
+    console.log(`Existing user email: "${existingUserEmail}"`);
+    cp.execSync(`git config --local --unset user.email`);
+}
+
+console.log(`Setting local user name to: "${userFullName}"`);
+cp.execSync(`git config --local user.name "${userFullName}"`);
+
+console.log(`Setting local user email to: "${userEmail}"`);
+cp.execSync(`git config --local user.email "${userEmail}"`);
 
 console.log(`Configuring git with permission to push and to create pull requests (git remote remove origin && git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
 cp.execSync('git remote remove origin');
 cp.execSync(`git remote add origin https://${authUser}:${authToken}@github.com/${repoOwner}/${repoName}.git`);
 
+// Commit changed files.
+console.log(`Commiting changes (git commit -m "${commitComment}")`);
+cp.execSync(`git commit -m "${commitComment}"`);
+
+if (existingUserName === undefined) {
+    console.log(`Restoring original user name: undefined`);
+    cp.execSync(`git config --local --unset user.name`);
+} else {
+    console.log(`Restoring original user name: "${existingUserName}"`);
+    cp.execSync(`git config --local user.name "${existingUserName}"`);
+}
+
+if (existingUserEmail === undefined) {
+    console.log(`Restoring original user email: undefined`);
+    cp.execSync(`git config --local --unset user.email`);
+} else {
+    console.log(`Restoring original user email: "${existingUserEmail}"`);
+    cp.execSync(`git config --local user.email "${existingUserEmail}"`);
+}
+
 console.log(`pushing to remove branch (git push -f origin ${branchName})`);
 cp.execSync(`git push -f origin ${branchName}`);
 
 console.log("Checking if there is already a pull request...");
-const octokit = new Octokit({auth: {
-    username: authUser,
-    password: authToken}
-});
+const octokit = new Octokit.Octokit({auth: authToken});
 octokit.pulls.list({ owner: repoOwner, repo: repoName }).then(({data}) => {
     let alreadyHasPullRequest = false;
     if (data) {
