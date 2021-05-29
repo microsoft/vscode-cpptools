@@ -159,7 +159,8 @@
             "title": "Lean back and get started",
             "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
             "media": {
-              "markdown": "walkthrough/images/getting-started-video.png"
+              "altText": "A screenshot with a preview of the video tutorial and a play button.",
+              "image": "walkthrough/images/getting-started-video.png"
             }
           }
         ]
@@ -2608,7 +2609,7 @@
     "typescript": "^3.5.3",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
-    "vscode-nls-dev": "^3.2.6",
+    "vscode-nls-dev": "^4.0.0-next.1",
     "vscode-test": "^1.3.0",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0",
