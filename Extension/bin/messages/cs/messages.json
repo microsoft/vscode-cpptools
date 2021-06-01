@@ -3376,11 +3376,21 @@
   "Moduly se v tomto režimu nepovolily.",
   "Název modulu nesmí obsahovat slovo import.",
   "Název modulu nesmí obsahovat slovo module.",
-  "Když se %sq používá v direktivě import, nemůže to být makro.",
+  null,
   null,
   "%n není výčtový typ.",
   "Enumerátor %no2 je v konfliktu s %n1.",
   "Enumerátor %no se už v tomto oboru %p deklaroval.",
   "specifikace throw() není součástí standardu C++20 a novějších",
-  "více než jedna položka v mapě jednotky hlavičky odpovídá %s"
+  "více než jedna položka v mapě jednotky hlavičky odpovídá %s",
+  "Diagnostika #pragma musí mít buď argument push nebo pop.",
+  "Nenašel se žádný push diagnostiky #pragma, které by odpovídal tomuto popu diagnostiky.",
+  "%sq nemůže být makro, pokud se použije ve směrnici pro import nebo modul.",
+  "Tato direktiva se může vyskytovat jenom v rozsahu globálního oboru názvů.",
+  "Deklarace typu export se může vyskytovat jenom na úrovni globálního rozsahu (global) nebo rozsahu oboru názvů (namespace).",
+  "%sq se parsuje jako identifikátor, nikoli jako klíčové slovo, protože tokeny, které po něm následují, se neshodují s direktivou preprocesoru.",
+  "Vypadá to, že se jedná o začátek direktivy preprocesoru, ale chybějící znak „;“, po kterém ihned následuje nový řádek, tomu brání.",
+  "Vypadá to, že se jedná o direktivu předběžného zpracování modulů, ale tyto direktivy se nemůžou vyskytovat v rámci rozšíření makra.",
+  "Direktiva typu module se nemůže vyskytovat v oboru podmíněného zahrnutí (např. #if, #else, #elseif apod.).",
+  "Import %sq se přeskočil."
 ]

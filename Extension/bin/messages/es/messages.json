@@ -3376,11 +3376,21 @@
   "los módulos no están habilitados en este modo",
   "No se permite \"import\" en un nombre de módulo",
   "No se permite usar \"módulo\" en un nombre de módulo",
-  "%sq no puede ser una macro cuando se use en una directiva import",
+  null,
   null,
   "%n no es un tipo de enumeración",
   "el enumerador %no2 entra en conflicto con %n1",
   "el enumerador %no ya se ha declarado en el ámbito %p",
   "la especificación \"throw()\" no forma parte de C++20 y versiones posteriores",
-  "más que la entrada en el mapa de la unidad del encabezado coincide con \"%s\""
+  "más que la entrada en el mapa de la unidad del encabezado coincide con \"%s\"",
+  "el diagnóstico #pragma debe tener un argumento \"push\" o \"pop\"",
+  "no se encontró ninguna \"diagnóstico 'push' de #pragma\" que coincidiera con este \"diagnóstico 'pop'\"",
+  "%sq no puede ser una macro cuando se usa en una directiva \"import\" o \"module\"",
+  "esta directiva solo puede aparecer en el ámbito de espacio de nombres global",
+  "una declaración \"export\" solo puede aparecer en un ámbito global o de espacio de nombres",
+  "%sq se analiza como identificador en lugar de como palabra clave porque los tokens posteriores no coinciden con los de una directiva de preprocesador",
+  "parece ser el inicio de una directiva de preprocesador, pero la ausencia de un \";\" seguida inmediatamente por una nueva línea impide eso",
+  "parece que se trata de una directiva de preprocesamiento de módulos, pero estas directivas no pueden aparecer dentro de una expansión de macro",
+  "una directiva \"module\" no puede aparecer en el ámbito de la inclusión condicional (por ejemplo, #if, #else, #elseif, etc.)",
+  "se ha omitido la importación de %sq"
 ]
