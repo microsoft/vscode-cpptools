@@ -2685,7 +2685,7 @@
       "integrity": "186614524A13EC75BF68798861818D25CE82FDE293C57B725C11F62B0694EC55"
     },
     {
-      "description": "C/C++ language components (macOS x86_64)",
+      "description": "C/C++ language components (macOS / x86_64)",
       "url": "https://go.microsoft.com/fwlink/?linkid=2164296",
       "platforms": [
         "darwin"
@@ -2700,7 +2700,7 @@
       "integrity": "8E19E1BDD95FCC80F74529E6B5C24AB761F7D84B92CF44C33DAE38A8F11F6FB5"
     },
     {
-      "description": "C/C++ language components (macOS ARM64)",
+      "description": "C/C++ language components (macOS / ARM64)",
       "url": "https://go.microsoft.com/fwlink/?linkid=2164187",
       "platforms": [
         "darwin"
@@ -2788,7 +2788,7 @@
       "integrity": "CD5578A21C8D515D15C0611621E44C03DE4E667EFB4EE1A0DE18B08FD9B96794"
     },
     {
-      "description": "ClangFormat (macOS)",
+      "description": "ClangFormat (macOS / x86_64)",
       "url": "https://go.microsoft.com/fwlink/?LinkID=2162416",
       "platforms": [
         "darwin"
@@ -2802,7 +2802,7 @@
       "integrity": "AEB24D394118EAD87087DCC651F2EE329FC335ECE88ED6C8C2A9E93ED60DFECD"
     },
     {
-      "description": "ClangFormat (macOS arm64)",
+      "description": "ClangFormat (macOS / ARM64)",
       "url": "https://go.microsoft.com/fwlink/?LinkID=2162413",
       "platforms": [
         "darwin"
