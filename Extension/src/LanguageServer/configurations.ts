@@ -1650,6 +1650,7 @@ export class CppProperties {
             // Resolve and split any environment variables
             paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
             compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
+            compilerPath = this.resolvePath(compilerPath, isWindows);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
