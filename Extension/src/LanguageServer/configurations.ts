@@ -1025,14 +1025,21 @@ export class CppProperties {
                         if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
                             this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
-                        setTimeout(() => {
-                            if (this.settingsPanel && this.configurationJson) {
-                                this.settingsPanel.updateConfigUI(configNames,
-                                    this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                    this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+                        const tryUpdate = () => {
+                            if (!this.settingsPanel || !this.configurationJson || this.settingsPanel.firstUpdateReceived) {
+                                return;
                             }
-                        },
-                        500); // Need some delay or the UI can randomly be blank, particularly in the remote scenario.
+                            this.settingsPanel.updateConfigUI(configNames,
+                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
+
+                            // Need to queue another update due to a VS Code regression bug which may drop the initial update.
+                            // It repros with a higher probability in cases that cause a slower load, such as after
+                            // switching to a Chinese langauge pack or in the remote scenario.
+                            setTimeout(tryUpdate, 500);
+                        };
+                        this.settingsPanel.firstUpdateReceived = false;
+                        tryUpdate();
                     } else {
                         // Parse failed, open json file
                         vscode.workspace.openTextDocument(this.propertiesFile);

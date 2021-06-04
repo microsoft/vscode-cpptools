@@ -73,6 +73,9 @@ export class SettingsPanel {
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
 
+    // Used to workaround a VS Code bug in which webviewPanel.postMessage calls sometimes get dropped.
+    public firstUpdateReceived: boolean = false;
+
     constructor() {
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
@@ -107,6 +110,8 @@ export class SettingsPanel {
                     vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui'))]
             }
         );
+
+        this.firstUpdateReceived = false;
 
         this.panel.iconPath = vscode.Uri.file(util.getExtensionFilePath("LanguageCCPP_color_128x.png"));
 
@@ -249,6 +254,9 @@ export class SettingsPanel {
                 break;
             case 'knownCompilerSelect':
                 this.knownCompilerSelect();
+                break;
+            case 'firstUpdateReceived':
+                this.firstUpdateReceived = true;
                 break;
         }
     }
