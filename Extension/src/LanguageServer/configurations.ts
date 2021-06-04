@@ -1032,7 +1032,7 @@ export class CppProperties {
                             this.settingsPanel.updateConfigUI(configNames,
                                 this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
                                 this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                                
+
                             // Need to queue another update due to a VS Code regression bug which may drop the initial update.
                             // It repros with a higher probability in cases that cause a slower load, such as after
                             // switching to a Chinese langauge pack or in the remote scenario.
