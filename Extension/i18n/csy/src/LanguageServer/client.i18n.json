@@ -34,7 +34,7 @@
 	"no.button": "Ne",
 	"configurations.received": "Přijaly se vlastní konfigurace:",
 	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}",
-	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
-	"compilers.found": "We found the following C++ compiler(s) on your system:",
-	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
+	"no.compilers.found": "V systému se nenašly žádné kompilátory jazyka C++. Pro vaši platformu doporučujeme podle instrukcí v editoru nainstalovat {0}.",
+	"compilers.found": "V systému jsme našli následující kompilátory jazyka C++:",
+	"compilers.found.message": "V konfiguraci IntelliSense vašeho projektu můžete zadat, který kompilátor se má použít."
 }

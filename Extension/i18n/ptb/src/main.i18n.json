@@ -17,5 +17,5 @@
 	"failed.at.stage": "Falha na fase: {0}",
 	"failed.at.stage2": "Se você trabalha em um ambiente offline ou vê este erro repetidamente, tente baixar uma versão da extensão com todas as dependências pré-incluídas de {0} e, em seguida, use o comando \"Instalar do VSIX\" no VS Code para instalá-la.",
 	"finished.installing.dependencies": "Concluída a instalação de dependências",
-	"failed.installing.dependencies": "Failed installing dependencies"
+	"failed.installing.dependencies": "Falha na instalação das dependências"
 }
