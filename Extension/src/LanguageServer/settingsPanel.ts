@@ -73,8 +73,11 @@ export class SettingsPanel {
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
 
-    // Used to workaround a VS Code bug in which webviewPanel.postMessage calls sometimes get dropped.
-    public firstUpdateReceived: boolean = false;
+    // Used to workaround a VS Code 1.56 regression in which webViewPanel.onDidChangeViewState
+    // gets called before the SettingsApp constructor is finished running.
+    // It repros with a higher probability in cases that cause a slower load,
+    // such as after switching to a Chinese language pack or in the remote scenario.
+    public initialized: boolean = false;
 
     constructor() {
         this.disposable = vscode.Disposable.from(
@@ -94,6 +97,8 @@ export class SettingsPanel {
             return;
         }
 
+        this.initialized = false;
+
         // Create new panel
         this.panel = vscode.window.createWebviewPanel(
             SettingsPanel.viewType,
@@ -110,8 +115,6 @@ export class SettingsPanel {
                     vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui'))]
             }
         );
-
-        this.firstUpdateReceived = false;
 
         this.panel.iconPath = vscode.Uri.file(util.getExtensionFilePath("LanguageCCPP_color_128x.png"));
 
@@ -216,7 +219,7 @@ export class SettingsPanel {
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         this.configValues = {...configuration}; // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
-        if (this.panel) {
+        if (this.panel && this.initialized) {
             this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
             this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
             this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
@@ -255,8 +258,9 @@ export class SettingsPanel {
             case 'knownCompilerSelect':
                 this.knownCompilerSelect();
                 break;
-            case 'firstUpdateReceived':
-                this.firstUpdateReceived = true;
+            case "initialized":
+                this.initialized = true;
+                this.settingsPanelActivated.fire();
                 break;
         }
     }
