@@ -74,7 +74,7 @@ export class SettingsPanel {
     private static readonly title: string = 'C/C++ Configurations';
 
     // Used to workaround a VS Code 1.56 regression in which webViewPanel.onDidChangeViewState gets called
-    // before the SettingsApp contructor is finished running.
+    // before the SettingsApp constructor is finished running.
     // It repros with a higher probability in cases that cause a slower load, such as after
     // switching to a Chinese language pack or in the remote scenario.
     public initialized: boolean = false;
