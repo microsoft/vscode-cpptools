@@ -167,7 +167,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "Se è true, i frammenti vengono forniti dal server di linguaggio.",
 	"c_cpp.configuration.enhancedColorization.description": "Se questa opzione è abilitata, il codice viene colorato in base a IntelliSense. Questa impostazione si applica solo se intelliSenseEngine è impostato su \"Default\".",
 	"c_cpp.configuration.codeFolding.description": "Se è abilitata, gli intervalli di riduzione del codice vengono fornite dal server di linguaggio.",
-	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Abilita i servizi di integrazione per l'[utilità di gestione dipendenze di vcpkg] (https://aka.ms/vcpkg/).",
+	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Abilita i servizi di integrazione per l'[utilità di gestione dipendenze di vcpkg](https://aka.ms/vcpkg/).",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "Aggiunge percorsi di inclusione da nan e node-addon-api quando sono dipendenze.",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "Se è true, con 'Rinomina simbolo' sarà richiesto un identificatore C/C++ valido.",
 	"c_cpp.configuration.autocompleteAddParentheses.description": "Se è true, il completamento automatico aggiungerà automaticamente \"(\" dopo le chiamate di funzione. In tal caso potrebbe essere aggiunto anche \")\", a seconda del valore dell'impostazione \"editor.autoClosingBrackets\".",
