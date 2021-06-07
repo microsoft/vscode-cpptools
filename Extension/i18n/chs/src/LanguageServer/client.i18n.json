@@ -34,7 +34,7 @@
 	"no.button": "否",
 	"configurations.received": "已收到自定义配置:",
 	"browse.configuration.received": "已收到自定义浏览配置: {0}",
-	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
-	"compilers.found": "We found the following C++ compiler(s) on your system:",
-	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
+	"no.compilers.found": "系统上未找到任何 C++ 编译器。对于你的平台，建议使用编辑器中的说明安装 {0}。",
+	"compilers.found": "我们在系统上发现了以下 C++ 编译器:",
+	"compilers.found.message": "可在项目的 IntelliSense 配置中指定要使用的编译器。"
 }

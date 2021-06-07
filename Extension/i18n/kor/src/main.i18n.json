@@ -17,5 +17,5 @@
 	"failed.at.stage": "{0} 단계에서 실패",
 	"failed.at.stage2": "오프라인 환경에서 작업하거나 이 오류가 반복적으로 표시되면 {0}에서 모든 종속성이 미리 포함된 확장 버전을 다운로드한 다음, VS Code에서 \"VSIX에서 설치\" 명령을 사용하여 확장을 설치합니다.",
 	"finished.installing.dependencies": "종속성 설치를 완료했습니다.",
-	"failed.installing.dependencies": "Failed installing dependencies"
+	"failed.installing.dependencies": "종속성을 설치하지 못했습니다."
 }

@@ -17,5 +17,5 @@
 	"failed.at.stage": "Şu aşamada başarısız oldu: {0}",
 	"failed.at.stage2": "Çevrimdışı bir ortamda çalışıyorsanız veya bu hatayı sürekli olarak görüyorsanız uzantının önceden eklenmiş tüm bağımlılıklara sahip bir sürümünü {0} adresinden indirmeyi deneyin ve sonra VS Code'da \"VSIX'ten yükle\" komutunu kullanarak uzantıyı yükleyin.",
 	"finished.installing.dependencies": "Bağımlılıkların yüklenmesi tamamlandı",
-	"failed.installing.dependencies": "Failed installing dependencies"
+	"failed.installing.dependencies": "Bağımlılıklar yüklenemedi"
 }
