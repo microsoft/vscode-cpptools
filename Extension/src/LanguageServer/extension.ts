@@ -27,10 +27,10 @@ import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
-import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import * as which from 'which';
+import { IExperimentationService } from 'tas-client';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -331,25 +331,32 @@ function realActivation(): void {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    PlatformInformation.GetPlatformInformation().then(info => {
+    PlatformInformation.GetPlatformInformation().then(async info => {
         // Skip Insiders processing for 32-bit Linux.
         if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
             // Skip Insiders processing for unsupported VS Code versions.
             const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
-            const abTestSettings: ABTestSettings = getABTestSettings();
-            const minimumSupportedVersionForInsidersUpgrades: PackageVersion = abTestSettings.getMinimumVSCodeVersion();
-            if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
-                insiderUpdateEnabled = true;
-                if (settings.updateChannel === 'Default') {
-                    const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                    if (userVersion.suffix === "insiders") {
-                        checkAndApplyUpdate(settings.updateChannel, false);
-                    } else {
-                        suggestInsidersChannel();
+            const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
+            // If we can't get to the experimentation service, don't suggest Insiders.
+            if (experimentationService !== undefined) {
+                const version: string | undefined = await experimentationService.getTreatmentVariableAsync<string>("", "minimumVSCodeVersion");
+                // If we can't get the minimum supported VS Code version for Insiders, don't suggest Insiders.
+                if (version !== undefined) {
+                    const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion(version);
+                    if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
+                        insiderUpdateEnabled = true;
+                        if (settings.updateChannel === 'Default') {
+                            const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                            if (userVersion.suffix === "insiders") {
+                                checkAndApplyUpdate(settings.updateChannel, false);
+                            } else {
+                                suggestInsidersChannel();
+                            }
+                        } else if (settings.updateChannel === 'Insiders') {
+                            insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                            checkAndApplyUpdate(settings.updateChannel, false);
+                        }
                     }
-                } else if (settings.updateChannel === 'Insiders') {
-                    insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
-                    checkAndApplyUpdate(settings.updateChannel, false);
                 }
             }
         }

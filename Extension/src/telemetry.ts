@@ -5,52 +5,121 @@
 'use strict';
 
 import TelemetryReporter from 'vscode-extension-telemetry';
+import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
+import { PackageVersion } from './packageVersion';
 
 interface IPackageInfo {
     name: string;
     version: string;
 }
 
-let telemetryReporter: TelemetryReporter | null;
+export class ExperimentationTelemetry implements IExperimentationTelemetry {
+    private sharedProperties: Record<string, string> = {};
+
+    constructor(private baseReporter: TelemetryReporter) { }
+
+    sendTelemetryEvent(eventName: string, properties?: Record<string, string>, measurements?: Record<string, number>): void {
+        this.baseReporter.sendTelemetryEvent(
+            eventName,
+            {
+                ...this.sharedProperties,
+                ...properties
+            },
+            measurements
+        );
+    }
+
+    sendTelemetryErrorEvent(eventName: string, properties?: Record<string, string>, _measurements?: Record<string, number>): void {
+        this.baseReporter.sendTelemetryErrorEvent(eventName, {
+            ...this.sharedProperties,
+            ...properties
+        });
+    }
+
+    setSharedProperty(name: string, value: string): void {
+        this.sharedProperties[name] = value;
+    }
+
+    postEvent(eventName: string, props: Map<string, string>): void {
+        const event: Record<string, string> = {};
+        for (const [key, value] of props) {
+            event[key] = value;
+        }
+        this.sendTelemetryEvent(eventName, event);
+    }
+
+    dispose(): Promise<any> {
+        return this.baseReporter.dispose();
+    }
+}
+
+let initializationPromise: Promise<IExperimentationService> | undefined;
+let experimentationTelemetry: ExperimentationTelemetry | undefined;
 const appInsightsKey: string = "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217";
 
 export function activate(): void {
     try {
-        telemetryReporter = createReporter();
+        if (util.extensionContext) {
+            const packageInfo: IPackageInfo = getPackageInfo();
+            if (packageInfo) {
+                let targetPopulation: TargetPopulation;
+                const userVersion: PackageVersion = new PackageVersion(packageInfo.version);
+                if (userVersion.suffix === "") {
+                    targetPopulation = TargetPopulation.Public;
+                } else if (userVersion.suffix === "insiders") {
+                    targetPopulation = TargetPopulation.Insiders;
+                } else {
+                    targetPopulation = TargetPopulation.Internal;
+                }
+                experimentationTelemetry = new ExperimentationTelemetry(new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey));
+                initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
+            }
+        }
     } catch (e) {
-        // can't really do much about this
+        // Can't really do much about this.
     }
 }
 
-export function deactivate(): void {
-    if (telemetryReporter) {
-        telemetryReporter.dispose();
-    }
+export async function getExperimentationService(): Promise<IExperimentationService | undefined> {
+    return initializationPromise;
 }
 
-export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): void {
-    if (telemetryReporter) {
-        const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
-        telemetryReporter.sendTelemetryEvent(eventNamePrefix + eventName, properties);
-    }
-}
-
-export function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
-    if (telemetryReporter) {
-        const eventNamePrefix: string = "C_Cpp/LanguageServer/";
-        telemetryReporter.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
-    }
-}
-
-function createReporter(): TelemetryReporter | null {
-    if (util.extensionContext) {
-        const packageInfo: IPackageInfo = getPackageInfo();
-        if (packageInfo) {
-            return new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey);
+export async function deactivate(): Promise<void> {
+    if (initializationPromise) {
+        try {
+            await initializationPromise;
+        } catch (e) {
+            // Continue even if we were not able to initialize the experimention platform.
+        }
+        if (experimentationTelemetry) {
+            experimentationTelemetry.dispose();
         }
     }
-    return null;
+}
+
+export async function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): Promise<void> {
+    try {
+        await initializationPromise;
+    } catch (e) {
+        // Continue even if we were not able to initialize the experimention platform.
+    }
+    if (experimentationTelemetry) {
+        const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
+        experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties);
+    }
+}
+
+export async function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): Promise<void> {
+    try {
+        await initializationPromise;
+    } catch (e) {
+        // Continue even if we were not able to initialize the experimention platform.
+    }
+    if (experimentationTelemetry) {
+        const eventNamePrefix: string = "C_Cpp/LanguageServer/";
+        experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
+    }
 }
 
 function getPackageInfo(): IPackageInfo {

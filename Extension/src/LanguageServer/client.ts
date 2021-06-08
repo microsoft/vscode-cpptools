@@ -37,7 +37,6 @@ import { updateLanguageConfigurations, registerCommands } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
-import { ABTestSettings, getABTestSettings } from '../abTesting';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as refs from './references';
@@ -1117,8 +1116,6 @@ export class DefaultClient implements Client {
             }
         }
 
-        const abTestSettings: ABTestSettings = getABTestSettings();
-
         let intelliSenseCacheDisabled: boolean = false;
         if (os.platform() === "darwin") {
             const releaseParts: string[] = os.release().split(".");
@@ -1254,7 +1251,7 @@ export class DefaultClient implements Client {
                     systemIncludePath: settings_defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
-                gotoDefIntelliSense: abTestSettings.UseGoToDefIntelliSense,
+                gotoDefIntelliSense: true,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
                 localizedStrings: localizedStrings,
