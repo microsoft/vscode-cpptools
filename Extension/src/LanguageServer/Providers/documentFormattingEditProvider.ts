@@ -50,8 +50,8 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
         } else {
             const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
             if (!editorConfigSettings) {
-                await editorConfig.parse(filePath);
-                return configCallBack(undefined);
+                const editorConfigContents: any = await editorConfig.parse(filePath);
+                return configCallBack(editorConfigContents);
             } else {
                 cachedEditorConfigSettings.set(filePath, editorConfigSettings);
                 return configCallBack(editorConfigSettings);
