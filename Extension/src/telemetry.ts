@@ -77,7 +77,7 @@ export function activate(): void {
             }
         }
     } catch (e) {
-        // Can't really do much about this.
+        // Handle error with a try/catch, but do nothing for errors.
     }
 }
 
@@ -90,7 +90,7 @@ export async function deactivate(): Promise<void> {
         try {
             await initializationPromise;
         } catch (e) {
-            // Continue even if we were not able to initialize the experimention platform.
+            // Continue even if we were not able to initialize the experimentation platform.
         }
         if (experimentationTelemetry) {
             experimentationTelemetry.dispose();
@@ -102,7 +102,7 @@ export async function logDebuggerEvent(eventName: string, properties?: { [key: s
     try {
         await initializationPromise;
     } catch (e) {
-        // Continue even if we were not able to initialize the experimention platform.
+        // Continue even if we were not able to initialize the experimentation platform.
     }
     if (experimentationTelemetry) {
         const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
@@ -114,7 +114,7 @@ export async function logLanguageServerEvent(eventName: string, properties?: { [
     try {
         await initializationPromise;
     } catch (e) {
-        // Continue even if we were not able to initialize the experimention platform.
+        // Continue even if we were not able to initialize the experimentation platform.
     }
     if (experimentationTelemetry) {
         const eventNamePrefix: string = "C_Cpp/LanguageServer/";
