@@ -17,5 +17,5 @@
 	"failed.at.stage": "Fehler in Stufe: {0}",
 	"failed.at.stage2": "Wenn Sie in einer Offlineumgebung arbeiten oder dieser Fehler wiederholt angezeigt wird, laden Sie eine Version der Erweiterung herunter, in die alle Abhängigkeiten von {0} bereits integriert sind. Verwenden Sie anschließend den Befehl \"Aus VSIX installieren\" in VS Code, um die Version zu installieren.",
 	"finished.installing.dependencies": "Installation der Abhängigkeiten abgeschlossen",
-	"failed.installing.dependencies": "Failed installing dependencies"
+	"failed.installing.dependencies": "Fehler beim Installieren von Abhängigkeiten"
 }
