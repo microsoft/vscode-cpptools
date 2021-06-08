@@ -54,14 +54,14 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
                 return configCallBack(undefined);
             }
         } else {
-            const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+            let editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
             if (!editorConfigSettings) {
-                const editorConfigContents: any = await editorConfig.parse(filePath);
-                return configCallBack(editorConfigContents);
-            } else {
-                cachedEditorConfigSettings.set(filePath, editorConfigSettings);
-                return configCallBack(editorConfigSettings);
+                editorConfigSettings = await editorConfig.parse(filePath);
+                if (editorConfigSettings !== undefined) {
+                    cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                }
             }
+            return configCallBack(editorConfigSettings);
         }
     }
 }
