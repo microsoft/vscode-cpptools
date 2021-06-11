@@ -2245,6 +2245,83 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "symbolOptions": {
+                "description": "%c_cpp.debuggers.symbolOptions.description%",
+                "default": {
+                  "searchPaths": [],
+                  "searchMicrosoftSymbolServer": false
+                },
+                "type": "object",
+                "properties": {
+                  "searchPaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchPaths.description%",
+                    "default": []
+                  },
+                  "searchMicrosoftSymbolServer": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description%",
+                    "default": false
+                  },
+                  "cachePath": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.cachePath.description%",
+                    "default": "%TEMP%\\SymbolCache"
+                  },
+                  "moduleFilter": {
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.moduleFilter.description%",
+                    "default": {
+                      "mode": "loadAllButExcluded",
+                      "excludedModules": []
+                    },
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "loadAllButExcluded",
+                          "loadOnlyIncluded"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
+                        ],
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
+                        "default": "loadAllButExcluded"
+                      },
+                      "excludedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description%",
+                        "default": []
+                      },
+                      "includedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description%",
+                        "default": [
+                          "MyExampleModule.dll"
+                        ]
+                      },
+                      "includeSymbolsNextToModules": {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description%",
+                        "default": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -2322,6 +2399,83 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "symbolOptions": {
+                "description": "%c_cpp.debuggers.symbolOptions.description%",
+                "default": {
+                  "searchPaths": [],
+                  "searchMicrosoftSymbolServer": false
+                },
+                "type": "object",
+                "properties": {
+                  "searchPaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchPaths.description%",
+                    "default": []
+                  },
+                  "searchMicrosoftSymbolServer": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description%",
+                    "default": false
+                  },
+                  "cachePath": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.cachePath.description%",
+                    "default": "%TEMP%\\SymbolCache"
+                  },
+                  "moduleFilter": {
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.moduleFilter.description%",
+                    "default": {
+                      "mode": "loadAllButExcluded",
+                      "excludedModules": []
+                    },
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "loadAllButExcluded",
+                          "loadOnlyIncluded"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
+                        ],
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
+                        "default": "loadAllButExcluded"
+                      },
+                      "excludedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description%",
+                        "default": []
+                      },
+                      "includedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description%",
+                        "default": [
+                          "MyExampleModule.dll"
+                        ]
+                      },
+                      "includeSymbolsNextToModules": {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description%",
+                        "default": true
+                      }
+                    }
+                  }
+                }
               }
             }
           }
