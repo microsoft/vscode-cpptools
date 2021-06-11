@@ -8,11 +8,11 @@
 ### Bug Fixes
 * Fix Find All References reporting certain references in headers as inactive. [#7609](https://github.com/microsoft/vscode-cpptools/issues/7609)
 * Fix IntelliSense process crash and tag parser failure with columns > 65535. [#7621](https://github.com/microsoft/vscode-cpptools/issues/7621)
-* Fix incorrect translations.
+* Fix incorrect localization translations.
   * jogo- (@jogo-) [PR #7625](https://github.com/microsoft/vscode-cpptools/pull/7625)
 * Fix `autocompleteAddParentheses` for some template argument deduction cases. [#7626](https://github.com/microsoft/vscode-cpptools/issues/7626)
 * Fix some incorrect IntelliSense errors. [#6639](https://github.com/microsoft/vscode-cpptools/issues/6639], [#7630](https://github.com/microsoft/vscode-cpptools/issues/7630)
-* Change references to OS X to macOS.
+* Change references of "OS X" to "macOS".
   * Tyler Davis (@TylerADavis) [PR #7636](https://github.com/microsoft/vscode-cpptools/pull/7636)
 * Prevent the root path from being added to the `browse.path`. [#7648](https://github.com/microsoft/vscode-cpptools/issues/7648)
 * Fix configuration squiggle when `${workspaceFolder}` is used with `compilerPath`. [#7649](https://github.com/microsoft/vscode-cpptools/issues/7649)
