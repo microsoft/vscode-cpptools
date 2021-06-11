@@ -643,6 +643,14 @@
           "type": "boolean",
           "description": "%c_cpp.debuggers.requireExactSource.description%",
           "default": true
+        },
+        "symbolOptions": {
+          "$ref": "#/definitions/VSSymbolOptions",
+          "description": "%c_cpp.debuggers.symbolOptions.description%",
+          "default": {
+            "searchPaths": [],
+            "searchMicrosoftSymbolServer": false
+          }
         }
       }
     },
@@ -720,6 +728,14 @@
           "type": "boolean",
           "description": "%c_cpp.debuggers.requireExactSource.description%",
           "default": true
+        },
+        "symbolOptions": {
+          "$ref": "#/definitions/VSSymbolOptions",
+          "description": "%c_cpp.debuggers.symbolOptions.description%",
+          "default": {
+            "searchPaths": [],
+            "searchMicrosoftSymbolServer": false
+          }
         }
       }
     }
