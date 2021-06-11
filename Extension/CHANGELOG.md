@@ -1,6 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 1.5.0-insiders: June 14, 2021
+### Enhancements
+* Add "Symbol Options" for CppVsdbg to configure symbol settings [PR #7680](https://github.com/microsoft/vscode-cpptools/pull/7680)
+* Update CppVsdbg to use newer CppEE and msdia. 
+
 ### Bug Fixes
 * Fix Find All References reporting certain references in headers as inactive. [#7609](https://github.com/microsoft/vscode-cpptools/issues/7609)
 * Fix IntelliSense process crash and tag parser failure with columns > 65535. [#7621](https://github.com/microsoft/vscode-cpptools/issues/7621)
