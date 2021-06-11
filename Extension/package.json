@@ -2293,7 +2293,7 @@
                           "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
                           "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
                         ],
-                        "description": "Controls which of the two basic operating modes the module filter operates in.",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
                         "default": "loadAllButExcluded"
                       },
                       "excludedModules": {
@@ -2447,7 +2447,7 @@
                           "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
                           "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
                         ],
-                        "description": "Controls which of the two basic operating modes the module filter operates in.",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
                         "default": "loadAllButExcluded"
                       },
                       "excludedModules": {
