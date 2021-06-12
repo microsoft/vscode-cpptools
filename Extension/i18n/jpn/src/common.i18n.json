@@ -13,5 +13,5 @@
 	"reload.workspace.for.changes": "設定の変更を有効にするには、ワークスペースを再度読み込んでください。",
 	"reload.string": "再読み込み",
 	"invalid.download.location.received": "無効なダウンロード場所を受信しました",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"c.cpp.symbolscope.separator": "{0}、{1}"
 }

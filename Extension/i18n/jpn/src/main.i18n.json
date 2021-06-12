@@ -17,5 +17,5 @@
 	"failed.at.stage": "以下のステージで失敗しました: {0}",
 	"failed.at.stage2": "オフライン環境で作業している場合、またはこのエラーが繰り返し表示される場合は、すべての依存関係が事前インクルードされている拡張機能のバージョンを {0} からダウンロードしてみてください。その後、VS Code で \"Install from VSIX\" コマンドを使用してインストールしてください。",
 	"finished.installing.dependencies": "依存関係のインストールが完了しました",
-	"failed.installing.dependencies": "Failed installing dependencies"
+	"failed.installing.dependencies": "依存関係をインストールできませんでした"
 }

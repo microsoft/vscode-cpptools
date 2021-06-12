@@ -34,7 +34,7 @@
 	"no.button": "No",
 	"configurations.received": "Configurazioni personalizzate ricevute:",
 	"browse.configuration.received": "La configurazione di esplorazione personalizzata è stata ricevuta: {0}",
-	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
-	"compilers.found": "We found the following C++ compiler(s) on your system:",
-	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
+	"no.compilers.found": "Nel sistema non sono stati trovati compilatori C++. Per la piattaforma, è consigliabile installare {0} usando le istruzioni nell'editor.",
+	"compilers.found": "Nel sistema sono stati trovati i seguenti compilatori C++:",
+	"compilers.found.message": "È possibile specificare il compilatore da utilizzare nella configurazione IntelliSense del progetto."
 }

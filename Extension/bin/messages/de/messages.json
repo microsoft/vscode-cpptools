@@ -3376,11 +3376,21 @@
   "Module sind in diesem Modus nicht aktiviert.",
   "\"Import\" ist in einem Modulnamen unzulässig.",
   "\"Modul\" ist in einem Modulnamen unzulässig.",
-  "\"%sq\" kann kein Makro sein, wenn es in einer Importdirektive verwendet wird.",
+  null,
   null,
   "\"%n\" ist kein Enumerationstyp.",
   "Der Enumerator \"%no2\" steht in Konflikt mit \"%n1\".",
   "Der Enumerator \"%no\" wurde bereits in diesem Bereich (%p) deklariert.",
   "Die Spezifikation \"throw()\" ist nicht in C++ 20 und höher enthalten.",
-  "Mehrere Einträge in der Headereinheitenzuordnung stimmen mit \"%s\" überein."
+  "Mehrere Einträge in der Headereinheitenzuordnung stimmen mit \"%s\" überein.",
+  "#pragma-Diagnose muss entweder das Argument \"push\" oder \"pop\" aufweisen",
+  "es wurde kein \"#pragma diagnostic push\" gefunden, um diesem \"diagnostic pop\" zu entsprechen",
+  "%sq kann kein Makro sein, wenn es in einer \"import\"- oder \"module\"-Direktive verwendet wird",
+  "diese Direktive darf nur im globalen Namespacebereich angezeigt werden",
+  "eine \"export\"-Deklaration kann nur im globalen oder Namespace-Gültigkeitsbereich auftreten.",
+  "%sq wird als Bezeichner und nicht als Schlüsselwort analysiert, da die nachfolgenden Token nicht mit denen einer Präprozessor-Direktive übereinstimmen",
+  "dies scheint der Anfang einer Präprozessor-Direktive zu sein, aber der Mangel an \";\", gefolgt von einem Zeilenumbruch, verhindert, dass",
+  "dies scheint eine Direktive für die Vorverarbeitung von Modulen zu sein, aber solche Direktiven dürfen nicht innerhalb einer Makroerweiterung auftreten",
+  "eine \"module\"-Direktive darf nicht im Bereich der bedingten Inklusion enthalten sein (z. B. #if, #else, #elseif usw.)",
+  "der Import von %sq wurde übersprungen"
 ]

@@ -975,7 +975,11 @@ export class CppProperties {
             const settings: CppSettings = new CppSettings(this.rootUri);
             this.settingsPanel = new SettingsPanel();
             this.settingsPanel.setKnownCompilers(this.knownCompilers, settings.preferredPathSeparator);
-            this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
+            this.settingsPanel.SettingsPanelActivated(() => {
+                if (this.settingsPanel?.initialized) {
+                    this.onSettingsPanelActivated();
+                }
+            });
             this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
             this.settingsPanel.ConfigSelectionChanged(() => this.onConfigSelectionChanged());
             this.settingsPanel.AddConfigRequested((e) => this.onAddConfigRequested(e));
@@ -1025,14 +1029,9 @@ export class CppProperties {
                         if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
                             this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
-                        setTimeout(() => {
-                            if (this.settingsPanel && this.configurationJson) {
-                                this.settingsPanel.updateConfigUI(configNames,
-                                    this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                    this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-                            }
-                        },
-                        500); // Need some delay or the UI can randomly be blank, particularly in the remote scenario.
+                        this.settingsPanel.updateConfigUI(configNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                     } else {
                         // Parse failed, open json file
                         vscode.workspace.openTextDocument(this.propertiesFile);
@@ -1643,6 +1642,7 @@ export class CppProperties {
             // Resolve and split any environment variables
             paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
             compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
+            compilerPath = this.resolvePath(compilerPath, isWindows);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
