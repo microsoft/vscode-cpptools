@@ -6,6 +6,7 @@
 * Update CppVsdbg to use newer CppEE and msdia. 
 
 ### Bug Fixes
+* Fix switch header/source not checking `files.exclude`. [#4429](https://github.com/microsoft/vscode-cpptools/issues/4429)
 * Fix Find All References reporting certain references in headers as inactive. [#7609](https://github.com/microsoft/vscode-cpptools/issues/7609)
 * Fix IntelliSense process crash and tag parser failure with columns > 65535. [#7621](https://github.com/microsoft/vscode-cpptools/issues/7621)
 * Fix incorrect localization translations.
