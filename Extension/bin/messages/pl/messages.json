@@ -3376,11 +3376,21 @@
   "moduły nie są włączone w tym trybie",
   "Ciąg „import” nie jest dozwolony w nazwie modułu",
   "Ciąg „module” nie jest dozwolony w nazwie modułu",
-  "Element %sq nie może być makrem, gdy jest używany w dyrektywie importu",
+  null,
   null,
   "Element %n nie jest typem wyliczenia",
   "moduł wyliczający %no2 powoduje konflikt z elementem %n1",
   "moduł wyliczający %no został już zadeklarowany w tym zakresie %p",
   "Specyfikacja „throw()” nie jest częścią języka C++20 i nowszych",
-  "więcej niż wpis na mapie jednostek nagłówka pasuje do „%s”"
+  "więcej niż wpis na mapie jednostek nagłówka pasuje do „%s”",
+  "Diagnostyka #pragma musi mieć argument \"push\" lub \"pop\"",
+  "nie znaleziono instrukcji \"#pragma diagnostic push\" pasującej do tego argumentu \"diagnostic pop\"",
+  "Element %sq nie może być makrem, gdy jest używany w dyrektywie importu lub modułu",
+  "ta dyrektywa może występować tylko w zakresie globalnej przestrzeni nazw",
+  "Deklaracja \"export\" może występować tylko w zakresie globalnym lub przestrzeni nazw",
+  "Element %sq jest analizowany jako identyfikator, a nie słowo kluczowe, ponieważ tokeny po nim występujące nie pasują do tych, które obowiązują w dyrektywie preprocesora",
+  "wydaje się, że jest to początek dyrektywy preprocesora, ale brak elementu \";\", po którym niezwłocznie występuje nowy wiersz to uniemożliwia",
+  "wydaje się, że jest to dyrektywa przetwarzania wstępnego modułów, ale takie dyrektywy nie mogą występować w rozszerzeniu makra",
+  "Dyrektywa \"module\" nie może pojawiać się w zakresie dołączania warunkowego (np. #if, #else, #elseif itp.)",
+  "import elementu %sq został pominięty"
 ]

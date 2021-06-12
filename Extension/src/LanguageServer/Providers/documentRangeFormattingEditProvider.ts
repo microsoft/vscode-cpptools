@@ -48,14 +48,14 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
         if (settings.formattingEngine !== "vcFormat") {
             return configCallBack(undefined);
         } else {
-            const editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
+            let editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
             if (!editorConfigSettings) {
-                await editorConfig.parse(filePath);
-                return configCallBack(undefined);
-            } else {
-                cachedEditorConfigSettings.set(filePath, editorConfigSettings);
-                return configCallBack(editorConfigSettings);
+                editorConfigSettings = await editorConfig.parse(filePath);
+                if (editorConfigSettings !== undefined) {
+                    cachedEditorConfigSettings.set(filePath, editorConfigSettings);
+                }
             }
+            return configCallBack(editorConfigSettings);
         }
     };
 }

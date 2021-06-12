@@ -81,6 +81,9 @@ class SettingsApp {
         document.getElementById(elementId.advancedSection).style.display = advancedShown ? "block" : "none";
         document.getElementById(elementId.showAdvanced).classList.toggle(advancedShown ? "collapse" : "expand", true);
         document.getElementById(elementId.showAdvanced).addEventListener("click", this.onShowAdvanced.bind(this));
+        this.vsCodeApi.postMessage({
+            command: "initialized"
+        });
     }
 
     private addEventsToInputValues(): void {

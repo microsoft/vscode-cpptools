@@ -13,5 +13,5 @@
 	"reload.workspace.for.changes": "請重新載入工作區以讓設定變更生效。",
 	"reload.string": "重新載入",
 	"invalid.download.location.received": "收到的下載位置無效",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"c.cpp.symbolscope.separator": "{0}，{1}"
 }

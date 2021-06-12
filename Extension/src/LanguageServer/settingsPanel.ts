@@ -73,6 +73,12 @@ export class SettingsPanel {
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = 'C/C++ Configurations';
 
+    // Used to workaround a VS Code 1.56 regression in which webViewPanel.onDidChangeViewState
+    // gets called before the SettingsApp constructor is finished running.
+    // It repros with a higher probability in cases that cause a slower load,
+    // such as after switching to a Chinese language pack or in the remote scenario.
+    public initialized: boolean = false;
+
     constructor() {
         this.disposable = vscode.Disposable.from(
             this.settingsPanelActivated,
@@ -90,6 +96,8 @@ export class SettingsPanel {
             this.panel.reveal(column, false);
             return;
         }
+
+        this.initialized = false;
 
         // Create new panel
         this.panel = vscode.window.createWebviewPanel(
@@ -211,7 +219,7 @@ export class SettingsPanel {
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         this.configValues = {...configuration}; // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
-        if (this.panel) {
+        if (this.panel && this.initialized) {
             this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
             this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
             this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
@@ -249,6 +257,10 @@ export class SettingsPanel {
                 break;
             case 'knownCompilerSelect':
                 this.knownCompilerSelect();
+                break;
+            case "initialized":
+                this.initialized = true;
+                this.settingsPanelActivated.fire();
                 break;
         }
     }

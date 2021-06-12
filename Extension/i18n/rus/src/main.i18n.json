@@ -17,5 +17,5 @@
 	"failed.at.stage": "Сбой на этапе: {0}",
 	"failed.at.stage2": "Если вы работаете в автономной среде или постоянно видите эту ошибку, попробуйте скачать версию расширения, в которую уже включены все зависимости, перейдя на следующую страницу: {0}. Затем выберите \"Установить из VSIX\" в VS Code, чтобы установить расширение.",
 	"finished.installing.dependencies": "Завершена установка зависимостей",
-	"failed.installing.dependencies": "Failed installing dependencies"
+	"failed.installing.dependencies": "Не удалось установить зависимости"
 }
