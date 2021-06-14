@@ -2790,7 +2790,8 @@
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
     "hosted-git-info": "^3.0.8",
-    "browserslist": "^4.16.6"
+    "browserslist": "^4.16.6",
+    "glob-parent": "^5.1.2"
   },
   "runtimeDependencies": [
     {

@@ -12,7 +12,7 @@
 * Fix incorrect localization translations.
   * jogo- (@jogo-) [PR #7625](https://github.com/microsoft/vscode-cpptools/pull/7625)
 * Fix `autocompleteAddParentheses` for some template argument deduction cases. [#7626](https://github.com/microsoft/vscode-cpptools/issues/7626)
-* Fix some incorrect IntelliSense errors. [#6639](https://github.com/microsoft/vscode-cpptools/issues/6639], [#7630](https://github.com/microsoft/vscode-cpptools/issues/7630)
+* Fix some incorrect IntelliSense errors. [#6639](https://github.com/microsoft/vscode-cpptools/issues/6639), [#7630](https://github.com/microsoft/vscode-cpptools/issues/7630)
 * Change references of "OS X" to "macOS".
   * Tyler Davis (@TylerADavis) [PR #7636](https://github.com/microsoft/vscode-cpptools/pull/7636)
 * Prevent the root path from being added to the `browse.path`. [#7648](https://github.com/microsoft/vscode-cpptools/issues/7648)
