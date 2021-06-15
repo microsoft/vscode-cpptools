@@ -14,7 +14,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
     async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
-        token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+        token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
         const id: number = ++DefaultClient.abortRequestId;
         const params: GetFoldingRangesParams = {
             id: id,
@@ -24,31 +24,30 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         token.onCancellationRequested(e => this.client.abortRequest(id));
         const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
         if (ranges.canceled) {
-            throw new vscode.CancellationError();
-        } else {
-            const result: vscode.FoldingRange[] = [];
-            ranges.ranges.forEach((r) => {
-                const foldingRange: vscode.FoldingRange = {
-                    start: r.range.start.line,
-                    end: r.range.end.line
-                };
-                switch (r.kind) {
-                    case FoldingRangeKind.Comment:
-                        foldingRange.kind = vscode.FoldingRangeKind.Comment;
-                        break;
-                    case FoldingRangeKind.Imports:
-                        foldingRange.kind = vscode.FoldingRangeKind.Imports;
-                        break;
-                    case FoldingRangeKind.Region:
-                        foldingRange.kind = vscode.FoldingRangeKind.Region;
-                        break;
-                    default:
-                        break;
-                }
-                result.push(foldingRange);
-            });
-            return result;
+            return undefined;
         }
+        const result: vscode.FoldingRange[] = [];
+        ranges.ranges.forEach((r) => {
+            const foldingRange: vscode.FoldingRange = {
+                start: r.range.start.line,
+                end: r.range.end.line
+            };
+            switch (r.kind) {
+                case FoldingRangeKind.Comment:
+                    foldingRange.kind = vscode.FoldingRangeKind.Comment;
+                    break;
+                case FoldingRangeKind.Imports:
+                    foldingRange.kind = vscode.FoldingRangeKind.Imports;
+                    break;
+                case FoldingRangeKind.Region:
+                    foldingRange.kind = vscode.FoldingRangeKind.Region;
+                    break;
+                default:
+                    break;
+            }
+            result.push(foldingRange);
+        });
+        return result;
     }
 
     public refresh(): void {

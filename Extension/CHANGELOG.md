@@ -1,5 +1,27 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.5.0-insiders: June 14, 2021
+### Enhancements
+* Add "Symbol Options" for CppVsdbg to configure symbol settings [PR #7680](https://github.com/microsoft/vscode-cpptools/pull/7680)
+* Update CppVsdbg to use newer CppEE and msdia. 
+
+### Bug Fixes
+* Fix switch header/source not checking `files.exclude`. [#4429](https://github.com/microsoft/vscode-cpptools/issues/4429)
+* Fix Find All References reporting certain references in headers as inactive. [#7609](https://github.com/microsoft/vscode-cpptools/issues/7609)
+* Fix IntelliSense process crash and tag parser failure with columns > 65535. [#7621](https://github.com/microsoft/vscode-cpptools/issues/7621)
+* Fix incorrect localization translations.
+  * jogo- (@jogo-) [PR #7625](https://github.com/microsoft/vscode-cpptools/pull/7625)
+* Fix `autocompleteAddParentheses` for some template argument deduction cases. [#7626](https://github.com/microsoft/vscode-cpptools/issues/7626)
+* Fix some incorrect IntelliSense errors. [#6639](https://github.com/microsoft/vscode-cpptools/issues/6639), [#7630](https://github.com/microsoft/vscode-cpptools/issues/7630)
+* Change references of "OS X" to "macOS".
+  * Tyler Davis (@TylerADavis) [PR #7636](https://github.com/microsoft/vscode-cpptools/pull/7636)
+* Prevent the root path from being added to the `browse.path`. [#7648](https://github.com/microsoft/vscode-cpptools/issues/7648)
+* Fix configuration squiggle when `${workspaceFolder}` is used with `compilerPath`. [#7649](https://github.com/microsoft/vscode-cpptools/issues/7649)
+* Fix an issue causing editorConfig not to be used or cached. [PR #7666](https://github.com/microsoft/vscode-cpptools/pull/7666)
+* Fix document symbols nesting with templates. [#7673](https://github.com/microsoft/vscode-cpptools/issues/7673)
+* Fix a duplicate IntelliSense update when a new C/C++ file is opened and after switching from a non-C/C++ file and back.
+* Fix a potential IntelliSense process crash on shutdown.
+
 ## Version 1.4.1: June 8, 2021
 * Fix the configuration UI sometimes not populating initially with VS Code 1.56 or later. [#7641](https://github.com/microsoft/vscode-cpptools/issues/7641)
 
