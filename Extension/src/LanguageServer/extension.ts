@@ -335,27 +335,23 @@ function realActivation(): void {
         // Skip Insiders processing for 32-bit Linux.
         if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
             // Skip Insiders processing for unsupported VS Code versions.
-            const vscodeVersion: PackageVersion = new PackageVersion(vscode.version);
             const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
             // If we can't get to the experimentation service, don't suggest Insiders.
             if (experimentationService !== undefined) {
-                const version: string | undefined = await experimentationService.getTreatmentVariableAsync<string>("", "minimumVSCodeVersion");
+                const allowInsiders: boolean | undefined = await experimentationService.getTreatmentVariableAsync<boolean>("vscode", "allowInsiders");
                 // If we can't get the minimum supported VS Code version for Insiders, don't suggest Insiders.
-                if (version !== undefined) {
-                    const minimumSupportedVersionForInsidersUpgrades: PackageVersion = new PackageVersion(version);
-                    if (!minimumSupportedVersionForInsidersUpgrades.isMajorMinorPatchGreaterThan(vscodeVersion)) {
-                        insiderUpdateEnabled = true;
-                        if (settings.updateChannel === 'Default') {
-                            const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                            if (userVersion.suffix === "insiders") {
-                                checkAndApplyUpdate(settings.updateChannel, false);
-                            } else {
-                                suggestInsidersChannel();
-                            }
-                        } else if (settings.updateChannel === 'Insiders') {
-                            insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                if (allowInsiders) {
+                    insiderUpdateEnabled = true;
+                    if (settings.updateChannel === 'Default') {
+                        const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
+                        if (userVersion.suffix === "insiders") {
                             checkAndApplyUpdate(settings.updateChannel, false);
+                        } else {
+                            suggestInsidersChannel();
                         }
+                    } else if (settings.updateChannel === 'Insiders') {
+                        insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
+                        checkAndApplyUpdate(settings.updateChannel, false);
                     }
                 }
             }
