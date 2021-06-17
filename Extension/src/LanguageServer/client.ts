@@ -1251,7 +1251,6 @@ export class DefaultClient implements Client {
                     systemIncludePath: settings_defaultSystemIncludePath
                 },
                 vcpkg_root: util.getVcpkgRoot(),
-                gotoDefIntelliSense: true,
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
                 localizedStrings: localizedStrings,
