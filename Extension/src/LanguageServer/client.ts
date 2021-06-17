@@ -813,7 +813,8 @@ export class DefaultClient implements Client {
                                             title: title,
                                             command: command.command,
                                             arguments: command.arguments
-                                        }
+                                        },
+                                        kind: vscode.CodeActionKind.QuickFix
                                     };
                                     resultCodeActions.push(vscodeCodeAction);
                                 });
