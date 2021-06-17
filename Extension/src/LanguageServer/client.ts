@@ -368,14 +368,14 @@ export enum FoldingRangeKind {
     Region = 3
 }
 
-interface FoldingRange {
+export interface CppFoldingRange {
     kind: FoldingRangeKind;
     range: Range;
 }
 
 export interface GetFoldingRangesResult {
     canceled: boolean;
-    ranges: FoldingRange[];
+    ranges: CppFoldingRange[];
 }
 
 interface AbortRequestParams {
