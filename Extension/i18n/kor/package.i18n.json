@@ -254,5 +254,18 @@
 	"c_cpp.taskDefinitions.detail.description": "작업의 추가 세부 정보",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "같은 소스 트리의 현재 및 컴파일 시간 경로입니다. EditorPath에 있는 파일은 중단점 일치를 위해 CompileTimePath 경로에 매핑되고 stacktrace 위치를 표시할 때 CompileTimePath에서 EditorPath로 매핑됩니다.",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "편집기가 사용할 소스 트리의 경로입니다.",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "이 항목이 스택 프레임 위치 매핑에만 사용되면 False입니다. 이 항목이 중단점 위치를 지정할 때도 사용되어야 하면 True입니다."
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "이 항목이 스택 프레임 위치 매핑에만 사용되면 False입니다. 이 항목이 중단점 위치를 지정할 때도 사용되어야 하면 True입니다.",
+	"c_cpp.debuggers.symbolOptions.description": "기호(.pdb 파일)를 찾아서 로드하는 방법을 제어하는 옵션입니다.",
+	"c_cpp.debuggers.VSSymbolOptions.description": "디버그 어댑터에 기호를 찾고 로드하기 위한 구성을 제공합니다.",
+	"c_cpp.debuggers.VSSymbolOptions.searchPaths.description": ".pdb 파일을 검색하는 기호 서버 URL(예: http​://MyExampleSymbolServer) 또는 디렉터리(예: /build/symbols)의 배열입니다. 이러한 디렉터리가 모듈 및 pdb가 원래 삭제된 경로 옆에 있는 기본 위치 외에 검색됩니다.",
+	"c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "'true'인 경우 Microsoft 기호 서버(https​://msdl.microsoft.com​/download/symbols)가 기호 검색 경로에 추가됩니다. 지정하지 않으면 이 옵션의 기본값은 'false'입니다.",
+	"c_cpp.debuggers.VSSymbolOptions.cachePath.description": "기호 서버에서 다운로드한 기호를 캐시해야 하는 디렉터리입니다. 지정되지 않은 경우 Windows에서 디버거는 기본적으로 %TEMP%\\SymbolCache로 설정됩니다.",
+	"c_cpp.debuggers.VSSymbolOptions.moduleFilter.description": "디버거에서 기호(.pdb 파일)를 로드하려고 시도할 모듈(.dll 파일)을 제어하는 옵션을 제공합니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.description": "디버그 어댑터에 기호를 로드하기 위한 구성을 제공합니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description": "두 가지 기본 운영 모드 중 모듈 필터가 작동하는 모드를 제어합니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions": "모듈이 'excludedModules' 배열에 있지 않으면 모든 모듈에 대한 기호를 로드합니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions": "'includedModules' 배열에 있거나 'includeSymbolsNextToModules' 설정을 통해 포함되는 경우가 아니면 모듈에 대한 기호를 로드하지 않도록 합니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "디버거에서 기호를 로드하지 않아야 하는 모듈의 배열입니다. 와일드카드(예: MyCompany.*.dll)가 지원됩니다.\n\n'모드'가 'loadAllButExcluded'로 설정되어 있지 않으면 이 속성은 무시됩니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "디버거에서 기호를 로드해야 하는 모듈의 배열입니다. 와일드카드(예: MyCompany.*.dll)가 지원됩니다.\n\n'모드'가 'loadOnlyIncluded'로 설정되어 있지 않으면 이 속성은 무시됩니다.",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "True 이면 'includedModules' 배열에 없는 모듈에 대해 디버거는 모듈 자체 및 시작 실행 파일 옆을 계속 확인하지만 기호 검색 목록의 경로는 확인하지 않습니다. 이 옵션의 기본값은 'true'입니다.\n\n'모드'가 'loadOnlyIncluded'로 설정되어 있지 않으면 이 속성은 무시됩니다."
 }

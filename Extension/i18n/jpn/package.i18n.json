@@ -254,5 +254,18 @@
 	"c_cpp.taskDefinitions.detail.description": "タスクのその他の詳細",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "同じソース ツリーへの現在およびコンパイル時のパスです。EditorPath で見つかったファイルは、ブレークポイントの一致のために CompileTimePath パスにマップされ、スタック トレースの場所を表示するときに CompileTimePath から EditorPath にマップされます。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "エディターで使用されるソース ツリーへのパスです。",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "このエントリをスタック フレームの場所のマッピングにのみ使用する場合は False です。ブレークポイントの位置を指定するときにもこのエントリを使用する必要がある場合は True です。"
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "このエントリをスタック フレームの場所のマッピングにのみ使用する場合は False です。ブレークポイントの位置を指定するときにもこのエントリを使用する必要がある場合は True です。",
+	"c_cpp.debuggers.symbolOptions.description": "シンボル (.pdb ファイル) の検索と読み込みの方法を制御するオプションです。",
+	"c_cpp.debuggers.VSSymbolOptions.description": "デバッグ アダプターへのシンボルの検索と読み込みのための構成を提供します。",
+	"c_cpp.debuggers.VSSymbolOptions.searchPaths.description": ".pdb ファイルを検索するためのシンボル サーバー URL (例: http​://MyExampleSymbolServer) の配列またはディレクトリ (例: /build/symbols) の配列です。これらのディレクトリは、既定の場所 (すなわちモジュールと、 pdb が最初にドロップされたパスの横) に加えて、検索されます。",
+	"c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "'true' の場合、Microsoft シンボルサーバー (https​://msdl.microsoft.com​/download/symbols) がシンボルの検索パスに追加されます。指定しない場合、このオプションの既定値は 'false' です。",
+	"c_cpp.debuggers.VSSymbolOptions.cachePath.description": "シンボル サーバーからダウンロードされたシンボルがキャッシュされるディレクトリです。指定しない場合、Windows では、デバッガーは既定で %TEMP% \\SymbolCache に設定されます。",
+	"c_cpp.debuggers.VSSymbolOptions.moduleFilter.description": "デバッガーが、シンボル (.pdb ファイル) を読み込もうとするモジュール (.dll ファイル) を制御するオプションを提供します。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.description": "デバッグ アダプターへのシンボルを読み込むための構成を提供します。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description": "モジュール フィルターが動作する 2 つの基本的な動作モードを制御します。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions": "モジュールが 'excludedModules' 配列内にある場合を除き、すべてのモジュールのシンボルを読み込みます。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions": "モジュールが 'includedModules' 配列に含まれていない場合、または 'includeSymbolsNextToModules' 設定を介して含まれていない場合は、どのモジュールに対してもシンボルを読み込もうとしてはいけません。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "デバッガーがシンボルを読み込んではいけないモジュールの配列です。ワイルドカード (例: MyCompany.*.dll) がサポートされています。\n\n'mode' が 'loadAllButExcluded' に設定されていない限り、このプロパティは無視されます。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "デバッガーがシンボルを読み込むべきモジュールの配列です。ワイルドカード (例: MyCompany.*.dll) がサポートされています。\n\n'mode' が 'loadOnlyIncluded' に設定されていない限り、このプロパティは無視されます。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "True の場合、'includedModules' 配列にないモジュールの場合、デバッガーはモジュール自体と起動中の実行可能ファイルの横を確認しますが、シンボル検索リストのパスはチェックしません。このオプションの既定値は 'true' です。\n\n'mode' が 'loadOnlyIncluded' に設定されていない限り、このプロパティは無視されます。"
 }
