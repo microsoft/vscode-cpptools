@@ -64,9 +64,6 @@ class SettingsApp {
     private readonly vsCodeApi: VsCodeApi;
     private updating: boolean = false;
 
-    // Used to workaround a VS Code bug in which webviewPanel.postMessage calls sometimes get dropped.
-    private firstUpdateReceived: boolean = false;
-
     constructor() {
         this.vsCodeApi = acquireVsCodeApi();
 
@@ -84,6 +81,9 @@ class SettingsApp {
         document.getElementById(elementId.advancedSection).style.display = advancedShown ? "block" : "none";
         document.getElementById(elementId.showAdvanced).classList.toggle(advancedShown ? "collapse" : "expand", true);
         document.getElementById(elementId.showAdvanced).addEventListener("click", this.onShowAdvanced.bind(this));
+        this.vsCodeApi.postMessage({
+            command: "initialized"
+        });
     }
 
     private addEventsToInputValues(): void {
@@ -235,12 +235,6 @@ class SettingsApp {
         switch (message.command) {
             case 'updateConfig':
                 this.updateConfig(message.config);
-
-                if (!this.firstUpdateReceived) {
-                    this.vsCodeApi.postMessage({
-                        command: "firstUpdateReceived"
-                    });
-                }
                 break;
             case 'updateErrors':
                 this.updateErrors(message.errors);

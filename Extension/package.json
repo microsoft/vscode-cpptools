@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.4.0-main",
+  "version": "1.5.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2245,6 +2245,83 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "symbolOptions": {
+                "description": "%c_cpp.debuggers.symbolOptions.description%",
+                "default": {
+                  "searchPaths": [],
+                  "searchMicrosoftSymbolServer": false
+                },
+                "type": "object",
+                "properties": {
+                  "searchPaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchPaths.description%",
+                    "default": []
+                  },
+                  "searchMicrosoftSymbolServer": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description%",
+                    "default": false
+                  },
+                  "cachePath": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.cachePath.description%",
+                    "default": "%TEMP%\\SymbolCache"
+                  },
+                  "moduleFilter": {
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.moduleFilter.description%",
+                    "default": {
+                      "mode": "loadAllButExcluded",
+                      "excludedModules": []
+                    },
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "loadAllButExcluded",
+                          "loadOnlyIncluded"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
+                        ],
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
+                        "default": "loadAllButExcluded"
+                      },
+                      "excludedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description%",
+                        "default": []
+                      },
+                      "includedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description%",
+                        "default": [
+                          "MyExampleModule.dll"
+                        ]
+                      },
+                      "includeSymbolsNextToModules": {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description%",
+                        "default": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -2322,6 +2399,83 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "symbolOptions": {
+                "description": "%c_cpp.debuggers.symbolOptions.description%",
+                "default": {
+                  "searchPaths": [],
+                  "searchMicrosoftSymbolServer": false
+                },
+                "type": "object",
+                "properties": {
+                  "searchPaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchPaths.description%",
+                    "default": []
+                  },
+                  "searchMicrosoftSymbolServer": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description%",
+                    "default": false
+                  },
+                  "cachePath": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.cachePath.description%",
+                    "default": "%TEMP%\\SymbolCache"
+                  },
+                  "moduleFilter": {
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.moduleFilter.description%",
+                    "default": {
+                      "mode": "loadAllButExcluded",
+                      "excludedModules": []
+                    },
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "loadAllButExcluded",
+                          "loadOnlyIncluded"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
+                        ],
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
+                        "default": "loadAllButExcluded"
+                      },
+                      "excludedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description%",
+                        "default": []
+                      },
+                      "includedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description%",
+                        "default": [
+                          "MyExampleModule.dll"
+                        ]
+                      },
+                      "includeSymbolsNextToModules": {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description%",
+                        "default": true
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2625,9 +2779,10 @@
     "plist": "^3.0.2",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^5.0.0",
-    "vscode-extension-telemetry": "^0.1.2",
+    "vscode-extension-telemetry": "^0.1.7",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^4.1.1",
+    "vscode-tas-client": "^0.1.22",
     "which": "^2.0.2",
     "yauzl": "^2.10.0"
   },
@@ -2636,7 +2791,8 @@
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
     "hosted-git-info": "^3.0.8",
-    "browserslist": "^4.16.6"
+    "browserslist": "^4.16.6",
+    "glob-parent": "^5.1.2"
   },
   "runtimeDependencies": [
     {

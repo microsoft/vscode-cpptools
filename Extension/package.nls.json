@@ -162,10 +162,7 @@
     "c_cpp.configuration.suggestSnippets.description": "If true, snippets are provided by the language server.",
     "c_cpp.configuration.enhancedColorization.description": "If enabled, code is colorized based on IntelliSense. This setting only applies if intelliSenseEngine is set to \"Default\".",
     "c_cpp.configuration.codeFolding.description": "If enabled, code folding ranges are provided by the language server.",
-    "c_cpp.configuration.vcpkg.enabled.markdownDescription": {
-        "message": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
-        "comment": ["This string contains markdown. Please ensure that markdown syntax and data such as URLs are preserved. https://en.wikipedia.org/wiki/Markdown"]
-    },
+    "c_cpp.configuration.vcpkg.enabled.markdownDescription": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
     "c_cpp.configuration.addNodeAddonIncludePaths.description": "Add include paths from nan and node-addon-api when they're dependencies.",
     "c_cpp.configuration.renameRequiresIdentifier.description": "If true, 'Rename Symbol' will require a valid C/C++ identifier.",
     "c_cpp.configuration.autocompleteAddParentheses.description": "If true, autocomplete will automatically add \"(\" after function calls, in which case \")\" may also be added, depending on the value of the \"editor.autoClosingBrackets\" setting.",
@@ -174,10 +171,7 @@
     "c_cpp.configuration.filesExcludeWhen.description": "Additional check on the siblings of a matching file. Use $(basename) as variable for the matching file name.",
     "c_cpp.configuration.debugger.useBacktickCommandSubstitution.description": "If true, debugger shell command substitution will use obsolete backtick (`).",
     "c_cpp.contributes.views.cppReferencesView.title": "C/C++: Other references results",
-    "c_cpp.contributes.viewsWelcome.contents": {
-        "message": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
-        "comment": ["This string contains markdown. Please ensure that markdown syntax and data such as URLs are preserved. https://en.wikipedia.org/wiki/Markdown"]
-    },
+    "c_cpp.contributes.viewsWelcome.contents": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
     "c_cpp.debuggers.pipeTransport.default.pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'",
     "c_cpp.debuggers.pipeTransport.default.debuggerPath": "The full path to the debugger on the target machine, for example /usr/bin/gdb.",
@@ -255,5 +249,18 @@
     "c_cpp.taskDefinitions.detail.description": "Additional details of the task",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "Current and compile-time paths to the same source trees. Files found under the EditorPath are mapped to the CompileTimePath path for breakpoint matching and mapped from CompileTimePath to EditorPath when displaying stacktrace locations.",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
-    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations."
+    "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations.",
+    "c_cpp.debuggers.symbolOptions.description": "Options to control how symbols (.pdb files) are found and loaded.",
+    "c_cpp.debuggers.VSSymbolOptions.description": "Provides configuration for locating and loading symbols to the debug adapter.",
+    "c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "Array of symbol server URLs (example: http\u200b://MyExampleSymbolServer) or directories (example: /build/symbols) to search for .pdb files. These directories will be searched in addition to the default locations -- next to the module and the path where the pdb was originally dropped to.",
+    "c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "If 'true' the Microsoft Symbol server (https\u200b://msdl.microsoft.com\u200b/download/symbols) is added to the symbols search path. If unspecified, this option defaults to 'false'.",
+    "c_cpp.debuggers.VSSymbolOptions.cachePath.description": "Directory where symbols downloaded from symbol servers should be cached. If unspecified, on Windows the debugger will default to %TEMP%\\SymbolCache.",
+    "c_cpp.debuggers.VSSymbolOptions.moduleFilter.description": "Provides options to control which modules (.dll files) the debugger will attempt to load symbols (.pdb files) for.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.description": "Provides configuration for loading symbols to the debug adapter.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description": "Controls which of the two basic operating modes the module filter operates in.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions": "Load symbols for all modules unless the module is in the 'excludedModules' array.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions": "Do not attempt to load symbols for ANY module unless it is in the 'includedModules' array, or it is included through the 'includeSymbolsNextToModules' setting.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "Array of modules that the debugger should NOT load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadAllButExcluded'.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "Array of modules that the debugger should load symbols for. Wildcards (example: MyCompany.*.dll) are supported.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'.",
+    "c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "If true, for any module NOT in the 'includedModules' array, the debugger will still check next to the module itself and the launching executable, but it will not check paths on the symbol search list. This option defaults to 'true'.\n\nThis property is ignored unless 'mode' is set to 'loadOnlyIncluded'."
 }

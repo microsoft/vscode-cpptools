@@ -11,7 +11,6 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
-import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
@@ -358,8 +357,7 @@ export class CppProperties {
 
         // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
-        const abTestSettings: ABTestSettings = getABTestSettings();
-        const rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+        const rootFolder: string = "${workspaceFolder}/**";
         const defaultFolder: string = "${default}";
         // We don't add system includes to the includePath anymore. The language server has this information.
         if (isUnset(settings.defaultIncludePath)) {
@@ -975,7 +973,11 @@ export class CppProperties {
             const settings: CppSettings = new CppSettings(this.rootUri);
             this.settingsPanel = new SettingsPanel();
             this.settingsPanel.setKnownCompilers(this.knownCompilers, settings.preferredPathSeparator);
-            this.settingsPanel.SettingsPanelActivated(() => this.onSettingsPanelActivated());
+            this.settingsPanel.SettingsPanelActivated(() => {
+                if (this.settingsPanel?.initialized) {
+                    this.onSettingsPanelActivated();
+                }
+            });
             this.settingsPanel.ConfigValuesChanged(() => this.saveConfigurationUI());
             this.settingsPanel.ConfigSelectionChanged(() => this.onConfigSelectionChanged());
             this.settingsPanel.AddConfigRequested((e) => this.onAddConfigRequested(e));
@@ -1025,21 +1027,9 @@ export class CppProperties {
                         if (this.settingsPanel.selectedConfigIndex >= this.configurationJson.configurations.length) {
                             this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         }
-                        const tryUpdate = () => {
-                            if (!this.settingsPanel || !this.configurationJson || this.settingsPanel.firstUpdateReceived) {
-                                return;
-                            }
-                            this.settingsPanel.updateConfigUI(configNames,
-                                this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
-                                this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
-
-                            // Need to queue another update due to a VS Code regression bug which may drop the initial update.
-                            // It repros with a higher probability in cases that cause a slower load, such as after
-                            // switching to a Chinese langauge pack or in the remote scenario.
-                            setTimeout(tryUpdate, 500);
-                        };
-                        this.settingsPanel.firstUpdateReceived = false;
-                        tryUpdate();
+                        this.settingsPanel.updateConfigUI(configNames,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                     } else {
                         // Parse failed, open json file
                         vscode.workspace.openTextDocument(this.propertiesFile);
