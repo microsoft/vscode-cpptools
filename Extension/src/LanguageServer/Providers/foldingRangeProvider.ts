@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult } from '../client';
+import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult, CppFoldingRange } from '../client';
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
@@ -27,10 +27,13 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             return undefined;
         }
         const result: vscode.FoldingRange[] = [];
-        ranges.ranges.forEach((r) => {
+        ranges.ranges.forEach((r: CppFoldingRange, index: number, array: CppFoldingRange[]) => {
             const foldingRange: vscode.FoldingRange = {
                 start: r.range.start.line,
-                end: r.range.end.line
+                // Move the end range up one if it overlaps with the next start range, because
+                // VS Code doesn't support column-based folding: https://github.com/microsoft/vscode/issues/50840
+                end: r.range.end.line - (index + 1 >= array.length ? 0 :
+                    (array[index + 1].range.start.line !== r.range.end.line ? 0 : 1))
             };
             switch (r.kind) {
                 case FoldingRangeKind.Comment:
