@@ -167,7 +167,7 @@
 	"c_cpp.configuration.suggestSnippets.description": "如果为 true，则由语言服务器提供片段。",
 	"c_cpp.configuration.enhancedColorization.description": "如果启用，则根据 IntelliSense 对代码设定颜色。此设置仅在 intelliSenseEngine 设置为“默认”时适用。",
 	"c_cpp.configuration.codeFolding.description": "如果启用，则由语言服务器提供代码折叠范围。",
-	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依赖关系管理器] (https://aka.ms/vcpkg/)启用集成服务。",
+	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依赖关系管理器](https://aka.ms/vcpkg/)启用集成服务。",
 	"c_cpp.configuration.addNodeAddonIncludePaths.description": "当它们是依赖项时，从 nan 和 node-addon-api 添加 include 路径。",
 	"c_cpp.configuration.renameRequiresIdentifier.description": "如果为 true，则“重命名符号”将需要有效的 C/C++ 标识符。",
 	"c_cpp.configuration.autocompleteAddParentheses.description": "如果为 true，则自动完成功能将在函数调用后自动添加 \"(\"，这种情况下还可以添加 \")\"，具体取决于 \"editor.autoClosingBrackets\" 设置的值。",
