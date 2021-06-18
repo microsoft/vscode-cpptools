@@ -254,5 +254,18 @@
 	"c_cpp.taskDefinitions.detail.description": "工作的其他詳細資料",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.description": "相同來源樹狀的目前路徑和編譯時間路徑。在顯示 stacktrace 位置時，在 EditorPath 下找到的檔案會對應到 CompileTimePath 路徑，以進行中斷點必對，並會從 CompileTimePath 對應到 EditorPath。",
 	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "編輯器要使用的來源樹狀路徑。",
-	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "若此項目只用於堆疊框架位置對應，則為 False; 若在指定中斷點位置時也應該使用此項目，則為 True。"
+	"c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "若此項目只用於堆疊框架位置對應，則為 False; 若在指定中斷點位置時也應該使用此項目，則為 True。",
+	"c_cpp.debuggers.symbolOptions.description": "控制如何找到並載入符號 (.pdb 檔案) 的選項。",
+	"c_cpp.debuggers.VSSymbolOptions.description": "提供將符號尋找及載入至偵錯介面卡的設定。",
+	"c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "符號陣列伺服器 URL (範例: http​://MyExampleSymbolServer) 或目錄 (範例: /build/symbols) 搜尋 .pdb 檔案。除了預設位置 (位於模組旁和 pdb 原先放置的路徑)，也會搜尋這些目錄。",
+	"c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "如果是 'true'，則會將 Microsoft 符號伺服器 (https​://msdl.microsoft.com​/download/symbols) 新增至符號搜尋路徑。若未指定，這個選項會預設為 'false'。",
+	"c_cpp.debuggers.VSSymbolOptions.cachePath.description": "應該快取從符號伺服器下載的符號所在目錄。若未指定，則在 Windows 上，偵錯工具會預設為 %TEMP%\\SymbolCache。",
+	"c_cpp.debuggers.VSSymbolOptions.moduleFilter.description": "提供選項，以控制偵錯工具會嘗試為其載入符號 (.pdb 檔案) 的模組 (.dll 檔案)。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.description": "提供將符號載入至偵錯介面卡的設定。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description": "控制模組篩選作業在兩個基本作業模式中的哪一個。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions": "載入所有模組的符號，除非模組位於 'excludedModules' 陣列中。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions": "請勿嘗試載入任何模組的符號，除非其位於 'includedModules' 陣列中，或包含在 'includeSymbolsNextToModules' 設定中。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description": "偵錯工具不應為其載入符號的模組陣列。支援萬用字元 (範例: MyCompany.*.dll)。\n\n除非 '模式' 設定為 'loadAllButExcluded'，否則會忽略此屬性。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description": "偵錯工具應該為其載入符號的模組陣列。支援萬用字元 (範例: MyCompany.*.dll)。\n\n除非 '模式' 設定為 'loadOnlyIncluded'，否則會忽略此屬性。",
+	"c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description": "若為 True，針對不在 'includedModules' 陣列中的任何模組，偵錯工具仍會檢查模組本身和啟動可執行檔的旁邊，但不會檢查符號搜尋清單上的路徑。此選項預設為 'true'。\n\n除非 '模式' 設定為 'loadOnlyIncluded'，否則會忽略此屬性。"
 }
