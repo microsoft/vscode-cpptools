@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "C/C++ 诊断",
 	"dismiss.button": "消除",
 	"diable.warnings.button": "禁用警告",
-	"unable.to.provide.configuraiton": "{0} 无法为“{1}”提供 IntelliSense 配置信息。将改为使用“{2}”配置中的设置。",
+	"unable.to.provide.configuration": "{0} 无法为“{1}”提供 IntelliSense 配置信息。将改为使用“{2}”配置中的设置。",
 	"config.not.found": "找不到请求的配置名称: {0}",
 	"unsupported.client": "不支持的客户端",
 	"timed.out": "将在 {0} 毫秒后超时。",
