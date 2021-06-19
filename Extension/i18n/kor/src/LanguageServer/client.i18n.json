@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "C/C++ 진단",
 	"dismiss.button": "해제",
 	"diable.warnings.button": "경고 사용 안 함",
-	"unable.to.provide.configuraiton": "{0}은(는) '{1}'에 대한 IntelliSense 구성 정보를 제공할 수 없습니다. '{2}' 구성의 설정이 대신 사용됩니다.",
+	"unable.to.provide.configuration": "{0}은(는) '{1}'에 대한 IntelliSense 구성 정보를 제공할 수 없습니다. '{2}' 구성의 설정이 대신 사용됩니다.",
 	"config.not.found": "요청된 구성 이름을 찾을 수 없음: {0}",
 	"unsupported.client": "지원되지 않는 클라이언트",
 	"timed.out": "{0}ms 후 시간이 초과되었습니다.",
