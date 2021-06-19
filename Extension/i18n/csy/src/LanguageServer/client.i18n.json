@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "Diagnostika C/C++",
 	"dismiss.button": "Zrušit",
 	"diable.warnings.button": "Zakázat upozornění",
-	"unable.to.provide.configuraiton": "{0} nemůže poskytnout informace pro konfiguraci IntelliSense pro {1}. Místo nich se použijí nastavení z konfigurace {2}.",
+	"unable.to.provide.configuration": "{0} nemůže poskytnout informace pro konfiguraci IntelliSense pro {1}. Místo nich se použijí nastavení z konfigurace {2}.",
 	"config.not.found": "Požadovaný název konfigurace se nenašel: {0}",
 	"unsupported.client": "Nepodporovaný klient",
 	"timed.out": "Po {0} ms vypršel časový limit.",
