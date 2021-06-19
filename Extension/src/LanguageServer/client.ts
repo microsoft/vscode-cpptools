@@ -1770,7 +1770,7 @@ export class DefaultClient implements Client {
                     if (!configName) {
                         return;
                     }
-                    let message: string = localize("unable.to.provide.configuraiton",
+                    let message: string = localize("unable.to.provide.configuration",
                         "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
                         providerName, docUri.fsPath, configName);
                     if (err) {
