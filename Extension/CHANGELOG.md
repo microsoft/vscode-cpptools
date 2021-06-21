@@ -7,9 +7,9 @@
 ### Bug Fixes
 * Fix code folding causing `} else if` lines to be hidden. [#5521](https://github.com/microsoft/vscode-cpptools/issues/5521)
 * Fix Find All References on a global variable giving incorrect references to local variables. [#7702](https://github.com/microsoft/vscode-cpptools/issues/7702)
-* Fix vcFormat not working near the end of the file with UTF-8 characters > 1 byte. [#7704](https://github.com/microsoft/vscode-cpptools/issues/7704)
+* Fix `vcFormat` not working near the end of the file with UTF-8 characters > 1 byte. [#7704](https://github.com/microsoft/vscode-cpptools/issues/7704)
 * Fix configuration squiggle on a recursively resolved `forcedInclude`. [PR #7722](https://github.com/microsoft/vscode-cpptools/pull/7722)
-* Fix Build and Debug Active file for certain file extensions (.cu, .cp, etc.).
+* Fix `Build and Debug Active File` for certain file extensions (.cu, .cp, etc.).
   * jogo- (@jogo-) [PR #7726](https://github.com/microsoft/vscode-cpptools/pull/7726)
 * Fix an infinite loop when importing a module with a template.
 
