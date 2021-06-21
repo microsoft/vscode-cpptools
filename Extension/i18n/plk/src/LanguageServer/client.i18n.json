@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "Diagnostyka języka C/C++",
 	"dismiss.button": "Odrzuć",
 	"diable.warnings.button": "Wyłącz ostrzeżenia",
-	"unable.to.provide.configuraiton": "{0} nie może dostarczyć informacji o konfiguracji funkcji IntelliSense dla elementu „{1}”. W zamian zostaną użyte ustawienia z konfiguracji „{2}”.",
+	"unable.to.provide.configuration": "{0} nie może dostarczyć informacji o konfiguracji funkcji IntelliSense dla elementu „{1}”. W zamian zostaną użyte ustawienia z konfiguracji „{2}”.",
 	"config.not.found": "Nie znaleziono żądanej nazwy konfiguracji: {0}",
 	"unsupported.client": "Nieobsługiwany klient",
 	"timed.out": "Przekroczono limit czasu: {0} ms.",

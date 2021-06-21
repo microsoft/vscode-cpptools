@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "Diagnósticos de C/C++",
 	"dismiss.button": "Descartar",
 	"diable.warnings.button": "Deshabilitar advertencias",
-	"unable.to.provide.configuraiton": "{0} no puede proporcionar información de configuración de IntelliSense para \"{1}\". Se utilizará la configuración de \"{2}\" en su lugar.",
+	"unable.to.provide.configuration": "{0} no puede proporcionar información de configuración de IntelliSense para \"{1}\". Se utilizará la configuración de \"{2}\" en su lugar.",
 	"config.not.found": "No se encuentra el nombre de la configuración que se ha solicitado: {0}",
 	"unsupported.client": "Cliente no admitido",
 	"timed.out": "Se agotó el tiempo de espera a los {0} ms.",

@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "C/C++ 診断",
 	"dismiss.button": "消去",
 	"diable.warnings.button": "警告を無効にする",
-	"unable.to.provide.configuraiton": "{0} が '{1}' の IntelliSense 構成情報を指定できません。'{2}' 構成からの設定が代わりに使用されます。",
+	"unable.to.provide.configuration": "{0} が '{1}' の IntelliSense 構成情報を指定できません。'{2}' 構成からの設定が代わりに使用されます。",
 	"config.not.found": "要求された構成名が見つかりません: {0}",
 	"unsupported.client": "サポートされていないクライアント",
 	"timed.out": "{0} ミリ秒でタイムアウトしました。",
