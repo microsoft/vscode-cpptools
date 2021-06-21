@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "C/C++-Diagnose",
 	"dismiss.button": "Schließen",
 	"diable.warnings.button": "Warnungen deaktivieren",
-	"unable.to.provide.configuraiton": "{0} kann keine IntelliSense-Konfigurationsinformationen für \"{1}\" bereitstellen. Stattdessen werden Einstellungen aus der Konfiguration \"{2}\" verwendet.",
+	"unable.to.provide.configuration": "{0} kann keine IntelliSense-Konfigurationsinformationen für \"{1}\" bereitstellen. Stattdessen werden Einstellungen aus der Konfiguration \"{2}\" verwendet.",
 	"config.not.found": "Der angeforderte Konfigurationsname wurde nicht gefunden: {0}",
 	"unsupported.client": "Nicht unterstützter Client",
 	"timed.out": "Timeout nach {0} ms.",

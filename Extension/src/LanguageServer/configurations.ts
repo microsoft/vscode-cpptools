@@ -11,7 +11,6 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
-import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
@@ -358,8 +357,7 @@ export class CppProperties {
 
         // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
-        const abTestSettings: ABTestSettings = getABTestSettings();
-        const rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+        const rootFolder: string = "${workspaceFolder}/**";
         const defaultFolder: string = "${default}";
         // We don't add system includes to the includePath anymore. The language server has this information.
         if (isUnset(settings.defaultIncludePath)) {
@@ -1748,6 +1746,10 @@ export class CppProperties {
                         }
                         let message: string;
                         if (!pathExists) {
+                            if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
+                                && !path.isAbsolute(resolvedPath)) {
+                                continue; // Skip the error, because it could be resolved recursively.
+                            }
                             message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
                         } else {
