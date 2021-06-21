@@ -1984,7 +1984,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private associations_for_did_change?: Set<string>;
+    private associations_for_file_watchers?: Set<string>;
 
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
@@ -2000,34 +2000,42 @@ export class DefaultClient implements Client {
                 false /* ignoreChangeEvents */,
                 false /* ignoreDeleteEvents */);
 
-            this.rootPathFileWatcher.onDidCreate((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
-                    cachedEditorConfigSettings.clear();
-                }
-
-                this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
-            });
-
             // TODO: Handle new associations without a reload.
-            this.associations_for_did_change = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
+            this.associations_for_file_watchers = new Set<string>(["cu", "cuh", "c", "i", "cpp", "cc", "cxx", "c++", "cp", "hpp", "hh", "hxx", "h++", "hp", "h", "ii", "ino", "inl", "ipp", "tcc", "idl"]);
             const assocs: any = new OtherSettings().filesAssociations;
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
                 if (dotIndex !== -1) {
                     const ext: string = assoc.substr(dotIndex + 1);
-                    this.associations_for_did_change.add(ext);
+                    this.associations_for_file_watchers.add(ext);
                 }
             }
-            this.rootPathFileWatcher.onDidChange((uri) => {
-                const dotIndex: number = uri.fsPath.lastIndexOf('.');
 
+            this.rootPathFileWatcher.onDidCreate((uri) => {
                 if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
                 }
 
+                const dotIndex: number = uri.fsPath.lastIndexOf('.');
+
                 if (dotIndex !== -1) {
                     const ext: string = uri.fsPath.substr(dotIndex + 1);
-                    if (this.associations_for_did_change?.has(ext)) {
+                    if (this.associations_for_file_watchers?.has(ext)) {
+                        this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
+                    }
+                }
+            });
+
+            this.rootPathFileWatcher.onDidChange((uri) => {
+                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                    cachedEditorConfigSettings.clear();
+                }
+
+                const dotIndex: number = uri.fsPath.lastIndexOf('.');
+
+                if (dotIndex !== -1) {
+                    const ext: string = uri.fsPath.substr(dotIndex + 1);
+                    if (this.associations_for_file_watchers?.has(ext)) {
                         // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                         // which causes a large backlog of "files to parse" to accumulate.
                         // We workaround this via only sending the change message if the modified time is within 10 seconds.
@@ -2045,7 +2053,14 @@ export class DefaultClient implements Client {
                     cachedEditorConfigSettings.clear();
                 }
 
-                this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
+                const dotIndex: number = uri.fsPath.lastIndexOf('.');
+
+                if (dotIndex !== -1) {
+                    const ext: string = uri.fsPath.substr(dotIndex + 1);
+                    if (this.associations_for_file_watchers?.has(ext)) {
+                        this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
+                    }
+                }
             });
 
             this.disposables.push(this.rootPathFileWatcher);
