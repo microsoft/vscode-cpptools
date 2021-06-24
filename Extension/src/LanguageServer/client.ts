@@ -449,6 +449,12 @@ interface GoToDirectiveInGroupParams {
     next: boolean;
 };
 
+interface SetTemporaryTextDocumentLanguageParams {
+    path: string;
+    isC: boolean;
+    isCuda: boolean;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -509,6 +515,7 @@ const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new N
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
+const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
 
 let failureMessageShown: boolean = false;
 
@@ -1971,6 +1978,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
+        this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         setupOutputHandlers();
     }
 
@@ -1981,6 +1989,15 @@ export class DefaultClient implements Client {
             const is_cuda: boolean = languageStr.startsWith("cu;");
             languageStr = languageStr.substr(is_c ? 2 : (is_cuda ? 3 : 1));
             this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
+        }
+    }
+
+    private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
+        // const uri: vscode.Uri = vscode.Uri.file(params.path);
+        const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
+        const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
+        if (!!document && document.languageId !== languageId) {
+            vscode.languages.setTextDocumentLanguage(document, languageId);
         }
     }
 
