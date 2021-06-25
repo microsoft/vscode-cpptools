@@ -1993,7 +1993,6 @@ export class DefaultClient implements Client {
     }
 
     private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
-        // const uri: vscode.Uri = vscode.Uri.file(params.path);
         const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
         if (!!document && document.languageId !== languageId) {
