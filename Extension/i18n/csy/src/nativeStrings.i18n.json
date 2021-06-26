@@ -212,5 +212,6 @@
 	"nvcc_host_compiler_not_found": "Nepovedlo se najít kompilátor hostitele nvcc: {0}",
 	"invoking_nvcc": "Volá se nvcc pomocí příkazového řádku: {0}",
 	"nvcc_host_compile_command_not_found": "Ve výstupu nástroje nvcc se nepovedlo najít příkaz pro kompilaci hostitele.",
-	"unable_to_locate_forced_include": "Nepovedlo se najít vynuceně zahrnované soubory: {0}"
+	"unable_to_locate_forced_include": "Nepovedlo se najít vynuceně zahrnované soubory: {0}",
+	"inline_macro": "Vložené makro"
 }
