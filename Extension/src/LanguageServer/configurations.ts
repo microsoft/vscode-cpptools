@@ -1746,6 +1746,10 @@ export class CppProperties {
                         }
                         let message: string;
                         if (!pathExists) {
+                            if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
+                                && !path.isAbsolute(resolvedPath)) {
+                                continue; // Skip the error, because it could be resolved recursively.
+                            }
                             message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
                         } else {

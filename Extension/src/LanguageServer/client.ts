@@ -277,6 +277,7 @@ interface CodeActionCommand {
     localizeStringParams: LocalizeStringParams;
     command: string;
     arguments?: any[];
+    edit?: TextEdit;
 }
 
 interface ShowMessageWindowParams {
@@ -368,14 +369,14 @@ export enum FoldingRangeKind {
     Region = 3
 }
 
-interface FoldingRange {
+export interface CppFoldingRange {
     kind: FoldingRangeKind;
     range: Range;
 }
 
 export interface GetFoldingRangesResult {
     canceled: boolean;
-    ranges: FoldingRange[];
+    ranges: CppFoldingRange[];
 }
 
 interface AbortRequestParams {
@@ -448,6 +449,12 @@ interface GoToDirectiveInGroupParams {
     next: boolean;
 };
 
+interface SetTemporaryTextDocumentLanguageParams {
+    path: string;
+    isC: boolean;
+    isCuda: boolean;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -496,9 +503,9 @@ const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new N
 const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
-const DebugLogNotification:  NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
-const InactiveRegionNotification:  NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
-const CompileCommandsPathsNotification:  NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
+const DebugLogNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
+const InactiveRegionNotification: NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
+const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
@@ -507,7 +514,8 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
-const IntelliSenseSetupNotification:  NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
+const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
+const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
 
 let failureMessageShown: boolean = false;
 
@@ -807,14 +815,23 @@ export class DefaultClient implements Client {
                                 // Convert to vscode.CodeAction array
                                 commands.forEach((command) => {
                                     const title: string = util.getLocalizedString(command.localizeStringParams);
+                                    let edit: vscode.WorkspaceEdit | undefined;
+                                    if (command.edit) {
+                                        edit = new vscode.WorkspaceEdit();
+                                        edit.replace(document.uri, new vscode.Range(
+                                            new vscode.Position(command.edit.range.start.line, command.edit.range.start.character),
+                                            new vscode.Position(command.edit.range.end.line, command.edit.range.end.character)),
+                                        command.edit.newText);
+                                    }
                                     const vscodeCodeAction: vscode.CodeAction = {
                                         title: title,
-                                        command: {
+                                        command: command.command === "edit" ? undefined : {
                                             title: title,
                                             command: command.command,
                                             arguments: command.arguments
                                         },
-                                        kind: vscode.CodeActionKind.QuickFix
+                                        edit: edit,
+                                        kind: edit === undefined ? vscode.CodeActionKind.QuickFix : vscode.CodeActionKind.RefactorInline
                                     };
                                     resultCodeActions.push(vscodeCodeAction);
                                 });
@@ -866,7 +883,7 @@ export class DefaultClient implements Client {
                         if (settings.formattingEngine !== "Disabled") {
                             this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
                             this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                            this.onTypeFormattingProviderDisposable  = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                            this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
                         }
                         if (settings.codeFolding) {
                             this.codeFoldingProvider = new FoldingRangeProvider(this);
@@ -922,7 +939,7 @@ export class DefaultClient implements Client {
         const serverName: string = this.getName(this.rootFolder);
         const serverOptions: ServerOptions = {
             run: { command: serverModule },
-            debug: { command: serverModule, args: [ serverName ] }
+            debug: { command: serverModule, args: [serverName] }
         };
 
         // Get all the per-workspace settings.
@@ -973,41 +990,41 @@ export class DefaultClient implements Client {
         const settings_newLineBeforeOpenBraceFunction: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceBlock: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceLambda: (string | undefined)[] = [];
-        const settings_newLineScopeBracesOnSeparateLines:  boolean[] = [];
-        const settings_newLineCloseBraceSameLineEmptyType:  boolean[] = [];
-        const settings_newLineCloseBraceSameLineEmptyFunction:  boolean[] = [];
-        const settings_newLineBeforeCatch:  boolean[] = [];
-        const settings_newLineBeforeElse:  boolean[] = [];
-        const settings_newLineBeforeWhileInDoWhile:  boolean[] = [];
+        const settings_newLineScopeBracesOnSeparateLines: boolean[] = [];
+        const settings_newLineCloseBraceSameLineEmptyType: boolean[] = [];
+        const settings_newLineCloseBraceSameLineEmptyFunction: boolean[] = [];
+        const settings_newLineBeforeCatch: boolean[] = [];
+        const settings_newLineBeforeElse: boolean[] = [];
+        const settings_newLineBeforeWhileInDoWhile: boolean[] = [];
         const settings_spaceBeforeFunctionOpenParenthesis: (string | undefined)[] = [];
-        const settings_spaceWithinParameterListParentheses:  boolean[] = [];
-        const settings_spaceBetweenEmptyParameterListParentheses:  boolean[] = [];
-        const settings_spaceAfterKeywordsInControlFlowStatements:  boolean[] = [];
-        const settings_spaceWithinControlFlowStatementParentheses:  boolean[] = [];
-        const settings_spaceBeforeLambdaOpenParenthesis:  boolean[] = [];
-        const settings_spaceWithinCastParentheses:  boolean[] = [];
-        const settings_spaceSpaceAfterCastCloseParenthesis:  boolean[] = [];
-        const settings_spaceWithinExpressionParentheses:  boolean[] = [];
-        const settings_spaceBeforeBlockOpenBrace:  boolean[] = [];
-        const settings_spaceBetweenEmptyBraces:  boolean[] = [];
-        const settings_spaceBeforeInitializerListOpenBrace:  boolean[] = [];
-        const settings_spaceWithinInitializerListBraces:  boolean[] = [];
-        const settings_spacePreserveInInitializerList:  boolean[] = [];
-        const settings_spaceBeforeOpenSquareBracket:  boolean[] = [];
-        const settings_spaceWithinSquareBrackets:  boolean[] = [];
-        const settings_spaceBeforeEmptySquareBrackets:  boolean[] = [];
-        const settings_spaceBetweenEmptySquareBrackets:  boolean[] = [];
-        const settings_spaceGroupSquareBrackets:  boolean[] = [];
-        const settings_spaceWithinLambdaBrackets:  boolean[] = [];
-        const settings_spaceBetweenEmptyLambdaBrackets:  boolean[] = [];
-        const settings_spaceBeforeComma:  boolean[] = [];
-        const settings_spaceAfterComma:  boolean[] = [];
-        const settings_spaceRemoveAroundMemberOperators:  boolean[] = [];
-        const settings_spaceBeforeInheritanceColon:  boolean[] = [];
-        const settings_spaceBeforeConstructorColon:  boolean[] = [];
-        const settings_spaceRemoveBeforeSemicolon:  boolean[] = [];
-        const settings_spaceInsertAfterSemicolon:  boolean[] = [];
-        const settings_spaceRemoveAroundUnaryOperator:  boolean[] = [];
+        const settings_spaceWithinParameterListParentheses: boolean[] = [];
+        const settings_spaceBetweenEmptyParameterListParentheses: boolean[] = [];
+        const settings_spaceAfterKeywordsInControlFlowStatements: boolean[] = [];
+        const settings_spaceWithinControlFlowStatementParentheses: boolean[] = [];
+        const settings_spaceBeforeLambdaOpenParenthesis: boolean[] = [];
+        const settings_spaceWithinCastParentheses: boolean[] = [];
+        const settings_spaceSpaceAfterCastCloseParenthesis: boolean[] = [];
+        const settings_spaceWithinExpressionParentheses: boolean[] = [];
+        const settings_spaceBeforeBlockOpenBrace: boolean[] = [];
+        const settings_spaceBetweenEmptyBraces: boolean[] = [];
+        const settings_spaceBeforeInitializerListOpenBrace: boolean[] = [];
+        const settings_spaceWithinInitializerListBraces: boolean[] = [];
+        const settings_spacePreserveInInitializerList: boolean[] = [];
+        const settings_spaceBeforeOpenSquareBracket: boolean[] = [];
+        const settings_spaceWithinSquareBrackets: boolean[] = [];
+        const settings_spaceBeforeEmptySquareBrackets: boolean[] = [];
+        const settings_spaceBetweenEmptySquareBrackets: boolean[] = [];
+        const settings_spaceGroupSquareBrackets: boolean[] = [];
+        const settings_spaceWithinLambdaBrackets: boolean[] = [];
+        const settings_spaceBetweenEmptyLambdaBrackets: boolean[] = [];
+        const settings_spaceBeforeComma: boolean[] = [];
+        const settings_spaceAfterComma: boolean[] = [];
+        const settings_spaceRemoveAroundMemberOperators: boolean[] = [];
+        const settings_spaceBeforeInheritanceColon: boolean[] = [];
+        const settings_spaceBeforeConstructorColon: boolean[] = [];
+        const settings_spaceRemoveBeforeSemicolon: boolean[] = [];
+        const settings_spaceInsertAfterSemicolon: boolean[] = [];
+        const settings_spaceRemoveAroundUnaryOperator: boolean[] = [];
         const settings_spaceAroundBinaryOperator: (string | undefined)[] = [];
         const settings_spaceAroundAssignmentOperator: (string | undefined)[] = [];
         const settings_spacePointerReferenceAlignment: (string | undefined)[] = [];
@@ -1141,7 +1158,7 @@ export class DefaultClient implements Client {
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
                 formatting: settings_formattingEngine,
-                vcFormat : {
+                vcFormat: {
                     indent: {
                         braces: settings_indentBraces,
                         multiLineRelativeTo: settings_indentMultiLine,
@@ -1152,10 +1169,10 @@ export class DefaultClient implements Client {
                         caseContentsWhenBlock: settings_indentCaseContentsWhenBlock,
                         lambdaBracesWhenParameter: settings_indentLambdaBracesWhenParameter,
                         gotoLabels: settings_indentGotoLabels,
-                        preprocessor : settings_indentPreprocessor,
-                        accesSpecifiers : settings_indentAccessSpecifiers,
-                        namespaceContents : settings_indentNamespaceContents,
-                        preserveComments : settings_indentPreserveComments
+                        preprocessor: settings_indentPreprocessor,
+                        accesSpecifiers: settings_indentAccessSpecifiers,
+                        namespaceContents: settings_indentNamespaceContents,
+                        preserveComments: settings_indentPreserveComments
                     },
                     newLine: {
                         beforeOpenBrace: {
@@ -1167,48 +1184,48 @@ export class DefaultClient implements Client {
                         },
                         scopeBracesOnSeparateLines: settings_newLineScopeBracesOnSeparateLines,
                         closeBraceSameLine: {
-                            emptyType:  settings_newLineCloseBraceSameLineEmptyType,
+                            emptyType: settings_newLineCloseBraceSameLineEmptyType,
                             emptyFunction: settings_newLineCloseBraceSameLineEmptyFunction
                         },
-                        beforeCatch : settings_newLineBeforeCatch,
-                        beforeElse : settings_newLineBeforeElse,
-                        beforeWhileInDoWhile : settings_newLineBeforeWhileInDoWhile
+                        beforeCatch: settings_newLineBeforeCatch,
+                        beforeElse: settings_newLineBeforeElse,
+                        beforeWhileInDoWhile: settings_newLineBeforeWhileInDoWhile
 
                     },
                     space: {
-                        beforeFunctionOpenParenthesis : settings_spaceBeforeFunctionOpenParenthesis,
-                        withinParameterListParentheses : settings_spaceWithinParameterListParentheses,
-                        betweenEmptyParameterListParentheses : settings_spaceBetweenEmptyParameterListParentheses,
-                        afterKeywordsInControlFlowStatements : settings_spaceAfterKeywordsInControlFlowStatements,
-                        withinControlFlowStatementParentheses : settings_spaceWithinControlFlowStatementParentheses,
-                        beforeLambdaOpenParenthesis : settings_spaceBeforeLambdaOpenParenthesis,
-                        withinCastParentheses : settings_spaceWithinCastParentheses,
-                        afterCastCloseParenthesis : settings_spaceSpaceAfterCastCloseParenthesis,
-                        withinExpressionParentheses : settings_spaceWithinExpressionParentheses,
-                        beforeBlockOpenBrace : settings_spaceBeforeBlockOpenBrace,
-                        betweenEmptyBraces : settings_spaceBetweenEmptyBraces,
-                        beforeInitializerListOpenBrace : settings_spaceBeforeInitializerListOpenBrace,
-                        withinInitializerListBraces : settings_spaceWithinInitializerListBraces,
-                        preserveInInitializerList : settings_spacePreserveInInitializerList,
-                        beforeOpenSquareBracket : settings_spaceBeforeOpenSquareBracket,
-                        withinSquareBrackets : settings_spaceWithinSquareBrackets,
-                        beforeEmptySquareBrackets : settings_spaceBeforeEmptySquareBrackets,
-                        betweenEmptySquareBrackets : settings_spaceBetweenEmptySquareBrackets,
-                        groupSquareBrackets : settings_spaceGroupSquareBrackets,
-                        withinLambdaBrackets : settings_spaceWithinLambdaBrackets,
-                        betweenEmptyLambdaBrackets : settings_spaceBetweenEmptyLambdaBrackets,
-                        beforeComma : settings_spaceBeforeComma,
-                        afterComma : settings_spaceAfterComma,
-                        removeAroundMemberOperators : settings_spaceRemoveAroundMemberOperators,
-                        beforeInheritanceColon : settings_spaceBeforeInheritanceColon,
-                        beforeConstructorColon : settings_spaceBeforeConstructorColon,
-                        removeBeforeSemicolon : settings_spaceRemoveBeforeSemicolon,
-                        insertAfterSemicolon : settings_spaceInsertAfterSemicolon,
-                        removeAroundUnaryOperator : settings_spaceRemoveAroundUnaryOperator,
-                        aroundBinaryOperator : settings_spaceAroundBinaryOperator,
-                        aroundAssignmentOperator : settings_spaceAroundAssignmentOperator,
-                        pointerReferenceAlignment : settings_spacePointerReferenceAlignment,
-                        aroundTernaryOperator : settings_spaceAroundTernaryOperator
+                        beforeFunctionOpenParenthesis: settings_spaceBeforeFunctionOpenParenthesis,
+                        withinParameterListParentheses: settings_spaceWithinParameterListParentheses,
+                        betweenEmptyParameterListParentheses: settings_spaceBetweenEmptyParameterListParentheses,
+                        afterKeywordsInControlFlowStatements: settings_spaceAfterKeywordsInControlFlowStatements,
+                        withinControlFlowStatementParentheses: settings_spaceWithinControlFlowStatementParentheses,
+                        beforeLambdaOpenParenthesis: settings_spaceBeforeLambdaOpenParenthesis,
+                        withinCastParentheses: settings_spaceWithinCastParentheses,
+                        afterCastCloseParenthesis: settings_spaceSpaceAfterCastCloseParenthesis,
+                        withinExpressionParentheses: settings_spaceWithinExpressionParentheses,
+                        beforeBlockOpenBrace: settings_spaceBeforeBlockOpenBrace,
+                        betweenEmptyBraces: settings_spaceBetweenEmptyBraces,
+                        beforeInitializerListOpenBrace: settings_spaceBeforeInitializerListOpenBrace,
+                        withinInitializerListBraces: settings_spaceWithinInitializerListBraces,
+                        preserveInInitializerList: settings_spacePreserveInInitializerList,
+                        beforeOpenSquareBracket: settings_spaceBeforeOpenSquareBracket,
+                        withinSquareBrackets: settings_spaceWithinSquareBrackets,
+                        beforeEmptySquareBrackets: settings_spaceBeforeEmptySquareBrackets,
+                        betweenEmptySquareBrackets: settings_spaceBetweenEmptySquareBrackets,
+                        groupSquareBrackets: settings_spaceGroupSquareBrackets,
+                        withinLambdaBrackets: settings_spaceWithinLambdaBrackets,
+                        betweenEmptyLambdaBrackets: settings_spaceBetweenEmptyLambdaBrackets,
+                        beforeComma: settings_spaceBeforeComma,
+                        afterComma: settings_spaceAfterComma,
+                        removeAroundMemberOperators: settings_spaceRemoveAroundMemberOperators,
+                        beforeInheritanceColon: settings_spaceBeforeInheritanceColon,
+                        beforeConstructorColon: settings_spaceBeforeConstructorColon,
+                        removeBeforeSemicolon: settings_spaceRemoveBeforeSemicolon,
+                        insertAfterSemicolon: settings_spaceInsertAfterSemicolon,
+                        removeAroundUnaryOperator: settings_spaceRemoveAroundUnaryOperator,
+                        aroundBinaryOperator: settings_spaceAroundBinaryOperator,
+                        aroundAssignmentOperator: settings_spaceAroundAssignmentOperator,
+                        pointerReferenceAlignment: settings_spacePointerReferenceAlignment,
+                        aroundTernaryOperator: settings_spaceAroundTernaryOperator
                     },
                     wrap: {
                         preserveBlocks: settings_wrapPreserveBlocks
@@ -1232,9 +1249,9 @@ export class DefaultClient implements Client {
                 intelliSenseEngine: settings_intelliSenseEngine,
                 intelliSenseEngineFallback: settings_intelliSenseEngineFallback,
                 intelliSenseCacheDisabled: intelliSenseCacheDisabled,
-                intelliSenseCachePath : settings_intelliSenseCachePath,
-                intelliSenseCacheSize : settings_intelliSenseCacheSize,
-                intelliSenseMemoryLimit : settings_intelliSenseMemoryLimit,
+                intelliSenseCachePath: settings_intelliSenseCachePath,
+                intelliSenseCacheSize: settings_intelliSenseCacheSize,
+                intelliSenseMemoryLimit: settings_intelliSenseMemoryLimit,
                 intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
                 autocomplete: settings_autocomplete,
                 autocompleteAddParentheses: settings_autocompleteAddParentheses,
@@ -1325,8 +1342,8 @@ export class DefaultClient implements Client {
                         beforeOpenBrace: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.beforeOpenBrace", this.RootUri),
                         closeBraceSameLine: vscode.workspace.getConfiguration("C_Cpp.vcFormat.newLine.closeBraceSameLine", this.RootUri)
                     },
-                    space:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
-                    wrap:  vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
+                    space: vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
+                    wrap: vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
                 }
             },
             editor: {
@@ -1349,7 +1366,7 @@ export class DefaultClient implements Client {
     public sendDidChangeSettings(settings: any): void {
         // Send settings json to native side
         this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(DidChangeSettingsNotification, {settings, workspaceFolderUri: this.RootPath});
+            this.languageClient.sendNotification(DidChangeSettingsNotification, { settings, workspaceFolderUri: this.RootPath });
         });
     }
 
@@ -1404,7 +1421,7 @@ export class DefaultClient implements Client {
                     if (changedSettings["enhancedColorization"]) {
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);                        ;
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
                         } else if (this.semanticTokensProviderDisposable) {
                             this.semanticTokensProviderDisposable.dispose();
                             this.semanticTokensProviderDisposable = undefined;
@@ -1760,7 +1777,7 @@ export class DefaultClient implements Client {
                     if (!configName) {
                         return;
                     }
-                    let message: string = localize("unable.to.provide.configuraiton",
+                    let message: string = localize("unable.to.provide.configuration",
                         "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
                         providerName, docUri.fsPath, configName);
                     if (err) {
@@ -1890,7 +1907,7 @@ export class DefaultClient implements Client {
             pendingTask = new util.BlockingTask<T>(task, pendingTask);
             return pendingTask.getPromise();
         } else {
-            throw new Error (localize("unsupported.client", "Unsupported client"));
+            throw new Error(localize("unsupported.client", "Unsupported client"));
         }
     }
 
@@ -1961,6 +1978,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
+        this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         setupOutputHandlers();
     }
 
@@ -1971,6 +1989,14 @@ export class DefaultClient implements Client {
             const is_cuda: boolean = languageStr.startsWith("cu;");
             languageStr = languageStr.substr(is_c ? 2 : (is_cuda ? 3 : 1));
             this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
+        }
+    }
+
+    private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
+        const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
+        const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
+        if (!!document && document.languageId !== languageId) {
+            vscode.languages.setTextDocumentLanguage(document, languageId);
         }
     }
 
@@ -2448,7 +2474,7 @@ export class DefaultClient implements Client {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
                 // Separate compiler path and args before sending to language client
-                const itemConfig: util.Mutable<SourceFileConfiguration> = {...item.configuration};
+                const itemConfig: util.Mutable<SourceFileConfiguration> = { ...item.configuration };
                 if (util.isString(itemConfig.compilerPath)) {
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
                         itemConfig.compilerPath,
@@ -2516,7 +2542,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            sanitized = {...<WorkspaceBrowseConfiguration>config};
+            sanitized = { ...<WorkspaceBrowseConfiguration>config };
             if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
                 console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
                 const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
@@ -2655,7 +2681,7 @@ export class DefaultClient implements Client {
                 // Check if still the active document.
                 const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
                 if (currentEditor && editor.document.uri === currentEditor.document.uri) {
-                    currentEditor.selection =  new vscode.Selection(r.start, r.end);
+                    currentEditor.selection = new vscode.Selection(r.start, r.end);
                     currentEditor.revealRange(r);
                 }
             }
@@ -2758,8 +2784,8 @@ export class DefaultClient implements Client {
         if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
             const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
             DefaultClient.referencesPendingCancellations.push({
-                reject: () => {},
-                callback: () => {}
+                reject: () => { },
+                callback: () => { }
             });
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
@@ -2815,17 +2841,17 @@ class NullClient implements Client {
     Name: string = "(empty)";
     TrackedDocuments = new Set<vscode.TextDocument>();
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } { return {}; }
-    onDidOpenTextDocument(document: vscode.TextDocument): void {}
-    onDidCloseTextDocument(document: vscode.TextDocument): void {}
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {}
-    onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {}
+    onDidOpenTextDocument(document: vscode.TextDocument): void { }
+    onDidCloseTextDocument(document: vscode.TextDocument): void { }
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void { }
+    onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void { }
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
-    toggleReferenceResultsView(): void {}
+    toggleReferenceResultsView(): void { }
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
     getCurrentConfigCustomVariable(variableName: string): Thenable<string> { return Promise.resolve(""); }
@@ -2833,34 +2859,34 @@ class NullClient implements Client {
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
-    takeOwnership(document: vscode.TextDocument): void {}
+    takeOwnership(document: vscode.TextDocument): void { }
     queueTask<T>(task: () => Thenable<T>): Promise<T> { return Promise.resolve(task()); }
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
-    notifyWhenLanguageClientReady(notify: () => void): void {}
-    awaitUntilLanguageClientReady(): void {}
+    notifyWhenLanguageClientReady(notify: () => void): void { }
+    awaitUntilLanguageClientReady(): void { }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    activeDocumentChanged(document: vscode.TextDocument): void {}
-    activate(): void {}
-    selectionChanged(selection: Range): void {}
-    resetDatabase(): void {}
-    deactivate(): void {}
-    pauseParsing(): void {}
-    resumeParsing(): void {}
+    activeDocumentChanged(document: vscode.TextDocument): void { }
+    activate(): void { }
+    selectionChanged(selection: Range): void { }
+    resetDatabase(): void { }
+    deactivate(): void { }
+    pauseParsing(): void { }
+    resumeParsing(): void { }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
-    handleReferencesIcon(): void {}
-    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void {}
-    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void {}
-    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void {}
+    handleReferencesIcon(): void { }
+    handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
+    handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }
+    handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
-    onInterval(): void {}
+    onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
         this.stringEvent.dispose();
     }
-    addFileAssociations(fileAssociations: string, languageId: string): void {}
-    sendDidChangeSettings(settings: any): void {}
+    addFileAssociations(fileAssociations: string, languageId: string): void { }
+    sendDidChangeSettings(settings: any): void { }
 }

@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "Diagnostics C/C++",
 	"dismiss.button": "Ignorer",
 	"diable.warnings.button": "Désactiver les avertissements",
-	"unable.to.provide.configuraiton": "{0} ne peut pas fournir les informations de configuration IntelliSense de '{1}'. Les paramètres de la configuration de '{2}' sont utilisés à la place.",
+	"unable.to.provide.configuration": "{0} ne peut pas fournir les informations de configuration IntelliSense de '{1}'. Les paramètres de la configuration de '{2}' sont utilisés à la place.",
 	"config.not.found": "Le nom de configuration demandé est introuvable : {0}",
 	"unsupported.client": "Client non pris en charge",
 	"timed.out": "Expiration du délai d'attente dans {0} ms.",
