@@ -1656,8 +1656,10 @@ export class CppProperties {
             let compilerPathNeedsQuotes: boolean = false;
             let compilerMessage: string | undefined;
             const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
-            // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
-            if (compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe" && compilerPathAndArgs.compilerPath !== undefined) {
+            const clCompilerShortPath: any = compilerPathAndArgs.compilerPath &&
+                (compilerPathAndArgs.compilerName.toLowerCase() === "cl" || compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe");
+            // Don't squiggle cl and cl.exe paths.
+            if (compilerPathAndArgs.compilerPath && !clCompilerShortPath) {
                 // Squiggle when the compiler's path has spaces without quotes but args are used.
                 compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
                     && !compilerPath.startsWith('"')
@@ -1676,7 +1678,7 @@ export class CppProperties {
             }
             const isWSL: boolean = isWindows && compilerPath.startsWith("/");
             let compilerPathExists: boolean = true;
-            if (this.rootUri) {
+            if (this.rootUri && !clCompilerShortPath) {
                 const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, true);
                 compilerPathExists = checkPathExists.pathExists;
                 compilerPath = checkPathExists.path;
