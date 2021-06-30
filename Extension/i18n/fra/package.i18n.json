@@ -194,7 +194,7 @@
 	"c_cpp.debuggers.logging.trace.description": "Indicateur facultatif pour déterminer si le suivi de commande de l'adaptateur de diagnostic doit être journalisé dans la console de débogage. La valeur par défaut est false.",
 	"c_cpp.debuggers.logging.traceResponse.description": "Indicateur facultatif pour déterminer si le suivi de commande et de réponse de l'adaptateur de diagnostic doit être journalisé dans la console de débogage. La valeur par défaut est false.",
 	"c_cpp.debuggers.cppvsdbg.logging.threadExit.description": "Indicateur facultatif pour déterminer si les messages indiquant la sortie du thread doivent être journalisés dans la console de débogage. Valeur par défaut: 'false'.",
-	"c_cpp.debuggers.cppvsdbg.logging.processExit.description": "Indicateur facultatif pour déterminer si les messages indiquant la sortie du processus cible doivent être journalisés dans la console de débogage. Valeur par défaut: 'true'.",
+	"c_cpp.debuggers.cppvsdbg.logging.processExit.description": "Indicateur facultatif pour déterminer si les messages indiquant la sortie du processus cible doivent être journalisés dans la console de débogage. Valeur par défaut : 'true'.",
 	"c_cpp.debuggers.text.description": "Commande de débogueur à exécuter.",
 	"c_cpp.debuggers.description.description": "Description facultative de la commande.",
 	"c_cpp.debuggers.ignoreFailures.description": "Si la valeur est true, les échecs de la commande doivent être ignorés. La valeur par défaut est false.",
