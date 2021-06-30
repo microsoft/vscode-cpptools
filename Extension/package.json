@@ -274,7 +274,7 @@
         "C_Cpp.vcFormat.indent.braces": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.braces.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.braces.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.multiLineRelativeTo": {
@@ -299,12 +299,12 @@
             "alignToParenthesis",
             "indent"
           ],
-          "enumDescriptions": [
+          "markdownEnumDescriptions": [
             "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.description%",
-            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description%"
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription%"
           ],
           "default": "indent",
-          "description": "%c_cpp.configuration.vcFormat.indent.withinParentheses.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.withinParentheses.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.preserveWithinParentheses": {
@@ -816,7 +816,7 @@
             "Disabled"
           ],
           "default": "Default",
-          "description": "%c_cpp.configuration.autocomplete.description%",
+          "markdownDescription": "%c_cpp.configuration.autocomplete.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.errorSquiggles": {
@@ -870,7 +870,7 @@
         "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
+          "markdownDescription": "%c_cpp.configuration.autoAddFileAssociations.markdownDescription%",
           "scope": "window"
         },
         "C_Cpp.workspaceParsingPriority": {
