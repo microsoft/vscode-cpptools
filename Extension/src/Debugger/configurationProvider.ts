@@ -71,7 +71,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            return []; // User canceled it.
+            throw Error(localize("debug.configuration.selection.canceled", "Debug configuration selection canceled")); // User canceled it.
         }
         if (selection.label.startsWith("cl.exe")) {
             if (!process.env.DevEnvDir) {
