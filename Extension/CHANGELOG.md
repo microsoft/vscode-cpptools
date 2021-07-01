@@ -1,5 +1,18 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.5.0-insiders3: July 1, 2021
+### Enhancement
+* Add auto-detection of clang compilers on Windows (and different versions of cl.exe). [#6718](https://github.com/microsoft/vscode-cpptools/issues/6718)
+* Stop adding .cu files to `files.associations` (switch to using setTextDocumentLanguage). [#7359](https://github.com/microsoft/vscode-cpptools/issues/7359)
+
+### Bug Fixes
+* Add abort handling to recursive includes directory iteration. [#6461](https://github.com/microsoft/vscode-cpptools/issues/6461)
+* Fix include completion with recursive includes in header files. [#6842](https://github.com/microsoft/vscode-cpptools/issues/6842)
+* Add the get-task-allow entitlement to macOS binaries to enable call stacks to be obtained when SIP is enabled. [#7412](https://github.com/microsoft/vscode-cpptools/issues/7412)
+* Fix `browse.path` being incorrect if an invalid `compileCommands` is set. [#7737](https://github.com/microsoft/vscode-cpptools/issues/7737)
+* Fix incorrect error message when `C_Cpp.errorSquiggles` is `"Enabled"`. [#7744](https://github.com/microsoft/vscode-cpptools/issues/7744)
+* Fix compiler querying sometimes not working with Cygwin. [#7751](https://github.com/microsoft/vscode-cpptools/issues/7751)
+
 ## Version 1.5.0-insiders2: June 21, 2021
 ### New Feature
 * Add "Inline macro" code action. [#4183](https://github.com/microsoft/vscode-cpptools/issues/4183)

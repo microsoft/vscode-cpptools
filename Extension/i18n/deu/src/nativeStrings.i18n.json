@@ -212,5 +212,6 @@
 	"nvcc_host_compiler_not_found": "Der nvcc-Hostcompiler wurde nicht gefunden: {0}",
 	"invoking_nvcc": "nvcc wird über Befehlszeile aufgerufen: {0}",
 	"nvcc_host_compile_command_not_found": "Der Hostkompilierbefehl wurde in der Ausgabe von nvcc nicht gefunden.",
-	"unable_to_locate_forced_include": "Erzwungene Includedatei wurde nicht gefunden: {0}"
+	"unable_to_locate_forced_include": "Erzwungene Includedatei wurde nicht gefunden: {0}",
+	"inline_macro": "Inlinemakro"
 }
