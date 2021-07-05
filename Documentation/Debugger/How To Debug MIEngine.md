@@ -1,6 +1,6 @@
 # How To Debug MIEngine
 
-MIEngine is one of the components used to enable the C/C++ debugging scenario with the Microsoft C/C++ extension with VS Code. This document is to help enable users who want to debug and contribute to MIEngine to fix issues or extend functionality. MIEngine is used to communicate with `gdb`/`lldb` using the MI protocol.
+MIEngine is one of the components used to enable the C/C++ debugging scenario with the Microsoft C/C++ extension with VS Code. This document is to help enable users who want to debug and contribute to MIEngine to fix issues or extend functionality. MIEngine is used to communicate with `gdb`/`lldb` using the MI protocol. 
 
 **Repository:** https://github.com/Microsoft/MIEngine
 
@@ -19,7 +19,7 @@ You can open the solution file **MIDebugEngine.sln** located under **src** and c
 
 The symbol files are as follows:
 
-**On Windows**
+**On Windows** 
 * Microsoft.MICore.pdb
 * Microsoft.MIDebugEngine.pdb
 * vscode\OpenDebugAD7.pdb
@@ -37,7 +37,7 @@ On Windows, the easiest way to debug is to use Visual Studio. Locate the **src\D
 
 If you are not building the extension, Locate the **out\src\Debugger\extension.ts** file in the **.vscode\extensions\ms-vscode.cpptools** folder and open it in an editor.
 
-Locate the following lines:
+Locate the following lines: 
 ```json
 return {
     command: command
@@ -48,13 +48,13 @@ and add the following line to the object:
 args: ["--pauseForDebugger"]
 ```
 
-This will cause the debugger to look like it has hung once you start debugging, but in reality it is waiting for a debugger to attach. Set your breakpoints and attach your debugger to the `OpenDebugAD7.exe` process. Once the debugger is attached, VS Code should start debugging and you can reproduce your scenario.
+This will cause the debugger to look like it has hung once you start debugging, but in reality it is waiting for a debugger to attach. Set your breakpoints and attach your debugger to the `OpenDebugAD7.exe` process. Once the debugger is attached, VS Code should start debugging and you can reproduce your scenario. 
 
-### Debugging MIEngine running on Linux or macOS
+### Debugging MIEngine running on Linux or Mac OS X
 
 #### With MonoDevelop
 
-On Linux and macOS, we use `mono` as our framework. You can download Xamarin Studio v5.10.1.6 and remotely attach to your Mac or Linux box to debug there.
+On Linux and Mac OS X, we use `mono` as our framework. You can download Xamarin Studio v5.10.1.6 and remotely attach to your Mac or Linux box to debug there.
 
 ##### Install Prerequisites
 1. Install [GTK](http://www.mono-project.com/download/).
@@ -78,12 +78,12 @@ MonoDevelop.exe
 
 ##### Configure the extension to enable remote debugging
 
-Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from Xamarin Studio.
+Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from Xamarin Studio. 
 
 ##### Attach the remote debugger
 
 In MonoDevelop: Run -> Run With -> Custom Command Mono Soft Debugger.
-Fill in the IP and port of the Linux/macOS machine and hit "Connect" to start debugging.
+Fill in the IP and port of the Linux/Mac OS X machine and hit "Connect" to start debugging.
 
 After you've done this once, you can hit the MonoDevelop "Play" button or <kbd>F5</kbd> to bring up the connect dialog again.
 
@@ -113,7 +113,7 @@ After you've done this once, you can hit the MonoDevelop "Play" button or <kbd>F
 
 ##### Configure the extension to enable remote debugging
 
-Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from VS Code.
+Open the **~/.vscode/extensions/ms-vscode.cpptools-\<version\>/debugAdapters/OpenDebugAD7** file with a text editor and locate and uncomment the line at the bottom. When you start debugging, it will now hang until the remote debugger is attached from VS Code. 
 
 ##### Attach the remote debugger
 
