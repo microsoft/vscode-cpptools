@@ -3107,7 +3107,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2162486",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167487",
       "platforms": [
         "win32"
       ],
@@ -3118,7 +3118,21 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "E5046509D510086B99F171595114220AD8E9F820E7238B6A5199CD78B9AD2078"
+      "integrity": "1EB0394D716604F9402AF43BE905A85F3C735CA94FE20DFE9770DDE6516019F7"
+    },
+    {
+      "description": "Visual Studio Windows ARM64 Debugger",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167488",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./debugAdapters/vsdbg/bin/vsdbg.exe"
+      ],
+      "integrity": "49D68434BD097752720137180E2ECA52637A9B65807651DA94D17620DD1EA8FA"
     }
   ]
 }
