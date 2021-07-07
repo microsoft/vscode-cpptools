@@ -3,6 +3,7 @@
 ## Version 1.5.0: July 8, 2021
 ### New Feature
 * Add the "Inline macro" code action. [#4183](https://github.com/microsoft/vscode-cpptools/issues/4183)
+* Add a debugger for Windows ARM64. [PR #7798](https://github.com/microsoft/vscode-cpptools/pull/7798)
 
 ### Enhancements
 * Add auto-detection of clang compilers on Windows (and different versions of cl.exe). [#6718](https://github.com/microsoft/vscode-cpptools/issues/6718)
