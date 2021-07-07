@@ -28,12 +28,18 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         }
         const result: vscode.FoldingRange[] = [];
         ranges.ranges.forEach((r: CppFoldingRange, index: number, array: CppFoldingRange[]) => {
+            let nextNonNestedIndex: number = index + 1; // Skip over nested if's.
+            for (; nextNonNestedIndex < array.length; ++nextNonNestedIndex) {
+                if (array[nextNonNestedIndex].range.start.line >= r.range.end.line) {
+                    break;
+                }
+            }
             const foldingRange: vscode.FoldingRange = {
                 start: r.range.start.line,
                 // Move the end range up one if it overlaps with the next start range, because
                 // VS Code doesn't support column-based folding: https://github.com/microsoft/vscode/issues/50840
-                end: r.range.end.line - (index + 1 >= array.length ? 0 :
-                    (array[index + 1].range.start.line !== r.range.end.line ? 0 : 1))
+                end: r.range.end.line - (nextNonNestedIndex >= array.length ? 0 :
+                    (array[nextNonNestedIndex].range.start.line !== r.range.end.line ? 0 : 1))
             };
             switch (r.kind) {
                 case FoldingRangeKind.Comment:
