@@ -3118,7 +3118,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "1EB0394D716604F9402AF43BE905A85F3C735CA94FE20DFE9770DDE6516019F7"
+      "integrity": "BACAD3BC69C548FA5CEC0B15109C8628CB45D0F622F1F6C635A23C29B0B042E1"
     },
     {
       "description": "Visual Studio Windows ARM64 Debugger",
@@ -3132,7 +3132,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "49D68434BD097752720137180E2ECA52637A9B65807651DA94D17620DD1EA8FA"
+      "integrity": "64325BABDC9B51E7D51111788083BE91C3CC36DEC80145687D9AB6F988F9071F"
     }
   ]
 }
