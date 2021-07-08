@@ -3376,11 +3376,21 @@
   "modüller bu modda etkin değil",
   "'import', modül adında kullanılamaz.",
   "Modül adında 'module' kullanılmasına izin verilmez",
-  "%sq, içeri aktarma yönergesinde kullanıldığında makro olamaz",
+  null,
   null,
   "%n sabit listesi türü değil",
   "%no2 numaralandırıcısı %n1 ile çakışıyor",
   "%no numaralandırıcısı bu %p kapsamında zaten bildirildi",
   "'throw ()' belirtimi C++ 20 ve üzeri sürümlerin bir parçası değil",
-  "üst bilgi birimi eşlemesindeki giriş sayısı '%s' ile eşleşiyor:"
+  "üst bilgi birimi eşlemesindeki giriş sayısı '%s' ile eşleşiyor:",
+  "#pragma tanılamasının 'push' ya da 'pop' bağımsız değişkeni olmalıdır",
+  "bu 'tanılama pop' ile eşleşen '#pragma tanı push' bulunamadı",
+  "%sq, içeri aktarma veya modül yönergesinde kullanıldığında makro olamaz",
+  "bu yönerge yalnızca genel ad alanı kapsamında yer görünebilir",
+  "'Export' bildirimi yalnızca genel veya ad alanı kapsamında görünebilir",
+  "%sq, bir anahtar sözcük yerine tanımlayıcı olarak ayrıştırıldı çünkü kendisini izleyen belirteçler bir önişlemci yönergesiyle eşleşmiyor",
+  "bu bir önişlemci yönergesinin başlangıcı gibi görünüyor, ancak yeni bir satırın hemen ardından gelen '; ' bulunmaması bunu engelliyor",
+  "bu bir modül ön işleme yönergesi gibi görünüyor, ancak bu yönergeler makro genişlemesi içinde görünemez",
+  "koşullu ekleme kapsamında bir 'modül' yönergesi görünemez (örneğin #if, #else, #elseif vb.)",
+  "%sq içeri aktarma işlemi atlandı"
 ]

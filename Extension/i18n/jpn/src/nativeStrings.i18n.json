@@ -212,5 +212,6 @@
 	"nvcc_host_compiler_not_found": "nvcc ホスト コンパイラが見つかりません: {0}",
 	"invoking_nvcc": "コマンド ラインで nvcc を呼び出しています: {0}",
 	"nvcc_host_compile_command_not_found": "nvcc の出力でホスト コンパイル コマンドが見つかりません。",
-	"unable_to_locate_forced_include": "強制インクルードが見つかりません: {0}"
+	"unable_to_locate_forced_include": "強制インクルードが見つかりません: {0}",
+	"inline_macro": "インライン マクロ"
 }

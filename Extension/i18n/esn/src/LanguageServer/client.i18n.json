@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "Diagnósticos de C/C++",
 	"dismiss.button": "Descartar",
 	"diable.warnings.button": "Deshabilitar advertencias",
-	"unable.to.provide.configuraiton": "{0} no puede proporcionar información de configuración de IntelliSense para \"{1}\". Se utilizará la configuración de \"{2}\" en su lugar.",
+	"unable.to.provide.configuration": "{0} no puede proporcionar información de configuración de IntelliSense para \"{1}\". Se utilizará la configuración de \"{2}\" en su lugar.",
 	"config.not.found": "No se encuentra el nombre de la configuración que se ha solicitado: {0}",
 	"unsupported.client": "Cliente no admitido",
 	"timed.out": "Se agotó el tiempo de espera a los {0} ms.",
@@ -34,7 +34,7 @@
 	"no.button": "No",
 	"configurations.received": "Configuraciones personalizadas recibidas:",
 	"browse.configuration.received": "Configuración de exploración personalizada recibida: {0}",
-	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
-	"compilers.found": "We found the following C++ compiler(s) on your system:",
-	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
+	"no.compilers.found": "No se encontró ningún compilador de C++ en el sistema. Para la plataforma, se recomienda instalar {0} mediante las instrucciones del editor.",
+	"compilers.found": "Se encontraron los siguientes compiladores de C++ en el sistema:",
+	"compilers.found.message": "Puede especificar el compilador que se va a usar en la configuración de IntelliSense del proyecto."
 }

@@ -11,7 +11,6 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
-import { ABTestSettings, getABTestSettings } from '../abTesting';
 import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
@@ -358,8 +357,7 @@ export class CppProperties {
 
         // Only add settings from the default compiler if user hasn't explicitly set the corresponding VS Code setting.
 
-        const abTestSettings: ABTestSettings = getABTestSettings();
-        const rootFolder: string = abTestSettings.UseRecursiveIncludes ? "${workspaceFolder}/**" : "${workspaceFolder}";
+        const rootFolder: string = "${workspaceFolder}/**";
         const defaultFolder: string = "${default}";
         // We don't add system includes to the includePath anymore. The language server has this information.
         if (isUnset(settings.defaultIncludePath)) {
@@ -1642,6 +1640,7 @@ export class CppProperties {
             // Resolve and split any environment variables
             paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
             compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
+            compilerPath = this.resolvePath(compilerPath, isWindows);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1657,8 +1656,10 @@ export class CppProperties {
             let compilerPathNeedsQuotes: boolean = false;
             let compilerMessage: string | undefined;
             const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
-            // Don't squiggle invalid cl.exe paths because it could be for an older preview build.
-            if (compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe" && compilerPathAndArgs.compilerPath !== undefined) {
+            const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
+            const isClCompiler: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
+            // Don't squiggle for invalid cl and cl.exe paths.
+            if (compilerPathAndArgs.compilerPath && !isClCompiler) {
                 // Squiggle when the compiler's path has spaces without quotes but args are used.
                 compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
                     && !compilerPath.startsWith('"')
@@ -1677,7 +1678,7 @@ export class CppProperties {
             }
             const isWSL: boolean = isWindows && compilerPath.startsWith("/");
             let compilerPathExists: boolean = true;
-            if (this.rootUri) {
+            if (this.rootUri && !isClCompiler) {
                 const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, true);
                 compilerPathExists = checkPathExists.pathExists;
                 compilerPath = checkPathExists.path;
@@ -1747,6 +1748,10 @@ export class CppProperties {
                         }
                         let message: string;
                         if (!pathExists) {
+                            if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
+                                && !path.isAbsolute(resolvedPath)) {
+                                continue; // Skip the error, because it could be resolved recursively.
+                            }
                             message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                             newSquiggleMetrics.PathNonExistent++;
                         } else {

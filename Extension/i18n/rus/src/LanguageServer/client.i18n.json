@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "Диагностика C/C++",
 	"dismiss.button": "Закрыть",
 	"diable.warnings.button": "Отключить предупреждения",
-	"unable.to.provide.configuraiton": "{0} не удается предоставить сведения о конфигурации IntelliSense для \"{1}\". Вместо этого будут использованы параметры из конфигурации \"{2}\".",
+	"unable.to.provide.configuration": "{0} не удается предоставить сведения о конфигурации IntelliSense для \"{1}\". Вместо этого будут использованы параметры из конфигурации \"{2}\".",
 	"config.not.found": "Запрошенное имя конфигурации не найдено: {0}",
 	"unsupported.client": "Неподдерживаемый клиент",
 	"timed.out": "Время ожидания истекло через {0} мс.",
@@ -34,7 +34,7 @@
 	"no.button": "Нет",
 	"configurations.received": "Получены пользовательские конфигурации:",
 	"browse.configuration.received": "Получена настраиваемая конфигурация просмотра: {0}",
-	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
-	"compilers.found": "We found the following C++ compiler(s) on your system:",
-	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
+	"no.compilers.found": "В системе не найдены компиляторы C++. Для вашей платформы рекомендуется установить {0}. Необходимые инструкции см. в редакторе.",
+	"compilers.found": "В системе обнаружены следующие компиляторы C++:",
+	"compilers.found.message": "Вы можете указать, какой компилятор использовать в конфигурации IntelliSense проекта."
 }

@@ -71,7 +71,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
 
         const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            return []; // User canceled it.
+            throw Error(localize("debug.configuration.selection.canceled", "Debug configuration selection canceled")); // User canceled it.
         }
         if (selection.label.startsWith("cl.exe")) {
             if (!process.env.DevEnvDir) {
@@ -161,11 +161,11 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 return false;
             }
             if (defaultConfig.name.startsWith("(Windows) ")) {
-                if (command.includes("cl.exe")) {
+                if (command.startsWith("cl.exe")) {
                     return true;
                 }
             } else {
-                if (!command.includes("cl.exe")) {
+                if (!command.startsWith("cl.exe")) {
                     return true;
                 }
             }
@@ -203,9 +203,16 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     let debuggerName: string;
                     if (compilerName.startsWith("clang")) {
                         newConfig.MIMode = "lldb";
-                        const suffixIndex: number = compilerName.indexOf("-");
-                        const suffix: string = suffixIndex === -1 ? "" : compilerName.substr(suffixIndex);
-                        debuggerName = "lldb-mi" + suffix;
+                        debuggerName = "lldb-mi";
+                        // Search for clang-8, clang-10, etc.
+                        if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
+                            const suffixIndex: number = compilerName.indexOf("-");
+                            if (suffixIndex !== -1) {
+                                const suffix: string = compilerName.substr(suffixIndex);
+                                debuggerName += suffix;
+                            }
+                        }
+                        newConfig.type = "cppdbg";
                     } else if (compilerName === "cl.exe") {
                         newConfig.miDebuggerPath = undefined;
                         newConfig.type = "cppvsdbg";
@@ -213,11 +220,9 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                     } else {
                         debuggerName = "gdb";
                     }
-
                     if (isWindows) {
-                        debuggerName += ".exe";
+                        debuggerName = debuggerName.endsWith(".exe") ? debuggerName : (debuggerName + ".exe");
                     }
-
                     const compilerDirname: string = path.dirname(compilerPath);
                     const debuggerPath: string = path.join(compilerDirname, debuggerName);
                     if (isWindows) {

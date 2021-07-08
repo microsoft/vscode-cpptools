@@ -3376,11 +3376,21 @@
   "i moduli non sono abilitati in questa modalità",
   "Il nome di un modulo non può contenere 'import'",
   "Il nome di un modulo non può contenere 'module'",
-  "%sq non può essere una macro se usata in una direttiva di importazione",
+  null,
   null,
   "%n non è un tipo di enumerazione",
   "l'enumeratore %no2 è in conflitto con %n1",
   "l'enumeratore %no è già stato dichiarato in questo ambito %p",
   "la specifica 'throw()' non fa parte di C++20 e versioni successive",
-  "più di una voce nel mapping dell'unità intestazione corrisponde a '%s'"
+  "più di una voce nel mapping dell'unità intestazione corrisponde a '%s'",
+  "la diagnostica #pragma deve avere l'argomento 'push' o 'pop'",
+  "nessun '#pragma diagnostic push' trovato che corrisponda a questo 'diagnostic pop'",
+  "%sq non può essere una macro se usata in una direttiva import o modulo",
+  "questa direttiva può essere visualizzata solo nell'ambito dello spazio dei nomi globale",
+  "una dichiarazione 'export' può essere visualizzata solo nell'ambito globale o dello spazio dei nomi",
+  "%sq viene analizzato come identificatore anziché come parola chiave perché i token che seguono non corrispondono a quelli di una direttiva preprocessore",
+  "sembra essere l'inizio di una direttiva preprocessore, ma la mancanza di ';' seguita immediatamente da una nuova riga lo impedisce",
+  "sembra essere una direttiva pre-elaborazione dei moduli, ma tali direttive non possono essere visualizzate all'interno di un'espansione delle macro",
+  "una direttiva 'module' non può comparire nell'ambito dell'inclusione condizionale (ad esempio, #if, #else, #elseif e così via)",
+  "l'importazione di %sq è stata ignorata"
 ]

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.4.1-main",
+  "version": "1.5.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2245,6 +2245,83 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "symbolOptions": {
+                "description": "%c_cpp.debuggers.symbolOptions.description%",
+                "default": {
+                  "searchPaths": [],
+                  "searchMicrosoftSymbolServer": false
+                },
+                "type": "object",
+                "properties": {
+                  "searchPaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchPaths.description%",
+                    "default": []
+                  },
+                  "searchMicrosoftSymbolServer": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description%",
+                    "default": false
+                  },
+                  "cachePath": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.cachePath.description%",
+                    "default": "%TEMP%\\SymbolCache"
+                  },
+                  "moduleFilter": {
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.moduleFilter.description%",
+                    "default": {
+                      "mode": "loadAllButExcluded",
+                      "excludedModules": []
+                    },
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "loadAllButExcluded",
+                          "loadOnlyIncluded"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
+                        ],
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
+                        "default": "loadAllButExcluded"
+                      },
+                      "excludedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description%",
+                        "default": []
+                      },
+                      "includedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description%",
+                        "default": [
+                          "MyExampleModule.dll"
+                        ]
+                      },
+                      "includeSymbolsNextToModules": {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description%",
+                        "default": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -2322,6 +2399,83 @@
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.requireExactSource.description%",
                 "default": true
+              },
+              "symbolOptions": {
+                "description": "%c_cpp.debuggers.symbolOptions.description%",
+                "default": {
+                  "searchPaths": [],
+                  "searchMicrosoftSymbolServer": false
+                },
+                "type": "object",
+                "properties": {
+                  "searchPaths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchPaths.description%",
+                    "default": []
+                  },
+                  "searchMicrosoftSymbolServer": {
+                    "type": "boolean",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description%",
+                    "default": false
+                  },
+                  "cachePath": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.cachePath.description%",
+                    "default": "%TEMP%\\SymbolCache"
+                  },
+                  "moduleFilter": {
+                    "description": "%c_cpp.debuggers.VSSymbolOptions.moduleFilter.description%",
+                    "default": {
+                      "mode": "loadAllButExcluded",
+                      "excludedModules": []
+                    },
+                    "type": "object",
+                    "required": [
+                      "mode"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "loadAllButExcluded",
+                          "loadOnlyIncluded"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadAllButExcluded.enumDescriptions%",
+                          "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.loadOnlyIncluded.enumDescriptions%"
+                        ],
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.mode.description%",
+                        "default": "loadAllButExcluded"
+                      },
+                      "excludedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.excludedModules.description%",
+                        "default": []
+                      },
+                      "includedModules": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includedModules.description%",
+                        "default": [
+                          "MyExampleModule.dll"
+                        ]
+                      },
+                      "includeSymbolsNextToModules": {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.VSSymbolOptionsModuleFilter.includeSymbolsNextToModules.description%",
+                        "default": true
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2609,7 +2763,7 @@
     "typescript": "^3.5.3",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
-    "vscode-nls-dev": "^3.2.6",
+    "vscode-nls-dev": "^4.0.0-next.1",
     "vscode-test": "^1.3.0",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0",
@@ -2625,9 +2779,10 @@
     "plist": "^3.0.2",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^5.0.0",
-    "vscode-extension-telemetry": "^0.1.2",
+    "vscode-extension-telemetry": "^0.1.7",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^4.1.1",
+    "vscode-tas-client": "^0.1.22",
     "which": "^2.0.2",
     "yauzl": "^2.10.0"
   },
@@ -2636,12 +2791,13 @@
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
     "hosted-git-info": "^3.0.8",
-    "browserslist": "^4.16.6"
+    "browserslist": "^4.16.6",
+    "glob-parent": "^5.1.2"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164295",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167520",
       "platforms": [
         "linux"
       ],
@@ -2652,11 +2808,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "2E6E25B3B9C10ECC25A5B523C413182D185F13492602CF92896C658E6959CBFA"
+      "integrity": "32AC1D58A5A21527AA24583011F5A3694FCEFB5920677D0CA8D13F70BC0102BE"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164297",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167624",
       "platforms": [
         "linux"
       ],
@@ -2667,11 +2823,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "25F5776247184254D49B9FCC25D0D018AECF1D8930FC517F25C9FCC0A9E650AC"
+      "integrity": "9CB1C36A34DD2F7A53FF5471F1FBB5C0AD65A9E67C17013C7FBF65CDDAF7A7E1"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2165100",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167623",
       "platforms": [
         "linux"
       ],
@@ -2682,11 +2838,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "186614524A13EC75BF68798861818D25CE82FDE293C57B725C11F62B0694EC55"
+      "integrity": "D8F6A5A4A8A13F6F872C94BD522602A7C0E5E5CCA58CE7CE1ED3DC32F82850AC"
     },
     {
-      "description": "C/C++ language components (OS X)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164296",
+      "description": "C/C++ language components (macOS / x86_64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167518",
       "platforms": [
         "darwin"
       ],
@@ -2697,11 +2853,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "8E19E1BDD95FCC80F74529E6B5C24AB761F7D84B92CF44C33DAE38A8F11F6FB5"
+      "integrity": "3EF54224CED1BCC6D64B2A93BFA8093E3D75510C8F96E943049CCB4C656161A2"
     },
     {
-      "description": "C/C++ language components (OS X ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164187",
+      "description": "C/C++ language components (macOS / ARM64)",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167519",
       "platforms": [
         "darwin"
       ],
@@ -2712,11 +2868,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "1225791C05E0DBD708D0EE9598ACBC94B742E25C7CAE92C5C89791AF924D4B96"
+      "integrity": "02F2BE96493256237995EF51D4E0CD0345727D27A61135C6FCDB88608406C908"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164298",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167517",
       "platforms": [
         "win32"
       ],
@@ -2728,11 +2884,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "8D9E008B789D13DF4175795400E9402D43D199846CEC1DC4DD1F319B4C0D5492"
+      "integrity": "1E23884810A6EBF56BC7C5C4CB5317723CC3519039D56BF07310735870163E77"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2165101",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167516",
       "platforms": [
         "win32"
       ],
@@ -2743,7 +2899,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "4B94A64721FE8D0E1F93AACBA1190A9DC00DF7225E20BF628AC57BEC6301AA7D"
+      "integrity": "26CCA79735F15BE0595510E2A170794CBF7E2EE72F2A565CD9D26970EA35547F"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2788,7 +2944,7 @@
       "integrity": "CD5578A21C8D515D15C0611621E44C03DE4E667EFB4EE1A0DE18B08FD9B96794"
     },
     {
-      "description": "ClangFormat (OS X)",
+      "description": "ClangFormat (macOS / x86_64)",
       "url": "https://go.microsoft.com/fwlink/?LinkID=2162416",
       "platforms": [
         "darwin"
@@ -2802,7 +2958,7 @@
       "integrity": "AEB24D394118EAD87087DCC651F2EE329FC335ECE88ED6C8C2A9E93ED60DFECD"
     },
     {
-      "description": "ClangFormat (OS X arm64)",
+      "description": "ClangFormat (macOS / ARM64)",
       "url": "https://go.microsoft.com/fwlink/?LinkID=2162413",
       "platforms": [
         "darwin"
@@ -2910,7 +3066,7 @@
       "integrity": "946C54C8C6BF5BF79AC05D4E152F8D8647700FA786C21505832B3C79988339B4"
     },
     {
-      "description": "Mono Runtime (OS X)",
+      "description": "Mono Runtime (macOS)",
       "url": "https://go.microsoft.com/fwlink/?LinkId=2027403",
       "platforms": [
         "darwin"
@@ -2951,7 +3107,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2162486",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167487",
       "platforms": [
         "win32"
       ],
@@ -2962,7 +3118,21 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "E5046509D510086B99F171595114220AD8E9F820E7238B6A5199CD78B9AD2078"
+      "integrity": "1EB0394D716604F9402AF43BE905A85F3C735CA94FE20DFE9770DDE6516019F7"
+    },
+    {
+      "description": "Visual Studio Windows ARM64 Debugger",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167488",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./debugAdapters/vsdbg/bin/vsdbg.exe"
+      ],
+      "integrity": "49D68434BD097752720137180E2ECA52637A9B65807651DA94D17620DD1EA8FA"
     }
   ]
 }

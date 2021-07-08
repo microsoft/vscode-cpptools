@@ -17,7 +17,7 @@
 	"c.cpp.diagnostics": "C/C++ 진단",
 	"dismiss.button": "해제",
 	"diable.warnings.button": "경고 사용 안 함",
-	"unable.to.provide.configuraiton": "{0}은(는) '{1}'에 대한 IntelliSense 구성 정보를 제공할 수 없습니다. '{2}' 구성의 설정이 대신 사용됩니다.",
+	"unable.to.provide.configuration": "{0}은(는) '{1}'에 대한 IntelliSense 구성 정보를 제공할 수 없습니다. '{2}' 구성의 설정이 대신 사용됩니다.",
 	"config.not.found": "요청된 구성 이름을 찾을 수 없음: {0}",
 	"unsupported.client": "지원되지 않는 클라이언트",
 	"timed.out": "{0}ms 후 시간이 초과되었습니다.",
@@ -34,7 +34,7 @@
 	"no.button": "아니요",
 	"configurations.received": "사용자 지정 구성이 수신됨:",
 	"browse.configuration.received": "사용자 지정 찾아보기 구성이 수신됨: {0}",
-	"no.compilers.found": "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.",
-	"compilers.found": "We found the following C++ compiler(s) on your system:",
-	"compilers.found.message": "You can specify which compiler to use in your project's IntelliSense Configuration."
+	"no.compilers.found": "C++시스템에서 컴파일러를 찾을 수 없습니다. 플랫폼의 경우 편집기의 지침을 사용하여 {0}을(를) 설치하는 것이 좋습니다.",
+	"compilers.found": "시스템에서 다음 C++ 컴파일러를 찾았습니다.",
+	"compilers.found.message": "프로젝트의 IntelliSense 구성에서 사용할 컴파일러를 지정할 수 있습니다."
 }

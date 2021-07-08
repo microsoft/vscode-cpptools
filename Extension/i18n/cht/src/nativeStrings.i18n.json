@@ -212,5 +212,6 @@
 	"nvcc_host_compiler_not_found": "找不到 nvcc 主機編譯器: {0}",
 	"invoking_nvcc": "正在使用命令列 {0} 叫用 nvcc",
 	"nvcc_host_compile_command_not_found": "在 nvcc 的輸出中找不到主機編譯命令。",
-	"unable_to_locate_forced_include": "找不到強制的 include: {0}"
+	"unable_to_locate_forced_include": "找不到強制的 include: {0}",
+	"inline_macro": "內嵌巨集"
 }
