@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.5.1: July 9, 2021
+### Bug Fixes
+* cppvsdbg Debugging becomes no-op between 1.4.1 and 1.5.0 [#7808](https://github.com/microsoft/vscode-cpptools/issues/7808)
+
 ## Version 1.5.0: July 8, 2021
 ### New Feature
 * Add the "Inline macro" code action. [#4183](https://github.com/microsoft/vscode-cpptools/issues/4183)
