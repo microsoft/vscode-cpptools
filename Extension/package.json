@@ -54,7 +54,6 @@
         "id": "cppWelcome",
         "title": "Get Started with C++ Development",
         "description": "Dive into VS Code's rich C++ development experience.",
-        "primary": true,
         "when": "false",
         "steps": [
           {
