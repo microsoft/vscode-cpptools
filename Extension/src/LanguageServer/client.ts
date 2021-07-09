@@ -1380,6 +1380,16 @@ export class DefaultClient implements Client {
                         updateLanguageConfigurations();
                     }
                     const settings: CppSettings = new CppSettings();
+                    if (changedSettings["loggingLevel"]) {
+                        const oldLoggingLevel: string | undefined = settings.loggingLevel;
+                        const newLoggingLevel: string | undefined = changedSettings["loggingLevel"];
+                        const oldLoggingLevelLogged: boolean = !!oldLoggingLevel && oldLoggingLevel !== "None" && oldLoggingLevel !== "Error";
+                        const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
+                        if (oldLoggingLevelLogged || newLoggingLevelLogged) {
+                            const out: logger.Logger = logger.getOutputChannelLogger();
+                            out.appendLine(localize("loggingLevel.changed", "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
+                        }
+                    }
                     if (changedSettings["formatting"]) {
                         if (settings.formattingEngine !== "Disabled") {
                             // Because the setting is not a bool, changes do not always imply we need to
