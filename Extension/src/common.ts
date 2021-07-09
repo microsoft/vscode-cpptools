@@ -89,7 +89,7 @@ export async function getRawJson(path: string | undefined): Promise<any> {
 
 export function fileIsCOrCppSource(file: string): boolean {
     const fileExtLower: string = path.extname(file).toLowerCase();
-    return [".cu", ".c", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".tcc", ".mm", ".ino", ".ipp", ".inl"].some(ext => fileExtLower === ext);
+    return [".cu", ".cuh", ".c", ".i", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".tcc", ".mm", ".ino", ".ipp", ".inl", ".hpp", ".hh", ".hxx", ".h++", ".h", ".ii", ".ixx", ".hpp.in", ".h.in"].some(ext => fileExtLower === ext);
 }
 
 export function isEditorFileCpp(file: string): boolean {
