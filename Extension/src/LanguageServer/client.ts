@@ -650,6 +650,7 @@ export class DefaultClient implements Client {
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
+    private loggingLevel: string | undefined;
     private configurationProvider?: string;
     private documentSelector: DocumentFilter[] = [
         { scheme: 'file', language: 'c' },
@@ -1302,6 +1303,7 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
+        this.loggingLevel = clientOptions.initializationOptions.loggingLevel;
         return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
@@ -1379,17 +1381,17 @@ export class DefaultClient implements Client {
                     if (changedSettings["commentContinuationPatterns"]) {
                         updateLanguageConfigurations();
                     }
-                    const settings: CppSettings = new CppSettings();
                     if (changedSettings["loggingLevel"]) {
-                        const oldLoggingLevel: string | undefined = settings.loggingLevel;
+                        const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== "None" && this.loggingLevel !== "Error";
                         const newLoggingLevel: string | undefined = changedSettings["loggingLevel"];
-                        const oldLoggingLevelLogged: boolean = !!oldLoggingLevel && oldLoggingLevel !== "None" && oldLoggingLevel !== "Error";
+                        this.loggingLevel = newLoggingLevel;
                         const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
                         if (oldLoggingLevelLogged || newLoggingLevelLogged) {
                             const out: logger.Logger = logger.getOutputChannelLogger();
                             out.appendLine(localize("loggingLevel.changed", "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
                         }
                     }
+                    const settings: CppSettings = new CppSettings();
                     if (changedSettings["formatting"]) {
                         if (settings.formattingEngine !== "Disabled") {
                             // Because the setting is not a bool, changes do not always imply we need to
