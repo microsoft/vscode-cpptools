@@ -2962,7 +2962,7 @@
     },
     {
       "description": "Clang tools (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167548",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2167654",
       "platforms": [
         "darwin"
       ],
