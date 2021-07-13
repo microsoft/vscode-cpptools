@@ -27,7 +27,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             return undefined;
         }
         const result: vscode.FoldingRange[] = [];
-        ranges.ranges.forEach((r: CppFoldingRange, index: number, array: CppFoldingRange[]) => {
+        ranges.ranges.forEach((r: CppFoldingRange) => {
             const foldingRange: vscode.FoldingRange = {
                 start: r.range.start.line,
                 // Move the end range up one, so the end } line isn't folded, because
