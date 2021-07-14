@@ -617,6 +617,9 @@ export interface Client {
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
+    handleRunClangTidyOnActiveFile(): Promise<void>;
+    handleRunClangTidyOnOpenFiles(): Promise<void>;
+    handleRunClangTidyOnAllFiles(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -2713,6 +2716,18 @@ export class DefaultClient implements Client {
         }
     }
 
+    public async handleRunClangTidyOnActiveFile(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+    }
+
+    public async handleRunClangTidyOnOpenFiles(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+    }
+
+    public async handleRunClangTidyOnAllFiles(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
@@ -2882,6 +2897,9 @@ class NullClient implements Client {
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
+    handleRunClangTidyOnActiveFile(): Promise<void> { return Promise.resolve(); }
+    handleRunClangTidyOnOpenFiles(): Promise<void> { return Promise.resolve(); }
+    handleRunClangTidyOnAllFiles(): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

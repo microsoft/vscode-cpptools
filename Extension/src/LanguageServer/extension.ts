@@ -789,6 +789,9 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunClangTidyOnActiveFile', onRunClangTidyOnActiveFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunClangTidyOnOpenFiles', onRunClangTidyOnOpenFiles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunClangTidyOnAllFiles', onRunClangTidyOnAllFiles));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -938,6 +941,21 @@ function onCheckForCompiler(): void {
     onActivationEvent();
     const client: Client = getActiveClient();
     client.handleCheckForCompiler();
+}
+
+function onRunClangTidyOnActiveFile(): void {
+    onActivationEvent();
+    getActiveClient().handleRunClangTidyOnActiveFile();
+}
+
+function onRunClangTidyOnOpenFiles(): void {
+    onActivationEvent();
+    getActiveClient().handleRunClangTidyOnOpenFiles();
+}
+
+function onRunClangTidyOnAllFiles(): void {
+    onActivationEvent();
+    getActiveClient().handleRunClangTidyOnAllFiles();
 }
 
 function onAddToIncludePath(path: string): void {

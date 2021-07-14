@@ -59,16 +59,24 @@ export class CppSettings extends Settings {
         super("C_Cpp", resource);
     }
 
-    private get clangFormatName(): string {
+    private get LLVMExtension(): string {
         switch (os.platform()) {
             case "win32":
-                return "clang-format.exe";
+                return ".exe";
             case "darwin":
-                return "clang-format.darwin";
+                return ".darwin";
             case "linux":
             default:
-                return "clang-format";
+                return "";
         }
+    }
+
+    private get clangFormatName(): string {
+        return "clang-format" + this.LLVMExtension;
+    }
+
+    public get clangTidyName(): string {
+        return "clang-tidy" + this.LLVMExtension;
     }
 
     public get clangFormatPath(): string | undefined {

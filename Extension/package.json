@@ -1429,6 +1429,21 @@
         "command": "C_Cpp.GoToPrevDirectiveInGroup",
         "title": "%c_cpp.command.GoToPrevDirectiveInGroup.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.RunClangTidyOnActiveFile",
+        "title": "%c_cpp.command.RunClangTidyOnActiveFile.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.RunClangTidyOnOpenFiles",
+        "title": "%c_cpp.command.RunClangTidyOnOpenFiles.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.RunClangTidyOnAllFiles",
+        "title": "%c_cpp.command.RunClangTidyOnAllFiles.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [
