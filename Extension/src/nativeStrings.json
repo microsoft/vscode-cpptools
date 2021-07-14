@@ -229,5 +229,8 @@
     "invoking_nvcc": "Invoking nvcc with command line: {0}",
     "nvcc_host_compile_command_not_found": "Unable to find host compile command in output of nvcc.",
     "unable_to_locate_forced_include": "Unable to locate forced include: {0}",
-    "inline_macro": "Inline macro"
+    "inline_macro": {
+        "text": "Inline macro",
+        "hint": "'Inline' is a command and not an adjective, i.e. like 'Expand macro'."
+    }
 }
