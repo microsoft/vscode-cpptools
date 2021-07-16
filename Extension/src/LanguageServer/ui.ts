@@ -42,14 +42,17 @@ export class UI {
     private referencesStatusBarItem: vscode.StatusBarItem;
     private curConfigurationStatus?: Promise<ConfigurationStatus>;
     private isParsingWorkspace: boolean = false;
+    private isParsingWorkspacePaused: boolean = false;
     private isParsingFiles: boolean = false;
     private isUpdatingIntelliSense: boolean = false;
     private isRunningCodeAnalysis: boolean = false;
     private workspaceParsingStatus: string = "";
+    private codeAnalysisType: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.files.tooltip", "Parsing open files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
     private readonly updatingIntelliSenseTooltip: string = localize("updating.intellisense.tooltip", "Updating IntelliSense");
-    private readonly runningCodeAnalysisTooltip: string = localize("running.code.analysis.tooltip", "Running clang-tidy");
+    private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
+    private runningCodeAnalysisTooltip: string = "";
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
@@ -74,6 +77,10 @@ export class UI {
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files");
         this.browseEngineStatusBarItem.command = "";
         this.ShowDBIcon = false;
+
+        this.codeAnalysisType = "clang-tidy";
+        this.runningCodeAnalysisTooltip = localize(
+            { key: "running.code.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisType);
     }
 
     private set ActiveConfig(label: string) {
@@ -99,12 +106,24 @@ export class UI {
         this.browseEngineStatusBarItem.tooltip = (this.IsParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
     }
 
+    private get IsParsingWorkspacePausable(): boolean {
+        return this.browseEngineStatusBarItem.command !== "";
+    }
+
     private set IsParsingWorkspacePausable(val: boolean) {
         if (val) {
             this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         } else {
             this.browseEngineStatusBarItem.command = "";
         }
+    }
+
+    private get IsParsingWorkspacePaused(): boolean {
+        return this.isParsingWorkspacePaused;
+    }
+
+    private set IsParsingWorkspacePaused(val: boolean) {
+        this.isParsingWorkspacePaused = val;
     }
 
     private get IsParsingFiles(): boolean {
@@ -141,6 +160,7 @@ export class UI {
         this.intelliSenseStatusBarItem.text = this.ShowFlameIcon ? "$(flame)" : "";
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? `${this.updatingIntelliSenseTooltip} | ` : "")
             + this.runningCodeAnalysisTooltip;
+        this.intelliSenseStatusBarItem.command = "C_Cpp.ShowCodeAnalysisCommands";
     }
 
     private get ReferencesCommand(): ReferencesCommandMode {
@@ -233,6 +253,7 @@ export class UI {
     public bind(client: Client): void {
         client.ParsingWorkspaceChanged(value => { this.IsParsingWorkspace = value; });
         client.ParsingWorkspacePausableChanged(value => { this.IsParsingWorkspacePausable = value; });
+        client.ParsingWorkspacePausedChanged(value => { this.IsParsingWorkspacePaused = value; });
         client.ParsingFilesChanged(value => { this.IsParsingFiles = value; });
         client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
         client.RunningCodeAnalysisChanged(value => { this.IsRunningCodeAnalysis = value; });
@@ -304,10 +325,26 @@ export class UI {
         options.placeHolder = localize("select.parsing.command", "Select a parsing command...");
 
         const items: IndexableQuickPickItem[] = [];
-        if (this.browseEngineStatusBarItem.tooltip === "Parsing paused") {
+        if (this.isParsingWorkspacePaused) {
             items.push({ label: localize("resume.parsing", "Resume Parsing"), description: "", index: 1 });
         } else {
             items.push({ label: localize("pause.parsing", "Pause Parsing"), description: "", index: 0 });
+        }
+        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.index : -1;
+    }
+
+    public async showAnalysisCommands(): Promise<number> {
+        const options: vscode.QuickPickOptions = {};
+        options.placeHolder = localize("select.parsing.command", "Select a command...");
+
+        const items: IndexableQuickPickItem[] = [];
+        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisType), description: "", index: 1 });
+
+        if (this.isParsingWorkspacePaused) {
+            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint]}, "Resume {0}", this.codeAnalysisType), description: "", index: 1 });
+        } else {
+            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisType), description: "", index: 0 });
         }
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
