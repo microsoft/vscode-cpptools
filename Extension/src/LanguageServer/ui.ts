@@ -53,7 +53,7 @@ export class UI {
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
-        this.configStatusBarItem = vscode.window.createStatusBarItem(configTooltip, vscode.StatusBarAlignment.Right, -100000);
+        this.configStatusBarItem = vscode.window.createStatusBarItem(configTooltip, vscode.StatusBarAlignment.Right, 0);
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
         this.configStatusBarItem.tooltip = configTooltip;
         this.ShowConfiguration = true;
