@@ -1423,7 +1423,7 @@ export class DefaultClient implements Client {
                         const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
                         if (oldLoggingLevelLogged || newLoggingLevelLogged) {
                             const out: logger.Logger = logger.getOutputChannelLogger();
-                            out.appendLine(localize("loggingLevel.changed", "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
+                            out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"]}, "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
                         }
                     }
                     const settings: CppSettings = new CppSettings();

@@ -48,7 +48,7 @@ export class UI {
     private isRunningCodeAnalysis: boolean = false;
     private workspaceParsingStatus: string = "";
     private codeAnalysisType: string = "";
-    private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.files.tooltip", "Parsing open files");
+    private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing open files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
     private readonly updatingIntelliSenseTooltip: string = localize("updating.intellisense.tooltip", "Updating IntelliSense");
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
@@ -80,7 +80,7 @@ export class UI {
 
         this.codeAnalysisType = "clang-tidy";
         this.runningCodeAnalysisTooltip = localize(
-            { key: "running.code.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisType);
+            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisType);
     }
 
     private set ActiveConfig(label: string) {
@@ -106,20 +106,12 @@ export class UI {
         this.browseEngineStatusBarItem.tooltip = (this.IsParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
     }
 
-    private get IsParsingWorkspacePausable(): boolean {
-        return this.browseEngineStatusBarItem.command !== "";
-    }
-
     private set IsParsingWorkspacePausable(val: boolean) {
         if (val) {
             this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         } else {
             this.browseEngineStatusBarItem.command = "";
         }
-    }
-
-    private get IsParsingWorkspacePaused(): boolean {
-        return this.isParsingWorkspacePaused;
     }
 
     private set IsParsingWorkspacePaused(val: boolean) {
