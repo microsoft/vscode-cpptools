@@ -89,24 +89,21 @@ export class UI {
 
     private set TagParseStatus(label: string) {
         this.workspaceParsingStatus = label;
+        this.browseEngineStatusBarItem.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + label;
     }
 
-    private get IsTagParsing(): boolean {
-        return this.IsParsingWorkspace || this.isParsingFiles;
+    private setIsParsingWorkspace(val: boolean): void {
+        this.isParsingWorkspace = val;
+        const showIcon: boolean = val || this.isParsingFiles;
+        const twoStatus: boolean = val && this.isParsingFiles;
+        this.ShowDBIcon = showIcon;
+        this.browseEngineStatusBarItem.text = showIcon ? "$(database)" : "";
+        this.browseEngineStatusBarItem.tooltip = (this.isParsingFiles ? this.parsingFilesTooltip : "")
+            + (twoStatus ? " | " : "")
+            + (val ? this.workspaceParsingStatus : "");
     }
 
-    private get IsParsingWorkspace(): boolean {
-        return this.isParsingWorkspace;
-    }
-
-    private set IsParsingWorkspace(val: boolean) {
-        this.isParsingWorkspace = true;
-        this.ShowDBIcon = val || this.isParsingFiles;
-        this.browseEngineStatusBarItem.text = this.ShowDBIcon ? "$(database)" : "";
-        this.browseEngineStatusBarItem.tooltip = (this.IsParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
-    }
-
-    private set IsParsingWorkspacePausable(val: boolean) {
+    private setIsParsingWorkspacePausable(val: boolean): void  {
         if (val) {
             this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         } else {
@@ -114,45 +111,42 @@ export class UI {
         }
     }
 
-    private set IsParsingWorkspacePaused(val: boolean) {
+    private setIsParsingWorkspacePaused(val: boolean): void  {
         this.isParsingWorkspacePaused = val;
     }
 
-    private get IsParsingFiles(): boolean {
-        return this.isParsingFiles;
-    }
-
-    private set IsParsingFiles(val: boolean) {
+    private setIsParsingFiles(val: boolean): void  {
         this.isParsingFiles = val;
-        this.ShowDBIcon = val || this.IsParsingWorkspace;
-        this.browseEngineStatusBarItem.text = this.ShowDBIcon ? "$(database)" : "";
-        this.browseEngineStatusBarItem.tooltip = this.parsingFilesTooltip +
-            (this.IsParsingWorkspace ? ` | ${this.workspaceParsingStatus} ` : "");
+        const showIcon: boolean = val || this.isParsingWorkspace;
+        const twoStatus: boolean = val && this.isParsingWorkspace;
+        this.ShowDBIcon = showIcon;
+        this.browseEngineStatusBarItem.text = showIcon ? "$(database)" : "";
+        this.browseEngineStatusBarItem.tooltip = (val ? this.parsingFilesTooltip : "")
+            + (twoStatus ? " | " : "")
+            + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
     }
 
-    private get IsUpdatingIntelliSense(): boolean {
-        return this.isUpdatingIntelliSense;
-    }
-
-    private set IsUpdatingIntelliSense(val: boolean) {
+    private setIsUpdatingIntelliSense(val: boolean): void  {
         this.isUpdatingIntelliSense = val;
-        this.ShowFlameIcon = val || this.IsRunningCodeAnalysis;
-        this.intelliSenseStatusBarItem.text = this.ShowFlameIcon ? "$(flame)" : "";
-        this.intelliSenseStatusBarItem.tooltip = this.updatingIntelliSenseTooltip
-            + (this.isRunningCodeAnalysis ? ` | ${this.runningCodeAnalysisTooltip}` : "");
+        const showIcon: boolean = val || this.isRunningCodeAnalysis;
+        const twoStatus: boolean = val && this.isRunningCodeAnalysis;
+        this.ShowFlameIcon = showIcon;
+        this.intelliSenseStatusBarItem.text = showIcon ? "$(flame)" : "";
+        this.intelliSenseStatusBarItem.tooltip = (val ? this.updatingIntelliSenseTooltip : "")
+            + (twoStatus ? " | " : "")
+            + (this.isRunningCodeAnalysis ? this.runningCodeAnalysisTooltip : "");
     }
 
-    private get IsRunningCodeAnalysis(): boolean {
-        return this.isRunningCodeAnalysis;
-    }
-
-    private set IsRunningCodeAnalysis(val: boolean) {
+    private setIsRunningCodeAnalysis(val: boolean): void  {
         this.isRunningCodeAnalysis = val;
-        this.ShowFlameIcon = val || this.IsUpdatingIntelliSense;
-        this.intelliSenseStatusBarItem.text = this.ShowFlameIcon ? "$(flame)" : "";
-        this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? `${this.updatingIntelliSenseTooltip} | ` : "")
-            + this.runningCodeAnalysisTooltip;
-        this.intelliSenseStatusBarItem.command = "C_Cpp.ShowCodeAnalysisCommands";
+        const showIcon: boolean = val || this.isUpdatingIntelliSense;
+        const twoStatus: boolean = val && this.isUpdatingIntelliSense;
+        this.ShowFlameIcon = showIcon;
+        this.intelliSenseStatusBarItem.text = showIcon ? "$(flame)" : "";
+        this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
+            + (twoStatus ? " | " : "")
+            + (val ? this.runningCodeAnalysisTooltip : "");
+        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : "";
     }
 
     private get ReferencesCommand(): ReferencesCommandMode {
@@ -181,7 +175,7 @@ export class UI {
         if (this.dbTimeout) {
             clearTimeout(this.dbTimeout);
         }
-        if (show && this.IsTagParsing) {
+        if (show && (this.isParsingWorkspace || this.isParsingFiles)) {
             this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.show(); }, this.iconDelayTime);
         } else {
             this.dbTimeout = setTimeout(() => { this.browseEngineStatusBarItem.hide(); }, this.iconDelayTime);
@@ -193,7 +187,7 @@ export class UI {
         if (this.flameTimeout) {
             clearTimeout(this.flameTimeout);
         }
-        if (show && this.IsUpdatingIntelliSense) {
+        if (show && (this.isUpdatingIntelliSense || this.isRunningCodeAnalysis)) {
             this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.show(); }, this.iconDelayTime);
         } else {
             this.flameTimeout = setTimeout(() => { this.intelliSenseStatusBarItem.hide(); }, this.iconDelayTime);
@@ -243,12 +237,12 @@ export class UI {
     }
 
     public bind(client: Client): void {
-        client.ParsingWorkspaceChanged(value => { this.IsParsingWorkspace = value; });
-        client.ParsingWorkspacePausableChanged(value => { this.IsParsingWorkspacePausable = value; });
-        client.ParsingWorkspacePausedChanged(value => { this.IsParsingWorkspacePaused = value; });
-        client.ParsingFilesChanged(value => { this.IsParsingFiles = value; });
-        client.IntelliSenseParsingChanged(value => { this.IsUpdatingIntelliSense = value; });
-        client.RunningCodeAnalysisChanged(value => { this.IsRunningCodeAnalysis = value; });
+        client.ParsingWorkspaceChanged(value => { this.setIsParsingWorkspace(value); });
+        client.ParsingWorkspacePausableChanged(value => { this.setIsParsingWorkspacePausable(value); });
+        client.ParsingWorkspacePausedChanged(value => { this.setIsParsingWorkspacePaused(value); });
+        client.ParsingFilesChanged(value => { this.setIsParsingFiles(value); });
+        client.IntelliSenseParsingChanged(value => { this.setIsUpdatingIntelliSense(value); });
+        client.RunningCodeAnalysisChanged(value => { this.setIsRunningCodeAnalysis(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });

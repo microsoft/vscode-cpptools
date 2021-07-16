@@ -122,7 +122,7 @@
     "discovering_files_count": "Discovering files: {0}",
     "parsing_open_files": "Parsing open files",
     "tag_parser_initializing": "Tag parser initializing",
-    "parsing_paused": "Parsing paused",
+    "parsing_paused": "Workspace parsing paused",
     "parsing_files": "Parsing workspace files: {0}",
     "discovering_files_count_progress": "Discovering files: {0} / {1} ({2}%)",
     "parsing_files_progress": "Parsing workspace files: {0} / {1} ({2}%)",

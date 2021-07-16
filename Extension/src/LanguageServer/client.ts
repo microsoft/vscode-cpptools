@@ -2166,19 +2166,21 @@ export class DefaultClient implements Client {
         const message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
-        if (message.endsWith("Parsing")) {
+        if (message.endsWith("Idle")) {
+            // nothing to do
+        } else if (message.endsWith("Parsing")) {
             this.model.isParsingWorkspace.Value = true;
             this.model.isParsingWorkspacePausable.Value = false;
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
-        } else if (message.endsWith("Parsing files")) {
+        } else if (message.endsWith("files")) {
             this.model.isParsingFiles.Value = true;
-        } else if (message.endsWith("Updating IntelliSense...")) {
+        } else if (message.endsWith("IntelliSense")) {
             timeStamp = Date.now();
             this.model.isUpdatingIntelliSense.Value = true;
             const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
             testHook.updateStatus(status);
-        } else if (message.endsWith("IntelliSense Ready")) {
+        } else if (message.endsWith("IntelliSense done")) {
             const settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
                 const out: logger.Logger = logger.getOutputChannelLogger();
@@ -2193,6 +2195,8 @@ export class DefaultClient implements Client {
             const status: IntelliSenseStatus = { status: Status.TagParsingDone };
             testHook.updateStatus(status);
             util.setProgress(util.getProgressParseRootSuccess());
+        } else if (message.endsWith("files done")) {
+            this.model.isParsingFiles.Value = false;
         } else if (message.endsWith("Analysis")) {
             this.model.isRunningCodeAnalysis.Value = true;
         } else if (message.endsWith("Analysis done")) {
@@ -2251,7 +2255,7 @@ export class DefaultClient implements Client {
 
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
         this.model.parsingWorkspaceStatus.Value = util.getLocalizedString(notificationBody);
-        if (notificationBody.text.startsWith("Parsing paused")) {
+        if (notificationBody.text.startsWith("Workspace parsing paused")) {
             this.model.isParsingWorkspacePausable.Value = true;
             this.model.isParsingWorkspacePaused.Value = true;
         } else if (notificationBody.text.startsWith("Parsing workspace")) {
