@@ -66,7 +66,7 @@ export class UI {
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status"), vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.text = "";
-        this.intelliSenseStatusBarItem.tooltip = updatingIntelliSenseTooltip;
+        this.intelliSenseStatusBarItem.tooltip = this.updatingIntelliSenseTooltip;
         this.ShowFlameIcon = false;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status"), vscode.StatusBarAlignment.Right, 902);
