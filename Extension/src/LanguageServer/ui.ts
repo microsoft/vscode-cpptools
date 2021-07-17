@@ -55,24 +55,32 @@ export class UI {
     private runningCodeAnalysisTooltip: string = "";
 
     constructor() {
-        const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
-        this.configStatusBarItem = vscode.window.createStatusBarItem(configTooltip, vscode.StatusBarAlignment.Right, 0);
+        const configId: string = "c.cpp.configuration.tooltip";
+        const configTooltip: string = localize(configId, "C/C++ Configuration");
+        this.configStatusBarItem = vscode.window.createStatusBarItem(configId, vscode.StatusBarAlignment.Right, 0);
+        this.configStatusBarItem.name = configTooltip;
         this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
         this.configStatusBarItem.tooltip = configTooltip;
         this.ShowConfiguration = true;
 
-        this.referencesStatusBarItem = vscode.window.createStatusBarItem(localize("c.cpp.references.statusbar", "C/C++ References Status"), vscode.StatusBarAlignment.Right, 901);
+        const referencesId: string = "c.cpp.references.statusbar";
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem(referencesId, vscode.StatusBarAlignment.Right, 901);
+        this.referencesStatusBarItem.name = localize(referencesId, "C/C++ References Status");
         this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = false;
 
-        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status"), vscode.StatusBarAlignment.Right, 903);
+        const intelliSenseId: string = "c.cpp.intellisense.statusbar";
+        this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem(intelliSenseId, vscode.StatusBarAlignment.Right, 903);
+        this.intelliSenseStatusBarItem.name = localize(intelliSenseId, "C/C++ IntelliSense Status");
         this.intelliSenseStatusBarItem.text = "";
         this.intelliSenseStatusBarItem.tooltip = this.updatingIntelliSenseTooltip;
         this.ShowFlameIcon = false;
 
-        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status"), vscode.StatusBarAlignment.Right, 902);
+        const browseEngineId: string = "c.cpp.tagparser.statusbar";
+        this.browseEngineStatusBarItem = vscode.window.createStatusBarItem(browseEngineId, vscode.StatusBarAlignment.Right, 902);
+        this.browseEngineStatusBarItem.name = localize(browseEngineId, "C/C++ Tag Parser Status");
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files");
         this.browseEngineStatusBarItem.command = "";
