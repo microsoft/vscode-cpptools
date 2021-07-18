@@ -3032,6 +3032,7 @@
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/eslint-plugin-tslint": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
+    "@vscode/test-electron": "^1.6.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "eslint": "^7.25.0",
@@ -3059,7 +3060,6 @@
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-nls-dev": "^4.0.0-next.1",
-    "vscode-test": "^1.3.0",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0",
     "xml2js": "^0.4.19"
