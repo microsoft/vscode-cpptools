@@ -20,6 +20,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 import { WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { getOutputChannelLogger } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -67,6 +68,7 @@ export interface Configuration {
     includePath?: string[];
     macFrameworkPath?: string[];
     windowsSdkVersion?: string;
+    dotConfig?: string;
     defines?: string[];
     intelliSenseMode?: string;
     intelliSenseModeIsExplicit?: boolean;
@@ -787,6 +789,22 @@ export class CppProperties {
         return this.resolveDefaultsDictionary(property, defaultValue, env);
     }
 
+    private getDotconfigDefines(dotConfigPath: string): string[] {
+        const isWindows: boolean = os.platform() === 'win32';
+
+        if (dotConfigPath !== undefined) {
+            const path: string = this.resolvePath(dotConfigPath, isWindows);
+            try {
+                const configContent: string[] = fs.readFileSync(path, "utf-8").split("\n");
+                return configContent.filter(i => !i.startsWith("#") && i !== "");
+            } catch (err) {
+                getOutputChannelLogger().appendLine(`Invalid input, cannot resolve .config path: ${err.message}`);
+            }
+        }
+
+        return [];
+    }
+
     private updateServerOnFolderSettingsChange(): void {
         if (!this.configurationJson) {
             return;
@@ -805,7 +823,15 @@ export class CppProperties {
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
-            configuration.macFrameworkPath = this.updateConfigurationPathsArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
+
+            // in case we have dotConfig
+            configuration.dotConfig = this.updateConfigurationString(configuration.dotConfig, settings.defaultDotconfig, env);
+            if (configuration.dotConfig !== undefined) {
+                configuration.defines = configuration.defines || [];
+                configuration.defines = configuration.defines.concat(this.getDotconfigDefines(configuration.dotConfig));
+            }
+
+            configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
             configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
