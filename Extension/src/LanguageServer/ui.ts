@@ -333,12 +333,12 @@ export class UI {
         options.placeHolder = localize("select.parsing.command", "Select a command...");
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisType), description: "", index: 1 });
+        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisType), description: "", index: 0 });
 
         if (this.isParsingWorkspacePaused) {
-            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint]}, "Resume {0}", this.codeAnalysisType), description: "", index: 1 });
+            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint]}, "Resume {0}", this.codeAnalysisType), description: "", index: 2 });
         } else {
-            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisType), description: "", index: 0 });
+            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisType), description: "", index: 1 });
         }
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
