@@ -39,6 +39,7 @@ const elementId: { [key: string]: string } = {
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
     forcedIncludeInvalid: "forcedIncludeInvalid",
+    dotConfig: "dotConfig",
 
     // Browse properties
     browsePath: "browsePath",
@@ -270,6 +271,7 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.compileCommands)).value = config.compileCommands ? config.compileCommands : "";
             (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ? config.configurationProvider : "";
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
+            (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = joinEntries(config.dotConfig);
 
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = joinEntries(config.browse.path);
