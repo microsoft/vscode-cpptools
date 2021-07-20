@@ -3309,18 +3309,50 @@
       "integrity": "6756365C82B5BD90C6A40C13CF8E3599E4A1DB50628111FFDB3A76FF85256BA4"
     },
     {
-      "description": "Mono Framework Assemblies",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027135",
+      "description": "OpenDebugAD7 (Windows x86)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/de9fa59805117816e8a5f94c8266f08f/win7-x86.zip",
       "platforms": [
-        "linux",
-        "darwin"
+        "win32"
       ],
-      "binaries": [],
-      "integrity": "579295329C1825588B6251EEA56571D1B9555BD529AA1A319CDFE741BC22D786"
+      "architectures": [
+        "x86"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7.exe"
+      ],
+      "integrity": "8144471564483F2CF2AD44F6E47FEE43CFE0DE935CC5B19AD057B2E9F17247EB"
     },
     {
-      "description": "Mono Runtime (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027416",
+      "description": "OpenDebugAD7 (Windows x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/76746f7e2b206af62790f7c531c5ebfe/win-x64.zip",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "x64"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7.exe"
+      ],
+      "integrity": "07BCB0E787B440D55377DA475BC6859694C5EDDFE4540DB11D5EC864B67C29E3"
+    },
+    {
+      "description": "OpenDebugAD7 (Windows ARM64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/c6fc1101fc22085d80ee5b51b05cf75b/win10-arm64.zip",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7.exe"
+      ],
+      "integrity": "98E7434DA74545FE0731E2BB08A14B92B075A0A888181223E45221EA823EE42C"
+    },
+    {
+      "description": "OpenDebugAD7 (Linux x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/cab96f290df15021d58396616c833fa4/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -3328,13 +3360,13 @@
         "x64"
       ],
       "binaries": [
-        "./debugAdapters/mono.linux-x86_64"
+        "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "927C5094E83CE64EDC3A267EE1F13267CFA09FC1E9A5ADC870A752C05AD26F17"
+      "integrity": "4912413127724649A10A0925316D7E735159F49405D7DD3EA2F54750D6F65964"
     },
     {
-      "description": "Mono Runtime (Linux / armhf)",
-      "url": "https://aka.ms/mono-runtime-linux-arm",
+      "description": "OpenDebugAD7 (Linux ARM)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/3aaff9a6621469d7efd1423fe2c1063e/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -3342,13 +3374,13 @@
         "arm"
       ],
       "binaries": [
-        "./debugAdapters/mono.linux-armhf"
+        "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "D2D1FE7FB5CC5B2A60364F08829467509879D603FC951AC3805B530C8CEEF981"
+      "integrity": "527426D22FCDD0F3A679F767DDEE82BE34A73A281A46FF3CD64771D37EF6B886"
     },
     {
-      "description": "Mono Runtime (Linux / arm64)",
-      "url": "https://aka.ms/mono-runtime-linux-arm64",
+      "description": "OpenDebugAD7 (Linux ARM64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/3ab22dae7df3d59330d73ce58c9025b5/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -3356,20 +3388,37 @@
         "arm64"
       ],
       "binaries": [
-        "./debugAdapters/mono.linux-arm64"
+        "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "946C54C8C6BF5BF79AC05D4E152F8D8647700FA786C21505832B3C79988339B4"
+      "integrity": "2EB2F631C70AB4C6717D5AC61009051F6EFD4BFAF68E7364D95533CA2A7F2F03"
     },
     {
-      "description": "Mono Runtime (macOS)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027403",
+      "description": "OpenDebugAD7 (Alpine Linux x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/df8be410ade3aea46110a64eb5afaf9f/linux-musl-x64.zip",
+      "platforms": [
+        "alpine-linux"
+      ],
+      "architectures": [
+        "x64"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7"
+      ],
+      "integrity": "5C830E144F8E9329232EDFC9760034C8A79F7146BB6EF49AE9CFF91BAEF8D10D"
+    },
+    {
+      "description": "OpenDebugAD7 (macOS x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/f69c1f2f41c21872843df39a3ced3e97/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
-      "binaries": [
-        "./debugAdapters/mono.osx"
+      "architectures": [
+        "x64"
       ],
-      "integrity": "5D9E5AB3E921D138887BD12FF46B02BFC85B692B438EDFAAEB1E1E7837F1D40B"
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7"
+      ],
+      "integrity": "6525551C0E7B64EC920BD527AC2C836841EBA7265151BC4EFC8B3FD56565CC80"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",

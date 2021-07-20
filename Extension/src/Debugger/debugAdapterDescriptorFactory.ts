@@ -35,12 +35,10 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
 
     async createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
         if (await util.isExtensionReady()) {
-            let command: string = path.join(this.context.extensionPath, './debugAdapters/OpenDebugAD7');
 
-            // Windows has the exe in debugAdapters/bin.
-            if (os.platform() === 'win32') {
-                command = path.join(this.context.extensionPath, "./debugAdapters/bin/OpenDebugAD7.exe");
-            }
+            const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
+
+            const command: string = path.join(this.context.extensionPath, adapter);
 
             return new vscode.DebugAdapterExecutable(command, []);
         } else {
