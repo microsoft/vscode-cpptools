@@ -9,6 +9,7 @@
 	"unable.to.start": "No se puede iniciar el servidor de lenguaje de C/C++. Las características de IntelliSense se deshabilitarán. Error: {0}",
 	"check.permissions": "EPERM: Compruebe los permisos de \"{0}\"",
 	"server.crashed2": "El servidor de lenguaje se ha bloqueado cinco veces en los tres últimos minutos. No se reiniciará.",
+	"loggingLevel.changed": "{0} se cambió a: {1}",
 	"provider.configure.folder": "{0} desea configurar IntelliSense para la carpeta \"{1}\".",
 	"provider.configure.this.folder": "{0} desea configurar IntelliSense para esta carpeta.",
 	"allow.button": "Permitir",

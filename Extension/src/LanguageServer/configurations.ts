@@ -775,12 +775,11 @@ export class CppProperties {
             configuration.intelliSenseModeIsExplicit = configuration.intelliSenseModeIsExplicit || settings.defaultIntelliSenseMode !== "";
             configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
             configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
-            configuration.compilerPathIsExplicit = false;
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
-                configuration.compilerPathIsExplicit = configuration.compilerPath !== undefined;
+                configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== undefined;
                 if (configuration.compilerPath === undefined) {
                     if (!!this.defaultCompilerPath) {
                         // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
@@ -820,6 +819,8 @@ export class CppProperties {
                 } else if (configuration.compilerPath !== undefined) {
                     configuration.compilerPath = util.resolveVariables(configuration.compilerPath, env);
                     configuration.compilerPathIsExplicit = true;
+                } else {
+                    configuration.compilerPathIsExplicit = false;
                 }
             }
 
