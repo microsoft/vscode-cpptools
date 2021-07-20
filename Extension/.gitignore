@@ -25,7 +25,6 @@ install.lock
 
 # ignore generated localization file
 **/nls.*.json
-**/*.nls.json
 **/*.nls.*.json
 
 # ignore generate native header
