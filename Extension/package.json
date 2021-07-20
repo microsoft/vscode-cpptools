@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.53.0"
+    "vscode": "^1.57.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -2656,60 +2656,356 @@
     ],
     "semanticTokenScopes": [
       {
+        "language": "c",
         "scopes": {
+          "namespace": [
+            "entity.name.namespace.c"
+          ],
+          "type": [
+            "entity.name.type.c"
+          ],
+          "type.defaultLibrary": [
+            "support.type.c"
+          ],
+          "struct": [
+            "storage.type.struct.c"
+          ],
+          "class": [
+            "entity.name.type.class.c"
+          ],
+          "class.defaultLibrary": [
+            "support.class.c"
+          ],
+          "interface": [
+            "entity.name.type.interface.c"
+          ],
+          "enum": [
+            "entity.name.type.enum.c"
+          ],
+          "function": [
+            "entity.name.function.c"
+          ],
+          "function.defaultLibrary": [
+            "support.function.c"
+          ],
+          "method": [
+            "entity.name.function.member.c"
+          ],
+          "variable": [
+            "variable.other.readwrite.c",
+            "entity.name.variable.c"
+          ],
+          "variable.readonly": [
+            "variable.other.constant.c"
+          ],
+          "variable.readonly.defaultLibrary": [
+            "support.constant.c"
+          ],
+          "parameter": [
+            "variable.parameter.c"
+          ],
+          "property": [
+            "variable.other.property.c"
+          ],
+          "property.readonly": [
+            "variable.other.constant.property.c"
+          ],
+          "enumMember": [
+            "variable.other.enummember.c"
+          ],
+          "event": [
+            "variable.other.event.c"
+          ],
           "label": [
-            "entity.name.label"
+            "entity.name.label.c"
           ],
           "variable.global": [
-            "variable.other.global"
+            "variable.other.global.c"
           ],
           "variable.local": [
-            "variable.other.local"
+            "variable.other.local.c"
           ],
           "property.static": [
-            "variable.other.property.static"
+            "variable.other.property.static.c"
           ],
           "method.static": [
-            "entity.name.function.member.static"
+            "entity.name.function.member.static.c"
           ],
           "macro": [
-            "entity.name.function.preprocessor"
+            "entity.name.function.preprocessor.c",
+            "entity.name.function.macro.c"
           ],
           "referenceType": [
-            "entity.name.type.class.reference"
+            "entity.name.type.class.reference.c"
           ],
           "cliProperty": [
-            "variable.other.property.cli"
+            "variable.other.property.cli.c"
           ],
           "genericType": [
-            "entity.name.type.class.generic"
+            "entity.name.type.class.generic.c"
           ],
           "valueType": [
-            "entity.name.type.class.value"
+            "entity.name.type.class.value.c"
           ],
           "templateFunction": [
-            "entity.name.function.templated"
+            "entity.name.function.templated.c"
           ],
           "templateType": [
-            "entity.name.type.class.templated"
+            "entity.name.type.class.templated.c"
           ],
           "operatorOverload": [
-            "entity.name.function.operator"
+            "entity.name.function.operator.c"
           ],
           "memberOperatorOverload": [
-            "entity.name.function.operator.member"
+            "entity.name.function.operator.member.c"
           ],
           "newOperator": [
-            "keyword.operator.new"
+            "keyword.operator.new.c"
           ],
           "numberLiteral": [
-            "entity.name.operator.custom-literal.number"
+            "entity.name.operator.custom-literal.number.c"
           ],
           "customLiteral": [
-            "entity.name.operator.custom-literal"
+            "entity.name.operator.custom-literal.c"
           ],
           "stringLiteral": [
-            "entity.name.operator.custom-literal.string"
+            "entity.name.operator.custom-literal.string.c"
+          ]
+        }
+      },
+      {
+        "language": "cpp",
+        "scopes": {
+          "namespace": [
+            "entity.name.namespace.cpp"
+          ],
+          "type": [
+            "entity.name.type.cpp"
+          ],
+          "type.defaultLibrary": [
+            "support.type.cpp"
+          ],
+          "struct": [
+            "storage.type.struct.cpp"
+          ],
+          "class": [
+            "entity.name.type.class.cpp"
+          ],
+          "class.defaultLibrary": [
+            "support.class.cpp"
+          ],
+          "interface": [
+            "entity.name.type.interface.cpp"
+          ],
+          "enum": [
+            "entity.name.type.enum.cpp"
+          ],
+          "function": [
+            "entity.name.function.cpp"
+          ],
+          "function.defaultLibrary": [
+            "support.function.cpp"
+          ],
+          "method": [
+            "entity.name.function.member.cpp"
+          ],
+          "variable": [
+            "variable.other.readwrite.cpp",
+            "entity.name.variable.cpp"
+          ],
+          "variable.readonly": [
+            "variable.other.constant.cpp"
+          ],
+          "variable.readonly.defaultLibrary": [
+            "support.constant.cpp"
+          ],
+          "parameter": [
+            "variable.parameter.cpp"
+          ],
+          "property": [
+            "variable.other.property.cpp"
+          ],
+          "property.readonly": [
+            "variable.other.constant.property.cpp"
+          ],
+          "enumMember": [
+            "variable.other.enummember.cpp"
+          ],
+          "event": [
+            "variable.other.event.cpp"
+          ],
+          "label": [
+            "entity.name.label.cpp"
+          ],
+          "variable.global": [
+            "variable.other.global.cpp"
+          ],
+          "variable.local": [
+            "variable.other.local.cpp"
+          ],
+          "property.static": [
+            "variable.other.property.static.cpp"
+          ],
+          "method.static": [
+            "entity.name.function.member.static.cpp"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor.cpp",
+            "entity.name.function.macro.cpp"
+          ],
+          "referenceType": [
+            "entity.name.type.class.reference.cpp"
+          ],
+          "cliProperty": [
+            "variable.other.property.cli.cpp"
+          ],
+          "genericType": [
+            "entity.name.type.class.generic.cpp"
+          ],
+          "valueType": [
+            "entity.name.type.class.value.cpp"
+          ],
+          "templateFunction": [
+            "entity.name.function.templated.cpp"
+          ],
+          "templateType": [
+            "entity.name.type.class.templated.cpp"
+          ],
+          "operatorOverload": [
+            "entity.name.function.operator.cpp"
+          ],
+          "memberOperatorOverload": [
+            "entity.name.function.operator.member.cpp"
+          ],
+          "newOperator": [
+            "keyword.operator.new.cpp"
+          ],
+          "numberLiteral": [
+            "entity.name.operator.custom-literal.number.cpp"
+          ],
+          "customLiteral": [
+            "entity.name.operator.custom-literal.cpp"
+          ],
+          "stringLiteral": [
+            "entity.name.operator.custom-literal.string.cpp"
+          ]
+        }
+      },
+      {
+        "language": "cuda-cpp",
+        "scopes": {
+          "namespace": [
+            "entity.name.namespace.cuda-cpp"
+          ],
+          "type": [
+            "entity.name.type.cuda-cpp"
+          ],
+          "type.defaultLibrary": [
+            "support.type.cuda-cpp"
+          ],
+          "struct": [
+            "storage.type.struct.cuda-cpp"
+          ],
+          "class": [
+            "entity.name.type.class.cuda-cpp"
+          ],
+          "class.defaultLibrary": [
+            "support.class.cuda-cpp"
+          ],
+          "interface": [
+            "entity.name.type.interface.cuda-cpp"
+          ],
+          "enum": [
+            "entity.name.type.enum.cuda-cpp"
+          ],
+          "function": [
+            "entity.name.function.cuda-cpp"
+          ],
+          "function.defaultLibrary": [
+            "support.function.cuda-cpp"
+          ],
+          "method": [
+            "entity.name.function.member.cuda-cpp"
+          ],
+          "variable": [
+            "variable.other.readwrite.cuda-cpp",
+            "entity.name.variable.cuda-cpp"
+          ],
+          "variable.readonly": [
+            "variable.other.constant.cuda-cpp"
+          ],
+          "variable.readonly.defaultLibrary": [
+            "support.constant.cuda-cpp"
+          ],
+          "parameter": [
+            "variable.parameter.cuda-cpp"
+          ],
+          "property": [
+            "variable.other.property.cuda-cpp"
+          ],
+          "property.readonly": [
+            "variable.other.constant.property.cuda-cpp"
+          ],
+          "enumMember": [
+            "variable.other.enummember.cuda-cpp"
+          ],
+          "event": [
+            "variable.other.event.cuda-cpp"
+          ],
+          "label": [
+            "entity.name.label.cuda-cpp"
+          ],
+          "variable.global": [
+            "variable.other.global.cuda-cpp"
+          ],
+          "variable.local": [
+            "variable.other.local.cuda-cpp"
+          ],
+          "property.static": [
+            "variable.other.property.static.cuda-cpp"
+          ],
+          "method.static": [
+            "entity.name.function.member.static.cuda-cpp"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor.cuda-cpp",
+            "entity.name.function.macro.cuda-cpp"
+          ],
+          "referenceType": [
+            "entity.name.type.class.reference.cuda-cpp"
+          ],
+          "cliProperty": [
+            "variable.other.property.cli.cuda-cpp"
+          ],
+          "genericType": [
+            "entity.name.type.class.generic.cuda-cpp"
+          ],
+          "valueType": [
+            "entity.name.type.class.value.cuda-cpp"
+          ],
+          "templateFunction": [
+            "entity.name.function.templated.cuda-cpp"
+          ],
+          "templateType": [
+            "entity.name.type.class.templated.cuda-cpp"
+          ],
+          "operatorOverload": [
+            "entity.name.function.operator.cuda-cpp"
+          ],
+          "memberOperatorOverload": [
+            "entity.name.function.operator.member.cuda-cpp"
+          ],
+          "newOperator": [
+            "keyword.operator.new.cuda-cpp"
+          ],
+          "numberLiteral": [
+            "entity.name.operator.custom-literal.number.cuda-cpp"
+          ],
+          "customLiteral": [
+            "entity.name.operator.custom-literal.cuda-cpp"
+          ],
+          "stringLiteral": [
+            "entity.name.operator.custom-literal.string.cuda-cpp"
           ]
         }
       }
@@ -2745,12 +3041,13 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.53.0",
+    "@types/vscode": "1.57.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/eslint-plugin-tslint": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
+    "@vscode/test-electron": "^1.6.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "eslint": "^7.25.0",
@@ -2778,7 +3075,6 @@
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-nls-dev": "^4.0.0-next.1",
-    "vscode-test": "^1.3.0",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0",
     "xml2js": "^0.4.19"

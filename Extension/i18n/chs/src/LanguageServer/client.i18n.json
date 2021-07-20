@@ -9,6 +9,7 @@
 	"unable.to.start": "无法启动 C/C++ 语言服务器。IntelliSense 功能将被禁用。错误: {0}",
 	"check.permissions": "EPERM: 检查“{0}”的权限",
 	"server.crashed2": "在过去 3 分钟内，语言服务器崩溃了 5 次。它不会重新启动。",
+	"loggingLevel.changed": "{0} 已更改为: {1}",
 	"provider.configure.folder": "{0} 想要为“{1}”文件夹配置 IntelliSense。",
 	"provider.configure.this.folder": "{0} 想要为此文件夹配置 IntelliSense。",
 	"allow.button": "允许",

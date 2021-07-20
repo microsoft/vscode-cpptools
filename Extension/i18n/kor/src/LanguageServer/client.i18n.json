@@ -9,6 +9,7 @@
 	"unable.to.start": "C/C++ 언어 서버를 시작할 수 없습니다. IntelliSense 기능을 사용할 수 없습니다. 오류: {0}",
 	"check.permissions": "EPERM: '{0}'에 대한 사용 권한 확인",
 	"server.crashed2": "지난 3분 동안 언어 서버에서 크래시가 5회 발생했습니다. 다시 시작되지 않습니다.",
+	"loggingLevel.changed": "{0}이(가) {1}(으)로 변경되었습니다.",
 	"provider.configure.folder": "{0}이(가) '{1}' 폴더에 IntelliSense를 구성하려고 합니다.",
 	"provider.configure.this.folder": "{0}이(가) 이 폴더에 IntelliSense를 구성하려고 합니다.",
 	"allow.button": "허용",
