@@ -9,6 +9,7 @@
 	"unable.to.start": "無法啟動 C/C + + 語言伺服器。將停用 IntelliSense 功能。錯誤: {0}",
 	"check.permissions": "EPERM: 檢查 '{0}' 的權限",
 	"server.crashed2": "語言伺服器在過去 3 分鐘內發生 5 次故障。將不會重新啟動。",
+	"loggingLevel.changed": "{0}已變更為: {1}",
 	"provider.configure.folder": "{0} 想要為 '{1}' 資料夾設定 IntelliSense。",
 	"provider.configure.this.folder": "{0} 想要為此資料夾設定 IntelliSense。",
 	"allow.button": "允許",

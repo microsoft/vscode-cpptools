@@ -9,6 +9,7 @@
 	"unable.to.start": "Der C/C++-Sprachserver kann nicht gestartet werden. IntelliSense-Features werden deaktiviert. Fehler: {0}",
 	"check.permissions": "EPERM: Berechtigungen für \"{0}\" überprüfen",
 	"server.crashed2": "Der Sprachserver ist in den letzten 3 Minuten 5-mal abgestürzt. Er wird nicht neu gestartet.",
+	"loggingLevel.changed": "\"{0}\" wurde geändert in \"{1}\"",
 	"provider.configure.folder": "{0} möchte IntelliSense für den Ordner \"{1}\" konfigurieren.",
 	"provider.configure.this.folder": "{0} möchte IntelliSense für diesen Ordner konfigurieren.",
 	"allow.button": "Zulassen",
