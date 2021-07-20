@@ -455,6 +455,12 @@ interface SetTemporaryTextDocumentLanguageParams {
     isCuda: boolean;
 }
 
+enum CodeAnalysisScope {
+    ActiveFile,
+    OpenFiles,
+    AllFiles
+};
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -496,6 +502,7 @@ const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, v
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
 const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
+const ClangTidyNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runClangTidy');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -2718,14 +2725,17 @@ export class DefaultClient implements Client {
 
     public async handleRunClangTidyOnActiveFile(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(ClangTidyNotification, CodeAnalysisScope.ActiveFile);
     }
 
     public async handleRunClangTidyOnOpenFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(ClangTidyNotification, CodeAnalysisScope.OpenFiles);
     }
 
     public async handleRunClangTidyOnAllFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(ClangTidyNotification, CodeAnalysisScope.AllFiles);
     }
 
     public onInterval(): void {

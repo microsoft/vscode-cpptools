@@ -12,7 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client } from './client';
+import { Client, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, generateEditorConfig, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
@@ -945,12 +945,16 @@ function onCheckForCompiler(): void {
 
 function onRunClangTidyOnActiveFile(): void {
     onActivationEvent();
-    getActiveClient().handleRunClangTidyOnActiveFile();
+    if (activeDocument !== "") {
+        getActiveClient().handleRunClangTidyOnActiveFile();
+    }
 }
 
 function onRunClangTidyOnOpenFiles(): void {
     onActivationEvent();
-    getActiveClient().handleRunClangTidyOnOpenFiles();
+    if (openFileVersions.size > 0) {
+        getActiveClient().handleRunClangTidyOnOpenFiles();
+    }
 }
 
 function onRunClangTidyOnAllFiles(): void {
