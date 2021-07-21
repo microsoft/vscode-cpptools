@@ -310,9 +310,11 @@ export class UI {
         return (selection) ? selection.key : "";
     }
 
+    private readonly selectACommandString: string = localize("select.command", "Select a command...");
+
     public async showParsingCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.parsing.command", "Select a workspace parsing command...");
+        options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
         if (this.isParsingWorkspacePaused) {
@@ -326,7 +328,7 @@ export class UI {
 
     public async showAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize({ key: "select.analysis.command", comment: [this.codeAnalysisTranslationHint]}, "Select a {0} command...", this.codeAnalysisProgram);
+        options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
         items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
