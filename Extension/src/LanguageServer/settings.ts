@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath  } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';

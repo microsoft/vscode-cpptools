@@ -252,6 +252,11 @@
           "description": "%c_cpp.configuration.clang_format_style.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.clangTidy.path": {
+          "type": "string",
+          "description": "%c_cpp.configuration.clangTidy.path.description%",
+          "scope": "machine-overridable"
+        },
         "C_Cpp.formatting": {
           "type": "string",
           "enum": [
