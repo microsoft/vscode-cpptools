@@ -215,9 +215,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
 
-    setInstallationStage('removeUnnecessaryFile');
-    await removeUnnecessaryFile();
-
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
 
@@ -232,9 +229,6 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
 
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
-
-    setInstallationStage('removeUnnecessaryFile');
-    await removeUnnecessaryFile();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -314,22 +308,6 @@ async function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
         }
     });
     await Promise.all(promises);
-}
-
-function removeUnnecessaryFile(): Promise<void> {
-    if (os.platform() !== 'win32') {
-        const sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
-        if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
-                if (err) {
-                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
-                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
-                }
-            });
-        }
-    }
-
-    return Promise.resolve();
 }
 
 function touchInstallLockFile(info: PlatformInformation): Promise<void> {
