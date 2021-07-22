@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath  } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath /* , getCachedClangTidyPath, setCachedClangTidyPath */  } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
@@ -77,6 +77,10 @@ export class CppSettings extends Settings {
 
     public get clangTidyName(): string {
         return "clang-tidy" + this.LLVMExtension;
+    }
+
+    public get clangTidyPath(): string | undefined {
+        return this.clangFormatPath; // TODO
     }
 
     public get clangFormatPath(): string | undefined {
