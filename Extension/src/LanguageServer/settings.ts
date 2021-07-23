@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath /* , getCachedClangTidyPath, setCachedClangTidyPath */  } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
@@ -63,51 +63,69 @@ export class CppSettings extends Settings {
         return os.platform() === "win32" ? ".exe" : "";
     }
 
-    private get clangFormatName(): string {
-        return "clang-format" + this.LLVMExtension;
+    private get clangFormatStr(): string {
+        return "clang-format";
     }
 
-    public get clangTidyName(): string {
-        return "clang-tidy" + this.LLVMExtension;
+    private get clangTidyStr(): string {
+        return "clang-tidy";
+    }
+
+    private get clangFormatName(): string {
+        return this.clangFormatStr + this.LLVMExtension;
+    }
+
+    private get clangTidyName(): string {
+        return this.clangTidyStr + this.LLVMExtension;
     }
 
     public get clangTidyPath(): string | undefined {
-        return this.clangFormatPath; // TODO
+        return this.getClangPath(false);
     }
 
     public get clangFormatPath(): string | undefined {
-        let path: string | undefined | null = super.Section.get<string>("clang_format_path");
+        return this.getClangPath(true);
+    }
+
+    private getClangPath(isFormat: boolean): string | undefined {
+        let path: string | undefined | null = super.Section.get<string>(isFormat ? "clang_format_path" : "clangTidy.path");
         if (!path) {
-            const cachedClangFormatPath: string | null | undefined = getCachedClangFormatPath();
-            if (cachedClangFormatPath !== undefined) {
-                if (cachedClangFormatPath === null) {
+            const cachedClangPath: string | null | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
+            if (cachedClangPath !== undefined) {
+                if (cachedClangPath === null) {
                     return undefined;
                 }
-                return cachedClangFormatPath;
+                return cachedClangPath;
             }
-            path = which.sync('clang-format', { nothrow: true });
-            setCachedClangFormatPath(path);
+            const clangStr: string = isFormat ? this.clangFormatStr : this.clangTidyStr;
+            const clangName: string = isFormat ? this.clangFormatName : this.clangTidyName;
+            path = which.sync(clangName, { nothrow: true });
+            if (isFormat) {
+                setCachedClangFormatPath(path);
+            } else {
+                setCachedClangTidyPath(path);
+            }
             if (!path) {
                 return undefined;
             } else {
-                // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
-                let clangFormatVersion: string;
+                // Attempt to invoke both our own version of clang-* to see if we can successfully execute it, and to get it's version.
+                let clangVersion: string;
                 try {
-                    const exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
+                    const exePath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
                     const output: string[] = execSync(`${exePath} --version`).toString().split(" ");
-                    if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || !semver.valid(output[2])) {
+                    if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || !semver.valid(output[2])) {
                         return path;
                     }
-                    clangFormatVersion = output[2];
+                    clangVersion = output[2];
                 } catch (e) {
-                    // Unable to invoke our own clang-format.  Use the system installed clang-format.
+                    // Unable to invoke our own clang-*.  Use the system installed clang-*.
                     return path;
                 }
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
                     const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
-                    if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
+                    if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || semver.ltr(output[2], clangVersion)) {
                         path = "";
                     }
                 } catch (e) {
