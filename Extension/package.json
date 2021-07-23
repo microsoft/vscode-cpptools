@@ -3240,7 +3240,7 @@
     },
     {
       "description": "ClangFormat (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2162416",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2168396",
       "platforms": [
         "darwin"
       ],
@@ -3248,13 +3248,13 @@
         "x64"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format.darwin"
+        "./LLVM/bin/clang-format"
       ],
-      "integrity": "AEB24D394118EAD87087DCC651F2EE329FC335ECE88ED6C8C2A9E93ED60DFECD"
+      "integrity": "5C4848EAAE3DBD7EDAB3155717C49204A09E4625B39463A00887CAA0C9D16657"
     },
     {
       "description": "ClangFormat (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2162413",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2168397",
       "platforms": [
         "darwin"
       ],
@@ -3262,9 +3262,9 @@
         "arm64"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format.darwin"
+        "./LLVM/bin/clang-format"
       ],
-      "integrity": "AE5507F54562B9DA99E3F8318E25C93BD38AD2FBF4238ADF1C152ECFB0C10FA9"
+      "integrity": "404C8CFC847FD9B740BD4077534F00918ED592C7F4DFE4B66F933CAC10CCA5FB"
     },
     {
       "description": "ClangFormat (Windows x86)",
