@@ -3271,10 +3271,10 @@
         "x64"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format.darwin",
-        "./LLVM/bin/clang-tidy.darwin"
+        "./LLVM/bin/clang-format",
+        "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "E4027DA8771AF28E1EBDC4B554B72D7501BF4989B0B5A0C374D7FC82A5C1BF5F"
+      "integrity": "ADD73C4822497BDB03328FC50046A5B5C5A0D89E62835C0180EE7DC857801B10"
     },
     {
       "description": "Clang tools (macOS / ARM64)",
@@ -3286,10 +3286,10 @@
         "arm64"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format.darwin",
-        "./LLVM/bin/clang-tidy.darwin"
+        "./LLVM/bin/clang-format",
+        "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "67BDAC6D46A3F8C5F491D6BC9A461C1CF6179C57B1CA7F6643512A1338C44E17"
+      "integrity": "14DBEFB75DF25553939CFF56E5FC9F5E1520E81B716EA45C9E710C80F254CE34"
     },
     {
       "description": "Clang tools (Windows x86)",

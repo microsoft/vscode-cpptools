@@ -60,15 +60,7 @@ export class CppSettings extends Settings {
     }
 
     private get LLVMExtension(): string {
-        switch (os.platform()) {
-            case "win32":
-                return ".exe";
-            case "darwin":
-                return ".darwin";
-            case "linux":
-            default:
-                return "";
-        }
+        return os.platform() === "win32" ? ".exe" : "";
     }
 
     private get clangFormatName(): string {
