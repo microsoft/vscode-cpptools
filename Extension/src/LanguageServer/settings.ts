@@ -105,9 +105,11 @@ export class CppSettings extends Settings {
                     const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
                         path = "";
+                        setCachedClangFormatPath(path);
                     }
                 } catch (e) {
                     path = "";
+                    setCachedClangFormatPath(path);
                 }
             }
         }
