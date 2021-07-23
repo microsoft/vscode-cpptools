@@ -257,6 +257,14 @@
           "description": "%c_cpp.configuration.clangTidy.path.description%",
           "scope": "machine-overridable"
         },
+        "C_Cpp.clangTidy.maxProcesses": {
+          "type": "integer",
+          "description": "%c_cpp.configuration.clangTidy.maxProcesses.description%",
+          "default": null,
+          "minimum": 1,
+          "maximum": 32,
+          "scope": "machine"
+        },
         "C_Cpp.formatting": {
           "type": "string",
           "enum": [

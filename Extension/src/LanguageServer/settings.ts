@@ -99,12 +99,9 @@ export class CppSettings extends Settings {
             }
             const clangStr: string = isFormat ? this.clangFormatStr : this.clangTidyStr;
             const clangName: string = isFormat ? this.clangFormatName : this.clangTidyName;
+            const setCachedClangPath: (path: string | null) => void = isFormat ? setCachedClangFormatPath : setCachedClangTidyPath;
             path = which.sync(clangName, { nothrow: true });
-            if (isFormat) {
-                setCachedClangFormatPath(path);
-            } else {
-                setCachedClangTidyPath(path);
-            }
+            setCachedClangPath(path);
             if (!path) {
                 return undefined;
             } else {
@@ -127,9 +124,11 @@ export class CppSettings extends Settings {
                     const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || semver.ltr(output[2], clangVersion)) {
                         path = "";
+                        setCachedClangPath(path);
                     }
                 } catch (e) {
                     path = "";
+                    setCachedClangPath(path);
                 }
             }
         }
