@@ -83,6 +83,10 @@ export class CppSettings extends Settings {
         return this.getClangPath(false);
     }
 
+    public get clangTidyMaxProcesses(): number | undefined {
+        return super.Section.get<number>("clangTidy.maxProcesses");
+    }
+
     public get clangFormatPath(): string | undefined {
         return this.getClangPath(true);
     }
