@@ -189,7 +189,7 @@ export class PackageManager {
         let success: boolean = false;
         let lastError: any = null;
         let retryCount: number = 0;
-        const MAX_RETRIES: number = 100;
+        const MAX_RETRIES: number = 10;
 
         // Retry the download at most MAX_RETRIES times with 2-32 seconds delay.
         do {

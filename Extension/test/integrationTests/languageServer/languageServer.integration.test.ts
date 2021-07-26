@@ -14,23 +14,6 @@ import * as testHelpers from '../testHelpers';
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
-
-        const cpptools: vscode.Extension<any> | undefined = vscode.extensions.getExtension("ms-vscode.cpptools");
-        let extension: apit.CppToolsTestApi | apit.CppToolsTestExtension;
-
-        if (cpptools) {
-            if (!cpptools.isActive) {
-                extension = await cpptools.activate();
-                if (!extension) {
-                    throw Error("bad1");
-                }
-            } else {
-                extension = cpptools.exports;
-                if (!extension) {
-                    throw Error("bad2");
-                }
-            }
-        }
     });
 
     const defaultMLRules: vscode.OnEnterRule[] = [
@@ -173,7 +156,6 @@ suite("extensibility tests v3", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v3);
         cpptools.registerCustomConfigurationProvider(provider);
         cpptools.notifyReady(provider);
@@ -267,7 +249,6 @@ suite("extensibility tests v2", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v2);
         cpptools.registerCustomConfigurationProvider(provider);
         cpptools.notifyReady(provider);
@@ -348,7 +329,6 @@ suite("extensibility tests v1", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v1);
         cpptools.registerCustomConfigurationProvider(provider);
         disposables.push(cpptools);
@@ -422,7 +402,6 @@ suite("extensibility tests v0", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v0);
         cpptools.registerCustomConfigurationProvider(provider);
         disposables.push(cpptools); // This is a no-op for v0, but do it anyway to make sure nothing breaks.
