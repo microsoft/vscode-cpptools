@@ -189,7 +189,7 @@ export class PackageManager {
         let success: boolean = false;
         let lastError: any = null;
         let retryCount: number = 0;
-        const MAX_RETRIES: number = 5;
+        const MAX_RETRIES: number = 100;
 
         // Retry the download at most MAX_RETRIES times with 2-32 seconds delay.
         do {
@@ -244,7 +244,7 @@ export class PackageManager {
 
         const buffers: Buffer[] = [];
         return new Promise<void>((resolve, reject) => {
-            let secondsDelay: number = Math.pow(2, delay);
+            let secondsDelay: number = Math.min(Math.pow(2, delay), 32);
             if (secondsDelay === 1) {
                 secondsDelay = 0;
             }
