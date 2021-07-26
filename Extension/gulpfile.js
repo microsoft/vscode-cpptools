@@ -354,7 +354,7 @@ async function generatePackageHashes(packageJson) {
     const downloadAndGetHash = async (url) => {
         console.log(url);
         let retry = 0;
-        while (retry < 10) {
+        while (retry < 100) {
             try {
                 const buf = await DownloadFile(url);
                 if (buf) {
