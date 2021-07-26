@@ -60,15 +60,7 @@ export class CppSettings extends Settings {
     }
 
     private get clangFormatName(): string {
-        switch (os.platform()) {
-            case "win32":
-                return "clang-format.exe";
-            case "darwin":
-                return "clang-format.darwin";
-            case "linux":
-            default:
-                return "clang-format";
-        }
+        return "clang-format" + (os.platform() === "win32" ? ".exe" : "");
     }
 
     public get clangFormatPath(): string | undefined {
