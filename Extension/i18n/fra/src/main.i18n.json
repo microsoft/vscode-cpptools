@@ -13,7 +13,6 @@
 	"json.files.missing": "Échec de l'installation de l'extension C/C++. Vous devez réinstaller l'extension pour que les fonctionnalités du langage C/C++ fonctionnent correctement.",
 	"initialization.failed": "L'installation de l'extension C/C++ a échoué. Pour plus d'informations, consultez la fenêtre Sortie.",
 	"updating.dependencies": "Mise à jour des dépendances C/C++...",
-	"rename.failed.delete.manually": "ERREUR : fs.rename a échoué avec \"{0}\". Supprimez {1} manuellement pour activer le débogage.",
 	"failed.at.stage": "Échec à l'étape {0}",
 	"failed.at.stage2": "Si vous travaillez dans un environnement hors connexion ou si vous voyez cette erreur à plusieurs reprises, essayez de télécharger une version de l'extension avec toutes les dépendances préalablement incluses à partir de {0}, puis utilisez la commande \"Installer depuis un VSIX\" dans VS Code pour effectuer l'installation.",
 	"finished.installing.dependencies": "Installation des dépendances terminée",
