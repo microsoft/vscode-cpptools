@@ -156,6 +156,7 @@ suite("extensibility tests v3", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
+        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v3);
         cpptools.registerCustomConfigurationProvider(provider);
         cpptools.notifyReady(provider);
