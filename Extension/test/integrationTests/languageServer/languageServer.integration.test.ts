@@ -14,6 +14,23 @@ import * as testHelpers from '../testHelpers';
 suite("multiline comment setting tests", function(): void {
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
+
+        const cpptools: vscode.Extension<any> | undefined = vscode.extensions.getExtension("ms-vscode.cpptools");
+        let extension: apit.CppToolsTestApi | apit.CppToolsTestExtension;
+
+        if (cpptools) {
+            if (!cpptools.isActive) {
+                extension = await cpptools.activate();
+                if (!extension) {
+                    throw Error("bad1");
+                }
+            } else {
+                extension = cpptools.exports;
+                if (!extension) {
+                    throw Error("bad2");
+                }
+            }
+        }
     });
 
     const defaultMLRules: vscode.OnEnterRule[] = [
