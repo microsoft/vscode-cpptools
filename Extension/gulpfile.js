@@ -83,8 +83,8 @@ gulp.task('pr-check', (done) => {
 // The result will be written to: ../vscode-extensions-localization-export/ms-vscode/
 // ****************************
 
-const translationProjectName  = "vscode-extensions";
-const translationExtensionName  = "vscode-cpptools";
+const translationProjectName = "vscode-extensions";
+const translationExtensionName = "vscode-cpptools";
 
 function removePathPrefix(path, prefix) {
     if (!prefix) {
@@ -123,8 +123,7 @@ const traverseHtml = (contents, nodeCallback, attributeCallback) => {
                 // Check if an attribute should be localized based on presense of data-loc-id-<attribute_name> attribute
                 node.attrs.forEach(attribute => {
                     const dataLocIdAttributePrefix = "data-loc-id-";
-                    if (attribute.name.startsWith(dataLocIdAttributePrefix))
-                    {
+                    if (attribute.name.startsWith(dataLocIdAttributePrefix)) {
                         let targetAttributeName = attribute.name.substring(dataLocIdAttributePrefix.length);
                         let targetAttribute = node.attrs.find(a => a.name == targetAttributeName);
                         if (targetAttribute) {
@@ -183,9 +182,9 @@ const processHtmlFiles = () => {
 const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     for (let fieldName in jsonTree) {
         if (jsonTree[fieldName] !== null) {
-            if (typeof(jsonTree[fieldName]) == "string" && fieldName === "description") {
+            if (typeof (jsonTree[fieldName]) == "string" && fieldName === "description") {
                 descriptionCallback(prefixPath, jsonTree[fieldName], jsonTree);
-            } else if (typeof(jsonTree[fieldName]) == "object") {
+            } else if (typeof (jsonTree[fieldName]) == "object") {
                 let path = prefixPath;
                 if (path !== "")
                     path = path + ".";
@@ -233,7 +232,7 @@ gulp.task("translations-export", (done) => {
         .pipe(sourcemaps.init())
         .pipe(tsProject()).js
         .pipe(nls.createMetaDataFiles());
-    
+
     // Scan html files for tags with the data-loc-id attribute
     let htmlStream = gulp.src(htmlFilesPatterns)
         .pipe(processHtmlFiles());
@@ -244,25 +243,25 @@ gulp.task("translations-export", (done) => {
     // Merge files from all source streams
     es.merge(jsStream, htmlStream, jsonSchemaStream)
 
-    // Filter down to only the files we need
-    .pipe(filter(['**/*.nls.json', '**/*.nls.metadata.json']))
+        // Filter down to only the files we need
+        .pipe(filter(['**/*.nls.json', '**/*.nls.metadata.json']))
 
-    // Consoldate them into nls.metadata.json, which the xlf is built from.
-    .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', '.'))
+        // Consoldate them into nls.metadata.json, which the xlf is built from.
+        .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', '.'))
 
-    // filter down to just the resulting metadata files
-    .pipe(filter(['**/nls.metadata.header.json', '**/nls.metadata.json']))
+        // filter down to just the resulting metadata files
+        .pipe(filter(['**/nls.metadata.header.json', '**/nls.metadata.json']))
 
-    // Add package.nls.json, used to localized package.json
-    .pipe(gulp.src(["package.nls.json"]))
+        // Add package.nls.json, used to localized package.json
+        .pipe(gulp.src(["package.nls.json"]))
 
-    // package.nls.json and nls.metadata.json are used to generate the xlf file
-    // Does not re-queue any files to the stream.  Outputs only the XLF file
-    .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
-    .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)))
-    .pipe(es.wait(() => {
-        done();
-    }));
+        // package.nls.json and nls.metadata.json are used to generate the xlf file
+        // Does not re-queue any files to the stream.  Outputs only the XLF file
+        .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
+        .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)))
+        .pipe(es.wait(() => {
+            done();
+        }));
 });
 
 
@@ -286,9 +285,9 @@ gulp.task("translations-import", (done) => {
             .pipe(nls.prepareJsonFiles())
             .pipe(gulp.dest(path.join("./i18n", language.folderName)));
     }))
-    .pipe(es.wait(() => {
-        done();
-    }));
+        .pipe(es.wait(() => {
+            done();
+        }));
 });
 
 // ****************************
@@ -349,19 +348,22 @@ async function DownloadFile(urlString) {
         // Execute the request
         req.end();
     });
-    
 }
 
 async function generatePackageHashes(packageJson) {
     const downloadAndGetHash = async (url) => {
         console.log(url);
         try {
-            const buf = await DownloadFile(url);
-            if (buf) {
-                const hash = crypto.createHash('sha256');
-                hash.update(buf);
-                const value = hash.digest('hex').toUpperCase();
-                return value;
+            let retry = 0;
+            while (retry < 5) {
+                const buf = await DownloadFile(url);
+                if (buf) {
+                    const hash = crypto.createHash('sha256');
+                    hash.update(buf);
+                    const value = hash.digest('hex').toUpperCase();
+                    return value;
+                }
+                ++retry;
             }
             return undefined;
         } catch (err) {
@@ -445,15 +447,15 @@ const generateLocalizedHtmlFiles = () => {
                     let matchParts = locString.match(/\{[0-9]+\}/g);
                     let newChildNodes = [];
                     let i = 0;
-                    for (; i < textParts.length - 1; i ++) {
+                    for (; i < textParts.length - 1; i++) {
                         if (textParts[i] != "") {
-                            newChildNodes.push({ nodeName: "#text", value: textParts[i]});
+                            newChildNodes.push({ nodeName: "#text", value: textParts[i] });
                         }
                         let childIndex = matchParts[i].match(/[0-9]+/);
                         newChildNodes.push(nonTextChildNodes[childIndex]);
                     }
                     if (textParts[i] != "") {
-                        newChildNodes.push({ nodeName: "#text", value: textParts[i]});
+                        newChildNodes.push({ nodeName: "#text", value: textParts[i] });
                     }
                     node.childNodes = newChildNodes;
                 }
@@ -549,15 +551,14 @@ gulp.task("generate-native-strings", (done) => {
     for (let property in stringTable) {
         let stringValue = stringTable[property];
         let hintValue;
-        if (typeof stringValue !== "string")
-        {
+        if (typeof stringValue !== "string") {
             hintValue = stringValue.hint;
             stringValue = stringValue.text;
         }
-        
+
         // Add to native enum
         nativeEnumContent += `    ${property} = ${stringIndex},\n`;
-        
+
         // Add to native string table
         nativeStringTableContent += `    ${JSON.stringify(stringValue)},\n`;
 
