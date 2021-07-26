@@ -250,6 +250,7 @@ suite("extensibility tests v2", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
+        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v2);
         cpptools.registerCustomConfigurationProvider(provider);
         cpptools.notifyReady(provider);
@@ -330,6 +331,7 @@ suite("extensibility tests v1", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
+        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v1);
         cpptools.registerCustomConfigurationProvider(provider);
         disposables.push(cpptools);
@@ -403,6 +405,7 @@ suite("extensibility tests v0", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
+        await testHelpers.activateCppExtension();
         cpptools = await apit.getCppToolsTestApi(api.Version.v0);
         cpptools.registerCustomConfigurationProvider(provider);
         disposables.push(cpptools); // This is a no-op for v0, but do it anyway to make sure nothing breaks.
