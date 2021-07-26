@@ -353,9 +353,9 @@ async function DownloadFile(urlString) {
 async function generatePackageHashes(packageJson) {
     const downloadAndGetHash = async (url) => {
         console.log(url);
-        try {
-            let retry = 0;
-            while (retry < 5) {
+        let retry = 0;
+        while (retry < 5) {
+            try {
                 const buf = await DownloadFile(url);
                 if (buf) {
                     const hash = crypto.createHash('sha256');
@@ -363,12 +363,11 @@ async function generatePackageHashes(packageJson) {
                     const value = hash.digest('hex').toUpperCase();
                     return value;
                 }
-                ++retry;
+            } catch (err) {
             }
-            return undefined;
-        } catch (err) {
-            return undefined;
+            ++retry;
         }
+        return undefined;
     };
 
     for (let dependency of packageJson.runtimeDependencies) {
