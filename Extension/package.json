@@ -1101,7 +1101,7 @@
           ],
           "default": null,
           "description": "%c_cpp.configuration.default.compilerPath.description%",
-          "scope": "resource"
+          "scope": "machine-overridable"
         },
         "C_Cpp.default.compilerArgs": {
           "type": [
