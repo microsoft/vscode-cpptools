@@ -60,15 +60,7 @@ export class CppSettings extends Settings {
     }
 
     private get clangFormatName(): string {
-        switch (os.platform()) {
-            case "win32":
-                return "clang-format.exe";
-            case "darwin":
-                return "clang-format.darwin";
-            case "linux":
-            default:
-                return "clang-format";
-        }
+        return "clang-format" + (os.platform() === "win32" ? ".exe" : "");
     }
 
     public get clangFormatPath(): string | undefined {
@@ -105,9 +97,11 @@ export class CppSettings extends Settings {
                     const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
                         path = "";
+                        setCachedClangFormatPath(path);
                     }
                 } catch (e) {
                     path = "";
+                    setCachedClangFormatPath(path);
                 }
             }
         }

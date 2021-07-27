@@ -9,6 +9,7 @@
 	"unable.to.start": "Non è possibile avviare il server di linguaggio C/C++. Le funzionalità IntelliSense verranno disabilitate. Errore: {0}",
 	"check.permissions": "EPERM: verificare le autorizzazioni per '{0}'",
 	"server.crashed2": "Si sono verificati cinque arresti anomali del server di linguaggio negli ultimi tre minuti. Non verrà riavviato.",
+	"loggingLevel.changed": "{0} è stato modificato in: {1}",
 	"provider.configure.folder": "{0} vuole configurare IntelliSense per la cartella '{1}'.",
 	"provider.configure.this.folder": "{0} vuole configurare IntelliSense per questa cartella.",
 	"allow.button": "Consenti",

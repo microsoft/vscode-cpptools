@@ -9,6 +9,7 @@
 	"unable.to.start": "Nie można uruchomić serwera języka C/C++. Funkcje IntelliSense zostaną wyłączone. Błąd: {0}",
 	"check.permissions": "EPERM: sprawdź uprawnienia dla elementu „{0}”",
 	"server.crashed2": "W ciągu ostatnich 3 minut awaria serwera języka wystąpiła 5 razy. Nie zostanie on ponownie uruchomiony.",
+	"loggingLevel.changed": "Poziom {0} zmienił się na: {1}",
 	"provider.configure.folder": "{0} chce skonfigurować funkcję IntelliSense dla folderu „{1}”.",
 	"provider.configure.this.folder": "{0} chce skonfigurować funkcję IntelliSense dla tego folderu.",
 	"allow.button": "Zezwalaj",

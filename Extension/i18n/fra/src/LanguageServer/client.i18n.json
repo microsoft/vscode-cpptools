@@ -9,6 +9,7 @@
 	"unable.to.start": "Impossible de démarrer le serveur de langage C/C++. Les fonctionnalités IntelliSense sont désactivées. Erreur : {0}",
 	"check.permissions": "EPERM : Vérifier les autorisations de '{0}'",
 	"server.crashed2": "Le serveur de langage s'est bloqué 5 fois au cours des 3 dernières minutes. Il n'est pas redémarré.",
+	"loggingLevel.changed": "{0} a été changé en : {1}",
 	"provider.configure.folder": "{0} veut configurer IntelliSense pour le dossier '{1}'.",
 	"provider.configure.this.folder": "{0} veut configurer IntelliSense pour ce dossier.",
 	"allow.button": "Autoriser",

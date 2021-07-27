@@ -775,7 +775,11 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseAnalysis', onPauseAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeAnalysis', onResumeAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelAnalysis', onCancelAnalysis));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowAnalysisCommands', onShowAnalysisCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
@@ -988,9 +992,29 @@ function onResumeParsing(): void {
     clients.ActiveClient.resumeParsing();
 }
 
+function onPauseAnalysis(): void {
+    onActivationEvent();
+    clients.ActiveClient.pauseAnalysis();
+}
+
+function onResumeAnalysis(): void {
+    onActivationEvent();
+    clients.ActiveClient.resumeAnalysis();
+}
+
+function onCancelAnalysis(): void {
+    onActivationEvent();
+    clients.ActiveClient.cancelAnalysis();
+}
+
 function onShowParsingCommands(): void {
     onActivationEvent();
     clients.ActiveClient.handleShowParsingCommands();
+}
+
+function onShowAnalysisCommands(): void {
+    onActivationEvent();
+    clients.ActiveClient.handleShowAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {

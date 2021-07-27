@@ -121,7 +121,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         });
     } else if (!(await util.checkInstallJsonsExist())) {
         // Check the Json files to declare if the extension has been installed successfully.
-        errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
+        errMsg = localize("json.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
         const downloadLink: string = localize("download.button", "Go to Download Page");
         vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
             if (selection === downloadLink) {
@@ -215,9 +215,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
 
-    setInstallationStage('removeUnnecessaryFile');
-    await removeUnnecessaryFile();
-
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
 
@@ -232,9 +229,6 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
 
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
-
-    setInstallationStage('removeUnnecessaryFile');
-    await removeUnnecessaryFile();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -314,22 +308,6 @@ async function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
         }
     });
     await Promise.all(promises);
-}
-
-function removeUnnecessaryFile(): Promise<void> {
-    if (os.platform() !== 'win32') {
-        const sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
-        if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
-                if (err) {
-                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
-                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
-                }
-            });
-        }
-    }
-
-    return Promise.resolve();
 }
 
 function touchInstallLockFile(info: PlatformInformation): Promise<void> {

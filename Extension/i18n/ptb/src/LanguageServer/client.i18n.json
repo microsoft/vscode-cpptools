@@ -9,6 +9,7 @@
 	"unable.to.start": "Não é possível iniciar o servidor de linguagem C/C++. Os recursos do IntelliSense serão desabilitados. Erro: {0}",
 	"check.permissions": "EPERM: verifique as permissões para '{0}'",
 	"server.crashed2": "O servidor de idioma falhou cinco vezes nos últimos três minutos. Ele não será reiniciado.",
+	"loggingLevel.changed": "{0} foi alterado para: {1}",
 	"provider.configure.folder": "{0} gostaria de configurar o IntelliSense para a pasta '{1}'.",
 	"provider.configure.this.folder": "{0} gostaria de configurar o IntelliSense para esta pasta.",
 	"allow.button": "Permitir",
