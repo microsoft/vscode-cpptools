@@ -244,7 +244,7 @@ export class PackageManager {
 
         const buffers: Buffer[] = [];
         return new Promise<void>((resolve, reject) => {
-            let secondsDelay: number = Math.min(Math.pow(2, delay), 32);
+            let secondsDelay: number = Math.min(Math.pow(2, delay), 15);
             if (secondsDelay === 1) {
                 secondsDelay = 0;
             }
