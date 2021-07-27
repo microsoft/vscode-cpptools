@@ -47,7 +47,7 @@ export class UI {
     private isUpdatingIntelliSense: boolean = false;
     private isRunningCodeAnalysis: boolean = false;
     private workspaceParsingStatus: string = "";
-    private codeAnalysisType: string = "";
+    private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing open files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
     private readonly updatingIntelliSenseTooltip: string = localize("updating.intellisense.tooltip", "Updating IntelliSense");
@@ -82,9 +82,9 @@ export class UI {
         this.browseEngineStatusBarItem.command = "";
         this.ShowDBIcon = false;
 
-        this.codeAnalysisType = "clang-tidy";
+        this.codeAnalysisProgram = "clang-tidy";
         this.runningCodeAnalysisTooltip = localize(
-            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisType);
+            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
     }
 
     private set ActiveConfig(label: string) {
@@ -310,15 +310,17 @@ export class UI {
         return (selection) ? selection.key : "";
     }
 
+    private readonly selectACommandString: string = localize("select.command", "Select a command...");
+
     public async showParsingCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.parsing.command", "Select a parsing command...");
+        options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
         if (this.isParsingWorkspacePaused) {
-            items.push({ label: localize("resume.parsing", "Resume Parsing"), description: "", index: 1 });
+            items.push({ label: localize("resume.parsing", "Resume Workspace Parsing"), description: "", index: 1 });
         } else {
-            items.push({ label: localize("pause.parsing", "Pause Parsing"), description: "", index: 0 });
+            items.push({ label: localize("pause.parsing", "Pause Workspace Parsing"), description: "", index: 0 });
         }
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
@@ -326,15 +328,15 @@ export class UI {
 
     public async showAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.parsing.command", "Select a command...");
+        options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisType), description: "", index: 0 });
+        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
 
         if (this.isParsingWorkspacePaused) {
-            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint]}, "Resume {0}", this.codeAnalysisType), description: "", index: 2 });
+            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint]}, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
         } else {
-            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisType), description: "", index: 1 });
+            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
         }
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
