@@ -2546,7 +2546,7 @@
   "Der Typ \"decltype(auto)\" kann nicht abgeleitet werden.",
   "Eine threadlokale Erklärung im Blockbereich muss \"static\" oder \"extern\" enthalten.",
   "abgeleiteter Rückgabetyp %t1 steht in Konflikt mit zuvor abgeleitetem Typ %t2",
-  "Rückgabetyp %nd kann nicht abgeleitet werden; wurde nicht definiert",
+  "Rückgabetyp %nd; kann nicht abgeleitet werden wurde nicht definiert",
   "Eine virtuelle Funktion darf keinen abgeleiteten Rückgabetyp aufweisen.",
   "%n wird als kontextsensibles Schlüsselwort von diesem Punkt betrachtet",
   "Der globale Namespace weist keinen tatsächlichen Member \"%sq\" auf.",

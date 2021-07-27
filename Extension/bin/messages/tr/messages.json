@@ -2546,7 +2546,7 @@
   "'decltype(auto)' türü çıkarılamıyor",
   "block-scope thread-local bildirimi static veya extern içermelidir",
   "çıkarılan dönüş türü %t1 daha önce çıkarılmış %t2 türüyle çakışıyor",
-  "%nd dönüş türü çıkarılamıyor; tanımlanmamış",
+  "%nd; dönüş türü çıkarılamıyor tanımlanmamış",
   "sanal bir işlevin çıkarılan dönüş türü olamaz",
   "bu noktadan sonra %n, içeriğe duyarlı anahtar sözcük işlemi görecek",
   "genel ad alanının gerçek bir %sq üyesi yok",

@@ -2546,7 +2546,7 @@
   "Typ decltype(auto) se nedá odvodit.",
   "Deklarace rozsahu bloku místního vlákna musí zahrnovat statickou nebo externí",
   "Odvozený návratový typ %t1 má konflikty s dříve odvozeným typem %t2.",
-  "Návratový typ %nd se nedá odvodit, nebyl definovaný.",
+  "Návratový typ %nd; se nedá odvodit, nebyl definovaný.",
   "Virtuální funkce nemůže mít odvozený návratový typ.",
   "%n se bude od tohoto bodu považovat za kontextové klíčové slovo.",
   "Globální obor názvů nemá žádný skutečný člen %sq.",

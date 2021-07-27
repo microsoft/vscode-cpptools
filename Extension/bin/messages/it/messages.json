@@ -2546,7 +2546,7 @@
   "non è possibile dedurre il tipo 'decltype(auto)'",
   "una dichiarazione thread-local con ambito blocco deve includere static o extern",
   "il tipo restituito dedotto %t1 è in conflitto con il tipo dedotto in precedenza %t2",
-  "non è possibile dedurre il tipo restituito di %nd perché non è stato definito",
+  "non è possibile dedurre il tipo restituito di %nd; perché non è stato definito",
   "il tipo restituito da una funzione virtuale non può essere dedotto",
   "a partire da questo punto %n verrà considerato come una parola chiave sensibile al contesto",
   "lo spazio dei nomi globale non include membri effettivi %sq",
