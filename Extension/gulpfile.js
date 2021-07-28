@@ -119,8 +119,8 @@ const dataLocHintAttribute = "data-loc-hint";
 // Helper to traverse HTML tree
 // nodeCallback(locId, locHint, node) is invoked for nodes
 // attributeCallback(locId, locHint, attribute) is invoked for attribtues
-const traverseHtml = (contents, nodeCallback, attributeCallback) => {
-    const htmlTree = parse5.parse(contents);
+const traverseHtml = (contents, nodeCallback, attributeCallback, isFragment) => {
+    const htmlTree = isFragment ? parse5.parseFragment(contents) : parse5.parse(contents);
     traverse(htmlTree, {
         pre(node, parent) {
             if (node.attrs) {
@@ -167,16 +167,16 @@ const processHtmlFiles = () => {
                     text += `{${subNodeCount++}}`;
                 }
             });
-            localizationJsonContents[locId] = locHint ? { message: text, comment: [locHint] } : text;
-            localizationMetadataContents.keys.push(locId);
+            localizationJsonContents[locId] = text;
+            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
             localizationMetadataContents.messages.push(text);
         };
         let attributeCallback = (locId, locHint, attribute) => {
-            localizationJsonContents[locId] = locHint ? { message: attribute.value, comment: [locHint] } : attribute.value;
-            localizationMetadataContents.keys.push(locId);
+            localizationJsonContents[locId] = attribute.value;
+            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
             localizationMetadataContents.messages.push(attribute.value);
         };
-        traverseHtml(file.contents.toString(), nodeCallback, attributeCallback);
+        traverseHtml(file.contents.toString(), nodeCallback, attributeCallback, false);
         this.queue(new vinyl({
             path: path.join(file.path + '.nls.json'),
             contents: Buffer.from(JSON.stringify(localizationJsonContents, null, '\t'), 'utf8')
@@ -431,7 +431,7 @@ const generateSrcLocBundle = () => {
         .pipe(gulp.dest('dist'));
 };
 
-const generateLocalizedHtmlFilesImpl = (file, relativePath, language) => {
+const generateLocalizedHtmlFilesImpl = (file, relativePath, language, isFragment) => {
     let stringTable = {};
     // Try to open i18n file for this file
     let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
@@ -469,7 +469,7 @@ const generateLocalizedHtmlFilesImpl = (file, relativePath, language) => {
             attribute.value = value;
         }
     };
-    let htmlTree = traverseHtml(file.contents.toString(), nodeCallback, attributeCallback);
+    let htmlTree = traverseHtml(file.contents.toString(), nodeCallback, attributeCallback, isFragment);
     return parse5.serialize(htmlTree);
 };
 
@@ -477,7 +477,7 @@ const generateLocalizedHtmlFiles = () => {
     return es.through(function (file) {
         let relativePath = removePathPrefix(file.path, file.cwd);
         languages.map((language) => {
-            let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language);
+            let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language, false);
             this.queue(new vinyl({
                 path: path.join("html", language.id, relativePath),
                 contents: Buffer.from(newContent, 'utf8')
@@ -496,16 +496,16 @@ const generateLocalizedWalkthroughHtmlFiles = () => {
         let relativePath = removePathPrefix(file.path, file.cwd);
         languages.map((language) => {
             let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + `.nls.${language.id}.md`;
-            let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language);
+            let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language, true);
             this.queue(new vinyl({
-                path: path.join("walkthrough", newPath),
+                path: newPath,
                 contents: Buffer.from(newContent, 'utf8')
             }));
         });
         // Put the original in an 'en' file.
         let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + ".nls.en.md";
         this.queue(new vinyl({
-            path: path.join("walkthrough", newPath),
+            path: newPath,
             contents: file.contents
         }));
     });
@@ -569,9 +569,7 @@ const generateJsonSchemaLoc = () => {
         .pipe(gulp.dest('dist'));
 };
 
-//gulp.task('translations-generate', gulp.series(generateSrcLocBundle, generateAdditionalLocFiles, generateHtmlLoc, generateWalkthroughHtmlLoc, generateJsonSchemaLoc));
-gulp.task('translations-generate', gulp.series(generateSrcLocBundle, generateAdditionalLocFiles, generateHtmlLoc, generateJsonSchemaLoc));
-
+gulp.task('translations-generate', gulp.series(generateSrcLocBundle, generateAdditionalLocFiles, generateHtmlLoc, generateWalkthroughHtmlLoc, generateJsonSchemaLoc));
 
 // ****************************
 // Command: generate-native-strings
