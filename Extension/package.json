@@ -292,8 +292,7 @@
         "C_Cpp.clangTidy.exclude": {
           "type": "object",
           "markdownDescription": "%c_cpp.configuration.clangTidy.exclude.description%",
-          "default": {
-          },
+          "default": {},
           "additionalProperties": {
             "anyOf": [
               {

@@ -997,7 +997,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
-        const settings_clangTidyMaxProcesses: (number | undefined)[] = [];
+        const settings_clangTidyExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
@@ -1096,7 +1096,7 @@ export class DefaultClient implements Client {
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
-                settings_clangTidyMaxProcesses.push(setting.clangTidyMaxProcesses);
+                settings_clangTidyExclude.push(setting.clangTidyExclude);
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
@@ -1205,10 +1205,14 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: {
+                maxThreads: workspaceSettings.maxThreads,
+                intelliSenseMaxThreads: workspaceSettings.intelliSenseMaxThreads,
+                intelliSenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
+                referencesMaxThreads: workspaceSettings.referencesMaxThreads,
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
-                clang_tidy_path: settings_clangTidyPath,
-                clang_tidy_max_processes: settings_clangTidyMaxProcesses,
+                clangTidyPath: settings_clangTidyPath,
+                clangTidyMaxThreads: workspaceSettings.clangTidyMaxThreads,
                 formatting: settings_formattingEngine,
                 vcFormat: {
                     indent: {
@@ -1293,6 +1297,7 @@ export class DefaultClient implements Client {
                     autoClosingBrackets: settings_editorAutoClosingBrackets
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
+                clang_tidy_exclude_files: settings_clangTidyExclude,
                 cpp_exclude_files: settings_cppFilesExclude,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
