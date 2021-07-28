@@ -241,6 +241,38 @@
       "type": "object",
       "title": "C/C++",
       "properties": {
+        "C_Cpp.maxThreads": {
+          "type": "integer",
+          "description": "%c_cpp.configuration.maxThreads.description%",
+          "default": null,
+          "minimum": 2,
+          "maximum": 32,
+          "scope": "machine"
+        },
+        "C_Cpp.intelliSense.maxThreads": {
+          "type": "integer",
+          "description": "%c_cpp.configuration.intelliSense.maxThreads.description%",
+          "default": null,
+          "minimum": 2,
+          "maximum": 32,
+          "scope": "machine"
+        },
+        "C_Cpp.intelliSense.maxMemory": {
+          "type": "integer",
+          "description": "%c_cpp.configuration.intelliSense.maxMemory.description%",
+          "default": 1024,
+          "minimum": 256,
+          "maximum": 65536,
+          "scope": "machine"
+        },
+        "C_Cpp.references.maxThreads": {
+          "type": "integer",
+          "description": "%c_cpp.configuration.references.maxThreads.description%",
+          "default": null,
+          "minimum": 2,
+          "maximum": 32,
+          "scope": "machine"
+        },
         "C_Cpp.clang_format_path": {
           "type": "string",
           "description": "%c_cpp.configuration.clang_format_path.description%",
@@ -257,12 +289,38 @@
           "description": "%c_cpp.configuration.clangTidy.path.description%",
           "scope": "machine-overridable"
         },
-        "C_Cpp.clangTidy.maxProcesses": {
+        "C_Cpp.clangTidy.exclude": {
+          "type": "object",
+          "markdownDescription": "%c_cpp.configuration.clangTidy.exclude.description%",
+          "default": {
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "description": "%c_cpp.configuration.clangTidy.excludeBoolean.description%"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "when": {
+                    "type": "string",
+                    "pattern": "\\w*\\$\\(basename\\)\\w*",
+                    "default": "$(basename).ext",
+                    "description": "%c_cpp.configuration.clangTidy.excludeWhen.description%"
+                  }
+                }
+              }
+            ]
+          },
+          "scope": "resource"
+        },
+        "C_Cpp.clangTidy.maxThreads": {
           "type": "integer",
           "description": "%c_cpp.configuration.clangTidy.maxProcesses.description%",
           "default": null,
-          "minimum": 1,
-          "maximum": 16,
+          "minimum": 2,
+          "maximum": 32,
           "scope": "machine"
         },
         "C_Cpp.formatting": {
