@@ -2785,7 +2785,8 @@ export class DefaultClient implements Client {
             const compilerName: string = process.platform === "win32" ? "MSVC" : (process.platform === "darwin" ? "Clang" : "GCC");
             vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.", compilerName), { modal: true });
         } else {
-            const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system:");
+            const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system.")
+                + "\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
             let message: string = "";
             const settings: CppSettings = new CppSettings(this.RootUri);
             const pathSeparator: string | undefined = settings.preferredPathSeparator;
@@ -2802,9 +2803,6 @@ export class DefaultClient implements Client {
                     message += compiler.path.replace(/\\/g, '/');
                 }
             });
-            if (compilers.length > 1) {
-                message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
-            }
             vscode.window.showInformationMessage(header, { modal: true, detail: message });
         }
     }
