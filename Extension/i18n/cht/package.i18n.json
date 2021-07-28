@@ -128,7 +128,7 @@
 	"c_cpp.configuration.inactiveRegionOpacity.description": "控制非作用中前置處理器區塊的不透明度。在 0.1 與 1.0 之間縮放。只有在啟用非作用中區域變暗時，才會套用此設定。",
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "控制非作用中前置處理器區塊的前景色彩。輸入的格式為十六進位色彩代碼或有效的佈景主題色彩。若未設定，會預設為編輯器的語法著色配置。只有在啟用非作用中區域變暗時，才會套用此設定。",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "控制非作用中前置處理器區塊的背景色彩。輸入的格式為十六進位色彩代碼或有效的佈景主題色彩。若未設定，會預設為透明。只有在啟用非作用中區域變暗時，才會套用此設定。",
-	"c_cpp.configuration.loggingLevel.description": "輸出面板中記錄的詳細程度。從最不詳細到最詳細的層級順序為: None < Error < Warning < Information < Debug.",
+	"c_cpp.configuration.loggingLevel.description": "輸出面板中記錄的詳細程度。從最不詳細到最詳細的層級順序為: None < Error < Warning < Information < Debug。",
 	"c_cpp.configuration.autoAddFileAssociations.description": "控制是否會在檔案為 C/C++ 檔案的瀏覽作業目標時，自動將檔案新增至 files.associations。",
 	"c_cpp.configuration.workspaceParsingPriority.description": "控制非作用中工作區檔案的剖析是否會使用睡眠來避免使用 100% 的 CPU。值 highest/high/medium/low 會約略對應至 100/75/50/25% CPU 使用率。",
 	"c_cpp.configuration.workspaceSymbols.description": "叫用「前往工作區中的符號」時，要包含在查詢結果中的符號。",
