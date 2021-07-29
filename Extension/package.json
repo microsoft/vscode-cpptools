@@ -62,7 +62,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == mac",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-clang-macos.md"
+              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
@@ -71,7 +71,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == linux",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-gcc-linux.md"
+              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
@@ -80,7 +80,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == windows",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-compiler-windows.md"
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
@@ -116,7 +116,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "when": "workspacePlatform == mac",
             "media": {
-              "markdown": "walkthrough/debugconfig/run-and-debug-project-mac.md"
+              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-mac.md"
             }
           },
           {
@@ -125,7 +125,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "when": "workspacePlatform == linux",
             "media": {
-              "markdown": "walkthrough/debugconfig/run-and-debug-project-linux.md"
+              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-linux.md"
             }
           },
           {
@@ -134,7 +134,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "when": "workspacePlatform == windows",
             "media": {
-              "markdown": "walkthrough/debugconfig/run-and-debug-project-windows.md"
+              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-windows.md"
             }
           },
           {

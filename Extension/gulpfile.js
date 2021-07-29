@@ -29,6 +29,12 @@ const htmlFilesPatterns = [
     "ui/**/*.html"
 ];
 
+// HTML files for walkthroughs are handled differently, as localization support
+// requires specific file name patterns, and must all reside in the same directory.
+const walkthroughHtmlFilesPatterns = [
+    "walkthrough/**/*.md"
+];
+
 const jsonSchemaFilesPatterns = [
     "*.schema.json"
 ];
@@ -83,8 +89,8 @@ gulp.task('pr-check', (done) => {
 // The result will be written to: ../vscode-extensions-localization-export/ms-vscode/
 // ****************************
 
-const translationProjectName  = "vscode-extensions";
-const translationExtensionName  = "vscode-cpptools";
+const translationProjectName = "vscode-extensions";
+const translationExtensionName = "vscode-cpptools";
 
 function removePathPrefix(path, prefix) {
     if (!prefix) {
@@ -107,28 +113,31 @@ function removePathPrefix(path, prefix) {
     return path;
 }
 
+const dataLocIdAttribute = "data-loc-id";
+const dataLocHintAttribute = "data-loc-hint";
+
 // Helper to traverse HTML tree
-// nodeCallback(locId, node) is invoked for nodes
-// attributeCallback(locId, attribute) is invoked for attribtues
-const traverseHtml = (contents, nodeCallback, attributeCallback) => {
-    const htmlTree = parse5.parse(contents);
+// nodeCallback(locId, locHint, node) is invoked for nodes
+// attributeCallback(locId, locHint, attribute) is invoked for attributes
+const traverseHtml = (contents, nodeCallback, attributeCallback, isFragment) => {
+    const htmlTree = isFragment ? parse5.parseFragment(contents) : parse5.parse(contents);
     traverse(htmlTree, {
         pre(node, parent) {
             if (node.attrs) {
                 // Check if content text should be localized based on presense of data-loc-id attribute
-                let locId = node.attrs.find(attribute => attribute.name.toLowerCase() == "data-loc-id");
+                let locId = node.attrs.find(attribute => attribute.name.toLowerCase() == dataLocIdAttribute);
                 if (locId) {
-                    nodeCallback(locId.value, node);
+                    let locHint = node.attrs.find(attribute => attribute.name.toLowerCase() == dataLocHintAttribute);
+                    nodeCallback(locId.value, locHint?.value, node);
                 }
                 // Check if an attribute should be localized based on presense of data-loc-id-<attribute_name> attribute
                 node.attrs.forEach(attribute => {
-                    const dataLocIdAttributePrefix = "data-loc-id-";
-                    if (attribute.name.startsWith(dataLocIdAttributePrefix))
-                    {
-                        let targetAttributeName = attribute.name.substring(dataLocIdAttributePrefix.length);
+                    if (attribute.name.startsWith(`${dataLocIdAttribute}-`)) {
+                        let targetAttributeName = attribute.name.substring(dataLocIdAttribute.length + 1);
                         let targetAttribute = node.attrs.find(a => a.name == targetAttributeName);
                         if (targetAttribute) {
-                            attributeCallback(attribute.value, targetAttribute);
+                            let hint = node.attrs.find(a => a.name.toLowerCase() == `${dataLocHintAttribute}-${targetAttributeName}`);
+                            attributeCallback(attribute.value, hint?.value, targetAttribute);
                         }
                     }
                 });
@@ -148,7 +157,7 @@ const processHtmlFiles = () => {
             keys: [],
             filePath: removePathPrefix(file.path, file.cwd)
         };
-        let nodeCallback = (locId, node) => {
+        let nodeCallback = (locId, locHint, node) => {
             let subNodeCount = 0;
             let text = "";
             node.childNodes.forEach((childNode) => {
@@ -158,16 +167,16 @@ const processHtmlFiles = () => {
                     text += `{${subNodeCount++}}`;
                 }
             });
-            localizationJsonContents[locId.value] = text;
-            localizationMetadataContents.keys.push(locId);
+            localizationJsonContents[locId] = text;
+            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
             localizationMetadataContents.messages.push(text);
         };
-        let attributeCallback = (locId, attribute) => {
+        let attributeCallback = (locId, locHint, attribute) => {
             localizationJsonContents[locId] = attribute.value;
-            localizationMetadataContents.keys.push(locId);
+            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
             localizationMetadataContents.messages.push(attribute.value);
         };
-        traverseHtml(file.contents.toString(), nodeCallback, attributeCallback);
+        traverseHtml(file.contents.toString(), nodeCallback, attributeCallback, false);
         this.queue(new vinyl({
             path: path.join(file.path + '.nls.json'),
             contents: Buffer.from(JSON.stringify(localizationJsonContents, null, '\t'), 'utf8')
@@ -179,13 +188,13 @@ const processHtmlFiles = () => {
     });
 };
 
-// descriptionCallback(path, value, parent) is invoked for attribtues
+// descriptionCallback(path, value, parent) is invoked for attributes
 const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     for (let fieldName in jsonTree) {
         if (jsonTree[fieldName] !== null) {
-            if (typeof(jsonTree[fieldName]) == "string" && fieldName === "description") {
+            if (typeof (jsonTree[fieldName]) == "string" && fieldName === "description") {
                 descriptionCallback(prefixPath, jsonTree[fieldName], jsonTree);
-            } else if (typeof(jsonTree[fieldName]) == "object") {
+            } else if (typeof (jsonTree[fieldName]) == "object") {
                 let path = prefixPath;
                 if (path !== "")
                     path = path + ".";
@@ -233,9 +242,9 @@ gulp.task("translations-export", (done) => {
         .pipe(sourcemaps.init())
         .pipe(tsProject()).js
         .pipe(nls.createMetaDataFiles());
-    
+
     // Scan html files for tags with the data-loc-id attribute
-    let htmlStream = gulp.src(htmlFilesPatterns)
+    let htmlStream = gulp.src([...htmlFilesPatterns, ...walkthroughHtmlFilesPatterns])
         .pipe(processHtmlFiles());
 
     let jsonSchemaStream = gulp.src(jsonSchemaFilesPatterns)
@@ -349,7 +358,7 @@ async function DownloadFile(urlString) {
         // Execute the request
         req.end();
     });
-    
+
 }
 
 async function generatePackageHashes(packageJson) {
@@ -422,70 +431,103 @@ const generateSrcLocBundle = () => {
         .pipe(gulp.dest('dist'));
 };
 
+const generateLocalizedHtmlFilesImpl = (file, relativePath, language, isFragment) => {
+    let stringTable = {};
+    // Try to open i18n file for this file
+    let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
+    if (fs.existsSync(locFile)) {
+        stringTable = jsonc.parse(fs.readFileSync(locFile).toString());
+    }
+    // Entire file is scanned and modified, then serialized for that language.
+    // Even if no translations are available, we still write new files to dist/html/...
+
+    // Rewrite child nodes to fill in {0}, {1}, etc., in localized string.
+    let nodeCallback = (locId, locHint, node) => {
+        let locString = stringTable[locId];
+        if (locString) {
+            let nonTextChildNodes = node.childNodes.filter(childNode => childNode.nodeName != "#text");
+            let textParts = locString.split(/\{[0-9]+\}/);
+            let matchParts = locString.match(/\{[0-9]+\}/g);
+            let newChildNodes = [];
+            let i = 0;
+            for (; i < textParts.length - 1; i++) {
+                if (textParts[i] != "") {
+                    newChildNodes.push({ nodeName: "#text", value: textParts[i] });
+                }
+                let childIndex = matchParts[i].match(/[0-9]+/);
+                newChildNodes.push(nonTextChildNodes[childIndex]);
+            }
+            if (textParts[i] != "") {
+                newChildNodes.push({ nodeName: "#text", value: textParts[i] });
+            }
+            node.childNodes = newChildNodes;
+        }
+    };
+    let attributeCallback = (locId, locHint, attribute) => {
+        let value = stringTable[locId];
+        if (value) {
+            attribute.value = value;
+        }
+    };
+    let htmlTree = traverseHtml(file.contents.toString(), nodeCallback, attributeCallback, isFragment);
+    return parse5.serialize(htmlTree);
+};
+
 const generateLocalizedHtmlFiles = () => {
     return es.through(function (file) {
         let relativePath = removePathPrefix(file.path, file.cwd);
         languages.map((language) => {
-            let stringTable = {};
-            // Try to open i18n file for this file
-            let relativePath = removePathPrefix(file.path, file.cwd);
-            let locFile = path.join("./i18n", language.folderName, relativePath + ".i18n.json");
-            if (fs.existsSync(locFile)) {
-                stringTable = jsonc.parse(fs.readFileSync(locFile).toString());
-            }
-            // Entire file is scanned and modified, then serialized for that language.
-            // Even if no translations are available, we still write new files to dist/html/...
-
-            // Rewrite child nodes to fill in {0}, {1}, etc., in localized string.
-            let nodeCallback = (locId, node) => {
-                let locString = stringTable[locId];
-                if (locString) {
-                    let nonTextChildNodes = node.childNodes.filter(childNode => childNode.nodeName != "#text");
-                    let textParts = locString.split(/\{[0-9]+\}/);
-                    let matchParts = locString.match(/\{[0-9]+\}/g);
-                    let newChildNodes = [];
-                    let i = 0;
-                    for (; i < textParts.length - 1; i ++) {
-                        if (textParts[i] != "") {
-                            newChildNodes.push({ nodeName: "#text", value: textParts[i]});
-                        }
-                        let childIndex = matchParts[i].match(/[0-9]+/);
-                        newChildNodes.push(nonTextChildNodes[childIndex]);
-                    }
-                    if (textParts[i] != "") {
-                        newChildNodes.push({ nodeName: "#text", value: textParts[i]});
-                    }
-                    node.childNodes = newChildNodes;
-                }
-            };
-            let attributeCallback = (locId, attribute) => {
-                let value = stringTable[locId];
-                if (value) {
-                    attribute.value = value;
-                }
-            };
-            let htmlTree = traverseHtml(file.contents.toString(), nodeCallback, attributeCallback);
-            let newContent = parse5.serialize(htmlTree);
+            let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language, false);
             this.queue(new vinyl({
                 path: path.join("html", language.id, relativePath),
                 contents: Buffer.from(newContent, 'utf8')
             }));
         });
-
-        // Special case - put the original in an 'en' directory to simplify referring code
+        // Put the original in an 'en' directory.
         this.queue(new vinyl({
-            path: path.join("html/en/", relativePath),
+            path: path.join("html/en", relativePath),
             contents: file.contents
         }));
     });
 };
 
-// Generate localized versions of HTML files
-// Check for cooresponding localized json file in i18n
-// Generate new version of the HTML file in dist/html/<language_id>/<path>
+const generateLocalizedWalkthroughHtmlFiles = () => {
+    return es.through(function (file) {
+        let relativePath = removePathPrefix(file.path, file.cwd);
+        languages.map((language) => {
+            let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + `.nls.${language.id}.md`;
+            let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language, true);
+            this.queue(new vinyl({
+                path: newPath,
+                contents: Buffer.from(newContent, 'utf8')
+            }));
+        });
+        // Put the original in an 'en' file.
+        let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + ".nls.en.md";
+        this.queue(new vinyl({
+            path: newPath,
+            contents: file.contents
+        }));
+    });
+}
+
+// Generate localized versions of HTML files.
+// Check for corresponding localized json file in i18n.
+// Generate new version of the HTML file in: dist/html/<language_id>/<path>
 const generateHtmlLoc = () => {
     return gulp.src(htmlFilesPatterns)
         .pipe(generateLocalizedHtmlFiles())
+        .pipe(gulp.dest('dist'));
+};
+
+// Generate localized versions of walkthrough HTML (.md) files.
+// Check for corresponding localized json file in i18n.
+// Generate new version of the HTML file in: dist/<path>
+// The destination filename will have ".md" extension replaced with: .nls.<language>.md
+// For example, the Spanish translation of "walkthrough/doc.md" will be written to "dist/walkthrough/doc.nls.es.md".
+const generateWalkthroughHtmlLoc = () => {
+    return gulp.src(walkthroughHtmlFilesPatterns)
+        .pipe(generateLocalizedWalkthroughHtmlFiles())
         .pipe(gulp.dest('dist'));
 };
 
@@ -520,7 +562,7 @@ const generateLocalizedJsonSchemaFiles = () => {
 };
 
 // Generate localized versions of JSON schema files
-// Check for cooresponding localized json file in i18n
+// Check for corresponding localized json file in i18n
 // Generate new version of the JSON schema file in dist/schema/<language_id>/<path>
 const generateJsonSchemaLoc = () => {
     return gulp.src(jsonSchemaFilesPatterns)
@@ -528,8 +570,7 @@ const generateJsonSchemaLoc = () => {
         .pipe(gulp.dest('dist'));
 };
 
-gulp.task('translations-generate', gulp.series(generateSrcLocBundle, generateAdditionalLocFiles, generateHtmlLoc, generateJsonSchemaLoc));
-
+gulp.task('translations-generate', gulp.series(generateSrcLocBundle, generateAdditionalLocFiles, generateHtmlLoc, generateWalkthroughHtmlLoc, generateJsonSchemaLoc));
 
 // ****************************
 // Command: generate-native-strings
@@ -549,15 +590,14 @@ gulp.task("generate-native-strings", (done) => {
     for (let property in stringTable) {
         let stringValue = stringTable[property];
         let hintValue;
-        if (typeof stringValue !== "string")
-        {
+        if (typeof stringValue !== "string") {
             hintValue = stringValue.hint;
             stringValue = stringValue.text;
         }
-        
+
         // Add to native enum
         nativeEnumContent += `    ${property} = ${stringIndex},\n`;
-        
+
         // Add to native string table
         nativeStringTableContent += `    ${JSON.stringify(stringValue)},\n`;
 
