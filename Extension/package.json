@@ -249,11 +249,19 @@
           "maximum": 32,
           "scope": "machine"
         },
+        "C_Cpp.maxMemory": {
+          "type": "integer",
+          "description": "%c_cpp.configuration.maxMemory.description%",
+          "default": null,
+          "minimum": 1024,
+          "maximum": 65536,
+          "scope": "machine"
+        },
         "C_Cpp.intelliSense.maxThreads": {
           "type": "integer",
           "description": "%c_cpp.configuration.intelliSense.maxThreads.description%",
           "default": null,
-          "minimum": 2,
+          "minimum": 3,
           "maximum": 32,
           "scope": "machine"
         },
@@ -262,14 +270,14 @@
           "description": "%c_cpp.configuration.intelliSense.maxMemory.description%",
           "default": 1024,
           "minimum": 256,
-          "maximum": 65536,
+          "maximum": 32768,
           "scope": "machine"
         },
         "C_Cpp.references.maxThreads": {
           "type": "integer",
           "description": "%c_cpp.configuration.references.maxThreads.description%",
           "default": null,
-          "minimum": 2,
+          "minimum": 1,
           "maximum": 32,
           "scope": "machine"
         },

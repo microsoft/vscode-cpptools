@@ -136,6 +136,7 @@ export class CppSettings extends Settings {
     }
 
     public get maxThreads(): number | undefined { return super.Section.get<number>("maxThreads"); }
+    public get maxMemory(): number | undefined { return super.Section.get<number>("maxMemory"); }
     public get intelliSenseMaxThreads(): number | undefined { return super.Section.get<number>("intelliSense.maxThreads"); }
     public get intelliSenseMaxMemory(): number | undefined { return super.Section.get<number>("intelliSense.maxMemory"); }
     public get referencesMaxThreads(): number | undefined { return super.Section.get<number>("references.maxThreads"); }
