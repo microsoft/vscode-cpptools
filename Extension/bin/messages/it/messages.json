@@ -684,7 +684,7 @@
   "un'istruzione __leave può essere utilizzata solo in un blocco __try",
   "rilevato durante la creazione di un'istanza del contesto %p1 del modello %nt1",
   "rilevato durante la generazione implicita del contesto %p1 del modello %nt1",
-  "rilevato durante la creazione di un'istanza del contesto %p1 della classe %na2",
+  "rilevato durante la creazione di un'istanza del contesto %p della classe %na",
   "rilevato durante l'elaborazione dell'elenco degli argomenti di modello per %na %p",
   "rilevato durante la definizione implicita del contesto %p1 del modello %nt1",
   "%sq non trovato nello stack di allineamento compressione",
