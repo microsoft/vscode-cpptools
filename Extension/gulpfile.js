@@ -522,8 +522,9 @@ const generateHtmlLoc = () => {
 
 // Generate localized versions of walkthrough HTML (.md) files.
 // Check for cooresponding localized json file in i18n.
-// Generate new version of the HTML file in: dist/html/<path>
-// The destination filename 
+// Generate new version of the HTML file in: dist/<path>
+// The destination filename will have ".md" extension replaced with: .nls.<language>.md
+// For example, the Spanish translation of "walkthrough/doc.md" will be written to "dist/walkthrough/doc.nls.es.md".
 const generateWalkthroughHtmlLoc = () => {
     return gulp.src(walkthroughHtmlFilesPatterns)
         .pipe(generateLocalizedWalkthroughHtmlFiles())
