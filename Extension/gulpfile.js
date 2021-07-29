@@ -118,7 +118,7 @@ const dataLocHintAttribute = "data-loc-hint";
 
 // Helper to traverse HTML tree
 // nodeCallback(locId, locHint, node) is invoked for nodes
-// attributeCallback(locId, locHint, attribute) is invoked for attribtues
+// attributeCallback(locId, locHint, attribute) is invoked for attributes
 const traverseHtml = (contents, nodeCallback, attributeCallback, isFragment) => {
     const htmlTree = isFragment ? parse5.parseFragment(contents) : parse5.parse(contents);
     traverse(htmlTree, {
@@ -188,7 +188,7 @@ const processHtmlFiles = () => {
     });
 };
 
-// descriptionCallback(path, value, parent) is invoked for attribtues
+// descriptionCallback(path, value, parent) is invoked for attributes
 const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     for (let fieldName in jsonTree) {
         if (jsonTree[fieldName] !== null) {
@@ -512,7 +512,7 @@ const generateLocalizedWalkthroughHtmlFiles = () => {
 }
 
 // Generate localized versions of HTML files.
-// Check for cooresponding localized json file in i18n.
+// Check for corresponding localized json file in i18n.
 // Generate new version of the HTML file in: dist/html/<language_id>/<path>
 const generateHtmlLoc = () => {
     return gulp.src(htmlFilesPatterns)
@@ -521,7 +521,7 @@ const generateHtmlLoc = () => {
 };
 
 // Generate localized versions of walkthrough HTML (.md) files.
-// Check for cooresponding localized json file in i18n.
+// Check for corresponding localized json file in i18n.
 // Generate new version of the HTML file in: dist/<path>
 // The destination filename will have ".md" extension replaced with: .nls.<language>.md
 // For example, the Spanish translation of "walkthrough/doc.md" will be written to "dist/walkthrough/doc.nls.es.md".
@@ -562,7 +562,7 @@ const generateLocalizedJsonSchemaFiles = () => {
 };
 
 // Generate localized versions of JSON schema files
-// Check for cooresponding localized json file in i18n
+// Check for corresponding localized json file in i18n
 // Generate new version of the JSON schema file in dist/schema/<language_id>/<path>
 const generateJsonSchemaLoc = () => {
     return gulp.src(jsonSchemaFilesPatterns)
