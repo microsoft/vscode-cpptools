@@ -253,25 +253,25 @@ gulp.task("translations-export", (done) => {
     // Merge files from all source streams
     es.merge(jsStream, htmlStream, jsonSchemaStream)
 
-        // Filter down to only the files we need
-        .pipe(filter(['**/*.nls.json', '**/*.nls.metadata.json']))
+    // Filter down to only the files we need
+    .pipe(filter(['**/*.nls.json', '**/*.nls.metadata.json']))
 
-        // Consoldate them into nls.metadata.json, which the xlf is built from.
-        .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', '.'))
+    // Consoldate them into nls.metadata.json, which the xlf is built from.
+    .pipe(nls.bundleMetaDataFiles('ms-vscode.cpptools', '.'))
 
-        // filter down to just the resulting metadata files
-        .pipe(filter(['**/nls.metadata.header.json', '**/nls.metadata.json']))
+    // filter down to just the resulting metadata files
+    .pipe(filter(['**/nls.metadata.header.json', '**/nls.metadata.json']))
 
-        // Add package.nls.json, used to localized package.json
-        .pipe(gulp.src(["package.nls.json"]))
+    // Add package.nls.json, used to localized package.json
+    .pipe(gulp.src(["package.nls.json"]))
 
-        // package.nls.json and nls.metadata.json are used to generate the xlf file
-        // Does not re-queue any files to the stream.  Outputs only the XLF file
-        .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
-        .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)))
-        .pipe(es.wait(() => {
-            done();
-        }));
+    // package.nls.json and nls.metadata.json are used to generate the xlf file
+    // Does not re-queue any files to the stream.  Outputs only the XLF file
+    .pipe(nls.createXlfFiles(translationProjectName, translationExtensionName))
+    .pipe(gulp.dest(path.join("..", `${translationProjectName}-localization-export`)))
+    .pipe(es.wait(() => {
+        done();
+    }));
 });
 
 
@@ -295,9 +295,9 @@ gulp.task("translations-import", (done) => {
             .pipe(nls.prepareJsonFiles())
             .pipe(gulp.dest(path.join("./i18n", language.folderName)));
     }))
-        .pipe(es.wait(() => {
-            done();
-        }));
+    .pipe(es.wait(() => {
+        done();
+    }));
 });
 
 // ****************************
