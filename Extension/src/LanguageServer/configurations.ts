@@ -1734,6 +1734,9 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathValueStart: number = curText.indexOf('"', curText.indexOf(":", compilerPathStart));
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', compilerPathValueStart + 1) + 1;
+            const dotConfigStart: number = curText.search(/\s*\"dotConfig\"\s*:\s*\"/);
+            const dotConfigValueStart: number = curText.indexOf('"', curText.indexOf(":", dotConfigStart));
+            const dotConfigEnd: number = dotConfigStart === -1 ? -1 : curText.indexOf('"', dotConfigValueStart + 1) + 1;
             const processedPaths: Set<string> = new Set<string>();
 
             // Validate compiler paths
@@ -1776,6 +1779,39 @@ export class CppProperties {
                     new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart),
                         document.positionAt(curTextStartOffset + compilerPathEnd)),
                     compilerMessage, vscode.DiagnosticSeverity.Warning);
+                diagnostics.push(diagnostic);
+            }
+
+            // validate .config path
+            let dotConfigPath: string | undefined;
+            let dotConfigPathExists: boolean = true;
+            let dotConfigMessage: string | undefined;
+
+            dotConfigPath = currentConfiguration.dotConfig;
+            dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
+            dotConfigPath = this.resolvePath(dotConfigPath, isWindows);
+            const isWSLDotConfig: boolean = isWindows && dotConfigPath.startsWith("/");
+            // does not try resolve if the dotConfig property is empty
+            dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
+
+            if (dotConfigPath && this.rootUri) {
+                const checkPathExists: any = util.checkPathExistsSync(dotConfigPath, this.rootUri.fsPath + path.sep, isWindows, isWSLDotConfig, true);
+                dotConfigPathExists = checkPathExists.pathExists;
+                dotConfigPath = checkPathExists.path;
+            }
+            if (!dotConfigPathExists) {
+                dotConfigMessage = localize('cannot.find2', "Cannot find \"{0}\".", dotConfigPath);
+                newSquiggleMetrics.PathNonExistent++;
+            } else if (dotConfigPath && !util.checkFileExistsSync(dotConfigPath)) {
+                dotConfigMessage = localize("path.is.not.a.file", "Path is not a file: {0}", dotConfigPath);
+                newSquiggleMetrics.PathNotAFile++;
+            }
+
+            if (dotConfigMessage) {
+                const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                    new vscode.Range(document.positionAt(curTextStartOffset + dotConfigValueStart),
+                        document.positionAt(curTextStartOffset + dotConfigEnd)),
+                    dotConfigMessage, vscode.DiagnosticSeverity.Warning);
                 diagnostics.push(diagnostic);
             }
 
