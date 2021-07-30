@@ -137,8 +137,10 @@
     "c_cpp.configuration.clangTidy.excludeBoolean.description": "The glob pattern to match file paths against. Set to true or false to enable or disable the pattern.",
     "c_cpp.configuration.clangTidy.excludeWhen.markdownDescription": "Additional check on the siblings of a matching file. Use `$(basename)` as variable for the matching file name.",
     "c_cpp.configuration.clangTidy.runInBackground.markdownDescription": "If `true`, clang-tidy will run automatically in the background.",
+    "c_cpp.configuration.clangTidy.runOnBuild.markdownDescription": "If `true`, clang-tidy will run automatically after a build is completed.",
+    "c_cpp.configuration.clangTidy.updateDelay.description": "Controls the delay in milliseconds before clang-tidy starts processing after a modification.",
     "c_cpp.configuration.clangTidy.buildPath.markdownDescription": "Path to the `compile_commands.json` compilation database for clang-tidy. If not specified, the build configuration from IntelliSense will be used.",
-    "c_cpp.configuration.clangTidy.checks.markdownDescription": "Values without a `-` prefix add clang-tidy checks with matching names, and values with the `-` prefix remove checks. The values are appended to the `Checks` in a `.clang-tidy` file, if any. The default check `clang-analyzer-*` is always used unless it's explicitly removed.",
+    "c_cpp.configuration.clangTidy.checks.markdownDescription": "Values without a `-` prefix add clang-tidy checks with matching names, and values with the `-` prefix remove checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it's explicitly removed.",
     "c_cpp.configuration.clangTidy.config.markdownDescription": {
         "message": "Specifies a clang-tidy configuration in YAML/JSON format: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`. When the value is empty, clang-tidy will attempt to find a file named `.clang-tidy` for each source file in its parent directories.",
         "comment": ["Normally, text in the \\`\\` are literal values that should not be translated, but `key` and `value` are a special case that should probably be translated, since they're meant to be placeholders."]

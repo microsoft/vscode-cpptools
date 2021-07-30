@@ -376,6 +376,20 @@
           "default": false,
           "scope": "application"
         },
+        "C_Cpp.clangTidy.updateDelay": {
+          "type": "number",
+          "default": 3000,
+          "description": "%c_cpp.configuration.clangTidy.updateDelay.description%",
+          "scope": "application",
+          "minimum": 1000,
+          "maximum": 5000
+        },
+        "C_Cpp.clangTidy.runOnBuild": {
+          "type": "boolean",
+          "markdownDescription": "%c_cpp.configuration.clangTidy.runInBuild.markdownDescription%",
+          "default": false,
+          "scope": "application"
+        },
         "C_Cpp.clangTidy.buildPath": {
           "type": "string",
           "markdownDescription": "%c_cpp.configuration.clangTidy.buildPath.markdownDescription%",
