@@ -2091,8 +2091,8 @@
             "Disabled"
           ],
           "default": "Default",
-          "description": "%c_cpp.configuration.autocomplete.markdownDescription%",
-          "markdownEnumDescriptions": [
+          "markdownDescription": "%c_cpp.configuration.autocomplete.markdownDescription%",
+          "description": [
             "%c_cpp.configuration.autocomplete.default.description%",
             "%c_cpp.configuration.autocomplete.disabled.description%"
           ],
