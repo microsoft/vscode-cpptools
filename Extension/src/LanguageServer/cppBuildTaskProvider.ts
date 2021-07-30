@@ -396,18 +396,20 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                     child.stdout?.on('data', data => {
                         const str: string = data.toString("utf8");
                         splitWriteEmitter(str);
-                        if (str.includes("warning C")) {
-                            warning = true; // cl.exe compiler warnings
+                        if (str.includes("error")){
+                            stderr = true;
+                        } else if (str.includes("warning")) {
+                            warning = true;
                         }
                         stdout = true;
                     });
                     child.stderr?.on('data', data => {
                         const str: string = data.toString("utf8");
                         splitWriteEmitter(str);
-                        if (str.includes("warning:")) {
-                            warning = true; // gcc/clang compiler warnings
-                        } else {
+                        if (str.includes("error")){
                             stderr = true;
+                        } else if (str.includes("warning")) {
+                            warning = true;
                         }
                     });
                     child.on('close', retc => {
@@ -424,7 +426,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private printBuildSummary(error: boolean, stdout: boolean, stderr: boolean, warning: boolean) {
         const dot: string = ".";
-        if (error || (stderr && !warning)) {
+        if (error || stderr) {
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error(s)") + dot + this.endOfLine);
         } else if (warning) {

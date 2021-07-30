@@ -1310,7 +1310,8 @@ export function quoteFilePaths(path: string): string {
     // Check if the path is not already quoted.
     if (!/".*?"/.test(path) && !/'.*?'/.test(path)) {
         // Check if this is a file
-        if (/^(.+)\/([^\/]+)$/.test(path) && path.includes(" ")) {
+        if ((/^(.+)\/([^\/]+)$/.test(path) || /^(.+)\\([^\\]+)$/.test(path))
+            && path.includes(" ")) {
             return `"${path}"`;
         }
     }
