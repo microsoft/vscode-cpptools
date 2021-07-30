@@ -1304,3 +1304,15 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
         return promiseBuilder(nextItem);
     }, Promise.resolve());
 }
+
+// Quote a file path if it includes space.
+export function quoteFilePaths(path: string): string {
+    // Check if the path is not already quoted.
+    if (!/".*?"/.test(path) && !/'.*?'/.test(path)) {
+        // Check if this is a file
+        if (/^(.+)\/([^\/]+)$/.test(path) && path.includes(" ")) {
+            return `"${path}"`;
+        }
+    }
+    return path;
+}
