@@ -1206,7 +1206,7 @@ export class DefaultClient implements Client {
             ],
             initializationOptions: {
                 maxThreads: workspaceSettings.maxThreads,
-                maxMemory: workspaceSettings.maxMemory ?? os.freemem() / 1024,
+                maxMemory: workspaceSettings.maxMemory ?? os.freemem() / 1048576,
                 intelliSenseMaxThreads: workspaceSettings.intelliSenseMaxThreads,
                 intelliSenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
                 referencesMaxThreads: workspaceSettings.referencesMaxThreads,
