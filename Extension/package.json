@@ -1997,10 +1997,10 @@
             "allOneLineScopes",
             "never"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.description%",
-            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.description%",
-            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription%"
           ],
           "default": "oneLiners",
           "description": "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.description%",
@@ -2023,7 +2023,7 @@
             null
           ],
           "default": null,
-          "description": "%c_cpp.configuration.clang_format_sortIncludes.description%",
+          "markdownDescription": "%c_cpp.configuration.clang_format_sortIncludes.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseEngine": {
