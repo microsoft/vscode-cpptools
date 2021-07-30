@@ -386,7 +386,7 @@
         },
         "C_Cpp.clangTidy.runOnBuild": {
           "type": "boolean",
-          "markdownDescription": "%c_cpp.configuration.clangTidy.runInBuild.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.clangTidy.runOnBuild.markdownDescription%",
           "default": false,
           "scope": "application"
         },
@@ -2079,7 +2079,7 @@
           ],
           "default": "Default",
           "markdownDescription": "%c_cpp.configuration.autocomplete.markdownDescription%",
-          "enumDescription": [
+          "enumDescriptions": [
             "%c_cpp.configuration.autocomplete.default.description%",
             "%c_cpp.configuration.autocomplete.disabled.description%"
           ],
