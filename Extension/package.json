@@ -386,6 +386,11 @@
           "markdownDescription": "%c_cpp.configuration.clangTidy.config.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.clangTidy.fallbackConfig": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.configuration.clangTidy.fallbackConfig.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.clangTidy.fix": {
           "type": "string",
           "enum": [
@@ -2060,7 +2065,7 @@
           ],
           "default": "Default",
           "markdownDescription": "%c_cpp.configuration.autocomplete.markdownDescription%",
-          "description": [
+          "enumDescription": [
             "%c_cpp.configuration.autocomplete.default.description%",
             "%c_cpp.configuration.autocomplete.disabled.description%"
           ],
