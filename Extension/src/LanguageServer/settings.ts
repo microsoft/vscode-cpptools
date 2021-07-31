@@ -135,12 +135,14 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxThreads(): number | undefined { return super.Section.get<number>("maxThreads"); }
-    public get maxMemory(): number | undefined { return super.Section.get<number>("maxMemory"); }
-    public get intelliSenseMaxThreads(): number | undefined { return super.Section.get<number>("intelliSense.maxThreads"); }
-    public get intelliSenseMaxMemory(): number | undefined { return super.Section.get<number>("intelliSense.maxMemory"); }
-    public get referencesMaxThreads(): number | undefined { return super.Section.get<number>("references.maxThreads"); }
+    public get maxThreads(): number | undefined | null { return super.Section.get<number | null>("maxThreads"); }
+    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get intelliSenseMaxThreads(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxThreads"); }
+    public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
+    public get referencesMaxThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxThreads"); }
+    public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
     public get clangTidyMaxThreads(): number | undefined { return super.Section.get<number>("clangTidy.maxThreads"); }
+    public get clangTidyMaxMemory(): number | undefined { return super.Section.get<number>("clangTidy.maxMemory"); }
     public get clangTidyExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("clangTidy.exclude"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }

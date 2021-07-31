@@ -329,17 +329,6 @@
           "maximum": 65536,
           "scope": "machine"
         },
-        "C_Cpp.clang_format_path": {
-          "type": "string",
-          "description": "%c_cpp.configuration.clang_format_path.description%",
-          "scope": "machine-overridable"
-        },
-        "C_Cpp.clang_format_style": {
-          "type": "string",
-          "default": "file",
-          "markdownDescription": "%c_cpp.configuration.clang_format_style.markdownDescription%",
-          "scope": "resource"
-        },
         "C_Cpp.clangTidy.path": {
           "type": "string",
           "description": "%c_cpp.configuration.clangTidy.path.description%",
@@ -1508,6 +1497,17 @@
             ]
           },
           "markdownDescription": "%c_cpp.configuration.clangTidy.checks.markdownDescription%",
+          "scope": "resource"
+        },
+        "C_Cpp.clang_format_path": {
+          "type": "string",
+          "description": "%c_cpp.configuration.clang_format_path.description%",
+          "scope": "machine-overridable"
+        },
+        "C_Cpp.clang_format_style": {
+          "type": "string",
+          "default": "file",
+          "markdownDescription": "%c_cpp.configuration.clang_format_style.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.formatting": {
