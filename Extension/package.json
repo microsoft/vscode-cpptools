@@ -1744,19 +1744,19 @@
         "C_Cpp.vcFormat.newLine.beforeCatch": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.newLine.beforeCatch.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeElse": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.newLine.beforeElse.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.newLine.beforeElse.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeWhileInDoWhile": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.space.beforeFunctionOpenParenthesis": {
@@ -2068,7 +2068,7 @@
             "Disabled"
           ],
           "default": "Disabled",
-          "description": "%c_cpp.configuration.intelliSenseEngineFallback.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseEngineFallback.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.autocomplete": {
@@ -2200,7 +2200,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.string.description%"
+                "markdownDescription": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription%"
               },
               {
                 "type": "object",
@@ -2238,14 +2238,14 @@
         "C_Cpp.intelliSenseCacheSize": {
           "type": "number",
           "default": 5120,
-          "description": "%c_cpp.configuration.intelliSenseCacheSize.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseCacheSize.markdownDescription%",
           "scope": "machine-overridable",
           "minimum": 0
         },
         "C_Cpp.intelliSenseMemoryLimit": {
           "type": "number",
           "default": 4096,
-          "description": "%c_cpp.configuration.intelliSenseMemoryLimit.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseMemoryLimit.markdownDescription%",
           "scope": "machine-overridable",
           "minimum": 256,
           "maximum": 16384
