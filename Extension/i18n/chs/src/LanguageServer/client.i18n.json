@@ -36,6 +36,5 @@
 	"configurations.received": "已收到自定义配置:",
 	"browse.configuration.received": "已收到自定义浏览配置: {0}",
 	"no.compilers.found": "系统上未找到任何 C++ 编译器。对于你的平台，建议使用编辑器中的说明安装 {0}。",
-	"compilers.found": "我们在系统上发现了以下 C++ 编译器:",
-	"compilers.found.message": "可在项目的 IntelliSense 配置中指定要使用的编译器。"
+	"compilers.found": "在你的系统上找到了以下 C++ 编译器。请在项目的 IntelliSense 配置中选择编译器。"
 }

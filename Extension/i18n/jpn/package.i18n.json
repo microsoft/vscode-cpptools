@@ -128,7 +128,7 @@
 	"c_cpp.configuration.inactiveRegionOpacity.description": "アクティブではないプリプロセッサ ブロックの不透明度を制御します。0.1 から 1.0 の範囲でスケーリングします。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
 	"c_cpp.configuration.inactiveRegionForegroundColor.description": "アクティブでないプリプロセッサ ブロックのフォントの色を制御します。入力の形式は 16 進数の色コードまたは有効なテーマの色です。設定しない場合、既定ではエディターの構文カラー スキームになります。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
 	"c_cpp.configuration.inactiveRegionBackgroundColor.description": "アクティブでないプリプロセッサ ブロックの背景色を制御します。入力の形式は 16 進数の色コードまたは有効なテーマの色です。設定しない場合、既定では透明になります。この設定は、アクティブでない領域の暗転が有効な場合にのみ適用されます。",
-	"c_cpp.configuration.loggingLevel.description": "出力パネルでのログの詳細度。詳細度のレベルは、低いものから順に次のとおりです: None < Error < Warning < Information < Debug.",
+	"c_cpp.configuration.loggingLevel.description": "出力パネルでのログの詳細度。詳細度のレベルは、低いものから順に次のとおりです: None < Error < Warning < Information < Debug。",
 	"c_cpp.configuration.autoAddFileAssociations.description": "ファイルが C/C++ ファイルからのナビゲーション操作の対象である場合に、files.associations に自動的に追加されるかどうかを制御します。",
 	"c_cpp.configuration.workspaceParsingPriority.description": "アクティブではないワークスペース ファイルの解析にスリープを使用して、CPU の使用率が 100% になるのを回避するかどうかを制御します。highest/high/medium/low の値は、おおよそ CPU の使用率 100/75/50/25% に対応します。",
 	"c_cpp.configuration.workspaceSymbols.description": "[ワークスペース内のシンボルへ移動] が呼び出されたときにクエリ結果に含めるシンボル。",
