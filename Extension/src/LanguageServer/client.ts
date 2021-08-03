@@ -1205,15 +1205,17 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: {
-                maxThreads: workspaceSettings.maxThreads,
+                maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+                maxCachedProcesses: workspaceSettings.maxCachedProcesses,
                 maxMemory: workspaceSettings.maxMemory ?? os.freemem() / 1048576,
-                intelliSenseMaxThreads: workspaceSettings.intelliSenseMaxThreads,
+                intelliSenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
                 intelliSenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
-                referencesMaxThreads: workspaceSettings.referencesMaxThreads,
+                referencesMaxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+                referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
+                clangTidyMaxConcurrentThreads: workspaceSettings.clangTidyMaxConcurrentThreads,
+                clangTidyPath: settings_clangTidyPath,
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
-                clangTidyPath: settings_clangTidyPath,
-                clangTidyMaxThreads: workspaceSettings.clangTidyMaxThreads,
                 formatting: settings_formattingEngine,
                 vcFormat: {
                     indent: {

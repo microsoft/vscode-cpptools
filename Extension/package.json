@@ -241,15 +241,26 @@
       "type": "object",
       "title": "C/C++",
       "properties": {
-        "C_Cpp.maxThreads": {
+        "C_Cpp.maxConcurrentThreads": {
           "type": [
             "integer",
             "null"
           ],
-          "markdownDescription": "%c_cpp.configuration.maxThreads.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.maxConcurrentThreads.markdownDescription%",
           "default": null,
-          "minimum": 2,
+          "minimum": 1,
           "maximum": 32,
+          "scope": "machine"
+        },
+        "C_Cpp.maxCachedProcesses": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "markdownDescription": "%c_cpp.configuration.maxCachedProcesses.markdownDescription%",
+          "default": null,
+          "minimum": 0,
+          "maximum": 64,
           "scope": "machine"
         },
         "C_Cpp.maxMemory": {
@@ -263,14 +274,14 @@
           "maximum": 65536,
           "scope": "machine"
         },
-        "C_Cpp.intelliSense.maxThreads": {
+        "C_Cpp.intelliSense.maxCachedProcesses": {
           "type": [
             "integer",
             "null"
           ],
           "markdownDescription": "%c_cpp.configuration.intelliSense.maxThreads.markdownDescription%",
           "default": null,
-          "minimum": 3,
+          "minimum": 2,
           "maximum": 32,
           "scope": "machine"
         },
@@ -285,14 +296,25 @@
           "maximum": 65536,
           "scope": "machine"
         },
-        "C_Cpp.references.maxThreads": {
+        "C_Cpp.references.maxConcurrentThreads": {
           "type": [
             "integer",
             "null"
           ],
-          "markdownDescription": "%c_cpp.configuration.references.maxThreads.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.references.maxConcurrentThreads.markdownDescription%",
           "default": null,
           "minimum": 1,
+          "maximum": 32,
+          "scope": "machine"
+        },
+        "C_Cpp.references.maxCachedProcesses": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "markdownDescription": "%c_cpp.configuration.references.maxCachedProcesses.markdownDescription%",
+          "default": null,
+          "minimum": 0,
           "maximum": 32,
           "scope": "machine"
         },
@@ -307,14 +329,14 @@
           "maximum": 65536,
           "scope": "machine"
         },
-        "C_Cpp.clangTidy.maxThreads": {
+        "C_Cpp.clangTidy.maxConcurrentThreads": {
           "type": [
             "integer",
             "null"
           ],
-          "markdownDescription": "%c_cpp.configuration.clangTidy.maxThreads.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.clangTidy.maxConcurrentThreads.markdownDescription%",
           "default": null,
-          "minimum": 2,
+          "minimum": 1,
           "maximum": 32,
           "scope": "machine"
         },

@@ -135,13 +135,15 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxThreads(): number | undefined | null { return super.Section.get<number | null>("maxThreads"); }
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
+    public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
-    public get intelliSenseMaxThreads(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxThreads"); }
+    public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
-    public get referencesMaxThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxThreads"); }
+    public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
+    public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
     public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
-    public get clangTidyMaxThreads(): number | undefined { return super.Section.get<number>("clangTidy.maxThreads"); }
+    public get clangTidyMaxConcurrentThreads(): number | undefined { return super.Section.get<number>("clangTidy.maxConcurrentThreads"); }
     public get clangTidyMaxMemory(): number | undefined { return super.Section.get<number>("clangTidy.maxMemory"); }
     public get clangTidyExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("clangTidy.exclude"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
