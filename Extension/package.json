@@ -279,7 +279,7 @@
             "integer",
             "null"
           ],
-          "markdownDescription": "%c_cpp.configuration.intelliSense.maxThreads.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.intelliSense.maxConcurrentThreads.markdownDescription%",
           "default": null,
           "minimum": 2,
           "maximum": 32,
@@ -351,15 +351,13 @@
           "maximum": 65536,
           "scope": "machine"
         },
-        "C_Cpp.codeAnalysis.enableClangTidy": {
-          "type": "boolean",
-          "default": false,
-          "scope": "resource"
-        },
-        "C_Cpp.codeAnalysis.clangTidy.path": {
-          "type": "string",
-          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.path.description%",
-          "scope": "machine-overridable"
+        "C_Cpp.codeAnalysis.updateDelay": {
+          "type": "number",
+          "default": 3000,
+          "description": "%c_cpp.configuration.codeAnalysis.updateDelay.description%",
+          "scope": "application",
+          "minimum": 1000,
+          "maximum": 5000
         },
         "C_Cpp.codeAnalysis.exclude": {
           "type": "object",
@@ -390,21 +388,24 @@
           "type": "boolean",
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.runInBackground.markdownDescription%",
           "default": true,
-          "scope": "application"
-        },
-        "C_Cpp.codeAnalysis.updateDelay": {
-          "type": "number",
-          "default": 3000,
-          "description": "%c_cpp.configuration.codeAnalysis.updateDelay.description%",
-          "scope": "application",
-          "minimum": 1000,
-          "maximum": 5000
+          "scope": "window"
         },
         "C_Cpp.codeAnalysis.runOnBuild": {
           "type": "boolean",
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.runOnBuild.markdownDescription%",
           "default": false,
-          "scope": "application"
+          "scope": "window"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.enabled": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription%",
+          "scope": "resource"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.path": {
+          "type": "string",
+          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.path.description%",
+          "scope": "machine-overridable"
         },
         "C_Cpp.codeAnalysis.clangTidy.buildPath": {
           "type": "string",

@@ -145,8 +145,17 @@ export class CppSettings extends Settings {
     public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
     public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxConcurrentThreads"); }
     public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }
-    public get codeAnlysisEnableClangTidy(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.enableClangTidy"); }
+    public get codeAnalysisUpdateDelay(): number | undefined | null { return super.Section.get<number>("codeAnalysis.updateDelay"); }
     public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
+    public get codeAnalysisRunInBackground(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runInBackground"); }
+    public get codeAnalysisRunOnBuild(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
+    public get clangTidyEnabled(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.enabled"); }
+    public get clangTidyBuildPath(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.buildPath"); }
+    public get clangTidyConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.config"); }
+    public get clangTidyFallbackConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.fallbackConfig"); }
+    public get clangTidyFix(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.fix"); }
+    public get clangTidyArgs(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.args"); }
+    public get clangTidyChecks(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.checks"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }

@@ -997,6 +997,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
+        const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
@@ -1096,6 +1097,7 @@ export class DefaultClient implements Client {
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
+                settings_clangTidyEnabled.push(setting.clangTidyEnabled);
                 settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
