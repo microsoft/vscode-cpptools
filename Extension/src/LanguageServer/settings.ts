@@ -88,7 +88,7 @@ export class CppSettings extends Settings {
     }
 
     private getClangPath(isFormat: boolean): string | undefined {
-        let path: string | undefined | null = super.Section.get<string>(isFormat ? "clang_format_path" : "clangTidy.path");
+        let path: string | undefined | null = super.Section.get<string>(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path");
         if (!path) {
             const cachedClangPath: string | null | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
             if (cachedClangPath !== undefined) {
@@ -143,9 +143,10 @@ export class CppSettings extends Settings {
     public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
     public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
     public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
-    public get clangTidyMaxConcurrentThreads(): number | undefined { return super.Section.get<number>("clangTidy.maxConcurrentThreads"); }
-    public get clangTidyMaxMemory(): number | undefined { return super.Section.get<number>("clangTidy.maxMemory"); }
-    public get clangTidyExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("clangTidy.exclude"); }
+    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxConcurrentThreads"); }
+    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }
+    public get codeAnlysisEnableClangTidy(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.enableClangTidy"); }
+    public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }

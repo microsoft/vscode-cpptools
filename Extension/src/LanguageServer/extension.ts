@@ -793,9 +793,9 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RunClangTidyOnActiveFile', onRunClangTidyOnActiveFile));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RunClangTidyOnOpenFiles', onRunClangTidyOnOpenFiles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RunClangTidyOnAllFiles', onRunClangTidyOnAllFiles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -947,23 +947,23 @@ function onCheckForCompiler(): void {
     client.handleCheckForCompiler();
 }
 
-function onRunClangTidyOnActiveFile(): void {
+function onRunCodeAnalysisOnActiveFile(): void {
     onActivationEvent();
     if (activeDocument !== "") {
-        getActiveClient().handleRunClangTidyOnActiveFile();
+        getActiveClient().handleRunCodeAnalysisOnActiveFile();
     }
 }
 
-function onRunClangTidyOnOpenFiles(): void {
+function onRunCodeAnalysisOnOpenFiles(): void {
     onActivationEvent();
     if (openFileVersions.size > 0) {
-        getActiveClient().handleRunClangTidyOnOpenFiles();
+        getActiveClient().handleRunCodeAnalysisOnOpenFiles();
     }
 }
 
-function onRunClangTidyOnAllFiles(): void {
+function onRunCodeAnalysisOnAllFiles(): void {
     onActivationEvent();
-    getActiveClient().handleRunClangTidyOnAllFiles();
+    getActiveClient().handleRunCodeAnalysisOnAllFiles();
 }
 
 function onAddToIncludePath(path: string): void {

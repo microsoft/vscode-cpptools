@@ -37,9 +37,9 @@ class TemporaryCommandRegistrar {
         "C_Cpp.VcpkgClipboardInstallSuggested",
         "C_Cpp.VcpkgOnlineHelpSuggested",
         "C_Cpp.CheckForCompiler",
-        "C_Cpp.RunClangTidyOnActiveFile",
-        "C_Cpp.RunClangTidyOnOpenFiles",
-        "C_Cpp.RunClangTidyOnAllFiles"
+        "C_Cpp.RunCodeAnalysisOnActiveFile",
+        "C_Cpp.RunCodeAnalysisOnOpenFiles",
+        "C_Cpp.RunCodeAnalysisOnAllFiles"
     ];
 
     constructor() {

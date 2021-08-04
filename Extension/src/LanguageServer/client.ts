@@ -505,7 +505,7 @@ const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, v
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
 const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
-const ClangTidyNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runClangTidy');
+const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runCodeAnalysis');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -655,9 +655,9 @@ export interface Client {
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
-    handleRunClangTidyOnActiveFile(): Promise<void>;
-    handleRunClangTidyOnOpenFiles(): Promise<void>;
-    handleRunClangTidyOnAllFiles(): Promise<void>;
+    handleRunCodeAnalysisOnActiveFile(): Promise<void>;
+    handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
+    handleRunCodeAnalysisOnAllFiles(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -997,7 +997,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
-        const settings_clangTidyExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
@@ -1096,7 +1096,7 @@ export class DefaultClient implements Client {
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
-                settings_clangTidyExclude.push(setting.clangTidyExclude);
+                settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
@@ -1212,8 +1212,9 @@ export class DefaultClient implements Client {
                 intelliSenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
                 referencesMaxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
                 referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
-                clangTidyMaxConcurrentThreads: workspaceSettings.clangTidyMaxConcurrentThreads,
+                codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
                 clangTidyPath: settings_clangTidyPath,
+                codeAnalysisExclude: settings_codeAnalysisExclude,
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
                 formatting: settings_formattingEngine,
@@ -1300,7 +1301,6 @@ export class DefaultClient implements Client {
                     autoClosingBrackets: settings_editorAutoClosingBrackets
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
-                clang_tidy_exclude_files: settings_clangTidyExclude,
                 cpp_exclude_files: settings_cppFilesExclude,
                 exclude_files: settings_filesExclude,
                 exclude_search: settings_searchExclude,
@@ -2830,19 +2830,19 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleRunClangTidyOnActiveFile(): Promise<void> {
+    public async handleRunCodeAnalysisOnActiveFile(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(ClangTidyNotification, CodeAnalysisScope.ActiveFile);
+        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ActiveFile);
     }
 
-    public async handleRunClangTidyOnOpenFiles(): Promise<void> {
+    public async handleRunCodeAnalysisOnOpenFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(ClangTidyNotification, CodeAnalysisScope.OpenFiles);
+        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.OpenFiles);
     }
 
-    public async handleRunClangTidyOnAllFiles(): Promise<void> {
+    public async handleRunCodeAnalysisOnAllFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(ClangTidyNotification, CodeAnalysisScope.AllFiles);
+        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.AllFiles);
     }
 
     public onInterval(): void {
@@ -3022,9 +3022,9 @@ class NullClient implements Client {
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
-    handleRunClangTidyOnActiveFile(): Promise<void> { return Promise.resolve(); }
-    handleRunClangTidyOnOpenFiles(): Promise<void> { return Promise.resolve(); }
-    handleRunClangTidyOnAllFiles(): Promise<void> { return Promise.resolve(); }
+    handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
+    handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
+    handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
