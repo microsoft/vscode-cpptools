@@ -279,7 +279,7 @@
             "integer",
             "null"
           ],
-          "markdownDescription": "%c_cpp.configuration.intelliSense.maxConcurrentThreads.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.intelliSense.maxCachedProcesses.markdownDescription%",
           "default": null,
           "minimum": 2,
           "maximum": 32,
