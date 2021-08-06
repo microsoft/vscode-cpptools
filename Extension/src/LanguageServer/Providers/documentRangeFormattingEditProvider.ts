@@ -51,9 +51,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             let editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
             if (!editorConfigSettings) {
                 editorConfigSettings = await editorConfig.parse(filePath);
-                if (editorConfigSettings !== undefined) {
-                    cachedEditorConfigSettings.set(filePath, editorConfigSettings);
-                }
+                cachedEditorConfigSettings.set(filePath, editorConfigSettings);
             }
             return configCallBack(editorConfigSettings);
         }
