@@ -461,6 +461,10 @@ enum CodeAnalysisScope {
     AllFiles
 };
 
+interface IntervalTimerParams {
+    freeMemory: number;
+};
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -492,7 +496,7 @@ const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new
 const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeCppProperties');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
-const IntervalTimerNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/onIntervalTimer');
+const IntervalTimerNotification: NotificationType<IntervalTimerParams, void> = new NotificationType<IntervalTimerParams, void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams, void> = new NotificationType<WorkspaceFolderParams, void>('cpptools/clearCustomConfigurations');
@@ -1223,9 +1227,10 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: {
+                freeMemory: os.freemem() / 1048576,
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
                 maxCachedProcesses: workspaceSettings.maxCachedProcesses,
-                maxMemory: workspaceSettings.maxMemory ?? os.freemem() / 1048576,
+                maxMemory: workspaceSettings.maxMemory,
                 intelliSense: {
                     maxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
                     maxMemory: workspaceSettings.intelliSenseMaxMemory
@@ -2887,7 +2892,10 @@ export class DefaultClient implements Client {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
-            this.languageClient.sendNotification(IntervalTimerNotification);
+            const params: IntervalTimerParams = {
+                freeMemory: os.freemem() / 1048576
+            };
+            this.languageClient.sendNotification(IntervalTimerNotification, params);
             this.configuration.checkCppProperties();
             this.configuration.checkCompileCommands();
         }
