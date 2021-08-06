@@ -2392,14 +2392,12 @@ export class DefaultClient implements Client {
 
     private async updateActiveDocumentTextOptions(): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (editor
-            && editor.document
-            && editor.document.uri.scheme === "file"
+        if (editor?.document?.uri.scheme === "file"
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
-            const settings: CppSettings = new CppSettings();
+            const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.formattingEngine === "vcFormat") {
                 const fsPath: string = editor.document.uri.fsPath;
                 let editorConfigSettings: any = cachedEditorConfigSettings.get(fsPath);
