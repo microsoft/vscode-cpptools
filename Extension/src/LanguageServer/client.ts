@@ -2417,6 +2417,11 @@ export class DefaultClient implements Client {
                         editor.options.tabSize = editorConfigSettings.indent_size;
                     }
                 }
+                if (editorConfigSettings.end_of_line !== undefined) {
+                    editor.edit((edit) => {
+                        edit.setEndOfLine(editorConfigSettings.end_of_line === "lf" ? vscode.EndOfLine.LF : vscode.EndOfLine.CRLF);
+                    });
+                }
             }
         }
     }
