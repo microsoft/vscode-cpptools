@@ -996,9 +996,17 @@ export class DefaultClient implements Client {
         const settings_clangFormatStyle: (string | undefined)[] = [];
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
-        const settings_clangTidyPath: (string | undefined)[] = [];
-        const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        const settings_codeAnalysisRunInBackground: (boolean | undefined)[] = [];
+        const settings_codeAnalysisRunOnBuild: (boolean | undefined)[] = [];
+        const settings_clangTidyEnabled: (boolean | undefined)[] = [];
+        const settings_clangTidyPath: (string | undefined)[] = [];
+        const settings_clangTidyBuildPath: (string | undefined)[] = [];
+        const settings_clangTidyConfig: (string | undefined)[] = [];
+        const settings_clangTidyFallbackConfig: (string | undefined)[] = [];
+        const settings_clangTidyFix: (string | undefined)[] = [];
+        const settings_clangTidyArgs: (string | undefined)[] = [];
+        const settings_clangTidyChecks: (string | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
@@ -1096,9 +1104,17 @@ export class DefaultClient implements Client {
 
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
-                settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
-                settings_clangTidyEnabled.push(setting.clangTidyEnabled);
+                settings_codeAnalysisRunInBackground.push(setting.codeAnalysisRunInBackground);
+                settings_codeAnalysisRunOnBuild.push(setting.codeAnalysisRunOnBuild);
                 settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
+                settings_clangTidyEnabled.push(setting.clangTidyEnabled);
+                settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
+                settings_clangTidyBuildPath.push(setting.clangTidyBuildPath);
+                settings_clangTidyConfig.push(setting.clangTidyConfig);
+                settings_clangTidyFallbackConfig.push(setting.clangTidyFallbackConfig);
+                settings_clangTidyFix.push(setting.clangTidyFix);
+                settings_clangTidyArgs.push(setting.clangTidyArgs);
+                settings_clangTidyChecks.push(setting.clangTidyChecks);
                 settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
@@ -1210,13 +1226,33 @@ export class DefaultClient implements Client {
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
                 maxCachedProcesses: workspaceSettings.maxCachedProcesses,
                 maxMemory: workspaceSettings.maxMemory ?? os.freemem() / 1048576,
-                intelliSenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
-                intelliSenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
-                referencesMaxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
-                referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
-                codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
-                clangTidyPath: settings_clangTidyPath,
-                codeAnalysisExclude: settings_codeAnalysisExclude,
+                intelliSense: {
+                    maxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
+                    maxMemory: workspaceSettings.intelliSenseMaxMemory,
+                },
+                references: {
+                    maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+                    maxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
+                    maxMemory: workspaceSettings.referencesMaxMemory,
+                },
+                codeAnalysis: {
+                    maxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
+                    maxMemory: workspaceSettings.codeAnalysisMaxMemory,
+                    updateDelay: workspaceSettings.codeAnalysisUpdateDelay,
+                    exclude: settings_codeAnalysisExclude,
+                    runInBackground: settings_codeAnalysisRunInBackground,
+                    runOnBuild: settings_codeAnalysisRunOnBuild,
+                    clangTidy: {
+                        enabled: settings_clangTidyEnabled,
+                        path: settings_clangTidyPath,
+                        buildPath: settings_clangTidyBuildPath,
+                        config: settings_clangTidyConfig,
+                        fallbackConfig: settings_clangTidyFallbackConfig,
+                        fix: settings_clangTidyFix,
+                        args: settings_clangTidyArgs,
+                        checks: settings_clangTidyChecks
+                    }
+                },
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
                 formatting: settings_formattingEngine,
