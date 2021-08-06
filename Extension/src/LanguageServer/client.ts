@@ -2407,16 +2407,14 @@ export class DefaultClient implements Client {
                     editorConfigSettings = await editorConfig.parse(fsPath);
                     cachedEditorConfigSettings.set(fsPath, editorConfigSettings);
                 }
-                const props: editorConfig.KnownProps = editorConfigSettings;
-                if (props.indent_style === "space" || props.indent_style === "tab") {
-                    editor.options.insertSpaces = props.indent_style === "space";
-                    if (props.indent_size === "tab") {
-                        // Try tab_width.  If not there, default to indent_size.
-                        if (!props.tab_width !== undefined) {
-                            editor.options.tabSize = props.tab_width;
+                if (editorConfigSettings.indent_style === "space" || editorConfigSettings.indent_style === "tab") {
+                    editor.options.insertSpaces = editorConfigSettings.indent_style === "space";
+                    if (editorConfigSettings.indent_size === "tab") {
+                        if (!editorConfigSettings.tab_width !== undefined) {
+                            editor.options.tabSize = editorConfigSettings.tab_width;
                         }
-                    } else if (props.indent_size !== undefined) {
-                        editor.options.tabSize = props.indent_size;
+                    } else if (editorConfigSettings.indent_size !== undefined) {
+                        editor.options.tabSize = editorConfigSettings.indent_size;
                     }
                 }
             }
