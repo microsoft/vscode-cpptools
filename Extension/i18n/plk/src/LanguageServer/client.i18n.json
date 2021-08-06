@@ -36,6 +36,5 @@
 	"configurations.received": "Odebrano konfiguracje niestandardowe:",
 	"browse.configuration.received": "Odebrano niestandardową konfigurację przeglądania: {0}",
 	"no.compilers.found": "W systemie nie odnaleziono żadnych kompilatorów języka C++. W przypadku Twojej platformy zalecamy zainstalowanie {0} przy użyciu instrukcji w edytorze.",
-	"compilers.found": "Znaleźliśmy następujące kompilatory C++ w systemie:",
-	"compilers.found.message": "Możesz określić, który kompilator ma być używany w konfiguracji IntelliSense projektu."
+	"compilers.found": "Znaleźliśmy następujące kompilatory języka C++ w systemie. Wybierz kompilator w konfiguracji funkcji IntelliSense projektu."
 }

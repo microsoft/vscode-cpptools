@@ -36,6 +36,5 @@
 	"configurations.received": "Benutzerdefinierte Konfigurationen empfangen:",
 	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}",
 	"no.compilers.found": "Es wurden keine C++ Compiler auf dem System gefunden. Für Ihre Plattform empfehlen wir Ihnen die Installation von {0} mithilfe der Anweisungen im Editor.",
-	"compilers.found": "Wir haben die folgenden C++ Compiler auf dem System gefunden:",
-	"compilers.found.message": "Sie können angeben, welcher Compiler in der IntelliSense-Konfiguration Ihres Projekts verwendet werden soll."
+	"compilers.found": "Wir haben die folgenden C++-Compiler auf Ihrem System gefunden. Wählen Sie einen Compiler in der IntelliSense-Konfiguration Ihres Projekts aus."
 }

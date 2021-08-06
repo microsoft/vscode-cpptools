@@ -36,6 +36,5 @@
 	"configurations.received": "Configurations personnalisées reçues :",
 	"browse.configuration.received": "Configuration de navigation personnalisée reçue : {0}",
 	"no.compilers.found": "Aucun C++ compilateur n’a été trouvé sur votre système. Pour votre plateforme, nous vous recommandons d’installer {0} à l’aide des instructions de l’éditeur.",
-	"compilers.found": "Nous avons trouvé les C++ compilateur(s) suivant(s) sur votre système :",
-	"compilers.found.message": "Vous pouvez spécifier le compilateur à utiliser dans la configuration IntelliSense de votre projet."
+	"compilers.found": "Nous avons trouvé les compilateurs C++ suivants sur votre système. Choisissez un compilateur dans la configuration IntelliSense de votre projet."
 }
