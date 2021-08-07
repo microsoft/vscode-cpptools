@@ -433,8 +433,8 @@
           "description": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.description%",
           "enumDescriptions": [
             "%c_cpp.configuration.codeAnalysis.clangTidy.fix.disabled.description%",
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixIfNoError.description%",
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixError.description%"
+            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixIfNoErrors.description%",
+            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixErrors.description%"
           ],
           "scope": "resource"
         },

@@ -155,7 +155,7 @@ export class CppSettings extends Settings {
     public get clangTidyFallbackConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.fallbackConfig"); }
     public get clangTidyFix(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.fix"); }
     public get clangTidyArgs(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.args"); }
-    public get clangTidyChecks(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.checks"); }
+    public get clangTidyChecks(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }

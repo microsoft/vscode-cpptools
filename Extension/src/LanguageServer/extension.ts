@@ -193,6 +193,22 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
         if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
+        if (event.execution.task.group === vscode.TaskGroup.Build || event.execution.task.group === vscode.TaskGroup.Rebuild) {
+            if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
+                const folder: vscode.WorkspaceFolder | undefined = event.execution.task.scope;
+                if (folder) {
+                    const settings: CppSettings = new CppSettings(folder.uri);
+                    if (settings.codeAnalysisRunOnBuild) {
+                        clients.getClientFor(folder.uri).handleRunCodeAnalysisOnAllFiles();
+                    }
+                    return;
+                }
+            }
+            const settings: CppSettings = new CppSettings();
+            if (settings.codeAnalysisRunOnBuild) {
+                clients.ActiveClient.handleRunCodeAnalysisOnAllFiles();
+            }
+        }
     });
 
     const selector: vscode.DocumentSelector = [

@@ -1001,8 +1001,6 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
-        const settings_codeAnalysisRunInBackground: (boolean | undefined)[] = [];
-        const settings_codeAnalysisRunOnBuild: (boolean | undefined)[] = [];
         const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
         const settings_clangTidyBuildPath: (string | undefined)[] = [];
@@ -1010,7 +1008,7 @@ export class DefaultClient implements Client {
         const settings_clangTidyFallbackConfig: (string | undefined)[] = [];
         const settings_clangTidyFix: (string | undefined)[] = [];
         const settings_clangTidyArgs: (string | undefined)[] = [];
-        const settings_clangTidyChecks: (string | undefined)[] = [];
+        const settings_clangTidyChecks: (string[] | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
@@ -1108,8 +1106,6 @@ export class DefaultClient implements Client {
 
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
-                settings_codeAnalysisRunInBackground.push(setting.codeAnalysisRunInBackground);
-                settings_codeAnalysisRunOnBuild.push(setting.codeAnalysisRunOnBuild);
                 settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
                 settings_clangTidyEnabled.push(setting.clangTidyEnabled);
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
@@ -1245,8 +1241,6 @@ export class DefaultClient implements Client {
                     maxMemory: workspaceSettings.codeAnalysisMaxMemory,
                     updateDelay: workspaceSettings.codeAnalysisUpdateDelay,
                     exclude: settings_codeAnalysisExclude,
-                    runInBackground: settings_codeAnalysisRunInBackground,
-                    runOnBuild: settings_codeAnalysisRunOnBuild,
                     clangTidy: {
                         enabled: settings_clangTidyEnabled,
                         path: settings_clangTidyPath,
@@ -1587,9 +1581,11 @@ export class DefaultClient implements Client {
         }
     }
 
+    private activeDocumentChangedPending: boolean = false;
     public onDidOpenTextDocument(document: vscode.TextDocument): void {
         if (document.uri.scheme === "file") {
             openFileVersions.set(document.uri.toString(), document.version);
+            this.activeDocumentChangedPending = true;
         }
     }
 
@@ -2460,6 +2456,13 @@ export class DefaultClient implements Client {
     public activeDocumentChanged(document: vscode.TextDocument): void {
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
+            if (this.activeDocumentChangedPending) {
+                this.activeDocumentChangedPending = false;
+                const settings: CppSettings = new CppSettings(this.RootUri);
+                if (settings.codeAnalysisRunInBackground) {
+                    this.handleRunCodeAnalysisOnActiveFile();
+                }
+            }
         });
     }
 
