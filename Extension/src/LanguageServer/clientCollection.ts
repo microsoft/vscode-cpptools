@@ -64,12 +64,12 @@ export class ClientCollection {
         this.disposables.push(vscode.workspace.onDidCloseTextDocument(d => this.onDidCloseTextDocument(d)));
     }
 
-    public activeDocumentChanged(document: vscode.TextDocument): void {
+    public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
         this.activeDocument = document;
         const activeClient: cpptools.Client = this.getClientFor(document.uri);
 
         // Notify the active client that the document has changed.
-        activeClient.activeDocumentChanged(document);
+        await activeClient.activeDocumentChanged(document);
 
         // If the active client changed, resume the new client and tell the currently active client to deactivate.
         if (activeClient !== this.activeClient) {

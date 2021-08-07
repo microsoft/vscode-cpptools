@@ -42,6 +42,7 @@ import * as os from 'os';
 import * as refs from './references';
 import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
+import * as editorConfig from 'editorconfig';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -627,7 +628,7 @@ export interface Client {
     notifyWhenLanguageClientReady(notify: () => void): void;
     awaitUntilLanguageClientReady(): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
-    activeDocumentChanged(document: vscode.TextDocument): void;
+    activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
@@ -2063,9 +2064,10 @@ export class DefaultClient implements Client {
                 false /* ignoreChangeEvents */,
                 false /* ignoreDeleteEvents */);
 
-            this.rootPathFileWatcher.onDidCreate((uri) => {
+            this.rootPathFileWatcher.onDidCreate(async (uri) => {
                 if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    await this.updateActiveDocumentTextOptions();
                 }
 
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
@@ -2081,11 +2083,12 @@ export class DefaultClient implements Client {
                     this.associations_for_did_change.add(ext);
                 }
             }
-            this.rootPathFileWatcher.onDidChange((uri) => {
+            this.rootPathFileWatcher.onDidChange(async (uri) => {
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
 
                 if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    await this.updateActiveDocumentTextOptions();
                 }
 
                 if (dotIndex !== -1) {
@@ -2387,10 +2390,45 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
+    private async updateActiveDocumentTextOptions(): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor?.document?.uri.scheme === "file"
+            && (editor.document.languageId === "c"
+                || editor.document.languageId === "cpp"
+                || editor.document.languageId === "cuda-cpp")) {
+            // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.formattingEngine === "vcFormat") {
+                const fsPath: string = editor.document.uri.fsPath;
+                let editorConfigSettings: any = cachedEditorConfigSettings.get(fsPath);
+                if (!editorConfigSettings) {
+                    editorConfigSettings = await editorConfig.parse(fsPath);
+                    cachedEditorConfigSettings.set(fsPath, editorConfigSettings);
+                }
+                if (editorConfigSettings.indent_style === "space" || editorConfigSettings.indent_style === "tab") {
+                    editor.options.insertSpaces = editorConfigSettings.indent_style === "space";
+                    if (editorConfigSettings.indent_size === "tab") {
+                        if (!editorConfigSettings.tab_width !== undefined) {
+                            editor.options.tabSize = editorConfigSettings.tab_width;
+                        }
+                    } else if (editorConfigSettings.indent_size !== undefined) {
+                        editor.options.tabSize = editorConfigSettings.indent_size;
+                    }
+                }
+                if (editorConfigSettings.end_of_line !== undefined) {
+                    editor.edit((edit) => {
+                        edit.setEndOfLine(editorConfigSettings.end_of_line === "lf" ? vscode.EndOfLine.LF : vscode.EndOfLine.CRLF);
+                    });
+                }
+            }
+        }
+    }
+
     /**
      * notifications to the language server
      */
-    public activeDocumentChanged(document: vscode.TextDocument): void {
+    public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
+        await this.updateActiveDocumentTextOptions();
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
@@ -2962,7 +3000,7 @@ class NullClient implements Client {
     notifyWhenLanguageClientReady(notify: () => void): void { }
     awaitUntilLanguageClientReady(): void { }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    activeDocumentChanged(document: vscode.TextDocument): void { }
+    activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
