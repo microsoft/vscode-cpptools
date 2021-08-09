@@ -638,6 +638,9 @@ export class CppSettings extends Settings {
                         return true;
                     }
                 }
+                if (editorConfigSettings.root?.toLowerCase() === "true") {
+                    return true;
+                }
             } else {
                 const clangFormatPath1: string = path.join(parentPath, ".clang-format");
                 if (fs.existsSync(clangFormatPath1)) {
