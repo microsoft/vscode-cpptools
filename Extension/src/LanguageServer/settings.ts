@@ -617,6 +617,10 @@ export class CppSettings extends Settings {
         if (this.formattingEngine !== "Default") {
             return this.formattingEngine === "vcFormat";
         }
+        if (this.clangFormatStyle !== "file") {
+            // If a clang-format style other than file is specified, don't try to switch to vcFormat.
+            return false;
+        }
         const cachedValue: boolean | undefined = cachedEditorConfigLookups.get(document.uri.fsPath);
         if (cachedValue !== undefined) {
             return cachedValue;

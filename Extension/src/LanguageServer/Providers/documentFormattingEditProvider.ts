@@ -19,7 +19,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
-                settings: { ...editorConfigSettings },
+                editorConfigSettings: { ...editorConfigSettings },
                 useVcFormat: useVcFormat,
                 uri: document.uri.toString(),
                 insertSpaces: options.insertSpaces,

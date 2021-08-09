@@ -350,7 +350,7 @@ export interface FormatParams {
     character: string;
     insertSpaces: boolean;
     tabSize: number;
-    settings: any;
+    editorConfigSettings: any;
     useVcFormat: boolean;
 }
 
