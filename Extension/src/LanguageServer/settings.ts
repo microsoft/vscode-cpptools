@@ -625,12 +625,11 @@ export class CppSettings extends Settings {
         if (cachedValue !== undefined) {
             return cachedValue;
         }
-        const fileName: string = path.basename(document.uri.fsPath);
         let foundEditorConfigWithVcFormatSettings: boolean = false;
         const findConfigFile: (parentPath: string) => boolean = (parentPath: string) => {
             const editorConfigPath: string = path.join(parentPath, ".editorconfig");
             if (fs.existsSync(editorConfigPath)) {
-                const editorConfigSettings: any = getEditorConfigSettings(path.join(fsPath, fileName));
+                const editorConfigSettings: any = getEditorConfigSettings(document.uri.fsPath);
                 const keys: string[] = Object.keys(editorConfigSettings);
                 for (let i: number = 0; i < keys.length; ++i) {
                     if (keys[i].startsWith("cpp_")) {
