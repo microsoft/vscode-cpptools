@@ -15,7 +15,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
     public async provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
-        const settings: CppSettings = new CppSettings();
+        const settings: CppSettings = new CppSettings(this.client.RootUri);
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
