@@ -795,7 +795,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeAnalysis', onResumeAnalysis));
     disposables.push(vscode.commands.registerCommand('C_Cpp.CancelAnalysis', onCancelAnalysis));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowAnalysisCommands', onShowAnalysisCommands));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', onShowCodeAnalysisCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
@@ -1065,9 +1065,9 @@ function onShowParsingCommands(): void {
     clients.ActiveClient.handleShowParsingCommands();
 }
 
-function onShowAnalysisCommands(): void {
+function onShowCodeAnalysisCommands(): void {
     onActivationEvent();
-    clients.ActiveClient.handleShowAnalysisCommands();
+    clients.ActiveClient.handleShowCodeAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {

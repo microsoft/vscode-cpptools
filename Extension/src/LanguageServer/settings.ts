@@ -135,13 +135,10 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
-    public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
-    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
     public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
-    public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
     public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
     public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxConcurrentThreads"); }
     public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }

@@ -326,7 +326,7 @@ export class UI {
         return (selection) ? selection.index : -1;
     }
 
-    public async showAnalysisCommands(): Promise<number> {
+    public async showCodeAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = this.selectACommandString;
 

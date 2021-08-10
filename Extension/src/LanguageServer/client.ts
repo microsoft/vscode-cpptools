@@ -652,7 +652,7 @@ export interface Client {
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
-    handleShowAnalysisCommands(): Promise<void>;
+    handleShowCodeAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
@@ -1226,7 +1226,6 @@ export class DefaultClient implements Client {
             initializationOptions: {
                 freeMemory: os.freemem() / 1048576,
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
-                maxCachedProcesses: workspaceSettings.maxCachedProcesses,
                 maxMemory: workspaceSettings.maxMemory,
                 intelliSense: {
                     maxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
@@ -1234,7 +1233,6 @@ export class DefaultClient implements Client {
                 },
                 references: {
                     maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
-                    maxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
                     maxMemory: workspaceSettings.referencesMaxMemory
                 },
                 codeAnalysis: {
@@ -2836,9 +2834,9 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleShowAnalysisCommands(): Promise<void> {
+    public async handleShowCodeAnalysisCommands(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        const index: number = await ui.showAnalysisCommands();
+        const index: number = await ui.showCodeAnalysisCommands();
         switch (index) {
             case 0: this.cancelAnalysis(); break;
             case 1: this.pauseAnalysis(); break;
@@ -3101,7 +3099,7 @@ class NullClient implements Client {
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
-    handleShowAnalysisCommands(): Promise<void> { return Promise.resolve(); }
+    handleShowCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }
