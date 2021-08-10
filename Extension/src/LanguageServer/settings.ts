@@ -15,6 +15,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { cachedEditorConfigLookups, cachedEditorConfigSettings } from './client';
 import * as editorConfig from 'editorconfig';
+import { PersistentState } from './persistentState';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -634,6 +639,12 @@ export class CppSettings extends Settings {
                 for (let i: number = 0; i < keys.length; ++i) {
                     if (keys[i].startsWith("cpp_")) {
                         foundEditorConfigWithVcFormatSettings = true;
+                        const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
+                        if (!didEditorConfigNotice.Value) {
+                            vscode.window.showInformationMessage(localize("editorconfig.default.behavior",
+                                "vcFormat was selected because an '.editorconfig' file was found containing vcFormat entries and 'Cpp.formatting' is set to 'Default'."));
+                            didEditorConfigNotice.Value = true;
+                        }
                         return true;
                     }
                 }
