@@ -150,7 +150,7 @@ export class UI {
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
             + (twoStatus ? " | " : "")
             + (val ? this.runningCodeAnalysisTooltip : "");
-        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : "";
+        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : undefined;
     }
 
     private get ReferencesCommand(): ReferencesCommandMode {

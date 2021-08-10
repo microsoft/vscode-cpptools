@@ -67,6 +67,7 @@ let diagnosticsCollection: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
+export const openNeverActiveFiles: Set<string> = new Set<string>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 
 export function disposeWorkspaceData(): void {
@@ -489,9 +490,9 @@ const FileDeletedNotification: NotificationType<FileChangedParams, void> = new N
 const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
-const PauseAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseAnalysis');
-const ResumeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeAnalysis');
-const CancelAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelAnalysis');
+const PauseCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/PauseCodeAnalysis');
+const ResumeCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/ResumeCodeAnalysis');
+const CancelCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/CancelCodeAnalysis');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
 const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
 const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeCppProperties');
@@ -646,9 +647,9 @@ export interface Client {
     deactivate(): void;
     pauseParsing(): void;
     resumeParsing(): void;
-    pauseAnalysis(): void;
-    resumeAnalysis(): void;
-    cancelAnalysis(): void;
+    PauseCodeAnalysis(): void;
+    ResumeCodeAnalysis(): void;
+    CancelCodeAnalysis(): void;
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
@@ -1580,19 +1581,24 @@ export class DefaultClient implements Client {
         }
     }
 
-    private activeDocumentChangedPending: boolean = false;
     public onDidOpenTextDocument(document: vscode.TextDocument): void {
         if (document.uri.scheme === "file") {
-            openFileVersions.set(document.uri.toString(), document.version);
-            this.activeDocumentChangedPending = true;
+            const uri: string = document.uri.toString();
+            openFileVersions.set(uri, document.version);
+            openNeverActiveFiles.add(uri);
         }
     }
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
+        const uri: string = document.uri.toString();
         if (this.semanticTokensProvider) {
-            this.semanticTokensProvider.invalidateFile(document.uri.toString());
+            this.semanticTokensProvider.invalidateFile(uri);
         }
-        openFileVersions.delete(document.uri.toString());
+
+        openFileVersions.delete(uri);
+        if (openNeverActiveFiles.has(uri)) {
+            openNeverActiveFiles.delete(uri);
+        }
     }
 
     private registeredProviders: CustomConfigurationProvider1[] = [];
@@ -2492,10 +2498,11 @@ export class DefaultClient implements Client {
         await this.updateActiveDocumentTextOptions();
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
-            if (this.activeDocumentChangedPending) {
-                this.activeDocumentChangedPending = false;
+            const uri: string = document.uri.toString();
+            if (openNeverActiveFiles.has(uri)) {
+                openNeverActiveFiles.delete(uri);
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.codeAnalysisRunInBackground) {
+                if (settings.clangTidyEnabled && settings.codeAnalysisRunInBackground) {
                     this.handleRunCodeAnalysisOnActiveFile();
                 }
             }
@@ -2535,16 +2542,16 @@ export class DefaultClient implements Client {
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
     }
 
-    public pauseAnalysis(): void {
-        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(PauseAnalysisNotification));
+    public PauseCodeAnalysis(): void {
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(PauseCodeAnalysisNotification));
     }
 
-    public resumeAnalysis(): void {
-        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeAnalysisNotification));
+    public ResumeCodeAnalysis(): void {
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeCodeAnalysisNotification));
     }
 
-    public cancelAnalysis(): void {
-        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CancelAnalysisNotification));
+    public CancelCodeAnalysis(): void {
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CancelCodeAnalysisNotification));
     }
 
     private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
@@ -2838,9 +2845,9 @@ export class DefaultClient implements Client {
         await this.awaitUntilLanguageClientReady();
         const index: number = await ui.showCodeAnalysisCommands();
         switch (index) {
-            case 0: this.cancelAnalysis(); break;
-            case 1: this.pauseAnalysis(); break;
-            case 2: this.resumeAnalysis(); break;
+            case 0: this.CancelCodeAnalysis(); break;
+            case 1: this.PauseCodeAnalysis(); break;
+            case 2: this.ResumeCodeAnalysis(); break;
         }
     }
 
@@ -3093,9 +3100,9 @@ class NullClient implements Client {
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }
-    pauseAnalysis(): void { }
-    resumeAnalysis(): void { }
-    cancelAnalysis(): void { }
+    PauseCodeAnalysis(): void { }
+    ResumeCodeAnalysis(): void { }
+    CancelCodeAnalysis(): void { }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }

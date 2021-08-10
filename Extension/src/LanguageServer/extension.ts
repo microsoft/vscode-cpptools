@@ -190,22 +190,30 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {
-        if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
+        getActiveClient().PauseCodeAnalysis();
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
-        if (event.execution.task.group === vscode.TaskGroup.Build || event.execution.task.group === vscode.TaskGroup.Rebuild) {
+    });
+
+    vscode.tasks.onDidEndTask(event => {
+        getActiveClient().ResumeCodeAnalysis();
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) {
+            telemetry.logLanguageServerEvent('buildTaskFinished');
             if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
                 const folder: vscode.WorkspaceFolder | undefined = event.execution.task.scope;
                 if (folder) {
                     const settings: CppSettings = new CppSettings(folder.uri);
-                    if (settings.codeAnalysisRunOnBuild) {
+                    if (settings.codeAnalysisRunOnBuild && settings.clangTidyEnabled) {
                         clients.getClientFor(folder.uri).handleRunCodeAnalysisOnAllFiles();
                     }
                     return;
                 }
             }
             const settings: CppSettings = new CppSettings();
-            if (settings.codeAnalysisRunOnBuild) {
+            if (settings.codeAnalysisRunOnBuild && settings.clangTidyEnabled) {
                 clients.ActiveClient.handleRunCodeAnalysisOnAllFiles();
             }
         }
@@ -791,9 +799,9 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseAnalysis', onPauseAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeAnalysis', onResumeAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelAnalysis', onCancelAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', onPauseCodeAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', onResumeCodeAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', onCancelCodeAnalysis));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', onShowCodeAnalysisCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
@@ -973,8 +981,9 @@ function onRunCodeAnalysisOnActiveFile(): void {
         const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
         if (!settings.clangTidyEnabled) {
             showCodeAnalysisDisabledMessage();
+        } else {
+            getActiveClient().handleRunCodeAnalysisOnActiveFile();
         }
-        getActiveClient().handleRunCodeAnalysisOnActiveFile();
     }
 }
 
@@ -984,8 +993,9 @@ function onRunCodeAnalysisOnOpenFiles(): void {
         const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
         if (!settings.clangTidyEnabled) {
             showCodeAnalysisDisabledMessage();
+        } else {
+            getActiveClient().handleRunCodeAnalysisOnOpenFiles();
         }
-        getActiveClient().handleRunCodeAnalysisOnOpenFiles();
     }
 }
 
@@ -993,6 +1003,8 @@ function onRunCodeAnalysisOnAllFiles(): void {
     onActivationEvent();
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     if (!settings.clangTidyEnabled) {
+        showCodeAnalysisDisabledMessage();
+    } else {
         getActiveClient().handleRunCodeAnalysisOnAllFiles();
     }
 }
@@ -1045,19 +1057,19 @@ function onResumeParsing(): void {
     clients.ActiveClient.resumeParsing();
 }
 
-function onPauseAnalysis(): void {
+function onPauseCodeAnalysis(): void {
     onActivationEvent();
-    clients.ActiveClient.pauseAnalysis();
+    clients.ActiveClient.PauseCodeAnalysis();
 }
 
-function onResumeAnalysis(): void {
+function onResumeCodeAnalysis(): void {
     onActivationEvent();
-    clients.ActiveClient.resumeAnalysis();
+    clients.ActiveClient.ResumeCodeAnalysis();
 }
 
-function onCancelAnalysis(): void {
+function onCancelCodeAnalysis(): void {
     onActivationEvent();
-    clients.ActiveClient.cancelAnalysis();
+    clients.ActiveClient.CancelCodeAnalysis();
 }
 
 function onShowParsingCommands(): void {
