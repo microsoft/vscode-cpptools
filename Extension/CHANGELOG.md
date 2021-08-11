@@ -1,9 +1,5 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.5.1: July 9, 2021
-### Bug Fixes
-* cppvsdbg Debugging becomes no-op between 1.4.1 and 1.5.0 [#7808](https://github.com/microsoft/vscode-cpptools/issues/7808)
-
 ## Version 1.6.0-insiders: August 12, 2021
 ### New Feature
 * Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
@@ -31,6 +27,10 @@
 * Fix issue with setting of MS extensions when `-fms-extensions` is used. [#7886](https://github.com/microsoft/vscode-cpptools/issues/7886)
 * Fix an issue with support detection on Android. [#7906](https://github.com/microsoft/vscode-cpptools/issues/7906)
 * Fix a bug with handling of `"C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "newLine"`. [#7926](https://github.com/microsoft/vscode-cpptools/issues/7926)
+
+## Version 1.5.1: July 9, 2021
+### Bug Fixes
+* cppvsdbg Debugging becomes no-op between 1.4.1 and 1.5.0 [#7808](https://github.com/microsoft/vscode-cpptools/issues/7808)
 
 ## Version 1.5.0: July 8, 2021
 ### New Feature
