@@ -24,7 +24,7 @@
     "c_cpp.configuration.formatting.description": "Configures the formatting engine",
     "c_cpp.configuration.formatting.clangFormat.description": "clang-format will be used to format code.",
     "c_cpp.configuration.formatting.vcFormat.description": "The Visual C++ formatting engine will be used to format code.",
-    "c_cpp.configuration.formatting.Default.description": "vcFormat is used to format code if a .editorconfig file is found that contains vcFormat entries in the same or closer proximity to the file than a .clang-format file.  Otherwise, clang-format is used to format code.",
+    "c_cpp.configuration.formatting.Default.description": "By default, clang-format will be used to format the code. However, the Visual C++ formatting engine will be used if an .editorconfig file with relevant settings is found nearer to the code being formatted and clang_format_style is the default value: 'file'.",
     "c_cpp.configuration.formatting.Disabled.description": "Code formatting will be disabled.",
     "c_cpp.configuration.vcFormat.indent.braces.description": "Braces are indented by the amount specified in the Editor: Tab Size setting.",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Determines what new line indentation is relative to",

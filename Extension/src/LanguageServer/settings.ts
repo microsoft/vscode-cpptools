@@ -642,7 +642,7 @@ export class CppSettings extends Settings {
                         const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                         if (!didEditorConfigNotice.Value) {
                             vscode.window.showInformationMessage(localize("editorconfig.default.behavior",
-                                "vcFormat was selected because an '.editorconfig' file was found containing vcFormat entries and 'Cpp.formatting' is set to 'Default'."));
+                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'C_Cpp.formatting.Default' setting."));
                             didEditorConfigNotice.Value = true;
                         }
                         return true;
