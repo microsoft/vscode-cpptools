@@ -373,7 +373,7 @@ export enum FoldingRangeKind {
 
 export interface CppFoldingRange {
     kind: FoldingRangeKind;
-    range: Range;
+    range: InputRegion;
 }
 
 export interface GetFoldingRangesResult {
