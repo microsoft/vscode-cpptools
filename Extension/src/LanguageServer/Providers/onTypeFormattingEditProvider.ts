@@ -3,9 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import {DefaultClient,  FormatParams, FormatOnTypeRequest, cachedEditorConfigSettings} from '../client';
-import { CppSettings } from '../settings';
-import * as editorConfig from 'editorconfig';
+import {DefaultClient,  FormatParams, FormatOnTypeRequest} from '../client';
+import { CppSettings, getEditorConfigSettings } from '../settings';
 
 export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
     private client: DefaultClient;
@@ -16,9 +15,12 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
     public async provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
+        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
-                settings: { ...editorConfigSettings },
+                editorConfigSettings: { ...editorConfigSettings },
+                useVcFormat: useVcFormat,
                 uri: document.uri.toString(),
                 insertSpaces: options.insertSpaces,
                 tabSize: options.tabSize,
@@ -44,8 +46,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
             });
             return result;
         };
-        const settings: CppSettings = new CppSettings();
-        if (settings.formattingEngine !== "vcFormat") {
+        if (!useVcFormat) {
             // If not using vcFormat, only process on-type requests for ';'
             if (ch !== ';') {
                 const result: vscode.TextEdit[] = [];
@@ -54,11 +55,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
                 return configCallBack(undefined);
             }
         } else {
-            let editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
-            if (!editorConfigSettings) {
-                editorConfigSettings = await editorConfig.parse(filePath);
-                cachedEditorConfigSettings.set(filePath, editorConfigSettings);
-            }
+            const editorConfigSettings: any = getEditorConfigSettings(filePath);
             return configCallBack(editorConfigSettings);
         }
     }

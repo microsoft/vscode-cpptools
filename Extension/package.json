@@ -266,7 +266,7 @@
             "%c_cpp.configuration.formatting.Default.description%",
             "%c_cpp.configuration.formatting.Disabled.description%"
           ],
-          "default": "clangFormat",
+          "default": "Default",
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },

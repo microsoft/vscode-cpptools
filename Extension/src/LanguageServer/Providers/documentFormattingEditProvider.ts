@@ -3,9 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, FormatDocumentRequest, cachedEditorConfigSettings } from '../client';
-import { CppSettings } from '../settings';
-import * as editorConfig from 'editorconfig';
+import { DefaultClient, FormatParams, FormatDocumentRequest } from '../client';
+import { CppSettings, getEditorConfigSettings } from '../settings';
 
 export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
     private client: DefaultClient;
@@ -16,9 +15,12 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
     public async provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
+        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
-                settings: { ...editorConfigSettings },
+                editorConfigSettings: { ...editorConfigSettings },
+                useVcFormat: useVcFormat,
                 uri: document.uri.toString(),
                 insertSpaces: options.insertSpaces,
                 tabSize: options.tabSize,
@@ -70,15 +72,10 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
             }
             return results;
         };
-        const settings: CppSettings = new CppSettings();
-        if (settings.formattingEngine !== "vcFormat") {
+        if (!useVcFormat) {
             return configCallBack(undefined);
         } else {
-            let editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
-            if (!editorConfigSettings) {
-                editorConfigSettings = await editorConfig.parse(filePath);
-                cachedEditorConfigSettings.set(filePath, editorConfigSettings);
-            }
+            const editorConfigSettings: any = getEditorConfigSettings(filePath);
             return configCallBack(editorConfigSettings);
         }
     }
