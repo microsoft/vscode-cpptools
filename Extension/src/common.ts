@@ -1305,15 +1305,17 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
     }, Promise.resolve());
 }
 
-// Quote a file path if it includes space.
-export function quoteFilePaths(path: string): string {
-    // Check if the path is not already quoted.
-    if (!/".*?"/.test(path) && !/'.*?'/.test(path)) {
-        // Check if this is a file
-        if ((/^(.+)\/([^\/]+)$/.test(path) || /^(.+)\\([^\\]+)$/.test(path))
-            && path.includes(" ")) {
-            return `"${path}"`;
-        }
+export function normalizeArg(arg: string): string {
+    arg = arg.trimLeft().trimRight();
+    // Check if the arg is enclosed in backtick, or includes escaped double-quotes, or unscaped single-quotes on mac and linux.
+    if (/`.*?`/.test(arg) || arg.includes("\\\"") ||
+        (!process.platform.includes("win") && arg.includes("\'"))) {
+        return arg;
     }
-    return path;
+    const unescapedSpaces = arg.split('').find((char, index) => index > 0 && char == " " && arg[index - 1] !== "\\");
+    if (unescapedSpaces) {
+        arg.replace(/\\ /g," ");
+        return `"${arg}"`;
+    }
+    return arg;
 }

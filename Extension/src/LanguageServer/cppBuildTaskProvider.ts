@@ -359,7 +359,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         // Do build.
         let activeCommand: string = util.resolveVariables(this.command);
         this.args.forEach((value, index) => {
-            value = util.quoteFilePaths(util.resolveVariables(value));
+            value = util.normalizeArg(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
             this.args[index]= value;
         });
@@ -382,58 +382,54 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         let child: cp.ChildProcess | undefined;
         try {
             child = cp.spawn(this.command, this.args, this.options ? this.options : {});
-            let error: boolean = false;
-            let stdout: boolean = false;
-            let stderr: boolean = false;
-            let warning: boolean = false;
+            let error: string = "";
+            let stdout: string = "";
+            let stderr: string = "";
             let result: number = await new Promise<number>(resolve => {
                 if (child) {
                     child.on('error', err => {
                         splitWriteEmitter(err.message);
-                        error = true;
+                        error = err.message;
                         resolve(-1);
                     });
                     child.stdout?.on('data', data => {
                         const str: string = data.toString("utf8");
                         splitWriteEmitter(str);
-                        if (str.includes("error")){
-                            stderr = true;
-                        } else if (str.includes("warning")) {
-                            warning = true;
-                        }
-                        stdout = true;
+                        stdout += str;
                     });
                     child.stderr?.on('data', data => {
                         const str: string = data.toString("utf8");
                         splitWriteEmitter(str);
-                        if (str.includes("error")){
-                            stderr = true;
-                        } else if (str.includes("warning")) {
-                            warning = true;
-                        }
+                        stderr += str;
                     });
-                    child.on('close', retc => {
+                    child.on('close', result => {
+                        if (result === null) {
+                            this.writeEmitter.fire(localize("build.run.terminated", "Build run was terminated.") + this.endOfLine);
+                            resolve(-1);
+                        }
                         resolve(0);
                     });
                 }
             });
-            this.printBuildSummary(error, stdout, stderr, warning);
+            this.printBuildSummary(error, stdout, stderr);
             this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
         }
     }
 
-    private printBuildSummary(error: boolean, stdout: boolean, stderr: boolean, warning: boolean) {
-        const dot: string = ".";
-        if (error || stderr) {
+    private printBuildSummary(error: string, stdout: string, stderr: string) {
+        if (error) {
             telemetry.logLanguageServerEvent("cppBuildTaskError");
-            this.writeEmitter.fire(localize("build_finished_with_error", "Build finished with error(s)") + dot + this.endOfLine);
-        } else if (warning) {
+            this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
+        } else if (stderr && stdout) { // gcc/clang
             telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
-            this.writeEmitter.fire(localize("build_finished_with_warnings", "Build finished with warning(s)") + dot + this.endOfLine);
+            this.writeEmitter.fire(localize("build.finished.with.warnings", "Build finished with warning(s).") + this.endOfLine);
+        } else if (stdout && stdout.includes("warning C")) { // cl.exe, compiler warnings
+            telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
+            this.writeEmitter.fire(localize("build.finished.with.warnings", "Build finished with warning(s).") + this.endOfLine);
         } else {
-            this.writeEmitter.fire(localize("build finished successfully", "Build finished successfully.") + this.endOfLine);
+            this.writeEmitter.fire(localize("build.finished.successfully", "Build finished successfully.") + this.endOfLine);
         }
     }
 }
