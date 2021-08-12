@@ -2356,10 +2356,7 @@
           "scope": "machine-overridable"
         },
         "C_Cpp.default.compilerPath": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": "string",
           "default": null,
           "markdownDescription": "%c_cpp.configuration.default.compilerPath.markdownDescription%",
           "scope": "machine-overridable"
@@ -2418,6 +2415,7 @@
           "items": {
             "type": "string"
           },
+          "default": null,
           "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
           "scope": "machine-overridable"
         },

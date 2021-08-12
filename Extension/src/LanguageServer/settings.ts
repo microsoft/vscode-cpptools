@@ -191,18 +191,12 @@ export class CppSettings extends Settings {
     public get defaultCompileCommands(): string | undefined { return super.Section.get<string>("default.compileCommands"); }
     public get defaultForcedInclude(): string[] | undefined { return super.Section.get<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
-    public get defaultCompilerPath(): string | undefined {
-        const result: string | undefined | null = super.Section.get<string | null>("default.compilerPath");
-        if (result === null) {
-            return undefined;
-        }
-        return result;
-    }
+    public get defaultCompilerPath(): string | undefined { return super.Section.get<string | null>("default.compilerPath") ?? undefined; }
     public get defaultCompilerArgs(): string[] | undefined { return super.Section.get<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return super.Section.get<string>("default.configurationProvider"); }
-    public get defaultBrowsePath(): string[] | undefined { return super.Section.get<string[]>("default.browse.path"); }
+    public get defaultBrowsePath(): string[] | undefined { return super.Section.get<string[] | null>("default.browse.path") ?? undefined; }
     public get defaultDatabaseFilename(): string | undefined { return super.Section.get<string>("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.systemIncludePath"); }
