@@ -29,11 +29,8 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         const result: vscode.FoldingRange[] = [];
         ranges.ranges.forEach((r: CppFoldingRange) => {
             const foldingRange: vscode.FoldingRange = {
-                start: r.range.start.line,
-                // Move the end range up one, so the end } line isn't folded, because
-                // VS Code doesn't support column-based folding: https://github.com/microsoft/vscode/issues/50840
-                // The behavior matches TypeScript but not VS (which has column-based folding).
-                end: r.range.end.line - 1
+                start: r.range.startLine,
+                end: r.range.endLine
             };
             switch (r.kind) {
                 case FoldingRangeKind.Comment:

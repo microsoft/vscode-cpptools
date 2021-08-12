@@ -266,7 +266,7 @@
             "%c_cpp.configuration.formatting.Default.description%",
             "%c_cpp.configuration.formatting.Disabled.description%"
           ],
-          "default": "clangFormat",
+          "default": "Default",
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
@@ -3087,7 +3087,8 @@
     "y18n": "^5.0.5",
     "hosted-git-info": "^3.0.8",
     "browserslist": "^4.16.6",
-    "glob-parent": "^5.1.2"
+    "glob-parent": "^5.1.2",
+    "path-parse": "^1.0.7"
   },
   "runtimeDependencies": [
     {
@@ -3310,7 +3311,7 @@
     },
     {
       "description": "OpenDebugAD7 (Windows x86)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/de9fa59805117816e8a5f94c8266f08f/win7-x86.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/4060fb247bf67b3bc90485a56daf7fdd/win7-x86.zip",
       "platforms": [
         "win32"
       ],
@@ -3320,11 +3321,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "8144471564483F2CF2AD44F6E47FEE43CFE0DE935CC5B19AD057B2E9F17247EB"
+      "integrity": "E8086823817ADEE7003A1838507227BBE191105710B1C1023778F520D92DDF4E"
     },
     {
       "description": "OpenDebugAD7 (Windows x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/76746f7e2b206af62790f7c531c5ebfe/win-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/3ff700fb393a8080572f7f3babf3c808/win-x64.zip",
       "platforms": [
         "win32"
       ],
@@ -3334,11 +3335,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "07BCB0E787B440D55377DA475BC6859694C5EDDFE4540DB11D5EC864B67C29E3"
+      "integrity": "B52871375EA4DF4A3F8544BBFEDBC5444BFB3373C2C7D0FDE2B298C4AD1D51F9"
     },
     {
       "description": "OpenDebugAD7 (Windows ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/c6fc1101fc22085d80ee5b51b05cf75b/win10-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/4329d0d448a1152a893f2b7d8a6b0f31/win10-arm64.zip",
       "platforms": [
         "win32"
       ],
@@ -3348,11 +3349,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "98E7434DA74545FE0731E2BB08A14B92B075A0A888181223E45221EA823EE42C"
+      "integrity": "FDCEAD821B680312C5E0DDC33FE0844BD773E7E20A66F681C95F9C82EB6CF7FA"
     },
     {
       "description": "OpenDebugAD7 (Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/cab96f290df15021d58396616c833fa4/linux-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/49513829a39fb5e185c7353334ec794d/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -3362,11 +3363,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "4912413127724649A10A0925316D7E735159F49405D7DD3EA2F54750D6F65964"
+      "integrity": "8F00D1918B2AA36DDF5285B0368B6C411CBC5C96C8DFDB715CED922838435FB7"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/3aaff9a6621469d7efd1423fe2c1063e/linux-arm.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/e6a83921874fb52c60931bb37753be9f/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -3376,11 +3377,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "527426D22FCDD0F3A679F767DDEE82BE34A73A281A46FF3CD64771D37EF6B886"
+      "integrity": "19B1C8D064B0FF82B215C725B4D5B0F3A62B5C426893B78F6636B80A068D0031"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/3ab22dae7df3d59330d73ce58c9025b5/linux-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/6976810e40d473c01fbeef0007724e3c/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -3390,11 +3391,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "2EB2F631C70AB4C6717D5AC61009051F6EFD4BFAF68E7364D95533CA2A7F2F03"
+      "integrity": "FC1A72EF745EB47A688C23A3CCA9B3099A9B0ABAC45AA22DA60BEB589DE0757B"
     },
     {
       "description": "OpenDebugAD7 (Alpine Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/df8be410ade3aea46110a64eb5afaf9f/linux-musl-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/f536f6270266082d58232b0a6cd9c6c5/linux-musl-x64.zip",
       "platforms": [
         "alpine-linux"
       ],
@@ -3404,11 +3405,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "5C830E144F8E9329232EDFC9760034C8A79F7146BB6EF49AE9CFF91BAEF8D10D"
+      "integrity": "0256DDDB3383F14D86EB8F7BF1C13636B542D888E4EF1CFC8709316870C5FFDC"
     },
     {
       "description": "OpenDebugAD7 (macOS x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/f69c1f2f41c21872843df39a3ced3e97/osx-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/40a9ab53927f802ae9b1b5ed5b17d886/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
@@ -3418,7 +3419,7 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "6525551C0E7B64EC920BD527AC2C836841EBA7265151BC4EFC8B3FD56565CC80"
+      "integrity": "C2F326AE29670D1A5626D53FC450BFDF8D5F79CF5B9E89D8C3D2A0059CAC7768"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",

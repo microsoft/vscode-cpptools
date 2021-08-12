@@ -3,9 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, FormatRangeRequest, cachedEditorConfigSettings } from '../client';
-import { CppSettings } from '../settings';
-import * as editorConfig from 'editorconfig';
+import { DefaultClient, FormatParams, FormatRangeRequest } from '../client';
+import { CppSettings, getEditorConfigSettings } from '../settings';
 
 export class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
     private client: DefaultClient;
@@ -16,9 +15,12 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
+        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
-                settings: { ...editorConfigSettings },
+                editorConfigSettings: { ...editorConfigSettings },
+                useVcFormat: useVcFormat,
                 uri: document.uri.toString(),
                 insertSpaces: options.insertSpaces,
                 tabSize: options.tabSize,
@@ -44,17 +46,10 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             });
             return result;
         };
-        const settings: CppSettings = new CppSettings();
-        if (settings.formattingEngine !== "vcFormat") {
+        if (!useVcFormat) {
             return configCallBack(undefined);
         } else {
-            let editorConfigSettings: any = cachedEditorConfigSettings.get(filePath);
-            if (!editorConfigSettings) {
-                editorConfigSettings = await editorConfig.parse(filePath);
-                if (editorConfigSettings !== undefined) {
-                    cachedEditorConfigSettings.set(filePath, editorConfigSettings);
-                }
-            }
+            const editorConfigSettings: any = getEditorConfigSettings(filePath);
             return configCallBack(editorConfigSettings);
         }
     };

@@ -24,7 +24,7 @@ import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileCo
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings, getEditorConfigSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState } from './persistentState';
 import { UI, getUI } from './ui';
@@ -67,6 +67,7 @@ let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
+export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -349,7 +350,8 @@ export interface FormatParams {
     character: string;
     insertSpaces: boolean;
     tabSize: number;
-    settings: any;
+    editorConfigSettings: any;
+    useVcFormat: boolean;
 }
 
 interface TextEdit {
@@ -371,7 +373,7 @@ export enum FoldingRangeKind {
 
 export interface CppFoldingRange {
     kind: FoldingRangeKind;
-    range: Range;
+    range: InputRegion;
 }
 
 export interface GetFoldingRangesResult {
@@ -627,7 +629,7 @@ export interface Client {
     notifyWhenLanguageClientReady(notify: () => void): void;
     awaitUntilLanguageClientReady(): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
-    activeDocumentChanged(document: vscode.TextDocument): void;
+    activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
@@ -1020,7 +1022,6 @@ export class DefaultClient implements Client {
         const settings_indentAccessSpecifiers: boolean[] = [];
         const settings_indentNamespaceContents: boolean[] = [];
         const settings_indentPreserveComments: boolean[] = [];
-        const settings_formattingEngine: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceNamespace: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceType: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceFunction: (string | undefined)[] = [];
@@ -1083,7 +1084,6 @@ export class DefaultClient implements Client {
 
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
-                settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
                 settings_indentPreserveWithinParentheses.push(setting.vcFormatIndentPreserveWithinParentheses);
@@ -1193,7 +1193,6 @@ export class DefaultClient implements Client {
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
-                formatting: settings_formattingEngine,
                 vcFormat: {
                     indent: {
                         braces: settings_indentBraces,
@@ -1911,6 +1910,7 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
+        this.updateActiveDocumentTextOptions();
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
         this.trackedDocuments.add(document);
     }
@@ -2063,9 +2063,15 @@ export class DefaultClient implements Client {
                 false /* ignoreChangeEvents */,
                 false /* ignoreDeleteEvents */);
 
-            this.rootPathFileWatcher.onDidCreate((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+            this.rootPathFileWatcher.onDidCreate(async (uri) => {
+                const fileName: string = path.basename(uri.fsPath).toLowerCase();
+                if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    cachedEditorConfigLookups.clear();
+                    await this.updateActiveDocumentTextOptions();
+                }
+                if (fileName === ".clang-format" || fileName === "_clang-format") {
+                    cachedEditorConfigLookups.clear();
                 }
 
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
@@ -2081,13 +2087,14 @@ export class DefaultClient implements Client {
                     this.associations_for_did_change.add(ext);
                 }
             }
-            this.rootPathFileWatcher.onDidChange((uri) => {
+            this.rootPathFileWatcher.onDidChange(async (uri) => {
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
-
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                const fileName: string = path.basename(uri.fsPath).toLowerCase();
+                if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    cachedEditorConfigLookups.clear();
+                    await this.updateActiveDocumentTextOptions();
                 }
-
                 if (dotIndex !== -1) {
                     const ext: string = uri.fsPath.substr(dotIndex + 1);
                     if (this.associations_for_did_change?.has(ext)) {
@@ -2104,10 +2111,14 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                const fileName: string = path.basename(uri.fsPath).toLowerCase();
+                if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    cachedEditorConfigLookups.clear();
                 }
-
+                if (fileName === ".clang-format" || fileName === "_clang-format") {
+                    cachedEditorConfigLookups.clear();
+                }
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
             });
 
@@ -2387,10 +2398,40 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
+    private async updateActiveDocumentTextOptions(): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor?.document?.uri.scheme === "file"
+            && (editor.document.languageId === "c"
+                || editor.document.languageId === "cpp"
+                || editor.document.languageId === "cuda-cpp")) {
+            // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.useVcFormat(editor.document)) {
+                const editorConfigSettings: any = getEditorConfigSettings(editor.document.uri.fsPath);
+                if (editorConfigSettings.indent_style === "space" || editorConfigSettings.indent_style === "tab") {
+                    editor.options.insertSpaces = editorConfigSettings.indent_style === "space";
+                    if (editorConfigSettings.indent_size === "tab") {
+                        if (!editorConfigSettings.tab_width !== undefined) {
+                            editor.options.tabSize = editorConfigSettings.tab_width;
+                        }
+                    } else if (editorConfigSettings.indent_size !== undefined) {
+                        editor.options.tabSize = editorConfigSettings.indent_size;
+                    }
+                }
+                if (editorConfigSettings.end_of_line !== undefined) {
+                    editor.edit((edit) => {
+                        edit.setEndOfLine(editorConfigSettings.end_of_line === "lf" ? vscode.EndOfLine.LF : vscode.EndOfLine.CRLF);
+                    });
+                }
+            }
+        }
+    }
+
     /**
      * notifications to the language server
      */
-    public activeDocumentChanged(document: vscode.TextDocument): void {
+    public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
+        await this.updateActiveDocumentTextOptions();
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
@@ -2962,7 +3003,7 @@ class NullClient implements Client {
     notifyWhenLanguageClientReady(notify: () => void): void { }
     awaitUntilLanguageClientReady(): void { }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    activeDocumentChanged(document: vscode.TextDocument): void { }
+    activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
