@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, generateEditorConfig, OtherSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -947,9 +947,13 @@ function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.A
 function onGenerateEditorConfig(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        generateEditorConfig();
+        const settings: CppSettings = new CppSettings();
+        settings.generateEditorConfig();
     } else {
-        selectClient().then(client => generateEditorConfig(client.RootUri));
+        selectClient().then(client => {
+            const settings: CppSettings = new CppSettings(client.RootUri);
+            settings.generateEditorConfig();
+        });
     }
 }
 

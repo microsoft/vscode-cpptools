@@ -1524,13 +1524,13 @@
             "Default",
             "Disabled"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.formatting.clangFormat.description%",
-            "%c_cpp.configuration.formatting.vcFormat.description%",
-            "%c_cpp.configuration.formatting.Default.description%",
-            "%c_cpp.configuration.formatting.Disabled.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.formatting.clangFormat.markdownDescription%",
+            "%c_cpp.configuration.formatting.vcFormat.markdownDescription%",
+            "%c_cpp.configuration.formatting.Default.markdownDescription%",
+            "%c_cpp.configuration.formatting.Disabled.markdownDescription%"
           ],
-          "default": "clangFormat",
+          "default": "Default",
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
@@ -4349,7 +4349,8 @@
     "y18n": "^5.0.5",
     "hosted-git-info": "^3.0.8",
     "browserslist": "^4.16.6",
-    "glob-parent": "^5.1.2"
+    "glob-parent": "^5.1.2",
+    "path-parse": "^1.0.7"
   },
   "runtimeDependencies": [
     {
