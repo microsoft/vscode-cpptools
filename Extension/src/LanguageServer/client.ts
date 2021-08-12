@@ -24,7 +24,7 @@ import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileCo
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
 import * as configs from './configurations';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings, getEditorConfigSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState } from './persistentState';
 import { UI, getUI } from './ui';
@@ -67,6 +67,7 @@ let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
+export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -349,7 +350,8 @@ export interface FormatParams {
     character: string;
     insertSpaces: boolean;
     tabSize: number;
-    settings: any;
+    editorConfigSettings: any;
+    useVcFormat: boolean;
 }
 
 interface TextEdit {
@@ -371,7 +373,7 @@ export enum FoldingRangeKind {
 
 export interface CppFoldingRange {
     kind: FoldingRangeKind;
-    range: Range;
+    range: InputRegion;
 }
 
 export interface GetFoldingRangesResult {
@@ -478,6 +480,9 @@ const FileDeletedNotification: NotificationType<FileChangedParams, void> = new N
 const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
+const PauseAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseAnalysis');
+const ResumeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeAnalysis');
+const CancelAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelAnalysis');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
 const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
 const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeCppProperties');
@@ -525,48 +530,72 @@ export interface ReferencesCancellationState {
 }
 
 class ClientModel {
-    public isTagParsing: DataBinding<boolean>;
+    public isParsingWorkspace: DataBinding<boolean>;
+    public isParsingWorkspacePausable: DataBinding<boolean>;
+    public isParsingWorkspacePaused: DataBinding<boolean>;
+    public isParsingFiles: DataBinding<boolean>;
     public isUpdatingIntelliSense: DataBinding<boolean>;
+    public isRunningCodeAnalysis: DataBinding<boolean>;
     public referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
-    public tagParserStatus: DataBinding<string>;
+    public parsingWorkspaceStatus: DataBinding<string>;
     public activeConfigName: DataBinding<string>;
 
     constructor() {
-        this.isTagParsing = new DataBinding<boolean>(false);
+        this.isParsingWorkspace = new DataBinding<boolean>(false);
+        this.isParsingWorkspacePausable = new DataBinding<boolean>(false);
+        this.isParsingWorkspacePaused = new DataBinding<boolean>(false);
+        this.isParsingFiles = new DataBinding<boolean>(false);
         this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
+        this.isRunningCodeAnalysis = new DataBinding<boolean>(false);
         this.referencesCommandMode = new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None);
-        this.tagParserStatus = new DataBinding<string>("");
+        this.parsingWorkspaceStatus = new DataBinding<string>("");
         this.activeConfigName = new DataBinding<string>("");
     }
 
     public activate(): void {
-        this.isTagParsing.activate();
+        this.isParsingWorkspace.activate();
+        this.isParsingWorkspacePausable.activate();
+        this.isParsingWorkspacePaused.activate();
+        this.isParsingFiles.activate();
         this.isUpdatingIntelliSense.activate();
+        this.isRunningCodeAnalysis.activate();
         this.referencesCommandMode.activate();
-        this.tagParserStatus.activate();
+        this.parsingWorkspaceStatus.activate();
         this.activeConfigName.activate();
     }
 
     public deactivate(): void {
-        this.isTagParsing.deactivate();
+        this.isParsingWorkspace.deactivate();
+        this.isParsingWorkspacePausable.deactivate();
+        this.isParsingWorkspacePaused.deactivate();
+        this.isParsingFiles.deactivate();
         this.isUpdatingIntelliSense.deactivate();
+        this.isRunningCodeAnalysis.deactivate();
         this.referencesCommandMode.deactivate();
-        this.tagParserStatus.deactivate();
+        this.parsingWorkspaceStatus.deactivate();
         this.activeConfigName.deactivate();
     }
 
     public dispose(): void {
-        this.isTagParsing.dispose();
+        this.isParsingWorkspace.dispose();
+        this.isParsingWorkspacePausable.dispose();
+        this.isParsingWorkspacePaused.dispose();
+        this.isParsingFiles.dispose();
         this.isUpdatingIntelliSense.dispose();
+        this.isRunningCodeAnalysis.dispose();
         this.referencesCommandMode.dispose();
-        this.tagParserStatus.dispose();
+        this.parsingWorkspaceStatus.dispose();
         this.activeConfigName.dispose();
     }
 }
 
 export interface Client {
-    TagParsingChanged: vscode.Event<boolean>;
+    ParsingWorkspaceChanged: vscode.Event<boolean>;
+    ParsingWorkspacePausableChanged: vscode.Event<boolean>;
+    ParsingWorkspacePausedChanged: vscode.Event<boolean>;
+    ParsingFilesChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
+    RunningCodeAnalysisChanged: vscode.Event<boolean>;
     ReferencesCommandModeChanged: vscode.Event<refs.ReferencesCommandMode>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
@@ -600,16 +629,20 @@ export interface Client {
     notifyWhenLanguageClientReady(notify: () => void): void;
     awaitUntilLanguageClientReady(): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
-    activeDocumentChanged(document: vscode.TextDocument): void;
+    activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
     pauseParsing(): void;
     resumeParsing(): void;
+    pauseAnalysis(): void;
+    resumeAnalysis(): void;
+    cancelAnalysis(): void;
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
+    handleShowAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
@@ -650,6 +683,7 @@ export class DefaultClient implements Client {
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
+    private loggingLevel: string | undefined;
     private configurationProvider?: string;
     private documentSelector: DocumentFilter[] = [
         { scheme: 'file', language: 'c' },
@@ -670,10 +704,14 @@ export class DefaultClient implements Client {
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
 
-    public get TagParsingChanged(): vscode.Event<boolean> { return this.model.isTagParsing.ValueChanged; }
+    public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspace.ValueChanged; }
+    public get ParsingWorkspacePausableChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspacePausable.ValueChanged; }
+    public get ParsingWorkspacePausedChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspacePaused.ValueChanged; }
+    public get ParsingFilesChanged(): vscode.Event<boolean> { return this.model.isParsingFiles.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
+    public get RunningCodeAnalysisChanged(): vscode.Event<boolean> { return this.model.isRunningCodeAnalysis.ValueChanged; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
-    public get TagParserStatusChanged(): vscode.Event<string> { return this.model.tagParserStatus.ValueChanged; }
+    public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
 
     /**
@@ -698,7 +736,7 @@ export class DefaultClient implements Client {
         return this.trackedDocuments;
     }
     public get IsTagParsing(): boolean {
-        return this.model.isTagParsing.Value;
+        return this.model.isParsingWorkspace.Value || this.model.isParsingFiles.Value;
     }
     public get ReferencesCommandMode(): refs.ReferencesCommandMode {
         return this.model.referencesCommandMode.Value;
@@ -984,7 +1022,6 @@ export class DefaultClient implements Client {
         const settings_indentAccessSpecifiers: boolean[] = [];
         const settings_indentNamespaceContents: boolean[] = [];
         const settings_indentPreserveComments: boolean[] = [];
-        const settings_formattingEngine: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceNamespace: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceType: (string | undefined)[] = [];
         const settings_newLineBeforeOpenBraceFunction: (string | undefined)[] = [];
@@ -1047,7 +1084,6 @@ export class DefaultClient implements Client {
 
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
-                settings_formattingEngine.push(setting.formattingEngine);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
                 settings_indentPreserveWithinParentheses.push(setting.vcFormatIndentPreserveWithinParentheses);
@@ -1157,7 +1193,6 @@ export class DefaultClient implements Client {
             initializationOptions: {
                 clang_format_path: settings_clangFormatPath,
                 clang_format_style: settings_clangFormatStyle,
-                formatting: settings_formattingEngine,
                 vcFormat: {
                     indent: {
                         braces: settings_indentBraces,
@@ -1302,6 +1337,7 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
+        this.loggingLevel = clientOptions.initializationOptions.loggingLevel;
         return new LanguageClient(`cpptools`, serverOptions, clientOptions);
     }
 
@@ -1378,6 +1414,16 @@ export class DefaultClient implements Client {
                 if (isFirstClient) {
                     if (changedSettings["commentContinuationPatterns"]) {
                         updateLanguageConfigurations();
+                    }
+                    if (changedSettings["loggingLevel"]) {
+                        const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== "None" && this.loggingLevel !== "Error";
+                        const newLoggingLevel: string | undefined = changedSettings["loggingLevel"];
+                        this.loggingLevel = newLoggingLevel;
+                        const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
+                        if (oldLoggingLevelLogged || newLoggingLevelLogged) {
+                            const out: logger.Logger = logger.getOutputChannelLogger();
+                            out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
+                        }
                     }
                     const settings: CppSettings = new CppSettings();
                     if (changedSettings["formatting"]) {
@@ -1864,6 +1910,7 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
+        this.updateActiveDocumentTextOptions();
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
         this.trackedDocuments.add(document);
     }
@@ -2016,9 +2063,15 @@ export class DefaultClient implements Client {
                 false /* ignoreChangeEvents */,
                 false /* ignoreDeleteEvents */);
 
-            this.rootPathFileWatcher.onDidCreate((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+            this.rootPathFileWatcher.onDidCreate(async (uri) => {
+                const fileName: string = path.basename(uri.fsPath).toLowerCase();
+                if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    cachedEditorConfigLookups.clear();
+                    await this.updateActiveDocumentTextOptions();
+                }
+                if (fileName === ".clang-format" || fileName === "_clang-format") {
+                    cachedEditorConfigLookups.clear();
                 }
 
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
@@ -2034,13 +2087,14 @@ export class DefaultClient implements Client {
                     this.associations_for_did_change.add(ext);
                 }
             }
-            this.rootPathFileWatcher.onDidChange((uri) => {
+            this.rootPathFileWatcher.onDidChange(async (uri) => {
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
-
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                const fileName: string = path.basename(uri.fsPath).toLowerCase();
+                if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    cachedEditorConfigLookups.clear();
+                    await this.updateActiveDocumentTextOptions();
                 }
-
                 if (dotIndex !== -1) {
                     const ext: string = uri.fsPath.substr(dotIndex + 1);
                     if (this.associations_for_did_change?.has(ext)) {
@@ -2057,10 +2111,14 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
-                if (path.basename(uri.fsPath).toLowerCase() === ".editorconfig") {
+                const fileName: string = path.basename(uri.fsPath).toLowerCase();
+                if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
+                    cachedEditorConfigLookups.clear();
                 }
-
+                if (fileName === ".clang-format" || fileName === "_clang-format") {
+                    cachedEditorConfigLookups.clear();
+                }
                 this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
             });
 
@@ -2119,16 +2177,21 @@ export class DefaultClient implements Client {
         const message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
-        if (message.endsWith("Indexing...")) {
-            this.model.isTagParsing.Value = true;
+        if (message.endsWith("Idle")) {
+            // nothing to do
+        } else if (message.endsWith("Parsing")) {
+            this.model.isParsingWorkspace.Value = true;
+            this.model.isParsingWorkspacePausable.Value = false;
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
-        } else if (message.endsWith("Updating IntelliSense...")) {
+        } else if (message.endsWith("files")) {
+            this.model.isParsingFiles.Value = true;
+        } else if (message.endsWith("IntelliSense")) {
             timeStamp = Date.now();
             this.model.isUpdatingIntelliSense.Value = true;
             const status: IntelliSenseStatus = { status: Status.IntelliSenseCompiling };
             testHook.updateStatus(status);
-        } else if (message.endsWith("IntelliSense Ready")) {
+        } else if (message.endsWith("IntelliSense done")) {
             const settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
                 const out: logger.Logger = logger.getOutputChannelLogger();
@@ -2138,11 +2201,17 @@ export class DefaultClient implements Client {
             this.model.isUpdatingIntelliSense.Value = false;
             const status: IntelliSenseStatus = { status: Status.IntelliSenseReady };
             testHook.updateStatus(status);
-        } else if (message.endsWith("Ready")) { // Tag Parser Ready
-            this.model.isTagParsing.Value = false;
+        } else if (message.endsWith("Parsing done")) { // Tag Parser Ready
+            this.model.isParsingWorkspace.Value = false;
             const status: IntelliSenseStatus = { status: Status.TagParsingDone };
             testHook.updateStatus(status);
             util.setProgress(util.getProgressParseRootSuccess());
+        } else if (message.endsWith("files done")) {
+            this.model.isParsingFiles.Value = false;
+        } else if (message.endsWith("Analysis")) {
+            this.model.isRunningCodeAnalysis.Value = true;
+        } else if (message.endsWith("Analysis done")) {
+            this.model.isRunningCodeAnalysis.Value = false;
         } else if (message.includes("Squiggles Finished - File name:")) {
             const index: number = message.lastIndexOf(":");
             const name: string = message.substring(index + 2);
@@ -2196,7 +2265,17 @@ export class DefaultClient implements Client {
     }
 
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
-        this.model.tagParserStatus.Value = util.getLocalizedString(notificationBody);
+        this.model.parsingWorkspaceStatus.Value = util.getLocalizedString(notificationBody);
+        if (notificationBody.text.startsWith("Workspace parsing paused")) {
+            this.model.isParsingWorkspacePausable.Value = true;
+            this.model.isParsingWorkspacePaused.Value = true;
+        } else if (notificationBody.text.startsWith("Parsing workspace")) {
+            this.model.isParsingWorkspacePausable.Value = true;
+            this.model.isParsingWorkspacePaused.Value = false;
+        } else {
+            this.model.isParsingWorkspacePausable.Value = false;
+            this.model.isParsingWorkspacePaused.Value = false;
+        }
     }
 
     private updateInactiveRegions(params: InactiveRegionParams): void {
@@ -2319,10 +2398,40 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
+    private async updateActiveDocumentTextOptions(): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor?.document?.uri.scheme === "file"
+            && (editor.document.languageId === "c"
+                || editor.document.languageId === "cpp"
+                || editor.document.languageId === "cuda-cpp")) {
+            // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.useVcFormat(editor.document)) {
+                const editorConfigSettings: any = getEditorConfigSettings(editor.document.uri.fsPath);
+                if (editorConfigSettings.indent_style === "space" || editorConfigSettings.indent_style === "tab") {
+                    editor.options.insertSpaces = editorConfigSettings.indent_style === "space";
+                    if (editorConfigSettings.indent_size === "tab") {
+                        if (!editorConfigSettings.tab_width !== undefined) {
+                            editor.options.tabSize = editorConfigSettings.tab_width;
+                        }
+                    } else if (editorConfigSettings.indent_size !== undefined) {
+                        editor.options.tabSize = editorConfigSettings.indent_size;
+                    }
+                }
+                if (editorConfigSettings.end_of_line !== undefined) {
+                    editor.edit((edit) => {
+                        edit.setEndOfLine(editorConfigSettings.end_of_line === "lf" ? vscode.EndOfLine.LF : vscode.EndOfLine.CRLF);
+                    });
+                }
+            }
+        }
+    }
+
     /**
      * notifications to the language server
      */
-    public activeDocumentChanged(document: vscode.TextDocument): void {
+    public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
+        await this.updateActiveDocumentTextOptions();
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
@@ -2359,6 +2468,18 @@ export class DefaultClient implements Client {
 
     public resumeParsing(): void {
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeParsingNotification));
+    }
+
+    public pauseAnalysis(): void {
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(PauseAnalysisNotification));
+    }
+
+    public resumeAnalysis(): void {
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeAnalysisNotification));
+    }
+
+    public cancelAnalysis(): void {
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CancelAnalysisNotification));
     }
 
     private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
@@ -2648,6 +2769,16 @@ export class DefaultClient implements Client {
         }
     }
 
+    public async handleShowAnalysisCommands(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        const index: number = await ui.showAnalysisCommands();
+        switch (index) {
+            case 0: this.cancelAnalysis(); break;
+            case 1: this.pauseAnalysis(); break;
+            case 2: this.resumeAnalysis(); break;
+        }
+    }
+
     public handleConfigurationEditCommand(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
         this.notifyWhenLanguageClientReady(() => this.configuration.handleConfigurationEditCommand(undefined, vscode.window.showTextDocument, viewColumn));
     }
@@ -2695,21 +2826,24 @@ export class DefaultClient implements Client {
             const compilerName: string = process.platform === "win32" ? "MSVC" : (process.platform === "darwin" ? "Clang" : "GCC");
             vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.", compilerName), { modal: true });
         } else {
-            const header: string = localize("compilers.found", "We found the following C++ compiler(s) on your system:");
-            let message: string = header + "\n";
+            const header: string = localize("compilers.found", "We found the following C++ compilers on your system. Choose a compiler in your project's IntelliSense Configuration.");
+            let message: string = "";
             const settings: CppSettings = new CppSettings(this.RootUri);
             const pathSeparator: string | undefined = settings.preferredPathSeparator;
+            let isFirstLine: boolean = true;
             compilers.forEach(compiler => {
-                if (pathSeparator !== "Forward Slash") {
-                    message += "\n" + compiler.path.replace(/\//g, '\\');
+                if (isFirstLine) {
+                    isFirstLine = false;
                 } else {
-                    message += "\n" + compiler.path.replace(/\\/g, '/');
+                    message += "\n";
+                }
+                if (pathSeparator !== "Forward Slash") {
+                    message += compiler.path.replace(/\//g, '\\');
+                } else {
+                    message += compiler.path.replace(/\\/g, '/');
                 }
             });
-            if (compilers.length > 1) {
-                message += "\n\n" + localize("compilers.found.message", "You can specify which compiler to use in your project's IntelliSense Configuration.");
-            }
-            vscode.window.showInformationMessage(message, { modal: true });
+            vscode.window.showInformationMessage(header, { modal: true, detail: message });
         }
     }
 
@@ -2830,8 +2964,12 @@ class NullClient implements Client {
     private stringEvent = new vscode.EventEmitter<string>();
     private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
-    public get TagParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get ParsingWorkspacePausableChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get ParsingWorkspacePausedChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get ParsingFilesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get RunningCodeAnalysisChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
@@ -2865,16 +3003,20 @@ class NullClient implements Client {
     notifyWhenLanguageClientReady(notify: () => void): void { }
     awaitUntilLanguageClientReady(): void { }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    activeDocumentChanged(document: vscode.TextDocument): void { }
+    activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }
+    pauseAnalysis(): void { }
+    resumeAnalysis(): void { }
+    cancelAnalysis(): void { }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
+    handleShowAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }

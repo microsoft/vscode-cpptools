@@ -199,7 +199,7 @@ export class ReferencesManager {
 
     private resultsCallback?: ReferencesResultCallback;
     private currentUpdateProgressTimer?: NodeJS.Timeout;
-    private currentUpdateProgressResolve?: () => void;
+    private currentUpdateProgressResolve?: (value: unknown) => void;
     public groupByFile: PersistentState<boolean> = new PersistentState<boolean>("CPP.referencesGroupByFile", false);
 
     constructor(client: DefaultClient) {
@@ -355,7 +355,7 @@ export class ReferencesManager {
                                     vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
                                 }
                             }
-                            resolve();
+                            resolve(undefined);
                         } else {
                             this.reportProgress(progress, false, mode);
                         }
@@ -465,7 +465,7 @@ export class ReferencesManager {
                     clearInterval(this.currentUpdateProgressTimer);
                 }
                 if (this.currentUpdateProgressResolve) {
-                    this.currentUpdateProgressResolve();
+                    this.currentUpdateProgressResolve(undefined);
                 }
                 this.currentUpdateProgressResolve = undefined;
                 this.currentUpdateProgressTimer = undefined;

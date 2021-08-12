@@ -9,6 +9,7 @@
 	"unable.to.start": "Nepovedlo se spustit jazykový server C/C++. Funkce IntelliSense se zakážou. Chyba: {0}",
 	"check.permissions": "EPERM: Zkontrolujte oprávnění pro {0}.",
 	"server.crashed2": "Jazykový server se 5krát za poslední 3 minuty chybově ukončil. Nebude se restartovat.",
+	"loggingLevel.changed": "{0} se změnila na: {1}",
 	"provider.configure.folder": "{0} chce nakonfigurovat IntelliSense pro složku {1}.",
 	"provider.configure.this.folder": "{0} chce nakonfigurovat IntelliSense pro tuto složku.",
 	"allow.button": "Povolit",
@@ -35,6 +36,5 @@
 	"configurations.received": "Přijaly se vlastní konfigurace:",
 	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}",
 	"no.compilers.found": "V systému se nenašly žádné kompilátory jazyka C++. Pro vaši platformu doporučujeme podle instrukcí v editoru nainstalovat {0}.",
-	"compilers.found": "V systému jsme našli následující kompilátory jazyka C++:",
-	"compilers.found.message": "V konfiguraci IntelliSense vašeho projektu můžete zadat, který kompilátor se má použít."
+	"compilers.found": "Ve vašem systému jsme našli následující kompilátory jazyka C++. Zvolte kompilátor v konfiguraci technologie IntelliSense vašeho projektu."
 }

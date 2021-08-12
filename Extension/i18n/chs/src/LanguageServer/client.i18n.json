@@ -9,6 +9,7 @@
 	"unable.to.start": "无法启动 C/C++ 语言服务器。IntelliSense 功能将被禁用。错误: {0}",
 	"check.permissions": "EPERM: 检查“{0}”的权限",
 	"server.crashed2": "在过去 3 分钟内，语言服务器崩溃了 5 次。它不会重新启动。",
+	"loggingLevel.changed": "{0} 已更改为: {1}",
 	"provider.configure.folder": "{0} 想要为“{1}”文件夹配置 IntelliSense。",
 	"provider.configure.this.folder": "{0} 想要为此文件夹配置 IntelliSense。",
 	"allow.button": "允许",
@@ -35,6 +36,5 @@
 	"configurations.received": "已收到自定义配置:",
 	"browse.configuration.received": "已收到自定义浏览配置: {0}",
 	"no.compilers.found": "系统上未找到任何 C++ 编译器。对于你的平台，建议使用编辑器中的说明安装 {0}。",
-	"compilers.found": "我们在系统上发现了以下 C++ 编译器:",
-	"compilers.found.message": "可在项目的 IntelliSense 配置中指定要使用的编译器。"
+	"compilers.found": "在你的系统上找到了以下 C++ 编译器。请在项目的 IntelliSense 配置中选择编译器。"
 }

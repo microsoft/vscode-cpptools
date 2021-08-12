@@ -9,6 +9,7 @@
 	"unable.to.start": "C/C++ dil sunucusu başlatılamıyor. IntelliSense özellikleri devre dışı bırakılacak. Hata: {0}",
 	"check.permissions": "EPERM: '{0}' için izinleri denetle",
 	"server.crashed2": "Dil sunucusu son 3 dakikada 5 kez kilitlendi. Sunucu yeniden başlatılmayacak.",
+	"loggingLevel.changed": "{0} {1} olarak değiştirildi",
 	"provider.configure.folder": "{0}, '{1}' klasörü için IntelliSense'i yapılandırmak istiyor.",
 	"provider.configure.this.folder": "{0}, bu klasör için IntelliSense'i yapılandırmak istiyor.",
 	"allow.button": "İzin ver",
@@ -35,6 +36,5 @@
 	"configurations.received": "Alınan özel yapılandırmalar:",
 	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}",
 	"no.compilers.found": "Sisteminizde C++ derleyicisi bulunamadı. Platformunuz için, düzenleyicideki yönergeleri takip ederek {0} derleyicisini yüklemenizi öneririz.",
-	"compilers.found": "Sisteminizde şu C++ derleyicileri bulundu:",
-	"compilers.found.message": "Projenizin IntelliSense Yapılandırmasında kullanılacak derleyiciyi belirtebilirsiniz."
+	"compilers.found": "Sisteminizde aşağıdaki C++ derleyicilerini bulduk. Projenizin IntelliSense Yapılandırmasında bir derleyici seçin."
 }
