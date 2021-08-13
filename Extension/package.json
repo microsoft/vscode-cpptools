@@ -250,7 +250,7 @@
           "type": "string",
           "default": "file",
           "description": "%c_cpp.configuration.clang_format_style.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.formatting": {
           "type": "string",
@@ -771,7 +771,7 @@
           "type": "string",
           "default": "Visual Studio",
           "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
           "type": [
@@ -983,7 +983,7 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "application",
+          "scope": "machine",
           "minimum": 500,
           "maximum": 3000
         },
@@ -1129,7 +1129,7 @@
             "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
           "type": "string",
@@ -1149,7 +1149,7 @@
             "gnu++20"
           ],
           "description": "%c_cpp.configuration.default.cppStandard.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.configurationProvider": {
           "type": "string",
@@ -1219,7 +1219,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "application"
+          "scope": "machine"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
