@@ -422,7 +422,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         if (error) {
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
-        } else if (stderr && stdout) { // gcc/clang
+        } else if (stderr && !stdout) { // gcc/clang
             telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
             this.writeEmitter.fire(localize("build.finished.with.warnings", "Build finished with warning(s).") + this.endOfLine);
         } else if (stdout && stdout.includes("warning C")) { // cl.exe, compiler warnings

@@ -1307,15 +1307,17 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 
 export function normalizeArg(arg: string): string {
     arg = arg.trimLeft().trimRight();
-    // Check if the arg is enclosed in backtick, or includes escaped double-quotes, or unscaped single-quotes on mac and linux.
-    if (/`.*?`/.test(arg) || arg.includes("\\\"") ||
-        (!process.platform.includes("win") && arg.includes("\'"))) {
+    // Check if the arg is enclosed in backtick,
+    // or includes escaped double-quotes,
+    // or includes unscaped single-quotes on mac and linux.
+    if (/^`.*`$/g.test(arg) || /.*\\".*/g.test(arg) ||
+        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))){
         return arg;
     }
     const unescapedSpaces = arg.split('').find((char, index) => index > 0 && char == " " && arg[index - 1] !== "\\");
     if (unescapedSpaces) {
-        arg.replace(/\\ /g," ");
-        return `"${arg}"`;
+        arg = arg.replace(/\\\s/g," ").replace(/"/g, '\\"');
+        return "\"" + arg + "\"";
     }
     return arg;
 }
