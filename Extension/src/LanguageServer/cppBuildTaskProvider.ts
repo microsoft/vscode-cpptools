@@ -2,6 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+/* eslint-disable no-unused-expressions */
 import * as path from 'path';
 import {
     TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
@@ -361,7 +362,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         this.args.forEach((value, index) => {
             value = util.normalizeArg(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
-            this.args[index]= value;
+            this.args[index] = value;
         });
         if (this.options) {
             this.options.shell = true;
@@ -385,7 +386,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             let error: string = "";
             let stdout: string = "";
             let stderr: string = "";
-            let result: number = await new Promise<number>(resolve => {
+            const result: number = await new Promise<number>(resolve => {
                 if (child) {
                     child.on('error', err => {
                         splitWriteEmitter(err.message);
@@ -418,7 +419,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
     }
 
-    private printBuildSummary(error: string, stdout: string, stderr: string) {
+    private printBuildSummary(error: string, stdout: string, stderr: string): void {
         if (error) {
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);

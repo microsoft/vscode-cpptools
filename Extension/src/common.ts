@@ -1311,13 +1311,14 @@ export function normalizeArg(arg: string): string {
     // or includes escaped double-quotes,
     // or includes unscaped single-quotes on mac and linux.
     if (/^`.*`$/g.test(arg) || /.*\\".*/g.test(arg) ||
-        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))){
+        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
         return arg;
     }
-    const unescapedSpaces = arg.split('').find((char, index) => index > 0 && char == " " && arg[index - 1] !== "\\");
+    const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
     if (unescapedSpaces) {
-        arg = arg.replace(/\\\s/g," ").replace(/"/g, '\\"');
+        arg = arg.replace(/\\\s/g, " ").replace(/"/g, '\\"');
         return "\"" + arg + "\"";
     }
     return arg;
 }
+
