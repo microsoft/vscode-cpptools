@@ -36,6 +36,5 @@
 	"configurations.received": "Přijaly se vlastní konfigurace:",
 	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}",
 	"no.compilers.found": "V systému se nenašly žádné kompilátory jazyka C++. Pro vaši platformu doporučujeme podle instrukcí v editoru nainstalovat {0}.",
-	"compilers.found": "V systému jsme našli následující kompilátory jazyka C++:",
-	"compilers.found.message": "V konfiguraci IntelliSense vašeho projektu můžete zadat, který kompilátor se má použít."
+	"compilers.found": "Ve vašem systému jsme našli následující kompilátory jazyka C++. Zvolte kompilátor v konfiguraci technologie IntelliSense vašeho projektu."
 }
