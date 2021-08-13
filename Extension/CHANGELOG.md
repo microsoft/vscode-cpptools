@@ -3,6 +3,8 @@
 ## Version 1.6.0-insiders: August 12, 2021
 ### New Feature
 * Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
+* Debug Step Granularity for cppdbg [MIEngine#1169](https://github.com/microsoft/MIEngine/pull/1169)
+  * Thank you for the contribution @Trass3r
 
 ### Enhancements
 * Debugger now runs on .NET 5 [#7858](https://github.com/microsoft/vscode-cpptools/pull/7858)
@@ -27,6 +29,7 @@
 * Fix issue with setting of MS extensions when `-fms-extensions` is used. [#7886](https://github.com/microsoft/vscode-cpptools/issues/7886)
 * Fix an issue with support detection on Android. [#7906](https://github.com/microsoft/vscode-cpptools/issues/7906)
 * Fix a bug with handling of `"C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "newLine"`. [#7926](https://github.com/microsoft/vscode-cpptools/issues/7926)
+* Fix Disassembly view is blank on linux [#7960](https://github.com/microsoft/vscode-cpptools/issues/7960)
 
 ## Version 1.5.1: July 9, 2021
 ### Bug Fixes
