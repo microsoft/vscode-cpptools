@@ -1226,6 +1226,7 @@ export class DefaultClient implements Client {
             initializationOptions: {
                 freeMemory: os.freemem() / 1048576,
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+                maxCachedProcesses: workspaceSettings.maxCachedProcesses,
                 maxMemory: workspaceSettings.maxMemory,
                 intelliSense: {
                     maxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
@@ -1233,6 +1234,7 @@ export class DefaultClient implements Client {
                 },
                 references: {
                     maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+                    maxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
                     maxMemory: workspaceSettings.referencesMaxMemory
                 },
                 codeAnalysis: {
