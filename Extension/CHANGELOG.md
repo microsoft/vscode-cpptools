@@ -3,7 +3,7 @@
 ## Version 1.6.0-insiders2: August 17, 2021
 ### Bug Fixes
 * Fix issues with overlapping code folding ranges. [#7809](https://github.com/microsoft/vscode-cpptools/issues/7809)
-* Fix an issue with cppdbg debugging on Window x64. [7971](https://github.com/microsoft/vscode-cpptools/issues/7971)
+* Fix an issue with cppdbg debugging on Windows x64. [7971](https://github.com/microsoft/vscode-cpptools/issues/7971)
 * Fix an issue with VS <execution> header causing IntelliSense process crash. [7972](https://github.com/microsoft/vscode-cpptools/issues/7972)
 
 ## Version 1.6.0-insiders: August 12, 2021
