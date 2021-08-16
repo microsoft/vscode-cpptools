@@ -5,7 +5,6 @@
 * Fix issues with overlapping code folding ranges. [#7809](https://github.com/microsoft/vscode-cpptools/issues/7809)
 * Fix an issue with VS <execution> header causing IntelliSense process crash. [7972](https://github.com/microsoft/vscode-cpptools/issues/7972)
 
-
 ## Version 1.6.0-insiders: August 12, 2021
 ### New Feature
 * Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
