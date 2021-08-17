@@ -533,6 +533,8 @@ const ReportTextDocumentLanguage: NotificationType<string, void> = new Notificat
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
+const ReportCodeAnalysisProcessedNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisProcessed');
+const ReportCodeAnalysisTotalNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisTotal');
 
 let failureMessageShown: boolean = false;
 
@@ -548,6 +550,8 @@ class ClientModel {
     public isParsingFiles: DataBinding<boolean>;
     public isUpdatingIntelliSense: DataBinding<boolean>;
     public isRunningCodeAnalysis: DataBinding<boolean>;
+    public codeAnalysisProcessed: DataBinding<number>;
+    public codeAnalysisTotal: DataBinding<number>;
     public referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
     public parsingWorkspaceStatus: DataBinding<string>;
     public activeConfigName: DataBinding<string>;
@@ -559,6 +563,8 @@ class ClientModel {
         this.isParsingFiles = new DataBinding<boolean>(false);
         this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
         this.isRunningCodeAnalysis = new DataBinding<boolean>(false);
+        this.codeAnalysisProcessed = new DataBinding<number>(0);
+        this.codeAnalysisTotal = new DataBinding<number>(0);
         this.referencesCommandMode = new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None);
         this.parsingWorkspaceStatus = new DataBinding<string>("");
         this.activeConfigName = new DataBinding<string>("");
@@ -571,6 +577,8 @@ class ClientModel {
         this.isParsingFiles.activate();
         this.isUpdatingIntelliSense.activate();
         this.isRunningCodeAnalysis.activate();
+        this.codeAnalysisProcessed.activate();
+        this.codeAnalysisTotal.activate();
         this.referencesCommandMode.activate();
         this.parsingWorkspaceStatus.activate();
         this.activeConfigName.activate();
@@ -583,6 +591,8 @@ class ClientModel {
         this.isParsingFiles.deactivate();
         this.isUpdatingIntelliSense.deactivate();
         this.isRunningCodeAnalysis.deactivate();
+        this.codeAnalysisProcessed.deactivate();
+        this.codeAnalysisTotal.deactivate();
         this.referencesCommandMode.deactivate();
         this.parsingWorkspaceStatus.deactivate();
         this.activeConfigName.deactivate();
@@ -595,6 +605,8 @@ class ClientModel {
         this.isParsingFiles.dispose();
         this.isUpdatingIntelliSense.dispose();
         this.isRunningCodeAnalysis.dispose();
+        this.codeAnalysisProcessed.dispose();
+        this.codeAnalysisTotal.dispose();
         this.referencesCommandMode.dispose();
         this.parsingWorkspaceStatus.dispose();
         this.activeConfigName.dispose();
@@ -608,6 +620,8 @@ export interface Client {
     ParsingFilesChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
     RunningCodeAnalysisChanged: vscode.Event<boolean>;
+    CodeAnalysisProcessedChanged: vscode.Event<number>;
+    CodeAnalysisTotalChanged: vscode.Event<number>;
     ReferencesCommandModeChanged: vscode.Event<refs.ReferencesCommandMode>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
@@ -725,6 +739,8 @@ export class DefaultClient implements Client {
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.model.isParsingFiles.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get RunningCodeAnalysisChanged(): vscode.Event<boolean> { return this.model.isRunningCodeAnalysis.ValueChanged; }
+    public get CodeAnalysisProcessedChanged(): vscode.Event<number> { return this.model.codeAnalysisProcessed.ValueChanged; }
+    public get CodeAnalysisTotalChanged(): vscode.Event<number> { return this.model.codeAnalysisTotal.ValueChanged; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
@@ -2095,6 +2111,8 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
+        this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
+        this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         setupOutputHandlers();
     }
 
@@ -2557,6 +2575,14 @@ export class DefaultClient implements Client {
 
     public CancelCodeAnalysis(): void {
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CancelCodeAnalysisNotification));
+    }
+
+    private updateCodeAnalysisProcessed(processed: number): void {
+        this.model.codeAnalysisProcessed.Value = processed;
+    }
+
+    private updateCodeAnalysisTotal(total: number): void {
+        this.model.codeAnalysisTotal.Value = total;
     }
 
     private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
@@ -3056,6 +3082,7 @@ function getLanguageServerFileName(): string {
 
 class NullClient implements Client {
     private booleanEvent = new vscode.EventEmitter<boolean>();
+    private numberEvent = new vscode.EventEmitter<number>();
     private stringEvent = new vscode.EventEmitter<string>();
     private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
@@ -3065,6 +3092,8 @@ class NullClient implements Client {
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get RunningCodeAnalysisChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get CodeAnalysisProcessedChanged(): vscode.Event<number> { return this.numberEvent.event; }
+    public get CodeAnalysisTotalChanged(): vscode.Event<number> { return this.numberEvent.event; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }

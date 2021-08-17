@@ -46,6 +46,8 @@ export class UI {
     private isParsingFiles: boolean = false;
     private isUpdatingIntelliSense: boolean = false;
     private isRunningCodeAnalysis: boolean = false;
+    private codeAnalysisProcessed: number = 0;
+    private codeAnalysisTotal: number = 0;
     private workspaceParsingStatus: string = "";
     private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing open files");
@@ -142,6 +144,10 @@ export class UI {
     }
 
     private setIsRunningCodeAnalysis(val: boolean): void  {
+        if (this.isRunningCodeAnalysis && !val) {
+            this.codeAnalysisTotal = 0;
+            this.codeAnalysisProcessed = 0;
+        }
         this.isRunningCodeAnalysis = val;
         const showIcon: boolean = val || this.isUpdatingIntelliSense;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
@@ -151,6 +157,24 @@ export class UI {
             + (twoStatus ? " | " : "")
             + (val ? this.runningCodeAnalysisTooltip : "");
         this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : undefined;
+    }
+
+    private updateCodeAnalysisTooltip(): void {
+        this.runningCodeAnalysisTooltip = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
+            this.codeAnalysisProcessed, this.codeAnalysisTotal, Math.floor(this.codeAnalysisProcessed / this.codeAnalysisTotal));
+    }
+
+    private setCodeAnalysisProcessed(processed: number): void {
+        this.codeAnalysisProcessed = processed;
+        if (this.codeAnalysisProcessed >= this.codeAnalysisTotal) {
+            this.codeAnalysisTotal = this.codeAnalysisProcessed + 1;
+        }
+        this.updateCodeAnalysisTooltip();
+    }
+
+    private setCodeAnalysisTotal(total: number): void {
+        this.codeAnalysisTotal = total;
+        this.updateCodeAnalysisTooltip();
     }
 
     private get ReferencesCommand(): ReferencesCommandMode {
@@ -247,6 +271,8 @@ export class UI {
         client.ParsingFilesChanged(value => { this.setIsParsingFiles(value); });
         client.IntelliSenseParsingChanged(value => { this.setIsUpdatingIntelliSense(value); });
         client.RunningCodeAnalysisChanged(value => { this.setIsRunningCodeAnalysis(value); });
+        client.CodeAnalysisProcessedChanged(value => { this.setCodeAnalysisProcessed(value); });
+        client.CodeAnalysisTotalChanged(value => { this.setCodeAnalysisTotal(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
