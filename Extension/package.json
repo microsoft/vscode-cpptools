@@ -250,7 +250,7 @@
           "type": "string",
           "default": "file",
           "description": "%c_cpp.configuration.clang_format_style.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.formatting": {
           "type": "string",
@@ -771,7 +771,7 @@
           "type": "string",
           "default": "Visual Studio",
           "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
           "type": [
@@ -983,7 +983,7 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "application",
+          "scope": "machine",
           "minimum": 500,
           "maximum": 3000
         },
@@ -1129,7 +1129,7 @@
             "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
           "type": "string",
@@ -1149,7 +1149,7 @@
             "gnu++20"
           ],
           "description": "%c_cpp.configuration.default.cppStandard.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.configurationProvider": {
           "type": "string",
@@ -1219,7 +1219,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "application"
+          "scope": "machine"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -3310,36 +3310,23 @@
       "integrity": "6756365C82B5BD90C6A40C13CF8E3599E4A1DB50628111FFDB3A76FF85256BA4"
     },
     {
-      "description": "OpenDebugAD7 (Windows x86)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/4060fb247bf67b3bc90485a56daf7fdd/win7-x86.zip",
+      "description": "OpenDebugAD7 (Windows x86/x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/db301b288a036364c1718048b97b0d58/win-x86.zip",
       "platforms": [
         "win32"
       ],
       "architectures": [
-        "x86"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7.exe"
-      ],
-      "integrity": "E8086823817ADEE7003A1838507227BBE191105710B1C1023778F520D92DDF4E"
-    },
-    {
-      "description": "OpenDebugAD7 (Windows x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/3ff700fb393a8080572f7f3babf3c808/win-x64.zip",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
+        "x86",
         "x64"
       ],
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "B52871375EA4DF4A3F8544BBFEDBC5444BFB3373C2C7D0FDE2B298C4AD1D51F9"
+      "integrity": "452B01805E3602B23E24AF3F271759F35C1961093B345C5835C304D7FCDC1439"
     },
     {
       "description": "OpenDebugAD7 (Windows ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/4329d0d448a1152a893f2b7d8a6b0f31/win10-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/365a4f83f0ece3c5fc1f0cb0c73a0f2c/win10-arm64.zip",
       "platforms": [
         "win32"
       ],
@@ -3349,11 +3336,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "FDCEAD821B680312C5E0DDC33FE0844BD773E7E20A66F681C95F9C82EB6CF7FA"
+      "integrity": "86D9C73FE551A8613DA3CD13D4C039D3E55E3773DF72636223A3C3F124598414"
     },
     {
       "description": "OpenDebugAD7 (Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/49513829a39fb5e185c7353334ec794d/linux-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/156c5a850e57f285f0b0a864ea719139/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -3363,11 +3350,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "8F00D1918B2AA36DDF5285B0368B6C411CBC5C96C8DFDB715CED922838435FB7"
+      "integrity": "107B8EB400999BD3EDD764D7301FFE6C3C0572E09E2126D247B59860CEE9A83E"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/e6a83921874fb52c60931bb37753be9f/linux-arm.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/12f05b118ffe89ce4635c3eed54f3bda/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -3377,11 +3364,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "19B1C8D064B0FF82B215C725B4D5B0F3A62B5C426893B78F6636B80A068D0031"
+      "integrity": "6594EC56505523031DCE4948734B3A840B6B02AB8F50AC2EFBA60CA3A151B51F"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/6976810e40d473c01fbeef0007724e3c/linux-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/ec8a27111cf71b9cc38afeac6d371afd/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -3391,11 +3378,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "FC1A72EF745EB47A688C23A3CCA9B3099A9B0ABAC45AA22DA60BEB589DE0757B"
+      "integrity": "2E1D8F435CF4DF9C63B584AD132A54F0C3702B531C7208FDC00810F714415FA0"
     },
     {
       "description": "OpenDebugAD7 (Alpine Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/f536f6270266082d58232b0a6cd9c6c5/linux-musl-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/d48c2023dda15f926fcb3883e608be26/linux-musl-x64.zip",
       "platforms": [
         "alpine-linux"
       ],
@@ -3405,11 +3392,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "0256DDDB3383F14D86EB8F7BF1C13636B542D888E4EF1CFC8709316870C5FFDC"
+      "integrity": "74C1AABD91FE3E3D02ADE6EEAC94A788BD4B309281595B02563E658A8F4A96AF"
     },
     {
       "description": "OpenDebugAD7 (macOS x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/db1a8e6a-c2e7-45a6-9ff9-95fbca2140eb/40a9ab53927f802ae9b1b5ed5b17d886/osx-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/368ecdd16d233a1dfd7cdbf09dc9801f/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
@@ -3419,7 +3406,7 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "C2F326AE29670D1A5626D53FC450BFDF8D5F79CF5B9E89D8C3D2A0059CAC7768"
+      "integrity": "D0D23C00763225F749A1495C1E9A1A70726E2EC8A0B72A695FEC231A41E739E9"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
@@ -3452,7 +3439,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167539",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2169833",
       "platforms": [
         "win32"
       ],
@@ -3463,11 +3450,11 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "3E71A1FDD78FBD9FD46ADEE0DF1283349363078B273CAE765978ACF1BA9C2DB1"
+      "integrity": "0C36EB31D90EC6FE5BFBD02D62222A7FE8E5BD7D238D9DD086BAAEA66C74FF16"
     },
     {
       "description": "Visual Studio Windows ARM64 Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167648",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2169834",
       "platforms": [
         "win32"
       ],
@@ -3477,7 +3464,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "698BA3D45B925F998AACE9ED387ADE4927FFE569860408570FD074DD0CD56252"
+      "integrity": "7DBD8F522420703AA85435A779CAC29B8226A8B92236BEF27AA41E84E4973458"
     }
   ]
 }
