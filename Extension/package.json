@@ -2057,7 +2057,7 @@
           "type": "string",
           "default": "Visual Studio",
           "markdownDescription": "%c_cpp.configuration.clang_format_fallbackStyle.markdownDescription%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
           "type": [
@@ -2282,7 +2282,7 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "application",
+          "scope": "machine",
           "minimum": 500,
           "maximum": 3000
         },
@@ -2405,7 +2405,7 @@
             "gnu17"
           ],
           "markdownDescription": "%c_cpp.configuration.default.cStandard.markdownDescription%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
           "type": "string",
@@ -2425,7 +2425,7 @@
             "gnu++20"
           ],
           "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.configurationProvider": {
           "type": "string",
@@ -2488,7 +2488,7 @@
           ],
           "default": "Default",
           "markdownDescription": "%c_cpp.configuration.updateChannel.markdownDescription%",
-          "scope": "application"
+          "scope": "machine"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -4602,36 +4602,23 @@
       "integrity": "67BDAC6D46A3F8C5F491D6BC9A461C1CF6179C57B1CA7F6643512A1338C44E17"
     },
     {
-      "description": "OpenDebugAD7 (Windows x86)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/de9fa59805117816e8a5f94c8266f08f/win7-x86.zip",
+      "description": "OpenDebugAD7 (Windows x86/x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/db301b288a036364c1718048b97b0d58/win-x86.zip",
       "platforms": [
         "win32"
       ],
       "architectures": [
-        "x86"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7.exe"
-      ],
-      "integrity": "8144471564483F2CF2AD44F6E47FEE43CFE0DE935CC5B19AD057B2E9F17247EB"
-    },
-    {
-      "description": "OpenDebugAD7 (Windows x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/76746f7e2b206af62790f7c531c5ebfe/win-x64.zip",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
+        "x86",
         "x64"
       ],
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "07BCB0E787B440D55377DA475BC6859694C5EDDFE4540DB11D5EC864B67C29E3"
+      "integrity": "452B01805E3602B23E24AF3F271759F35C1961093B345C5835C304D7FCDC1439"
     },
     {
       "description": "OpenDebugAD7 (Windows ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/c6fc1101fc22085d80ee5b51b05cf75b/win10-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/365a4f83f0ece3c5fc1f0cb0c73a0f2c/win10-arm64.zip",
       "platforms": [
         "win32"
       ],
@@ -4641,11 +4628,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "98E7434DA74545FE0731E2BB08A14B92B075A0A888181223E45221EA823EE42C"
+      "integrity": "86D9C73FE551A8613DA3CD13D4C039D3E55E3773DF72636223A3C3F124598414"
     },
     {
       "description": "OpenDebugAD7 (Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/cab96f290df15021d58396616c833fa4/linux-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/156c5a850e57f285f0b0a864ea719139/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -4655,11 +4642,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "4912413127724649A10A0925316D7E735159F49405D7DD3EA2F54750D6F65964"
+      "integrity": "107B8EB400999BD3EDD764D7301FFE6C3C0572E09E2126D247B59860CEE9A83E"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/3aaff9a6621469d7efd1423fe2c1063e/linux-arm.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/12f05b118ffe89ce4635c3eed54f3bda/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -4669,11 +4656,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "527426D22FCDD0F3A679F767DDEE82BE34A73A281A46FF3CD64771D37EF6B886"
+      "integrity": "6594EC56505523031DCE4948734B3A840B6B02AB8F50AC2EFBA60CA3A151B51F"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/3ab22dae7df3d59330d73ce58c9025b5/linux-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/ec8a27111cf71b9cc38afeac6d371afd/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -4683,11 +4670,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "2EB2F631C70AB4C6717D5AC61009051F6EFD4BFAF68E7364D95533CA2A7F2F03"
+      "integrity": "2E1D8F435CF4DF9C63B584AD132A54F0C3702B531C7208FDC00810F714415FA0"
     },
     {
       "description": "OpenDebugAD7 (Alpine Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/df8be410ade3aea46110a64eb5afaf9f/linux-musl-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/d48c2023dda15f926fcb3883e608be26/linux-musl-x64.zip",
       "platforms": [
         "alpine-linux"
       ],
@@ -4697,11 +4684,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "5C830E144F8E9329232EDFC9760034C8A79F7146BB6EF49AE9CFF91BAEF8D10D"
+      "integrity": "74C1AABD91FE3E3D02ADE6EEAC94A788BD4B309281595B02563E658A8F4A96AF"
     },
     {
       "description": "OpenDebugAD7 (macOS x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/65d2e4a8-b9e4-40e8-a131-51b3b6af7b43/f69c1f2f41c21872843df39a3ced3e97/osx-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/368ecdd16d233a1dfd7cdbf09dc9801f/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
@@ -4711,7 +4698,7 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "6525551C0E7B64EC920BD527AC2C836841EBA7265151BC4EFC8B3FD56565CC80"
+      "integrity": "D0D23C00763225F749A1495C1E9A1A70726E2EC8A0B72A695FEC231A41E739E9"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
@@ -4744,7 +4731,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167539",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2169833",
       "platforms": [
         "win32"
       ],
@@ -4755,11 +4742,11 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "3E71A1FDD78FBD9FD46ADEE0DF1283349363078B273CAE765978ACF1BA9C2DB1"
+      "integrity": "0C36EB31D90EC6FE5BFBD02D62222A7FE8E5BD7D238D9DD086BAAEA66C74FF16"
     },
     {
       "description": "Visual Studio Windows ARM64 Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167648",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2169834",
       "platforms": [
         "win32"
       ],
@@ -4769,7 +4756,7 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "698BA3D45B925F998AACE9ED387ADE4927FFE569860408570FD074DD0CD56252"
+      "integrity": "7DBD8F522420703AA85435A779CAC29B8226A8B92236BEF27AA41E84E4973458"
     }
   ]
 }
