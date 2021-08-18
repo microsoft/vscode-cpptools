@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "서식 엔진을 구성합니다.",
 	"c_cpp.configuration.formatting.clangFormat.description": "코드 서식을 지정하는 데 clang-format이 사용됩니다.",
 	"c_cpp.configuration.formatting.vcFormat.description": "코드 서식을 지정하는 데 Visual C++ 서식 엔진이 사용됩니다.",
-	"c_cpp.configuration.formatting.Default.description": "코드 서식을 지정하는 데 clang-format이 사용됩니다.",
+	"c_cpp.configuration.formatting.Default.description": "기본적으로 clang 형식이 코드 형식에 사용되지만 관련 설정을 가진 .editorconfig 파일이 포맷 중인 코드에 가까이 있고 clang_format_style이 기본값인 'file'인 경우 Visual C++ 형식 지정 엔진이 사용됩니다.",
 	"c_cpp.configuration.formatting.Disabled.description": "코드 서식을 사용하지 않도록 설정됩니다.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "편집기: 탭 크기 설정에 지정된 수만큼 중괄호를 들여씁니다.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "새 줄 들여쓰기의 기준을 결정합니다.",

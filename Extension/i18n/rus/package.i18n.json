@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Настраивает подсистему форматирования.",
 	"c_cpp.configuration.formatting.clangFormat.description": "Для форматирования кода будет использоваться clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Для форматирования кода будет использоваться подсистема форматирования Visual C++.",
-	"c_cpp.configuration.formatting.Default.description": "Для форматирования кода будет использоваться clang-format.",
+	"c_cpp.configuration.formatting.Default.description": "По умолчанию для форматирования кода будет использоваться clang-format. Однако если рядом с форматируемым файлом найден файл .editorconfig с соответствующими параметрами и параметр clang_format_style имеет значение по умолчанию (\"file\"), будет использована подсистема форматирования Visual C++.",
 	"c_cpp.configuration.formatting.Disabled.description": "Форматирование кода будет отключено.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Добавление отступа для фигурных скобок на величину, указанную параметром \"Редактор: размер табуляции\".",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Определяет, относительно чего устанавливается отступ новой строки.",

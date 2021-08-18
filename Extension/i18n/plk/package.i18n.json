@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Konfiguruje aparat formatowania",
 	"c_cpp.configuration.formatting.clangFormat.description": "Do formatowania kodu będzie używane narzędzie clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Do formatowania kodu będzie używany aparat formatowania języka Visual C++.",
-	"c_cpp.configuration.formatting.Default.description": "Do formatowania kodu będzie używane narzędzie clang-format.",
+	"c_cpp.configuration.formatting.Default.description": "Domyślnie do formatowania kodu zostanie użyty format Clang. Niemniej jednak aparat formatowania Visual C++ będzie używany, jeśli plik .editorconfig z odpowiednimi ustawieniami zostanie znaleziony bliżej formatowanego kodu, a clang_format_style jest wartością domyślną: „file”.",
 	"c_cpp.configuration.formatting.Disabled.description": "Formatowanie kodu zostanie wyłączone.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Dla nawiasów klamrowych jest stosowane wcięcie według liczby określonej w ustawieniu Edytor: rozmiar tabulatora.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Określa element, względem którego jest ustalane wcięcie nowego wiersza",

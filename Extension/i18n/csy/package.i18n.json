@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Nakonfiguruje nástroj formátování textu.",
 	"c_cpp.configuration.formatting.clangFormat.description": "K formátování kódu se použije clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "K formátování kódu se použije nástroj formátování textu Visual C++.",
-	"c_cpp.configuration.formatting.Default.description": "K formátování kódu se použije clang-format.",
+	"c_cpp.configuration.formatting.Default.description": "Ve výchozím nastavení se k formátování kódu použije clang-format. Pokud se ale blíže k formátovanému kódu najde soubor .editorconfig s relevantními nastaveními a clang_format_style bude mít výchozí hodnotu file, použije se modul formátování Visual C++.",
 	"c_cpp.configuration.formatting.Disabled.description": "Formátování kódu bude zakázané.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Složené závorky se odsazují mezerou zadanou v nastavení Editor: Velikost tabulátoru.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Určuje, k čemu bude relativní odsazení nových řádků.",
