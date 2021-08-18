@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Configura il motore di formattazione",
 	"c_cpp.configuration.formatting.clangFormat.description": "Per formattare il codice, verrà usato clang-format.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Per formattare il codice, verrà usato il motore di formattazione Visual C++.",
-	"c_cpp.configuration.formatting.Default.description": "Per formattare il codice, verrà usato clang-format.",
+	"c_cpp.configuration.formatting.Default.description": "Per impostazione predefinita, per formattare il codice verrà usato clang-format. Verrà tuttavia usato il motore di formattazione di Visual C++ se viene trovato un file con estensione editorconfig con impostazioni pertinenti in una posizione più vicina al codice da formattare e clang_format_style è impostato sul valore predefinito 'file'.",
 	"c_cpp.configuration.formatting.Disabled.description": "La formattazione del codice verrà disabilitata.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Le parentesi graffe vengono rientrate in base al valore specificato nell'impostazione Editor: Dimensione tabulazione.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Determina l'elemento rispetto al quale viene impostato il rientro della nuova riga",

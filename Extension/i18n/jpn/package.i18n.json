@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "書式設定エンジンを構成します",
 	"c_cpp.configuration.formatting.clangFormat.description": "clang-format を使用してコードがフォーマットされます。",
 	"c_cpp.configuration.formatting.vcFormat.description": "コードの書式設定に Visual C++ の書式設定エンジンが使用されます。",
-	"c_cpp.configuration.formatting.Default.description": "clang-format を使用してコードがフォーマットされます。",
+	"c_cpp.configuration.formatting.Default.description": "既定では、clang-format を使用してコードをフォーマットします。ただし、関連する設定を持つ .editorconfig ファイルがフォーマット対象のコードの近くに見つかり、clang_format_style が既定値である場合は、Visual C++ フォーマット エンジンが使用されます: 'file'。",
 	"c_cpp.configuration.formatting.Disabled.description": "コードの書式設定は無効になります。",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "中かっこは、[Editor: Tab Size](エディター: タブ サイズ) 設定で指定された分だけインデントされます。",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "新しい行のインデントの基準を決定します",
