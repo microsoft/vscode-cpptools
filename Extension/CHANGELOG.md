@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.6.0-insiders3: August 18, 2021
+### Bug Fixes
+* Fix insiders update install loop for remote scenarios. [#8000](https://github.com/microsoft/vscode-cpptools/issues/8000)
+
 ## Version 1.6.0-insiders2: August 17, 2021
 ### Bug Fixes
 * Fix issues with overlapping code folding ranges. [#7809](https://github.com/microsoft/vscode-cpptools/issues/7809)
