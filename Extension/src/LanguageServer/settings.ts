@@ -11,6 +11,15 @@ import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
 import * as semver from 'semver';
+import * as fs from 'fs';
+import * as path from 'path';
+import { cachedEditorConfigLookups, cachedEditorConfigSettings } from './client';
+import * as editorConfig from 'editorconfig';
+import { PersistentState } from './persistentState';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
@@ -23,7 +32,7 @@ class Settings {
      * create the Settings object.
      * @param resource The path to a resource to which the settings should apply, or undefined if global settings are desired
      */
-    constructor(section: string, resource?: vscode.Uri) {
+    constructor(section: string, public resource?: vscode.Uri) {
         this.settings = vscode.workspace.getConfiguration(section, resource ? resource : undefined);
     }
 
@@ -60,15 +69,7 @@ export class CppSettings extends Settings {
     }
 
     private get clangFormatName(): string {
-        switch (os.platform()) {
-            case "win32":
-                return "clang-format.exe";
-            case "darwin":
-                return "clang-format.darwin";
-            case "linux":
-            default:
-                return "clang-format";
-        }
+        return "clang-format" + (os.platform() === "win32" ? ".exe" : "");
     }
 
     public get clangFormatPath(): string | undefined {
@@ -105,9 +106,11 @@ export class CppSettings extends Settings {
                     const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
                     if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
                         path = "";
+                        setCachedClangFormatPath(path);
                     }
                 } catch (e) {
                     path = "";
+                    setCachedClangFormatPath(path);
                 }
             }
         }
@@ -458,6 +461,224 @@ export class CppSettings extends Settings {
     public update<T>(name: string, value: T): void {
         super.Section.update(name, value);
     }
+
+    public populateEditorConfig(document: vscode.TextDocument): void {
+        // Set up a map of setting names and values. Parse through the document line-by-line, looking for
+        // existing occurrences to replace. Replaced occurrences are removed from the map. If any remain when
+        // done, they are added as a new section at the end of the file. The file is opened with unsaved
+        // edits, so the user may edit or undo if we made a mistake.
+        const settingMap: Map<string, string> = new Map<string, string>();
+        settingMap.set("cpp_indent_braces", this.vcFormatIndentBraces.toString());
+        settingMap.set("cpp_indent_multi_line_relative_to", mapIndentationReferenceToEditorConfig(this.vcFormatIndentMultiLineRelativeTo));
+        settingMap.set("cpp_indent_within_parentheses", this.vcFormatIndentWithinParentheses.toString());
+        settingMap.set("cpp_indent_preserve_within_parentheses", this.vcFormatIndentPreserveWithinParentheses.toString());
+        settingMap.set("cpp_indent_case_labels", this.vcFormatIndentCaseLabels.toString());
+        settingMap.set("cpp_indent_case_contents", this.vcFormatIndentCaseContents.toString());
+        settingMap.set("cpp_indent_case_contents_when_block", this.vcFormatIndentCaseContentsWhenBlock.toString());
+        settingMap.set("cpp_indent_lambda_braces_when_parameter", this.vcFormatIndentLambdaBracesWhenParameter.toString());
+        settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(this.vcFormatIndentGotoLables));
+        settingMap.set("cpp_indent_preprocessor", mapIndentToEditorConfig(this.vcFormatIndentPreprocessor));
+        settingMap.set("cpp_indent_access_specifiers", this.vcFormatIndentAccessSpecifiers.toString());
+        settingMap.set("cpp_indent_namespace_contents", this.vcFormatIndentNamespaceContents.toString());
+        settingMap.set("cpp_indent_preserve_comments", this.vcFormatIndentPreserveComments.toString());
+        settingMap.set("cpp_new_line_before_open_brace_namespace", mapNewOrSameLineToEditorConfig(this.vcFormatNewlineBeforeOpenBraceNamespace));
+        settingMap.set("cpp_new_line_before_open_brace_type", mapNewOrSameLineToEditorConfig(this.vcFormatNewlineBeforeOpenBraceType));
+        settingMap.set("cpp_new_line_before_open_brace_function", mapNewOrSameLineToEditorConfig(this.vcFormatNewlineBeforeOpenBraceFunction));
+        settingMap.set("cpp_new_line_before_open_brace_block", mapNewOrSameLineToEditorConfig(this.vcFormatNewlineBeforeOpenBraceBlock));
+        settingMap.set("cpp_new_line_before_open_brace_lambda", mapNewOrSameLineToEditorConfig(this.vcFormatNewlineBeforeOpenBraceLambda));
+        settingMap.set("cpp_new_line_scope_braces_on_separate_lines", this.vcFormatNewlineScopeBracesOnSeparateLines.toString());
+        settingMap.set("cpp_new_line_close_brace_same_line_empty_type", this.vcFormatNewlineCloseBraceSameLineEmptyType.toString());
+        settingMap.set("cpp_new_line_close_brace_same_line_empty_function", this.vcFormatNewlineCloseBraceSameLineEmptyFunction.toString());
+        settingMap.set("cpp_new_line_before_catch", this.vcFormatNewlineBeforeCatch.toString().toString());
+        settingMap.set("cpp_new_line_before_else", this.vcFormatNewlineBeforeElse.toString().toString());
+        settingMap.set("cpp_new_line_before_while_in_do_while", this.vcFormatNewlineBeforeWhileInDoWhile.toString());
+        settingMap.set("cpp_space_before_function_open_parenthesis", this.vcFormatSpaceBeforeFunctionOpenParenthesis.toString());
+        settingMap.set("cpp_space_within_parameter_list_parentheses", this.vcFormatSpaceWithinParameterListParentheses.toString());
+        settingMap.set("cpp_space_between_empty_parameter_list_parentheses", this.vcFormatSpaceBetweenEmptyParameterListParentheses.toString());
+        settingMap.set("cpp_space_after_keywords_in_control_flow_statements", this.vcFormatSpaceAfterKeywordsInControlFlowStatements.toString());
+        settingMap.set("cpp_space_within_control_flow_statement_parentheses", this.vcFormatSpaceWithinControlFlowStatementParentheses.toString());
+        settingMap.set("cpp_space_before_lambda_open_parenthesis", this.vcFormatSpaceBeforeLambdaOpenParenthesis.toString());
+        settingMap.set("cpp_space_within_cast_parentheses", this.vcFormatSpaceWithinCastParentheses.toString());
+        settingMap.set("cpp_space_after_cast_close_parenthesis", this.vcFormatSpaceAfterCastCloseParenthesis.toString());
+        settingMap.set("cpp_space_within_expression_parentheses", this.vcFormatSpaceWithinExpressionParentheses.toString());
+        settingMap.set("cpp_space_before_block_open_brace", this.vcFormatSpaceBeforeBlockOpenBrace.toString());
+        settingMap.set("cpp_space_between_empty_braces", this.vcFormatSpaceBetweenEmptyBraces.toString());
+        settingMap.set("cpp_space_before_initializer_list_open_brace", this.vcFormatSpaceBeforeInitializerListOpenBrace.toString());
+        settingMap.set("cpp_space_within_initializer_list_braces", this.vcFormatSpaceWithinInitializerListBraces.toString());
+        settingMap.set("cpp_space_preserve_in_initializer_list", this.vcFormatSpacePreserveInInitializerList.toString());
+        settingMap.set("cpp_space_before_open_square_bracket", this.vcFormatSpaceBeforeOpenSquareBracket.toString());
+        settingMap.set("cpp_space_within_square_brackets", this.vcFormatSpaceWithinSquareBrackets.toString());
+        settingMap.set("cpp_space_before_empty_square_brackets", this.vcFormatSpaceBeforeEmptySquareBrackets.toString());
+        settingMap.set("cpp_space_between_empty_square_brackets", this.vcFormatSpaceBetweenEmptySquareBrackets.toString());
+        settingMap.set("cpp_space_group_square_brackets", this.vcFormatSpaceGroupSquareBrackets.toString());
+        settingMap.set("cpp_space_within_lambda_brackets", this.vcFormatSpaceWithinLambdaBrackets.toString());
+        settingMap.set("cpp_space_between_empty_lambda_brackets", this.vcFormatSpaceBetweenEmptyLambdaBrackets.toString());
+        settingMap.set("cpp_space_before_comma", this.vcFormatSpaceBeforeComma.toString());
+        settingMap.set("cpp_space_after_comma", this.vcFormatSpaceAfterComma.toString());
+        settingMap.set("cpp_space_remove_around_member_operators", this.vcFormatSpaceRemoveAroundMemberOperators.toString());
+        settingMap.set("cpp_space_before_inheritance_colon", this.vcFormatSpaceBeforeInheritanceColon.toString());
+        settingMap.set("cpp_space_before_constructor_colon", this.vcFormatSpaceBeforeConstructorColon.toString());
+        settingMap.set("cpp_space_remove_before_semicolon", this.vcFormatSpaceRemoveBeforeSemicolon.toString());
+        settingMap.set("cpp_space_after_semicolon", this.vcFormatSpaceInsertAfterSemicolon.toString());
+        settingMap.set("cpp_space_remove_around_unary_operator", this.vcFormatSpaceRemoveAroundUnaryOperator.toString());
+        settingMap.set("cpp_space_around_binary_operator", this.vcFormatSpaceAroundBinaryOperator.toString());
+        settingMap.set("cpp_space_around_assignment_operator", this.vcFormatSpaceAroundAssignmentOperator.toString());
+        settingMap.set("cpp_space_pointer_reference_alignment", this.vcFormatSpacePointerReferenceAlignment.toString());
+        settingMap.set("cpp_space_around_ternary_operator", this.vcFormatSpaceAroundTernaryOperator.toString());
+        settingMap.set("cpp_wrap_preserve_blocks", mapWrapToEditorConfig(this.vcFormatWrapPreserveBlocks));
+        const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let isInWildcardSection: boolean = false;
+        let trailingBlankLines: number = 0;
+        // Cycle through lines using document.lineAt(), to avoid issues mapping edits back to lines.
+        for (let i: number = 0; i < document.lineCount; ++i) {
+            let textLine: vscode.TextLine = document.lineAt(i);
+            if (textLine.range.end.character === 0) {
+                trailingBlankLines++;
+                continue;
+            }
+            trailingBlankLines = 0;
+            // Keep track of whether we left off in a wildcard section, so we don't output a redundant one.
+            let text: string = textLine.text.trim();
+            if (text.startsWith("[")) {
+                isInWildcardSection = text.startsWith("[*]");
+                continue;
+            }
+            for (const setting of settingMap) {
+                if (text.startsWith(setting[0])) {
+                    // The next character must be white space or '=', otherwise it's a partial match.
+                    if (text.length > setting[0].length) {
+                        const c: string = text[setting[0].length];
+                        if (c !== '=' && c.trim() !== "") {
+                            continue;
+                        }
+                    }
+                    edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
+                    // Because we're going to remove this setting from the map,
+                    // scan ahead to update any other sections it may need to be updated in.
+                    for (let j: number = i + 1; j < document.lineCount; ++j) {
+                        textLine = document.lineAt(j);
+                        text = textLine.text.trim();
+                        if (text.startsWith(setting[0])) {
+                            // The next character must be white space or '=', otherwise it's a partial match.
+                            if (text.length > setting[0].length) {
+                                const c: string = text[setting[0].length];
+                                if (c !== '=' && c.trim() !== "") {
+                                    continue;
+                                }
+                            }
+                            edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
+                        }
+                    }
+                    settingMap.delete(setting[0]);
+                    break;
+                }
+            }
+            if (settingMap.size === 0) {
+                break;
+            }
+        }
+        if (settingMap.size > 0) {
+            let remainingSettingsText: string = "";
+            if (document.lineCount > 0) {
+                while (++trailingBlankLines < 2) {
+                    remainingSettingsText += "\n";
+                }
+            }
+            if (!isInWildcardSection) {
+                remainingSettingsText += "[*]\n";
+            }
+            for (const setting of settingMap) {
+                remainingSettingsText += setting[0] + "=" + setting[1] + "\n";
+            }
+            const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
+            edits.insert(document.uri, lastPosition, remainingSettingsText);
+        }
+        vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
+    }
+
+    public async generateEditorConfig(): Promise<void> {
+        let document: vscode.TextDocument;
+        if (this.resource) {
+            // If a folder is open and '.editorconfig' exists at the root, use that.
+            const uri: vscode.Uri = vscode.Uri.joinPath(this.resource, ".editorconfig");
+            const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            edits.createFile(uri, { ignoreIfExists: true, overwrite: false });
+            try {
+                await vscode.workspace.applyEdit(edits);
+                document = await vscode.workspace.openTextDocument(uri);
+            } catch (e) {
+                document = await vscode.workspace.openTextDocument();
+            }
+        } else {
+            document = await vscode.workspace.openTextDocument();
+        }
+        this.populateEditorConfig(document);
+    }
+
+    // If formattingEngine is set to "Default", searches for .editorconfig with vcFormat
+    // entries, or a .clang-format file, to determine which settings to use.
+    // This is intentionally not async to avoid races due to multiple entrancy.
+    public useVcFormat(document: vscode.TextDocument): boolean {
+        if (this.formattingEngine !== "Default") {
+            return this.formattingEngine === "vcFormat";
+        }
+        if (this.clangFormatStyle !== "file") {
+            // If a clang-format style other than file is specified, don't try to switch to vcFormat.
+            return false;
+        }
+        const cachedValue: boolean | undefined = cachedEditorConfigLookups.get(document.uri.fsPath);
+        if (cachedValue !== undefined) {
+            return cachedValue;
+        }
+        let foundEditorConfigWithVcFormatSettings: boolean = false;
+        const findConfigFile: (parentPath: string) => boolean = (parentPath: string) => {
+            const editorConfigPath: string = path.join(parentPath, ".editorconfig");
+            if (fs.existsSync(editorConfigPath)) {
+                const editorConfigSettings: any = getEditorConfigSettings(document.uri.fsPath);
+                const keys: string[] = Object.keys(editorConfigSettings);
+                for (let i: number = 0; i < keys.length; ++i) {
+                    if (keys[i].startsWith("cpp_")) {
+                        foundEditorConfigWithVcFormatSettings = true;
+                        const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
+                        if (!didEditorConfigNotice.Value) {
+                            vscode.window.showInformationMessage(localize("editorconfig.default.behavior",
+                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the `Default` value of the 'C_Cpp.formatting' setting."));
+                            didEditorConfigNotice.Value = true;
+                        }
+                        return true;
+                    }
+                }
+                if (editorConfigSettings.root?.toLowerCase() === "true") {
+                    return true;
+                }
+            } else {
+                const clangFormatPath1: string = path.join(parentPath, ".clang-format");
+                if (fs.existsSync(clangFormatPath1)) {
+                    return true;
+                } else {
+                    const clangFormatPath2: string = path.join(parentPath, "_clang-format");
+                    if (fs.existsSync(clangFormatPath2)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+        // Scan parent paths to see which we find first, ".clang-format" or ".editorconfig"
+        const fsPath: string = document.uri.fsPath;
+        let parentPath: string = path.dirname(fsPath);
+        let currentParentPath: string;
+        do {
+            currentParentPath = parentPath;
+            if (findConfigFile(currentParentPath)) {
+                cachedEditorConfigLookups.set(document.uri.fsPath, foundEditorConfigWithVcFormatSettings);
+                return foundEditorConfigWithVcFormatSettings;
+            }
+            parentPath = path.dirname(parentPath);
+        } while (parentPath !== currentParentPath);
+        cachedEditorConfigLookups.set(document.uri.fsPath, false);
+        return false;
+    }
 }
 
 export interface TextMateRuleSettings {
@@ -553,159 +774,14 @@ function mapWrapToEditorConfig(value: string | undefined): string {
     return "never";
 }
 
-function populateEditorConfig(rootUri: vscode.Uri | undefined, document: vscode.TextDocument): void {
-    // Set up a map of setting names and values. Parse through the document line-by-line, looking for
-    // existing occurrences to replace. Replaced occurrences are removed from the map. If any remain when
-    // done, they are added as a new section at the end of the file. The file is opened with unsaved
-    // edits, so the user may edit or undo if we made a mistake.
-    const settings: CppSettings = new CppSettings(rootUri);
-    const settingMap: Map<string, string> = new Map<string, string>();
-    settingMap.set("cpp_indent_braces", settings.vcFormatIndentBraces.toString());
-    settingMap.set("cpp_indent_multi_line_relative_to", mapIndentationReferenceToEditorConfig(settings.vcFormatIndentMultiLineRelativeTo));
-    settingMap.set("cpp_indent_within_parentheses", settings.vcFormatIndentWithinParentheses.toString());
-    settingMap.set("cpp_indent_preserve_within_parentheses", settings.vcFormatIndentPreserveWithinParentheses.toString());
-    settingMap.set("cpp_indent_case_labels", settings.vcFormatIndentCaseLabels.toString());
-    settingMap.set("cpp_indent_case_contents", settings.vcFormatIndentCaseContents.toString());
-    settingMap.set("cpp_indent_case_contents_when_block", settings.vcFormatIndentCaseContentsWhenBlock.toString());
-    settingMap.set("cpp_indent_lambda_braces_when_parameter", settings.vcFormatIndentLambdaBracesWhenParameter.toString());
-    settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(settings.vcFormatIndentGotoLables));
-    settingMap.set("cpp_indent_preprocessor", mapIndentToEditorConfig(settings.vcFormatIndentPreprocessor));
-    settingMap.set("cpp_indent_access_specifiers", settings.vcFormatIndentAccessSpecifiers.toString());
-    settingMap.set("cpp_indent_namespace_contents", settings.vcFormatIndentNamespaceContents.toString());
-    settingMap.set("cpp_indent_preserve_comments", settings.vcFormatIndentPreserveComments.toString());
-    settingMap.set("cpp_new_line_before_open_brace_namespace", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceNamespace));
-    settingMap.set("cpp_new_line_before_open_brace_type", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceType));
-    settingMap.set("cpp_new_line_before_open_brace_function", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceFunction));
-    settingMap.set("cpp_new_line_before_open_brace_block", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceBlock));
-    settingMap.set("cpp_new_line_before_open_brace_lambda", mapNewOrSameLineToEditorConfig(settings.vcFormatNewlineBeforeOpenBraceLambda));
-    settingMap.set("cpp_new_line_scope_braces_on_separate_lines", settings.vcFormatNewlineScopeBracesOnSeparateLines.toString());
-    settingMap.set("cpp_new_line_close_brace_same_line_empty_type", settings.vcFormatNewlineCloseBraceSameLineEmptyType.toString());
-    settingMap.set("cpp_new_line_close_brace_same_line_empty_function", settings.vcFormatNewlineCloseBraceSameLineEmptyFunction.toString());
-    settingMap.set("cpp_new_line_before_catch", settings.vcFormatNewlineBeforeCatch.toString().toString());
-    settingMap.set("cpp_new_line_before_else", settings.vcFormatNewlineBeforeElse.toString().toString());
-    settingMap.set("cpp_new_line_before_while_in_do_while", settings.vcFormatNewlineBeforeWhileInDoWhile.toString());
-    settingMap.set("cpp_space_before_function_open_parenthesis", settings.vcFormatSpaceBeforeFunctionOpenParenthesis.toString());
-    settingMap.set("cpp_space_within_parameter_list_parentheses", settings.vcFormatSpaceWithinParameterListParentheses.toString());
-    settingMap.set("cpp_space_between_empty_parameter_list_parentheses", settings.vcFormatSpaceBetweenEmptyParameterListParentheses.toString());
-    settingMap.set("cpp_space_after_keywords_in_control_flow_statements", settings.vcFormatSpaceAfterKeywordsInControlFlowStatements.toString());
-    settingMap.set("cpp_space_within_control_flow_statement_parentheses", settings.vcFormatSpaceWithinControlFlowStatementParentheses.toString());
-    settingMap.set("cpp_space_before_lambda_open_parenthesis", settings.vcFormatSpaceBeforeLambdaOpenParenthesis.toString());
-    settingMap.set("cpp_space_within_cast_parentheses", settings.vcFormatSpaceWithinCastParentheses.toString());
-    settingMap.set("cpp_space_after_cast_close_parenthesis", settings.vcFormatSpaceAfterCastCloseParenthesis.toString());
-    settingMap.set("cpp_space_within_expression_parentheses", settings.vcFormatSpaceWithinExpressionParentheses.toString());
-    settingMap.set("cpp_space_before_block_open_brace", settings.vcFormatSpaceBeforeBlockOpenBrace.toString());
-    settingMap.set("cpp_space_between_empty_braces", settings.vcFormatSpaceBetweenEmptyBraces.toString());
-    settingMap.set("cpp_space_before_initializer_list_open_brace", settings.vcFormatSpaceBeforeInitializerListOpenBrace.toString());
-    settingMap.set("cpp_space_within_initializer_list_braces", settings.vcFormatSpaceWithinInitializerListBraces.toString());
-    settingMap.set("cpp_space_preserve_in_initializer_list", settings.vcFormatSpacePreserveInInitializerList.toString());
-    settingMap.set("cpp_space_before_open_square_bracket", settings.vcFormatSpaceBeforeOpenSquareBracket.toString());
-    settingMap.set("cpp_space_within_square_brackets", settings.vcFormatSpaceWithinSquareBrackets.toString());
-    settingMap.set("cpp_space_before_empty_square_brackets", settings.vcFormatSpaceBeforeEmptySquareBrackets.toString());
-    settingMap.set("cpp_space_between_empty_square_brackets", settings.vcFormatSpaceBetweenEmptySquareBrackets.toString());
-    settingMap.set("cpp_space_group_square_brackets", settings.vcFormatSpaceGroupSquareBrackets.toString());
-    settingMap.set("cpp_space_within_lambda_brackets", settings.vcFormatSpaceWithinLambdaBrackets.toString());
-    settingMap.set("cpp_space_between_empty_lambda_brackets", settings.vcFormatSpaceBetweenEmptyLambdaBrackets.toString());
-    settingMap.set("cpp_space_before_comma", settings.vcFormatSpaceBeforeComma.toString());
-    settingMap.set("cpp_space_after_comma", settings.vcFormatSpaceAfterComma.toString());
-    settingMap.set("cpp_space_remove_around_member_operators", settings.vcFormatSpaceRemoveAroundMemberOperators.toString());
-    settingMap.set("cpp_space_before_inheritance_colon", settings.vcFormatSpaceBeforeInheritanceColon.toString());
-    settingMap.set("cpp_space_before_constructor_colon", settings.vcFormatSpaceBeforeConstructorColon.toString());
-    settingMap.set("cpp_space_remove_before_semicolon", settings.vcFormatSpaceRemoveBeforeSemicolon.toString());
-    settingMap.set("cpp_space_after_semicolon", settings.vcFormatSpaceInsertAfterSemicolon.toString());
-    settingMap.set("cpp_space_remove_around_unary_operator", settings.vcFormatSpaceRemoveAroundUnaryOperator.toString());
-    settingMap.set("cpp_space_around_binary_operator", settings.vcFormatSpaceAroundBinaryOperator.toString());
-    settingMap.set("cpp_space_around_assignment_operator", settings.vcFormatSpaceAroundAssignmentOperator.toString());
-    settingMap.set("cpp_space_pointer_reference_alignment", settings.vcFormatSpacePointerReferenceAlignment.toString());
-    settingMap.set("cpp_space_around_ternary_operator", settings.vcFormatSpaceAroundTernaryOperator.toString());
-    settingMap.set("cpp_wrap_preserve_blocks", mapWrapToEditorConfig(settings.vcFormatWrapPreserveBlocks));
-
-    const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-    let isInWildcardSection: boolean = false;
-    let trailingBlankLines: number = 0;
-
-    // Cycle through lines using document.lineAt(), to avoid issues mapping edits back to lines.
-    for (let i: number = 0; i < document.lineCount; ++i) {
-        let textLine: vscode.TextLine = document.lineAt(i);
-        if (textLine.range.end.character === 0) {
-            trailingBlankLines++;
-            continue;
-        }
-        trailingBlankLines = 0;
-        // Keep track of whether we left off in a wildcard section, so we don't output a redundant one.
-        let text: string = textLine.text.trim();
-        if (text.startsWith("[")) {
-            isInWildcardSection = text.startsWith("[*]");
-            continue;
-        }
-        for (const setting of settingMap) {
-            if (text.startsWith(setting[0])) {
-                // The next character must be white space or '=', otherwise it's a partial match.
-                if (text.length > setting[0].length) {
-                    const c: string = text[setting[0].length];
-                    if (c !== '=' && c.trim() !== "") {
-                        continue;
-                    }
-                }
-                edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
-                // Because we're going to remove this setting from the map,
-                // scan ahead to update any other sections it may need to be updated in.
-                for (let j: number = i + 1; j < document.lineCount; ++j) {
-                    textLine = document.lineAt(j);
-                    text = textLine.text.trim();
-                    if (text.startsWith(setting[0])) {
-                        // The next character must be white space or '=', otherwise it's a partial match.
-                        if (text.length > setting[0].length) {
-                            const c: string = text[setting[0].length];
-                            if (c !== '=' && c.trim() !== "") {
-                                continue;
-                            }
-                        }
-                        edits.replace(document.uri, textLine.range, setting[0] + "=" + setting[1]);
-                    }
-                }
-                settingMap.delete(setting[0]);
-                break;
-            }
-        }
-        if (settingMap.size === 0) {
-            break;
-        }
+// Look up the appropriate .editorconfig settings for the specified file.
+// This is intentionally not async to avoid races due to multiple entrancy.
+export function getEditorConfigSettings(fsPath: string): Promise<any> {
+    let editorConfigSettings: any = cachedEditorConfigSettings.get(fsPath);
+    if (!editorConfigSettings) {
+        editorConfigSettings = editorConfig.parseSync(fsPath);
+        cachedEditorConfigSettings.set(fsPath, editorConfigSettings);
     }
-
-    if (settingMap.size > 0) {
-        let remainingSettingsText: string = "";
-        if (document.lineCount > 0) {
-            while (++trailingBlankLines < 2) {
-                remainingSettingsText += "\n";
-            }
-        }
-        if (!isInWildcardSection) {
-            remainingSettingsText += "[*]\n";
-        }
-        for (const setting of settingMap) {
-            remainingSettingsText += setting[0] + "=" + setting[1] + "\n";
-        }
-        const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
-        edits.insert(document.uri, lastPosition, remainingSettingsText);
-    }
-    vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
+    return editorConfigSettings;
 }
 
-export async function generateEditorConfig(rootUri?: vscode.Uri): Promise<void> {
-    let document: vscode.TextDocument;
-    if (rootUri) {
-        // If a folder is open and '.editorconfig' exists at the root, use that.
-        const uri: vscode.Uri = vscode.Uri.joinPath(rootUri, ".editorconfig");
-        const edits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        edits.createFile(uri, { ignoreIfExists: true, overwrite: false });
-        try {
-            await vscode.workspace.applyEdit(edits);
-            document = await vscode.workspace.openTextDocument(uri);
-        } catch (e) {
-            document = await vscode.workspace.openTextDocument();
-        }
-    } else {
-        document = await vscode.workspace.openTextDocument();
-    }
-    populateEditorConfig(rootUri, document);
-}

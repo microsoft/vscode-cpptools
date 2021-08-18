@@ -14,7 +14,7 @@ import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client } from './client';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, generateEditorConfig, OtherSettings } from './settings';
+import { CppSettings, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -775,7 +775,11 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseAnalysis', onPauseAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeAnalysis', onResumeAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelAnalysis', onCancelAnalysis));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowAnalysisCommands', onShowAnalysisCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
@@ -916,9 +920,13 @@ function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.A
 function onGenerateEditorConfig(): void {
     onActivationEvent();
     if (!isFolderOpen()) {
-        generateEditorConfig();
+        const settings: CppSettings = new CppSettings();
+        settings.generateEditorConfig();
     } else {
-        selectClient().then(client => generateEditorConfig(client.RootUri));
+        selectClient().then(client => {
+            const settings: CppSettings = new CppSettings(client.RootUri);
+            settings.generateEditorConfig();
+        });
     }
 }
 
@@ -988,9 +996,29 @@ function onResumeParsing(): void {
     clients.ActiveClient.resumeParsing();
 }
 
+function onPauseAnalysis(): void {
+    onActivationEvent();
+    clients.ActiveClient.pauseAnalysis();
+}
+
+function onResumeAnalysis(): void {
+    onActivationEvent();
+    clients.ActiveClient.resumeAnalysis();
+}
+
+function onCancelAnalysis(): void {
+    onActivationEvent();
+    clients.ActiveClient.cancelAnalysis();
+}
+
 function onShowParsingCommands(): void {
     onActivationEvent();
     clients.ActiveClient.handleShowParsingCommands();
+}
+
+function onShowAnalysisCommands(): void {
+    onActivationEvent();
+    clients.ActiveClient.handleShowAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {

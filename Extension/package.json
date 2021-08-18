@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.5.0-main",
+  "version": "1.5.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.53.0"
+    "vscode": "^1.58.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -54,7 +54,6 @@
         "id": "cppWelcome",
         "title": "Get Started with C++ Development",
         "description": "Dive into VS Code's rich C++ development experience.",
-        "primary": true,
         "when": "false",
         "steps": [
           {
@@ -63,7 +62,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == mac",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-clang-macos.md"
+              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
@@ -72,7 +71,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == linux",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-gcc-linux.md"
+              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
@@ -81,7 +80,7 @@
             "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == windows",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-compiler-windows.md"
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
@@ -117,7 +116,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "when": "workspacePlatform == mac",
             "media": {
-              "markdown": "walkthrough/debugconfig/run-and-debug-project-mac.md"
+              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-mac.md"
             }
           },
           {
@@ -126,7 +125,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "when": "workspacePlatform == linux",
             "media": {
-              "markdown": "walkthrough/debugconfig/run-and-debug-project-linux.md"
+              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-linux.md"
             }
           },
           {
@@ -135,7 +134,7 @@
             "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "when": "workspacePlatform == windows",
             "media": {
-              "markdown": "walkthrough/debugconfig/run-and-debug-project-windows.md"
+              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-windows.md"
             }
           },
           {
@@ -251,7 +250,7 @@
           "type": "string",
           "default": "file",
           "description": "%c_cpp.configuration.clang_format_style.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.formatting": {
           "type": "string",
@@ -267,7 +266,7 @@
             "%c_cpp.configuration.formatting.Default.description%",
             "%c_cpp.configuration.formatting.Disabled.description%"
           ],
-          "default": "clangFormat",
+          "default": "Default",
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
@@ -772,7 +771,7 @@
           "type": "string",
           "default": "Visual Studio",
           "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
           "type": [
@@ -984,7 +983,7 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "application",
+          "scope": "machine",
           "minimum": 500,
           "maximum": 3000
         },
@@ -1102,7 +1101,7 @@
           ],
           "default": null,
           "description": "%c_cpp.configuration.default.compilerPath.description%",
-          "scope": "resource"
+          "scope": "machine-overridable"
         },
         "C_Cpp.default.compilerArgs": {
           "type": [
@@ -1130,7 +1129,7 @@
             "gnu17"
           ],
           "description": "%c_cpp.configuration.default.cStandard.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
           "type": "string",
@@ -1150,7 +1149,7 @@
             "gnu++20"
           ],
           "description": "%c_cpp.configuration.default.cppStandard.description%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.default.configurationProvider": {
           "type": "string",
@@ -1220,7 +1219,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "application"
+          "scope": "machine"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -2642,60 +2641,356 @@
     ],
     "semanticTokenScopes": [
       {
+        "language": "c",
         "scopes": {
+          "namespace": [
+            "entity.name.namespace.c"
+          ],
+          "type": [
+            "entity.name.type.c"
+          ],
+          "type.defaultLibrary": [
+            "support.type.c"
+          ],
+          "struct": [
+            "storage.type.struct.c"
+          ],
+          "class": [
+            "entity.name.type.class.c"
+          ],
+          "class.defaultLibrary": [
+            "support.class.c"
+          ],
+          "interface": [
+            "entity.name.type.interface.c"
+          ],
+          "enum": [
+            "entity.name.type.enum.c"
+          ],
+          "function": [
+            "entity.name.function.c"
+          ],
+          "function.defaultLibrary": [
+            "support.function.c"
+          ],
+          "method": [
+            "entity.name.function.member.c"
+          ],
+          "variable": [
+            "variable.other.readwrite.c",
+            "entity.name.variable.c"
+          ],
+          "variable.readonly": [
+            "variable.other.constant.c"
+          ],
+          "variable.readonly.defaultLibrary": [
+            "support.constant.c"
+          ],
+          "parameter": [
+            "variable.parameter.c"
+          ],
+          "property": [
+            "variable.other.property.c"
+          ],
+          "property.readonly": [
+            "variable.other.constant.property.c"
+          ],
+          "enumMember": [
+            "variable.other.enummember.c"
+          ],
+          "event": [
+            "variable.other.event.c"
+          ],
           "label": [
-            "entity.name.label"
+            "entity.name.label.c"
           ],
           "variable.global": [
-            "variable.other.global"
+            "variable.other.global.c"
           ],
           "variable.local": [
-            "variable.other.local"
+            "variable.other.local.c"
           ],
           "property.static": [
-            "variable.other.property.static"
+            "variable.other.property.static.c"
           ],
           "method.static": [
-            "entity.name.function.member.static"
+            "entity.name.function.member.static.c"
           ],
           "macro": [
-            "entity.name.function.preprocessor"
+            "entity.name.function.preprocessor.c",
+            "entity.name.function.macro.c"
           ],
           "referenceType": [
-            "entity.name.type.class.reference"
+            "entity.name.type.class.reference.c"
           ],
           "cliProperty": [
-            "variable.other.property.cli"
+            "variable.other.property.cli.c"
           ],
           "genericType": [
-            "entity.name.type.class.generic"
+            "entity.name.type.class.generic.c"
           ],
           "valueType": [
-            "entity.name.type.class.value"
+            "entity.name.type.class.value.c"
           ],
           "templateFunction": [
-            "entity.name.function.templated"
+            "entity.name.function.templated.c"
           ],
           "templateType": [
-            "entity.name.type.class.templated"
+            "entity.name.type.class.templated.c"
           ],
           "operatorOverload": [
-            "entity.name.function.operator"
+            "entity.name.function.operator.c"
           ],
           "memberOperatorOverload": [
-            "entity.name.function.operator.member"
+            "entity.name.function.operator.member.c"
           ],
           "newOperator": [
-            "keyword.operator.new"
+            "keyword.operator.new.c"
           ],
           "numberLiteral": [
-            "entity.name.operator.custom-literal.number"
+            "entity.name.operator.custom-literal.number.c"
           ],
           "customLiteral": [
-            "entity.name.operator.custom-literal"
+            "entity.name.operator.custom-literal.c"
           ],
           "stringLiteral": [
-            "entity.name.operator.custom-literal.string"
+            "entity.name.operator.custom-literal.string.c"
+          ]
+        }
+      },
+      {
+        "language": "cpp",
+        "scopes": {
+          "namespace": [
+            "entity.name.namespace.cpp"
+          ],
+          "type": [
+            "entity.name.type.cpp"
+          ],
+          "type.defaultLibrary": [
+            "support.type.cpp"
+          ],
+          "struct": [
+            "storage.type.struct.cpp"
+          ],
+          "class": [
+            "entity.name.type.class.cpp"
+          ],
+          "class.defaultLibrary": [
+            "support.class.cpp"
+          ],
+          "interface": [
+            "entity.name.type.interface.cpp"
+          ],
+          "enum": [
+            "entity.name.type.enum.cpp"
+          ],
+          "function": [
+            "entity.name.function.cpp"
+          ],
+          "function.defaultLibrary": [
+            "support.function.cpp"
+          ],
+          "method": [
+            "entity.name.function.member.cpp"
+          ],
+          "variable": [
+            "variable.other.readwrite.cpp",
+            "entity.name.variable.cpp"
+          ],
+          "variable.readonly": [
+            "variable.other.constant.cpp"
+          ],
+          "variable.readonly.defaultLibrary": [
+            "support.constant.cpp"
+          ],
+          "parameter": [
+            "variable.parameter.cpp"
+          ],
+          "property": [
+            "variable.other.property.cpp"
+          ],
+          "property.readonly": [
+            "variable.other.constant.property.cpp"
+          ],
+          "enumMember": [
+            "variable.other.enummember.cpp"
+          ],
+          "event": [
+            "variable.other.event.cpp"
+          ],
+          "label": [
+            "entity.name.label.cpp"
+          ],
+          "variable.global": [
+            "variable.other.global.cpp"
+          ],
+          "variable.local": [
+            "variable.other.local.cpp"
+          ],
+          "property.static": [
+            "variable.other.property.static.cpp"
+          ],
+          "method.static": [
+            "entity.name.function.member.static.cpp"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor.cpp",
+            "entity.name.function.macro.cpp"
+          ],
+          "referenceType": [
+            "entity.name.type.class.reference.cpp"
+          ],
+          "cliProperty": [
+            "variable.other.property.cli.cpp"
+          ],
+          "genericType": [
+            "entity.name.type.class.generic.cpp"
+          ],
+          "valueType": [
+            "entity.name.type.class.value.cpp"
+          ],
+          "templateFunction": [
+            "entity.name.function.templated.cpp"
+          ],
+          "templateType": [
+            "entity.name.type.class.templated.cpp"
+          ],
+          "operatorOverload": [
+            "entity.name.function.operator.cpp"
+          ],
+          "memberOperatorOverload": [
+            "entity.name.function.operator.member.cpp"
+          ],
+          "newOperator": [
+            "keyword.operator.new.cpp"
+          ],
+          "numberLiteral": [
+            "entity.name.operator.custom-literal.number.cpp"
+          ],
+          "customLiteral": [
+            "entity.name.operator.custom-literal.cpp"
+          ],
+          "stringLiteral": [
+            "entity.name.operator.custom-literal.string.cpp"
+          ]
+        }
+      },
+      {
+        "language": "cuda-cpp",
+        "scopes": {
+          "namespace": [
+            "entity.name.namespace.cuda-cpp"
+          ],
+          "type": [
+            "entity.name.type.cuda-cpp"
+          ],
+          "type.defaultLibrary": [
+            "support.type.cuda-cpp"
+          ],
+          "struct": [
+            "storage.type.struct.cuda-cpp"
+          ],
+          "class": [
+            "entity.name.type.class.cuda-cpp"
+          ],
+          "class.defaultLibrary": [
+            "support.class.cuda-cpp"
+          ],
+          "interface": [
+            "entity.name.type.interface.cuda-cpp"
+          ],
+          "enum": [
+            "entity.name.type.enum.cuda-cpp"
+          ],
+          "function": [
+            "entity.name.function.cuda-cpp"
+          ],
+          "function.defaultLibrary": [
+            "support.function.cuda-cpp"
+          ],
+          "method": [
+            "entity.name.function.member.cuda-cpp"
+          ],
+          "variable": [
+            "variable.other.readwrite.cuda-cpp",
+            "entity.name.variable.cuda-cpp"
+          ],
+          "variable.readonly": [
+            "variable.other.constant.cuda-cpp"
+          ],
+          "variable.readonly.defaultLibrary": [
+            "support.constant.cuda-cpp"
+          ],
+          "parameter": [
+            "variable.parameter.cuda-cpp"
+          ],
+          "property": [
+            "variable.other.property.cuda-cpp"
+          ],
+          "property.readonly": [
+            "variable.other.constant.property.cuda-cpp"
+          ],
+          "enumMember": [
+            "variable.other.enummember.cuda-cpp"
+          ],
+          "event": [
+            "variable.other.event.cuda-cpp"
+          ],
+          "label": [
+            "entity.name.label.cuda-cpp"
+          ],
+          "variable.global": [
+            "variable.other.global.cuda-cpp"
+          ],
+          "variable.local": [
+            "variable.other.local.cuda-cpp"
+          ],
+          "property.static": [
+            "variable.other.property.static.cuda-cpp"
+          ],
+          "method.static": [
+            "entity.name.function.member.static.cuda-cpp"
+          ],
+          "macro": [
+            "entity.name.function.preprocessor.cuda-cpp",
+            "entity.name.function.macro.cuda-cpp"
+          ],
+          "referenceType": [
+            "entity.name.type.class.reference.cuda-cpp"
+          ],
+          "cliProperty": [
+            "variable.other.property.cli.cuda-cpp"
+          ],
+          "genericType": [
+            "entity.name.type.class.generic.cuda-cpp"
+          ],
+          "valueType": [
+            "entity.name.type.class.value.cuda-cpp"
+          ],
+          "templateFunction": [
+            "entity.name.function.templated.cuda-cpp"
+          ],
+          "templateType": [
+            "entity.name.type.class.templated.cuda-cpp"
+          ],
+          "operatorOverload": [
+            "entity.name.function.operator.cuda-cpp"
+          ],
+          "memberOperatorOverload": [
+            "entity.name.function.operator.member.cuda-cpp"
+          ],
+          "newOperator": [
+            "keyword.operator.new.cuda-cpp"
+          ],
+          "numberLiteral": [
+            "entity.name.operator.custom-literal.number.cuda-cpp"
+          ],
+          "customLiteral": [
+            "entity.name.operator.custom-literal.cuda-cpp"
+          ],
+          "stringLiteral": [
+            "entity.name.operator.custom-literal.string.cuda-cpp"
           ]
         }
       }
@@ -2731,12 +3026,13 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.53.0",
+    "@types/vscode": "1.58.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/eslint-plugin-tslint": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
+    "@vscode/test-electron": "^1.6.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
     "eslint": "^7.25.0",
@@ -2764,7 +3060,6 @@
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-nls-dev": "^4.0.0-next.1",
-    "vscode-test": "^1.3.0",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0",
     "xml2js": "^0.4.19"
@@ -2792,12 +3087,13 @@
     "y18n": "^5.0.5",
     "hosted-git-info": "^3.0.8",
     "browserslist": "^4.16.6",
-    "glob-parent": "^5.1.2"
+    "glob-parent": "^5.1.2",
+    "path-parse": "^1.0.7"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164295",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167520",
       "platforms": [
         "linux"
       ],
@@ -2808,11 +3104,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "2E6E25B3B9C10ECC25A5B523C413182D185F13492602CF92896C658E6959CBFA"
+      "integrity": "32AC1D58A5A21527AA24583011F5A3694FCEFB5920677D0CA8D13F70BC0102BE"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164297",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167624",
       "platforms": [
         "linux"
       ],
@@ -2823,11 +3119,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "25F5776247184254D49B9FCC25D0D018AECF1D8930FC517F25C9FCC0A9E650AC"
+      "integrity": "9CB1C36A34DD2F7A53FF5471F1FBB5C0AD65A9E67C17013C7FBF65CDDAF7A7E1"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2165100",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167623",
       "platforms": [
         "linux"
       ],
@@ -2838,11 +3134,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "186614524A13EC75BF68798861818D25CE82FDE293C57B725C11F62B0694EC55"
+      "integrity": "D8F6A5A4A8A13F6F872C94BD522602A7C0E5E5CCA58CE7CE1ED3DC32F82850AC"
     },
     {
       "description": "C/C++ language components (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164296",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167518",
       "platforms": [
         "darwin"
       ],
@@ -2853,11 +3149,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "8E19E1BDD95FCC80F74529E6B5C24AB761F7D84B92CF44C33DAE38A8F11F6FB5"
+      "integrity": "3EF54224CED1BCC6D64B2A93BFA8093E3D75510C8F96E943049CCB4C656161A2"
     },
     {
       "description": "C/C++ language components (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164187",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167519",
       "platforms": [
         "darwin"
       ],
@@ -2868,11 +3164,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "1225791C05E0DBD708D0EE9598ACBC94B742E25C7CAE92C5C89791AF924D4B96"
+      "integrity": "02F2BE96493256237995EF51D4E0CD0345727D27A61135C6FCDB88608406C908"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2164298",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167517",
       "platforms": [
         "win32"
       ],
@@ -2884,11 +3180,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "8D9E008B789D13DF4175795400E9402D43D199846CEC1DC4DD1F319B4C0D5492"
+      "integrity": "1E23884810A6EBF56BC7C5C4CB5317723CC3519039D56BF07310735870163E77"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2165101",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2167516",
       "platforms": [
         "win32"
       ],
@@ -2899,7 +3195,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "4B94A64721FE8D0E1F93AACBA1190A9DC00DF7225E20BF628AC57BEC6301AA7D"
+      "integrity": "26CCA79735F15BE0595510E2A170794CBF7E2EE72F2A565CD9D26970EA35547F"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -2945,7 +3241,7 @@
     },
     {
       "description": "ClangFormat (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2162416",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2168396",
       "platforms": [
         "darwin"
       ],
@@ -2953,13 +3249,13 @@
         "x64"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format.darwin"
+        "./LLVM/bin/clang-format"
       ],
-      "integrity": "AEB24D394118EAD87087DCC651F2EE329FC335ECE88ED6C8C2A9E93ED60DFECD"
+      "integrity": "5C4848EAAE3DBD7EDAB3155717C49204A09E4625B39463A00887CAA0C9D16657"
     },
     {
       "description": "ClangFormat (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2162413",
+      "url": "https://go.microsoft.com/fwlink/?LinkID=2168397",
       "platforms": [
         "darwin"
       ],
@@ -2967,9 +3263,9 @@
         "arm64"
       ],
       "binaries": [
-        "./LLVM/bin/clang-format.darwin"
+        "./LLVM/bin/clang-format"
       ],
-      "integrity": "AE5507F54562B9DA99E3F8318E25C93BD38AD2FBF4238ADF1C152ECFB0C10FA9"
+      "integrity": "404C8CFC847FD9B740BD4077534F00918ED592C7F4DFE4B66F933CAC10CCA5FB"
     },
     {
       "description": "ClangFormat (Windows x86)",
@@ -3014,18 +3310,37 @@
       "integrity": "6756365C82B5BD90C6A40C13CF8E3599E4A1DB50628111FFDB3A76FF85256BA4"
     },
     {
-      "description": "Mono Framework Assemblies",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027135",
+      "description": "OpenDebugAD7 (Windows x86/x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/db301b288a036364c1718048b97b0d58/win-x86.zip",
       "platforms": [
-        "linux",
-        "darwin"
+        "win32"
       ],
-      "binaries": [],
-      "integrity": "579295329C1825588B6251EEA56571D1B9555BD529AA1A319CDFE741BC22D786"
+      "architectures": [
+        "x86",
+        "x64"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7.exe"
+      ],
+      "integrity": "452B01805E3602B23E24AF3F271759F35C1961093B345C5835C304D7FCDC1439"
     },
     {
-      "description": "Mono Runtime (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027416",
+      "description": "OpenDebugAD7 (Windows ARM64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/365a4f83f0ece3c5fc1f0cb0c73a0f2c/win10-arm64.zip",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7.exe"
+      ],
+      "integrity": "86D9C73FE551A8613DA3CD13D4C039D3E55E3773DF72636223A3C3F124598414"
+    },
+    {
+      "description": "OpenDebugAD7 (Linux x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/156c5a850e57f285f0b0a864ea719139/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -3033,13 +3348,13 @@
         "x64"
       ],
       "binaries": [
-        "./debugAdapters/mono.linux-x86_64"
+        "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "927C5094E83CE64EDC3A267EE1F13267CFA09FC1E9A5ADC870A752C05AD26F17"
+      "integrity": "107B8EB400999BD3EDD764D7301FFE6C3C0572E09E2126D247B59860CEE9A83E"
     },
     {
-      "description": "Mono Runtime (Linux / armhf)",
-      "url": "https://aka.ms/mono-runtime-linux-arm",
+      "description": "OpenDebugAD7 (Linux ARM)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/12f05b118ffe89ce4635c3eed54f3bda/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -3047,13 +3362,13 @@
         "arm"
       ],
       "binaries": [
-        "./debugAdapters/mono.linux-armhf"
+        "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "D2D1FE7FB5CC5B2A60364F08829467509879D603FC951AC3805B530C8CEEF981"
+      "integrity": "6594EC56505523031DCE4948734B3A840B6B02AB8F50AC2EFBA60CA3A151B51F"
     },
     {
-      "description": "Mono Runtime (Linux / arm64)",
-      "url": "https://aka.ms/mono-runtime-linux-arm64",
+      "description": "OpenDebugAD7 (Linux ARM64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/ec8a27111cf71b9cc38afeac6d371afd/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -3061,20 +3376,37 @@
         "arm64"
       ],
       "binaries": [
-        "./debugAdapters/mono.linux-arm64"
+        "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "946C54C8C6BF5BF79AC05D4E152F8D8647700FA786C21505832B3C79988339B4"
+      "integrity": "2E1D8F435CF4DF9C63B584AD132A54F0C3702B531C7208FDC00810F714415FA0"
     },
     {
-      "description": "Mono Runtime (macOS)",
-      "url": "https://go.microsoft.com/fwlink/?LinkId=2027403",
+      "description": "OpenDebugAD7 (Alpine Linux x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/d48c2023dda15f926fcb3883e608be26/linux-musl-x64.zip",
+      "platforms": [
+        "alpine-linux"
+      ],
+      "architectures": [
+        "x64"
+      ],
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7"
+      ],
+      "integrity": "74C1AABD91FE3E3D02ADE6EEAC94A788BD4B309281595B02563E658A8F4A96AF"
+    },
+    {
+      "description": "OpenDebugAD7 (macOS x64)",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/368ecdd16d233a1dfd7cdbf09dc9801f/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
-      "binaries": [
-        "./debugAdapters/mono.osx"
+      "architectures": [
+        "x64"
       ],
-      "integrity": "5D9E5AB3E921D138887BD12FF46B02BFC85B692B438EDFAAEB1E1E7837F1D40B"
+      "binaries": [
+        "./debugAdapters/bin/OpenDebugAD7"
+      ],
+      "integrity": "D0D23C00763225F749A1495C1E9A1A70726E2EC8A0B72A695FEC231A41E739E9"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",
@@ -3107,7 +3439,7 @@
     },
     {
       "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2162486",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2169833",
       "platforms": [
         "win32"
       ],
@@ -3118,7 +3450,21 @@
       "binaries": [
         "./debugAdapters/vsdbg/bin/vsdbg.exe"
       ],
-      "integrity": "E5046509D510086B99F171595114220AD8E9F820E7238B6A5199CD78B9AD2078"
+      "integrity": "0C36EB31D90EC6FE5BFBD02D62222A7FE8E5BD7D238D9DD086BAAEA66C74FF16"
+    },
+    {
+      "description": "Visual Studio Windows ARM64 Debugger",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2169834",
+      "platforms": [
+        "win32"
+      ],
+      "architectures": [
+        "arm64"
+      ],
+      "binaries": [
+        "./debugAdapters/vsdbg/bin/vsdbg.exe"
+      ],
+      "integrity": "7DBD8F522420703AA85435A779CAC29B8226A8B92236BEF27AA41E84E4973458"
     }
   ]
 }

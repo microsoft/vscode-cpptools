@@ -9,6 +9,7 @@
 	"unable.to.start": "C/C++ 言語サーバーを起動できません。IntelliSense 機能は無効になります。エラー: {0}",
 	"check.permissions": "EPERM: '{0}' のアクセス許可を確認してください",
 	"server.crashed2": "言語サーバーが過去 3 分間に 5 回クラッシュしました。再起動されません。",
+	"loggingLevel.changed": "{0} が次に変更されました: {1}",
 	"provider.configure.folder": "{0} が '{1}' フォルダーに対して IntelliSense を構成しようとしています。",
 	"provider.configure.this.folder": "{0} がこのフォルダーに対して IntelliSense を構成しようとしています。",
 	"allow.button": "許可する",
@@ -35,6 +36,5 @@
 	"configurations.received": "カスタム構成を受信しました:",
 	"browse.configuration.received": "カスタムの参照構成を受信しました: {0}",
 	"no.compilers.found": "お使いのシステムで C++ コンパイラが見つかりませんでした。プラットフォーム向けに、エディターの指示に従って {0} をインストールすることをお勧めします。",
-	"compilers.found": "システムに次の C++ コンパイラが見つかりました:",
-	"compilers.found.message": "プロジェクトの IntelliSense 構成で使用するコンパイラを指定できます。"
+	"compilers.found": "お使いのシステムに、次の C++ コンパイラが見つかりました。プロジェクトの IntelliSense 構成でコンパイラを選択します。"
 }
