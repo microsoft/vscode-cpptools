@@ -1219,7 +1219,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "machine"
+          "scope": "application"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
