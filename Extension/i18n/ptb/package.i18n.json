@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Configura o mecanismo de formatação",
 	"c_cpp.configuration.formatting.clangFormat.description": "O clang-format será usado para formatar o código.",
 	"c_cpp.configuration.formatting.vcFormat.description": "O mecanismo de formatação Visual C++ será usado para formatar o código.",
-	"c_cpp.configuration.formatting.Default.description": "O clang-format será usado para formatar o código.",
+	"c_cpp.configuration.formatting.Default.description": "Por padrão, clang-format será usado para formatar o código. No entanto, o mecanismo de formatação Microsoft Visual C++ será usado se um arquivo .editorconfig com configurações relevantes for encontrado mais próximo do código que está sendo formatado e clang_format_style for o valor padrão: 'arquivo'.",
 	"c_cpp.configuration.formatting.Disabled.description": "A formatação de código será desabilitada.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "As chaves são recuadas de acordo com o valor especificado na configuração Editor: Tamanho da Tabulação.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Determina em relação a que o recuo da nova linha será aplicado",

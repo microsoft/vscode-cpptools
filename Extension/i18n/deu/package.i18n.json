@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Konfiguriert das Formatierungsmodul.",
 	"c_cpp.configuration.formatting.clangFormat.description": "Zum Formatieren von Code wird \"clang-format\" verwendet.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Das Visual C++-Formatierungsmodul wird zum Formatieren von Code verwendet.",
-	"c_cpp.configuration.formatting.Default.description": "Zum Formatieren von Code wird \"clang-format\" verwendet.",
+	"c_cpp.configuration.formatting.Default.description": "Standardmäßig wird „clang-format“ zum Formatieren des Codes verwendet. Das Visual C++-Formatierungsmodul wird jedoch verwendet, wenn eine „.editorconfig“-Datei mit relevanten Einstellungen näher am zu formatierenden Code gefunden wird und „clang_format_style“ folgender Standardwert ist: „file“.",
 	"c_cpp.configuration.formatting.Disabled.description": "Die Codeformatierung wird deaktiviert.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Geschweifte Klammern werden um den im Editor in der Einstellung für die Tabstoppgröße angegebenen Wert eingerückt.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Legt den Bezugspunkt für den neuen Zeileneinzug fest.",
