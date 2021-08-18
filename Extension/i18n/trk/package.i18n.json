@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Biçimlendirme altyapısını yapılandırır",
 	"c_cpp.configuration.formatting.clangFormat.description": "Kodu biçimlendirmek için clang-format kullanılacak.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Kodu biçimlendirmek için Visual C++ biçimlendirme altyapısı kullanılacak.",
-	"c_cpp.configuration.formatting.Default.description": "Kodu biçimlendirmek için clang-format kullanılacak.",
+	"c_cpp.configuration.formatting.Default.description": "Varsayılan olarak, kodu biçimlendirmek için clang-format kullanılır. Ancak, ilgili ayarlara sahip bir .editorconfig dosyası, biçimlendirilmekte olan koda yaklaştığında ve clang_format_style varsayılan değer olan 'file' olduğunda Visual C++ biçimlendirme altyapısı kullanılır.",
 	"c_cpp.configuration.formatting.Disabled.description": "Kod biçimlendirme devre dışı bırakılacak.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Küme ayraçları, Düzenleyici: Sekme Boyutu ayarında belirtilen miktara göre girintilenir.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Yeni satır girintisinin ne ile göreli olduğunu belirler",

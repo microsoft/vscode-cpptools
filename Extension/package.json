@@ -983,7 +983,7 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "machine",
+          "scope": "application",
           "minimum": 500,
           "maximum": 3000
         },
@@ -1219,7 +1219,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "machine"
+          "scope": "application"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
