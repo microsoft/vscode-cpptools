@@ -421,23 +421,6 @@ async function finalizeExtensionActivation(): Promise<void> {
         }
     }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
-
-    const packageJson: any = util.getRawPackageJson();
-    let writePackageJson: boolean = false;
-    const packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (packageJsonPath.includes(".vscode-insiders") ||
-        packageJsonPath.includes(".vscode-server-insiders") ||
-        packageJsonPath.includes(".vscode-exploration") ||
-        packageJsonPath.includes(".vscode-server-exploration")) {
-        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
-            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
-            writePackageJson = true;
-        }
-    }
-
-    if (writePackageJson) {
-        return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-    }
 }
 
 function rewriteManifest(): Promise<void> {
@@ -476,6 +459,16 @@ function rewriteManifest(): Promise<void> {
         "workspaceContains:/.vscode/c_cpp_properties.json",
         "onFileSystem:cpptools-schema"
     ];
+
+    const packageJsonPath: string = util.getExtensionFilePath("package.json");
+    if (packageJsonPath.includes(".vscode-insiders") ||
+        packageJsonPath.includes(".vscode-server-insiders") ||
+        packageJsonPath.includes(".vscode-exploration") ||
+        packageJsonPath.includes(".vscode-server-exploration")) {
+        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
+            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
+        }
+    }
 
     return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
 }
