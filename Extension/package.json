@@ -404,7 +404,7 @@
         },
         "C_Cpp.codeAnalysis.clangTidy.path": {
           "type": "string",
-          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.path.description%",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.codeAnalysis.clangTidy.buildPath": {
@@ -430,11 +430,11 @@
             "FixErrors"
           ],
           "default": "Disabled",
-          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.description%",
-          "enumDescriptions": [
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.disabled.description%",
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixIfNoErrors.description%",
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixErrors.description%"
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.markdownDescription%",
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.disabled.markdownDescription%",
+            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixIfNoErrors.markdownDescription%",
+            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixErrors.markdownDescription%"
           ],
           "scope": "resource"
         },
@@ -1529,7 +1529,7 @@
         },
         "C_Cpp.clang_format_path": {
           "type": "string",
-          "description": "%c_cpp.configuration.clang_format_path.description%",
+          "markdownDescription": "%c_cpp.configuration.clang_format_path.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.clang_format_style": {
