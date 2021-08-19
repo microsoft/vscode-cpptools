@@ -9,7 +9,7 @@
 	"walkthrough.windows.link.title1": "Použití C++ a subsystému Windows pro Linux (WSL) ve VS Code",
 	"walkthrough.windows.link.title2": "instalovat GCC na Windows pomocí MinGW",
 	"walkthrough.windows.text2": "Pokud chcete nainstalovat MSVC, stáhněte {0} ze stránky Visual Studio {1}.",
-	"walkthrough.windows.build.tools1": "C++ Build Tools",
+	"walkthrough.windows.build.tools1": "Build Tools for Visual Studio 2019",
 	"walkthrough.windows.link.downloads": "Položky ke stažení",
 	"walkthrough.windows.text3": "V Instalační program pro Visual Studio zkontrolujte {0} úlohy a vyberte {1}.",
 	"walkthrough.windows.build.tools2": "C++ Build Tools",
