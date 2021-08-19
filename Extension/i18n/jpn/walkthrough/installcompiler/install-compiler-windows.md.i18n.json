@@ -9,7 +9,7 @@
 	"walkthrough.windows.link.title1": "VS Code で C++ と Windows Subsystem for Linux (WSL) を使用する",
 	"walkthrough.windows.link.title2": "MinGW を使用して Windows で GCC をインストールする",
 	"walkthrough.windows.text2": "MSVC をインストールするには、Visual Studio {1} ページから {0} をダウンロードします。",
-	"walkthrough.windows.build.tools1": "C++ Build Tools",
+	"walkthrough.windows.build.tools1": "Build Tools for Visual Studio 2019",
 	"walkthrough.windows.link.downloads": "ダウンロード",
 	"walkthrough.windows.text3": "Visual Studio インストーラーで {0} ワークロードを確認し、{1} を選択します。",
 	"walkthrough.windows.build.tools2": "C++ Build Tools",
