@@ -188,6 +188,7 @@
         "env": {
             "type": "object",
             "description": "Custom variables that can be reused anywhere in this file using the ${variable} or ${env:variable} syntax.",
+            "descriptionHint": "The contents within curl braces ('variable', and 'env:variable') should not be translated.",
             "patternProperties": {
                 "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^workspaceFolderBasename$)(?!^default$)(^.+$)": {
                     "oneOf": [

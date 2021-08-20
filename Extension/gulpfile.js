@@ -219,8 +219,9 @@ const processJsonSchemaFiles = () => {
         };
         let descriptionCallback = (path, value, parent) => {
             let locId = filePath + "." + path;
+            let locHint = parent.descriptionHint;
             localizationJsonContents[locId] = value;
-            localizationMetadataContents.keys.push(locId);
+            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
             localizationMetadataContents.messages.push(value);
         };
         traverseJson(jsonTree, descriptionCallback, "");
