@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "選擇格式設定引擎",
 	"c_cpp.configuration.formatting.clangFormat.description": "將使用 clang-format 來格式化程式碼。",
 	"c_cpp.configuration.formatting.vcFormat.description": "將使用 Visual C++ 格式化引擎來格式化程式碼。",
-	"c_cpp.configuration.formatting.Default.description": "將使用 clang-format 來格式化程式碼。",
+	"c_cpp.configuration.formatting.Default.description": "根據預設，會使用 clang 格式將程式碼格式化。不過，如果具有相關設定之 .editorconfig 檔案更接近要格式化的程式碼，且 clang_format_style 為預設值 'file'，則將會使用 Visual C++ 格式引擎。",
 	"c_cpp.configuration.formatting.Disabled.description": "將停用程式碼格式化。",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "大括弧會依據 [Editor: Tab Size] 設定中指定的數量縮排。",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "決定換行縮排相對於",

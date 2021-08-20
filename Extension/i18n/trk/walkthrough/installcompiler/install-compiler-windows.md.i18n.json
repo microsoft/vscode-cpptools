@@ -9,7 +9,7 @@
 	"walkthrough.windows.link.title1": "VS Code'da Linux için C++’yı ve Windows Alt Sistemi’ni (WSL) kullanma",
 	"walkthrough.windows.link.title2": "MinGW ile Windows’a GCC'yi yükleme",
 	"walkthrough.windows.text2": "MSVC’yi yüklemek için Visual Studio {1} sayfasından {0} indirin. ",
-	"walkthrough.windows.build.tools1": "C++ Derleme Araçları",
+	"walkthrough.windows.build.tools1": "Build Tools for Visual Studio 2019",
 	"walkthrough.windows.link.downloads": "İndirmeler",
 	"walkthrough.windows.text3": "Visual Studio Yükleyicisi’nde {0} iş yükünü denetleyip {1} seçin.",
 	"walkthrough.windows.build.tools2": "C++ derleme araçları",
