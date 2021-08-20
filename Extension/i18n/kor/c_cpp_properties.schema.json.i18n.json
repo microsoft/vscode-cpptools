@@ -21,7 +21,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.databaseFilename": "생성된 기호 데이터베이스의 경로입니다. 상대 경로가 지정된 경우 작업 영역의 기본 스토리지 위치에 대해 상대적으로 만들어집니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "작업 영역 기호의 인덱싱 및 구문 분석에 사용할 경로의 목록입니다(정의로 이동, 모든 참조 찾기 등에서 사용). 이 경로에서 검색하는 작업은 기본적으로 재귀 작업입니다. 비재귀 검색을 나타내려면 '*'를 지정하세요. 예를 들어 '${workspaceFolder}'은(는) 모든 하위 디렉터리를 검색하지만 '${workspaceFolder}/*'는 그러지 않습니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.customConfigurationVariables": "launch.json 또는 tasks.json의 입력 변수에 사용하기 위해 ${cpptools:activeConfigCustomVariable} 명령을 통해 쿼리할 수 있는 사용자 지정 변수입니다.",
-	"c_cpp_properties.schema.json.definitions.env": "${변수} 또는 ${환경 변수} 구문을 사용하여 이 파일 내 어디서나 재사용할 수 있는 사용자 지정 변수입니다.",
+	"c_cpp_properties.schema.json.definitions.env": "${변수} 또는 ${env:변수} 구문을 사용하여 이 파일 내 어디서나 재사용할 수 있는 사용자 지정 변수입니다.",
 	"c_cpp_properties.schema.json.definitions.version": "구성 파일의 버전입니다. 이 속성은 확장에서 관리합니다. 변경하지 마세요.",
 	"c_cpp_properties.schema.json.definitions.enableConfigurationSquiggles": "확장이 c_cpp_properties.json에서 탐지된 오류를 보고하도록 할지를 제어합니다."
 }
