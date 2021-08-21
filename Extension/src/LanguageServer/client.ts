@@ -1020,7 +1020,6 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
-        const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
         const settings_clangTidyBuildPath: (string | undefined)[] = [];
         const settings_clangTidyConfig: (string | undefined)[] = [];
@@ -1125,7 +1124,6 @@ export class DefaultClient implements Client {
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
-                settings_clangTidyEnabled.push(setting.clangTidyEnabled);
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
                 settings_clangTidyBuildPath.push(setting.clangTidyBuildPath);
                 settings_clangTidyConfig.push(setting.clangTidyConfig);
@@ -1259,7 +1257,6 @@ export class DefaultClient implements Client {
                     updateDelay: workspaceSettings.codeAnalysisUpdateDelay,
                     exclude: settings_codeAnalysisExclude,
                     clangTidy: {
-                        enabled: settings_clangTidyEnabled,
                         path: settings_clangTidyPath,
                         buildPath: settings_clangTidyBuildPath,
                         config: settings_clangTidyConfig,

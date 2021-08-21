@@ -975,42 +975,23 @@ function onCheckForCompiler(): void {
     client.handleCheckForCompiler();
 }
 
-function showCodeAnalysisDisabledMessage(): void {
-    vscode.window.showInformationMessage(localize('no.code.analysis.enabled', 'Set a C_Cpp.codeAnalysis.<provider>.enabled setting to true to enable code analysis.'));
-}
-
 function onRunCodeAnalysisOnActiveFile(): void {
     onActivationEvent();
     if (activeDocument !== "") {
-        const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-        if (!settings.clangTidyEnabled) {
-            showCodeAnalysisDisabledMessage();
-        } else {
-            getActiveClient().handleRunCodeAnalysisOnActiveFile();
-        }
+        getActiveClient().handleRunCodeAnalysisOnActiveFile();
     }
 }
 
 function onRunCodeAnalysisOnOpenFiles(): void {
     onActivationEvent();
     if (openFileVersions.size > 0) {
-        const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-        if (!settings.clangTidyEnabled) {
-            showCodeAnalysisDisabledMessage();
-        } else {
-            getActiveClient().handleRunCodeAnalysisOnOpenFiles();
-        }
+        getActiveClient().handleRunCodeAnalysisOnOpenFiles();
     }
 }
 
 function onRunCodeAnalysisOnAllFiles(): void {
     onActivationEvent();
-    const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    if (!settings.clangTidyEnabled) {
-        showCodeAnalysisDisabledMessage();
-    } else {
-        getActiveClient().handleRunCodeAnalysisOnAllFiles();
-    }
+    getActiveClient().handleRunCodeAnalysisOnAllFiles();
 }
 
 function onAddToIncludePath(path: string): void {
