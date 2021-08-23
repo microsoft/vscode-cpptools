@@ -470,5 +470,5 @@ function rewriteManifest(): Promise<void> {
         }
     }
 
-    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => util.touchExtensionFolder());
 }
