@@ -3093,7 +3093,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167520",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170969",
       "platforms": [
         "linux"
       ],
@@ -3104,11 +3104,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "32AC1D58A5A21527AA24583011F5A3694FCEFB5920677D0CA8D13F70BC0102BE"
+      "integrity": "1554D6291CEC20CE0E39B0A4AD9E50FAD012FCAA76460FA0A2DDD7654ADC197F"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167624",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170862",
       "platforms": [
         "linux"
       ],
@@ -3119,11 +3119,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "9CB1C36A34DD2F7A53FF5471F1FBB5C0AD65A9E67C17013C7FBF65CDDAF7A7E1"
+      "integrity": "94712D1268A54FF8224B908E15439B3B9C22FE2C268407D871D1C1B7EEF6630C"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167623",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170860",
       "platforms": [
         "linux"
       ],
@@ -3134,11 +3134,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "D8F6A5A4A8A13F6F872C94BD522602A7C0E5E5CCA58CE7CE1ED3DC32F82850AC"
+      "integrity": "B65F184826F61F3DF2E68CFE409C85BE6A9195595B524BCF74E67F1B50E474F5"
     },
     {
       "description": "C/C++ language components (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167518",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170970",
       "platforms": [
         "darwin"
       ],
@@ -3149,11 +3149,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "3EF54224CED1BCC6D64B2A93BFA8093E3D75510C8F96E943049CCB4C656161A2"
+      "integrity": "081A4A0098EC557A32692B2E9DAB852371B5330D8993FF8C5EE12AC6A8EE1605"
     },
     {
       "description": "C/C++ language components (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167519",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170971",
       "platforms": [
         "darwin"
       ],
@@ -3164,11 +3164,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "02F2BE96493256237995EF51D4E0CD0345727D27A61135C6FCDB88608406C908"
+      "integrity": "409E9221C7D8C318FBD09E02D41CA166692606521EB7B9A6E6C615359A7CDE4C"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167517",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170863",
       "platforms": [
         "win32"
       ],
@@ -3180,11 +3180,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "1E23884810A6EBF56BC7C5C4CB5317723CC3519039D56BF07310735870163E77"
+      "integrity": "6A766CE793DA60F8596139833A996A7015AB2FFAFBA441544A8616E6D9D0E9CC"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167516",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170861",
       "platforms": [
         "win32"
       ],
@@ -3195,7 +3195,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "26CCA79735F15BE0595510E2A170794CBF7E2EE72F2A565CD9D26970EA35547F"
+      "integrity": "9B984390FD80EE6FAA5615BDD343CF96575F507D1907101C42BC78C1F0AF7917"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
