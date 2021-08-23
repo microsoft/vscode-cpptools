@@ -460,6 +460,8 @@ function rewriteManifest(): Promise<void> {
         "onFileSystem:cpptools-schema"
     ];
 
+    let doTouchExtension: boolean = false;
+
     const packageJsonPath: string = util.getExtensionFilePath("package.json");
     if (packageJsonPath.includes(".vscode-insiders") ||
         packageJsonPath.includes(".vscode-server-insiders") ||
@@ -467,8 +469,14 @@ function rewriteManifest(): Promise<void> {
         packageJsonPath.includes(".vscode-server-exploration")) {
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
+            doTouchExtension = true;
         }
     }
 
-    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => util.touchExtensionFolder());
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => {
+        if (doTouchExtension) {
+            // This is required to prevent VS Code from using the cached version with the old updateChannel setting.
+            util.touchExtensionFolder();
+        }
+    });
 }
