@@ -263,7 +263,7 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
 }
 
 function makeBinariesExecutable(): Promise<void> {
-    return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
+    return util.allowExecution(util.getDebugAdaptersPath("bin/OpenDebugAD7"));
 }
 
 function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
