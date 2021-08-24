@@ -209,9 +209,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationStage('cleanUpUnusedBinaries');
     await cleanUpUnusedBinaries(info);
 
-    setInstallationStage('makeBinariesExecutable');
-    await makeBinariesExecutable();
-
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
 
@@ -226,9 +223,6 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Online);
 
     await downloadAndInstallPackages(info);
-
-    setInstallationStage('makeBinariesExecutable');
-    await makeBinariesExecutable();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -260,10 +254,6 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
         setInstallationStage('installPackages');
         await packageManager.InstallPackages(progress);
     });
-}
-
-function makeBinariesExecutable(): Promise<void> {
-    return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
 function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
