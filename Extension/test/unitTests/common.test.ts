@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
 import * as os from "os";
-import { envDelimiter, resolveVariables, escapeForSquiggles } from "../../src/common";
+import { envDelimiter, resolveVariables, escapeForSquiggles, normalizeArg } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {
@@ -215,6 +215,36 @@ suite("Common Utility validation", () => {
             testEscapeForSquigglesScenario("\\\\\\t", "\\\\\\\\\\\\t"); // escaped backslash, unescaped non-quote
             testEscapeForSquigglesScenario("\"\"", "\"\""); // empty quoted string
             testEscapeForSquigglesScenario("\"\\\\\"", "\"\\\\\\\\\""); // quoted string containing escaped backslash
+        });
+
+        test("normalizeArgs:", () => {
+            const testNormalizeArgsScenario: any = (input: string, expectedOutput: string) => {
+                const result: string = normalizeArg(input);
+                if (result !== expectedOutput) {
+                    throw new Error(`normalizeArgs failure: for \"${input}\", \"${result}\" !== \"${expectedOutput}\"`);
+                }
+            };
+            /*
+            this is how the args from tasks.json will be sent to the chilprocess.spawn:
+            "args":[
+                "-DTEST1=TEST1 TEST1",          // "-DTEST1=TEST1 TEST1"
+                "-DTEST2=\"TEST2 TEST2\"",      // -DTEST2="TEST2 TEST2"
+                "-DTEST3=\\\"TEST3 TEST3\\\"",  // "-DTEST3=\"TEST3 TEST3\""
+                "-DTEST4=TEST4\\ TEST4",        // "-DTEST4=TEST4 TEST4"
+                "-DTEST5=TEST5\\ TEST5 Test5",  // "-DTEST5=TEST5 TEST5 Test5"
+                "-DTEST6='TEST6 TEST6'",        // -DTEST6='TEST6 TEST6'
+            ]
+            */
+            testNormalizeArgsScenario("-DTEST1=TEST1 TEST1", "\"-DTEST1=TEST1 TEST1\""); 
+            testNormalizeArgsScenario("-DTEST2=\"TEST2 TEST2\"", "-DTEST2=\"TEST2 TEST2\""); 
+            testNormalizeArgsScenario("-DTEST3=\\\"TEST3 TEST3\\\"", "\"-DTEST3=\\\"TEST3 TEST3\\\"\"");
+            if (process.platform.includes("win")) {
+                testNormalizeArgsScenario("-DTEST4=TEST4\\ TEST4", "\"-DTEST4=TEST4 TEST4\"");
+            } else {
+                testNormalizeArgsScenario("-DTEST4=TEST4\\ TEST4", "-DTEST4=TEST4\\ TEST4");
+            }
+            testNormalizeArgsScenario("-DTEST5=TEST5\\ TEST5 Test5", "\"-DTEST5=TEST5 TEST5 Test5\""); 
+            testNormalizeArgsScenario("-DTEST6='TEST6 TEST6'", "-DTEST6='TEST6 TEST6'"); 
         });
 
         interface ResolveTestFlowEnvironment {

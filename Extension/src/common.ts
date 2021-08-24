@@ -1316,10 +1316,13 @@ export function normalizeArg(arg: string): string {
     }
     // The special character double-quote is already scaped in the arg.
     const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
-    if (unescapedSpaces) {
+    if (!unescapedSpaces && !process.platform.includes("win"))
+        return arg;
+    else if (arg.includes(" ")) {
         arg = arg.replace(/\\\s/g, " ");
         return "\"" + arg + "\"";
+    } else {
+        return arg;
     }
-    return arg;
 }
 
