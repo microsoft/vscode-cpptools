@@ -3401,7 +3401,8 @@
         "darwin"
       ],
       "architectures": [
-        "x64"
+        "x64",
+        "arm64"
       ],
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
