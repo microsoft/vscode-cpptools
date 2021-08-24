@@ -1308,15 +1308,16 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 export function normalizeArg(arg: string): string {
     arg = arg.trimLeft().trimRight();
     // Check if the arg is enclosed in backtick,
-    // or includes escaped double-quotes,
+    // or includes unscaped double-quotes,
     // or includes unscaped single-quotes on mac and linux.
-    if (/^`.*`$/g.test(arg) || /.*\\".*/g.test(arg) ||
+    if (/^`.*`$/g.test(arg) || /.*[^\\]".*/g.test(arg) ||
         (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
         return arg;
     }
+    // The special character double-quote is already scaped in the arg.
     const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
     if (unescapedSpaces) {
-        arg = arg.replace(/\\\s/g, " ").replace(/"/g, '\\"');
+        arg = arg.replace(/\\\s/g, " ");
         return "\"" + arg + "\"";
     }
     return arg;
