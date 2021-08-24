@@ -1308,9 +1308,10 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 export function normalizeArg(arg: string): string {
     arg = arg.trimLeft().trimRight();
     // Check if the arg is enclosed in backtick,
-    // or includes unscaped double-quotes,
+    // or includes unscaped double-quotes (or single-quotes on windows),
     // or includes unscaped single-quotes on mac and linux.
     if (/^`.*`$/g.test(arg) || /.*[^\\]".*/g.test(arg) ||
+        (process.platform.includes("win") && /.*[^\\]'.*/g.test(arg)) ||
         (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
         return arg;
     }
