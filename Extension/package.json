@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.5.1-main",
+  "version": "1.6.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -983,7 +983,7 @@
           "type": "number",
           "default": 2000,
           "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-          "scope": "machine",
+          "scope": "application",
           "minimum": 500,
           "maximum": 3000
         },
@@ -1219,7 +1219,7 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.updateChannel.description%",
-          "scope": "machine"
+          "scope": "application"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -3093,7 +3093,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167520",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170969",
       "platforms": [
         "linux"
       ],
@@ -3104,11 +3104,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "32AC1D58A5A21527AA24583011F5A3694FCEFB5920677D0CA8D13F70BC0102BE"
+      "integrity": "1554D6291CEC20CE0E39B0A4AD9E50FAD012FCAA76460FA0A2DDD7654ADC197F"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167624",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170862",
       "platforms": [
         "linux"
       ],
@@ -3119,11 +3119,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "9CB1C36A34DD2F7A53FF5471F1FBB5C0AD65A9E67C17013C7FBF65CDDAF7A7E1"
+      "integrity": "94712D1268A54FF8224B908E15439B3B9C22FE2C268407D871D1C1B7EEF6630C"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167623",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170860",
       "platforms": [
         "linux"
       ],
@@ -3134,11 +3134,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "D8F6A5A4A8A13F6F872C94BD522602A7C0E5E5CCA58CE7CE1ED3DC32F82850AC"
+      "integrity": "B65F184826F61F3DF2E68CFE409C85BE6A9195595B524BCF74E67F1B50E474F5"
     },
     {
       "description": "C/C++ language components (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167518",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170970",
       "platforms": [
         "darwin"
       ],
@@ -3149,11 +3149,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "3EF54224CED1BCC6D64B2A93BFA8093E3D75510C8F96E943049CCB4C656161A2"
+      "integrity": "081A4A0098EC557A32692B2E9DAB852371B5330D8993FF8C5EE12AC6A8EE1605"
     },
     {
       "description": "C/C++ language components (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167519",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170971",
       "platforms": [
         "darwin"
       ],
@@ -3164,11 +3164,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "02F2BE96493256237995EF51D4E0CD0345727D27A61135C6FCDB88608406C908"
+      "integrity": "409E9221C7D8C318FBD09E02D41CA166692606521EB7B9A6E6C615359A7CDE4C"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167517",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170863",
       "platforms": [
         "win32"
       ],
@@ -3180,11 +3180,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "1E23884810A6EBF56BC7C5C4CB5317723CC3519039D56BF07310735870163E77"
+      "integrity": "6A766CE793DA60F8596139833A996A7015AB2FFAFBA441544A8616E6D9D0E9CC"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167516",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170861",
       "platforms": [
         "win32"
       ],
@@ -3195,7 +3195,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "26CCA79735F15BE0595510E2A170794CBF7E2EE72F2A565CD9D26970EA35547F"
+      "integrity": "9B984390FD80EE6FAA5615BDD343CF96575F507D1907101C42BC78C1F0AF7917"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -3311,7 +3311,7 @@
     },
     {
       "description": "OpenDebugAD7 (Windows x86/x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/db301b288a036364c1718048b97b0d58/win-x86.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/9e0d89da33375c3afa96da088d56db97/win-x86.zip",
       "platforms": [
         "win32"
       ],
@@ -3322,11 +3322,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "452B01805E3602B23E24AF3F271759F35C1961093B345C5835C304D7FCDC1439"
+      "integrity": "7FCBB4459DB36280D5AEE65536D0A66601F506DEB405A9C01500868E2213E13A"
     },
     {
       "description": "OpenDebugAD7 (Windows ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/365a4f83f0ece3c5fc1f0cb0c73a0f2c/win10-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/7db279694f7a053a456c675fcbaf8e8e/win10-arm64.zip",
       "platforms": [
         "win32"
       ],
@@ -3336,11 +3336,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "86D9C73FE551A8613DA3CD13D4C039D3E55E3773DF72636223A3C3F124598414"
+      "integrity": "F27E3273DDB1E9D865D76F50D0CBCBCADE972DFEC7106CCB48B12AE7A8E5E538"
     },
     {
       "description": "OpenDebugAD7 (Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/156c5a850e57f285f0b0a864ea719139/linux-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/d2e0c7fc1f5feeac7df5a746831b0b0b/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -3350,11 +3350,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "107B8EB400999BD3EDD764D7301FFE6C3C0572E09E2126D247B59860CEE9A83E"
+      "integrity": "0CEFEBD8B1B75DA4C9746AA1B7C343730E76A3BF07F0BE3A7F16367AF2E12978"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/12f05b118ffe89ce4635c3eed54f3bda/linux-arm.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/916f76a47d9a6ae706ba90314c3dc01f/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -3364,11 +3364,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "6594EC56505523031DCE4948734B3A840B6B02AB8F50AC2EFBA60CA3A151B51F"
+      "integrity": "B44552DB10C5AC1ADFE553782D36B4F9C82D3D1C9B0EFC9BA847FA793A744AC9"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/ec8a27111cf71b9cc38afeac6d371afd/linux-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/5cb2c28b1c663f2831d01ac19614ec40/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -3378,11 +3378,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "2E1D8F435CF4DF9C63B584AD132A54F0C3702B531C7208FDC00810F714415FA0"
+      "integrity": "C706B61501E96C0AFA1F254F2B69BCF42D61BF1E7BB95003BE8F65BB9191FE04"
     },
     {
       "description": "OpenDebugAD7 (Alpine Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/d48c2023dda15f926fcb3883e608be26/linux-musl-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/796a635895e702d13924808823ea9537/linux-musl-x64.zip",
       "platforms": [
         "alpine-linux"
       ],
@@ -3392,21 +3392,22 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "74C1AABD91FE3E3D02ADE6EEAC94A788BD4B309281595B02563E658A8F4A96AF"
+      "integrity": "CBBFF5EA7663044E4F65DC26A8BB8DCD9C93712DAB1E0F2164295671FB3D9591"
     },
     {
       "description": "OpenDebugAD7 (macOS x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/368ecdd16d233a1dfd7cdbf09dc9801f/osx-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/f9b1e85f-ef47-4d90-936b-bf0ecc74fb28/689dc458caece74a39bab10917be8f8d/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
       "architectures": [
-        "x64"
+        "x64",
+        "arm64"
       ],
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "D0D23C00763225F749A1495C1E9A1A70726E2EC8A0B72A695FEC231A41E739E9"
+      "integrity": "4933FF1DDBD8A823F10FB734965A8E611775787722CE0B5C8D625F17869031F3"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",

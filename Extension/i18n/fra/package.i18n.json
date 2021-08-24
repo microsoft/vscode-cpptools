@@ -29,7 +29,7 @@
 	"c_cpp.configuration.formatting.description": "Configure le moteur de mise en forme",
 	"c_cpp.configuration.formatting.clangFormat.description": "clang-format est utilisé pour la mise en forme du code.",
 	"c_cpp.configuration.formatting.vcFormat.description": "Le moteur de mise en forme de Visual C++ est utilisé pour la mise en forme du code.",
-	"c_cpp.configuration.formatting.Default.description": "clang-format est utilisé pour la mise en forme du code.",
+	"c_cpp.configuration.formatting.Default.description": "Par défaut, clang-format sera utilisé pour formater le code. Cependant, le moteur de formatage Visual C++ sera utilisé si un fichier .editorconfig avec des paramètres pertinents est trouvé plus près du code à formater et si clang_format_style a la valeur par défaut : 'file'.",
 	"c_cpp.configuration.formatting.Disabled.description": "La mise en forme du code va être désactivée.",
 	"c_cpp.configuration.vcFormat.indent.braces.description": "Les accolades sont mises en retrait en fonction de la valeur spécifiée dans le paramètre Éditeur : Taille des tabulations.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Détermine par rapport à quoi la nouvelle ligne est mise en retrait",
