@@ -9,6 +9,7 @@
 	"unable.to.start": "Impossible de démarrer le serveur de langage C/C++. Les fonctionnalités IntelliSense sont désactivées. Erreur : {0}",
 	"check.permissions": "EPERM : Vérifier les autorisations de '{0}'",
 	"server.crashed2": "Le serveur de langage s'est bloqué 5 fois au cours des 3 dernières minutes. Il n'est pas redémarré.",
+	"loggingLevel.changed": "{0} a été changé en : {1}",
 	"provider.configure.folder": "{0} veut configurer IntelliSense pour le dossier '{1}'.",
 	"provider.configure.this.folder": "{0} veut configurer IntelliSense pour ce dossier.",
 	"allow.button": "Autoriser",
@@ -35,6 +36,5 @@
 	"configurations.received": "Configurations personnalisées reçues :",
 	"browse.configuration.received": "Configuration de navigation personnalisée reçue : {0}",
 	"no.compilers.found": "Aucun C++ compilateur n’a été trouvé sur votre système. Pour votre plateforme, nous vous recommandons d’installer {0} à l’aide des instructions de l’éditeur.",
-	"compilers.found": "Nous avons trouvé les C++ compilateur(s) suivant(s) sur votre système :",
-	"compilers.found.message": "Vous pouvez spécifier le compilateur à utiliser dans la configuration IntelliSense de votre projet."
+	"compilers.found": "Nous avons trouvé les compilateurs C++ suivants sur votre système. Choisissez un compilateur dans la configuration IntelliSense de votre projet."
 }

@@ -9,6 +9,7 @@
 	"unable.to.start": "無法啟動 C/C + + 語言伺服器。將停用 IntelliSense 功能。錯誤: {0}",
 	"check.permissions": "EPERM: 檢查 '{0}' 的權限",
 	"server.crashed2": "語言伺服器在過去 3 分鐘內發生 5 次故障。將不會重新啟動。",
+	"loggingLevel.changed": "{0}已變更為: {1}",
 	"provider.configure.folder": "{0} 想要為 '{1}' 資料夾設定 IntelliSense。",
 	"provider.configure.this.folder": "{0} 想要為此資料夾設定 IntelliSense。",
 	"allow.button": "允許",
@@ -35,6 +36,5 @@
 	"configurations.received": "收到的自訂組態:",
 	"browse.configuration.received": "收到的自訂瀏覽組態: {0}",
 	"no.compilers.found": "在您的系統 C++ 上找不到編譯器。針對您的平台，建議您使用編輯器中的指示來安裝 {0}。",
-	"compilers.found": "我們在您的系統上找到下列 C++ 編譯器:",
-	"compilers.found.message": "您可以在專案的 IntelliSense 設定中指定要使用的編譯器。"
+	"compilers.found": "我們在您的系統上找到下列 C++ 編譯器。在專案的 IntelliSense 設定中選擇編譯器。"
 }

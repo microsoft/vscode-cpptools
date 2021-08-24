@@ -9,5 +9,4 @@
 # 3. If you created a new folder, please make sure it is added to the .vscodeignore 
 
 tools/GenerateOptionsSchema.ts
-tools/copyDebuggerDependencies.ts
 ui/settings.ts

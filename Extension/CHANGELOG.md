@@ -1,5 +1,41 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.6.0: August 24, 2021
+### New Feature
+* Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
+* Debug Step Granularity for cppdbg [MIEngine#1169](https://github.com/microsoft/MIEngine/pull/1169)
+  * Thank you for the contribution @Trass3r
+* InstructionBreakpoints for cppdbg [MIEgnine#1192](https://github.com/microsoft/MIEngine/pull/1192)
+
+### Enhancements
+* Debugger now runs on .NET 5 [#7858](https://github.com/microsoft/vscode-cpptools/pull/7858)
+* When using the `Default` setting for `C_Cpp.formatting`, vcFormat will now be selected if a `.editorconfig` file is found with vcFormat entries and no `.clang-format` file was found with nearer proximity to the source file. [#7929](https://github.com/microsoft/vscode-cpptools/issues/7929)
+
+### Bug Fixes
+* Fix incorrect sizeof for packed structs (gcc/clang) [#5267](https://github.com/microsoft/vscode-cpptools/issues/5267)
+* Fix designated initializers not working at file scope. [#6316](https://github.com/microsoft/vscode-cpptools/issues/6316)
+* Fix an IntelliSense crash on template code. [#7349](https://github.com/microsoft/vscode-cpptools/issues/7349)
+* Rank existence of a custom configuration higher than filename similarity and path proximity, when choosing a TU source for a header [#7396](https://github.com/microsoft/vscode-cpptools/issues/7396)
+* Fix an IntelliSense crash when the display language is set to Italian. [#7685](https://github.com/microsoft/vscode-cpptools/issues/7685)
+* Enable the C++ status bar items to be selectively disabled. [#7700](https://github.com/microsoft/vscode-cpptools/issues/7700)
+* Fix an issue causing incorrect color selection for semantic tokens. [#7773](https://github.com/microsoft/vscode-cpptools/issues/7773)
+* Fix some cl.exe and clang installations not being detected. [#7767](https://github.com/microsoft/vscode-cpptools/issues/7767) [#7795](https://github.com/microsoft/vscode-cpptools/issues/7795) [#7800](https://github.com/microsoft/vscode-cpptools/issues/7800)
+* Fix an issue with recursive includes not found. [#7783](https://github.com/microsoft/vscode-cpptools/issues/7783)
+* Fix an issue with code folding of single-line blocks. [#7809](https://github.com/microsoft/vscode-cpptools/issues/7809)
+* Fix a typo in a localized string. [#7823](https://github.com/microsoft/vscode-cpptools/issues/7823)
+* Add open file parsing status when hovering over the database icon. [PR #7831](https://github.com/microsoft/vscode-cpptools/pull/7831)
+* Fix an issue with IntelliSense flame icon getting stuck on. [#7838](https://github.com/microsoft/vscode-cpptools/issues/7838)
+* Fix an issue with character position after include completion. [#7856](https://github.com/microsoft/vscode-cpptools/issues/7856)
+* Fix wrong version of clang-format being used in multi-root workspaces. [#7870](https://github.com/microsoft/vscode-cpptools/issues/7870)
+* Fix issue with setting of MS extensions when `-fms-extensions` is used. [#7886](https://github.com/microsoft/vscode-cpptools/issues/7886)
+* Fix an issue with support detection on Android. [#7906](https://github.com/microsoft/vscode-cpptools/issues/7906)
+* Fix a bug with handling of `"C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "newLine"`. [#7926](https://github.com/microsoft/vscode-cpptools/issues/7926)
+* Fix Disassembly view is blank on linux [#7960](https://github.com/microsoft/vscode-cpptools/issues/7960)
+* Fix an issue with cppdbg debugging on Windows x64. [#7971](https://github.com/microsoft/vscode-cpptools/issues/7971)
+* Fix an issue with VS `<execution>` header causing IntelliSense process crash. [#7972](https://github.com/microsoft/vscode-cpptools/issues/7972)
+* Fix insiders update install loop for remote scenarios. [#8000](https://github.com/microsoft/vscode-cpptools/issues/8000)
+* Fix MacOS unable to use external terminal to debug [#8008](https://github.com/microsoft/vscode-cpptools/issues/8008)
+
 ## Version 1.5.1: July 9, 2021
 ### Bug Fixes
 * cppvsdbg Debugging becomes no-op between 1.4.1 and 1.5.0 [#7808](https://github.com/microsoft/vscode-cpptools/issues/7808)

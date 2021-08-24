@@ -9,6 +9,7 @@
 	"unable.to.start": "Não é possível iniciar o servidor de linguagem C/C++. Os recursos do IntelliSense serão desabilitados. Erro: {0}",
 	"check.permissions": "EPERM: verifique as permissões para '{0}'",
 	"server.crashed2": "O servidor de idioma falhou cinco vezes nos últimos três minutos. Ele não será reiniciado.",
+	"loggingLevel.changed": "{0} foi alterado para: {1}",
 	"provider.configure.folder": "{0} gostaria de configurar o IntelliSense para a pasta '{1}'.",
 	"provider.configure.this.folder": "{0} gostaria de configurar o IntelliSense para esta pasta.",
 	"allow.button": "Permitir",
@@ -35,6 +36,5 @@
 	"configurations.received": "Configurações personalizadas recebidas:",
 	"browse.configuration.received": "Configuração de pesquisa personalizada recebida: {0}",
 	"no.compilers.found": "Não foram encontrados compiladores C++ em seu sistema. Para sua plataforma, recomendamos instalar {0} usando as instruções do editor.",
-	"compilers.found": "Encontramos o(s) seguinte(s) compilador(es) C++ em seu sistema:",
-	"compilers.found.message": "Você pode especificar qual compilador usar na Configuração IntelliSense de seu projeto."
+	"compilers.found": "Localizamos os seguintes compiladores de C++ em seu sistema. Escolha um compilador na Configuração do IntelliSense do seu projeto."
 }

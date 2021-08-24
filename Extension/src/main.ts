@@ -38,7 +38,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     let errMsg: string = "";
     const arch: string = PlatformInformation.GetArchitecture();
-    if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && (process.platform !== 'linux' || (arch !== 'x64' && arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
+    if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && ((process.platform === 'win32' || process.platform === 'darwin') || (arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(arch));
     } else if (process.platform === 'linux' && await util.checkDirectoryExists('/etc/alpine-release')) {
         errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
@@ -121,7 +121,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         });
     } else if (!(await util.checkInstallJsonsExist())) {
         // Check the Json files to declare if the extension has been installed successfully.
-        errMsg = localize("jason.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
+        errMsg = localize("json.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
         const downloadLink: string = localize("download.button", "Go to Download Page");
         vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
             if (selection === downloadLink) {
@@ -215,9 +215,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
 
-    setInstallationStage('removeUnnecessaryFile');
-    await removeUnnecessaryFile();
-
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
 
@@ -232,9 +229,6 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
 
     setInstallationStage('makeBinariesExecutable');
     await makeBinariesExecutable();
-
-    setInstallationStage('removeUnnecessaryFile');
-    await removeUnnecessaryFile();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -314,22 +308,6 @@ async function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
         }
     });
     await Promise.all(promises);
-}
-
-function removeUnnecessaryFile(): Promise<void> {
-    if (os.platform() !== 'win32') {
-        const sourcePath: string = util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config");
-        if (fs.existsSync(sourcePath)) {
-            fs.rename(sourcePath, util.getDebugAdaptersPath("bin/OpenDebugAD7.exe.config.unused"), (err: NodeJS.ErrnoException | null) => {
-                if (err) {
-                    getOutputChannelLogger().appendLine(localize("rename.failed.delete.manually",
-                        'ERROR: fs.rename failed with "{0}". Delete {1} manually to enable debugging.', err.message, sourcePath));
-                }
-            });
-        }
-    }
-
-    return Promise.resolve();
 }
 
 function touchInstallLockFile(info: PlatformInformation): Promise<void> {
@@ -443,20 +421,6 @@ async function finalizeExtensionActivation(): Promise<void> {
         }
     }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
-
-    const packageJson: any = util.getRawPackageJson();
-    let writePackageJson: boolean = false;
-    const packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (packageJsonPath.includes(".vscode-insiders") || packageJsonPath.includes(".vscode-exploration")) {
-        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
-            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
-            writePackageJson = true;
-        }
-    }
-
-    if (writePackageJson) {
-        return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-    }
 }
 
 function rewriteManifest(): Promise<void> {
@@ -496,5 +460,23 @@ function rewriteManifest(): Promise<void> {
         "onFileSystem:cpptools-schema"
     ];
 
-    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+    let doTouchExtension: boolean = false;
+
+    const packageJsonPath: string = util.getExtensionFilePath("package.json");
+    if (packageJsonPath.includes(".vscode-insiders") ||
+        packageJsonPath.includes(".vscode-server-insiders") ||
+        packageJsonPath.includes(".vscode-exploration") ||
+        packageJsonPath.includes(".vscode-server-exploration")) {
+        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
+            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
+            doTouchExtension = true;
+        }
+    }
+
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => {
+        if (doTouchExtension) {
+            // This is required to prevent VS Code from using the cached version with the old updateChannel setting.
+            util.touchExtensionFolder();
+        }
+    });
 }
