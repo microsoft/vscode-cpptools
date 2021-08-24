@@ -209,9 +209,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationStage('cleanUpUnusedBinaries');
     await cleanUpUnusedBinaries(info);
 
-    setInstallationStage('makeBinariesExecutable');
-    await makeBinariesExecutable();
-
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
 
@@ -226,9 +223,6 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Online);
 
     await downloadAndInstallPackages(info);
-
-    setInstallationStage('makeBinariesExecutable');
-    await makeBinariesExecutable();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -260,10 +254,6 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
         setInstallationStage('installPackages');
         await packageManager.InstallPackages(progress);
     });
-}
-
-function makeBinariesExecutable(): Promise<void> {
-    return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
 function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
@@ -463,6 +453,8 @@ function rewriteManifest(): Promise<void> {
         "onFileSystem:cpptools-schema"
     ];
 
+    let doTouchExtension: boolean = false;
+
     const packageJsonPath: string = util.getExtensionFilePath("package.json");
     if (packageJsonPath.includes(".vscode-insiders") ||
         packageJsonPath.includes(".vscode-server-insiders") ||
@@ -470,8 +462,14 @@ function rewriteManifest(): Promise<void> {
         packageJsonPath.includes(".vscode-server-exploration")) {
         if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
             packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
+            doTouchExtension = true;
         }
     }
 
-    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => {
+        if (doTouchExtension) {
+            // This is required to prevent VS Code from using the cached version with the old updateChannel setting.
+            util.touchExtensionFolder();
+        }
+    });
 }
