@@ -1,10 +1,11 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.6.0-insiders: August 12, 2021
+## Version 1.6.0: August 24, 2021
 ### New Feature
 * Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
 * Debug Step Granularity for cppdbg [MIEngine#1169](https://github.com/microsoft/MIEngine/pull/1169)
   * Thank you for the contribution @Trass3r
+* InstructionBreakpoints for cppdbg [MIEgnine#1192](https://github.com/microsoft/MIEngine/pull/1192)
 
 ### Enhancements
 * Debugger now runs on .NET 5 [#7858](https://github.com/microsoft/vscode-cpptools/pull/7858)
@@ -30,6 +31,10 @@
 * Fix an issue with support detection on Android. [#7906](https://github.com/microsoft/vscode-cpptools/issues/7906)
 * Fix a bug with handling of `"C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "newLine"`. [#7926](https://github.com/microsoft/vscode-cpptools/issues/7926)
 * Fix Disassembly view is blank on linux [#7960](https://github.com/microsoft/vscode-cpptools/issues/7960)
+* Fix an issue with cppdbg debugging on Windows x64. [#7971](https://github.com/microsoft/vscode-cpptools/issues/7971)
+* Fix an issue with VS `<execution>` header causing IntelliSense process crash. [#7972](https://github.com/microsoft/vscode-cpptools/issues/7972)
+* Fix insiders update install loop for remote scenarios. [#8000](https://github.com/microsoft/vscode-cpptools/issues/8000)
+* Fix MacOS unable to use external terminal to debug [#8008](https://github.com/microsoft/vscode-cpptools/issues/8008)
 
 ## Version 1.5.1: July 9, 2021
 ### Bug Fixes
