@@ -1024,7 +1024,9 @@ export class DefaultClient implements Client {
         const settings_clangTidyBuildPath: (string | undefined)[] = [];
         const settings_clangTidyConfig: (string | undefined)[] = [];
         const settings_clangTidyFallbackConfig: (string | undefined)[] = [];
-        const settings_clangTidyFix: (string | undefined)[] = [];
+        const settings_clangTidyFixWarnings: (boolean | undefined)[] = [];
+        const settings_clangTidyFixErrors: (boolean | undefined)[] = [];
+        const settings_clangTidyFixNotes: (boolean | undefined)[] = [];
         const settings_clangTidyArgs: (string | undefined)[] = [];
         const settings_clangTidyChecks: (string[] | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
@@ -1128,7 +1130,9 @@ export class DefaultClient implements Client {
                 settings_clangTidyBuildPath.push(setting.clangTidyBuildPath);
                 settings_clangTidyConfig.push(setting.clangTidyConfig);
                 settings_clangTidyFallbackConfig.push(setting.clangTidyFallbackConfig);
-                settings_clangTidyFix.push(setting.clangTidyFix);
+                settings_clangTidyFixWarnings.push(setting.clangTidyFixWarnings);
+                settings_clangTidyFixErrors.push(setting.clangTidyFixErrors);
+                settings_clangTidyFixNotes.push(setting.clangTidyFixNotes);
                 settings_clangTidyArgs.push(setting.clangTidyArgs);
                 settings_clangTidyChecks.push(setting.clangTidyChecks);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
@@ -1261,7 +1265,11 @@ export class DefaultClient implements Client {
                         buildPath: settings_clangTidyBuildPath,
                         config: settings_clangTidyConfig,
                         fallbackConfig: settings_clangTidyFallbackConfig,
-                        fix: settings_clangTidyFix,
+                        fix: {
+                            settings_clangTidyFixWarnings,
+                            settings_clangTidyFixErrors,
+                            settings_clangTidyFixNotes
+                        },
                         args: settings_clangTidyArgs,
                         checks: settings_clangTidyChecks
                     }

@@ -422,20 +422,22 @@
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription%",
           "scope": "resource"
         },
-        "C_Cpp.codeAnalysis.clangTidy.fix": {
-          "type": "string",
-          "enum": [
-            "Disabled",
-            "FixIfNoErrors",
-            "FixErrors"
-          ],
-          "default": "Disabled",
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.markdownDescription%",
-          "markdownEnumDescriptions": [
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.disabled.markdownDescription%",
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixIfNoErrors.markdownDescription%",
-            "%c_cpp.configuration.codeAnalysis.clangTidy.fix.fixErrors.markdownDescription%"
-          ],
+        "C_Cpp.codeAnalysis.clangTidy.fix.warnings": {
+          "type": "boolean",
+          "default": "false",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.warnings.markdownDescription%",
+          "scope": "resource"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.fix.errors": {
+          "type": "boolean",
+          "default": "false",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.errors.markdownDescription%",
+          "scope": "resource"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.fix.notes": {
+          "type": "boolean",
+          "default": "false",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.notes.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.codeAnalysis.clangTidy.args": {
