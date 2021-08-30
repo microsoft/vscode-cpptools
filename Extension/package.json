@@ -1211,6 +1211,12 @@
           "description": "%c_cpp.configuration.default.enableConfigurationSquiggles.description%",
           "scope": "resource"
         },
+        "C_Cpp.default.dotConfig": {
+          "type": "string",
+          "default": null,
+          "description": "%c_cpp.configuration.default.dotConfig.description%",
+          "scope": "resource"
+        },
         "C_Cpp.updateChannel": {
           "type": "string",
           "enum": [
