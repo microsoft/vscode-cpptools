@@ -307,7 +307,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // Replace environment and configuration variables.
-    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension)(\.|:))?(.*?)\}/g;
+    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     const cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
@@ -331,6 +331,17 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                     }
                     if (newValue === undefined) {
                         newValue = process.env[name];
+                        if (!newValue) {
+                            if (name === "execPath") {
+                                newValue = process.execPath;
+                            } else if (name === "pathSeparator") {
+                                if (os.platform() === 'win32') {
+                                    newValue = "\\";
+                                } else {
+                                    newValue = "/";
+                                }
+                            }
+                        }
                     }
                     break;
                 }
