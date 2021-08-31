@@ -979,6 +979,7 @@ function onRunCodeAnalysisOnActiveFile(): void {
     onActivationEvent();
     if (activeDocument !== "") {
         getActiveClient().handleRunCodeAnalysisOnActiveFile();
+        vscode.commands.executeCommand("workbench.action.files.saveAll");
     }
 }
 
@@ -986,12 +987,14 @@ function onRunCodeAnalysisOnOpenFiles(): void {
     onActivationEvent();
     if (openFileVersions.size > 0) {
         getActiveClient().handleRunCodeAnalysisOnOpenFiles();
+        vscode.commands.executeCommand("workbench.action.files.saveAll");
     }
 }
 
 function onRunCodeAnalysisOnAllFiles(): void {
     onActivationEvent();
     getActiveClient().handleRunCodeAnalysisOnAllFiles();
+    vscode.commands.executeCommand("workbench.action.files.saveAll");
 }
 
 function onAddToIncludePath(path: string): void {

@@ -1020,6 +1020,8 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        const settings_codeAnalysisRunInBackground: (boolean | undefined)[] = [];
+        const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
         const settings_clangTidyBuildPath: (string | undefined)[] = [];
         const settings_clangTidyConfig: (string | undefined)[] = [];
@@ -1032,6 +1034,7 @@ export class DefaultClient implements Client {
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
+        const settings_filesAutoSaveAfterDelay: boolean[] = [];
         const settings_searchExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_editorAutoClosingBrackets: (string | undefined)[] = [];
         const settings_intelliSenseEngine: (string | undefined)[] = [];
@@ -1126,6 +1129,8 @@ export class DefaultClient implements Client {
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
+                settings_codeAnalysisRunInBackground.push(setting.codeAnalysisRunInBackground);
+                settings_clangTidyEnabled.push(setting.clangTidyEnabled);
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
                 settings_clangTidyBuildPath.push(setting.clangTidyBuildPath);
                 settings_clangTidyConfig.push(setting.clangTidyConfig);
@@ -1216,6 +1221,7 @@ export class DefaultClient implements Client {
             for (const otherSetting of otherSettings) {
                 settings_filesEncoding.push(otherSetting.filesEncoding);
                 settings_filesExclude.push(otherSetting.filesExclude);
+                settings_filesAutoSaveAfterDelay.push(otherSetting.filesAutoSaveAfterDelay);
                 settings_searchExclude.push(otherSetting.searchExclude);
                 settings_editorAutoClosingBrackets.push(otherSetting.editorAutoClosingBrackets);
             }
@@ -1260,15 +1266,17 @@ export class DefaultClient implements Client {
                     maxMemory: workspaceSettings.codeAnalysisMaxMemory,
                     updateDelay: workspaceSettings.codeAnalysisUpdateDelay,
                     exclude: settings_codeAnalysisExclude,
+                    runInBackground: settings_codeAnalysisRunInBackground,
                     clangTidy: {
+                        enabled: settings_clangTidyEnabled,
                         path: settings_clangTidyPath,
                         buildPath: settings_clangTidyBuildPath,
                         config: settings_clangTidyConfig,
                         fallbackConfig: settings_clangTidyFallbackConfig,
                         fix: {
-                            settings_clangTidyFixWarnings,
-                            settings_clangTidyFixErrors,
-                            settings_clangTidyFixNotes
+                            warnings: settings_clangTidyFixWarnings,
+                            errors: settings_clangTidyFixErrors,
+                            notes: settings_clangTidyFixNotes
                         },
                         args: settings_clangTidyArgs,
                         checks: settings_clangTidyChecks
@@ -1353,7 +1361,8 @@ export class DefaultClient implements Client {
                 clang_format_sortIncludes: settings_clangFormatSortIncludes,
                 extension_path: util.extensionPath,
                 files: {
-                    encoding: settings_filesEncoding
+                    encoding: settings_filesEncoding,
+                    autoSaveAfterDelay: settings_filesAutoSaveAfterDelay
                 },
                 editor: {
                     autoClosingBrackets: settings_editorAutoClosingBrackets
@@ -1471,7 +1480,8 @@ export class DefaultClient implements Client {
             files: {
                 encoding: otherSettingsFolder.filesEncoding,
                 exclude: vscode.workspace.getConfiguration("files.exclude", this.RootUri),
-                associations: new OtherSettings().filesAssociations
+                associations: new OtherSettings().filesAssociations,
+                autoSaveAfterDelay: otherSettingsFolder.filesAutoSaveAfterDelay
             },
             workspace_fallback_encoding: otherSettingsWorkspace.filesEncoding,
             search: {
