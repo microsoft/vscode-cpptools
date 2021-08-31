@@ -335,11 +335,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                             if (name === "execPath") {
                                 newValue = process.execPath;
                             } else if (name === "pathSeparator") {
-                                if (os.platform() === 'win32') {
-                                    newValue = "\\";
-                                } else {
-                                    newValue = "/";
-                                }
+                                newValue = (os.platform() === 'win32') ? "\\" : "/";
                             }
                         }
                     }
