@@ -1207,6 +1207,8 @@ export class CppProperties {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
                 delete this.configurationJson.env['workspaceFolderBasename'];
+                delete this.configurationJson.env['execPath'];
+                delete this.configurationJson.env['pathSeparator'];
                 delete this.configurationJson.env['default'];
             }
 

@@ -757,7 +757,12 @@ export class DefaultClient implements Client {
     }
 
     private get AdditionalEnvironment(): { [key: string]: string | string[] } {
-        return { workspaceFolderBasename: this.Name, workspaceStorage: this.storagePath };
+        return {
+            workspaceFolderBasename: this.Name,
+            workspaceStorage: this.storagePath,
+            execPath: process.execPath,
+            pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
+        };
     }
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
