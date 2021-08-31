@@ -403,6 +403,8 @@ export class CppProperties {
         }
 
         result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
+        result["execPath"] = process.execPath;
+        result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
         return result;
     }
 
