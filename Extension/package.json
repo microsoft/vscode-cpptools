@@ -353,11 +353,11 @@
         },
         "C_Cpp.codeAnalysis.updateDelay": {
           "type": "number",
-          "default": 3000,
+          "default": 2000,
           "description": "%c_cpp.configuration.codeAnalysis.updateDelay.description%",
           "scope": "application",
-          "minimum": 1000,
-          "maximum": 5000
+          "minimum": 0,
+          "maximum": 6000
         },
         "C_Cpp.codeAnalysis.exclude": {
           "type": "object",
