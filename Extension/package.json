@@ -4362,7 +4362,7 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "plist": "^3.0.2",
+    "plist": "^3.0.4",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^5.0.0",
     "vscode-extension-telemetry": "^0.1.7",
