@@ -62,6 +62,7 @@ export class ClientCollection {
 
         this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
         this.disposables.push(vscode.workspace.onDidCloseTextDocument(d => this.onDidCloseTextDocument(d)));
+        this.disposables.push(vscode.workspace.onWillSaveTextDocument(e => this.onWillSaveWaitUntil(e)));
     }
 
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
@@ -136,6 +137,10 @@ export class ClientCollection {
             console.assert(key, "unable to locate language client");
             return undefined;
         }
+    }
+
+    private onWillSaveWaitUntil(e: vscode.TextDocumentWillSaveEvent): void {
+        e.waitUntil(this.activeClient.onWillSaveWaitUntil(e));
     }
 
     private onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): void {
