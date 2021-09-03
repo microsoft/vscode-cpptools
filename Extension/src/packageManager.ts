@@ -14,7 +14,7 @@ import * as yauzl from 'yauzl';
 import * as mkdirp from 'mkdirp';
 
 import * as util from './common';
-import { PlatformInformation } from './platform';
+import { PlatformInformation, IsAlpine } from './platform';
 import * as Telemetry from './telemetry';
 import { IncomingMessage, ClientRequest } from 'http';
 import { Logger } from './logger';
@@ -521,5 +521,10 @@ export function ArchitecturesMatch(value: IPackage, info: PlatformInformation): 
 }
 
 export function PlatformsMatch(value: IPackage, info: PlatformInformation): boolean {
+    if (IsAlpine()) {
+        // Alpine needs to be explicitly stated in packages list in order to be downloaded.
+        return value.platforms && value.platforms.indexOf("alpine-linux") !== -1;
+    }
+
     return !value.platforms || value.platforms.indexOf(info.platform) !== -1;
 }

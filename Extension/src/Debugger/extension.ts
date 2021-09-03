@@ -24,6 +24,26 @@ export function buildAndDebugActiveFileStr(): string {
     return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
+/*
+   Separate initialize method for Alpine until we can use the regular 'initialize' method.
+
+   This enables attach and cppdbg for alpine without snippets or 'Build and Debug Active file'
+   since we do not have a language service.
+
+   TODO(LS-alpine): Remove initializeForAlpine
+*/
+export function initializeForAlpine(context: vscode.ExtensionContext): void {
+    const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+    const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+    disposables.push(vscode.commands.registerCommand('extension.pickNativeProcess', () => attacher.ShowAttachEntries()));
+    const remoteAttacher: RemoteAttachPicker = new RemoteAttachPicker();
+    disposables.push(vscode.commands.registerCommand('extension.pickRemoteNativeProcess', (any) => remoteAttacher.ShowAttachEntries(any)));
+
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppdbgDebugAdapterDescriptorFactory(context)));
+
+    vscode.Disposable.from(...disposables);
+}
+
 export function initialize(context: vscode.ExtensionContext): void {
     // Activate Process Picker Commands
     const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();

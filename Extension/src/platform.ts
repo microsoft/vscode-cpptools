@@ -9,6 +9,7 @@ import * as plist from 'plist';
 import * as fs from 'fs';
 import * as logger from './logger';
 import * as nls from 'vscode-nls';
+import * as util from './common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -20,6 +21,16 @@ export function GetOSName(processPlatform: string | undefined): string | undefin
         case "linux": return "Linux";
         default: return undefined;
     }
+}
+
+let _isAlpine: boolean | undefined;
+
+export function IsAlpine(): boolean {
+    if (_isAlpine === undefined) {
+        _isAlpine = process.platform === 'linux' && util.checkFileExistsSync('/etc/alpine-release');
+    }
+
+    return _isAlpine;
 }
 
 export class PlatformInformation {

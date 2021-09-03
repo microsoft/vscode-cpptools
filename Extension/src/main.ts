@@ -17,7 +17,7 @@ import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
-import { PlatformInformation, GetOSName } from './platform';
+import { PlatformInformation, GetOSName, IsAlpine } from './platform';
 import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
 import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
 import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
@@ -40,8 +40,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const arch: string = PlatformInformation.GetArchitecture();
     if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && ((process.platform === 'win32' || process.platform === 'darwin') || (arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
         errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(arch));
-    } else if (process.platform === 'linux' && await util.checkDirectoryExists('/etc/alpine-release')) {
-        errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
+    // TODO(LS-alpine): Remove Alpine check
+    } else if (IsAlpine()) {
+        vscode.window.showWarningMessage(localize("apline.containers.not.supported", "Alpine containers are not fully supported, only debugging is enabled."));
     }
     if (errMsg) {
         vscode.window.showErrorMessage(errMsg);
@@ -53,25 +54,30 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     Telemetry.activate();
     util.setProgress(0);
 
-    // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
-    class SchemaProvider implements vscode.TextDocumentContentProvider {
-        public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
-            const fileName: string = uri.path.substr(1);
-            const locale: string = util.getLocaleId();
-            let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
-            const fileExists: boolean = await util.checkFileExists(localizedFilePath);
-            if (!fileExists) {
-                localizedFilePath = util.getExtensionFilePath(fileName);
+    // TODO(LS-alpine): Remove Alpine check and initialize normally and remove specific alpine debugger initialize
+    if (IsAlpine()) {
+        // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
+        class SchemaProvider implements vscode.TextDocumentContentProvider {
+            public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+                console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
+                const fileName: string = uri.path.substr(1);
+                const locale: string = util.getLocaleId();
+                let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
+                const fileExists: boolean = await util.checkFileExists(localizedFilePath);
+                if (!fileExists) {
+                    localizedFilePath = util.getExtensionFilePath(fileName);
+                }
+                return util.readFileText(localizedFilePath);
             }
-            return util.readFileText(localizedFilePath);
         }
+
+        vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
+
+        // Initialize the DebuggerExtension and register the related commands and providers.
+        DebuggerExtension.initialize(context);
+    } else {
+        DebuggerExtension.initializeForAlpine(context);
     }
-
-    vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
-
-    // Initialize the DebuggerExtension and register the related commands and providers.
-    DebuggerExtension.initialize(context);
 
     await processRuntimeDependencies();
 
@@ -119,7 +125,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                 vscode.commands.executeCommand("workbench.action.reloadWindow");
             }
         });
-    } else if (!(await util.checkInstallJsonsExist())) {
+    // TODO(LS-alpine): Remove Alpine check and validate LS json
+    } else if (!IsAlpine() && !(await util.checkInstallJsonsExist())) {
         // Check the Json files to declare if the extension has been installed successfully.
         errMsg = localize("json.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
         const downloadLink: string = localize("download.button", "Go to Download Page");
@@ -130,7 +137,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         });
     }
 
-    return cppTools;
+    // TODO(LS-alpine): Remove Alpine check and just return cpptools
+    return IsAlpine() ? new NullCppTools() : cppTools;
 }
 
 export function deactivate(): Thenable<void> {
@@ -392,63 +400,76 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    const settings: CppSettings = new CppSettings();
-    if (settings.intelliSenseEngine === "Disabled") {
-        languageServiceDisabled = true;
-        getTemporaryCommandRegistrarInstance().disableLanguageServer();
+    // TODO(LS-alpine): Remove Alpine check to validate extensionActivation for LS.
+    if (!IsAlpine()) {
+        const settings: CppSettings = new CppSettings();
+        if (settings.intelliSenseEngine === "Disabled") {
+            languageServiceDisabled = true;
+            getTemporaryCommandRegistrarInstance().disableLanguageServer();
+            disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+                if (!reloadMessageShown && settings.intelliSenseEngine !== "Disabled") {
+                    reloadMessageShown = true;
+                    util.promptForReloadWindowDueToSettingsChange();
+                }
+            }));
+            return;
+        }
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && settings.intelliSenseEngine !== "Disabled") {
+            if (!reloadMessageShown && settings.intelliSenseEngine === "Disabled") {
                 reloadMessageShown = true;
                 util.promptForReloadWindowDueToSettingsChange();
             }
         }));
-        return;
+        getTemporaryCommandRegistrarInstance().activateLanguageServer();
     }
-    disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-        if (!reloadMessageShown && settings.intelliSenseEngine === "Disabled") {
-            reloadMessageShown = true;
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }));
-    getTemporaryCommandRegistrarInstance().activateLanguageServer();
 }
 
 function rewriteManifest(): Promise<void> {
     // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
     const packageJson: any = util.getRawPackageJson();
 
-    packageJson.activationEvents = [
-        "onLanguage:c",
-        "onLanguage:cpp",
-        "onLanguage:cuda-cpp",
-        "onCommand:extension.pickNativeProcess",
-        "onCommand:extension.pickRemoteNativeProcess",
-        "onCommand:C_Cpp.BuildAndDebugActiveFile",
-        "onCommand:C_Cpp.ConfigurationEditJSON",
-        "onCommand:C_Cpp.ConfigurationEditUI",
-        "onCommand:C_Cpp.ConfigurationSelect",
-        "onCommand:C_Cpp.ConfigurationProviderSelect",
-        "onCommand:C_Cpp.SwitchHeaderSource",
-        "onCommand:C_Cpp.EnableErrorSquiggles",
-        "onCommand:C_Cpp.DisableErrorSquiggles",
-        "onCommand:C_Cpp.ToggleIncludeFallback",
-        "onCommand:C_Cpp.ToggleDimInactiveRegions",
-        "onCommand:C_Cpp.ResetDatabase",
-        "onCommand:C_Cpp.TakeSurvey",
-        "onCommand:C_Cpp.LogDiagnostics",
-        "onCommand:C_Cpp.RescanWorkspace",
-        "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
-        "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
-        "onCommand:C_Cpp.GenerateEditorConfig",
-        "onCommand:C_Cpp.GoToNextDirectiveInGroup",
-        "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
-        "onCommand:C_Cpp.CheckForCompiler",
-        "onDebugInitialConfigurations",
-        "onDebugResolve:cppdbg",
-        "onDebugResolve:cppvsdbg",
-        "workspaceContains:/.vscode/c_cpp_properties.json",
-        "onFileSystem:cpptools-schema"
-    ];
+    // TODO(LS-alpine): Remove Alpine check and remove minimal activation events.
+    if (IsAlpine()) {
+        packageJson.activationEvents = [
+            "onCommand:extension.pickNativeProcess",
+            "onCommand:extension.pickRemoteNativeProcess",
+            "onDebugInitialConfigurations",
+            "onDebugResolve:cppdbg"
+        ];
+    } else {
+        packageJson.activationEvents = [
+            "onLanguage:c",
+            "onLanguage:cpp",
+            "onLanguage:cuda-cpp",
+            "onCommand:extension.pickNativeProcess",
+            "onCommand:extension.pickRemoteNativeProcess",
+            "onCommand:C_Cpp.BuildAndDebugActiveFile",
+            "onCommand:C_Cpp.ConfigurationEditJSON",
+            "onCommand:C_Cpp.ConfigurationEditUI",
+            "onCommand:C_Cpp.ConfigurationSelect",
+            "onCommand:C_Cpp.ConfigurationProviderSelect",
+            "onCommand:C_Cpp.SwitchHeaderSource",
+            "onCommand:C_Cpp.EnableErrorSquiggles",
+            "onCommand:C_Cpp.DisableErrorSquiggles",
+            "onCommand:C_Cpp.ToggleIncludeFallback",
+            "onCommand:C_Cpp.ToggleDimInactiveRegions",
+            "onCommand:C_Cpp.ResetDatabase",
+            "onCommand:C_Cpp.TakeSurvey",
+            "onCommand:C_Cpp.LogDiagnostics",
+            "onCommand:C_Cpp.RescanWorkspace",
+            "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+            "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
+            "onCommand:C_Cpp.GenerateEditorConfig",
+            "onCommand:C_Cpp.GoToNextDirectiveInGroup",
+            "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
+            "onCommand:C_Cpp.CheckForCompiler",
+            "onDebugInitialConfigurations",
+            "onDebugResolve:cppdbg",
+            "onDebugResolve:cppvsdbg",
+            "workspaceContains:/.vscode/c_cpp_properties.json",
+            "onFileSystem:cpptools-schema"
+        ];
+    }
 
     let doTouchExtension: boolean = false;
 
