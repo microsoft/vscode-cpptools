@@ -236,6 +236,14 @@
           },
           "default": []
         },
+        "postRemoteConnectCommands": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.postRemoteConnectCommands.description%",
+          "items": {
+            "$ref": "#/definitions/SetupCommandsConfiguration"
+          },
+          "default": []
+        },
         "customLaunchSetupCommands": {
           "type": "array",
           "description": "%c_cpp.debuggers.customLaunchSetupCommands.description%",

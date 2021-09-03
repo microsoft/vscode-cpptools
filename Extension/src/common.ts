@@ -307,7 +307,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // Replace environment and configuration variables.
-    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension)(\.|:))?(.*?)\}/g;
+    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     const cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
