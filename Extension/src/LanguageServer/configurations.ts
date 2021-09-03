@@ -1440,7 +1440,7 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (skipRelativePaths) {
+                if (skipRelativePaths && !path.isAbsolute(resolvedPath)) {
                     continue;
                 } else if (!this.rootUri) {
                     pathExists = false;
@@ -1635,7 +1635,7 @@ export class CppProperties {
             if (currentConfiguration.forcedInclude) {
                 for (const file of currentConfiguration.forcedInclude) {
                     const resolvedFilePath: string = this.resolvePath(file, isWindows);
-                    if (util.checkFileExistsSync(resolvedFilePath) || util.checkDirectoryExistsSync(resolvedFilePath)) {
+                    if (path.isAbsolute(resolvedFilePath)) {
                         paths.push(`${file}`);
                     }
                 }
