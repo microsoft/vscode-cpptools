@@ -1513,6 +1513,32 @@
                 },
                 "default": []
               },
+              "postRemoteConnectCommands": {
+                "type": "array",
+                "description": "%c_cpp.debuggers.postRemoteConnectCommands.description%",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.text.description%",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.description.description%",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
+                      "default": false
+                    }
+                  }
+                },
+                "default": []
+              },
               "customLaunchSetupCommands": {
                 "type": "array",
                 "description": "%c_cpp.debuggers.customLaunchSetupCommands.description%",
@@ -3071,7 +3097,7 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "plist": "^3.0.2",
+    "plist": "^3.0.4",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^5.0.0",
     "vscode-extension-telemetry": "^0.1.7",

@@ -403,6 +403,8 @@ export class CppProperties {
         }
 
         result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
+        result["execPath"] = process.execPath;
+        result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
         return result;
     }
 
@@ -1205,6 +1207,8 @@ export class CppProperties {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
                 delete this.configurationJson.env['workspaceFolderBasename'];
+                delete this.configurationJson.env['execPath'];
+                delete this.configurationJson.env['pathSeparator'];
                 delete this.configurationJson.env['default'];
             }
 
