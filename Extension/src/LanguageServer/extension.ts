@@ -975,26 +975,26 @@ function onCheckForCompiler(): void {
     client.handleCheckForCompiler();
 }
 
-function onRunCodeAnalysisOnActiveFile(): void {
+async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
     onActivationEvent();
     if (activeDocument !== "") {
+        await vscode.commands.executeCommand("workbench.action.files.saveAll");
         getActiveClient().handleRunCodeAnalysisOnActiveFile();
-        vscode.commands.executeCommand("workbench.action.files.saveAll");
     }
 }
 
-function onRunCodeAnalysisOnOpenFiles(): void {
+async function onRunCodeAnalysisOnOpenFiles(): Promise<void> {
     onActivationEvent();
     if (openFileVersions.size > 0) {
+        await vscode.commands.executeCommand("workbench.action.files.saveAll");
         getActiveClient().handleRunCodeAnalysisOnOpenFiles();
-        vscode.commands.executeCommand("workbench.action.files.saveAll");
     }
 }
 
-function onRunCodeAnalysisOnAllFiles(): void {
+async function onRunCodeAnalysisOnAllFiles(): Promise<void> {
     onActivationEvent();
+    await vscode.commands.executeCommand("workbench.action.files.saveAll");
     getActiveClient().handleRunCodeAnalysisOnAllFiles();
-    vscode.commands.executeCommand("workbench.action.files.saveAll");
 }
 
 function onAddToIncludePath(path: string): void {
