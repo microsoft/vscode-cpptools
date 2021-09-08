@@ -30,10 +30,10 @@ class Settings {
 
     /**
      * create the Settings object.
-     * @param resource The path to a resource to which the settings should apply, or undefined if global settings are desired
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired
      */
     constructor(section: string, public resource?: vscode.Uri) {
-        this.settings = vscode.workspace.getConfiguration(section, resource ? resource : undefined);
+        this.settings = vscode.workspace.getConfiguration(section, resource ? resource : null);
     }
 
     protected get Section(): vscode.WorkspaceConfiguration { return this.settings; }
