@@ -796,7 +796,22 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('cpptools.restartLanguageServerActiveFile', onRestartLanguageServerActiveFile));
+
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
+}
+
+async function onRestartLanguageServerActiveFile(): Promise<void> {
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor || !activeEditor.document) {
+        return;
+    }
+
+    if (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp") {
+        return;
+    }
+
+    clients.ActiveClient.restartLanguageServerActiveFile(activeEditor.document);
 }
 
 async function onSwitchHeaderSource(): Promise<void> {

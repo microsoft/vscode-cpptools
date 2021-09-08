@@ -2539,6 +2539,11 @@
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.BuildAndDebugActiveFile",
           "group": "other2_debug@1"
+        },
+        {
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "command": "C_Cpp.RestartLanguageServerActiveFile",
+          "group": "other2_debug@2"
         }
       ],
       "commandPalette": [
