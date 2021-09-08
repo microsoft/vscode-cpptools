@@ -12,6 +12,7 @@
     "c_cpp.command.resetDatabase.title": "Reset IntelliSense Database",
     "c_cpp.command.takeSurvey.title": "Take Survey",
     "c_cpp.command.buildAndDebugActiveFile.title": "Build and Debug Active File",
+    "c_cpp.command.RestartLanguageServerActiveFile.title": "Restart Language Server on Active File",
     "c_cpp.command.logDiagnostics.title": "Log Diagnostics",
     "c_cpp.command.referencesViewGroupByType.title": "Group by Reference Type",
     "c_cpp.command.referencesViewUngroupByType.title": "Ungroup by Reference Type",

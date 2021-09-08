@@ -1378,6 +1378,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.RestartLanguageServerActiveFile",
+        "title": "%c_cpp.command.RestartLanguageServerActiveFile.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.LogDiagnostics",
         "title": "%c_cpp.command.logDiagnostics.title%",
         "category": "C/C++"
