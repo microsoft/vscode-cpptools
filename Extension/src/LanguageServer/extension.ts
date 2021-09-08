@@ -796,7 +796,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
-    disposables.push(vscode.commands.registerCommand('cpptools.restartLanguageServerActiveFile', onRestartLanguageServerActiveFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.restartLanguageServerActiveFile', onRestartLanguageServerActiveFile));
 
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
