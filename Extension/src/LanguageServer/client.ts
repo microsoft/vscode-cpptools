@@ -468,6 +468,11 @@ interface IntervalTimerParams {
     freeMemory: number;
 };
 
+export interface TextDocumentWillSaveParams {
+    textDocument: TextDocumentIdentifier;
+    reason: vscode.TextDocumentSaveReason;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
@@ -482,6 +487,7 @@ export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, 
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
+const WillSaveWaitUntilRequest: RequestType<TextDocumentWillSaveParams, void, void, void> = new RequestType<TextDocumentWillSaveParams, void, void, void>('cpptools/willSaveWaitUntil');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -654,6 +660,7 @@ export interface Client {
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     notifyWhenLanguageClientReady(notify: () => void): void;
     awaitUntilLanguageClientReady(): void;
+    onWillSaveWaitUntil(params: vscode.TextDocumentWillSaveEvent): Promise<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     activate(): void;
@@ -2101,6 +2108,15 @@ export class DefaultClient implements Client {
         return this.queueTask(task);
     }
 
+    public async onWillSaveWaitUntil(params: vscode.TextDocumentWillSaveEvent): Promise<void> {
+        const params2: TextDocumentWillSaveParams = {
+            textDocument: this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(params.document),
+            reason: params.reason
+        };
+        await this.awaitUntilLanguageClientReady();
+        await this.languageClient.sendRequest(WillSaveWaitUntilRequest, params2);
+    }
+
     /**
      * listen for notifications from the language server.
      */
@@ -3141,6 +3157,7 @@ class NullClient implements Client {
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
     notifyWhenLanguageClientReady(notify: () => void): void { }
     awaitUntilLanguageClientReady(): void { }
+    onWillSaveWaitUntil(params: vscode.TextDocumentWillSaveEvent): Promise<void> {  return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
