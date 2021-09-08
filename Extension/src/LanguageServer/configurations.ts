@@ -20,6 +20,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 import { WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { getOutputChannelLogger } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -67,6 +68,7 @@ export interface Configuration {
     includePath?: string[];
     macFrameworkPath?: string[];
     windowsSdkVersion?: string;
+    dotConfig?: string;
     defines?: string[];
     intelliSenseMode?: string;
     intelliSenseModeIsExplicit?: boolean;
@@ -748,6 +750,22 @@ export class CppProperties {
         return this.resolveDefaultsDictionary(property, defaultValue, env);
     }
 
+    private getDotconfigDefines(dotConfigPath: string): string[] {
+        const isWindows: boolean = os.platform() === 'win32';
+
+        if (dotConfigPath !== undefined) {
+            const path: string = this.resolvePath(dotConfigPath, isWindows);
+            try {
+                const configContent: string[] = fs.readFileSync(path, "utf-8").split("\n");
+                return configContent.filter(i => !i.startsWith("#") && i !== "");
+            } catch (err) {
+                getOutputChannelLogger().appendLine(`Invalid input, cannot resolve .config path: ${err.message}`);
+            }
+        }
+
+        return [];
+    }
+
     private updateServerOnFolderSettingsChange(): void {
         if (!this.configurationJson) {
             return;
@@ -766,6 +784,14 @@ export class CppProperties {
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
+
+            // in case we have dotConfig
+            configuration.dotConfig = this.updateConfigurationString(configuration.dotConfig, settings.defaultDotconfig, env);
+            if (configuration.dotConfig !== undefined) {
+                configuration.defines = configuration.defines || [];
+                configuration.defines = configuration.defines.concat(this.getDotconfigDefines(configuration.dotConfig));
+            }
+
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
             configuration.forcedInclude = this.updateConfigurationStringArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
@@ -1666,6 +1692,9 @@ export class CppProperties {
             const compilerPathStart: number = curText.search(/\s*\"compilerPath\"\s*:\s*\"/);
             const compilerPathValueStart: number = curText.indexOf('"', curText.indexOf(":", compilerPathStart));
             const compilerPathEnd: number = compilerPathStart === -1 ? -1 : curText.indexOf('"', compilerPathValueStart + 1) + 1;
+            const dotConfigStart: number = curText.search(/\s*\"dotConfig\"\s*:\s*\"/);
+            const dotConfigValueStart: number = curText.indexOf('"', curText.indexOf(":", dotConfigStart));
+            const dotConfigEnd: number = dotConfigStart === -1 ? -1 : curText.indexOf('"', dotConfigValueStart + 1) + 1;
             const processedPaths: Set<string> = new Set<string>();
 
             // Validate compiler paths
@@ -1708,6 +1737,39 @@ export class CppProperties {
                     new vscode.Range(document.positionAt(curTextStartOffset + compilerPathValueStart),
                         document.positionAt(curTextStartOffset + compilerPathEnd)),
                     compilerMessage, vscode.DiagnosticSeverity.Warning);
+                diagnostics.push(diagnostic);
+            }
+
+            // validate .config path
+            let dotConfigPath: string | undefined;
+            let dotConfigPathExists: boolean = true;
+            let dotConfigMessage: string | undefined;
+
+            dotConfigPath = currentConfiguration.dotConfig;
+            dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
+            dotConfigPath = this.resolvePath(dotConfigPath, isWindows);
+            const isWSLDotConfig: boolean = isWindows && dotConfigPath.startsWith("/");
+            // does not try resolve if the dotConfig property is empty
+            dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
+
+            if (dotConfigPath && this.rootUri) {
+                const checkPathExists: any = util.checkPathExistsSync(dotConfigPath, this.rootUri.fsPath + path.sep, isWindows, isWSLDotConfig, true);
+                dotConfigPathExists = checkPathExists.pathExists;
+                dotConfigPath = checkPathExists.path;
+            }
+            if (!dotConfigPathExists) {
+                dotConfigMessage = localize('cannot.find2', "Cannot find \"{0}\".", dotConfigPath);
+                newSquiggleMetrics.PathNonExistent++;
+            } else if (dotConfigPath && !util.checkFileExistsSync(dotConfigPath)) {
+                dotConfigMessage = localize("path.is.not.a.file", "Path is not a file: {0}", dotConfigPath);
+                newSquiggleMetrics.PathNotAFile++;
+            }
+
+            if (dotConfigMessage) {
+                const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
+                    new vscode.Range(document.positionAt(curTextStartOffset + dotConfigValueStart),
+                        document.positionAt(curTextStartOffset + dotConfigEnd)),
+                    dotConfigMessage, vscode.DiagnosticSeverity.Warning);
                 diagnostics.push(diagnostic);
             }
 

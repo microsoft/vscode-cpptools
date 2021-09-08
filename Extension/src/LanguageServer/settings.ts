@@ -149,6 +149,7 @@ export class CppSettings extends Settings {
     public get renameRequiresIdentifier(): boolean | undefined { return super.Section.get<boolean>("renameRequiresIdentifier"); }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("files.exclude"); }
     public get defaultIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.includePath"); }
+    public get defaultDotconfig(): string | undefined { return super.Section.get<string>("default.dotConfig"); }
     public get defaultDefines(): string[] | undefined { return super.Section.get<string[]>("default.defines"); }
     public get defaultMacFrameworkPath(): string[] | undefined { return super.Section.get<string[]>("default.macFrameworkPath"); }
     public get defaultWindowsSdkVersion(): string | undefined { return super.Section.get<string>("default.windowsSdkVersion"); }
