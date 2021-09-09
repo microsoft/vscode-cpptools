@@ -3384,13 +3384,13 @@
   "a especificação 'throw()' não faz parte de C++ 20 e posteriores",
   "mais de uma entrada no mapa de unidades de cabeçalho corresponde a '%s'",
   "diagnóstico #pragma deve ter argumento 'push' ou 'pop'",
-  "nenhum 'diagnóstico push #pragma' foi encontrado para corresponder a esse 'pop de diagnóstico'",
+  "nenhum 'diagnóstico push #pragma' foi encontrado para corresponder a esae 'pop de diagnóstico'",
   "o %sq não pode ser uma macro quando for usado em uma diretiva de importação ou módulo",
   "essa diretiva só pode aparecer no escopo de namespace global",
   "uma declaração 'exportar' só pode aparecer no escopo global ou de namespace",
   "%sq é analisado como um identificador em vez de uma palavra-chave porque os tokens que o seguem não correspondem aos de uma diretiva de pré-processador",
   "parece que esse é o início de uma diretiva de pré-processador, mas a falta de um '; ' seguido imediatamente por uma nova linha evita que",
   "parece ser uma diretiva de pré-processamento de módulos, mas essas diretivas não podem aparecer dentro de uma expansão de macro",
-  "uma diretriz 'módulo' não pode aparecer dentro do escopo de inclusão condicional (por exemplo, #if, #else, #elseif, etc.)",
+  "uma diretriz 'módulo' não pode aparecer dentro do escopo de inclusão condicional (por exemplo, #se, #outro, #outrose, etc.)",
   "a importação de %sq foi ignorada"
 ]
