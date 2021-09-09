@@ -403,6 +403,8 @@ export class CppProperties {
         }
 
         result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
+        result["execPath"] = process.execPath;
+        result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
         return result;
     }
 
@@ -1205,6 +1207,8 @@ export class CppProperties {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
                 delete this.configurationJson.env['workspaceFolderBasename'];
+                delete this.configurationJson.env['execPath'];
+                delete this.configurationJson.env['pathSeparator'];
                 delete this.configurationJson.env['default'];
             }
 
@@ -1397,7 +1401,7 @@ export class CppProperties {
         errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, false);
+        errors.forcedInclude = this.validatePath(config.forcedInclude, false, true);
         errors.compileCommands = this.validatePath(config.compileCommands, false);
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
@@ -1412,7 +1416,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, isDirectory: boolean = true): string | undefined {
+    private validatePath(input: string | string[] | undefined, isDirectory: boolean = true, skipRelativePaths: boolean = false): string | undefined {
         if (!input) {
             return undefined;
         }
@@ -1440,7 +1444,9 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (!this.rootUri) {
+                if (skipRelativePaths && !path.isAbsolute(resolvedPath)) {
+                    continue;
+                } else if (!this.rootUri) {
                     pathExists = false;
                 } else {
                     // Check for relative path if resolved path does not exists
@@ -1622,10 +1628,19 @@ export class CppProperties {
             let paths: string[] = [];
             let compilerPath: string | undefined;
             for (const pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
+                currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
                 if (pathArray) {
                     for (const curPath of pathArray) {
                         paths.push(`${curPath}`);
+                    }
+                }
+            }
+            // Skip the relative forcedInclude files.
+            if (currentConfiguration.forcedInclude) {
+                for (const file of currentConfiguration.forcedInclude) {
+                    const resolvedFilePath: string = this.resolvePath(file, isWindows);
+                    if (path.isAbsolute(resolvedFilePath)) {
+                        paths.push(`${file}`);
                     }
                 }
             }
