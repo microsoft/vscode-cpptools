@@ -1432,7 +1432,8 @@ export class DefaultClient implements Client {
                     }
                     const settings: CppSettings = new CppSettings();
                     if (changedSettings["formatting"]) {
-                        if (settings.formattingEngine !== "Disabled") {
+                        const folderSettings: CppSettings = new CppSettings(this.RootUri);
+                        if (folderSettings.formattingEngine !== "Disabled") {
                             // Because the setting is not a bool, changes do not always imply we need to
                             // register/unregister the providers.
                             if (!this.documentFormattingProviderDisposable) {

@@ -284,7 +284,7 @@ function sendActivationTelemetry(): void {
 }
 
 function realActivation(): void {
-    if (new CppSettings().intelliSenseEngine === "Disabled") {
+    if (new CppSettings(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined).intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");

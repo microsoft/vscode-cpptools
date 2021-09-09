@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import { CustomConfigurationProvider, Version, SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { CppSettings } from './settings';
+import * as ext from './extension';
 
 /**
  * An interface that is guaranteed to be backward compatible with version 0
@@ -157,7 +158,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
-        if (new CppSettings().intelliSenseEngine === "Disabled") {
+        if (new CppSettings(ext.getActiveClient().RootUri).intelliSenseEngine === "Disabled") {
             console.warn("Language service is disabled. Provider will not be registered.");
             return false;
         }
