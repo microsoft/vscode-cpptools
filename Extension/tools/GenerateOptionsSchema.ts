@@ -39,11 +39,11 @@ function mergeDefaults(parentDefault: any, childDefault: any): any {
 }
 
 function updateDefaults(object: any, defaults: any): any {
-    if (defaults != null) {
+    if (defaults !== null) {
         for (const key in object) {
             if (object[key].hasOwnProperty('type') && object[key].type === 'object' && object[key].properties !== null) {
                 object[key].properties = updateDefaults(object[key].properties, mergeDefaults(defaults, object[key].default));
-            } else if (key in defaults) {
+            } else if (defaults && key in defaults) {
                 object[key].default = defaults[key];
             }
         }
@@ -105,7 +105,7 @@ function replaceReferences(definitions: any, objects: any): any {
 }
 
 function mergeReferences(baseDefinitions: any, additionalDefinitions: any): void {
-    for (let key in additionalDefinitions) {
+    for (const key in additionalDefinitions) {
         if (baseDefinitions[key]) {
             throw `Error: '${key}' defined in multiple schema files.`;
         }
@@ -116,7 +116,7 @@ function mergeReferences(baseDefinitions: any, additionalDefinitions: any): void
 function generateOptionsSchema(): void {
     const packageJSON: any = JSON.parse(fs.readFileSync('package.json').toString());
     const schemaJSON: any = JSON.parse(fs.readFileSync('tools/OptionsSchema.json').toString());
-    let symbolSettingsJSON: any = JSON.parse(fs.readFileSync('tools/VSSymbolSettings.json').toString());
+    const symbolSettingsJSON: any = JSON.parse(fs.readFileSync('tools/VSSymbolSettings.json').toString());
 
     mergeReferences(schemaJSON.definitions, symbolSettingsJSON.definitions);
 

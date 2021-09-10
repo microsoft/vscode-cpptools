@@ -1154,7 +1154,7 @@ export class DefaultClient implements Client {
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
                 settings_errorSquiggles.push(setting.errorSquiggles);
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
-                settings_enhancedColorization.push(setting.enhancedColorization ? "Enabled" : "Disabled");
+                settings_enhancedColorization.push(workspaceSettings.enhancedColorization ? "Enabled" : "Disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
@@ -1432,7 +1432,8 @@ export class DefaultClient implements Client {
                     }
                     const settings: CppSettings = new CppSettings();
                     if (changedSettings["formatting"]) {
-                        if (settings.formattingEngine !== "Disabled") {
+                        const folderSettings: CppSettings = new CppSettings(this.RootUri);
+                        if (folderSettings.formattingEngine !== "Disabled") {
                             // Because the setting is not a bool, changes do not always imply we need to
                             // register/unregister the providers.
                             if (!this.documentFormattingProviderDisposable) {
