@@ -43,7 +43,7 @@ function updateDefaults(object: any, defaults: any): any {
         for (const key in object) {
             if (object[key].hasOwnProperty('type') && object[key].type === 'object' && object[key].properties !== null) {
                 object[key].properties = updateDefaults(object[key].properties, mergeDefaults(defaults, object[key].default));
-            } else if (key in defaults) {
+            } else if (defaults && key in defaults) {
                 object[key].default = defaults[key];
             }
         }
