@@ -487,7 +487,7 @@ export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, 
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
-const WillSaveWaitUntilRequest: RequestType<TextDocumentWillSaveParams, void, void, void> = new RequestType<TextDocumentWillSaveParams, void, void, void>('cpptools/willSaveWaitUntil');
+const WillSaveWaitUntilRequest: RequestType<TextDocumentWillSaveParams, void, void, void> = new RequestType<TextDocumentWillSaveParams, void, void, void>('textDocument/willSaveWaitUntil');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -2119,8 +2119,15 @@ export class DefaultClient implements Client {
             textDocument: this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(params.document),
             reason: params.reason
         };
-        await this.awaitUntilLanguageClientReady();
-        await this.languageClient.sendRequest(WillSaveWaitUntilRequest, params2);
+        console.log("onWillSaveWaitUntil start: " + new Date());
+        try {
+            await this.awaitUntilLanguageClientReady();
+            await this.languageClient.sendRequest(WillSaveWaitUntilRequest, params2);
+        } catch (e) {
+            console.log("onWillSaveWaitUntil: " + e);
+            return;
+        }
+        console.log("onWillSaveWaitUntil end: " + new Date());
     }
 
     /**
