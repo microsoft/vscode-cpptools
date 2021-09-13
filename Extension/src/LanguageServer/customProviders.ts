@@ -52,10 +52,10 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
             valid = !!(this.provider.extensionId && this.provider.dispose);
         }
         if (valid && this._version > Version.v1) {
-            valid = !!(this.provider.canProvideBrowseConfiguration && this.provider.provideBrowseConfiguration);
+            valid = !!(this.provider.provideBrowseConfiguration);
         }
         if (valid && this._version > Version.v2) {
-            valid = !!(this.provider.canProvideBrowseConfigurationsPerFolder && this.provider.provideFolderBrowseConfiguration);
+            valid = !!(this.provider.provideFolderBrowseConfiguration);
         }
         return valid;
     }
