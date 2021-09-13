@@ -98,7 +98,7 @@
                     },
                     "intelliSenseMode": {
                         "markdownDescription": "The IntelliSense mode to use that maps to a platform and architecture variant of MSVC, gcc, or Clang. If not set or if set to `${default}`, the extension will choose the default for that platform. Windows defaults to `windows-msvc-x64`, Linux defaults to `linux-gcc-x64`, and macOS defaults to `macos-clang-x64`. IntelliSense modes that only specify `<compiler>-<architecture>` variants (e.g. `gcc-x64`) are legacy modes and are converted automatically to the `<platform>-<compiler>-<architecture>` variants based on the host platform.",
-                        "descriptionHint": "Uses of words 'platform', 'compiler', and 'architecture' are meant to be descriptive placeholders for literal values, so they should be translated, but without changing the surrounding `<>-<>` symbols. All other text inside `` should not translated.",
+                        "descriptionHint": "Uses of words 'platform', 'compiler', and 'architecture' are meant to be descriptive placeholders for literal values, so they should be translated, but without changing the surrounding `<>-<>` symbols. All other text inside `` should not be translated.",
                         "type": "string",
                         "enum": [
                             "macos-clang-x86",
