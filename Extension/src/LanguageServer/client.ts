@@ -987,7 +987,8 @@ export class DefaultClient implements Client {
                     }
                 }
             });
-        } catch (err) {
+        } catch (errJS) {
+            const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
             this.isSupported = false;   // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;

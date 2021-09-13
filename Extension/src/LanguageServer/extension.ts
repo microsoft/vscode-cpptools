@@ -651,7 +651,8 @@ async function suggestInsidersChannel(): Promise<void> {
     let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders", false);
-    } catch (error) {
+    } catch (errJS) {
+        const error: Error = errJS as Error;
         console.log(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
@@ -730,7 +731,8 @@ async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
         util.promptReloadWindow(message);
         telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
 
-    } catch (error) {
+    } catch (errJS) {
+        const error: Error = errJS as Error;
         console.error(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
@@ -763,7 +765,8 @@ async function checkAndApplyUpdate(updateChannel: string, isFromSettingsChange: 
     if (!buildInfo) {
         try {
             buildInfo = await getTargetBuildInfo(updateChannel, isFromSettingsChange);
-        } catch (error) {
+        } catch (errJS) {
+            const error: Error = errJS as Error;
             telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         }
     }
