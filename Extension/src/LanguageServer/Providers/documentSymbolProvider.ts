@@ -30,6 +30,20 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                         detail = util.getLocalizedSymbolScope("protected", detail);
                     }
                 }
+
+                // Move the scope in the name to the detail.
+                if (detail.length === 0) {
+                    let offset_paren: number = symbol.name.indexOf("(");
+                    if (offset_paren < 0) {
+                        offset_paren = symbol.name.length;
+                    }
+                    const offset_scope: number = symbol.name.lastIndexOf("::", offset_paren - 2);
+                    if (offset_scope > 0) {
+                        detail = symbol.name.substr(0, offset_scope);
+                        symbol.name = symbol.name.substr(offset_scope + 2);
+                    }
+                }
+
                 const r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
                 const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
                 const vscodeSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(symbol.name, detail, symbol.kind, r, sr);
