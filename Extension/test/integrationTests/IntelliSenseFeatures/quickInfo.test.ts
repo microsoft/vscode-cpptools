@@ -46,9 +46,15 @@ suite("[Quick info test]", function(): void {
 
     test("[Hover over function call - normal comment]", async () => {
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(35, 23)));
-        const expected: string = `\`\`\`cpp\nbool isEven(int value)\n\`\`\`  \nVerifies if input is even number or not`;
+        const expected_full_comment: string = `\`\`\`cpp\nbool isEven(int value)\n\`\`\`  \nVerifies if input is even number or not`;
+        const expectedMap: Map<string, string> = new Map<string, string>();
+        expectedMap.set("win32", `\`\`\`cpp\nbool isEven(int value)\n\`\`\``); // Running test locally returns full comment, but running test on Azure pipeline does not.
+        expectedMap.set("linux", expected_full_comment);
+        expectedMap.set("darwin", expected_full_comment);
+
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
-        assert.equal(actual, expected);
+        const expected: string = expectedMap.get(platform);
+        assert.strictEqual(actual, expected);
     });
 
     test("[Hover over function call - Doxygen comment]", async () => {
@@ -56,13 +62,13 @@ suite("[Quick info test]", function(): void {
 
         const expected_full_comment: string = `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\`  \nCalculates area of rectangle  \n  \n**Template Parameters:**  \n\`T\` – is template param  \n  \n**Parameters:**  \n\`base\` – is horizontal length  \n\`height\` – is virtical length  \n  \n**Returns:**  \nArea of rectangle  \n  \n**Exceptions:**  \nThis is an exception comment`;
         const expectedMap: Map<string, string> = new Map<string, string>();
-        expectedMap.set("win32", `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\``); // Running test locally returns fully comment, but running test on Azure pipeline does not.
+        expectedMap.set("win32", `\`\`\`cpp\nint testDoxygen<int>(int base, int height)\n\`\`\``); // Running test locally returns full comment, but running test on Azure pipeline does not.
         expectedMap.set("linux", expected_full_comment);
         expectedMap.set("darwin", expected_full_comment);
 
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
         const expected: string = expectedMap.get(platform);
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("[Hover over function param string variable]", async () => {
@@ -75,13 +81,13 @@ suite("[Quick info test]", function(): void {
 
         const expected: string = expectedMap.get(platform);
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 
     test("[Hover over function param int]", async () => {
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(33, 18)));
         const expected: string = `\`\`\`cpp\nint intVar\n\`\`\``;
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
-        assert.equal(actual, expected);
+        assert.strictEqual(actual, expected);
     });
 });
