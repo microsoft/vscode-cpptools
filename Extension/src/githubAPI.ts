@@ -277,7 +277,8 @@ async function getRateLimit(): Promise<RateLimit | undefined> {
             throw new Error('Rate limit JSON is not of type RateLimit');
         }
 
-    } catch (err) {
+    } catch (errJS) {
+        const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
         if (err && err.code && err.code !== "ENOENT") {
             // Only throw if the user is connected to the Internet.
             throw new Error('Failed to download rate limit JSON');
@@ -324,7 +325,8 @@ async function getReleaseJson(): Promise<Build[] | undefined> {
         } else {
             return builds;
         }
-    } catch (err) {
+    } catch (errJS) {
+        const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
         if (err && err.code && err.code !== "ENOENT") {
             // Only throw if the user is connected to the Internet.
             throw new Error('Failed to download release JSON');
