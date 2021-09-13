@@ -2113,7 +2113,6 @@ export class DefaultClient implements Client {
         return this.queueTask(task);
     }
 
-
     /**
      * listen for notifications from the language server.
      */
