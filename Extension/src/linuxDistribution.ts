@@ -19,8 +19,8 @@ export class LinuxDistribution {
         // First check /etc/os-release and only fallback to /usr/lib/os-release
         // as per the os-release documentation.
         const linuxDistro: Promise<LinuxDistribution> = LinuxDistribution.getDistroInformationFromFile('/etc/os-release')
-            .catch (() => LinuxDistribution.getDistroInformationFromFile('/usr/lib/os-release'))
-            .catch (() => Promise.resolve(new LinuxDistribution('unknown', 'unknown'))); // couldn't get distro information;
+            .catch(() => LinuxDistribution.getDistroInformationFromFile('/usr/lib/os-release'))
+            .catch(() => Promise.resolve(new LinuxDistribution('unknown', 'unknown'))); // couldn't get distro information;
         return linuxDistro;
     }
 
