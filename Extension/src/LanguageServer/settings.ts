@@ -753,7 +753,7 @@ export class OtherSettings {
         vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
-    public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files", this.resource).get("autoSave") === "afterDelay"; }
+    public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
