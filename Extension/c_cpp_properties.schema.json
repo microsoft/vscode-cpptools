@@ -172,7 +172,7 @@
                             },
                             "path": {
                                 "markdownDescription": "A list of paths to use for indexing and parsing of workspace symbols (for use by 'Go to Definition', 'Find All References', etc.). Searching on these paths is recursive by default. Specify `*` to indicate non-recursive search. For example, `${workspaceFolder}` will search through all subdirectories while `${workspaceFolder}/*` will not.",
-                                "descriptionHint": "Markdown text between `` should not be translated and the capitalization and punctuation should not be altered.",
+                                "descriptionHint": "Text in '' is a command and should be translated in the same way that VS Code itself translates it. Markdown text between `` should not be translated and the capitalization and punctuation should not be altered.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"
