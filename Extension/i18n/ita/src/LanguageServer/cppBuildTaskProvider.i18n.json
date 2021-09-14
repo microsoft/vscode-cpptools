@@ -7,8 +7,10 @@
 	"build_active_file": "compila il file attivo",
 	"compiler_details": "compilatore:",
 	"task_generated_by_debugger": "Attività generata dal debugger.",
+	"cannot.build.non.cpp": "Non è possibile compilare ed eseguire il debug perché il file attivo non è un file di origine C o C++.",
 	"starting_build": "Avvio della compilazione...",
-	"build_finished_with_error": "La compilazione è terminata con errore/i",
-	"build_finished_with_warnings": "La compilazione è terminata con uno o più avvisi",
-	"build finished successfully": "La compilazione è terminata."
+	"build.run.terminated": "L'esecuzione della compilazione è stata terminata.",
+	"build.finished.with.error": "La compilazione è terminata con errore/i.",
+	"build.finished.with.warnings": "La compilazione è terminata con uno o più avvisi.",
+	"build.finished.successfully": "La compilazione è terminata."
 }

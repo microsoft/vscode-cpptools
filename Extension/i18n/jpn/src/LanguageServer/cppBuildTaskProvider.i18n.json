@@ -7,8 +7,10 @@
 	"build_active_file": "アクティブなファイルのビルド",
 	"compiler_details": "コンパイラ:",
 	"task_generated_by_debugger": "デバッガーによって生成されたタスク。",
+	"cannot.build.non.cpp": "アクティブ ファイルが C または C++ ソース ファイルではないため、ビルドおよびデバッグできません。",
 	"starting_build": "ビルドを開始しています...",
-	"build_finished_with_error": "ビルドが完了しましたが、エラーが発生しました",
-	"build_finished_with_warnings": "ビルドが完了しましたが、警告が発生しました",
-	"build finished successfully": "ビルドが正常に完了しました。"
+	"build.run.terminated": "ビルドの実行が終了しました。",
+	"build.finished.with.error": "ビルドが完了しましたが、エラーが発生しました。",
+	"build.finished.with.warnings": "ビルドが完了しましたが、警告が発生しました。",
+	"build.finished.successfully": "ビルドが正常に完了しました。"
 }
