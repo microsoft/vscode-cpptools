@@ -3098,7 +3098,8 @@
     "browserslist": "^4.16.6",
     "glob-parent": "^5.1.2",
     "path-parse": "^1.0.7",
-    "axios": "^0.21.4"
+    "axios": "^0.21.4",
+    "set-value": "^4.0.1"
   },
   "runtimeDependencies": [
     {
