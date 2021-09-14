@@ -1470,8 +1470,23 @@ export class DefaultClient implements Client {
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
+                codeAnalysis: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis", this.RootUri),
+                    clangTidy: {
+                        ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy", this.RootUri),
+                        fix: {
+                            ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy.fix", this.RootUri)
+                        }
+                    }
+                },
                 files: {
                     exclude: vscode.workspace.getConfiguration("C_Cpp.files.exclude", this.RootUri)
+                },
+                intelliSense: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.intelliSense", this.RootUri)
+                },
+                references: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.references", this.RootUri)
                 },
                 vcFormat: {
                     ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
