@@ -354,7 +354,7 @@
         "C_Cpp.codeAnalysis.updateDelay": {
           "type": "number",
           "default": 2000,
-          "description": "%c_cpp.configuration.codeAnalysis.updateDelay.description%",
+          "description": "%c_cpp.configuration.codeAnalysis.updateDelay.markdownDescription%",
           "scope": "application",
           "minimum": 0,
           "maximum": 6000
