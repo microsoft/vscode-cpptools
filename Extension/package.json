@@ -924,7 +924,7 @@
             "Backslash"
           ],
           "default": "Forward Slash",
-          "description": "%c_cpp.configuration.preferredPathSeparator.description%",
+          "markdownDescription": "%c_cpp.configuration.preferredPathSeparator.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.simplifyStructuredComments": {
