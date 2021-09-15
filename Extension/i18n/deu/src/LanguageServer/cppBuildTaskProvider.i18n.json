@@ -7,8 +7,10 @@
 	"build_active_file": "Aktive Datei kompilieren",
 	"compiler_details": "Compiler:",
 	"task_generated_by_debugger": "Vom Debugger generierte Aufgabe.",
+	"cannot.build.non.cpp": "Erstellen und Debuggen nicht möglich, da die aktive Datei keine C- oder C++-Quelldatei ist.",
 	"starting_build": "Kompilierung wird gestartet...",
-	"build_finished_with_error": "Die Kompilierung wurde mit Fehlern abgeschlossen.",
-	"build_finished_with_warnings": "Die Kompilierung wurde mit Warnungen abgeschlossen.",
-	"build finished successfully": "Die Kompilierung wurde erfolgreich abgeschlossen."
+	"build.run.terminated": "Die Build-Ausführung wurde beendet.",
+	"build.finished.with.error": "Der Build wurde mit Fehlern abgeschlossen.",
+	"build.finished.with.warnings": "Der Build wurde mit Warnungen abgeschlossen.",
+	"build.finished.successfully": "Die Kompilierung wurde erfolgreich abgeschlossen."
 }
