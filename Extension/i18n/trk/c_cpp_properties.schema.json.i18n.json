@@ -21,7 +21,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.databaseFilename": "Oluşturulan sembol veritabanının yolu. Göreli bir yol belirtilirse, çalışma alanının varsayılan depolama konumuna göreli hale getirilir.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "Çalışma alanı sembollerinin (‘Tanıma Git’, ‘Tüm Başvuruları Bul’ gibi özellikler için kullanılabilir) dizininin oluşturulması ve ayrıştırılması için kullanılacak yolların listesi. Bu yollarda arama varsayılan olarak özyinelemelidir. Özyinelemeli olmayan aramayı göstermek için `*` belirtin. Örneğin, `${workspaceFolder}` tüm alt dizinlerde arama yaparken `${workspaceFolder}/*` arama yapmaz.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.customConfigurationVariables": "`launch.json` veya `tasks.json` içindeki giriş bağımsız değişkenleri için kullanılacak, `${cpptools:activeConfigCustomVariable}` komutu aracılığıyla sorgulanabilen özel değişkenler.",
-	"c_cpp_properties.schema.json.definitions.env": "`${variable}` veya `${env:variable}` söz dizimi kullanılarak bu dosyada herhangi bir yerde yeniden kullanılabilen özel değişkenler.",
+	"c_cpp_properties.schema.json.definitions.env": "`${değişken}` veya `${env:değişken}` söz dizimi kullanılarak bu dosyada herhangi bir yerde yeniden kullanılabilen özel değişkenler.",
 	"c_cpp_properties.schema.json.definitions.version": "Yapılandırma dosyasının sürümü. Bu özellik uzantı tarafından yönetilir. Lütfen değiştirmeyin.",
 	"c_cpp_properties.schema.json.definitions.enableConfigurationSquiggles": "Uzantının `c_cpp_properties.json` dosyasında algılanan hataları bildirip bildirmeyeceğini denetler."
 }
