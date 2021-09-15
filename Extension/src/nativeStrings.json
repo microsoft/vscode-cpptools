@@ -232,5 +232,6 @@
     "inline_macro": {
         "text": "Inline macro",
         "hint": "'Inline' is a command and not an adjective, i.e. like 'Expand macro'."
-    }
+    },
+    "unable_to_access_browse_database": "Unable to access browse database. ({0})"
 }
