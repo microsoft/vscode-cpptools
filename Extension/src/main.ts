@@ -194,7 +194,8 @@ async function processRuntimeDependencies(): Promise<void> {
         // No lock file, need to download and install dependencies.
         try {
             await onlineInstallation(info);
-        } catch (error) {
+        } catch (errJS) {
+            const error: Error = errJS as Error;
             handleError(error);
 
             // Send the failure telemetry since postInstall will not be called.
@@ -304,7 +305,7 @@ function touchInstallLockFile(info: PlatformInformation): Promise<void> {
     return util.touchInstallLockFile(info);
 }
 
-function handleError(error: any): void {
+function handleError(error: Error): void {
     const installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
     installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";

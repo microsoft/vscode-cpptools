@@ -12,17 +12,17 @@
                 "properties": {
                     "name": {
                         "markdownDescription": "Configuration identifier. `Mac`, `Linux`, and `Win32` are special identifiers for configurations that will be auto-selected on those platforms, but the identifier can be anything.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "string"
                     },
                     "compilerPath": {
                         "markdownDescription": "Full path of the compiler being used, e.g. `/usr/bin/gcc`, to enable more accurate IntelliSense.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "string"
                     },
                     "compilerArgs": {
                         "markdownDescription": "Compiler arguments to modify the includes or defines used, e.g. `-nostdinc++`, `-m32`, etc.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -64,12 +64,12 @@
                     },
                     "compileCommands": {
                         "markdownDescription": "Full path to `compile_commands.json` file for the workspace.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "string"
                     },
                     "includePath": {
-                        "markdownDescription": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive. Specify `**` to indicate recursive search. For example, `${workspaceFolder}/**` will search through all subdirectories while `${workspaceFolder}` will not. Usually, this should not include system includes; instead, set `#C_Cpp.default.compilerPath#`.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "markdownDescription": "A list of paths for the IntelliSense engine to use while searching for included headers. Searching on these paths is not recursive. Specify `**` to indicate recursive search. For example, `${workspaceFolder}/**` will search through all subdirectories while `${workspaceFolder}` will not. Usually, this should not include system includes; instead, set `C_Cpp.default.compilerPath`.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -84,13 +84,13 @@
                     },
                     "windowsSdkVersion": {
                         "markdownDescription": "Version of the Windows SDK include path to use on Windows, e.g. `10.0.17134.0`.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "string",
                         "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$"
                     },
                     "defines": {
                         "markdownDescription": "A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use `=` to set a value, e.g. `VERSION=1`.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -98,7 +98,7 @@
                     },
                     "intelliSenseMode": {
                         "markdownDescription": "The IntelliSense mode to use that maps to a platform and architecture variant of MSVC, gcc, or Clang. If not set or if set to `${default}`, the extension will choose the default for that platform. Windows defaults to `windows-msvc-x64`, Linux defaults to `linux-gcc-x64`, and macOS defaults to `macos-clang-x64`. IntelliSense modes that only specify `<compiler>-<architecture>` variants (e.g. `gcc-x64`) are legacy modes and are converted automatically to the `<platform>-<compiler>-<architecture>` variants based on the host platform.",
-                        "descriptionHint": "Uses of words 'platform', 'compiler', and 'architecture' are meant to be descriptive placeholders for literal values, so they should be translated, but without changing the surrounding `<>-<>` symbols. All other text inside `` should not translated.",
+                        "descriptionHint": "Uses of words 'platform', 'compiler', and 'architecture' are meant to be descriptive placeholders for literal values, so they should be translated, but without changing the surrounding `<>-<>` symbols. All other text inside `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "string",
                         "enum": [
                             "macos-clang-x86",
@@ -159,8 +159,8 @@
                         "type": "object",
                         "properties": {
                             "limitSymbolsToIncludedHeaders": {
-                                "markdownDescription": "`true` to process only those files directly or indirectly included as headers, `false` to process all files under the specified include paths.",
-                                "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                                "markdownDescription": "Set to `true` to process only those files directly or indirectly included as headers. Set to `false` to process all files under the specified include paths.",
+                                "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                                 "type": [
                                     "boolean",
                                     "string"
@@ -172,7 +172,7 @@
                             },
                             "path": {
                                 "markdownDescription": "A list of paths to use for indexing and parsing of workspace symbols (for use by 'Go to Definition', 'Find All References', etc.). Searching on these paths is recursive by default. Specify `*` to indicate non-recursive search. For example, `${workspaceFolder}` will search through all subdirectories while `${workspaceFolder}/*` will not.",
-                                "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                                "descriptionHint": "Text in '' is a command and should be translated in the same way that VS Code itself translates it. Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"
@@ -184,7 +184,7 @@
                     "customConfigurationVariables": {
                         "type": "object",
                         "markdownDescription": "Custom variables that can be queried through the command `${cpptools:activeConfigCustomVariable}` to use for the input variables in `launch.json` or `tasks.json`.",
-                        "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "patternProperties": {
                             "(^.+$)": {
                                 "type": "string"
@@ -199,7 +199,7 @@
         "env": {
             "type": "object",
             "markdownDescription": "Custom variables that can be reused anywhere in this file using the `${variable}` or `${env:variable}` syntax.",
-            "descriptionHint": "The word 'variable' within curly braces should be translated. The \"env\" should not be translated, and the punctuation (\"${:}\") should be preserved.",
+            "descriptionHint": "The word 'variable' within curly braces should be translated. The \"env\" should not be translated, and the capitalization, spacing, and punctuation (\"${:}\", including the ``) should be preserved.",
             "patternProperties": {
                 "(?!^workspaceFolder$)(?!^workspaceRoot$)(?!^workspaceFolderBasename$)(?!^execPath$)(?!^pathSeparator$)(?!^default$)(^.+$)": {
                     "oneOf": [
@@ -225,7 +225,7 @@
             "type": "boolean",
             "default": true,
             "markdownDescription": "Controls whether the extension will report errors detected in `c_cpp_properties.json`.",
-            "descriptionHint": "Markdown text between `` should not be translated and the punctuation should not be altered."
+            "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         }
     },
     "properties": {

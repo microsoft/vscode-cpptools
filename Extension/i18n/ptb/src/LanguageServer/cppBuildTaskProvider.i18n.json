@@ -7,8 +7,10 @@
 	"build_active_file": "arquivo de build ativo",
 	"compiler_details": "compilador:",
 	"task_generated_by_debugger": "Tarefa gerada pelo Depurador.",
+	"cannot.build.non.cpp": "Não é possível criar e depurar porque o arquivo ativo não é um arquivo de origem C ou C++.",
 	"starting_build": "Iniciando o build...",
-	"build_finished_with_error": "Build concluído com erros",
-	"build_finished_with_warnings": "Build concluído com avisos",
-	"build finished successfully": "Build concluído com êxito."
+	"build.run.terminated": "A execução da build foi terminada.",
+	"build.finished.with.error": "Build concluída com erro(s).",
+	"build.finished.with.warnings": "Build concluída com aviso(s).",
+	"build.finished.successfully": "Build concluído com êxito."
 }

@@ -448,7 +448,8 @@ export class CppProperties {
         try {
             packageJson = JSON.parse(await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8"));
             pdjFound = true;
-        } catch (err) {
+        } catch (errJS) {
+            const err: Error = errJS as Error;
             error = err;
         }
 
@@ -498,12 +499,14 @@ export class CppProperties {
                             if (stdout) {
                                 this.nodeAddonIncludes.push(stdout);
                             }
-                        } catch (err) {
+                        } catch (errJS) {
+                            const err: Error = errJS as Error;
                             console.log('readNodeAddonIncludeLocations', err.message);
                         }
                     }
                 }
-            } catch (e) {
+            } catch (errJS) {
+                const e: Error = errJS as Error;
                 error = e;
             }
         }
@@ -1146,7 +1149,8 @@ export class CppProperties {
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
-            } catch (err) {
+            } catch (errJS) {
+                const err: Error = errJS as Error;
                 const failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', this.configFolder);
                 vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
             }
@@ -1268,7 +1272,8 @@ export class CppProperties {
                 e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
             });
 
-        } catch (err) {
+        } catch (errJS) {
+            const err: Error = errJS as Error;
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
             vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
