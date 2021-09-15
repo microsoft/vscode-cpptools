@@ -7,8 +7,10 @@
 	"build_active_file": "sestavit aktivní soubor",
 	"compiler_details": "kompilátor:",
 	"task_generated_by_debugger": "Úloha vygenerovaná ladicím programem",
+	"cannot.build.non.cpp": "Sestavení a ladění není možné, protože aktivní soubor není zdrojový soubor jazyka C ani C++.",
 	"starting_build": "Spouští se sestavování...",
-	"build_finished_with_error": "Sestavování se dokončilo s chybami.",
-	"build_finished_with_warnings": "Sestavování se dokončilo s upozorněními.",
-	"build finished successfully": "Sestavování se úspěšně dokončilo."
+	"build.run.terminated": "Spuštění sestavení se ukončilo.",
+	"build.finished.with.error": "Sestavování se dokončilo s chybami.",
+	"build.finished.with.warnings": "Sestavování se dokončilo s upozorněními.",
+	"build.finished.successfully": "Sestavování se úspěšně dokončilo."
 }
