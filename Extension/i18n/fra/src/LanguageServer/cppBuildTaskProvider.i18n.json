@@ -7,8 +7,10 @@
 	"build_active_file": "générer le fichier actif",
 	"compiler_details": "compilateur :",
 	"task_generated_by_debugger": "Tâche générée par le débogueur.",
+	"cannot.build.non.cpp": "Génération et débogage impossibles, car le fichier actif n'est pas un fichier source C ou C++.",
 	"starting_build": "Démarrage de la génération...",
-	"build_finished_with_error": "La génération s'est achevée avec une ou plusieurs erreurs",
-	"build_finished_with_warnings": "La génération s'est achevée avec un ou plusieurs avertissements",
-	"build finished successfully": "La génération s'est achevée correctement."
+	"build.run.terminated": "Exécution est terminée.",
+	"build.finished.with.error": "La génération s'est achevée avec une ou plusieurs erreurs.",
+	"build.finished.with.warnings": "La génération s'est achevée avec un ou plusieurs avertissements.",
+	"build.finished.successfully": "La génération s'est achevée correctement."
 }

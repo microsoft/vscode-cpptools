@@ -74,7 +74,7 @@ export class PackageManagerError extends Error {
         public localizedMessage: string,
         public methodName: string,
         public pkg: IPackage | null = null,
-        public innerError: any = null,
+        public innerError: Error | null = null,
         public errorCode: string = '') {
         super(message);
         this.localizedMessageText = localizedMessage;
@@ -88,7 +88,7 @@ export class PackageManagerWebResponseError extends PackageManagerError {
         public localizedMessage: string,
         public methodName: string,
         public pkg: IPackage | null = null,
-        public innerError: any = null,
+        public innerError: Error | null = null,
         public errorCode: string = '') {
         super(message, localizedMessage, methodName, pkg, innerError, errorCode);
     }
@@ -187,7 +187,7 @@ export class PackageManager {
         pkg.tmpFile = tmpResult;
 
         let success: boolean = false;
-        let lastError: any = null;
+        let lastError: Error | null = null;
         let retryCount: number = 0;
         const MAX_RETRIES: number = 10;
 
@@ -196,7 +196,8 @@ export class PackageManager {
             try {
                 await this.DownloadFile(pkg.url, pkg, retryCount);
                 success = true;
-            } catch (error) {
+            } catch (errJS) {
+                const error: Error = errJS as Error;
                 retryCount += 1;
                 lastError = error;
                 if (retryCount >= MAX_RETRIES) {
@@ -274,8 +275,8 @@ export class PackageManager {
                             return reject(new PackageManagerError('Invalid response code received', localize("invalid.response.code.received", 'Invalid response code received'), 'DownloadFile', pkg));
                         }
                         // Download failed - print error message
-                        const errorMessage: string = localize("failed.web.error", "failed (error code '{0}')", response.statusCode);
-                        return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, errorMessage, response.statusCode.toString()));
+                        const error: Error = new Error(localize("failed.web.error", "failed (error code '{0}')", response.statusCode));
+                        return reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error, response.statusCode.toString()));
                     } else {
                         // Downloading - hook up events
                         let contentLength: any = response.headers['content-length'];
@@ -313,8 +314,10 @@ export class PackageManager {
                             }
                         });
 
-                        response.on('error', (error) =>
-                            reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error.stack, error.name)));
+                        response.on('error', (errJS) => {
+                            const error: Error = errJS as Error;
+                            reject(new PackageManagerWebResponseError(response.socket, 'HTTP/HTTPS Response Error', localize("web.response.error", 'HTTP/HTTPS Response Error'), 'DownloadFile', pkg, error, error.name));
+                        });
 
                         // Begin piping data from the response to the package file
                         response.pipe(tmpFile, { end: false });
@@ -327,7 +330,7 @@ export class PackageManager {
                     reject(new PackageManagerError(
                         'HTTP/HTTPS Request error' + (urlString.includes("fwlink") ? ": fwlink" : ""),
                         localize("web.request.error", 'HTTP/HTTPS Request error') + (urlString.includes("fwlink") ? ": fwlink" : ""),
-                        'DownloadFile', pkg, error.stack, error.message)));
+                        'DownloadFile', pkg, error, error.message)));
 
                 // Execute the request
                 request.end();
@@ -407,7 +410,8 @@ export class PackageManager {
                                         if (await util.checkFileExists(absoluteEntryTempFile)) {
                                             try {
                                                 await util.unlinkAsync(absoluteEntryTempFile);
-                                            } catch (err) {
+                                            } catch (errJS) {
+                                                const err: Error = errJS as Error;
                                                 pendingError = new PackageManagerError(`Error unlinking file ${absoluteEntryTempFile}`, localize("unlink.error", "Error unlinking file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err);
                                                 zipfile.close();
                                                 return;
@@ -426,7 +430,8 @@ export class PackageManager {
                                             if (!pendingError) {
                                                 try {
                                                     await util.renameAsync(absoluteEntryTempFile, absoluteEntryPath);
-                                                } catch (err) {
+                                                } catch (errJS) {
+                                                    const err: Error = errJS as Error;
                                                     pendingError = new PackageManagerError(`Error renaming file ${absoluteEntryTempFile}`, localize("rename.error", "Error renaming file {0}", absoluteEntryTempFile), 'InstallPackage', pkg, err);
                                                     zipfile.close();
                                                     return;

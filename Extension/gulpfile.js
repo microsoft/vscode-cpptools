@@ -192,7 +192,7 @@ const processHtmlFiles = () => {
 const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     for (let fieldName in jsonTree) {
         if (jsonTree[fieldName] !== null) {
-            if (typeof (jsonTree[fieldName]) == "string" && fieldName === "description") {
+            if (typeof (jsonTree[fieldName]) == "string" && (fieldName === "description" || fieldName === "markdownDescription")) {
                 descriptionCallback(prefixPath, jsonTree[fieldName], jsonTree);
             } else if (typeof (jsonTree[fieldName]) == "object") {
                 let path = prefixPath;
