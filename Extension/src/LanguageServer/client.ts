@@ -62,7 +62,8 @@ let diagnosticsChannel: vscode.OutputChannel;
 let outputChannel: vscode.OutputChannel;
 let debugChannel: vscode.OutputChannel;
 let warningChannel: vscode.OutputChannel;
-let diagnosticsCollection: vscode.DiagnosticCollection;
+let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
+let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
@@ -149,23 +150,37 @@ function showWarning(params: ShowWarningParams): void {
 }
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
-    if (!diagnosticsCollection) {
-        diagnosticsCollection = vscode.languages.createDiagnosticCollection("C/C++");
+    const is_intelliSense: boolean = params.diagnosticsType === DiagnosticsType.IntelliSense;
+    if (is_intelliSense) {
+        if (!diagnosticsCollectionIntelliSense) {
+            diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection("C/C++");
+        }
+    } else if (!diagnosticsCollectionCodeAnalysis) {
+        diagnosticsCollectionCodeAnalysis = vscode.languages.createDiagnosticCollection("clang-tidy");
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
-    const diagnostics: vscode.Diagnostic[] = [];
+    const diagnosticsIntelliSense: vscode.Diagnostic[] = [];
+    const diagnosticsCodeAnalysis: vscode.Diagnostic[] = [];
     params.diagnostics.forEach((d) => {
         const message: string = util.getLocalizedString(d.localizeStringParams);
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
         diagnostic.code = d.code;
         diagnostic.source = d.source;
-        diagnostics.push(diagnostic);
+        if (is_intelliSense) {
+            diagnosticsIntelliSense.push(diagnostic);
+        } else {
+            diagnosticsCodeAnalysis.push(diagnostic);
+        }
     });
 
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
-    diagnosticsCollection.set(realUri, diagnostics);
+    if (is_intelliSense) {
+        diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
+    } else {
+        diagnosticsCollectionCodeAnalysis.set(realUri, diagnosticsCodeAnalysis);
+    }
 
     clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
 }
@@ -265,9 +280,15 @@ interface Diagnostic {
     localizeStringParams: LocalizeStringParams;
 }
 
+enum DiagnosticsType {
+    IntelliSense,
+    CodeAnalysis
+}
+
 interface PublishDiagnosticsParams {
     uri: string;
     diagnostics: Diagnostic[];
+    diagnosticsType: DiagnosticsType;
 }
 
 interface GetCodeActionsRequestParams {
