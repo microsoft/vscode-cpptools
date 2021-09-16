@@ -796,12 +796,12 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RestartLanguageServerActiveFile', onRestartLanguageServerActiveFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
 
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
-async function onRestartLanguageServerActiveFile(): Promise<void> {
+async function onRestartIntelliSenseForFile(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
         return;
@@ -811,7 +811,7 @@ async function onRestartLanguageServerActiveFile(): Promise<void> {
         return;
     }
 
-    clients.ActiveClient.restartLanguageServerActiveFile(activeEditor.document);
+    clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
 async function onSwitchHeaderSource(): Promise<void> {

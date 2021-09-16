@@ -484,7 +484,7 @@ const PauseAnalysisNotification: NotificationType<void, void> = new Notification
 const ResumeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeAnalysis');
 const CancelAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelAnalysis');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
-const RestartLanguageServerActiveFileNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/restartLanguageServerActiveFile');
+const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/restartIntelliSenseForFile');
 const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
 const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeCppProperties');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
@@ -631,7 +631,7 @@ export interface Client {
     awaitUntilLanguageClientReady(): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
-    restartLanguageServerActiveFile(document: vscode.TextDocument): Promise<void>;
+    restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
@@ -2440,11 +2440,11 @@ export class DefaultClient implements Client {
     }
 
     /**
-     * notifications to the language server
+     * send notifications to the language server to restart IntelliSense for the selected file.
      */
-    public async restartLanguageServerActiveFile(document: vscode.TextDocument): Promise<void> {
+    public async restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> {
         this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(RestartLanguageServerActiveFileNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
+            this.languageClient.sendNotification(RestartIntelliSenseForFileNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
         });
     }
 
@@ -3015,7 +3015,7 @@ class NullClient implements Client {
     awaitUntilLanguageClientReady(): void { }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    restartLanguageServerActiveFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
