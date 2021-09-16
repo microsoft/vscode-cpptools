@@ -803,14 +803,10 @@ export function registerCommands(): void {
 
 async function onRestartIntelliSenseForFile(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || !activeEditor.document) {
+    if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
+        (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
         return;
     }
-
-    if (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp") {
-        return;
-    }
-
     clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
