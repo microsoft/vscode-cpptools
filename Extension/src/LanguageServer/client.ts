@@ -167,7 +167,8 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
         diagnostic.code = d.code;
-        diagnostic.source = "clang-tidy";
+        diagnostic.source = "C/C++";
+
         if (is_intelliSense) {
             diagnosticsIntelliSense.push(diagnostic);
         } else {
