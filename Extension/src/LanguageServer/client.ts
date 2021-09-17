@@ -67,7 +67,6 @@ let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
-export const openNeverActiveFiles: Set<string> = new Set<string>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 
@@ -1665,7 +1664,6 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            openNeverActiveFiles.add(uri);
         }
     }
 
@@ -1676,9 +1674,6 @@ export class DefaultClient implements Client {
         }
 
         openFileVersions.delete(uri);
-        if (openNeverActiveFiles.has(uri)) {
-            openNeverActiveFiles.delete(uri);
-        }
     }
 
     private registeredProviders: CustomConfigurationProvider1[] = [];
@@ -2583,17 +2578,8 @@ export class DefaultClient implements Client {
      */
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
         await this.updateActiveDocumentTextOptions();
-        this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
-            const uri: string = document.uri.toString();
-            if (openNeverActiveFiles.has(uri)) {
-                openNeverActiveFiles.delete(uri);
-                const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.clangTidyEnabled && settings.codeAnalysisRunInBackground) {
-                    this.handleRunCodeAnalysisOnActiveFile();
-                }
-            }
-        });
+        await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
     }
 
     /**
