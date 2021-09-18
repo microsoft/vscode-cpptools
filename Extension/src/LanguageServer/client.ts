@@ -1062,7 +1062,8 @@ export class DefaultClient implements Client {
         const settings_clangTidyFixErrors: (boolean | undefined)[] = [];
         const settings_clangTidyFixNotes: (boolean | undefined)[] = [];
         const settings_clangTidyArgs: (string | undefined)[] = [];
-        const settings_clangTidyChecks: (string[] | undefined)[] = [];
+        const settings_clangTidyChecksEnabled: (string[] | undefined)[] = [];
+        const settings_clangTidyChecksDisabled: (string[] | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
         const settings_cppFilesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
         const settings_filesExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
@@ -1171,7 +1172,8 @@ export class DefaultClient implements Client {
                 settings_clangTidyFixErrors.push(setting.clangTidyFixErrors);
                 settings_clangTidyFixNotes.push(setting.clangTidyFixNotes);
                 settings_clangTidyArgs.push(setting.clangTidyArgs);
-                settings_clangTidyChecks.push(setting.clangTidyChecks);
+                settings_clangTidyChecksEnabled.push(setting.clangTidyChecksEnabled);
+                settings_clangTidyChecksDisabled.push(setting.clangTidyChecksDisabled);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
                 settings_indentWithinParentheses.push(setting.vcFormatIndentWithinParentheses);
                 settings_indentPreserveWithinParentheses.push(setting.vcFormatIndentPreserveWithinParentheses);
@@ -1311,7 +1313,10 @@ export class DefaultClient implements Client {
                             notes: settings_clangTidyFixNotes
                         },
                         args: settings_clangTidyArgs,
-                        checks: settings_clangTidyChecks
+                        checks: {
+                            enabled: settings_clangTidyChecksEnabled,
+                            disabled: settings_clangTidyChecksDisabled
+                        }
                     }
                 },
                 clang_format_path: settings_clangFormatPath,
@@ -1497,6 +1502,9 @@ export class DefaultClient implements Client {
                         ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy", this.RootUri),
                         fix: {
                             ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy.fix", this.RootUri)
+                        },
+                        checks: {
+                            ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy.checks", this.RootUri)
                         }
                     }
                 },

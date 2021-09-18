@@ -165,7 +165,8 @@ export class CppSettings extends Settings {
     public get clangTidyFixErrors(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.fix.errors"); }
     public get clangTidyFixNotes(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.fix.notes"); }
     public get clangTidyArgs(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.args"); }
-    public get clangTidyChecks(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks"); }
+    public get clangTidyChecksEnabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.enabled"); }
+    public get clangTidyChecksDisabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.disabled"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
