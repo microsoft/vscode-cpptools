@@ -73,6 +73,7 @@ export interface Configuration {
     compileCommands?: string;
     forcedInclude?: string[];
     configurationProvider?: string;
+    mergeConfigurations?: boolean;
     browse?: Browse;
     customConfigurationVariables?: {[key: string]: string};
 }

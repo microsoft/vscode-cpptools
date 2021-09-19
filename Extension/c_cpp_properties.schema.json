@@ -155,6 +155,10 @@
                         "description": "The id of a VS Code extension that can provide IntelliSense configuration information for source files.",
                         "type": "string"
                     },
+                    "mergeConfigurations": {
+                        "description": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
+                        "type": "boolean"
+                    },
                     "browse": {
                         "type": "object",
                         "properties": {

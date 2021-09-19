@@ -1797,9 +1797,36 @@ export class DefaultClient implements Client {
                             const candidate: string = response.candidates[i];
                             const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
                             if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                                const configs: SourceFileConfigurationItem[] = await provider.provideConfigurations([tuUri], tokenSource.token);
+                                const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
                                 if (configs && configs.length > 0 && configs[0]) {
-                                    return configs;
+                                    const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
+                                    if (fileConfiguration?.mergeConfigurations ?? false) {
+                                        configs.forEach(config => {
+                                            fileConfiguration?.includePath?.forEach(p => {
+                                                if (!config.configuration.includePath.includes(p)) {
+                                                    config.configuration.includePath.push(p);
+                                                }
+                                            });
+
+                                            fileConfiguration?.defines?.forEach(d => {
+                                                if (!config.configuration.defines.includes(d)) {
+                                                    config.configuration.defines.push(d);
+                                                }
+                                            });
+
+                                            if (!config.configuration.forcedInclude) {
+                                                config.configuration.forcedInclude = [];
+                                            }
+
+                                            fileConfiguration?.forcedInclude?.forEach(i => {
+                                                if (!config.configuration.forcedInclude?.includes(i) ?? false) {
+                                                    config.configuration.forcedInclude?.push(i);
+                                                }
+                                            });
+                                        });
+                                    }
+
+                                    return configs as SourceFileConfigurationItem[];
                                 }
                             }
                             if (tokenSource.token.isCancellationRequested) {
