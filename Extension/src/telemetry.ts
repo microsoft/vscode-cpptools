@@ -81,7 +81,7 @@ export function activate(): void {
     }
 }
 
-export async function getExperimentationService(): Promise<IExperimentationService | undefined> {
+export function getExperimentationService(): Promise<IExperimentationService> | undefined {
     return initializationPromise;
 }
 
@@ -92,34 +92,50 @@ export async function deactivate(): Promise<void> {
         } catch (e) {
             // Continue even if we were not able to initialize the experimentation platform.
         }
+    }
+    if (experimentationTelemetry) {
+        experimentationTelemetry.dispose();
+    }
+}
+
+export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): void {
+    const sendTelemetry = () => {
         if (experimentationTelemetry) {
-            experimentationTelemetry.dispose();
+            const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
+            experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties);
+        }
+    };
+
+    if (initializationPromise) {
+        try {
+            // Use 'then' instead of 'await' because telemetry should be "fire and forget".
+            initializationPromise.then(sendTelemetry);
+            return;
+        } catch (e) {
+            // Continue even if we were not able to initialize the experimentation platform.
         }
     }
+    sendTelemetry();
 }
 
-export async function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): Promise<void> {
-    try {
-        await initializationPromise;
-    } catch (e) {
-        // Continue even if we were not able to initialize the experimentation platform.
-    }
-    if (experimentationTelemetry) {
-        const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
-        experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties);
-    }
-}
+export function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
+    const sendTelemetry = () => {
+        if (experimentationTelemetry) {
+            const eventNamePrefix: string = "C_Cpp/LanguageServer/";
+            experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
+        }
+    };
 
-export async function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): Promise<void> {
-    try {
-        await initializationPromise;
-    } catch (e) {
-        // Continue even if we were not able to initialize the experimentation platform.
+    if (initializationPromise) {
+        try {
+            // Use 'then' instead of 'await' because telemetry should be "fire and forget".
+            initializationPromise.then(sendTelemetry);
+            return;
+        } catch (e) {
+            // Continue even if we were not able to initialize the experimentation platform.
+        }
     }
-    if (experimentationTelemetry) {
-        const eventNamePrefix: string = "C_Cpp/LanguageServer/";
-        experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
-    }
+    sendTelemetry();
 }
 
 function getPackageInfo(): IPackageInfo {
