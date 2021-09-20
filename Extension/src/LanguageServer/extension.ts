@@ -804,7 +804,8 @@ export function registerCommands(): void {
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
-async function onRestartIntelliSenseForFile(): Promise<void> {
+function onRestartIntelliSenseForFile(): void {
+    onActivationEvent();
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
         (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
