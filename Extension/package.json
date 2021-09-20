@@ -367,7 +367,7 @@
             "anyOf": [
               {
                 "type": "boolean",
-                "description": "%c_cpp.configuration.codeAnalysis.excludeBoolean.description%"
+                "markdownDescription": "%c_cpp.configuration.codeAnalysis.excludeBoolean.markdownDescription%"
               },
               {
                 "type": "object",
