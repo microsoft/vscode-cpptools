@@ -521,6 +521,7 @@ const PauseCodeAnalysisNotification: NotificationType<void, void> = new Notifica
 const ResumeCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeCodeAnalysis');
 const CancelCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelCodeAnalysis');
 const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
+const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/restartIntelliSenseForFile');
 const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
 const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeCppProperties');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
@@ -682,6 +683,7 @@ export interface Client {
     awaitUntilLanguageClientReady(): void;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
+    restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
@@ -2591,6 +2593,14 @@ export class DefaultClient implements Client {
     }
 
     /**
+     * send notifications to the language server to restart IntelliSense for the selected file.
+     */
+    public async restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(RestartIntelliSenseForFileNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
+    }
+
+    /**
      * enable UI updates from this client and resume tag parsing on the server.
      */
     public activate(): void {
@@ -3186,6 +3196,7 @@ class NullClient implements Client {
     awaitUntilLanguageClientReady(): void { }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }

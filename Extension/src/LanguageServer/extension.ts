@@ -826,7 +826,19 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
+
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
+}
+
+function onRestartIntelliSenseForFile(): void {
+    onActivationEvent();
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
+        (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
+        return;
+    }
+    clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
 async function onSwitchHeaderSource(): Promise<void> {
