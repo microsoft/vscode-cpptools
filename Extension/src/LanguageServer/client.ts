@@ -2441,18 +2441,16 @@ export class DefaultClient implements Client {
      */
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
         await this.updateActiveDocumentTextOptions();
-        this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
-        });
+        await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
     }
 
     /**
      * send notifications to the language server to restart IntelliSense for the selected file.
      */
     public async restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> {
-        this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(RestartIntelliSenseForFileNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
-        });
+        await this.awaitUntilLanguageClientReady();
+        this.languageClient.sendNotification(RestartIntelliSenseForFileNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
     }
 
     /**

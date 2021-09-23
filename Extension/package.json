@@ -2547,12 +2547,12 @@
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2_debug@1"
+          "group": "other2@1"
         },
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.RestartIntelliSenseForFile",
-          "group": "other2_debug@2"
+          "group": "other2@2"
         }
       ],
       "commandPalette": [
