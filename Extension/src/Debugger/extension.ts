@@ -92,7 +92,8 @@ export function initialize(context: vscode.ExtensionContext): void {
                 try {
                     await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
                     Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                } catch (e) {
+                } catch (errJS) {
+                    const e: Error = errJS as Error;
                     if (e && e.message === util.failedToParseJson) {
                         vscode.window.showErrorMessage(util.failedToParseJson);
                     }

@@ -417,7 +417,8 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
                 config.environment = parsedFile.Env;
 
                 delete config.envFile;
-            } catch (e) {
+            } catch (errJS) {
+                const e: Error = errJS as Error;
                 throw new Error(localize("envfale.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
             }
         }
