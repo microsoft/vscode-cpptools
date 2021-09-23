@@ -156,7 +156,8 @@
                         "type": "string"
                     },
                     "mergeConfigurations": {
-                        "description": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
+                        "markdownDescription": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "boolean"
                     },
                     "browse": {
