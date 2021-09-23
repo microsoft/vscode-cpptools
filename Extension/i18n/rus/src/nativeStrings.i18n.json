@@ -213,5 +213,6 @@
 	"invoking_nvcc": "Идет вызов nvcc с помощью командной строки: {0}",
 	"nvcc_host_compile_command_not_found": "Не удалось найти команду компиляции узла в выходных данных nvcc.",
 	"unable_to_locate_forced_include": "Не удалось найти принудительное включение: {0}",
-	"inline_macro": "Встроенный макрос"
+	"inline_macro": "Встроенный макрос",
+	"unable_to_access_browse_database": "Не удалось получить доступ к базе данных просмотра. ({0})"
 }

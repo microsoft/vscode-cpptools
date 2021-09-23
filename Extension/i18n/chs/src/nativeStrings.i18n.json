@@ -213,5 +213,6 @@
 	"invoking_nvcc": "正在使用命令行调用 nvcc: {0}",
 	"nvcc_host_compile_command_not_found": "在 nvcc 的输出中找不到主机编译命令。",
 	"unable_to_locate_forced_include": "找不到 forced include: {0}",
-	"inline_macro": "内联宏"
+	"inline_macro": "内联宏",
+	"unable_to_access_browse_database": "无法访问浏览数据库。({0})"
 }
