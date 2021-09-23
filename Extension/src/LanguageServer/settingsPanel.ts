@@ -39,6 +39,7 @@ const elementId: { [key: string]: string } = {
     windowsSdkVersion: "windowsSdkVersion",
     macFrameworkPath: "macFrameworkPath",
     compileCommands: "compileCommands",
+    mergeConfigurations: "mergeConfigurations",
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
 
@@ -324,6 +325,9 @@ export class SettingsPanel {
                 break;
             case elementId.compileCommands:
                 this.configValues.compileCommands = message.value;
+                break;
+            case elementId.mergeConfigurations:
+                this.configValues.mergeConfigurations = message.value;
                 break;
             case elementId.configurationProvider:
                 this.configValues.configurationProvider = message.value;

@@ -668,6 +668,15 @@
         </div>
 
         <div class="section">
+            <div class="section-title" data-loc-id="merge.configurations">Merge configurations</div>
+            <div>
+                <input type="checkbox" id="mergeConfigurations" style="vertical-align: middle; transform: scale(1.5)">
+                    <span data-loc-id="merge.configurations.description">When true (or checked), merge include paths, defines, and forced includes with those from a configuration provider.</span>
+                </input>
+            </div>
+        </div>
+
+        <div class="section">
             <div class="section-title" data-loc-id="browse.path">Browse: path</div>
             <div class="section-text">
                 <span data-loc-id="browse.path.description">A list of paths for the Tag Parser to search for headers included by your source files. If omitted, <code>includePath</code> will be used as the <code>path</code>. Searching on these paths is recursive by default. Specify <code>*</code> to indicate non-recursive search. For example: <code>/usr/include</code> will search through all subdirectories while <code>/usr/include/*</code> will not.</span>
