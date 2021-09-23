@@ -114,7 +114,7 @@ export class CppSettings extends Settings {
             if (!path) {
                 return undefined;
             } else {
-                // Attempt to invoke both our own version of clang-* to see if we can successfully execute it, and to get it's version.
+                // Attempt to invoke both our own version of clang-* to see if we can successfully execute it, and to get its version.
                 let clangVersion: string;
                 try {
                     const exePath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
