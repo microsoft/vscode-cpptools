@@ -140,7 +140,7 @@
 	"c_cpp.configuration.exclusionPolicy.markdownDescription": "当扩展在确定哪些文件应添加到代码导航数据库，并遍历 `browse.path` 数组中的路径时，指示其使用 `#files.exclude#` (和 `#C_Cpp.files.exclude#`)设置的时间。如果 `#files.exclude#` 设置仅包含文件夹，则 `checkFolders` 为最佳选择，且将提高扩展可以初始化代码导航数据库的速度。",
 	"c_cpp.configuration.exclusionPolicy.checkFolders.description": "排除筛选器将仅对每个文件夹进行一次评估(不检查单个文件)。",
 	"c_cpp.configuration.exclusionPolicy.checkFilesAndFolders.description": "将针对每个遇到的文件和文件夹评估排除筛选器。",
-	"c_cpp.configuration.preferredPathSeparator.description": "要作为 #include 自动完成结果的路径分隔符使用的字符。",
+	"c_cpp.configuration.preferredPathSeparator.markdownDescription": "用作 `#include` 自动完成结果的路径分隔符的字符。",
 	"c_cpp.configuration.simplifyStructuredComments.markdownDescription": "如果为 `true`，则悬停和自动完成的工具提示将仅显示结构化注释的某些标签。否则，将显示所有注释。",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": "开始多行或单行注释块的模式。多行注释块的延续模式默认为 ` * `，或单行注释块默认为此字符串。",
 	"c_cpp.configuration.commentContinuationPatterns.items.anyof.object.begin.description": "开启一个多行或单行注释块的模式。",

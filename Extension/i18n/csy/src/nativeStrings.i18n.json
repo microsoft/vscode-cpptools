@@ -213,5 +213,6 @@
 	"invoking_nvcc": "Volá se nvcc pomocí příkazového řádku: {0}",
 	"nvcc_host_compile_command_not_found": "Ve výstupu nástroje nvcc se nepovedlo najít příkaz pro kompilaci hostitele.",
 	"unable_to_locate_forced_include": "Nepovedlo se najít vynuceně zahrnované soubory: {0}",
-	"inline_macro": "Vložené makro"
+	"inline_macro": "Vložené makro",
+	"unable_to_access_browse_database": "Nedá se získat přístup k procházení databáze. ({0})"
 }

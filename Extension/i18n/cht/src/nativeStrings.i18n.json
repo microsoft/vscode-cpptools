@@ -213,5 +213,6 @@
 	"invoking_nvcc": "正在使用命令列 {0} 叫用 nvcc",
 	"nvcc_host_compile_command_not_found": "在 nvcc 的輸出中找不到主機編譯命令。",
 	"unable_to_locate_forced_include": "找不到強制的 include: {0}",
-	"inline_macro": "內嵌巨集"
+	"inline_macro": "內嵌巨集",
+	"unable_to_access_browse_database": "無法存取瀏覽資料庫。({0})"
 }

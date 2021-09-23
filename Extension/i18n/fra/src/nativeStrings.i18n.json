@@ -213,5 +213,6 @@
 	"invoking_nvcc": "Appel de nvcc avec la ligne de commande : {0}",
 	"nvcc_host_compile_command_not_found": "La commande de compilation hôte est introuvable dans la sortie de nvcc.",
 	"unable_to_locate_forced_include": "Impossible de localiser le fichier include forcé : {0}",
-	"inline_macro": "Macro inlined"
+	"inline_macro": "Macro inlined",
+	"unable_to_access_browse_database": "Impossible d’accéder à la base de données Browse. ({0})"
 }

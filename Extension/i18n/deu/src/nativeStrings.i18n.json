@@ -213,5 +213,6 @@
 	"invoking_nvcc": "nvcc wird über Befehlszeile aufgerufen: {0}",
 	"nvcc_host_compile_command_not_found": "Der Hostkompilierbefehl wurde in der Ausgabe von nvcc nicht gefunden.",
 	"unable_to_locate_forced_include": "Erzwungene Includedatei wurde nicht gefunden: {0}",
-	"inline_macro": "Inlinemakro"
+	"inline_macro": "Inlinemakro",
+	"unable_to_access_browse_database": "Auf die Suchdatenbank kann nicht zugegriffen werden. ({0})"
 }
