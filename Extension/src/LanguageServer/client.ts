@@ -577,6 +577,7 @@ class ClientModel {
     public isParsingFiles: DataBinding<boolean>;
     public isUpdatingIntelliSense: DataBinding<boolean>;
     public isRunningCodeAnalysis: DataBinding<boolean>;
+    public isCodeAnalysisPaused: DataBinding<boolean>;
     public codeAnalysisProcessed: DataBinding<number>;
     public codeAnalysisTotal: DataBinding<number>;
     public referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
@@ -590,6 +591,7 @@ class ClientModel {
         this.isParsingFiles = new DataBinding<boolean>(false);
         this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
         this.isRunningCodeAnalysis = new DataBinding<boolean>(false);
+        this.isCodeAnalysisPaused = new DataBinding<boolean>(false);
         this.codeAnalysisProcessed = new DataBinding<number>(0);
         this.codeAnalysisTotal = new DataBinding<number>(0);
         this.referencesCommandMode = new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None);
@@ -604,6 +606,7 @@ class ClientModel {
         this.isParsingFiles.activate();
         this.isUpdatingIntelliSense.activate();
         this.isRunningCodeAnalysis.activate();
+        this.isCodeAnalysisPaused.activate();
         this.codeAnalysisProcessed.activate();
         this.codeAnalysisTotal.activate();
         this.referencesCommandMode.activate();
@@ -618,6 +621,7 @@ class ClientModel {
         this.isParsingFiles.deactivate();
         this.isUpdatingIntelliSense.deactivate();
         this.isRunningCodeAnalysis.deactivate();
+        this.isCodeAnalysisPaused.deactivate();
         this.codeAnalysisProcessed.deactivate();
         this.codeAnalysisTotal.deactivate();
         this.referencesCommandMode.deactivate();
@@ -632,6 +636,7 @@ class ClientModel {
         this.isParsingFiles.dispose();
         this.isUpdatingIntelliSense.dispose();
         this.isRunningCodeAnalysis.dispose();
+        this.isCodeAnalysisPaused.dispose();
         this.codeAnalysisProcessed.dispose();
         this.codeAnalysisTotal.dispose();
         this.referencesCommandMode.dispose();
@@ -647,6 +652,7 @@ export interface Client {
     ParsingFilesChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
     RunningCodeAnalysisChanged: vscode.Event<boolean>;
+    CodeAnalysisPausedChanged: vscode.Event<boolean>;
     CodeAnalysisProcessedChanged: vscode.Event<number>;
     CodeAnalysisTotalChanged: vscode.Event<number>;
     ReferencesCommandModeChanged: vscode.Event<refs.ReferencesCommandMode>;
@@ -767,6 +773,7 @@ export class DefaultClient implements Client {
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.model.isParsingFiles.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
     public get RunningCodeAnalysisChanged(): vscode.Event<boolean> { return this.model.isRunningCodeAnalysis.ValueChanged; }
+    public get CodeAnalysisPausedChanged(): vscode.Event<boolean> { return this.model.isCodeAnalysisPaused.ValueChanged; }
     public get CodeAnalysisProcessedChanged(): vscode.Event<number> { return this.model.codeAnalysisProcessed.ValueChanged; }
     public get CodeAnalysisTotalChanged(): vscode.Event<number> { return this.model.codeAnalysisTotal.ValueChanged; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
@@ -2635,10 +2642,12 @@ export class DefaultClient implements Client {
 
     public PauseCodeAnalysis(): void {
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(PauseCodeAnalysisNotification));
+        this.model.isCodeAnalysisPaused.Value = true;
     }
 
     public ResumeCodeAnalysis(): void {
         this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(ResumeCodeAnalysisNotification));
+        this.model.isCodeAnalysisPaused.Value = false;
     }
 
     public CancelCodeAnalysis(): void {
@@ -3160,6 +3169,7 @@ class NullClient implements Client {
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get RunningCodeAnalysisChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
+    public get CodeAnalysisPausedChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get CodeAnalysisProcessedChanged(): vscode.Event<number> { return this.numberEvent.event; }
     public get CodeAnalysisTotalChanged(): vscode.Event<number> { return this.numberEvent.event; }
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
