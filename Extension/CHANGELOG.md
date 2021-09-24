@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.7.0-insiders: Sept 24, 2021
+## Version 1.7.0-insiders: September 27, 2021
 ### New Features
 * Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
 * Add support for macOS app bundles [#6726](https://github.com/microsoft/vscode-cpptools/issues/6726)
@@ -12,7 +12,6 @@
 
 ### Bug Fixes
 * Fix an issue with signature help for overloaded constructors. [#1664](https://github.com/microsoft/vscode-cpptools/issues/1664)
-* Fix an issue with the signature popup not being displayed. [#4413](https://github.com/microsoft/vscode-cpptools/issues/4413)
 * Add markdown to settings descriptions. [#4544](https://github.com/microsoft/vscode-cpptools/issues/4544)
 * Fix an IntelliSense process crash. [#5584](https://github.com/microsoft/vscode-cpptools/issues/5548), [#8110](https://github.com/microsoft/vscode-cpptools/issues/8110)
 * Fix an issue with incorrect E0513 and E0167 IntelliSense errors. [#6338](https://github.com/microsoft/vscode-cpptools/issues/6338)
