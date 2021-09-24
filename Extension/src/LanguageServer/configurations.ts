@@ -748,7 +748,7 @@ export class CppProperties {
         }
 
         if (property === null) {
-            return property = undefined;
+            return undefined;
         }
 
         return property;
