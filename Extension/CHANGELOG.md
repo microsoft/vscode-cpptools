@@ -1,7 +1,40 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.7.0-insiders: September 27, 2021
+### New Features
+* Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
+* Add support for macOS app bundles [#6726](https://github.com/microsoft/vscode-cpptools/issues/6726)
+	* [MIEngine#1091](https://github.com/microsoft/MIEngine/pull/1091)
+* Add support for Go To / Peek Type Definition. [#7999](https://github.com/microsoft/vscode-cpptools/issues/7999)
+
+### Enhancements
+* In generated build tasks, add a compiler arg to cause color to be displayed in gcc/clang output in terminal. [PR #8165](https://github.com/microsoft/vscode-cpptools/pull/8165)
+
+### Bug Fixes
+* Fix an issue with signature help for overloaded constructors. [#1664](https://github.com/microsoft/vscode-cpptools/issues/1664)
+* Add markdown to settings descriptions. [#4544](https://github.com/microsoft/vscode-cpptools/issues/4544)
+* Fix an IntelliSense process crash. [#5584](https://github.com/microsoft/vscode-cpptools/issues/5548), [#8110](https://github.com/microsoft/vscode-cpptools/issues/8110)
+* Fix an issue with incorrect E0513 and E0167 IntelliSense errors. [#6338](https://github.com/microsoft/vscode-cpptools/issues/6338)
+* Fix issue with IntelliSense for anonymous members. [#6412](https://github.com/microsoft/vscode-cpptools/issues/6412)
+* Fix an issue with incorrect "no suitable user-defined conversion" errors. [#6721](https://github.com/microsoft/vscode-cpptools/issues/6721)
+* Fix some issues with punctuation in setting descriptions. [#6870](https://github.com/microsoft/vscode-cpptools/issues/6870)
+* Add descriptions for setting enum values. [#7358](https://github.com/microsoft/vscode-cpptools/issues/7358)
+* Add support for `${execPath}` and `${pathSeparator}` in `c_cpp_properties.json`. [#7753](https://github.com/microsoft/vscode-cpptools/issues/7753)
+* Move the scope of document symbols from the name (on the left) to the details (on the right). [#7785](https://github.com/microsoft/vscode-cpptools/issues/7785)
+* Fix an issue with config validation of Force Include values. [#7822](https://github.com/microsoft/vscode-cpptools/issues/7822)
+* Fix an issue related to arg parsing in build tasks. [#7891](https://github.com/microsoft/vscode-cpptools/issues/7891)
+* Add a check when cppbuild task is used when the active file is not a source file. [#7892](https://github.com/microsoft/vscode-cpptools/issues/7892)
+* Fix a cpptools crash [#8055](https://github.com/microsoft/vscode-cpptools/issues/8055)
+* Fix issue "LogPoint stopped working v1.6.0".  [#8065](https://github.com/microsoft/vscode-cpptools/issues/8065)
+	* [MIEngine#1208](https://github.com/microsoft/MIEngine/pull/1208)
+* Fix issue "Debugger won't read/write from/to stdio". [#8075](https://github.com/microsoft/vscode-cpptools/issues/8075)
+	* [MIEngine#1209](https://github.com/microsoft/MIEngine/pull/1209)
+* Fix an issue with VC 14.0 headers not being found. [#8078](https://github.com/microsoft/vscode-cpptools/issues/8078)
+* Fix an issue with CUDA support with `compile_commands.json`. [#8091](https://github.com/microsoft/vscode-cpptools/issues/8091)
+* Fix an issue with `/kernel` arg to `cl.exe` for C files. [#8158](https://github.com/microsoft/vscode-cpptools/issues/8158)
+
 ## Version 1.6.0: August 24, 2021
-### New Feature
+### New Features
 * Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
 * Debug Step Granularity for cppdbg [MIEngine#1169](https://github.com/microsoft/MIEngine/pull/1169)
   * Thank you for the contribution @Trass3r
