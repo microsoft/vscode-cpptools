@@ -192,7 +192,7 @@ const processHtmlFiles = () => {
 const traverseJson = (jsonTree, descriptionCallback, prefixPath) => {
     for (let fieldName in jsonTree) {
         if (jsonTree[fieldName] !== null) {
-            if (typeof (jsonTree[fieldName]) == "string" && fieldName === "description") {
+            if (typeof (jsonTree[fieldName]) == "string" && (fieldName === "description" || fieldName === "markdownDescription")) {
                 descriptionCallback(prefixPath, jsonTree[fieldName], jsonTree);
             } else if (typeof (jsonTree[fieldName]) == "object") {
                 let path = prefixPath;
@@ -219,8 +219,9 @@ const processJsonSchemaFiles = () => {
         };
         let descriptionCallback = (path, value, parent) => {
             let locId = filePath + "." + path;
+            let locHint = parent.descriptionHint;
             localizationJsonContents[locId] = value;
-            localizationMetadataContents.keys.push(locId);
+            localizationMetadataContents.keys.push(locHint ? { key: locId, comment: [locHint] } : locId);
             localizationMetadataContents.messages.push(value);
         };
         traverseJson(jsonTree, descriptionCallback, "");

@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.5.1-main",
+  "version": "1.6.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.58.0"
+    "vscode": "^1.60.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -243,13 +243,13 @@
       "properties": {
         "C_Cpp.clang_format_path": {
           "type": "string",
-          "description": "%c_cpp.configuration.clang_format_path.description%",
+          "markdownDescription": "%c_cpp.configuration.clang_format_path.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.clang_format_style": {
           "type": "string",
           "default": "file",
-          "description": "%c_cpp.configuration.clang_format_style.description%",
+          "markdownDescription": "%c_cpp.configuration.clang_format_style.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.formatting": {
@@ -260,11 +260,11 @@
             "Default",
             "Disabled"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.formatting.clangFormat.description%",
-            "%c_cpp.configuration.formatting.vcFormat.description%",
-            "%c_cpp.configuration.formatting.Default.description%",
-            "%c_cpp.configuration.formatting.Disabled.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.formatting.clangFormat.markdownDescription%",
+            "%c_cpp.configuration.formatting.vcFormat.markdownDescription%",
+            "%c_cpp.configuration.formatting.Default.markdownDescription%",
+            "%c_cpp.configuration.formatting.Disabled.markdownDescription%"
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.formatting.description%",
@@ -273,7 +273,7 @@
         "C_Cpp.vcFormat.indent.braces": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.braces.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.braces.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.multiLineRelativeTo": {
@@ -298,12 +298,12 @@
             "alignToParenthesis",
             "indent"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.description%",
-            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription%"
           ],
           "default": "indent",
-          "description": "%c_cpp.configuration.vcFormat.indent.withinParentheses.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.withinParentheses.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.preserveWithinParentheses": {
@@ -315,25 +315,25 @@
         "C_Cpp.vcFormat.indent.caseLabels": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.caseLabels.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.caseContents": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.indent.caseContents.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.caseContentsWhenBlock": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.lambdaBracesWhenParameter": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.gotoLabels": {
@@ -343,10 +343,10 @@
             "leftmostColumn",
             "none"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.description%",
-            "%c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.description%",
-            "%c_cpp.configuration.vcFormat.indent.gotoLabels.none.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.indent.gotoLabels.none.markdownDescription%"
           ],
           "default": "oneLeft",
           "description": "%c_cpp.configuration.vcFormat.indent.gotoLabels.description%",
@@ -359,10 +359,10 @@
             "leftmostColumn",
             "none"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.description%",
-            "%c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.description%",
-            "%c_cpp.configuration.vcFormat.indent.preprocessor.none.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.indent.preprocessor.none.markdownDescription%"
           ],
           "default": "leftmostColumn",
           "description": "%c_cpp.configuration.vcFormat.indent.preprocessor.description%",
@@ -371,13 +371,13 @@
         "C_Cpp.vcFormat.indent.accessSpecifiers": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.indent.accessSpecifiers.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.accessSpecifiers.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.namespaceContents": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.indent.namespaceContents.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.indent.namespaceContents.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.indent.preserveComments": {
@@ -486,19 +486,19 @@
         "C_Cpp.vcFormat.newLine.beforeCatch": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.newLine.beforeCatch.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeElse": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.vcFormat.newLine.beforeElse.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.newLine.beforeElse.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.newLine.beforeWhileInDoWhile": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.description%",
+          "markdownDescription": "%c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.vcFormat.space.beforeFunctionOpenParenthesis": {
@@ -758,10 +758,10 @@
             "allOneLineScopes",
             "never"
           ],
-          "enumDescriptions": [
-            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.description%",
-            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.description%",
-            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.description%"
+          "markdownEnumDescriptions": [
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription%",
+            "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription%"
           ],
           "default": "oneLiners",
           "description": "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.description%",
@@ -770,7 +770,7 @@
         "C_Cpp.clang_format_fallbackStyle": {
           "type": "string",
           "default": "Visual Studio",
-          "description": "%c_cpp.configuration.clang_format_fallbackStyle.description%",
+          "markdownDescription": "%c_cpp.configuration.clang_format_fallbackStyle.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.clang_format_sortIncludes": {
@@ -784,7 +784,7 @@
             null
           ],
           "default": null,
-          "description": "%c_cpp.configuration.clang_format_sortIncludes.description%",
+          "markdownDescription": "%c_cpp.configuration.clang_format_sortIncludes.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.intelliSenseEngine": {
@@ -796,6 +796,11 @@
           ],
           "default": "Default",
           "description": "%c_cpp.configuration.intelliSenseEngine.description%",
+          "enumDescriptions": [
+            "%c_cpp.configuration.intelliSenseEngine.default.description%",
+            "%c_cpp.configuration.intelliSenseEngine.tagParser.description%",
+            "%c_cpp.configuration.intelliSenseEngine.disabled.description%"
+          ],
           "scope": "resource"
         },
         "C_Cpp.intelliSenseEngineFallback": {
@@ -805,7 +810,7 @@
             "Disabled"
           ],
           "default": "Disabled",
-          "description": "%c_cpp.configuration.intelliSenseEngineFallback.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseEngineFallback.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.autocomplete": {
@@ -815,7 +820,11 @@
             "Disabled"
           ],
           "default": "Default",
-          "description": "%c_cpp.configuration.autocomplete.description%",
+          "markdownDescription": "%c_cpp.configuration.autocomplete.markdownDescription%",
+          "enumDescriptions": [
+            "%c_cpp.configuration.autocomplete.default.description%",
+            "%c_cpp.configuration.autocomplete.disabled.description%"
+          ],
           "scope": "resource"
         },
         "C_Cpp.errorSquiggles": {
@@ -838,7 +847,7 @@
         "C_Cpp.inactiveRegionOpacity": {
           "type:": "number",
           "default": 0.55,
-          "description": "%c_cpp.configuration.inactiveRegionOpacity.description%",
+          "markdownDescription": "%c_cpp.configuration.inactiveRegionOpacity.markdownDescription%",
           "scope": "resource",
           "minimum": 0.1,
           "maximum": 1
@@ -863,13 +872,13 @@
             "Debug"
           ],
           "default": "Error",
-          "description": "%c_cpp.configuration.loggingLevel.description%",
+          "markdownDescription": "%c_cpp.configuration.loggingLevel.markdownDescription%",
           "scope": "window"
         },
         "C_Cpp.autoAddFileAssociations": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.autoAddFileAssociations.description%",
+          "markdownDescription": "%c_cpp.configuration.autoAddFileAssociations.markdownDescription%",
           "scope": "window"
         },
         "C_Cpp.workspaceParsingPriority": {
@@ -881,7 +890,7 @@
             "low"
           ],
           "default": "highest",
-          "description": "%c_cpp.configuration.workspaceParsingPriority.description%",
+          "markdownDescription": "%c_cpp.configuration.workspaceParsingPriority.markdownDescription%",
           "scope": "window"
         },
         "C_Cpp.workspaceSymbols": {
@@ -901,7 +910,11 @@
             "checkFilesAndFolders"
           ],
           "default": "checkFolders",
-          "description": "%c_cpp.configuration.exclusionPolicy.description%",
+          "markdownDescription": "%c_cpp.configuration.exclusionPolicy.markdownDescription%",
+          "enumDescriptions": [
+            "%c_cpp.configuration.exclusionPolicy.checkFolders.description%",
+            "%c_cpp.configuration.exclusionPolicy.checkFilesAndFolders.description%"
+          ],
           "scope": "resource"
         },
         "C_Cpp.preferredPathSeparator": {
@@ -911,13 +924,13 @@
             "Backslash"
           ],
           "default": "Forward Slash",
-          "description": "%c_cpp.configuration.preferredPathSeparator.description%",
+          "markdownDescription": "%c_cpp.configuration.preferredPathSeparator.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.simplifyStructuredComments": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.simplifyStructuredComments.description%",
+          "markdownDescription": "%c_cpp.configuration.simplifyStructuredComments.markdownDescription%",
           "scope": "application"
         },
         "C_Cpp.commentContinuationPatterns": {
@@ -929,7 +942,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.string.description%"
+                "markdownDescription": "%c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription%"
               },
               {
                 "type": "object",
@@ -961,20 +974,20 @@
         },
         "C_Cpp.intelliSenseCachePath": {
           "type": "string",
-          "description": "%c_cpp.configuration.intelliSenseCachePath.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseCachePath.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.intelliSenseCacheSize": {
           "type": "number",
           "default": 5120,
-          "description": "%c_cpp.configuration.intelliSenseCacheSize.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseCacheSize.markdownDescription%",
           "scope": "machine-overridable",
           "minimum": 0
         },
         "C_Cpp.intelliSenseMemoryLimit": {
           "type": "number",
           "default": 4096,
-          "description": "%c_cpp.configuration.intelliSenseMemoryLimit.description%",
+          "markdownDescription": "%c_cpp.configuration.intelliSenseMemoryLimit.markdownDescription%",
           "scope": "machine-overridable",
           "minimum": 256,
           "maximum": 16384
@@ -988,62 +1001,46 @@
           "maximum": 3000
         },
         "C_Cpp.default.includePath": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "default": null,
-          "description": "%c_cpp.configuration.default.includePath.description%",
+          "markdownDescription": "%c_cpp.configuration.default.includePath.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.defines": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "default": null,
-          "description": "%c_cpp.configuration.default.defines.description%",
+          "markdownDescription": "%c_cpp.configuration.default.defines.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.macFrameworkPath": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "default": null,
-          "description": "%c_cpp.configuration.default.macFrameworkPath.description%",
+          "markdownDescription": "%c_cpp.configuration.default.macFrameworkPath.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.windowsSdkVersion": {
           "type": "string",
-          "description": "%c_cpp.configuration.default.windowsSdkVersion.description%",
+          "markdownDescription": "%c_cpp.configuration.default.windowsSdkVersion.markdownDescription%",
           "pattern": "^((\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1)|())$",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.compileCommands": {
           "type": "string",
-          "description": "%c_cpp.configuration.default.compileCommands.description%",
+          "markdownDescription": "%c_cpp.configuration.default.compileCommands.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.forcedInclude": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "default": null,
-          "description": "%c_cpp.configuration.default.forcedInclude.description%",
+          "markdownDescription": "%c_cpp.configuration.default.forcedInclude.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.intelliSenseMode": {
@@ -1091,28 +1088,21 @@
             "msvc-arm",
             "msvc-arm64"
           ],
-          "description": "%c_cpp.configuration.default.intelliSenseMode.description%",
+          "markdownDescription": "%c_cpp.configuration.default.intelliSenseMode.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.compilerPath": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": "string",
           "default": null,
-          "description": "%c_cpp.configuration.default.compilerPath.description%",
+          "markdownDescription": "%c_cpp.configuration.default.compilerPath.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.compilerArgs": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "default": null,
-          "description": "%c_cpp.configuration.default.compilerArgs.description%",
+          "markdownDescription": "%c_cpp.configuration.default.compilerArgs.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.cStandard": {
@@ -1128,7 +1118,7 @@
             "gnu11",
             "gnu17"
           ],
-          "description": "%c_cpp.configuration.default.cStandard.description%",
+          "markdownDescription": "%c_cpp.configuration.default.cStandard.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.default.cppStandard": {
@@ -1148,47 +1138,40 @@
             "gnu++17",
             "gnu++20"
           ],
-          "description": "%c_cpp.configuration.default.cppStandard.description%",
+          "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.default.configurationProvider": {
           "type": "string",
-          "description": "%c_cpp.configuration.default.configurationProvider.description%",
+          "markdownDescription": "%c_cpp.configuration.default.configurationProvider.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.default.browse.path": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
           "default": null,
-          "description": "%c_cpp.configuration.default.browse.path.description%",
+          "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.browse.databaseFilename": {
           "type": "string",
-          "description": "%c_cpp.configuration.default.browse.databaseFilename.description%",
+          "markdownDescription": "%c_cpp.configuration.default.browse.databaseFilename.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.description%",
+          "markdownDescription": "%c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.default.systemIncludePath": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "default": null,
-          "description": "%c_cpp.configuration.default.systemIncludePath.description%",
+          "markdownDescription": "%c_cpp.configuration.default.systemIncludePath.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.customConfigurationVariables": {
@@ -1202,13 +1185,13 @@
               "type": "string"
             }
           },
-          "description": "%c_cpp.configuration.default.customConfigurationVariables.description%",
+          "markdownDescription": "%c_cpp.configuration.default.customConfigurationVariables.markdownDescription%",
           "scope": "machine-overridable"
         },
         "C_Cpp.default.enableConfigurationSquiggles": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.default.enableConfigurationSquiggles.description%",
+          "markdownDescription": "%c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.updateChannel": {
@@ -1218,7 +1201,7 @@
             "Insiders"
           ],
           "default": "Default",
-          "description": "%c_cpp.configuration.updateChannel.description%",
+          "markdownDescription": "%c_cpp.configuration.updateChannel.markdownDescription%",
           "scope": "application"
         },
         "C_Cpp.experimentalFeatures": {
@@ -1234,7 +1217,7 @@
         "C_Cpp.suggestSnippets": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.suggestSnippets.description%",
+          "markdownDescription": "%c_cpp.configuration.suggestSnippets.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.enhancedColorization": {
@@ -1244,7 +1227,7 @@
             "Disabled"
           ],
           "default": "Enabled",
-          "description": "%c_cpp.configuration.enhancedColorization.description%",
+          "markdownDescription": "%c_cpp.configuration.enhancedColorization.markdownDescription%",
           "scope": "window"
         },
         "C_Cpp.vcpkg.enabled": {
@@ -1256,19 +1239,19 @@
         "C_Cpp.addNodeAddonIncludePaths": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.description%",
+          "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
           "scope": "application"
         },
         "C_Cpp.renameRequiresIdentifier": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.renameRequiresIdentifier.description%",
+          "markdownDescription": "%c_cpp.configuration.renameRequiresIdentifier.markdownDescription%",
           "scope": "application"
         },
         "C_Cpp.debugger.useBacktickCommandSubstitution": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.debugger.useBacktickCommandSubstitution.description%",
+          "markdownDescription": "%c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription%",
           "scope": "window"
         },
         "C_Cpp.codeFolding": {
@@ -1284,12 +1267,12 @@
         "C_Cpp.autocompleteAddParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "%c_cpp.configuration.autocompleteAddParentheses.description%",
+          "markdownDescription": "%c_cpp.configuration.autocompleteAddParentheses.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.files.exclude": {
           "type": "object",
-          "markdownDescription": "%c_cpp.configuration.filesExclude.description%",
+          "markdownDescription": "%c_cpp.configuration.filesExclude.markdownDescription%",
           "default": {
             "**/.vscode": true
           },
@@ -1297,7 +1280,7 @@
             "anyOf": [
               {
                 "type": "boolean",
-                "description": "%c_cpp.configuration.filesExcludeBoolean.description%"
+                "markdownDescription": "%c_cpp.configuration.filesExcludeBoolean.markdownDescription%"
               },
               {
                 "type": "object",
@@ -1306,7 +1289,7 @@
                     "type": "string",
                     "pattern": "\\w*\\$\\(basename\\)\\w*",
                     "default": "$(basename).ext",
-                    "description": "%c_cpp.configuration.filesExcludeWhen.description%"
+                    "markdownDescription": "%c_cpp.configuration.filesExcludeWhen.markdownDescription%"
                   }
                 }
               }
@@ -1375,6 +1358,11 @@
       {
         "command": "C_Cpp.BuildAndDebugActiveFile",
         "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.RestartIntelliSenseForFile",
+        "title": "%c_cpp.command.restartIntelliSenseForFile.title%",
         "category": "C/C++"
       },
       {
@@ -1490,6 +1478,32 @@
               "setupCommands": {
                 "type": "array",
                 "description": "%c_cpp.debuggers.setupCommands.description%",
+                "items": {
+                  "type": "object",
+                  "default": {},
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.text.description%",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.description.description%",
+                      "default": ""
+                    },
+                    "ignoreFailures": {
+                      "type": "boolean",
+                      "description": "%c_cpp.debuggers.ignoreFailures.description%",
+                      "default": false
+                    }
+                  }
+                },
+                "default": []
+              },
+              "postRemoteConnectCommands": {
+                "type": "array",
+                "description": "%c_cpp.debuggers.postRemoteConnectCommands.description%",
                 "items": {
                   "type": "object",
                   "default": {},
@@ -2533,7 +2547,12 @@
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2_debug@1"
+          "group": "other2@1"
+        },
+        {
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "command": "C_Cpp.RestartIntelliSenseForFile",
+          "group": "other2@2"
         }
       ],
       "commandPalette": [
@@ -3026,18 +3045,18 @@
     "@types/plist": "^3.0.2",
     "@types/semver": "^7.1.0",
     "@types/tmp": "^0.1.0",
-    "@types/vscode": "1.58.0",
+    "@types/vscode": "1.60.0",
     "@types/which": "^1.3.2",
     "@types/yauzl": "^2.9.1",
-    "@typescript-eslint/eslint-plugin": "^4.22.1",
-    "@typescript-eslint/eslint-plugin-tslint": "^4.22.1",
-    "@typescript-eslint/parser": "^4.22.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/eslint-plugin-tslint": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
     "@vscode/test-electron": "^1.6.1",
     "async-child-process": "^1.1.1",
     "await-notify": "^1.0.1",
-    "eslint": "^7.25.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsdoc": "^33.1.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jsdoc": "^36.1.0",
     "event-stream": "^4.0.1",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
@@ -3056,7 +3075,7 @@
     "parse5-traverse": "^1.0.3",
     "ts-loader": "^8.1.0",
     "tslint": "^5.19.0",
-    "typescript": "^3.5.3",
+    "typescript": "^4.4.3",
     "vscode-debugadapter": "^1.35.0",
     "vscode-debugprotocol": "^1.35.0",
     "vscode-nls-dev": "^4.0.0-next.1",
@@ -3071,7 +3090,7 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
-    "plist": "^3.0.2",
+    "plist": "^3.0.4",
     "tmp": "^0.1.0",
     "vscode-cpptools": "^5.0.0",
     "vscode-extension-telemetry": "^0.1.7",
@@ -3088,12 +3107,14 @@
     "hosted-git-info": "^3.0.8",
     "browserslist": "^4.16.6",
     "glob-parent": "^5.1.2",
-    "path-parse": "^1.0.7"
+    "path-parse": "^1.0.7",
+    "axios": "^0.21.4",
+    "set-value": "^4.0.1"
   },
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167520",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170969",
       "platforms": [
         "linux"
       ],
@@ -3104,11 +3125,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "32AC1D58A5A21527AA24583011F5A3694FCEFB5920677D0CA8D13F70BC0102BE"
+      "integrity": "1554D6291CEC20CE0E39B0A4AD9E50FAD012FCAA76460FA0A2DDD7654ADC197F"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167624",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170862",
       "platforms": [
         "linux"
       ],
@@ -3119,11 +3140,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "9CB1C36A34DD2F7A53FF5471F1FBB5C0AD65A9E67C17013C7FBF65CDDAF7A7E1"
+      "integrity": "94712D1268A54FF8224B908E15439B3B9C22FE2C268407D871D1C1B7EEF6630C"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167623",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170860",
       "platforms": [
         "linux"
       ],
@@ -3134,11 +3155,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "D8F6A5A4A8A13F6F872C94BD522602A7C0E5E5CCA58CE7CE1ED3DC32F82850AC"
+      "integrity": "B65F184826F61F3DF2E68CFE409C85BE6A9195595B524BCF74E67F1B50E474F5"
     },
     {
       "description": "C/C++ language components (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167518",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170970",
       "platforms": [
         "darwin"
       ],
@@ -3149,11 +3170,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "3EF54224CED1BCC6D64B2A93BFA8093E3D75510C8F96E943049CCB4C656161A2"
+      "integrity": "081A4A0098EC557A32692B2E9DAB852371B5330D8993FF8C5EE12AC6A8EE1605"
     },
     {
       "description": "C/C++ language components (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167519",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170971",
       "platforms": [
         "darwin"
       ],
@@ -3164,11 +3185,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "02F2BE96493256237995EF51D4E0CD0345727D27A61135C6FCDB88608406C908"
+      "integrity": "409E9221C7D8C318FBD09E02D41CA166692606521EB7B9A6E6C615359A7CDE4C"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167517",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170863",
       "platforms": [
         "win32"
       ],
@@ -3180,11 +3201,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "1E23884810A6EBF56BC7C5C4CB5317723CC3519039D56BF07310735870163E77"
+      "integrity": "6A766CE793DA60F8596139833A996A7015AB2FFAFBA441544A8616E6D9D0E9CC"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2167516",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2170861",
       "platforms": [
         "win32"
       ],
@@ -3195,7 +3216,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "26CCA79735F15BE0595510E2A170794CBF7E2EE72F2A565CD9D26970EA35547F"
+      "integrity": "9B984390FD80EE6FAA5615BDD343CF96575F507D1907101C42BC78C1F0AF7917"
     },
     {
       "description": "ClangFormat (Linux / x86_64)",
@@ -3311,7 +3332,7 @@
     },
     {
       "description": "OpenDebugAD7 (Windows x86/x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/db301b288a036364c1718048b97b0d58/win-x86.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/b6f4a97889ec460d5a7cb8e880c802ba/win-x86.zip",
       "platforms": [
         "win32"
       ],
@@ -3322,11 +3343,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "452B01805E3602B23E24AF3F271759F35C1961093B345C5835C304D7FCDC1439"
+      "integrity": "6E3D9651FF1ACCFB90A5CEF0F4B5C3FEFB4B8D0D68EC1A9E662428C0558BB062"
     },
     {
       "description": "OpenDebugAD7 (Windows ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/365a4f83f0ece3c5fc1f0cb0c73a0f2c/win10-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/10847664407c73081a2b1e77368d1b2e/win10-arm64.zip",
       "platforms": [
         "win32"
       ],
@@ -3336,11 +3357,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7.exe"
       ],
-      "integrity": "86D9C73FE551A8613DA3CD13D4C039D3E55E3773DF72636223A3C3F124598414"
+      "integrity": "A583716260318ACA8DDD27E8CAC68A1D1D6F9435871720ABF55740BA7A58096A"
     },
     {
       "description": "OpenDebugAD7 (Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/156c5a850e57f285f0b0a864ea719139/linux-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/99f1a2287dcf76cc2ad85b800bba9c01/linux-x64.zip",
       "platforms": [
         "linux"
       ],
@@ -3350,11 +3371,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "107B8EB400999BD3EDD764D7301FFE6C3C0572E09E2126D247B59860CEE9A83E"
+      "integrity": "5746E5C1372ACC1CB86D599447FBD4E1F8AA6994590AE5FCC9B961BDD09183E9"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/12f05b118ffe89ce4635c3eed54f3bda/linux-arm.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/ed287e8059e08c574952f5231ffbc1ba/linux-arm.zip",
       "platforms": [
         "linux"
       ],
@@ -3364,11 +3385,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "6594EC56505523031DCE4948734B3A840B6B02AB8F50AC2EFBA60CA3A151B51F"
+      "integrity": "7D6F99793D2824EE996A37357663BDAA6BE929092DD3CEB16C5A532820B0E51D"
     },
     {
       "description": "OpenDebugAD7 (Linux ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/ec8a27111cf71b9cc38afeac6d371afd/linux-arm64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/b9dc0e0f12f33d0b88be942cb1ff5ebe/linux-arm64.zip",
       "platforms": [
         "linux"
       ],
@@ -3378,11 +3399,11 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "2E1D8F435CF4DF9C63B584AD132A54F0C3702B531C7208FDC00810F714415FA0"
+      "integrity": "94BA61786551685D19130F0AE740F6A4EA4D2862B3364E08A53117773CFC1032"
     },
     {
       "description": "OpenDebugAD7 (Alpine Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/d48c2023dda15f926fcb3883e608be26/linux-musl-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/f74cb83d6e43dfc2c30a9a0ec46d46b4/linux-musl-x64.zip",
       "platforms": [
         "alpine-linux"
       ],
@@ -3392,21 +3413,22 @@
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "74C1AABD91FE3E3D02ADE6EEAC94A788BD4B309281595B02563E658A8F4A96AF"
+      "integrity": "5B0400B1F28E059CC74AEA02174661659C0FF89F4835E9947C9F853212A72984"
     },
     {
       "description": "OpenDebugAD7 (macOS x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/8bec3403-fc69-49ab-ae04-abf260ae1d81/368ecdd16d233a1dfd7cdbf09dc9801f/osx-x64.zip",
+      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/7ed17c1525fb70665716366891d2296a/osx-x64.zip",
       "platforms": [
         "darwin"
       ],
       "architectures": [
-        "x64"
+        "x64",
+        "arm64"
       ],
       "binaries": [
         "./debugAdapters/bin/OpenDebugAD7"
       ],
-      "integrity": "D0D23C00763225F749A1495C1E9A1A70726E2EC8A0B72A695FEC231A41E739E9"
+      "integrity": "48C36077BD4BE44E2B62246CDD72F90FAAAE26E3D3199CDC980047F41E31B718"
     },
     {
       "description": "LLDB-MI (macOS Mojave and higher)",

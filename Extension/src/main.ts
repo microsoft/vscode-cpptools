@@ -195,7 +195,8 @@ async function processRuntimeDependencies(): Promise<void> {
         // No lock file, need to download and install dependencies.
         try {
             await onlineInstallation(info);
-        } catch (error) {
+        } catch (errJS) {
+            const error: Error = errJS as Error;
             handleError(error);
 
             // Send the failure telemetry since postInstall will not be called.
@@ -209,9 +210,6 @@ async function offlineInstallation(info: PlatformInformation): Promise<void> {
 
     setInstallationStage('cleanUpUnusedBinaries');
     await cleanUpUnusedBinaries(info);
-
-    setInstallationStage('makeBinariesExecutable');
-    await makeBinariesExecutable();
 
     setInstallationStage('makeOfflineBinariesExecutable');
     await makeOfflineBinariesExecutable(info);
@@ -227,9 +225,6 @@ async function onlineInstallation(info: PlatformInformation): Promise<void> {
     setInstallationType(InstallationType.Online);
 
     await downloadAndInstallPackages(info);
-
-    setInstallationStage('makeBinariesExecutable');
-    await makeBinariesExecutable();
 
     setInstallationStage('rewriteManifest');
     await rewriteManifest();
@@ -261,10 +256,6 @@ async function downloadAndInstallPackages(info: PlatformInformation): Promise<vo
         setInstallationStage('installPackages');
         await packageManager.InstallPackages(progress);
     });
-}
-
-function makeBinariesExecutable(): Promise<void> {
-    return util.allowExecution(util.getDebugAdaptersPath("OpenDebugAD7"));
 }
 
 function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
@@ -315,7 +306,7 @@ function touchInstallLockFile(info: PlatformInformation): Promise<void> {
     return util.touchInstallLockFile(info);
 }
 
-function handleError(error: any): void {
+function handleError(error: Error): void {
     const installationInformation: InstallationInformation = getInstallationInformation();
     installationInformation.hasError = true;
     installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
@@ -403,7 +394,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    const settings: CppSettings = new CppSettings();
+    const settings: CppSettings = new CppSettings(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined);
     if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
@@ -422,23 +413,6 @@ async function finalizeExtensionActivation(): Promise<void> {
         }
     }));
     getTemporaryCommandRegistrarInstance().activateLanguageServer();
-
-    const packageJson: any = util.getRawPackageJson();
-    let writePackageJson: boolean = false;
-    const packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (packageJsonPath.includes(".vscode-insiders") ||
-        packageJsonPath.includes(".vscode-server-insiders") ||
-        packageJsonPath.includes(".vscode-exploration") ||
-        packageJsonPath.includes(".vscode-server-exploration")) {
-        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
-            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
-            writePackageJson = true;
-        }
-    }
-
-    if (writePackageJson) {
-        return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
-    }
 }
 
 function rewriteManifest(): Promise<void> {
@@ -452,6 +426,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugActiveFile",
+        "onCommand:C_Cpp.RestartIntelliSenseForFile",
         "onCommand:C_Cpp.ConfigurationEditJSON",
         "onCommand:C_Cpp.ConfigurationEditUI",
         "onCommand:C_Cpp.ConfigurationSelect",
@@ -478,5 +453,23 @@ function rewriteManifest(): Promise<void> {
         "onFileSystem:cpptools-schema"
     ];
 
-    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson));
+    let doTouchExtension: boolean = false;
+
+    const packageJsonPath: string = util.getExtensionFilePath("package.json");
+    if (packageJsonPath.includes(".vscode-insiders") ||
+        packageJsonPath.includes(".vscode-server-insiders") ||
+        packageJsonPath.includes(".vscode-exploration") ||
+        packageJsonPath.includes(".vscode-server-exploration")) {
+        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
+            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
+            doTouchExtension = true;
+        }
+    }
+
+    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => {
+        if (doTouchExtension) {
+            // This is required to prevent VS Code from using the cached version with the old updateChannel setting.
+            util.touchExtensionFolder();
+        }
+    });
 }

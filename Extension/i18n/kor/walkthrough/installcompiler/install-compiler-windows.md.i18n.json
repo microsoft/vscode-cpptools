@@ -9,7 +9,7 @@
 	"walkthrough.windows.link.title1": "VS Code에서 C++ 및 Linux용 Windows 하위 시스템(WSL) 사용",
 	"walkthrough.windows.link.title2": "MinGW로 Windows에 GCC 설치",
 	"walkthrough.windows.text2": "MSVC를 설치하려면 Visual Studio {1} 페이지에서 {0}을(를) 다운로드합니다.",
-	"walkthrough.windows.build.tools1": "C++ 빌드 도구",
+	"walkthrough.windows.build.tools1": "Visual Studio 2019용 Build Tools",
 	"walkthrough.windows.link.downloads": "다운로드",
 	"walkthrough.windows.text3": "Visual Studio 설치 프로그램에서 {0} 워크로드를 확인하고 {1}을(를) 선택합니다.",
 	"walkthrough.windows.build.tools2": "C++ 빌드 도구",

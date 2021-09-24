@@ -9,7 +9,7 @@
 	"walkthrough.windows.link.title1": "在 VS Code 中使用 C++ 和 适用于 Linux 的 Windows 子系统(WSL)",
 	"walkthrough.windows.link.title2": "在带 MinGW 的 Windows 上安装 GCC",
 	"walkthrough.windows.text2": "要安装 MSVC，请从 Visual Studio {1} 页面下载 {0}。",
-	"walkthrough.windows.build.tools1": "C++ 生成工具",
+	"walkthrough.windows.build.tools1": "Visual Studio 2019 生成工具",
 	"walkthrough.windows.link.downloads": "下载",
 	"walkthrough.windows.text3": "在 Visual Studio 安装程序中，检查 {0} 工作负载并选择 {1}。",
 	"walkthrough.windows.build.tools2": "C++ 生成工具",

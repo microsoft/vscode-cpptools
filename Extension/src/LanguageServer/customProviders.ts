@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import { CustomConfigurationProvider, Version, SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { CppSettings } from './settings';
+import * as ext from './extension';
 
 /**
  * An interface that is guaranteed to be backward compatible with version 0
@@ -46,15 +47,15 @@ class CustomProviderWrapper implements CustomConfigurationProvider1 {
     }
 
     public get isValid(): boolean {
-        let valid: boolean = !!(this.provider.name && this.provider.canProvideConfiguration && this.provider.provideConfigurations);
+        let valid: boolean = !!this.provider.name && !!this.provider.canProvideConfiguration && !!this.provider.provideConfigurations;
         if (valid && this._version > Version.v0) {
-            valid = !!(this.provider.extensionId && this.provider.dispose);
+            valid = !!this.provider.extensionId && !!this.provider.dispose;
         }
         if (valid && this._version > Version.v1) {
-            valid = !!(this.provider.canProvideBrowseConfiguration && this.provider.provideBrowseConfiguration);
+            valid = !!this.provider.canProvideBrowseConfiguration && !!this.provider.provideBrowseConfiguration;
         }
         if (valid && this._version > Version.v2) {
-            valid = !!(this.provider.canProvideBrowseConfigurationsPerFolder && this.provider.provideFolderBrowseConfiguration);
+            valid = !!this.provider.canProvideBrowseConfigurationsPerFolder && !!this.provider.provideFolderBrowseConfiguration;
         }
         return valid;
     }
@@ -157,7 +158,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
-        if (new CppSettings().intelliSenseEngine === "Disabled") {
+        if (new CppSettings(ext.getActiveClient().RootUri).intelliSenseEngine === "Disabled") {
             console.warn("Language service is disabled. Provider will not be registered.");
             return false;
         }

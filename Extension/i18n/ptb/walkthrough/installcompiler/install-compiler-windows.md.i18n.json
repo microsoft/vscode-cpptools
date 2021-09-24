@@ -9,7 +9,7 @@
 	"walkthrough.windows.link.title1": "Usando C++ e Subsistema Windows para Linux (WSL) no código VS",
 	"walkthrough.windows.link.title2": "instalar GCC no Windows com MinGW",
 	"walkthrough.windows.text2": "Para instalar o MSVC, faça download de {0} na página do Visual Studio {1}. ",
-	"walkthrough.windows.build.tools1": "Ferramentas de Compilação em C++",
+	"walkthrough.windows.build.tools1": "Ferramentas de Build para Visual Studio 2019",
 	"walkthrough.windows.link.downloads": "Downloads",
 	"walkthrough.windows.text3": "No Instalador do Visual Studio, verifique a {0} carga de trabalho e selecione {1}.",
 	"walkthrough.windows.build.tools2": "Ferramentas de construção C++",
