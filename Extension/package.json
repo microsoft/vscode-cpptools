@@ -440,6 +440,11 @@
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.notes.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.headerFilter": {
+          "type": "string",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.codeAnalysis.clangTidy.args": {
           "type": "string",
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
@@ -765,8 +770,8 @@
               "darwin-*",
               "darwin-avoid-spinlock",
               "darwin-dispatch-once-nonstatic",
-              "fuschsia-*",
-              "fuschsia-default-*",
+              "fuchsia-*",
+              "fuchsia-default-*",
               "fuchsia-default-arguments-calls",
               "fuchsia-default-arguments-declarations",
               "fuchsia-header-anon-namespaces",

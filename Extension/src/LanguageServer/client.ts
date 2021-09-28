@@ -1070,6 +1070,7 @@ export class DefaultClient implements Client {
         const settings_clangTidyFixWarnings: (boolean | undefined)[] = [];
         const settings_clangTidyFixErrors: (boolean | undefined)[] = [];
         const settings_clangTidyFixNotes: (boolean | undefined)[] = [];
+        const settings_clangTidyHeaderFilter: (string | undefined)[] = [];
         const settings_clangTidyArgs: (string | undefined)[] = [];
         const settings_clangTidyChecksEnabled: (string[] | undefined)[] = [];
         const settings_clangTidyChecksDisabled: (string[] | undefined)[] = [];
@@ -1180,6 +1181,7 @@ export class DefaultClient implements Client {
                 settings_clangTidyFixWarnings.push(setting.clangTidyFixWarnings);
                 settings_clangTidyFixErrors.push(setting.clangTidyFixErrors);
                 settings_clangTidyFixNotes.push(setting.clangTidyFixNotes);
+                settings_clangTidyHeaderFilter.push(setting.clangTidyHeaderFilter);
                 settings_clangTidyArgs.push(setting.clangTidyArgs);
                 settings_clangTidyChecksEnabled.push(setting.clangTidyChecksEnabled);
                 settings_clangTidyChecksDisabled.push(setting.clangTidyChecksDisabled);
@@ -1321,6 +1323,7 @@ export class DefaultClient implements Client {
                             errors: settings_clangTidyFixErrors,
                             notes: settings_clangTidyFixNotes
                         },
+                        headerFilter: settings_clangTidyHeaderFilter,
                         args: settings_clangTidyArgs,
                         checks: {
                             enabled: settings_clangTidyChecksEnabled,
