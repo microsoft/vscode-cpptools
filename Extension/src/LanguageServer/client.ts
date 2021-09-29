@@ -1802,29 +1802,29 @@ export class DefaultClient implements Client {
                                 const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
                                 if (configs && configs.length > 0 && configs[0]) {
                                     const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
-                                    if (fileConfiguration?.mergeConfigurations ?? false) {
+                                    if (fileConfiguration?.mergeConfigurations) {
                                         configs.forEach(config => {
-                                            fileConfiguration?.includePath?.forEach(p => {
+                                            for (const p in fileConfiguration.includePath) {
                                                 if (!config.configuration.includePath.includes(p)) {
                                                     config.configuration.includePath.push(p);
                                                 }
-                                            });
+                                            }
 
-                                            fileConfiguration?.defines?.forEach(d => {
+                                            for (const d in fileConfiguration.defines) {
                                                 if (!config.configuration.defines.includes(d)) {
                                                     config.configuration.defines.push(d);
                                                 }
-                                            });
+                                            }
 
                                             if (!config.configuration.forcedInclude) {
                                                 config.configuration.forcedInclude = [];
                                             }
 
-                                            fileConfiguration?.forcedInclude?.forEach(i => {
-                                                if (!config.configuration.forcedInclude?.includes(i) ?? false) {
+                                            for (const i in fileConfiguration.forcedInclude) {
+                                                if (!config.configuration.forcedInclude?.includes(i)) {
                                                     config.configuration.forcedInclude?.push(i);
                                                 }
-                                            });
+                                            }
                                         });
                                     }
 
