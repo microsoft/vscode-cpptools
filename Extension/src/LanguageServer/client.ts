@@ -2230,6 +2230,9 @@ export class DefaultClient implements Client {
                 false /* ignoreDeleteEvents */);
 
             this.rootPathFileWatcher.onDidCreate(async (uri) => {
+                if (uri.scheme !== 'file') {
+                    return;
+                }
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
@@ -2254,6 +2257,9 @@ export class DefaultClient implements Client {
                 }
             }
             this.rootPathFileWatcher.onDidChange(async (uri) => {
+                if (uri.scheme !== 'file') {
+                    return;
+                }
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
@@ -2277,6 +2283,9 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
+                if (uri.scheme !== 'file') {
+                    return;
+                }
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
                 if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
