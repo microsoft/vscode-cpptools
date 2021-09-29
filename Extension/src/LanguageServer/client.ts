@@ -1820,9 +1820,11 @@ export class DefaultClient implements Client {
                                                 config.configuration.forcedInclude = [];
                                             }
 
-                                            for (const i in fileConfiguration.forcedInclude) {
-                                                if (!config.configuration.forcedInclude?.includes(i)) {
-                                                    config.configuration.forcedInclude?.push(i);
+                                            if (config.configuration.forcedInclude) {
+                                                for (const i in fileConfiguration.forcedInclude) {
+                                                    if (!config.configuration.forcedInclude.includes(i)) {
+                                                        config.configuration.forcedInclude.push(i);
+                                                    }
                                                 }
                                             }
                                         });
