@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.7.0-insiders2: Sept 30, 2021
+
+### Bug Fixes
+* Reduce required version of glibc to 2.17 on Linux x64 systems. [#8192](https://github.com/microsoft/vscode-cpptools/issues/8192)
+
+### Enhancements
+* Detect IntelliSenseMode target architecture for `cl.exe` based on its path. [#8044](https://github.com/microsoft/vscode-cpptools/issues/8044)
+
 ## Version 1.7.0-insiders: September 27, 2021
 ### New Features
 * Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
