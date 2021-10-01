@@ -1,7 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.7.0-insiders2: Sept 30, 2021
-
+## Version 1.7.0-insiders2: September 30, 2021
 ### Bug Fixes
 * Reduce required version of glibc to 2.17 on Linux x64 systems. [#8192](https://github.com/microsoft/vscode-cpptools/issues/8192)
 
@@ -123,6 +122,7 @@
 * Fix a potential IntelliSense process crash on shutdown.
 
 ## Version 1.4.1: June 8, 2021
+### Bug Fixes
 * Fix the configuration UI sometimes not populating initially with VS Code 1.56 or later. [#7641](https://github.com/microsoft/vscode-cpptools/issues/7641)
 
 ## Version 1.4.0: May 27, 2021
@@ -235,7 +235,7 @@
 * Fix an extension activation failure when a non-existent folder exists in the workspace. [#6981](https://github.com/microsoft/vscode-cpptools/issues/6981)
 * Fix infinite loops during document symbol processing. [#6988](https://github.com/microsoft/vscode-cpptools/issues/6988), [#7012](https://github.com/microsoft/vscode-cpptools/issues/7012), [#7022](https://github.com/microsoft/vscode-cpptools/issues/7022), [#7025](https://github.com/microsoft/vscode-cpptools/issues/7025)
 * Fix a regression with handling of -isysroot/--sysroot compiler arguments. [#6992](https://github.com/microsoft/vscode-cpptools/issues/6992)
-* Fix issue querying certain compilers, including armclang and arm-poky-linux-musleabi-gcc. [7021](https://github.com/microsoft/vscode-cpptools/issues/7021)
+* Fix issue querying certain compilers, including armclang and arm-poky-linux-musleabi-gcc. [#7021](https://github.com/microsoft/vscode-cpptools/issues/7021)
 * Fix invalid "console" property when generating a "cppdbg" task. [#7048](https://github.com/microsoft/vscode-cpptools/issues/7048)
 
 ## Version 1.2.1: February 16, 2021
@@ -342,7 +342,7 @@
 * Fix the default `cwd` for `cppbuild` tasks. [#6618](https://github.com/microsoft/vscode-cpptools/issues/6618)
 
 ## Version 1.1.2: November 17, 2020
-### Bug Fix
+### Bug Fixes
 * Fix resolution of `${fileDirname}` with `cppbuild` tasks. [#6386](https://github.com/microsoft/vscode-cpptools/issues/6386)
 
 ## Version 1.1.1: November 9, 2020
@@ -395,7 +395,7 @@
 * Fix C files being treated as C++ files with compile_commands.json. [#6279](https://github.com/microsoft/vscode-cpptools/issues/6279)
 * Fix `Build and Debug Active File` race condition with EngineLogs. [#6304](https://github.com/microsoft/vscode-cpptools/pull/6304)
 * Fix changes to some `c_cpp_properties.json` properties not taking effect (until a reload) if `compileCommands` is set. [#6332](https://github.com/microsoft/vscode-cpptools/issues/6332)
-* Fix issue with compiler querying not handling various clang command line options correctly. [6359](https://github.com/microsoft/vscode-cpptools/issues/6356)
+* Fix issue with compiler querying not handling various clang command line options correctly. [#6356](https://github.com/microsoft/vscode-cpptools/issues/6356),  [#6359](https://github.com/microsoft/vscode-cpptools/issues/6359)
 * Fix multiroot workspace tag parsing when `compileCommands` is set. [#6383](https://github.com/microsoft/vscode-cpptools/issues/6383)
 * Fix mingw32 compilers not being detected. [#6394](https://github.com/microsoft/vscode-cpptools/issues/6394)
 * Various bug fixes for vcFormat. [PR #6408](https://github.com/microsoft/vscode-cpptools/pull/6408)
