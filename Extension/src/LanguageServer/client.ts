@@ -608,7 +608,7 @@ export interface Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
+    onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
@@ -1496,15 +1496,13 @@ export class DefaultClient implements Client {
         return changedSettings;
     }
 
-    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+    public onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void {
         const settings: CppSettings = new CppSettings(this.RootUri);
         if (settings.dimInactiveRegions) {
             // Apply text decorations to inactive regions
-            for (const e of editors) {
-                const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-                if (valuePair) {
-                    e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
-                }
+            const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(editor.document.uri.toString());
+            if (valuePair) {
+                editor.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
             }
         }
     }
@@ -2997,7 +2995,7 @@ class NullClient implements Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void { }
     onDidCloseTextDocument(document: vscode.TextDocument): void { }
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void { }
+    onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void { }
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void { }
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
