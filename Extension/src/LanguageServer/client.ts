@@ -165,8 +165,21 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
         const message: string = util.getLocalizedString(d.localizeStringParams);
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
-        diagnostic.code = d.code;
+        if (typeof d.code === "string" && d.code.length !== 0 && d.code !== "clang-diagnostic-error") {
+            diagnostic.code = { value: d.code,
+                target: vscode.Uri.parse(`https://clang.llvm.org/extra/clang-tidy/checks/${d.code}.html`) };
+        } else {
+            diagnostic.code = d.code;
+        }
         diagnostic.source = "C/C++";
+        if (d.relatedInformation) {
+            diagnostic.relatedInformation = [];
+            for (const info of d.relatedInformation) {
+                const infoRange: vscode.Range = new vscode.Range(info.location.range.start.line, info.location.range.start.character, info.location.range.end.line, info.location.range.end.character);
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(
+                    new vscode.Location(vscode.Uri.parse(info.location.uri), infoRange), info.message));
+            }
+        }
 
         if (is_intelliSense) {
             diagnosticsIntelliSense.push(diagnostic);
@@ -272,12 +285,18 @@ interface GetDiagnosticsResult {
     diagnostics: string;
 }
 
+interface CppDiagnosticRelatedInformation {
+    location: Location;
+    message: string;
+}
+
 interface Diagnostic {
     range: Range;
     code?: number | string;
     source?: string;
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
+    relatedInformation?: CppDiagnosticRelatedInformation[];
 }
 
 enum DiagnosticsType {
