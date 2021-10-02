@@ -1804,28 +1804,34 @@ export class DefaultClient implements Client {
                                     const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
                                     if (fileConfiguration?.mergeConfigurations) {
                                         configs.forEach(config => {
-                                            for (const p in fileConfiguration.includePath) {
-                                                if (!config.configuration.includePath.includes(p)) {
-                                                    config.configuration.includePath.push(p);
-                                                }
+                                            if (fileConfiguration.includePath) {
+                                                fileConfiguration.includePath.forEach(p => {
+                                                    if (!config.configuration.includePath.includes(p)) {
+                                                        config.configuration.includePath.push(p);
+                                                    }
+                                                });
                                             }
 
-                                            for (const d in fileConfiguration.defines) {
-                                                if (!config.configuration.defines.includes(d)) {
-                                                    config.configuration.defines.push(d);
-                                                }
+                                            if (fileConfiguration.defines) {
+                                                fileConfiguration.defines.forEach(d => {
+                                                    if (!config.configuration.defines.includes(d)) {
+                                                        config.configuration.defines.push(d);
+                                                    }
+                                                });
                                             }
 
                                             if (!config.configuration.forcedInclude) {
                                                 config.configuration.forcedInclude = [];
                                             }
 
-                                            if (config.configuration.forcedInclude) {
-                                                for (const i in fileConfiguration.forcedInclude) {
-                                                    if (!config.configuration.forcedInclude.includes(i)) {
-                                                        config.configuration.forcedInclude.push(i);
+                                            if (fileConfiguration.forcedInclude) {
+                                                fileConfiguration.forcedInclude.forEach(i => {
+                                                    if (config.configuration.forcedInclude) {
+                                                        if (!config.configuration.forcedInclude.includes(i)) {
+                                                            config.configuration.forcedInclude.push(i);
+                                                        }
                                                     }
-                                                }
+                                                });
                                             }
                                         });
                                     }
