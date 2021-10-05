@@ -73,6 +73,7 @@ export interface Configuration {
     compileCommands?: string;
     forcedInclude?: string[];
     configurationProvider?: string;
+    mergeConfigurations?: boolean;
     browse?: Browse;
     customConfigurationVariables?: {[key: string]: string};
 }
@@ -741,6 +742,18 @@ export class CppProperties {
         return util.resolveVariables(property, env);
     }
 
+    private updateConfigurationBoolean(property: boolean | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
+        if (property === null || property === undefined) {
+            property = defaultValue;
+        }
+
+        if (property === null) {
+            return undefined;
+        }
+
+        return property;
+    }
+
     private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
         if (!property || property === {}) {
             property = defaultValue;
@@ -780,6 +793,7 @@ export class CppProperties {
             configuration.intelliSenseModeIsExplicit = configuration.intelliSenseModeIsExplicit || settings.defaultIntelliSenseMode !== "";
             configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
             configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
+            configuration.mergeConfigurations = this.updateConfigurationBoolean(configuration.mergeConfigurations, settings.defaultMergeConfigurations);
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.

@@ -1146,6 +1146,11 @@
           "markdownDescription": "%c_cpp.configuration.default.configurationProvider.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.default.mergeConfigurations": {
+          "type": "boolean",
+          "markdownDescription": "%c_cpp.configuration.default.mergeConfigurations.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.default.browse.path": {
           "type": "array",
           "items": {
