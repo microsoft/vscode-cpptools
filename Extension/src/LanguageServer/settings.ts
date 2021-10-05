@@ -217,6 +217,7 @@ export class CppSettings extends Settings {
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return super.Section.get<string>("default.configurationProvider"); }
+    public get defaultMergeConfigurations(): boolean | undefined { return super.Section.get<boolean>("default.mergeConfigurations"); }
     public get defaultBrowsePath(): string[] | undefined { return super.Section.get<string[] | null>("default.browse.path") ?? undefined; }
     public get defaultDatabaseFilename(): string | undefined { return super.Section.get<string>("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }

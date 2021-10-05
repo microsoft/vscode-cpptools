@@ -456,7 +456,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
-export function processDelayedDidOpen(document: vscode.TextDocument): void {
+export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
@@ -490,16 +490,21 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 if (!languageChanged) {
                     finishDidOpen(document);
                 }
+                return true;
             }
         }
     }
+    return false;
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
-            processDelayedDidOpen(editor.document);
+            if (!processDelayedDidOpen(editor.document)) {
+                const client: Client = clients.getClientFor(editor.document.uri);
+                client.onDidChangeVisibleTextEditor(editor);
+            }
         }
     });
 }

@@ -685,7 +685,7 @@ export interface Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
+    onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
@@ -1667,15 +1667,13 @@ export class DefaultClient implements Client {
         return changedSettings;
     }
 
-    public onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+    public onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void {
         const settings: CppSettings = new CppSettings(this.RootUri);
         if (settings.dimInactiveRegions) {
             // Apply text decorations to inactive regions
-            for (const e of editors) {
-                const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(e.document.uri.toString());
-                if (valuePair) {
-                    e.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
-                }
+            const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(editor.document.uri.toString());
+            if (valuePair) {
+                editor.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
             }
         }
     }
@@ -1973,9 +1971,44 @@ export class DefaultClient implements Client {
                             const candidate: string = response.candidates[i];
                             const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
                             if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                                const configs: SourceFileConfigurationItem[] = await provider.provideConfigurations([tuUri], tokenSource.token);
+                                const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
                                 if (configs && configs.length > 0 && configs[0]) {
-                                    return configs;
+                                    const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
+                                    if (fileConfiguration?.mergeConfigurations) {
+                                        configs.forEach(config => {
+                                            if (fileConfiguration.includePath) {
+                                                fileConfiguration.includePath.forEach(p => {
+                                                    if (!config.configuration.includePath.includes(p)) {
+                                                        config.configuration.includePath.push(p);
+                                                    }
+                                                });
+                                            }
+
+                                            if (fileConfiguration.defines) {
+                                                fileConfiguration.defines.forEach(d => {
+                                                    if (!config.configuration.defines.includes(d)) {
+                                                        config.configuration.defines.push(d);
+                                                    }
+                                                });
+                                            }
+
+                                            if (!config.configuration.forcedInclude) {
+                                                config.configuration.forcedInclude = [];
+                                            }
+
+                                            if (fileConfiguration.forcedInclude) {
+                                                fileConfiguration.forcedInclude.forEach(i => {
+                                                    if (config.configuration.forcedInclude) {
+                                                        if (!config.configuration.forcedInclude.includes(i)) {
+                                                            config.configuration.forcedInclude.push(i);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+
+                                    return configs as SourceFileConfigurationItem[];
                                 }
                             }
                             if (tokenSource.token.isCancellationRequested) {
@@ -3214,7 +3247,7 @@ class NullClient implements Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string } { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void { }
     onDidCloseTextDocument(document: vscode.TextDocument): void { }
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void { }
+    onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void { }
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void { }
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
