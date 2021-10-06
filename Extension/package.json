@@ -4559,7 +4559,7 @@
         "./LLVM/bin/clang-format",
         "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "3F3E0C7219ABF9B4D17113B6DDE94A062365E38BABAE6E53721CC98444C8F4FA"
+      "integrity": "0B5F60E1D18B14FFF97EA436A080AC03D7A1B591A835E0F2B39C01C058375E36"
     },
     {
       "description": "Clang tools (Linux / armhf)",
@@ -4574,7 +4574,7 @@
         "./LLVM/bin/clang-format",
         "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "2A8F48B0B3CC8D516C177CF0A0FD671E688FB37A075151C4413D55FE0194A831"
+      "integrity": "80855487EE8E26E16F36A8E45A46366B6EA71AE7CFFB64022612019B014F0ED8"
     },
     {
       "description": "Clang tools (Linux / aarch64)",
@@ -4589,7 +4589,7 @@
         "./LLVM/bin/clang-format",
         "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "08EA62D201DA0744277969142AA376B9FCCE74BE7A86B65A71AE64D68D60496E"
+      "integrity": "2B5839C2E26DAE6DE9FF555FD096C517C5AEB003297F6DEFEE5290AB73CD0CE6"
     },
     {
       "description": "Clang tools (macOS / x86_64)",
@@ -4604,7 +4604,7 @@
         "./LLVM/bin/clang-format",
         "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "ADD73C4822497BDB03328FC50046A5B5C5A0D89E62835C0180EE7DC857801B10"
+      "integrity": "DD9A702A8104D385357D5A192F47E0D8EC516FC6239C8E210C429881F32A21DF"
     },
     {
       "description": "Clang tools (macOS / ARM64)",
@@ -4619,7 +4619,7 @@
         "./LLVM/bin/clang-format",
         "./LLVM/bin/clang-tidy"
       ],
-      "integrity": "14DBEFB75DF25553939CFF56E5FC9F5E1520E81B716EA45C9E710C80F254CE34"
+      "integrity": "D5C827306C7AA94B3C2397E592199F1C68ADD4DB4BECF552B3C02CB280AC875B"
     },
     {
       "description": "Clang tools (Windows x86)",
@@ -4634,7 +4634,7 @@
         "./LLVM/bin/clang-format.exe",
         "./LLVM/bin/clang-tidy.exe"
       ],
-      "integrity": "4600A5030CF419880D80F9C55A9346C21F6BA79CD8F540DB1576595DFE093492"
+      "integrity": "66BAAC412988FE1E40CE6F94BDE64BB7A2FB7C4E2493EBDBE6B4F994604A3FBD"
     },
     {
       "description": "Clang tools (Windows x64)",
@@ -4649,7 +4649,7 @@
         "./LLVM/bin/clang-format.exe",
         "./LLVM/bin/clang-tidy.exe"
       ],
-      "integrity": "3BBC1ABAD14E7A6F2709708E1534DD1B912575682872614E780E2EC398F31B49"
+      "integrity": "702AF7F679CB943D3D80C2E68FC7B5708ACAA227E84417F835AE9C6A7468808E"
     },
     {
       "description": "Clang tools (Windows arm64)",
@@ -4664,7 +4664,7 @@
         "./LLVM/bin/clang-format.exe",
         "./LLVM/bin/clang-tidy.exe"
       ],
-      "integrity": "67BDAC6D46A3F8C5F491D6BC9A461C1CF6179C57B1CA7F6643512A1338C44E17"
+      "integrity": "76032192FE82E8C51A4721E7C9660B3B5755BF75DAF47A71F844F561732A92F5"
     },
     {
       "description": "OpenDebugAD7 (Windows x86/x64)",
