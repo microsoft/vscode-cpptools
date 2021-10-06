@@ -446,7 +446,10 @@
           "scope": "resource"
         },
         "C_Cpp.codeAnalysis.clangTidy.args": {
-          "type": "string",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
           "scope": "resource"
         },
