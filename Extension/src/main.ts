@@ -448,6 +448,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
         "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
         "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
+        "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
         "onDebugInitialConfigurations",
         "onDebugResolve:cppdbg",
         "onDebugResolve:cppvsdbg",

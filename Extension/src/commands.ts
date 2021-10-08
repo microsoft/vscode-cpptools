@@ -39,7 +39,8 @@ class TemporaryCommandRegistrar {
         "C_Cpp.CheckForCompiler",
         "C_Cpp.RunCodeAnalysisOnActiveFile",
         "C_Cpp.RunCodeAnalysisOnOpenFiles",
-        "C_Cpp.RunCodeAnalysisOnAllFiles"
+        "C_Cpp.RunCodeAnalysisOnAllFiles",
+        "C_Cpp.ClearCodeAnalysisSquiggles"
     ];
 
     constructor() {

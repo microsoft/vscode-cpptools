@@ -2743,6 +2743,11 @@
         "command": "C_Cpp.RunCodeAnalysisOnAllFiles",
         "title": "%c_cpp.command.RunCodeAnalysisOnAllFiles.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.ClearCodeAnalysisSquiggles",
+        "title": "%c_cpp.command.ClearCodeAnalysisSquiggles.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [

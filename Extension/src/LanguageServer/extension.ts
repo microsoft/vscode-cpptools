@@ -828,6 +828,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ClearCodeAnalysisSquiggles', onClearCodeAnalysisSquiggles));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -1015,6 +1016,11 @@ async function onRunCodeAnalysisOnAllFiles(): Promise<void> {
     onActivationEvent();
     await vscode.commands.executeCommand("workbench.action.files.saveAll");
     getActiveClient().handleRunCodeAnalysisOnAllFiles();
+}
+
+async function onClearCodeAnalysisSquiggles(): Promise<void> {
+    onActivationEvent();
+    getActiveClient().handleClearCodeAnalysisSquiggles();
 }
 
 function onAddToIncludePath(path: string): void {

@@ -501,7 +501,8 @@ interface SetTemporaryTextDocumentLanguageParams {
 enum CodeAnalysisScope {
     ActiveFile,
     OpenFiles,
-    AllFiles
+    AllFiles,
+    ClearSquiggles
 };
 
 interface IntervalTimerParams {
@@ -732,6 +733,7 @@ export interface Client {
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
     handleRunCodeAnalysisOnAllFiles(): Promise<void>;
+    handleClearCodeAnalysisSquiggles(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3106,6 +3108,12 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.AllFiles);
     }
 
+    public async handleClearCodeAnalysisSquiggles(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        diagnosticsCollectionCodeAnalysis.clear();
+        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
@@ -3294,6 +3302,7 @@ class NullClient implements Client {
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }
+    handleClearCodeAnalysisSquiggles(): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
