@@ -65,7 +65,7 @@ export function activate(): void {
             if (packageInfo) {
                 let targetPopulation: TargetPopulation;
                 const userVersion: PackageVersion = new PackageVersion(packageInfo.version);
-                if (userVersion.suffix === "") {
+                if (userVersion.suffix === "main") {
                     targetPopulation = TargetPopulation.Public;
                 } else if (userVersion.suffix === "insiders") {
                     targetPopulation = TargetPopulation.Insiders;
