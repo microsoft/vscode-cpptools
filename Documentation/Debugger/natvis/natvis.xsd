@@ -240,7 +240,7 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
+
   <!-- Attributes for elements that support filtering by view-->
   <xs:attributeGroup name="ViewConstraints">
     <xs:attribute name="IncludeView" type ="ViewIncludeType" use="optional" />
@@ -335,9 +335,9 @@
         are evaluated in the context of the node.
       </xs:documentation>
     </xs:annotation>
-  </xs:attribute>    
+  </xs:attribute>
   </xs:attributeGroup>
-  
+
   <xs:complexType name="ListItemsNodeType">
     <xs:annotation>
       <xs:documentation>Expression that points to value of the linked list node. It can be left empty or have 'this' to refer to the linked list node itself. This expression is evaluated under the context of the linked list node and not the parent linked list type.</xs:documentation>
@@ -402,7 +402,7 @@
           <xs:documentation>
             Indicates that the item should use the icon associated with general data.
           </xs:documentation>
-        </xs:annotation>        
+        </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Method">
         <xs:annotation>
@@ -864,16 +864,16 @@
   <xs:complexType name="MostDerivedObjectType">
     <xs:annotation>
       <xs:documentation>
-        Specifies an expression which evaluates to the current object, casted to its most-derived type.  
-        
-        In most cases, the debugger is able to automatically determine an object's most-derived type, in which case use of the &lt;MostDerivedType&gt; 
+        Specifies an expression which evaluates to the current object, casted to its most-derived type.
+
+        In most cases, the debugger is able to automatically determine an object's most-derived type, in which case use of the &lt;MostDerivedType&gt;
         element is unecessary.  Automatic determination of an object's most-derived type requires the object to be an instance of a C++ class, with a
         compiler-generated virtual function table.  This is sufficient for most class-hierarchies; however, custom logic may occasionally be necessary
-        when dealing with a class hierarchy that does not contain virtual functions, or when the virtual function table is manually constructed by the 
+        when dealing with a class hierarchy that does not contain virtual functions, or when the virtual function table is manually constructed by the
         application code.
       </xs:documentation>
     </xs:annotation>
-    
+
     <xs:simpleContent>
       <xs:extension base="StringType">
         <xs:attributeGroup ref="CommonAttributes" />
@@ -935,12 +935,12 @@
     <xs:annotation>
       <xs:documentation>
         Indicates that the given type is a smart pointer.  The text inside this element specifies the expression to evaluate the underlying pointer.
-        
+
         The &lt;SmartPointer&gt; element has the following effects:
           - If no alternative &lt;DisplayString&gt; element is provided (or all &lt;DisplayString&gt; elements have failed conditions), the underlying pointer will be the display string
           - If no alternative &lt;StringView&gt; element is provided (or all &lt;StringView&gt; elements have failed conditions), the underlying pointer will be the string view, if it has one.
           - If no alternative &lt;Expand&gt; element is provided, the expansion of the smart pointer will be the expansion of the underlying pointer.
-          - The smart pointer class will also support overloaded operators as determined by the &lt;Usage&gt; attribute.  You can opt out of this behavior by specifying 
+          - The smart pointer class will also support overloaded operators as determined by the &lt;Usage&gt; attribute.  You can opt out of this behavior by specifying
               'DefaultExpansion=&quot;false&quot;'
       </xs:documentation>
     </xs:annotation>
@@ -949,7 +949,7 @@
         <xs:attributeGroup ref="CommonAttributes_NoCondition" />
         <xs:attribute name="Usage" type="SmartPointerUsage" use="required">
           <xs:annotation>
-            <xs:documentation>Indicates which combinations of operators this smart pointer object supports.              
+            <xs:documentation>Indicates which combinations of operators this smart pointer object supports.
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
@@ -1004,10 +1004,10 @@
       <xs:documentation>Specifies an optional priority to assign to this entry for type matching. Higher priority entries within a particular file or directory
       are checked first.  &lt;Type&gt; entries that do not specify a priority receive default priority of &quot;Medium&quot;  &lt;AlternativeType&gt; entries which do not specify a priority
       will inherit the priority of the enclosing &lt;Type&gt; element.  The priority is only used to disambiguate type matching when all other means of disambiguation are unavailable.
-      For example, entries with more specific template instantiations, module constraints, or view constraints will take priority regardless of any priority values specified.  
-      Similarly, regardless of priority, natvis files that are part of a loaded project will always take precedence over files in the user natvis directory, 
-      which will, in turn, take precedence over files in the system-wide natvis directory.   
-      
+      For example, entries with more specific template instantiations, module constraints, or view constraints will take priority regardless of any priority values specified.
+      Similarly, regardless of priority, natvis files that are part of a loaded project will always take precedence over files in the user natvis directory,
+      which will, in turn, take precedence over files in the system-wide natvis directory.
+
       If two entries have the same priority and cannot otherwise be disambiguated, it is unspecified which one will get used.
       </xs:documentation>
     </xs:annotation>

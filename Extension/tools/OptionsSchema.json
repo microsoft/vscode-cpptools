@@ -279,9 +279,9 @@
           },
           "default": []
         },
-        "envFile": { 
-          "type": "string", 
-          "description": "%c_cpp.debuggers.envFile.description%", 
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
           "default": "${workspaceFolder}/.env"
         },
         "additionalSOLibSearchPath": {
@@ -551,9 +551,9 @@
           },
           "default": []
         },
-        "envFile": { 
-          "type": "string", 
-          "description": "%c_cpp.debuggers.envFile.description%", 
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
           "default": "${workspaceFolder}/.env"
         },
         "symbolSearchPath": {

@@ -17,7 +17,7 @@ C/C++ extension tutorials per compiler and platform
 * [Clang on macOS](https://code.visualstudio.com/docs/cpp/config-clang-mac)
 
 ## Quick links
-* [Editing features (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) 
+* [Editing features (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide)
 * [IntelliSense configuration](https://code.visualstudio.com/docs/cpp/customize-default-settings-cpp)
 * [Enhanced colorization](https://code.visualstudio.com/docs/cpp/colorization-cpp)
 * [Debugging](https://code.visualstudio.com/docs/cpp/cpp-debug)
