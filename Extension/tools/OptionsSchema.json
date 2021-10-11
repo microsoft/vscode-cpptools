@@ -118,10 +118,10 @@
       "default": {},
       "properties": {
         "name": {
-            "type": "string"
+          "type": "string"
         },
         "value": {
-            "type": "string"
+          "type": "string"
         }
       }
     },
@@ -196,9 +196,7 @@
     "CppdbgLaunchOptions": {
       "type": "object",
       "default": {},
-      "required": [
-        "program"
-      ],
+      "required": ["program"],
       "properties": {
         "program": {
           "type": "string",
@@ -253,17 +251,18 @@
           "default": []
         },
         "launchCompleteCommand": {
-          "enum": [
-            "exec-run",
-            "exec-continue",
-            "None"
-          ],
+          "enum": ["exec-run", "exec-continue", "None"],
           "description": "%c_cpp.debuggers.launchCompleteCommand.description%",
           "default": "exec-run"
         },
         "visualizerFile": {
           "type": "string",
           "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
+          "default": ""
+        },
+        "svdPath": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description",
           "default": ""
         },
         "showDisplayString": {
@@ -279,9 +278,9 @@
           },
           "default": []
         },
-        "envFile": { 
-          "type": "string", 
-          "description": "%c_cpp.debuggers.envFile.description%", 
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
           "default": "${workspaceFolder}/.env"
         },
         "additionalSOLibSearchPath": {
@@ -401,10 +400,7 @@
     "CppdbgAttachOptions": {
       "type": "object",
       "default": {},
-      "required": [
-        "program",
-        "processId"
-      ],
+      "required": ["program", "processId"],
       "properties": {
         "program": {
           "type": "string",
@@ -515,10 +511,7 @@
     "CppvsdbgLaunchOptions": {
       "type": "object",
       "default": {},
-      "required": [
-        "program",
-        "cwd"
-      ],
+      "required": ["program", "cwd"],
       "properties": {
         "program": {
           "type": "string",
@@ -551,9 +544,9 @@
           },
           "default": []
         },
-        "envFile": { 
-          "type": "string", 
-          "description": "%c_cpp.debuggers.envFile.description%", 
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
           "default": "${workspaceFolder}/.env"
         },
         "symbolSearchPath": {
@@ -665,9 +658,7 @@
     "CppvsdbgAttachOptions": {
       "type": "object",
       "default": {},
-      "required": [
-        "processId"
-      ],
+      "required": ["processId"],
       "properties": {
         "type": {
           "type": "string",
