@@ -177,7 +177,11 @@ export class SettingsTracker {
                     break;
                 }
                 default: {
-                    if (key === "clang_format_path" || key === "codeAnalysis.clangTidy.path" || key === "codeAnalysis.clangTidy.buildPath" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
+                    if (key === "clang_format_path" || key === "intelliSenseCachePath" || key.startsWith("default.")
+                        || key === "codeAnalysis.clangTidy.path" || key === "codeAnalysis.clangTidy.buildPath"
+                        || key === "codeAnalysis.clangTidy.headerFilter" || key === "codeAnalysis.clangTidy.args"
+                        || key === "codeAnalysis.clangTidy.config" || key === "codeAnalysis.clangTidy.fallbackConfig"
+                    ) {
                         value = this.areEqual(val, settings.inspect(key)?.defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     } else {
                         value = String(this.previousCppSettings[key]);
