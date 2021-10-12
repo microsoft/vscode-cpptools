@@ -22,7 +22,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.databaseFilename": "Caminho para o banco de dados de símbolo gerado. Se um caminho relativo for especificado, ele será criado em relação ao local de armazenamento padrão do workspace.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "Uma lista de caminhos a serem usados ​​para indexação e análise de símbolos do espaço de trabalho (para uso por 'Ir para a definição', 'Localizar Tudo todas as referências', etc.). A pesquisa nesses caminhos é recursiva por padrão. Especifique `*` para indicar pesquisa não recursiva. Por exemplo, `${workspaceFolder}` irá pesquisar em todos os subdiretórios enquanto `${workspaceFolder}/*` não irá.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.customConfigurationVariables": "Variáveis ​​personalizadas que podem ser consultadas através do comando `${cpptools: activeConfigCustomVariable}` para usar para as variáveis ​​de entrada em `launch.json` ou` tasks.json`.",
-	"c_cpp_properties.schema.json.definitions.env": "Variáveis ​​personalizadas que podem ser reutilizadas em qualquer lugar neste arquivo usando a sintaxe `${variable}` ou `${env:variable}`.",
+	"c_cpp_properties.schema.json.definitions.env": "Variáveis ​​personalizadas que podem ser reutilizadas em qualquer lugar neste arquivo usando a sintaxe `${variável}` ou `${env:variável}`.",
 	"c_cpp_properties.schema.json.definitions.version": "Versão do arquivo de configuração. Esta propriedade é gerenciada pela extensão. Não a altere.",
 	"c_cpp_properties.schema.json.definitions.enableConfigurationSquiggles": "Controla se a extensão reportará erros detectados em `c_cpp_properties.json`."
 }
