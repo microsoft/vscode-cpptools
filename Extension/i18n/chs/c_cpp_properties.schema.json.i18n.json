@@ -22,7 +22,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.databaseFilename": "所生成的符号数据库的路径。如果指定了相对路径，则它将相对于工作区的默认存储位置。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.browse.properties.path": "用于索引和分析工作区符号的路径列表(供“转到定义”、“查找所有引用”等使用)。默认情况下，在这些路径上进行搜索为递归搜索。指定 `*` 以指示非递归搜索。例如，`${workspaceFolder}` 将搜索所有子目录，而 `${workspaceFolder}/*` 将不进行搜索。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.customConfigurationVariables": "可通过命令`${cpptools:activeConfigCustomVariable}` 查询的自定义变量，用于 `launch.json` 或 `tasks.json`. 中的输入变量。",
-	"c_cpp_properties.schema.json.definitions.env": "可以使用 `${variable}` 或 `${env:variable}` 语法在此文件中的任何位置重复使用的自定义变量。",
+	"c_cpp_properties.schema.json.definitions.env": "可以使用 `${变量}` 或 `${env:变量}` 语法在此文件中的任何位置重复使用的自定义变量。",
 	"c_cpp_properties.schema.json.definitions.version": "配置文件的版本。此属性由扩展托管。请勿更改它。",
 	"c_cpp_properties.schema.json.definitions.enableConfigurationSquiggles": "控制扩展是否将报告在 `c_cpp_properties.json` 中检测到的错误。"
 }
