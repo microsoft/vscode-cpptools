@@ -213,5 +213,6 @@
 	"invoking_nvcc": "コマンド ラインで nvcc を呼び出しています: {0}",
 	"nvcc_host_compile_command_not_found": "nvcc の出力でホスト コンパイル コマンドが見つかりません。",
 	"unable_to_locate_forced_include": "強制インクルードが見つかりません: {0}",
-	"inline_macro": "インライン マクロ"
+	"inline_macro": "インライン マクロ",
+	"unable_to_access_browse_database": "参照データベースにアクセスできません。({0})"
 }

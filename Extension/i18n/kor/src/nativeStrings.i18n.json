@@ -213,5 +213,6 @@
 	"invoking_nvcc": "명령줄 {0}을(를) 사용하여 nvcc를 호출하는 중",
 	"nvcc_host_compile_command_not_found": "nvcc의 출력에서 호스트 컴파일 명령을 찾을 수 없습니다.",
 	"unable_to_locate_forced_include": "강제 포함을 찾을 수 없음: {0}",
-	"inline_macro": "인라인 매크로"
+	"inline_macro": "인라인 매크로",
+	"unable_to_access_browse_database": "찾아보기 데이터베이스에 액세스할 수 없습니다({0})."
 }
