@@ -35,7 +35,7 @@
 * Fix an issue with VC 14.0 headers not being found. [#8078](https://github.com/microsoft/vscode-cpptools/issues/8078)
 * Fix an issue with CUDA support with `compile_commands.json`. [#8091](https://github.com/microsoft/vscode-cpptools/issues/8091)
 * Fix an issue with `/kernel` arg to `cl.exe` for C files. [#8158](https://github.com/microsoft/vscode-cpptools/issues/8158)
- * Fix an issue where inactive regions no longer dimmed after switching between open files. [#8206](https://github.com/microsoft/vscode-cpptools/issues/8206)
+* Fix an issue where inactive regions no longer dimmed after switching between open files. [#8206](https://github.com/microsoft/vscode-cpptools/issues/8206)
 
 ## Version 1.6.0: August 24, 2021
 ### New Features
