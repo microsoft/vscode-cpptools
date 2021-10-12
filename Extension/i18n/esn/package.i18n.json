@@ -42,7 +42,7 @@
 	"c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription": "Se aplica sangría a la línea nueva en función de `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.",
 	"c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "En el código existente, conserve la alineación de sangría existente de las líneas nuevas entre paréntesis.",
 	"c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription": "Se aplica sangría a las etiquetas en relación con las instrucciones switch según la cantidad especificada en el valor `#editor.tabSize#`.",
-	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "Se aplica sangría al código dentro del bloque en mayúsculas y minúsculas en relación con su etiqueta según la cantidad especificada en la configuración \"#editor.tabSize#\".",
+	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "Se aplica sangría al código dentro del bloque en mayúsculas y minúsculas en relación con su etiqueta según la cantidad especificada en la configuración `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription": "Se aplica sangría a las llaves siguiendo una instrucción case, según lo especificado en la configuración de `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription": "Se aplica sangría a las llaves de expresiones lambda usadas como parámetros de función en relación con el inicio de la instrucción, según lo especificado en la configuración de `#editor.tabSize#`",
 	"c_cpp.configuration.vcFormat.indent.gotoLabels.description": "La posición de las etiquetas goto.",
