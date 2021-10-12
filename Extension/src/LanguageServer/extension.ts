@@ -284,7 +284,7 @@ function sendActivationTelemetry(): void {
 }
 
 function realActivation(): void {
-    if (new CppSettings().intelliSenseEngine === "Disabled") {
+    if (new CppSettings(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined).intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
@@ -432,7 +432,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
-export function processDelayedDidOpen(document: vscode.TextDocument): void {
+export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
@@ -466,16 +466,21 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 if (!languageChanged) {
                     finishDidOpen(document);
                 }
+                return true;
             }
         }
     }
+    return false;
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
-            processDelayedDidOpen(editor.document);
+            if (!processDelayedDidOpen(editor.document)) {
+                const client: Client = clients.getClientFor(editor.document.uri);
+                client.onDidChangeVisibleTextEditor(editor);
+            }
         }
     });
 }
@@ -627,7 +632,8 @@ async function suggestInsidersChannel(): Promise<void> {
     let buildInfo: BuildInfo | undefined;
     try {
         buildInfo = await getTargetBuildInfo("Insiders", false);
-    } catch (error) {
+    } catch (errJS) {
+        const error: Error = errJS as Error;
         console.log(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
@@ -706,7 +712,8 @@ async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
         util.promptReloadWindow(message);
         telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
 
-    } catch (error) {
+    } catch (errJS) {
+        const error: Error = errJS as Error;
         console.error(`${cppInstallVsixStr}${error.message}`);
         if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
             error.message = "Potential PII hidden";
@@ -739,7 +746,8 @@ async function checkAndApplyUpdate(updateChannel: string, isFromSettingsChange: 
     if (!buildInfo) {
         try {
             buildInfo = await getTargetBuildInfo(updateChannel, isFromSettingsChange);
-        } catch (error) {
+        } catch (errJS) {
+            const error: Error = errJS as Error;
             telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
         }
     }
@@ -796,7 +804,19 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
+
     getTemporaryCommandRegistrarInstance().executeDelayedCommands();
+}
+
+function onRestartIntelliSenseForFile(): void {
+    onActivationEvent();
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
+        (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
+        return;
+    }
+    clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
 async function onSwitchHeaderSource(): Promise<void> {

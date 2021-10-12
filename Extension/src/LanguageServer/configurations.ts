@@ -73,6 +73,7 @@ export interface Configuration {
     compileCommands?: string;
     forcedInclude?: string[];
     configurationProvider?: string;
+    mergeConfigurations?: boolean;
     browse?: Browse;
     customConfigurationVariables?: {[key: string]: string};
 }
@@ -403,6 +404,8 @@ export class CppProperties {
         }
 
         result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
+        result["execPath"] = process.execPath;
+        result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
         return result;
     }
 
@@ -446,7 +449,8 @@ export class CppProperties {
         try {
             packageJson = JSON.parse(await fs.promises.readFile(path.join(rootPath, "package.json"), "utf8"));
             pdjFound = true;
-        } catch (err) {
+        } catch (errJS) {
+            const err: Error = errJS as Error;
             error = err;
         }
 
@@ -496,12 +500,14 @@ export class CppProperties {
                             if (stdout) {
                                 this.nodeAddonIncludes.push(stdout);
                             }
-                        } catch (err) {
+                        } catch (errJS) {
+                            const err: Error = errJS as Error;
                             console.log('readNodeAddonIncludeLocations', err.message);
                         }
                     }
                 }
-            } catch (e) {
+            } catch (errJS) {
+                const e: Error = errJS as Error;
                 error = e;
             }
         }
@@ -736,6 +742,18 @@ export class CppProperties {
         return util.resolveVariables(property, env);
     }
 
+    private updateConfigurationBoolean(property: boolean | undefined | null, defaultValue: boolean | undefined | null): boolean | undefined {
+        if (property === null || property === undefined) {
+            property = defaultValue;
+        }
+
+        if (property === null) {
+            return undefined;
+        }
+
+        return property;
+    }
+
     private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
         if (!property || property === {}) {
             property = defaultValue;
@@ -775,6 +793,7 @@ export class CppProperties {
             configuration.intelliSenseModeIsExplicit = configuration.intelliSenseModeIsExplicit || settings.defaultIntelliSenseMode !== "";
             configuration.cStandardIsExplicit = configuration.cStandardIsExplicit || settings.defaultCStandard !== "";
             configuration.cppStandardIsExplicit = configuration.cppStandardIsExplicit || settings.defaultCppStandard !== "";
+            configuration.mergeConfigurations = this.updateConfigurationBoolean(configuration.mergeConfigurations, settings.defaultMergeConfigurations);
             if (!configuration.compileCommands) {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
@@ -1144,7 +1163,8 @@ export class CppProperties {
 
                 this.propertiesFile = vscode.Uri.file(path.join(this.configFolder, "c_cpp_properties.json"));
 
-            } catch (err) {
+            } catch (errJS) {
+                const err: Error = errJS as Error;
                 const failedToCreate: string = localize("failed.to.create.config.folder", 'Failed to create "{0}"', this.configFolder);
                 vscode.window.showErrorMessage(`${failedToCreate}: ${err.message}`);
             }
@@ -1205,6 +1225,8 @@ export class CppProperties {
                 delete this.configurationJson.env['workspaceRoot'];
                 delete this.configurationJson.env['workspaceFolder'];
                 delete this.configurationJson.env['workspaceFolderBasename'];
+                delete this.configurationJson.env['execPath'];
+                delete this.configurationJson.env['pathSeparator'];
                 delete this.configurationJson.env['default'];
             }
 
@@ -1264,7 +1286,8 @@ export class CppProperties {
                 e.intelliSenseModeIsExplicit = e.intelliSenseMode !== undefined;
             });
 
-        } catch (err) {
+        } catch (errJS) {
+            const err: Error = errJS as Error;
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
             vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
@@ -1397,7 +1420,7 @@ export class CppProperties {
         errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, false);
+        errors.forcedInclude = this.validatePath(config.forcedInclude, false, true);
         errors.compileCommands = this.validatePath(config.compileCommands, false);
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
@@ -1412,7 +1435,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, isDirectory: boolean = true): string | undefined {
+    private validatePath(input: string | string[] | undefined, isDirectory: boolean = true, skipRelativePaths: boolean = false): string | undefined {
         if (!input) {
             return undefined;
         }
@@ -1440,7 +1463,9 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (!this.rootUri) {
+                if (skipRelativePaths && !path.isAbsolute(resolvedPath)) {
+                    continue;
+                } else if (!this.rootUri) {
                     pathExists = false;
                 } else {
                     // Check for relative path if resolved path does not exists
@@ -1622,10 +1647,19 @@ export class CppProperties {
             let paths: string[] = [];
             let compilerPath: string | undefined;
             for (const pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-                currentConfiguration.includePath, currentConfiguration.macFrameworkPath, currentConfiguration.forcedInclude ]) {
+                currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
                 if (pathArray) {
                     for (const curPath of pathArray) {
                         paths.push(`${curPath}`);
+                    }
+                }
+            }
+            // Skip the relative forcedInclude files.
+            if (currentConfiguration.forcedInclude) {
+                for (const file of currentConfiguration.forcedInclude) {
+                    const resolvedFilePath: string = this.resolvePath(file, isWindows);
+                    if (path.isAbsolute(resolvedFilePath)) {
+                        paths.push(`${file}`);
                     }
                 }
             }

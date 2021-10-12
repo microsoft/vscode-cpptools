@@ -39,6 +39,7 @@ const elementId: { [key: string]: string } = {
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
     forcedIncludeInvalid: "forcedIncludeInvalid",
+    mergeConfigurations: "mergeConfigurations",
 
     // Browse properties
     browsePath: "browsePath",
@@ -92,8 +93,9 @@ class SettingsApp {
             el.addEventListener("change", this.onChanged.bind(this, el.id));
         });
 
-        // Special case for checkbox element
+        // Special case for checkbox elements
         document.getElementById(elementId.limitSymbolsToIncludedHeaders).addEventListener("change", this.onChangedCheckbox.bind(this, elementId.limitSymbolsToIncludedHeaders));
+        document.getElementById(elementId.mergeConfigurations).addEventListener("change", this.onChangedCheckbox.bind(this, elementId.mergeConfigurations));
     }
 
     private addEventsToConfigNameChanges(): void {
@@ -268,6 +270,7 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.windowsSdkVersion)).value = config.windowsSdkVersion ? config.windowsSdkVersion : "";
             (<HTMLInputElement>document.getElementById(elementId.macFrameworkPath)).value = joinEntries(config.macFrameworkPath);
             (<HTMLInputElement>document.getElementById(elementId.compileCommands)).value = config.compileCommands ? config.compileCommands : "";
+            (<HTMLInputElement>document.getElementById(elementId.mergeConfigurations)).checked = config.mergeConfigurations;
             (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ? config.configurationProvider : "";
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
 
