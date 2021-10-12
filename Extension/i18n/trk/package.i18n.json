@@ -69,7 +69,7 @@
 	"c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description": "Boş işlev gövdeleri için kapatma küme ayracını açma küme ayracıyla aynı satıra taşıyın.",
 	"c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription": "`catch` ve benzer anahtar sözcükleri yeni bir satıra yerleştirin.",
 	"c_cpp.configuration.vcFormat.newLine.beforeElse.markdownDescription": "`else` ifadesini yeni bir satıra yerleştirin.",
-	"c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription": "`do`-`while` döngüsündeki 'while' ifadesini yeni bir satıra yerleştirin.",
+	"c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription": "`do`-`while` döngüsündeki `while` ifadesini yeni bir satıra yerleştirin.",
 	"c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.description": "İşlev adları arasındaki boşluklar ve bağımsız değişken listelerinin açma parantezleri.",
 	"c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.insert.description": "İşlevin açma parantezinden önce bir boşluk eklenir.",
 	"c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.remove.description": "İşleve ait sol ayraçtan önceki boşluklar kaldırıldı.",
