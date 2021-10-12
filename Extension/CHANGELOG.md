@@ -1,13 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.7.0-insiders2: September 30, 2021
-### Bug Fixes
-* Reduce required version of glibc to 2.17 on Linux x64 systems. [#8192](https://github.com/microsoft/vscode-cpptools/issues/8192)
-
-### Enhancements
-* Detect IntelliSenseMode target architecture for `cl.exe` based on its path. [#8044](https://github.com/microsoft/vscode-cpptools/issues/8044)
-
-## Version 1.7.0-insiders: September 27, 2021
+## Version 1.7.0: October 13, 2021
 ### New Features
 * Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
 * Add support for macOS app bundles [#6726](https://github.com/microsoft/vscode-cpptools/issues/6726)
@@ -15,7 +8,10 @@
 * Add support for Go To / Peek Type Definition. [#7999](https://github.com/microsoft/vscode-cpptools/issues/7999)
 
 ### Enhancements
+* Detect IntelliSenseMode target architecture for `cl.exe` based on its path. [#8044](https://github.com/microsoft/vscode-cpptools/issues/8044)
 * In generated build tasks, add a compiler arg to cause color to be displayed in gcc/clang output in terminal. [PR #8165](https://github.com/microsoft/vscode-cpptools/pull/8165)
+* Add new configuration `mergeConfigurations` that enables include paths, defines, and forced includes from c_cpp_properties.json to be merged with those provided by a configuration provider.
+  *  Thomas Willson (@willson556) [PR #8174](https://github.com/microsoft/vscode-cpptools/pull/8174)
 
 ### Bug Fixes
 * Fix an issue with signature help for overloaded constructors. [#1664](https://github.com/microsoft/vscode-cpptools/issues/1664)
@@ -39,6 +35,7 @@
 * Fix an issue with VC 14.0 headers not being found. [#8078](https://github.com/microsoft/vscode-cpptools/issues/8078)
 * Fix an issue with CUDA support with `compile_commands.json`. [#8091](https://github.com/microsoft/vscode-cpptools/issues/8091)
 * Fix an issue with `/kernel` arg to `cl.exe` for C files. [#8158](https://github.com/microsoft/vscode-cpptools/issues/8158)
+* Fix an issue where inactive regions no longer dimmed after switching between open files. [#8206](https://github.com/microsoft/vscode-cpptools/issues/8206)
 
 ## Version 1.6.0: August 24, 2021
 ### New Features
