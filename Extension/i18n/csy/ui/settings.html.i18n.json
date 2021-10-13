@@ -54,6 +54,8 @@
 	"one.file.per.line": "Na každý řádek jeden soubor",
 	"compile.commands": "Příkazy kompilace",
 	"compile.commands.description": "Úplná cesta k souboru {0} pro pracovní prostor. Cesty pro vložené soubory a direktivy define v tomto souboru se použijí namísto hodnot nastavených pro nastavení {1} a {2}. Pokud databáze příkazů pro kompilaci neobsahuje položku pro jednotku překladu, která odpovídá souboru otevřenému v editoru, zobrazí se zpráva upozornění a rozšíření místo toho použije nastavení {3} a {4}.",
+	"merge.configurations": "Sloučit konfigurace",
+	"merge.configurations.description": "Pokud je tato možnost true (nebo zaškrtnutá), sloučí cesty k zahrnutým souborům, direktivy define a vynucená zahrnutí s těmi od poskytovatele konfigurace.",
 	"browse.path": "Procházení: cesta",
 	"browse.path.description": "Seznam cest, na kterých bude analyzátor značek hledat hlavičky zahrnuté zdrojovými soubory. Pokud se vynechá, {0} se použije jako {1}. Hledání na těchto cestách je standardně rekurzivní. Pokud chcete zadat nerekurzivní vyhledávání, zadejte {2}. Příklad: {3} prohledá všechny podadresáře, zatímco {4} ne.",
 	"one.browse.path.per.line": "Na každý řádek jedna cesta procházení",

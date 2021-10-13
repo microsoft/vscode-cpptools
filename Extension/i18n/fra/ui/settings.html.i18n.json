@@ -54,6 +54,8 @@
 	"one.file.per.line": "Un fichier par ligne.",
 	"compile.commands": "Commandes de compilation",
 	"compile.commands.description": "Chemin complet du fichier {0} pour l'espace de travail. Les chemins d'inclusion et les définitions découverts dans ce fichier sont utilisés à la place des valeurs définies pour les paramètres {1} et {2}. Si la base de données des commandes de compilation n'a pas d'entrée pour l'unité de traduction qui correspond au fichier que vous avez ouvert dans l'éditeur, un message d'avertissement s'affiche et l'extension utilise les paramètres {3} et {4} à la place.",
+	"merge.configurations": "Fusionner les configurations",
+	"merge.configurations.description": "Lorsque la valeur est true (ou vérifiée), la fusion inclut des chemins d’accès, des définitions et des éléments obligatoires avec ceux d’un fournisseur de configuration.",
 	"browse.path": "Parcourir : chemin",
 	"browse.path.description": "Liste de chemins dans lesquels l'analyseur de balises doit rechercher les en-têtes inclus par vos fichiers sources. En cas d'omission, {0} est utilisé comme {1}. La recherche dans ces chemins est récursive par défaut. Spécifiez {2} pour indiquer une recherche non récursive. Par exemple : {3} effectue une recherche dans tous les sous-répertoires, contrairement à {4}.",
 	"one.browse.path.per.line": "Un chemin de navigation par ligne.",
