@@ -213,5 +213,6 @@
 	"invoking_nvcc": "Komut satırı ile nvcc çağrılıyor: {0}",
 	"nvcc_host_compile_command_not_found": "Nvcc çıkışındaki konak derleme komutu bulunamıyor.",
 	"unable_to_locate_forced_include": "Zorlamalı ekleme bulunamıyor: {0}",
-	"inline_macro": "Satır içi makro"
+	"inline_macro": "Satır içi makro",
+	"unable_to_access_browse_database": "Göz atma veritabanına erişilemiyor. ({0})"
 }
