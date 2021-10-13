@@ -164,7 +164,7 @@
 	"c_cpp.configuration.default.cStandard.markdownDescription": "當 `cStandard` 未指定或設定為 `${default}` 時，要在組態中使用的值。",
 	"c_cpp.configuration.default.cppStandard.markdownDescription": "當 `cppStandard` 未指定或設定為 `${default}` 時，要在組態中使用的值。",
 	"c_cpp.configuration.default.configurationProvider.markdownDescription": "當 `configurationProvider` 未指定或設定為 `${default}` 時，要在組態中使用的值。",
-	"c_cpp.configuration.default.mergeConfigurations.markdownDescription": "設定為 [True] 以合併包含路徑、定義和強制包含來自設定提供者的路徑。",
+	"c_cpp.configuration.default.mergeConfigurations.markdownDescription": "設定為 `true` 以合併包含路徑、定義和強制包含來自設定提供者的路徑。",
 	"c_cpp.configuration.default.browse.path.markdownDescription": "當 `browse.path` 未指定時，要在設定中使用的值，或 `browse.path` 中有 `${default}` 時要插入的值。",
 	"c_cpp.configuration.default.browse.databaseFilename.markdownDescription": "當 `browse.databaseFilename` 未指定或設定為 `${default}` 時，要在組態中使用的值。",
 	"c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.markdownDescription": "當 `browse.limitSymbolsToIncludedHeaders` 未指定或設定為 `${default}` 時，要在組態中使用的值。",

@@ -67,7 +67,7 @@
 	"c_cpp.configuration.vcFormat.newLine.scopeBracesOnSeparateLines.description": "Levé a pravé složené závorky pro obory se umístí na samostatné řádky.",
 	"c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyType.description": "V případě prázdných typů se pravá závorka přesune na stejný řádek, na kterém je levá závorka.",
 	"c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description": "V případě prázdných těl funkcí se pravá závorka přesune na stejný řádek, na kterém je levá závorka.",
-	"c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription": "Catch a podobná klíčová slova se budou umísťovat na nový řádek.",
+	"c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription": "`catch` a podobná klíčová slova se budou umísťovat na nový řádek.",
 	"c_cpp.configuration.vcFormat.newLine.beforeElse.markdownDescription": "Klíčové slovo `else` se umístí na nový řádek.",
 	"c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription": "Podmínka `while` ve smyčce `do`-`while` se umístí na nový řádek.",
 	"c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.description": "Mezery mezi názvy funkcí a levými závorkami seznamů argumentů.",
