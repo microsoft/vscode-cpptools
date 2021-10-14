@@ -149,17 +149,42 @@ function showWarning(params: ShowWarningParams): void {
 }
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
-    const is_intelliSense: boolean = params.diagnosticsType === DiagnosticsType.IntelliSense;
-    if (is_intelliSense) {
-        if (!diagnosticsCollectionIntelliSense) {
-            diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection("C/C++");
-        }
-    } else if (!diagnosticsCollectionCodeAnalysis) {
-        diagnosticsCollectionCodeAnalysis = vscode.languages.createDiagnosticCollection("clang-tidy");
+    if (!diagnosticsCollectionIntelliSense) {
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection("C/C++");
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
     const diagnosticsIntelliSense: vscode.Diagnostic[] = [];
+    params.diagnostics.forEach((d) => {
+        const message: string = util.getLocalizedString(d.localizeStringParams);
+        const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
+        diagnostic.code = d.code;
+        diagnostic.source = "C/C++";
+        if (d.relatedInformation) {
+            diagnostic.relatedInformation = [];
+            for (const info of d.relatedInformation) {
+                const infoRange: vscode.Range = new vscode.Range(info.location.range.start.line, info.location.range.start.character, info.location.range.end.line, info.location.range.end.character);
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(
+                    new vscode.Location(vscode.Uri.parse(info.location.uri), infoRange), info.message));
+            }
+        }
+
+        diagnosticsIntelliSense.push(diagnostic);
+    });
+
+    const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
+
+    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
+}
+
+function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void {
+    if (!diagnosticsCollectionCodeAnalysis) {
+        diagnosticsCollectionCodeAnalysis = vscode.languages.createDiagnosticCollection("clang-tidy");
+    }
+
+    // Convert from our Diagnostic objects to vscode Diagnostic objects
     const diagnosticsCodeAnalysis: vscode.Diagnostic[] = [];
     params.diagnostics.forEach((d) => {
         const message: string = util.getLocalizedString(d.localizeStringParams);
@@ -181,21 +206,11 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
             }
         }
 
-        if (is_intelliSense) {
-            diagnosticsIntelliSense.push(diagnostic);
-        } else {
-            diagnosticsCodeAnalysis.push(diagnostic);
-        }
+        diagnosticsCodeAnalysis.push(diagnostic);
     });
 
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
-    if (is_intelliSense) {
-        diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
-    } else {
-        diagnosticsCollectionCodeAnalysis.set(realUri, diagnosticsCodeAnalysis);
-    }
-
-    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
+    diagnosticsCollectionCodeAnalysis.set(realUri, diagnosticsCodeAnalysis);
 }
 
 interface WorkspaceFolderParams {
@@ -299,15 +314,9 @@ interface Diagnostic {
     relatedInformation?: CppDiagnosticRelatedInformation[];
 }
 
-enum DiagnosticsType {
-    IntelliSense,
-    CodeAnalysis
-}
-
 interface PublishDiagnosticsParams {
     uri: string;
     diagnostics: Diagnostic[];
-    diagnosticsType: DiagnosticsType;
 }
 
 interface GetCodeActionsRequestParams {
@@ -574,6 +583,7 @@ const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, voi
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
 const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
+const PublishCodeAnalysisDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishCodeAnalysisDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
@@ -2238,6 +2248,7 @@ export class DefaultClient implements Client {
             client.handleRequestCustomConfig(requestFile);
         });
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
+        this.languageClient.onNotification(PublishCodeAnalysisDiagnosticsNotification, publishCodeAnalysisDiagnostics);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
