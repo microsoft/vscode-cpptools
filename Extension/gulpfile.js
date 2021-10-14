@@ -549,7 +549,10 @@ const generateLocalizedJsonSchemaFiles = () => {
             keyPrefix = keyPrefix.replace(/\\/g, "/");
             let descriptionCallback = (path, value, parent) => {
                 if (stringTable[keyPrefix + path]) {
-                    parent.description = stringTable[keyPrefix + path];
+                    if (!parent.markdownDescription)
+                        parent.description = stringTable[keyPrefix + path];
+                    else
+                        parent.markdownDescription = stringTable[keyPrefix + path];
                 }
             };
             traverseJson(jsonTree, descriptionCallback, "");
