@@ -1272,7 +1272,7 @@ function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, a
         return workspaceFolderName; // No duplicate names to search for.
     }
     for (let i: number = 0; i < workspaceFolder.index; ++i) {
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0 && vscode.workspace.workspaceFolders[i].name === workspaceFolderName) {
             return addSubfolder ? path.join(workspaceFolderName, String(workspaceFolder.index)) : // Use the index as a subfolder.
                 workspaceFolderName + String(workspaceFolder.index);
         }

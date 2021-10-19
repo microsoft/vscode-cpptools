@@ -264,7 +264,7 @@ export class CppProperties {
             // not for each notifying folder.
             const savedDocWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(doc.uri);
             const notifyingWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(settingsPath));
-            if ((!savedDocWorkspaceFolder && vscode.workspace.workspaceFolders && notifyingWorkspaceFolder === vscode.workspace.workspaceFolders[0])
+            if ((!savedDocWorkspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0 && notifyingWorkspaceFolder === vscode.workspace.workspaceFolders[0])
                || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
                 let fileType: string | undefined;
                 const documentPath: string = doc.uri.fsPath.toLowerCase();

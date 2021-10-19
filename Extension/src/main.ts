@@ -393,7 +393,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    const settings: CppSettings = new CppSettings(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined);
+    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
