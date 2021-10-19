@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.7.1: October 19, 2021
+### Bug Fixes
+* Fix an extension crash that occurred on activation while a workspace is open with no folders in it. [#8280](https://github.com/microsoft/vscode-cpptools/issues/8280)
+* Fix an issue in which configuration defaults were not properly applied. [#8298](https://github.com/microsoft/vscode-cpptools/pull/8298)
+
 ## Version 1.7.0: October 13, 2021
 ### New Features
 * Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
