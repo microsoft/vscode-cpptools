@@ -61,6 +61,18 @@ class Settings {
         }
         return result;
     }
+
+    protected getWithUndefinedDefault<T>(section: string): T | undefined {
+        const info: any = this.settings.inspect<T>(section);
+        if (info.workspaceFolderValue !== undefined) {
+            return info.workspaceFolderValue;
+        } else if (info.workspaceValue !== undefined) {
+            return info.workspaceValue;
+        } else if (info.globalValue !== undefined) {
+            return info.globalValue;
+        }
+        return undefined;
+    }
 }
 
 export class CppSettings extends Settings {
@@ -204,23 +216,23 @@ export class CppSettings extends Settings {
     public get addNodeAddonIncludePaths(): boolean | undefined { return super.Section.get<boolean>("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean | undefined { return super.Section.get<boolean>("renameRequiresIdentifier"); }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("files.exclude"); }
-    public get defaultIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.includePath"); }
-    public get defaultDefines(): string[] | undefined { return super.Section.get<string[]>("default.defines"); }
-    public get defaultMacFrameworkPath(): string[] | undefined { return super.Section.get<string[]>("default.macFrameworkPath"); }
+    public get defaultIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.includePath"); }
+    public get defaultDefines(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.defines"); }
+    public get defaultMacFrameworkPath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.macFrameworkPath"); }
     public get defaultWindowsSdkVersion(): string | undefined { return super.Section.get<string>("default.windowsSdkVersion"); }
     public get defaultCompileCommands(): string | undefined { return super.Section.get<string>("default.compileCommands"); }
-    public get defaultForcedInclude(): string[] | undefined { return super.Section.get<string[]>("default.forcedInclude"); }
+    public get defaultForcedInclude(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | undefined { return super.Section.get<string | null>("default.compilerPath") ?? undefined; }
-    public get defaultCompilerArgs(): string[] | undefined { return super.Section.get<string[]>("default.compilerArgs"); }
+    public get defaultCompilerArgs(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
     public get defaultConfigurationProvider(): string | undefined { return super.Section.get<string>("default.configurationProvider"); }
     public get defaultMergeConfigurations(): boolean | undefined { return super.Section.get<boolean>("default.mergeConfigurations"); }
-    public get defaultBrowsePath(): string[] | undefined { return super.Section.get<string[] | null>("default.browse.path") ?? undefined; }
+    public get defaultBrowsePath(): string[] | undefined { return super.getWithUndefinedDefault<string[] | null>("default.browse.path") ?? undefined; }
     public get defaultDatabaseFilename(): string | undefined { return super.Section.get<string>("default.browse.databaseFilename"); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
-    public get defaultSystemIncludePath(): string[] | undefined { return super.Section.get<string[]>("default.systemIncludePath"); }
+    public get defaultSystemIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }

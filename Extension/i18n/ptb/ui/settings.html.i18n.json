@@ -54,6 +54,8 @@
 	"one.file.per.line": "Um arquivo por linha.",
 	"compile.commands": "Compilar comandos",
 	"compile.commands.description": "O caminho completo para o arquivo {0} para o workspace. Os caminhos de inclusão e as definições descobertas neste arquivo serão usados no lugar dos valores definidos para as configurações {1} e {2}. Se o banco de dados de comandos de compilação não contiver uma entrada para a unidade de tradução que corresponda ao arquivo aberto no editor, uma mensagem de aviso será exibida e, em vez disso, a extensão usará as configurações {3} e {4}.",
+	"merge.configurations": "Mesclar as configurações",
+	"merge.configurations.description": "Quando definido como true (ou verificado), mesclar os caminhos de inclusão, definições e inclusões forçadas com aqueles de um provedor de configuração.",
 	"browse.path": "Procurar: caminho",
 	"browse.path.description": "Uma lista de caminhos para o Analisador de Marca pesquisar os cabeçalhos incluídos pelos arquivos de origem. Se omitido, {0} será usado como o {1}. A pesquisa nesses caminhos é recursiva por padrão. Especifique {2} para indicar pesquisa não recursiva. Por exemplo: {3} pesquisará todos os subdiretórios enquanto {4} não pesquisará.",
 	"one.browse.path.per.line": "Um caminho de pesquisa por linha.",

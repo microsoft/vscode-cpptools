@@ -54,6 +54,8 @@
 	"one.file.per.line": "每行一個檔案。",
 	"compile.commands": "編譯命令",
 	"compile.commands.description": "工作區 {0} 檔案的完整路徑。系統會使用在這個檔案中找到的 include 路徑和 define，而不是為 {1} 與 {2} 設定所指定的值。如果在編譯命令資料庫中，對應到您在編輯器中開啟之檔案的編譯單位，沒有任何項目，就會出現警告訊息，而延伸模組會改為使用 {3} 和 {4} 設定。",
+	"merge.configurations": "合併設定",
+	"merge.configurations.description": "當為 True (或核取) 時，合併包含路徑、定義和強制包含來自設定提供者的路徑。",
 	"browse.path": "瀏覽: 路徑",
 	"browse.path.description": "供標籤剖析器在搜尋原始程式檔包含的標頭時使用的路徑清單。若省略，就會使用 {0} 當作 {1}。根據預設，會在這些路徑進行遞迴搜尋。指定 {2} 來指示非遞迴搜尋。例如: {3} 會在所有子目錄中搜尋，但 {4} 不會。",
 	"one.browse.path.per.line": "每行一個瀏覽路徑。",

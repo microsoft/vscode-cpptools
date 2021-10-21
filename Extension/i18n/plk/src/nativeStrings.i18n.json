@@ -213,5 +213,6 @@
 	"invoking_nvcc": "Wywoływanie narzędzia nvcc za pomocą wiersza polecenia: {0}",
 	"nvcc_host_compile_command_not_found": "Nie można znaleźć polecenia kompilacji hosta w danych wyjściowych narzędzia nvcc.",
 	"unable_to_locate_forced_include": "Nie można zlokalizować wymuszonego dołączenia: {0}",
-	"inline_macro": "Makro śródwierszowe"
+	"inline_macro": "Makro śródwierszowe",
+	"unable_to_access_browse_database": "Nie można uzyskać dostępu, aby przeglądać bazę danych ({0})"
 }

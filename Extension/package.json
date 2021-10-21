@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.6.0-main",
+  "version": "1.7.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -4445,7 +4445,7 @@
   "runtimeDependencies": [
     {
       "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170969",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2175018",
       "platforms": [
         "linux"
       ],
@@ -4456,11 +4456,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "1554D6291CEC20CE0E39B0A4AD9E50FAD012FCAA76460FA0A2DDD7654ADC197F"
+      "integrity": "2C657DD48E5C327242C912954315098F81329190C72CE4D4FCB228264BE3AA01"
     },
     {
       "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170862",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2174710",
       "platforms": [
         "linux"
       ],
@@ -4471,11 +4471,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "94712D1268A54FF8224B908E15439B3B9C22FE2C268407D871D1C1B7EEF6630C"
+      "integrity": "22E6BDD91BF0E8592D1101034AE0459E9B103947F246478932650E34C1FAE8C1"
     },
     {
       "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170860",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2174708",
       "platforms": [
         "linux"
       ],
@@ -4486,11 +4486,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "B65F184826F61F3DF2E68CFE409C85BE6A9195595B524BCF74E67F1B50E474F5"
+      "integrity": "D43ECEC2DCCA9E62B3C3A03C404AC383E570717C4343A3D0C56BADA0991336CD"
     },
     {
       "description": "C/C++ language components (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170970",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2175017",
       "platforms": [
         "darwin"
       ],
@@ -4501,11 +4501,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "081A4A0098EC557A32692B2E9DAB852371B5330D8993FF8C5EE12AC6A8EE1605"
+      "integrity": "3409C9D435F97EBD2F1176124873A675C81A079842F41E6E75EC1A78F454535A"
     },
     {
       "description": "C/C++ language components (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170971",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2174709",
       "platforms": [
         "darwin"
       ],
@@ -4516,11 +4516,11 @@
         "./bin/cpptools",
         "./bin/cpptools-srv"
       ],
-      "integrity": "409E9221C7D8C318FBD09E02D41CA166692606521EB7B9A6E6C615359A7CDE4C"
+      "integrity": "3557666DB85407E8CF12BB2C807C83F3ABD55DF811075A91544CC98BC092B9E2"
     },
     {
       "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170863",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2175016",
       "platforms": [
         "win32"
       ],
@@ -4532,11 +4532,11 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "6A766CE793DA60F8596139833A996A7015AB2FFAFBA441544A8616E6D9D0E9CC"
+      "integrity": "40D2953E807B48AB05EDB865F48928B2E09C0C0A84834E4022D6BA6333159F3D"
     },
     {
       "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2170861",
+      "url": "https://go.microsoft.com/fwlink/?linkid=2174707",
       "platforms": [
         "win32"
       ],
@@ -4547,7 +4547,7 @@
         "./bin/cpptools.exe",
         "./bin/cpptools-srv.exe"
       ],
-      "integrity": "9B984390FD80EE6FAA5615BDD343CF96575F507D1907101C42BC78C1F0AF7917"
+      "integrity": "040AC8D9BFD5648C283A567520A0B76871593C0594C5F9266CFB5F321BBE0DA8"
     },
     {
       "description": "Clang tools (Linux / x86_64)",
