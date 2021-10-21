@@ -1092,7 +1092,7 @@ export class DefaultClient implements Client {
         const settings_clangFormatFallbackStyle: (string | undefined)[] = [];
         const settings_clangFormatSortIncludes: (string | undefined)[] = [];
         const settings_codeAnalysisExclude: (vscode.WorkspaceConfiguration | undefined)[] = [];
-        const settings_codeAnalysisRunInBackground: (boolean | undefined)[] = [];
+        const settings_codeAnalysisRunAutomatically: (boolean | undefined)[] = [];
         const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
         const settings_clangTidyConfig: (string | undefined)[] = [];
@@ -1202,7 +1202,7 @@ export class DefaultClient implements Client {
             for (const setting of settings) {
                 settings_clangFormatPath.push(util.resolveVariables(setting.clangFormatPath, this.AdditionalEnvironment));
                 settings_codeAnalysisExclude.push(setting.codeAnalysisExclude);
-                settings_codeAnalysisRunInBackground.push(setting.codeAnalysisRunInBackground);
+                settings_codeAnalysisRunAutomatically.push(setting.codeAnalysisRunAutomatically);
                 settings_clangTidyEnabled.push(setting.clangTidyEnabled);
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
                 settings_clangTidyConfig.push(setting.clangTidyConfig);
@@ -1340,7 +1340,7 @@ export class DefaultClient implements Client {
                     maxMemory: workspaceSettings.codeAnalysisMaxMemory,
                     updateDelay: workspaceSettings.codeAnalysisUpdateDelay,
                     exclude: settings_codeAnalysisExclude,
-                    runInBackground: settings_codeAnalysisRunInBackground,
+                    runAutomatically: settings_codeAnalysisRunAutomatically,
                     clangTidy: {
                         enabled: settings_clangTidyEnabled,
                         path: settings_clangTidyPath,

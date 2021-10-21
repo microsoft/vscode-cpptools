@@ -173,7 +173,7 @@ export class CppSettings extends Settings {
     public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }
     public get codeAnalysisUpdateDelay(): number | undefined | null { return super.Section.get<number>("codeAnalysis.updateDelay"); }
     public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
-    public get codeAnalysisRunInBackground(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runInBackground"); }
+    public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
     public get clangTidyEnabled(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.enabled"); }
     public get clangTidyConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.config"); }

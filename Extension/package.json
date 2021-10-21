@@ -384,9 +384,9 @@
           },
           "scope": "resource"
         },
-        "C_Cpp.codeAnalysis.runInBackground": {
+        "C_Cpp.codeAnalysis.runAutomatically": {
           "type": "boolean",
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.runInBackground.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.runAutomatically.markdownDescription%",
           "default": true,
           "scope": "resource"
         },
