@@ -407,11 +407,6 @@
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription%",
           "scope": "machine-overridable"
         },
-        "C_Cpp.codeAnalysis.clangTidy.buildPath": {
-          "type": "string",
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.buildPath.markdownDescription%",
-          "scope": "machine-overridable"
-        },
         "C_Cpp.codeAnalysis.clangTidy.config": {
           "type": "string",
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription%",

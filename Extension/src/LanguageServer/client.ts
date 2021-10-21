@@ -1095,7 +1095,6 @@ export class DefaultClient implements Client {
         const settings_codeAnalysisRunInBackground: (boolean | undefined)[] = [];
         const settings_clangTidyEnabled: (boolean | undefined)[] = [];
         const settings_clangTidyPath: (string | undefined)[] = [];
-        const settings_clangTidyBuildPath: (string | undefined)[] = [];
         const settings_clangTidyConfig: (string | undefined)[] = [];
         const settings_clangTidyFallbackConfig: (string | undefined)[] = [];
         const settings_clangTidyFixWarnings: (boolean | undefined)[] = [];
@@ -1206,7 +1205,6 @@ export class DefaultClient implements Client {
                 settings_codeAnalysisRunInBackground.push(setting.codeAnalysisRunInBackground);
                 settings_clangTidyEnabled.push(setting.clangTidyEnabled);
                 settings_clangTidyPath.push(util.resolveVariables(setting.clangTidyPath, this.AdditionalEnvironment));
-                settings_clangTidyBuildPath.push(setting.clangTidyBuildPath);
                 settings_clangTidyConfig.push(setting.clangTidyConfig);
                 settings_clangTidyFallbackConfig.push(setting.clangTidyFallbackConfig);
                 settings_clangTidyFixWarnings.push(setting.clangTidyFixWarnings);
@@ -1346,7 +1344,6 @@ export class DefaultClient implements Client {
                     clangTidy: {
                         enabled: settings_clangTidyEnabled,
                         path: settings_clangTidyPath,
-                        buildPath: settings_clangTidyBuildPath,
                         config: settings_clangTidyConfig,
                         fallbackConfig: settings_clangTidyFallbackConfig,
                         fix: {
