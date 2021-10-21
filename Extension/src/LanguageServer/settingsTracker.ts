@@ -178,7 +178,7 @@ export class SettingsTracker {
                 }
                 default: {
                     if (key === "clang_format_path" || key === "intelliSenseCachePath" || key.startsWith("default.")
-                        || key === "codeAnalysis.clangTidy.path" ||
+                        || key === "codeAnalysis.clangTidy.path"
                         || key === "codeAnalysis.clangTidy.headerFilter" || key === "codeAnalysis.clangTidy.args"
                         || key === "codeAnalysis.clangTidy.config" || key === "codeAnalysis.clangTidy.fallbackConfig"
                     ) {
