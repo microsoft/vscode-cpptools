@@ -1804,7 +1804,9 @@ export class DefaultClient implements Client {
             }
 
             this.clearCustomConfigurations();
-            diagnosticsCollectionCodeAnalysis.clear();
+            if (diagnosticsCollectionCodeAnalysis) {
+                diagnosticsCollectionCodeAnalysis.clear();
+            }
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, undefined);
             });
@@ -3119,7 +3121,9 @@ export class DefaultClient implements Client {
 
     public async handleClearCodeAnalysisSquiggles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        diagnosticsCollectionCodeAnalysis.clear();
+        if (diagnosticsCollectionCodeAnalysis) {
+            diagnosticsCollectionCodeAnalysis.clear();
+        }
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
     }
 
