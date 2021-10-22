@@ -1804,6 +1804,7 @@ export class DefaultClient implements Client {
             }
 
             this.clearCustomConfigurations();
+            diagnosticsCollectionCodeAnalysis.clear();
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, undefined);
             });
