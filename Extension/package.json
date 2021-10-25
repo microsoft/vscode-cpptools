@@ -3103,7 +3103,6 @@
     "vscode-nls": "^4.1.1",
     "vscode-tas-client": "^0.1.22",
     "which": "^2.0.2",
-    "yarn": "^1.22.15",
     "yauzl": "^2.10.0"
   },
   "resolutions": {

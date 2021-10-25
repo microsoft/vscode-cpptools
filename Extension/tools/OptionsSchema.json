@@ -196,7 +196,9 @@
     "CppdbgLaunchOptions": {
       "type": "object",
       "default": {},
-      "required": ["program"],
+      "required": [
+          "program"
+      ],
       "properties": {
         "program": {
           "type": "string",
@@ -400,7 +402,10 @@
     "CppdbgAttachOptions": {
       "type": "object",
       "default": {},
-      "required": ["program", "processId"],
+      "required": [
+        "program", 
+        "processId"
+      ],
       "properties": {
         "program": {
           "type": "string",
@@ -511,7 +516,10 @@
     "CppvsdbgLaunchOptions": {
       "type": "object",
       "default": {},
-      "required": ["program", "cwd"],
+      "required": [
+        "program", 
+        "cwd"
+      ],
       "properties": {
         "program": {
           "type": "string",
@@ -658,7 +666,9 @@
     "CppvsdbgAttachOptions": {
       "type": "object",
       "default": {},
-      "required": ["processId"],
+      "required": [
+        "processId"
+      ],
       "properties": {
         "type": {
           "type": "string",
