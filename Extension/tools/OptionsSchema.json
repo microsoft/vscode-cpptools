@@ -197,7 +197,7 @@
       "type": "object",
       "default": {},
       "required": [
-          "program"
+        "program"
       ],
       "properties": {
         "program": {
@@ -253,7 +253,11 @@
           "default": []
         },
         "launchCompleteCommand": {
-          "enum": ["exec-run", "exec-continue", "None"],
+          "enum": [
+            "exec-run", 
+            "exec-continue", 
+            "None"
+          ],
           "description": "%c_cpp.debuggers.launchCompleteCommand.description%",
           "default": "exec-run"
         },
@@ -403,7 +407,7 @@
       "type": "object",
       "default": {},
       "required": [
-        "program", 
+        "program",
         "processId"
       ],
       "properties": {
@@ -517,7 +521,7 @@
       "type": "object",
       "default": {},
       "required": [
-        "program", 
+        "program",
         "cwd"
       ],
       "properties": {
