@@ -8,6 +8,7 @@ import * as os from 'os';
 import { AttachItemsProvider } from './attachToProcess';
 import { AttachItem } from './attachQuickPick';
 import * as nls from 'vscode-nls';
+import { findPowerShell } from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -28,7 +29,8 @@ export class Process {
 export class NativeAttachItemsProviderFactory {
     static Get(): AttachItemsProvider {
         if (os.platform() === 'win32') {
-            return new WmicAttachItemsProvider();
+            const pwsh: string | undefined = findPowerShell();
+            return pwsh ? new CimAttachItemsProvider(pwsh) : new WmicAttachItemsProvider();
         } else {
             return new PsAttachItemsProvider();
         }
@@ -244,6 +246,70 @@ export class WmicProcessParser {
             } else if (key === WmicProcessParser.wmicPidTitle) {
                 process.pid = value;
             } else if (key === WmicProcessParser.wmicCommandLineTitle) {
+                const extendedLengthPath: string = '\\??\\';
+                if (value.lastIndexOf(extendedLengthPath, 0) === 0) {
+                    value = value.slice(extendedLengthPath.length);
+                }
+
+                process.commandLine = value;
+            }
+        }
+    }
+}
+
+export class CimAttachItemsProvider extends NativeAttachItemsProvider {
+    constructor(private pwsh: string) { super(); }
+
+    // Perf numbers on Win10:
+    // TODO
+
+    protected async getInternalProcessEntries(): Promise<Process[]> {
+        const pwshCommand: string = `${this.pwsh} -NoProfile -Command`;
+        const cimCommand: string = 'Get-CimInstance Win32_Process | Format-List -Property Name,ProcessId,CommandLine';
+        const processes: string = await execChildProcess(`${pwshCommand} "${cimCommand}"`, undefined);
+        return CimProcessParser.ParseProcessFromCim(processes);
+    }
+}
+
+export class CimProcessParser {
+    private static get cimNameTitle(): string { return 'Name'; }
+    private static get cimCommandLineTitle(): string { return 'CommandLine'; }
+    private static get cimPidTitle(): string { return 'ProcessId'; }
+
+    // Only public for tests.
+    public static ParseProcessFromCim(processes: string): Process[] {
+        const lines: string[] = processes.split(os.EOL);
+        let currentProcess: Process = new Process("current process", undefined, undefined);
+        const processEntries: Process[] = [];
+
+        for (let i: number = 0; i < lines.length; i++) {
+            const line: string = lines[i];
+            if (!line) {
+                continue;
+            }
+
+            CimProcessParser.parseLineFromCim(line, currentProcess);
+
+            // Each entry of processes has ProcessId as the last line
+            if (line.lastIndexOf(CimProcessParser.cimPidTitle, 0) === 0) {
+                processEntries.push(currentProcess);
+                currentProcess = new Process("current process", undefined, undefined);
+            }
+        }
+
+        return processEntries;
+    }
+
+    private static parseLineFromCim(line: string, process: Process): void {
+        const splitter: number = line.indexOf(':');
+        if (splitter >= 0) {
+            const key: string = line.slice(0, line.indexOf(':')).trim();
+            let value: string = line.slice(line.indexOf(':') + 1).trim();
+            if (key === CimProcessParser.cimNameTitle) {
+                process.name = value;
+            } else if (key === CimProcessParser.cimPidTitle) {
+                process.pid = value;
+            } else if (key === CimProcessParser.cimCommandLineTitle) {
                 const extendedLengthPath: string = '\\??\\';
                 if (value.lastIndexOf(extendedLengthPath, 0) === 0) {
                     value = value.slice(extendedLengthPath.length);
