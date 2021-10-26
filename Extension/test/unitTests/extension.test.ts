@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import * as os from 'os';
 import { LinuxDistribution } from '../../src/linuxDistribution';
-import { Process, WmicProcessParser, PsProcessParser } from '../../src/Debugger/nativeAttach';
+import { Process, WmicProcessParser, PsProcessParser, CimProcessParser } from '../../src/Debugger/nativeAttach';
 
 suite("LinuxDistro Tests", () => {
     test("Parse valid os-release file", () => {
@@ -124,5 +124,47 @@ suite("Pick Process Tests", () => {
         assert.equal(process2.commandLine, 'mdworker -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared');
         assert.equal(process2.name, 'mdworker');
         assert.equal(process2.pid, '15220');
+    });
+
+    test('Parse valid CIM output', () => {
+        // output from the command used in CimAttachItemsProvider
+        const cimOutput: string = 'Name        : System Idle Process' + os.EOL +
+                           'ProcessId   : 0' + os.EOL +
+                           'CommandLine :' + os.EOL +
+                           '' + os.EOL +
+                           'Name        : WindowsTerminal.exe' + os.EOL +
+                           'ProcessId   : 5112' + os.EOL +
+                           'CommandLine : "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminalPreview_1.12.2931.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"' + os.EOL +
+                           '' + os.EOL +
+                           'Name        : conhost.exe' + os.EOL +
+                           'ProcessId   : 34560' + os.EOL +
+                           'CommandLine : \\\\?\\C:\\WINDOWS\\system32\\conhost.exe --headless --width 80 --height 30 --signal 0x8e0 --server 0x824' + os.EOL +
+                           '' + os.EOL +
+                           'Name        : conhost.exe' + os.EOL +
+                           'ProcessId   : 33732' + os.EOL +
+                           'CommandLine : \\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4' + os.EOL;
+
+        const parsedOutput: Process[] = CimProcessParser.ParseProcessFromCim(cimOutput);
+
+        const process1: Process = parsedOutput[0];
+        const process2: Process = parsedOutput[1];
+        const process3: Process = parsedOutput[2];
+        const process4: Process = parsedOutput[3];
+
+        assert.equal(process1.commandLine, '');
+        assert.equal(process1.name, 'System Idle Process');
+        assert.equal(process1.pid, '0');
+
+        assert.equal(process2.commandLine, '"C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminalPreview_1.12.2931.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"');
+        assert.equal(process2.name, 'WindowsTerminal.exe');
+        assert.equal(process2.pid, '5112');
+
+        assert.equal(process3.commandLine, 'C:\\WINDOWS\\system32\\conhost.exe --headless --width 80 --height 30 --signal 0x8e0 --server 0x824');
+        assert.equal(process3.name, 'conhost.exe');
+        assert.equal(process3.pid, '34560');
+
+        assert.equal(process4.commandLine, 'C:\\WINDOWS\\system32\\conhost.exe 0x4');
+        assert.equal(process4.name, 'conhost.exe');
+        assert.equal(process4.pid, '33732');
     });
 });
