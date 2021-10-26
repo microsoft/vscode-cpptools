@@ -290,8 +290,8 @@ export class CimProcessParser {
 
             CimProcessParser.parseLineFromCim(line, currentProcess);
 
-            // Each entry of processes has ProcessId as the last line
-            if (line.lastIndexOf(CimProcessParser.cimPidTitle, 0) === 0) {
+            // Each entry of processes has CommandLine as the last line
+            if (line.lastIndexOf(CimProcessParser.cimCommandLineTitle, 0) === 0) {
                 processEntries.push(currentProcess);
                 currentProcess = new Process("current process", undefined, undefined);
             }
@@ -310,9 +310,13 @@ export class CimProcessParser {
             } else if (key === CimProcessParser.cimPidTitle) {
                 process.pid = value;
             } else if (key === CimProcessParser.cimCommandLineTitle) {
-                const extendedLengthPath: string = '\\??\\';
-                if (value.lastIndexOf(extendedLengthPath, 0) === 0) {
-                    value = value.slice(extendedLengthPath.length);
+                const extendedLengthPathPrefix: string = '\\\\?\\';
+                if (value.lastIndexOf(extendedLengthPathPrefix, 0) === 0) {
+                    value = value.slice(extendedLengthPathPrefix.length);
+                }
+                const ntObjectManagerPathPrefix: string = '\\??\\';
+                if (value.lastIndexOf(ntObjectManagerPathPrefix, 0) === 0) {
+                    value = value.slice(ntObjectManagerPathPrefix.length);
                 }
 
                 process.commandLine = value;
