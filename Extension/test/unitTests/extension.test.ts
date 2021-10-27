@@ -128,21 +128,28 @@ suite("Pick Process Tests", () => {
 
     test('Parse valid CIM output', () => {
         // output from the command used in CimAttachItemsProvider
-        const cimOutput: string = 'Name        : System Idle Process' + os.EOL +
-                           'ProcessId   : 0' + os.EOL +
-                           'CommandLine :' + os.EOL +
-                           '' + os.EOL +
-                           'Name        : WindowsTerminal.exe' + os.EOL +
-                           'ProcessId   : 5112' + os.EOL +
-                           'CommandLine : "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminalPreview_1.12.2931.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe"' + os.EOL +
-                           '' + os.EOL +
-                           'Name        : conhost.exe' + os.EOL +
-                           'ProcessId   : 34560' + os.EOL +
-                           'CommandLine : \\\\?\\C:\\WINDOWS\\system32\\conhost.exe --headless --width 80 --height 30 --signal 0x8e0 --server 0x824' + os.EOL +
-                           '' + os.EOL +
-                           'Name        : conhost.exe' + os.EOL +
-                           'ProcessId   : 33732' + os.EOL +
-                           'CommandLine : \\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4' + os.EOL;
+        const cimOutput: string = String.raw`[
+  {
+    "Name": "System Idle Process",
+    "ProcessId": 0,
+    "CommandLine": null
+  },
+  {
+    "Name": "WindowsTerminal.exe",
+    "ProcessId": 5112,
+    "CommandLine": "\"C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminalPreview_1.12.2931.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe\""
+  },
+  {
+    "Name": "conhost.exe",
+    "ProcessId": 34560,
+    "CommandLine": "\\\\?\\C:\\WINDOWS\\system32\\conhost.exe --headless --width 80 --height 30 --signal 0x8e0 --server 0x824"
+  },
+  {
+    "Name": "conhost.exe",
+    "ProcessId": 33732,
+    "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4"
+  }
+]`;
 
         const parsedOutput: Process[] = CimProcessParser.ParseProcessFromCim(cimOutput);
 
@@ -151,7 +158,7 @@ suite("Pick Process Tests", () => {
         const process3: Process = parsedOutput[2];
         const process4: Process = parsedOutput[3];
 
-        assert.equal(process1.commandLine, '');
+        assert.equal(process1.commandLine, undefined);
         assert.equal(process1.name, 'System Idle Process');
         assert.equal(process1.pid, '0');
 

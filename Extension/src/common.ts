@@ -1327,6 +1327,9 @@ export function normalizeArg(arg: string): string {
     }
 }
 
+/**
+ * Find PowerShell executable from PATH (for Windows only).
+ */
 export function findPowerShell(): string | undefined {
     const dirs: string[] = (process.env.PATH || '').replace(/"+/g, '').split(';').filter(x => x);
     const exts: string[] = (process.env.PATHEXT || '').split(';');

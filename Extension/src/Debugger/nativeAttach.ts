@@ -265,62 +265,34 @@ export class CimAttachItemsProvider extends NativeAttachItemsProvider {
 
     protected async getInternalProcessEntries(): Promise<Process[]> {
         const pwshCommand: string = `${this.pwsh} -NoProfile -Command`;
-        const cimCommand: string = 'Get-CimInstance Win32_Process | Format-List -Property Name,ProcessId,CommandLine';
+        const cimCommand: string = 'Get-CimInstance Win32_Process | Select-Object Name,ProcessId,CommandLine | ConvertTo-JSON';
         const processes: string = await execChildProcess(`${pwshCommand} "${cimCommand}"`, undefined);
         return CimProcessParser.ParseProcessFromCim(processes);
     }
 }
 
+type CimProcessInfo = {
+    Name: string;
+    ProcessId: number;
+    CommandLine: string | null;
+};
+
 export class CimProcessParser {
-    private static get cimNameTitle(): string { return 'Name'; }
-    private static get cimCommandLineTitle(): string { return 'CommandLine'; }
-    private static get cimPidTitle(): string { return 'ProcessId'; }
+    private static get extendedLengthPathPrefix(): string { return '\\\\?\\'; }
+    private static get ntObjectManagerPathPrefix(): string { return '\\??\\'; }
 
     // Only public for tests.
     public static ParseProcessFromCim(processes: string): Process[] {
-        const lines: string[] = processes.split(os.EOL);
-        let currentProcess: Process = new Process("current process", undefined, undefined);
-        const processEntries: Process[] = [];
-
-        for (let i: number = 0; i < lines.length; i++) {
-            const line: string = lines[i];
-            if (!line) {
-                continue;
+        const processInfos: CimProcessInfo[] = JSON.parse(processes);
+        return processInfos.map(info => {
+            let cmdline: string | undefined = info.CommandLine || undefined;
+            if (cmdline?.startsWith(this.extendedLengthPathPrefix)) {
+                cmdline = cmdline.slice(this.extendedLengthPathPrefix.length);
             }
-
-            CimProcessParser.parseLineFromCim(line, currentProcess);
-
-            // Each entry of processes has CommandLine as the last line
-            if (line.lastIndexOf(CimProcessParser.cimCommandLineTitle, 0) === 0) {
-                processEntries.push(currentProcess);
-                currentProcess = new Process("current process", undefined, undefined);
+            if (cmdline?.startsWith(this.ntObjectManagerPathPrefix)) {
+                cmdline = cmdline.slice(this.ntObjectManagerPathPrefix.length);
             }
-        }
-
-        return processEntries;
-    }
-
-    private static parseLineFromCim(line: string, process: Process): void {
-        const splitter: number = line.indexOf(':');
-        if (splitter >= 0) {
-            const key: string = line.slice(0, line.indexOf(':')).trim();
-            let value: string = line.slice(line.indexOf(':') + 1).trim();
-            if (key === CimProcessParser.cimNameTitle) {
-                process.name = value;
-            } else if (key === CimProcessParser.cimPidTitle) {
-                process.pid = value;
-            } else if (key === CimProcessParser.cimCommandLineTitle) {
-                const extendedLengthPathPrefix: string = '\\\\?\\';
-                if (value.lastIndexOf(extendedLengthPathPrefix, 0) === 0) {
-                    value = value.slice(extendedLengthPathPrefix.length);
-                }
-                const ntObjectManagerPathPrefix: string = '\\??\\';
-                if (value.lastIndexOf(ntObjectManagerPathPrefix, 0) === 0) {
-                    value = value.slice(ntObjectManagerPathPrefix.length);
-                }
-
-                process.commandLine = value;
-            }
-        }
+            return new Process(info.Name, `${info.ProcessId}`, cmdline);
+        });
     }
 }
