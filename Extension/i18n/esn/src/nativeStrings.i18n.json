@@ -213,5 +213,6 @@
 	"invoking_nvcc": "Invocando nvcc con la línea de comandos: {0}",
 	"nvcc_host_compile_command_not_found": "No se encuentra el comando de compilación del host en la salida de nvcc.",
 	"unable_to_locate_forced_include": "No se encuentra la inclusión forzada: {0}",
-	"inline_macro": "Macro insertada"
+	"inline_macro": "Macro insertada",
+	"unable_to_access_browse_database": "No se puede acceder a la base de datos de exploración. ({0})"
 }

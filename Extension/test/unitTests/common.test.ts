@@ -235,8 +235,8 @@ suite("Common Utility validation", () => {
                 "-DTEST6=TEST6\\ TEST6 Test6",  // "-DTEST6=TEST6 TEST6 Test6"
             ]
             */
-            testNormalizeArgsScenario("-DTEST1=TEST1 TEST1", "\"-DTEST1=TEST1 TEST1\""); 
-            testNormalizeArgsScenario("-DTEST2=\"TEST2 TEST2\"", "-DTEST2=\"TEST2 TEST2\""); 
+            testNormalizeArgsScenario("-DTEST1=TEST1 TEST1", "\"-DTEST1=TEST1 TEST1\"");
+            testNormalizeArgsScenario("-DTEST2=\"TEST2 TEST2\"", "-DTEST2=\"TEST2 TEST2\"");
             testNormalizeArgsScenario("-DTEST3=\\\"TEST3 TEST3\\\"", "\"-DTEST3=\\\"TEST3 TEST3\\\"\"");
             if (process.platform.includes("win")) {
                 testNormalizeArgsScenario("-DTEST4=TEST4\\ TEST4", "\"-DTEST4=TEST4 TEST4\"");
@@ -245,7 +245,7 @@ suite("Common Utility validation", () => {
                 testNormalizeArgsScenario("-DTEST4=TEST4\\ TEST4", "-DTEST4=TEST4\\ TEST4");
                 testNormalizeArgsScenario("-DTEST5='TEST5 TEST5'", "-DTEST5='TEST5 TEST5'");
             }
-            testNormalizeArgsScenario("-DTEST6=TEST6\\ TEST6 Test6", "\"-DTEST6=TEST6 TEST6 Test6\""); 
+            testNormalizeArgsScenario("-DTEST6=TEST6\\ TEST6 Test6", "\"-DTEST6=TEST6 TEST6 Test6\"");
         });
 
         interface ResolveTestFlowEnvironment {

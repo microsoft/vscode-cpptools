@@ -31,7 +31,7 @@
         "codespace",
         "liveshare"
       ],
-    "extensionPack": [ 
+    "extensionPack": [
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
         "twxs.cmake",
