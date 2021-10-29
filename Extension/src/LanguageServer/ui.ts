@@ -173,12 +173,13 @@ export class UI {
 
     private updateCodeAnalysisTooltip(): void {
         this.runningCodeAnalysisTooltip = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
-            this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
+            this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
+        this.setIsRunningCodeAnalysis(true);
     }
 
     private setCodeAnalysisProcessed(processed: number): void {
         this.codeAnalysisProcessed = processed;
-        if (this.codeAnalysisProcessed >= this.codeAnalysisTotal) {
+        if (this.codeAnalysisProcessed > this.codeAnalysisTotal) {
             this.codeAnalysisTotal = this.codeAnalysisProcessed + 1;
         }
         this.updateCodeAnalysisTooltip();
