@@ -191,8 +191,9 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
         if (typeof d.code === "string" && d.code.length !== 0 && !d.code.startsWith("clang-diagnostic-")) {
+            const codes: string[] = d.code.split(',');
             diagnostic.code = { value: d.code,
-                target: vscode.Uri.parse(`https://clang.llvm.org/extra/clang-tidy/checks/${d.code}.html`) };
+                target: vscode.Uri.parse(`https://releases.llvm.org/13.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${codes[0]}.html`) };
         } else {
             diagnostic.code = d.code;
         }
