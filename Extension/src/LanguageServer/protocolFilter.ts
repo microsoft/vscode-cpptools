@@ -86,7 +86,9 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
         willSaveWaitUntil: (event, sendMessage) => {
             const me: Client = clients.getClientFor(event.document.uri);
             if (me.TrackedDocuments.has(event.document)) {
-                return me.requestWhenReady(() => sendMessage(event));
+                // Don't use me.requestWhenReady or notifyWhenLanguageClientReady;
+                // otherwise, the message can be delayed too long.
+                sendMessage(event);
             }
             return Promise.resolve([]);
         },
