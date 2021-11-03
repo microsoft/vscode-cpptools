@@ -15,7 +15,7 @@
     "axios": "^0.21.4"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^8.1.0",
     "typescript": "^3.8.3"
   }
 }
