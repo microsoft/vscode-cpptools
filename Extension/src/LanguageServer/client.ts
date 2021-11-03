@@ -193,7 +193,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         if (typeof d.code === "string" && d.code.length !== 0 && !d.code.startsWith("clang-diagnostic-")) {
             const codes: string[] = d.code.split(',');
             diagnostic.code = { value: d.code,
-                target: vscode.Uri.parse(`https://releases.llvm.org/13.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${codes[0]}.html`) };
+                target: vscode.Uri.parse(`https://releases.llvm.org/13.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${codes[codes.length - 1]}.html`) };
         } else {
             diagnostic.code = d.code;
         }
