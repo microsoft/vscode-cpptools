@@ -1327,3 +1327,24 @@ export function normalizeArg(arg: string): string {
     }
 }
 
+/**
+ * Find PowerShell executable from PATH (for Windows only).
+ */
+export function findPowerShell(): string | undefined {
+    const dirs: string[] = (process.env.PATH || '').replace(/"+/g, '').split(';').filter(x => x);
+    const exts: string[] = (process.env.PATHEXT || '').split(';');
+    const names: string[] = ['pwsh', 'powershell'];
+    for (const name of names) {
+        const candidates: string[] = dirs.reduce<string[]>((paths, dir) => [
+            ...paths, ...exts.map(ext => path.join(dir, name + ext))
+        ], []);
+        for (const candidate of candidates) {
+            try {
+                if (fs.statSync(candidate).isFile()) {
+                    return name;
+                }
+            } catch (e) {
+            }
+        }
+    }
+}
