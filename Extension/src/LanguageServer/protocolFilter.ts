@@ -88,7 +88,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
             if (me.TrackedDocuments.has(event.document)) {
                 // Don't use me.requestWhenReady or notifyWhenLanguageClientReady;
                 // otherwise, the message can be delayed too long.
-                sendMessage(event);
+                return sendMessage(event);
             }
             return Promise.resolve([]);
         },
