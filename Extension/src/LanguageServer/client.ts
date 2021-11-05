@@ -2455,6 +2455,8 @@ export class DefaultClient implements Client {
             this.model.isParsingFiles.Value = false;
         } else if (message.endsWith("Analysis")) {
             this.model.isRunningCodeAnalysis.Value = true;
+            this.model.codeAnalysisTotal.Value = 1;
+            this.model.codeAnalysisProcessed.Value = 0;
         } else if (message.endsWith("Analysis done")) {
             this.model.isRunningCodeAnalysis.Value = false;
         } else if (message.includes("Squiggles Finished - File name:")) {
