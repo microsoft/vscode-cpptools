@@ -436,7 +436,11 @@
           "scope": "resource"
         },
         "C_Cpp.codeAnalysis.clangTidy.headerFilter": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription%",
           "scope": "resource"
         },

@@ -1105,7 +1105,7 @@ export class DefaultClient implements Client {
         const settings_clangTidyFixWarnings: (boolean | undefined)[] = [];
         const settings_clangTidyFixErrors: (boolean | undefined)[] = [];
         const settings_clangTidyFixNotes: (boolean | undefined)[] = [];
-        const settings_clangTidyHeaderFilter: (string | undefined)[] = [];
+        const settings_clangTidyHeaderFilter: (string | undefined | null)[] = [];
         const settings_clangTidyArgs: (string[] | undefined)[] = [];
         const settings_clangTidyChecksEnabled: (string[] | undefined)[] = [];
         const settings_clangTidyChecksDisabled: (string[] | undefined)[] = [];
