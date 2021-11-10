@@ -390,12 +390,6 @@
           "default": true,
           "scope": "resource"
         },
-        "C_Cpp.codeAnalysis.runOnBuild": {
-          "type": "boolean",
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.runOnBuild.markdownDescription%",
-          "default": false,
-          "scope": "resource"
-        },
         "C_Cpp.codeAnalysis.clangTidy.enabled": {
           "type": "boolean",
           "default": false,
@@ -415,24 +409,6 @@
         "C_Cpp.codeAnalysis.clangTidy.fallbackConfig": {
           "type": "string",
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription%",
-          "scope": "resource"
-        },
-        "C_Cpp.codeAnalysis.clangTidy.fix.warnings": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.warnings.markdownDescription%",
-          "scope": "resource"
-        },
-        "C_Cpp.codeAnalysis.clangTidy.fix.errors": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.errors.markdownDescription%",
-          "scope": "resource"
-        },
-        "C_Cpp.codeAnalysis.clangTidy.fix.notes": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.fix.notes.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.codeAnalysis.clangTidy.headerFilter": {
