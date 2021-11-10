@@ -42,7 +42,7 @@
 	"c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription": "La nouvelle ligne est indentée en fonction de `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.",
 	"c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "Dans le code existant, conservez l'alignement existant de la mise en retrait des nouvelles lignes entre parenthèses.",
 	"c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription": "Les étiquettes sont indentées par rapport aux instructions de commutation de la quantité spécifiée dans le paramètre `#editor.tabSize#`.",
-	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "Le code à l’intérieur d’un bloc « case » est mis en retrait par rapport à son étiquette en fonction de la quantité spécifiée dans le paramètre « #editor.tabSize# ».",
+	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "Le code à l’intérieur d’un bloc « case » est mis en retrait par rapport à son étiquette en fonction de la quantité spécifiée dans le paramètre `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription": "Mettez en retrait les accolades qui suivent une instruction case en fonction de la quantité spécifiée dans le paramètre `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription": "Mettre en retrait les accolades des expressions lambda utilisées comme paramètres de fonction par rapport au début de l’instruction par la quantité spécifiée dans le paramètre `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.gotoLabels.description": "Position des étiquettes goto.",

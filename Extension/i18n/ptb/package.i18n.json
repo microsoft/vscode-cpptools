@@ -42,7 +42,7 @@
 	"c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription": "A nova linha é recuada com base em `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.",
 	"c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "No código existente, preservar o alinhamento de recuo existente das novas linhas entre parênteses.",
 	"c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription": "Os rótulos são recuados em relação às instruções de troca pela quantidade especificada na configuração `#editor.tabSize#`.",
-	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "O código dentro de um bloco `case` é recuado em relação ao seu rótulo pela quantidade especificada na configuração`#editor.tabSize#`.",
+	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "O código dentro de um bloco `case` é recuado em relação ao seu rótulo pela quantidade especificada na configuração `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription": "Recue os colchetes seguindo uma instrução de caso pela quantidade especificada na configuração `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription": "Recue colchetes de lambdas usados ​​como parâmetros de função relativos ao início da instrução pela quantidade especificada na configuração `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.gotoLabels.description": "A posição dos rótulos goto.",
