@@ -55,12 +55,12 @@
 	"compile.commands": "Příkazy kompilace",
 	"compile.commands.description": "Úplná cesta k souboru {0} pro pracovní prostor. Cesty pro vložené soubory a direktivy define v tomto souboru se použijí namísto hodnot nastavených pro nastavení {1} a {2}. Pokud databáze příkazů pro kompilaci neobsahuje položku pro jednotku překladu, která odpovídá souboru otevřenému v editoru, zobrazí se zpráva upozornění a rozšíření místo toho použije nastavení {3} a {4}.",
 	"merge.configurations": "Sloučit konfigurace",
-	"merge.configurations.description": "Pokud je tato možnost true (nebo zaškrtnutá), sloučí cesty k zahrnutým souborům, direktivy define a vynucená zahrnutí s těmi od poskytovatele konfigurace.",
+	"merge.configurations.description": "Pokud je tato možnost {0} (nebo zaškrtnutá), sloučí cesty k zahrnutým souborům, direktivy define a vynucená zahrnutí s těmi od poskytovatele konfigurace.",
 	"browse.path": "Procházení: cesta",
 	"browse.path.description": "Seznam cest, na kterých bude analyzátor značek hledat hlavičky zahrnuté zdrojovými soubory. Pokud se vynechá, {0} se použije jako {1}. Hledání na těchto cestách je standardně rekurzivní. Pokud chcete zadat nerekurzivní vyhledávání, zadejte {2}. Příklad: {3} prohledá všechny podadresáře, zatímco {4} ne.",
 	"one.browse.path.per.line": "Na každý řádek jedna cesta procházení",
 	"limit.symbols": "Procházení: omezení symbolů na zahrnuté hlavičky",
-	"limit.symbols.checkbox": "Když se nastaví na true (nebo zaškrtne), analyzátor značek bude parsovat jen soubory kódů, které přímo nebo nepřímo zahrnul zdrojový soubor v {0}. Když se nastaví na false (nebo nezaškrtne), analyzátor značek bude parsovat všechny soubory kódů nalezené na cestách zadaných v seznamu {1}.",
+	"limit.symbols.checkbox": "Když se nastaví na {0} (nebo zaškrtne), analyzátor značek bude parsovat jen soubory kódů, které přímo nebo nepřímo zahrnul zdrojový soubor v {1}. Když se nastaví na {2} (nebo nezaškrtne), analyzátor značek bude parsovat všechny soubory kódů nalezené na cestách zadaných v seznamu {3}.",
 	"database.filename": "Procházení: název souboru databáze",
 	"database.filename.description": "Cesta k vygenerované databázi symbolů. Na základě této možnosti bude rozšíření ukládat databázi symbolů analyzátoru značek někam jinam než do výchozího umístění úložiště pracovního prostoru. Pokud se zadá relativní cesta, bude relativní vzhledem k výchozímu umístění úložiště pracovního prostoru, nikoli k samotné složce pracovního prostoru. Pokud chcete zadat cestu relativní ke složce pracovního prostoru (třeba {1}), dá se použít proměnná {0}."
 }
