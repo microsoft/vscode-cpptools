@@ -9,7 +9,7 @@
 	"walkthrough.linux.instructions1": "Öffnen Sie die C++-Quelldatei, die Sie ausführen und debuggen möchten. Stellen Sie sicher, dass diese Datei im Editor aktiv ist, d. h. aktuell angezeigt wird und ausgewählt ist.",
 	"walkthrough.linux.press.f5": "Drücken Sie {0}, oder wählen Sie im Hauptmenü {1} aus.",
 	"walkthrough.linux.run": "Ausführen",
-	"walkthrough.linux.start.debugging": "Starten Sie das Debuggen.",
+	"walkthrough.linux.start.debugging": "Debuggen starten",
 	"walkthrough.linux.select.compiler": "Wählen Sie {0}.",
 	"walkthrough.linux.choose.build.active.file": "Wählen Sie {0}.",
 	"walkthrough.linux.build.and.debug.active.file": "Aktive Datei erstellen und debuggen",

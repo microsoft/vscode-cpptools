@@ -163,9 +163,9 @@
 	"preprocessor_keyword": "palabra clave del preprocesador",
 	"c_keyword": "Palabra clave de C",
 	"cpp_keyword": "Palabra clave de C++",
-	"overload": "1 sobrecarga más",
+	"overload": "1 sobrecarga más",
 	"overloads": "%d sobrecargas más",
-	"specialization": "1 especialización más",
+	"specialization": "1 especialización más",
 	"specializations": "%d especializaciones más",
 	"expands_to": "Se expande a:",
 	"file_label": "Archivo:",
@@ -207,12 +207,13 @@
 	"failed_to_query_for_standard_version": "No se pudo consultar el compilador en la ruta de acceso \"{0}\" para las versiones estándar predeterminadas. La consulta del compilador está deshabilitada para este.",
 	"unrecognized_language_standard_version": "La consulta del compilador devolvió una versión estándar del lenguaje no reconocida. En su lugar se usará la última versión admitida.",
 	"intellisense_process_crash_detected": "Se ha detectado un bloqueo del proceso de IntelliSense.",
-	"return_values_label": "Valores devueltos:",
+	"return_values_label": "Devuelve los valores:",
 	"nvcc_compiler_not_found": "No se encuentra el compilador de nvcc: {0}",
 	"nvcc_host_compiler_not_found": "No se encuentra el compilador host nvcc: {0}",
 	"invoking_nvcc": "Invocando nvcc con la línea de comandos: {0}",
 	"nvcc_host_compile_command_not_found": "No se encuentra el comando de compilación del host en la salida de nvcc.",
 	"unable_to_locate_forced_include": "No se encuentra la inclusión forzada: {0}",
-	"inline_macro": "Macro insertada",
-	"unable_to_access_browse_database": "No se puede acceder a la base de datos de exploración. ({0})"
+	"inline_macro": "Insertar macro",
+	"unable_to_access_browse_database": "No se puede acceder a la base de datos de exploración. ({0})",
+	"default_compiler_path_modified_explicit_intellisense_mode": "Se ha cambiado IntelliSenseMode porque no coincidía con el compilador detectado.  Considere la posibilidad de establecer \"compilerPath\" en su lugar.  Establezca \"compilerPath\" en \"\" para deshabilitar la detección de las inclusión y definiciones del sistema."
 }
