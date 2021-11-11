@@ -8,7 +8,7 @@
 	"walkthrough.linux.run.and.debug.your.file": "VS Code에서 C++ 파일을 실행하고 디버그하려면:",
 	"walkthrough.linux.instructions1": "실행하고 디버그할 C++ 원본 파일을 엽니다. 이 파일이 편집기에서 활성화되어 있는지(현재 표시되고 선택되어 있는지) 확인하세요.",
 	"walkthrough.linux.press.f5": "{0}을(를) 누릅니다. 또는 기본 메뉴에서 {1}을(를) 선택합니다.",
-	"walkthrough.linux.run": "운영",
+	"walkthrough.linux.run": "실행",
 	"walkthrough.linux.start.debugging": "디버깅 시작",
 	"walkthrough.linux.select.compiler": "{0}을(를) 선택합니다.",
 	"walkthrough.linux.choose.build.active.file": "{0}을(를) 선택합니다.",

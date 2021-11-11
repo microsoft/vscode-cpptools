@@ -1291,6 +1291,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
 }
 
 export function deactivate(): Thenable<void> {
+    if (!realActivationOccurred) {
+        return Promise.resolve();
+    }
     clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
