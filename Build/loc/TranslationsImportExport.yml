@@ -42,7 +42,6 @@ steps:
     patVariable: '$(OneLocBuildPat)'
     LclSource: lclFilesfromPackage
     LclPackageId: 'LCL-JUNO-PROD-VCPP'
-    lsBuildXLocPackageVersion: '7.0.30510'
 
 - task: CmdLine@2
   inputs:
