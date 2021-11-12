@@ -36,14 +36,10 @@
         "ms-vscode.cpptools-themes",
         "twxs.cmake",
         "ms-vscode.cmake-tools",
+        "cschlosser.doxdocgen",
+        "jeff-hykin.better-cpp-syntax",
         "ms-vscode-remote.remote-wsl",
         "ms-vscode-remote.remote-containers",
-        "ms-vscode-remote.remote-ssh",
-        "github.vscode-pull-request-github",
-        "ms-vsonline.vsonline",
-        "ms-vsliveshare.vsliveshare",
-        "ms-vsliveshare.vsliveshare-audio",
-        "cschlosser.doxdocgen",
-        "jeff-hykin.better-cpp-syntax"
+        "ms-vscode-remote.remote-ssh"
     ]
 }
