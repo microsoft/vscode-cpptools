@@ -39,7 +39,7 @@
         "ms-vscode-remote.remote-wsl",
         "ms-vscode-remote.remote-containers",
         "ms-vscode-remote.remote-ssh",
-        "GitHub.codespaces",
+        "github.codespaces",
         "github.vscode-pull-request-github",
         "ms-vsliveshare.vsliveshare",
         "ms-vsliveshare.vsliveshare-audio",
