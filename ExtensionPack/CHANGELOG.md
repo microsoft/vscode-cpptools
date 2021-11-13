@@ -1,5 +1,8 @@
 # C/C++ Extension Pack for Visual Studio Code Change Log
 
+## Version 1.0.1: November 13, 2021
+### Changed
+* Replace VSO with GitHub Codespaces
 
 ## Version 1.0.0: September 14, 2020
 ### List of extensions:
