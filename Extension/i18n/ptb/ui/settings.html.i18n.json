@@ -55,12 +55,12 @@
 	"compile.commands": "Compilar comandos",
 	"compile.commands.description": "O caminho completo para o arquivo {0} para o workspace. Os caminhos de inclusão e as definições descobertas neste arquivo serão usados no lugar dos valores definidos para as configurações {1} e {2}. Se o banco de dados de comandos de compilação não contiver uma entrada para a unidade de tradução que corresponda ao arquivo aberto no editor, uma mensagem de aviso será exibida e, em vez disso, a extensão usará as configurações {3} e {4}.",
 	"merge.configurations": "Mesclar as configurações",
-	"merge.configurations.description": "Quando definido como true (ou verificado), mesclar os caminhos de inclusão, definições e inclusões forçadas com aqueles de um provedor de configuração.",
+	"merge.configurations.description": "Quando definido como {0} (ou verificado), mesclar os caminhos de inclusão, definições e inclusões forçadas com aqueles de um provedor de configuração.",
 	"browse.path": "Procurar: caminho",
 	"browse.path.description": "Uma lista de caminhos para o Analisador de Marca pesquisar os cabeçalhos incluídos pelos arquivos de origem. Se omitido, {0} será usado como o {1}. A pesquisa nesses caminhos é recursiva por padrão. Especifique {2} para indicar pesquisa não recursiva. Por exemplo: {3} pesquisará todos os subdiretórios enquanto {4} não pesquisará.",
 	"one.browse.path.per.line": "Um caminho de pesquisa por linha.",
 	"limit.symbols": "Procurar: limitar símbolos a cabeçalhos incluídos",
-	"limit.symbols.checkbox": "Quando true (ou marcado), o Analisador de Marca analisará somente os arquivos de código que foram diretamente ou indiretamente incluídos em um arquivo de origem no {0}. Quando falso (ou não marcado), o Analisador de Marca analisará todos os arquivos de código encontrados nos caminhos especificados na lista de {1}.",
+	"limit.symbols.checkbox": "Quando {0} (ou marcado), o Analisador de Marca analisará somente os arquivos de código que foram diretamente ou indiretamente incluídos em um arquivo de origem no {1}. Quando {2} (ou não marcado), o Analisador de Marca analisará todos os arquivos de código encontrados nos caminhos especificados na lista de {3}.",
 	"database.filename": "Procurar: nome do arquivo do banco de dados",
 	"database.filename.description": "O caminho para o banco de dados de símbolos gerado. Isso instrui a extensão a salvar o banco de dados de símbolos do Analisador de Marca em algum lugar que não seja o local de armazenamento padrão do workspace. Se um caminho relativo for especificado, ele será criado em relação ao local de armazenamento padrão do workspace e não à própria pasta do workspace. A variável {0} pode ser usada para especificar um caminho relativo à pasta do workspace (por exemplo, {1})"
 }
