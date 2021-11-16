@@ -45,7 +45,7 @@ locFolderNames.forEach((locFolderName) => {
     if (!languageInfo) {
         return;
     }
-    let languageId = languages.find(l => l.folderName == locFolderName).id;
+    let languageId = languageInfo.id;
     let outputLanguageFolder = path.join(cpptoolsRepoPath, "Extension/bin/messages", languageId);
     let outputPath = path.join(outputLanguageFolder, "messages.json");
     let sourceContent = fs.readFileSync(lclPath, 'utf-8');
