@@ -41,6 +41,10 @@ const languages = [
 var locFolderNames = fs.readdirSync(localizeRepoPath).filter(f => fs.lstatSync(path.join(localizeRepoPath, f)).isDirectory());
 locFolderNames.forEach((locFolderName) => {
     let lclPath = path.join(localizeRepoPath, locFolderName, "vc/vc/cpfeui.dll.lcl");
+    let languageInfo = languages.find(l => l.folderName == locFolderName);
+    if (!languageInfo) {
+        return;
+    }
     let languageId = languages.find(l => l.folderName == locFolderName).id;
     let outputLanguageFolder = path.join(cpptoolsRepoPath, "Extension/bin/messages", languageId);
     let outputPath = path.join(outputLanguageFolder, "messages.json");
