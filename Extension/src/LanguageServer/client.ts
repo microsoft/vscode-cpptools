@@ -1336,7 +1336,7 @@ export class DefaultClient implements Client {
                     maxMemory: workspaceSettings.intelliSenseMaxMemory
                 },
                 references: {
-                    maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+                    maxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
                     maxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
                     maxMemory: workspaceSettings.referencesMaxMemory
                 },
