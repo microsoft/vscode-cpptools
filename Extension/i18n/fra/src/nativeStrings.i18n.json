@@ -215,5 +215,6 @@
 	"unable_to_locate_forced_include": "Impossible de localiser le fichier include forcé : {0}",
 	"inline_macro": "Inline macro",
 	"unable_to_access_browse_database": "Impossible d’accéder à la base de données Browse. ({0})",
-	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode a été modifié car il ne correspondait pas au compilateur détecté.  Envisagez de définir \"compilerPath\" à la place.  Définissez \"compilerPath\" à \"\" pour désactiver la détection des includes et defines du système."
+	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode a été modifié car il ne correspondait pas au compilateur détecté.  Envisagez de définir \"compilerPath\" à la place.  Définissez \"compilerPath\" à \"\" pour désactiver la détection des includes et defines du système.",
+	"clear_code_analysis_squiggles": "Effacer les tildes d’analyse du code"
 }

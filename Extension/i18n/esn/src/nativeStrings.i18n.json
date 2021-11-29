@@ -215,5 +215,6 @@
 	"unable_to_locate_forced_include": "No se encuentra la inclusión forzada: {0}",
 	"inline_macro": "Insertar macro",
 	"unable_to_access_browse_database": "No se puede acceder a la base de datos de exploración. ({0})",
-	"default_compiler_path_modified_explicit_intellisense_mode": "Se ha cambiado IntelliSenseMode porque no coincidía con el compilador detectado.  Considere la posibilidad de establecer \"compilerPath\" en su lugar.  Establezca \"compilerPath\" en \"\" para deshabilitar la detección de las inclusión y definiciones del sistema."
+	"default_compiler_path_modified_explicit_intellisense_mode": "Se ha cambiado IntelliSenseMode porque no coincidía con el compilador detectado.  Considere la posibilidad de establecer \"compilerPath\" en su lugar.  Establezca \"compilerPath\" en \"\" para deshabilitar la detección de las inclusión y definiciones del sistema.",
+	"clear_code_analysis_squiggles": "Borrar el subrayado ondulado del análisis de código"
 }

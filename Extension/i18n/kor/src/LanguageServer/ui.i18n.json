@@ -14,6 +14,8 @@
 	"c.cpp.tagparser.statusbar": "C/C++ 태그 파서 상태",
 	"discovering.files.tooltip": "파일을 검색하는 중",
 	"running.analysis.tooltip": "{0} 실행 중",
+	"code.analysis.paused.tooltip": "{0} 일시 중지됨",
+	"running.analysis.processed.tooltip": "{0}: {1} / {2} 실행 중({3}%)",
 	"select.a.configuration": "구성 선택...",
 	"edit.configuration.ui": "구성 편집(UI)",
 	"edit.configuration.json": "구성 편집(JSON)",

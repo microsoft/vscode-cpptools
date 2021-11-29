@@ -25,5 +25,6 @@
 	"open.envfile": "Abrir {0}",
 	"unexpected.os": "Tipo de sistema operativo no esperado",
 	"path.to.pipe.program": "Ruta de acceso completa al programa de canalización, como {0}.",
-	"enable.pretty.printing": "Habilitar la impresión con sangría para {0}"
+	"enable.pretty.printing": "Habilitar la impresión con sangría para {0}",
+	"enable.intel.disassembly.flavor": "Establecer tipo de desensamblado en {0}"
 }

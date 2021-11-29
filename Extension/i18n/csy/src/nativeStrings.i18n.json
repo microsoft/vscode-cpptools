@@ -215,5 +215,6 @@
 	"unable_to_locate_forced_include": "Nepovedlo se najít vynuceně zahrnované soubory: {0}",
 	"inline_macro": "Vložit makro",
 	"unable_to_access_browse_database": "Nedá se získat přístup k procházení databáze. ({0})",
-	"default_compiler_path_modified_explicit_intellisense_mode": "Režim IntelliSenseMode se změnil, protože neodpovídá zjištěnému kompilátoru. Zvažte místo toho nastavení compilerPath. Nastavte compilerPath, aby byla zakázána detekce systémových parametrů include a define."
+	"default_compiler_path_modified_explicit_intellisense_mode": "Režim IntelliSenseMode se změnil, protože neodpovídá zjištěnému kompilátoru. Zvažte místo toho nastavení \"compilerPath\". Nastavte \"compilerPath\" na \"\", aby byla zakázána detekce systémových parametrů include a define.",
+	"clear_code_analysis_squiggles": "Vymazat podtržení analýzy kódu vlnovkou"
 }
