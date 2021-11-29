@@ -314,5 +314,5 @@
     "c_cpp.semanticTokenTypes.numberLiteral.description": "Style for C++ user-defined literal numbers.",
     "c_cpp.semanticTokenTypes.stringLiteral.description": "Style for C++ user-defined literal strings.",
     "c_cpp.semanticTokenModifiers.global.description": "Style to use for symbols that are global.",
-    "c_cpp.semanticTokenModifiers.local.description": "Style to use for symbols that are local.",
+    "c_cpp.semanticTokenModifiers.local.description": "Style to use for symbols that are local."
 }
