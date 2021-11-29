@@ -3864,72 +3864,72 @@
       {
         "id": "referenceType",
         "superType": "class",
-        "description": "A C++/CLI reference type."
+        "description": "%c_cpp.semanticTokenTypes.referenceType.description%"
       },
       {
         "id": "cliProperty",
         "superType": "property",
-        "description": "A C++/CLI property."
+        "description": "%c_cpp.semanticTokenTypes.cliProperty.description%"
       },
       {
         "id": "genericType",
         "superType": "class",
-        "description": "A C++/CLI generic type."
+        "description": "%c_cpp.semanticTokenTypes.genericType.description%"
       },
       {
         "id": "valueType",
         "superType": "class",
-        "description": "A C++/CLI value type."
+        "description": "%c_cpp.semanticTokenTypes.valueType.description%"
       },
       {
         "id": "templateFunction",
         "superType": "function",
-        "description": "A template function."
+        "description": "%c_cpp.semanticTokenTypes.templateFunction.description%"
       },
       {
         "id": "templateType",
         "superType": "class",
-        "description": "A template type."
+        "description": "%c_cpp.semanticTokenTypes.templateType.description%"
       },
       {
         "id": "operatorOverload",
         "superType": "operator",
-        "description": "An overloaded operator."
+        "description": "%c_cpp.semanticTokenTypes.operatorOverload.description%"
       },
       {
         "id": "memberOperatorOverload",
         "superType": "operator",
-        "description": "An overloaded operator member function."
+        "description": "%c_cpp.semanticTokenTypes.memberOperatorOverload.description%"
       },
       {
         "id": "newOperator",
         "superType": "operator",
-        "description": "A C++ new or delete operator."
+        "description": "%c_cpp.semanticTokenTypes.newOperator.description%"
       },
       {
         "id": "customLiteral",
         "superType": "number",
-        "description": "A user-defined literal."
+        "description": "%c_cpp.semanticTokenTypes.customLiteral.description%"
       },
       {
         "id": "numberLiteral",
         "superType": "number",
-        "description": "A user-defined literal number."
+        "description": "%c_cpp.semanticTokenTypes.numberLiteral.description%"
       },
       {
         "id": "stringLiteral",
         "superType": "string",
-        "description": "A user-defined literal string."
+        "description": "%c_cpp.semanticTokenTypes.stringLiteral.description%"
       }
     ],
     "semanticTokenModifiers": [
       {
         "id": "global",
-        "description": "Annotates a symbol that is declared in global scope."
+        "description": "%c_cpp.semanticTokenModifiers.global.description%"
       },
       {
         "id": "local",
-        "description": "Annotates a symbol that is declared in local scope."
+        "description": "%c_cpp.semanticTokenModifiers.local.description%"
       }
     ],
     "semanticTokenScopes": [
