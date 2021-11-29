@@ -25,5 +25,6 @@
 	"open.envfile": "Abrir {0}",
 	"unexpected.os": "Tipo de SO inesperado",
 	"path.to.pipe.program": "caminho completo para o programa de pipe, como {0}",
-	"enable.pretty.printing": "Habilitar a reformatação automática para {0}"
+	"enable.pretty.printing": "Habilitar a reformatação automática para {0}",
+	"enable.intel.disassembly.flavor": "Definir Tipo de Desmontagem como {0}"
 }

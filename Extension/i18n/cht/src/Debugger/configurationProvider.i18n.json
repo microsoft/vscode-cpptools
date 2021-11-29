@@ -25,5 +25,6 @@
 	"open.envfile": "開啟 {0}",
 	"unexpected.os": "未預期的 OS 類型",
 	"path.to.pipe.program": "管道程式的完整路徑，例如 {0}",
-	"enable.pretty.printing": "啟用 {0} 的美化顯示"
+	"enable.pretty.printing": "啟用 {0} 的美化顯示",
+	"enable.intel.disassembly.flavor": "將反組譯碼變體設為 {0}"
 }

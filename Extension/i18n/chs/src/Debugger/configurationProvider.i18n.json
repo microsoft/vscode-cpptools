@@ -25,5 +25,6 @@
 	"open.envfile": "打开 {0}",
 	"unexpected.os": "意外的 OS 类型",
 	"path.to.pipe.program": "管道程序的完整路径，如 {0}",
-	"enable.pretty.printing": "为 {0} 启用整齐打印"
+	"enable.pretty.printing": "为 {0} 启用整齐打印",
+	"enable.intel.disassembly.flavor": "将反汇编风格设置为 {0}"
 }

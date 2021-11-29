@@ -215,5 +215,6 @@
 	"unable_to_locate_forced_include": "Nie można zlokalizować wymuszonego dołączenia: {0}",
 	"inline_macro": "Osadź makro w tekście",
 	"unable_to_access_browse_database": "Nie można uzyskać dostępu, aby przeglądać bazę danych ({0})",
-	"default_compiler_path_modified_explicit_intellisense_mode": "Tryb IntelliSenseMode został zmieniony, ponieważ nie jest zgodny z wykrytym kompilatorem.  Zamiast tego rozważ ustawienie parametru „compilerPath”.  Ustaw parametr „compilerPath” na wartość \"\", aby wyłączyć wykrywanie elementów systemowych uwzględnianych i definiowanych."
+	"default_compiler_path_modified_explicit_intellisense_mode": "Tryb IntelliSenseMode został zmieniony, ponieważ nie jest zgodny z wykrytym kompilatorem.  Zamiast tego rozważ ustawienie parametru „compilerPath”.  Ustaw parametr „compilerPath” na wartość \"\", aby wyłączyć wykrywanie elementów systemowych uwzględnianych i definiowanych.",
+	"clear_code_analysis_squiggles": "Wyczyść zygzaki rozszerzenia Code Analysis"
 }

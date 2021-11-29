@@ -25,5 +25,6 @@
 	"open.envfile": "{0} 열기",
 	"unexpected.os": "예기치 않은 OS 유형",
 	"path.to.pipe.program": "{0} 같은 파이프 프로그램의 전체 경로",
-	"enable.pretty.printing": "{0}에 자동 서식 지정 사용"
+	"enable.pretty.printing": "{0}에 자동 서식 지정 사용",
+	"enable.intel.disassembly.flavor": "디스어셈블리 버전을 {0}(으)로 설정"
 }

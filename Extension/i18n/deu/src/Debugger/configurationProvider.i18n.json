@@ -25,5 +25,6 @@
 	"open.envfile": "{0} öffnen",
 	"unexpected.os": "Unerwarteter Betriebssystemtyp",
 	"path.to.pipe.program": "Vollständiger Pfad zum Pipeprogramm wie z. B. \"{0}\"",
-	"enable.pretty.printing": "Automatische Strukturierung und Einrückung für \"{0}\" aktivieren"
+	"enable.pretty.printing": "Automatische Strukturierung und Einrückung für \"{0}\" aktivieren",
+	"enable.intel.disassembly.flavor": "Disassemblierungsvariante auf {0} festlegen"
 }
