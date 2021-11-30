@@ -64,7 +64,7 @@ function hasAnyChanges() {
             anyChanges = true;
         }
     });
-    
+
     return anyChanges;
 }
 

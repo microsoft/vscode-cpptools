@@ -394,7 +394,7 @@ async function postInstall(info: PlatformInformation): Promise<void> {
 }
 
 async function finalizeExtensionActivation(): Promise<void> {
-    const settings: CppSettings = new CppSettings(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined);
+    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
         getTemporaryCommandRegistrarInstance().disableLanguageServer();
@@ -446,6 +446,10 @@ function rewriteManifest(): Promise<void> {
         "onCommand:C_Cpp.GoToNextDirectiveInGroup",
         "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
         "onCommand:C_Cpp.CheckForCompiler",
+        "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
+        "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
+        "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
+        "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
         "onDebugInitialConfigurations",
         "onDebugResolve:cppdbg",
         "onDebugResolve:cppvsdbg",

@@ -9,7 +9,7 @@
 	"walkthrough.mac.instructions1": "Öffnen Sie die C++-Quelldatei, die Sie ausführen und debuggen möchten. Stellen Sie sicher, dass diese Datei im Editor aktiv ist, d. h. aktuell angezeigt wird und ausgewählt ist.",
 	"walkthrough.mac.press.f5": "Drücken Sie {0}, oder wählen Sie im Hauptmenü {1} aus.",
 	"walkthrough.mac.run": "Ausführen",
-	"walkthrough.mac.start.debugging": "Starten Sie das Debuggen.",
+	"walkthrough.mac.start.debugging": "Debuggen starten",
 	"walkthrough.mac.select.compiler": "Wählen Sie {0}.",
 	"walkthrough.mac.choose.build.active.file": "Wählen Sie {0}.",
 	"walkthrough.windows.build.and.debug.active.file": "Aktive Datei erstellen und debuggen",

@@ -54,11 +54,13 @@
 	"one.file.per.line": "Satır başına bir dosya.",
 	"compile.commands": "Derleme komutları",
 	"compile.commands.description": "Çalışma alanı için {0} dosyasının tam yolu. {1} ve {2} ayarları için ayarlanan değerler yerine bu dosyada bulunan içerme yolları ve tanımlar kullanılır. Derleme komutları veritabanı, düzenleyicide açtığınız dosyaya karşılık gelen çeviri birimi için bir giriş içermiyorsa, bir uyarı mesajı görüntülenir ve uzantı bunun yerine {3} ve {4} ayarlarını kullanır.",
+	"merge.configurations": "Yapılandırmaları birleştir",
+	"merge.configurations.description": "{0} (veya işaretli) olduğunda, dahil etme yollarını, tanımları ve bir yapılandırma sağlayıcısından gelenlerle zorunlu dahil etmeleri birleştir.",
 	"browse.path": "Gözat: yol",
 	"browse.path.description": "Etiket Ayrıştırıcısının kaynak dosyalarınızın içerdiği üst bilgileri arayacağı yolların listesi. Atlanırsa, {1} olarak {0} kullanılır. Bu yollarda arama varsayılan olarak özyinelemelidir. Özyinelemeli olmayan aramayı belirtmek için {2} belirtin. Örneğin: {3}, tüm alt dizinlerde arar ancak {4} aramaz.",
 	"one.browse.path.per.line": "Satır başına bir gözatma yolu.",
 	"limit.symbols": "Gözat: sembolleri eklenen üst bilgilerle sınırla",
-	"limit.symbols.checkbox": "True olduğunda (veya işaretlendiğinde), Etiket Ayrıştırıcısı yalnızca {0} içindeki bir kaynak dosya tarafından doğrudan veya dolaylı olarak eklenen kod dosyalarını ayrıştırır. False olduğunda (veya işaretlenmediğinde), Etiket Ayrıştırıcısı, {1} listesinde belirtilen yollarda bulunan tüm kod dosyalarını ayrıştırır.",
+	"limit.symbols.checkbox": "{0} (veya işaretli) olduğunda, Etiket Ayrıştırıcı yalnızca {1} içindeki bir kaynak dosya tarafından doğrudan veya dolaylı olarak dahil edilen kod dosyalarını ayrıştırır. {2} olduğunda (veya işaretlenmediğinde), Etiket Ayrıştırıcı {3} listesinde belirtilen yollarda bulunan tüm kod dosyalarını ayrıştırır.",
 	"database.filename": "Gözat: veritabanı dosya adı",
 	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1})"
 }

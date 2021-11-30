@@ -12,7 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client } from './client';
+import { Client, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentWorkspaceState, PersistentState } from './persistentState';
@@ -190,8 +190,32 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {
-        if (event.execution.task.source === CppBuildTaskProvider.CppBuildSourceStr) {
+        getActiveClient().PauseCodeAnalysis();
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
+        }
+    });
+
+    vscode.tasks.onDidEndTask(event => {
+        getActiveClient().ResumeCodeAnalysis();
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) {
+            telemetry.logLanguageServerEvent('buildTaskFinished');
+            if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
+                const folder: vscode.WorkspaceFolder | undefined = event.execution.task.scope;
+                if (folder) {
+                    const settings: CppSettings = new CppSettings(folder.uri);
+                    if (settings.codeAnalysisRunOnBuild && settings.clangTidyEnabled) {
+                        clients.getClientFor(folder.uri).handleRunCodeAnalysisOnAllFiles();
+                    }
+                    return;
+                }
+            }
+            const settings: CppSettings = new CppSettings();
+            if (settings.codeAnalysisRunOnBuild && settings.clangTidyEnabled) {
+                clients.ActiveClient.handleRunCodeAnalysisOnAllFiles();
+            }
         }
     });
 
@@ -284,7 +308,7 @@ function sendActivationTelemetry(): void {
 }
 
 function realActivation(): void {
-    if (new CppSettings(vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri : undefined).intelliSenseEngine === "Disabled") {
+    if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
         console.log("activating extension");
@@ -432,7 +456,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
 }
 
-export function processDelayedDidOpen(document: vscode.TextDocument): void {
+export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
@@ -466,16 +490,21 @@ export function processDelayedDidOpen(document: vscode.TextDocument): void {
                 if (!languageChanged) {
                     finishDidOpen(document);
                 }
+                return true;
             }
         }
     }
+    return false;
 }
 
 function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
-            processDelayedDidOpen(editor.document);
+            if (!processDelayedDidOpen(editor.document)) {
+                const client: Client = clients.getClientFor(editor.document.uri);
+                client.onDidChangeVisibleTextEditor(editor);
+            }
         }
     });
 }
@@ -778,11 +807,11 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
     disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseAnalysis', onPauseAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeAnalysis', onResumeAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelAnalysis', onCancelAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', onPauseCodeAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', onResumeCodeAnalysis));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', onCancelCodeAnalysis));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowAnalysisCommands', onShowAnalysisCommands));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', onShowCodeAnalysisCommands));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
     disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
     disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
@@ -796,6 +825,10 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ClearCodeAnalysisSquiggles', onClearCodeAnalysisSquiggles));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -963,6 +996,33 @@ function onCheckForCompiler(): void {
     client.handleCheckForCompiler();
 }
 
+async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
+    onActivationEvent();
+    if (activeDocument !== "") {
+        await vscode.commands.executeCommand("workbench.action.files.saveAll");
+        getActiveClient().handleRunCodeAnalysisOnActiveFile();
+    }
+}
+
+async function onRunCodeAnalysisOnOpenFiles(): Promise<void> {
+    onActivationEvent();
+    if (openFileVersions.size > 0) {
+        await vscode.commands.executeCommand("workbench.action.files.saveAll");
+        getActiveClient().handleRunCodeAnalysisOnOpenFiles();
+    }
+}
+
+async function onRunCodeAnalysisOnAllFiles(): Promise<void> {
+    onActivationEvent();
+    await vscode.commands.executeCommand("workbench.action.files.saveAll");
+    getActiveClient().handleRunCodeAnalysisOnAllFiles();
+}
+
+async function onClearCodeAnalysisSquiggles(): Promise<void> {
+    onActivationEvent();
+    getActiveClient().handleClearCodeAnalysisSquiggles();
+}
+
 function onAddToIncludePath(path: string): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('add.includepath.open.first', 'Open a folder first to add to {0}', "includePath"));
@@ -1011,19 +1071,19 @@ function onResumeParsing(): void {
     clients.ActiveClient.resumeParsing();
 }
 
-function onPauseAnalysis(): void {
+function onPauseCodeAnalysis(): void {
     onActivationEvent();
-    clients.ActiveClient.pauseAnalysis();
+    clients.ActiveClient.PauseCodeAnalysis();
 }
 
-function onResumeAnalysis(): void {
+function onResumeCodeAnalysis(): void {
     onActivationEvent();
-    clients.ActiveClient.resumeAnalysis();
+    clients.ActiveClient.ResumeCodeAnalysis();
 }
 
-function onCancelAnalysis(): void {
+function onCancelCodeAnalysis(): void {
     onActivationEvent();
-    clients.ActiveClient.cancelAnalysis();
+    clients.ActiveClient.CancelCodeAnalysis();
 }
 
 function onShowParsingCommands(): void {
@@ -1031,9 +1091,9 @@ function onShowParsingCommands(): void {
     clients.ActiveClient.handleShowParsingCommands();
 }
 
-function onShowAnalysisCommands(): void {
+function onShowCodeAnalysisCommands(): void {
     onActivationEvent();
-    clients.ActiveClient.handleShowAnalysisCommands();
+    clients.ActiveClient.handleShowCodeAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {
@@ -1286,6 +1346,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
 }
 
 export function deactivate(): Thenable<void> {
+    if (!realActivationOccurred) {
+        return Promise.resolve();
+    }
     clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");

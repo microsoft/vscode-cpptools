@@ -14,6 +14,8 @@
 	"c.cpp.tagparser.statusbar": "État de l’analyseur de balises C/C++",
 	"discovering.files.tooltip": "Détection de fichiers",
 	"running.analysis.tooltip": "Exécution de {0}",
+	"code.analysis.paused.tooltip": "{0} en pause",
+	"running.analysis.processed.tooltip": "En cours d'exécution {0}: {1} / {2} ({3}%)",
 	"select.a.configuration": "Sélectionner une configuration...",
 	"edit.configuration.ui": "Modifier les configurations (IU)",
 	"edit.configuration.json": "Modifier les configurations (JSON)",

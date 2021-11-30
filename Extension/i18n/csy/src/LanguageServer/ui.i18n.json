@@ -14,6 +14,8 @@
 	"c.cpp.tagparser.statusbar": "Stav analyzátoru značky jazyka C/C++",
 	"discovering.files.tooltip": "Zjišťují se soubory.",
 	"running.analysis.tooltip": "Probíhá {0}",
+	"code.analysis.paused.tooltip": "{0} pozastaveno",
+	"running.analysis.processed.tooltip": "Spuštěno {0}: {1} / {2} ({3}%)",
 	"select.a.configuration": "Vybrat konfiguraci...",
 	"edit.configuration.ui": "Upravit konfigurace (uživatelské rozhraní)",
 	"edit.configuration.json": "Upravit konfigurace (JSON)",

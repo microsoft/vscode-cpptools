@@ -14,6 +14,8 @@
 	"c.cpp.tagparser.statusbar": "Status des C/C++-Tagparsers",
 	"discovering.files.tooltip": "Dateien werden ermittelt",
 	"running.analysis.tooltip": "\"{0}\" wird ausgeführt",
+	"code.analysis.paused.tooltip": "{0} angehalten",
+	"running.analysis.processed.tooltip": "Ausführen von {0}: {1} / {2} ({3}%)",
 	"select.a.configuration": "Konfiguration auswählen...",
 	"edit.configuration.ui": "Konfigurationen bearbeiten (Benutzeroberfläche)",
 	"edit.configuration.json": "Konfigurationen bearbeiten (JSON)",
