@@ -313,7 +313,7 @@
             "null"
           ],
           "markdownDescription": "%c_cpp.configuration.references.maxCachedProcesses.markdownDescription%",
-          "default": 0,
+          "default": null,
           "minimum": 0,
           "maximum": 32,
           "scope": "machine"
