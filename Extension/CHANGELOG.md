@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.8.0-insiders2: December 7, 2021
+### Bug Fixes
+* Fix the tag parser getting stuck on certain code. [#8459](https://github.com/microsoft/vscode-cpptools/issues/8459)
+* Fix `C_Cpp.codeAnalysis.maxConcurrentThreads` using the wrong value. [#8471](https://github.com/microsoft/vscode-cpptools/issues/8471)
+* Fix save failing after editing a header that is used by clang-tidy for a TU that is different from the default TU. [#8473](https://github.com/microsoft/vscode-cpptools/issues/8473)
+* Fix inactive region rendering. [#8478](https://github.com/microsoft/vscode-cpptools/issues/8478)
+* Fix CUDA support not working. [#8481](https://github.com/microsoft/vscode-cpptools/issues/8481)
+* Fixes for other IntelliSense issues.
+* Fix some translations.
+
 ## Version 1.8.0-insiders: November 29, 2021
 
 ### New Features
