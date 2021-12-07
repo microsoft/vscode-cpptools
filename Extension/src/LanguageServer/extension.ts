@@ -15,7 +15,8 @@ import { UI, getUI } from './ui';
 import { Client, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
-import { PersistentWorkspaceState, PersistentState } from './persistentState';
+//import { PersistentWorkspaceState, PersistentState } from './persistentState';
+import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
 import { PlatformInformation } from '../platform';
@@ -23,7 +24,7 @@ import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn } from 'child_process';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import { PackageVersion } from '../packageVersion';
-import { getTemporaryCommandRegistrarInstance } from '../commands';
+//import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
@@ -46,9 +47,9 @@ let intervalTimer: NodeJS.Timer;
 let insiderUpdateEnabled: boolean = false;
 let insiderUpdateTimer: NodeJS.Timer;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
-let realActivationOccurred: boolean = false;
-let tempCommands: vscode.Disposable[] = [];
-let activatedPreviously: PersistentWorkspaceState<boolean>;
+//let realActivationOccurred: boolean = false;
+//let tempCommands: vscode.Disposable[] = [];
+//let activatedPreviously: PersistentWorkspaceState<boolean>;
 let buildInfoCache: BuildInfo | undefined;
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
@@ -148,44 +149,63 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
     return diagnostic.code === missingIncludeCode && diagnostic.source === 'C/C++';
 }
 
+function sendActivationTelemetry(): void {
+    const activateEvent: { [key: string]: string } = {};
+    // Don't log telemetry for machineId if it's a special value used by the dev host: someValue.machineid
+    if (vscode.env.machineId !== "someValue.machineId") {
+        const machineIdPersistentState: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.machineId", undefined);
+        if (!machineIdPersistentState.Value) {
+            activateEvent["newMachineId"] = vscode.env.machineId;
+        } else if (machineIdPersistentState.Value !== vscode.env.machineId) {
+            activateEvent["newMachineId"] = vscode.env.machineId;
+            activateEvent["oldMachineId"] = machineIdPersistentState.Value;
+        }
+        machineIdPersistentState.Value = vscode.env.machineId;
+    }
+    if (vscode.env.uiKind === vscode.UIKind.Web) {
+        activateEvent["WebUI"] = "1";
+    }
+    telemetry.logLanguageServerEvent("Activate", activateEvent);
+}
+
 /**
  * activate: set up the extension for language services
  */
 export async function activate(activationEventOccurred: boolean): Promise<void> {
-    if (realActivationOccurred) {
-        return; // Occurs if multiple delayed commands occur before the real commands are registered.
-    }
+    // if (realActivationOccurred) {
+    //     return; // Occurs if multiple delayed commands occur before the real commands are registered.
+    // }
 
-    // Activate immediately if an activation event occurred in the previous workspace session.
-    // If onActivationEvent doesn't occur, it won't auto-activate next time.
-    activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
-    if (activatedPreviously.Value) {
-        activatedPreviously.Value = false;
-        realActivation();
-    }
+    // // Activate immediately if an activation event occurred in the previous workspace session.
+    // // If onActivationEvent doesn't occur, it won't auto-activate next time.
+    // activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
+    // if (activatedPreviously.Value) {
+    //     activatedPreviously.Value = false;
+    //     realActivation();
+    // }
 
-    if (tempCommands.length === 0) { // Only needs to be added once.
-        tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
-    }
+    //if (tempCommands.length === 0) { // Only needs to be added once.
+    //    tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
+    //}
 
     // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
-    let cppPropertiesExists: boolean = false;
+    //let cppPropertiesExists: boolean = false;
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (await util.checkFileExists(config)) {
-                cppPropertiesExists = true;
+                //cppPropertiesExists = true;
                 const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
                 vscode.languages.setTextDocumentLanguage(doc, "jsonc");
             }
         }
     }
 
-    // Check if an activation event has already occurred.
-    if (activationEventOccurred) {
-        onActivationEvent();
-        return;
-    }
+    // // Check if an activation event has already occurred.
+    // if (activationEventOccurred) {
+    //     onActivationEvent();
+    //     return;
+    // }
 
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
@@ -247,67 +267,48 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
         }
     });
 
-    if (cppPropertiesExists) {
-        onActivationEvent();
-        return;
-    }
+    // if (cppPropertiesExists) {
+    //     onActivationEvent();
+    //     return;
+    // }
 
-    // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
-    if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-        for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
-            const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-            if (document.uri.scheme === "file") {
-                if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
-                    onActivationEvent();
-                    return;
-                }
-            }
-        }
-    }
-}
+    // // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
+    // if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
+    //     for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
+    //         const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
+    //         if (document.uri.scheme === "file") {
+    //             if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
+    //                 onActivationEvent();
+    //                 return;
+    //             }
+    //         }
+    //     }
+    // }
+//}
 
-function onDidOpenTextDocument(document: vscode.TextDocument): void {
-    if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
-        onActivationEvent();
-    }
-}
+// function onDidOpenTextDocument(document: vscode.TextDocument): void {
+//     if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
+//         onActivationEvent();
+//     }
+// }
 
-function onActivationEvent(): void {
-    if (tempCommands.length === 0) {
-        return;
-    }
+// function onActivationEvent(): void {
+//     if (tempCommands.length === 0) {
+//         return;
+//     }
+//
+//     // Cancel all the temp commands that just look for activations.
+//     tempCommands.forEach((command) => {
+//         command.dispose();
+//     });
+//     tempCommands = [];
+//     if (!realActivationOccurred) {
+//         realActivation();
+//     }
+//     activatedPreviously.Value = true;
+// }
 
-    // Cancel all the temp commands that just look for activations.
-    tempCommands.forEach((command) => {
-        command.dispose();
-    });
-    tempCommands = [];
-    if (!realActivationOccurred) {
-        realActivation();
-    }
-    activatedPreviously.Value = true;
-}
-
-function sendActivationTelemetry(): void {
-    const activateEvent: { [key: string]: string } = {};
-    // Don't log telemetry for machineId if it's a special value used by the dev host: someValue.machineid
-    if (vscode.env.machineId !== "someValue.machineId") {
-        const machineIdPersistentState: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.machineId", undefined);
-        if (!machineIdPersistentState.Value) {
-            activateEvent["newMachineId"] = vscode.env.machineId;
-        } else if (machineIdPersistentState.Value !== vscode.env.machineId) {
-            activateEvent["newMachineId"] = vscode.env.machineId;
-            activateEvent["oldMachineId"] = machineIdPersistentState.Value;
-        }
-        machineIdPersistentState.Value = vscode.env.machineId;
-    }
-    if (vscode.env.uiKind === vscode.UIKind.Web) {
-        activateEvent["WebUI"] = "1";
-    }
-    telemetry.logLanguageServerEvent("Activate", activateEvent);
-}
-
-function realActivation(): void {
+//function realActivation(): void {
     if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
@@ -324,7 +325,7 @@ function realActivation(): void {
         }
     }
 
-    realActivationOccurred = true;
+    //realActivationOccurred = true;
     console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
@@ -792,7 +793,7 @@ export function registerCommands(): void {
     }
 
     commandsRegistered = true;
-    getTemporaryCommandRegistrarInstance().clearTempCommands();
+    //getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
@@ -834,11 +835,10 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
 
-    getTemporaryCommandRegistrarInstance().executeDelayedCommands();
+    //getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
 function onRestartIntelliSenseForFile(): void {
-    onActivationEvent();
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
         (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
@@ -848,7 +848,6 @@ function onRestartIntelliSenseForFile(): void {
 }
 
 async function onSwitchHeaderSource(): Promise<void> {
-    onActivationEvent();
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document) {
         return;
@@ -912,12 +911,10 @@ async function selectClient(): Promise<Client> {
 }
 
 function onResetDatabase(): void {
-    onActivationEvent();
     clients.ActiveClient.resetDatabase();
 }
 
 function onSelectConfiguration(): void {
-    onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration'));
     } else {
@@ -928,7 +925,6 @@ function onSelectConfiguration(): void {
 }
 
 function onSelectConfigurationProvider(): void {
-    onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
     } else {
@@ -937,7 +933,6 @@ function onSelectConfigurationProvider(): void {
 }
 
 function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
-    onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
@@ -947,7 +942,6 @@ function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColu
 }
 
 function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
-    onActivationEvent();
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
@@ -957,7 +951,6 @@ function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn
 }
 
 function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
-    onActivationEvent();
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
@@ -966,7 +959,6 @@ function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.A
 }
 
 function onGenerateEditorConfig(): void {
-    onActivationEvent();
     if (!isFolderOpen()) {
         const settings: CppSettings = new CppSettings();
         settings.generateEditorConfig();
@@ -979,25 +971,21 @@ function onGenerateEditorConfig(): void {
 }
 
 function onGoToNextDirectiveInGroup(): void {
-    onActivationEvent();
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(true);
 }
 
 function onGoToPrevDirectiveInGroup(): void {
-    onActivationEvent();
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(false);
 }
 
 function onCheckForCompiler(): void {
-    onActivationEvent();
     const client: Client = getActiveClient();
     client.handleCheckForCompiler();
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
-    onActivationEvent();
     if (activeDocument !== "") {
         await vscode.commands.executeCommand("workbench.action.files.saveAll");
         getActiveClient().handleRunCodeAnalysisOnActiveFile();
@@ -1005,7 +993,6 @@ async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
 }
 
 async function onRunCodeAnalysisOnOpenFiles(): Promise<void> {
-    onActivationEvent();
     if (openFileVersions.size > 0) {
         await vscode.commands.executeCommand("workbench.action.files.saveAll");
         getActiveClient().handleRunCodeAnalysisOnOpenFiles();
@@ -1013,13 +1000,11 @@ async function onRunCodeAnalysisOnOpenFiles(): Promise<void> {
 }
 
 async function onRunCodeAnalysisOnAllFiles(): Promise<void> {
-    onActivationEvent();
     await vscode.commands.executeCommand("workbench.action.files.saveAll");
     getActiveClient().handleRunCodeAnalysisOnAllFiles();
 }
 
 async function onClearCodeAnalysisSquiggles(): Promise<void> {
-    onActivationEvent();
     getActiveClient().handleClearCodeAnalysisSquiggles();
 }
 
@@ -1034,70 +1019,58 @@ function onAddToIncludePath(path: string): void {
 }
 
 function onEnableSquiggles(): void {
-    onActivationEvent();
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<string>("errorSquiggles", "Enabled");
 }
 
 function onDisableSquiggles(): void {
-    onActivationEvent();
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<string>("errorSquiggles", "Disabled");
 }
 
 function onToggleIncludeFallback(): void {
-    onActivationEvent();
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
 }
 
 function onToggleDimInactiveRegions(): void {
-    onActivationEvent();
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
     settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
 }
 
 function onPauseParsing(): void {
-    onActivationEvent();
     clients.ActiveClient.pauseParsing();
 }
 
 function onResumeParsing(): void {
-    onActivationEvent();
     clients.ActiveClient.resumeParsing();
 }
 
 function onPauseCodeAnalysis(): void {
-    onActivationEvent();
     clients.ActiveClient.PauseCodeAnalysis();
 }
 
 function onResumeCodeAnalysis(): void {
-    onActivationEvent();
     clients.ActiveClient.ResumeCodeAnalysis();
 }
 
 function onCancelCodeAnalysis(): void {
-    onActivationEvent();
     clients.ActiveClient.CancelCodeAnalysis();
 }
 
 function onShowParsingCommands(): void {
-    onActivationEvent();
     clients.ActiveClient.handleShowParsingCommands();
 }
 
 function onShowCodeAnalysisCommands(): void {
-    onActivationEvent();
     clients.ActiveClient.handleShowCodeAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {
-    onActivationEvent();
     clients.ActiveClient.handleReferencesIcon();
 }
 
@@ -1108,7 +1081,6 @@ function onToggleRefGroupView(): void {
 }
 
 function onTakeSurvey(): void {
-    onActivationEvent();
     telemetry.logLanguageServerEvent("onTakeSurvey");
     const uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
     vscode.commands.executeCommand('vscode.open', uri);
@@ -1121,7 +1093,6 @@ function onVcpkgOnlineHelpSuggested(dummy?: any): void {
 }
 
 async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
-    onActivationEvent();
     let source: string;
     if (ports && ports.length) {
         source = 'CodeAction';
@@ -1189,12 +1160,10 @@ function onGetActiveConfigCustomVariable(variableName: string): Thenable<string>
 }
 
 function onLogDiagnostics(): void {
-    onActivationEvent();
     clients.ActiveClient.logDiagnostics();
 }
 
 function onRescanWorkspace(): void {
-    onActivationEvent();
     clients.ActiveClient.rescanFolder();
 }
 
@@ -1346,9 +1315,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
 }
 
 export function deactivate(): Thenable<void> {
-    if (!realActivationOccurred) {
-        return Promise.resolve();
-    }
+    // if (!realActivationOccurred) {
+    //     return Promise.resolve();
+    // }
     clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
@@ -1371,15 +1340,15 @@ export function isFolderOpen(): boolean {
 }
 
 export function getClients(): ClientCollection {
-    if (!realActivationOccurred) {
-        realActivation();
-    }
+    // if (!realActivationOccurred) {
+    //     realActivation();
+    // }
     return clients;
 }
 
 export function getActiveClient(): Client {
-    if (!realActivationOccurred) {
-        realActivation();
-    }
+    // if (!realActivationOccurred) {
+    //     realActivation();
+    // }
     return clients.ActiveClient;
 }

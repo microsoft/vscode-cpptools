@@ -26,11 +26,11 @@ export class AttachPicker {
 
     // We should not await on this function.
     public async ShowAttachEntries(): Promise<string | undefined> {
-        if (!await util.isExtensionReady()) {
-            util.displayExtensionNotReadyPrompt();
-        } else {
+        // if (!await util.isExtensionReady()) {
+        //     util.displayExtensionNotReadyPrompt();
+        // } else {
             return showQuickPick(() => this.attachItemsProvider.getAttachItems());
-        }
+        // }
     }
 }
 
@@ -42,9 +42,9 @@ export class RemoteAttachPicker {
     private _channel: vscode.OutputChannel;
 
     public async ShowAttachEntries(config: any): Promise<string | undefined> {
-        if (!await util.isExtensionReady()) {
-            util.displayExtensionNotReadyPrompt();
-        } else {
+        // if (!await util.isExtensionReady()) {
+        //     util.displayExtensionNotReadyPrompt();
+        // } else {
             this._channel.clear();
 
             const pipeTransport: any = config ? config.pipeTransport : undefined;
@@ -100,7 +100,7 @@ export class RemoteAttachPicker {
             } else {
                 throw new Error(localize("process.not.selected", "Process not selected."));
             }
-        }
+        // }
     }
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
