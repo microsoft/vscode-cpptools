@@ -2604,7 +2604,7 @@
   "Definice veřejného typu C++/CX není u globálního rozsahu povolená.",
   "Indexovaná vlastnost s veřejným přístupovým objektem get nebo set není povolená.",
   "Veřejný vnořený typ delegáta není povolený.",
-  "Neplatný inicializátor delegáta -- očekávaná syntaxe je (<adresa-funkce nebo objekt-funktoru> [, Platform::CallbackContext]) nebo (<popisovač objektu>, <adresa-člena> [, Platform::CallbackContext [, bool]]).",
+  "Neplatný inicializátor delegáta -- očekávaná syntaxe je (<adresa-funkce nebo objekt-funktoru> [, Platform::CallbackContext]) nebo (<úchyt objektu>, <adresa-člena> [, Platform::CallbackContext [, bool]]).",
   "Neplatný inicializátor delegáta -- objekt musí být popisovačem na třídu %[managed].",
   "C++/CX nepodporuje pole in nebo out. U veřejných rozhraní API použijte pro in: const Platform::Array<T>^ a pro out: Platform::WriteOnlyArray<T>^ nebo Platform::Array<T>^*.",
   "Chybí cílový atribut pro %nd.",
