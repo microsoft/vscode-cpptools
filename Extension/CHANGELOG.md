@@ -2,6 +2,7 @@
 
 ## Version 1.8.0-insiders2: December 7, 2021
 ### Bug Fixes
+* Fix GCC system include processing on Windows. [#8112](https://github.com/microsoft/vscode-cpptools/issues/8112), [#8496](https://github.com/microsoft/vscode-cpptools/issues/8496)
 * Fix the tag parser getting stuck on certain code. [#8459](https://github.com/microsoft/vscode-cpptools/issues/8459)
 * Fix `C_Cpp.codeAnalysis.maxConcurrentThreads` using the wrong value. [#8471](https://github.com/microsoft/vscode-cpptools/issues/8471)
 * Fix save failing after editing a header that is used by clang-tidy for a TU that is different from the default TU. [#8473](https://github.com/microsoft/vscode-cpptools/issues/8473)
