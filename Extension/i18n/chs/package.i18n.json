@@ -39,7 +39,7 @@
 	"c_cpp.configuration.references.maxConcurrentThreads.markdownDescription": "用于“查找所有引用”和“重命名”的最大并发线程数。默认值 `null` (空)使用从 `#C_Cpp.maxConcurrentThreads#` 继承的值。",
 	"c_cpp.configuration.references.maxCachedProcesses.markdownDescription": "“查找所有引用”和“重命名”的要保留在内存中的最大进程数。默认值 `0` 将禁用此功能。值为 `null` (空)则使用从 `#C_Cpp.maxCachedProcesses#` 继承的值。",
 	"c_cpp.configuration.references.maxMemory.markdownDescription": "超过此内存使用量(以 MB 为单位)后，将缓存且并发运行更少的“查找所有引用”和“重命名”进程。默认值 `null` (空)使用从 `#C_Cpp.maxMemory#` 继承的值。",
-	"c_cpp.configuration.codeAnalysis.maxConcurrentThreads.markdownDescription": "用于代码分析的最大并发线程数。默认值 \"null\" (空)使用从 \"#C_Cpp.maxConcurrentThreads#\" 继承的值的一半。",
+	"c_cpp.configuration.codeAnalysis.maxConcurrentThreads.markdownDescription": "用于代码分析的最大并发线程数。默认值 `null` (空)使用从 `#C_Cpp.maxConcurrentThreads#` 继承的值的一半。",
 	"c_cpp.configuration.codeAnalysis.maxMemory.markdownDescription": "超过此内存使用量(以 MB 为单位)后，将并发运行更少的代码分析进程。默认值 `null` (空)使用从 `#C_Cpp.maxMemory#` 继承的值。",
 	"c_cpp.configuration.codeAnalysis.updateDelay.markdownDescription": "控制在 `#files.autoSave#` 为 `afterDelay` 且 `#C_Cpp.codeAnalysis.runAutomatically#` 为 `true` 时从编辑触发保存后，代码分析开始处理之前的延迟(以毫秒为单位)。",
 	"c_cpp.configuration.codeAnalysis.exclude.markdownDescription": "配置 glob 模式已排除用于代码分析的文件夹和文件。始终排除不在工作区文件夹下的文件。从 `#files.exclude#` 和 `#C_Cpp.files.exclude#` 继承值。详细了解 glob 模式 [此处](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options)。",
