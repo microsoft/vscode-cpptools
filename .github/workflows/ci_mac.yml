@@ -22,10 +22,6 @@ jobs:
         run: yarn install --network-timeout 100000
         working-directory: Extension
 
-      - name: Generate hashes for runtime dependency packages
-        run: yarn run generatePackageHashes
-        working-directory: Extension
-
       - name: Compile Sources
         run: yarn run compile
         working-directory: Extension
