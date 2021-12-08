@@ -26,10 +26,6 @@ jobs:
         run: yarn run compile
         working-directory: Extension
 
-      - name: Validate Extension/package.json
-        run: yarn run pr-check
-        working-directory: Extension
-
       - name: Run Linter
         run: yarn run lint
         working-directory: Extension
