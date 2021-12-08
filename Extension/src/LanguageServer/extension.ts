@@ -15,7 +15,6 @@ import { UI, getUI } from './ui';
 import { Client, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
-//import { PersistentWorkspaceState, PersistentState } from './persistentState';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -24,7 +23,6 @@ import { Range } from 'vscode-languageclient';
 import { ChildProcess, spawn } from 'child_process';
 import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
 import { PackageVersion } from '../packageVersion';
-//import { getTemporaryCommandRegistrarInstance } from '../commands';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable, Writable } from 'stream';
@@ -47,9 +45,6 @@ let intervalTimer: NodeJS.Timer;
 let insiderUpdateEnabled: boolean = false;
 let insiderUpdateTimer: NodeJS.Timer;
 const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
-//let realActivationOccurred: boolean = false;
-//let tempCommands: vscode.Disposable[] = [];
-//let activatedPreviously: PersistentWorkspaceState<boolean>;
 let buildInfoCache: BuildInfo | undefined;
 const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
@@ -171,41 +166,17 @@ function sendActivationTelemetry(): void {
 /**
  * activate: set up the extension for language services
  */
-export async function activate(activationEventOccurred: boolean): Promise<void> {
-    // if (realActivationOccurred) {
-    //     return; // Occurs if multiple delayed commands occur before the real commands are registered.
-    // }
+export async function activate(): Promise<void> {
 
-    // // Activate immediately if an activation event occurred in the previous workspace session.
-    // // If onActivationEvent doesn't occur, it won't auto-activate next time.
-    // activatedPreviously = new PersistentWorkspaceState("activatedPreviously", false);
-    // if (activatedPreviously.Value) {
-    //     activatedPreviously.Value = false;
-    //     realActivation();
-    // }
-
-    //if (tempCommands.length === 0) { // Only needs to be added once.
-    //    tempCommands.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
-    //}
-
-    // handle "workspaceContains:/.vscode/c_cpp_properties.json" activation event.
-    //let cppPropertiesExists: boolean = false;
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (await util.checkFileExists(config)) {
-                //cppPropertiesExists = true;
                 const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
                 vscode.languages.setTextDocumentLanguage(doc, "jsonc");
             }
         }
     }
-
-    // // Check if an activation event has already occurred.
-    // if (activationEventOccurred) {
-    //     onActivationEvent();
-    //     return;
-    // }
 
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
@@ -267,48 +238,6 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
         }
     });
 
-    // if (cppPropertiesExists) {
-    //     onActivationEvent();
-    //     return;
-    // }
-
-    // // handle "onLanguage:c", "onLanguage:cpp" and "onLanguage:cuda-cpp" activation events.
-    // if (vscode.workspace.textDocuments !== undefined && vscode.workspace.textDocuments.length > 0) {
-    //     for (let i: number = 0; i < vscode.workspace.textDocuments.length; ++i) {
-    //         const document: vscode.TextDocument = vscode.workspace.textDocuments[i];
-    //         if (document.uri.scheme === "file") {
-    //             if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
-    //                 onActivationEvent();
-    //                 return;
-    //             }
-    //         }
-    //     }
-    // }
-//}
-
-// function onDidOpenTextDocument(document: vscode.TextDocument): void {
-//     if (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp") {
-//         onActivationEvent();
-//     }
-// }
-
-// function onActivationEvent(): void {
-//     if (tempCommands.length === 0) {
-//         return;
-//     }
-//
-//     // Cancel all the temp commands that just look for activations.
-//     tempCommands.forEach((command) => {
-//         command.dispose();
-//     });
-//     tempCommands = [];
-//     if (!realActivationOccurred) {
-//         realActivation();
-//     }
-//     activatedPreviously.Value = true;
-// }
-
-//function realActivation(): void {
     if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
         throw new Error(intelliSenseDisabledError);
     } else {
@@ -325,7 +254,6 @@ export async function activate(activationEventOccurred: boolean): Promise<void> 
         }
     }
 
-    //realActivationOccurred = true;
     console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
@@ -793,7 +721,6 @@ export function registerCommands(): void {
     }
 
     commandsRegistered = true;
-    //getTemporaryCommandRegistrarInstance().clearTempCommands();
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
@@ -834,8 +761,6 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
-
-    //getTemporaryCommandRegistrarInstance().executeDelayedCommands();
 }
 
 function onRestartIntelliSenseForFile(): void {
@@ -1315,9 +1240,6 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
 }
 
 export function deactivate(): Thenable<void> {
-    // if (!realActivationOccurred) {
-    //     return Promise.resolve();
-    // }
     clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
@@ -1340,15 +1262,9 @@ export function isFolderOpen(): boolean {
 }
 
 export function getClients(): ClientCollection {
-    // if (!realActivationOccurred) {
-    //     realActivation();
-    // }
     return clients;
 }
 
 export function getActiveClient(): Client {
-    // if (!realActivationOccurred) {
-    //     realActivation();
-    // }
     return clients.ActiveClient;
 }
