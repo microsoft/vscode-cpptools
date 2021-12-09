@@ -18,18 +18,12 @@ import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
-import { PlatformInformation } from '../platform';
 import { Range } from 'vscode-languageclient';
-import { ChildProcess, spawn } from 'child_process';
-import { getTargetBuildInfo, BuildInfo } from '../githubAPI';
-import { PackageVersion } from '../packageVersion';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
-import { Readable, Writable } from 'stream';
+import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
-import * as which from 'which';
-import { IExperimentationService } from 'tas-client';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -42,11 +36,6 @@ let ui: UI;
 const disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
-let insiderUpdateEnabled: boolean = false;
-let insiderUpdateTimer: NodeJS.Timer;
-const insiderUpdateTimerInterval: number = 1000 * 60 * 60;
-let buildInfoCache: BuildInfo | undefined;
-const cppInstallVsixStr: string = 'C/C++: Install vsix -- ';
 let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
@@ -280,36 +269,8 @@ export async function activate(): Promise<void> {
 
     reportMacCrashes();
 
-    const settings: CppSettings = new CppSettings();
-
     vcpkgDbPromise = initVcpkgDatabase();
 
-    PlatformInformation.GetPlatformInformation().then(async info => {
-        // Skip Insiders processing for 32-bit Linux.
-        if (info.platform !== "linux" || info.architecture === "x64" || info.architecture === "arm" || info.architecture === "arm64") {
-            // Skip Insiders processing for unsupported VS Code versions.
-            const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
-            // If we can't get to the experimentation service, don't suggest Insiders.
-            if (experimentationService !== undefined) {
-                const allowInsiders: boolean | undefined = await experimentationService.getTreatmentVariableAsync<boolean>("vscode", "allowInsiders");
-                // If we can't get the minimum supported VS Code version for Insiders, don't suggest Insiders.
-                if (allowInsiders) {
-                    insiderUpdateEnabled = true;
-                    if (settings.updateChannel === 'Default') {
-                        const userVersion: PackageVersion = new PackageVersion(util.packageJson.version);
-                        if (userVersion.suffix === "insiders") {
-                            checkAndApplyUpdate(settings.updateChannel, false);
-                        } else {
-                            suggestInsidersChannel();
-                        }
-                    } else if (settings.updateChannel === 'Insiders') {
-                        insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
-                        checkAndApplyUpdate(settings.updateChannel, false);
-                    }
-                }
-            }
-        }
-    });
     clients.ActiveClient.notifyWhenLanguageClientReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
@@ -329,25 +290,11 @@ export function updateLanguageConfigurations(): void {
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     const activeClient: Client = clients.ActiveClient;
-    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
     clients.forEach(client => {
         if (client !== activeClient) {
             client.onDidChangeSettings(event, false);
         }
     });
-
-    if (insiderUpdateEnabled) {
-        const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
-        if (newUpdateChannel) {
-            if (newUpdateChannel === 'Default') {
-                clearInterval(insiderUpdateTimer);
-            } else if (newUpdateChannel === 'Insiders') {
-                insiderUpdateTimer = global.setInterval(checkAndApplyUpdateOnTimer, insiderUpdateTimerInterval);
-            }
-
-            checkAndApplyUpdate(newUpdateChannel, true);
-        }
-    }
 }
 
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
@@ -441,273 +388,6 @@ function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
 function onInterval(): void {
     // TODO: do we need to pump messages to all clients? depends on what we do with the icons, I suppose.
     clients.ActiveClient.onInterval();
-}
-
-/**
- * Install a VSIX package. This helper function will exist until VSCode offers a command to do so.
- * @param updateChannel The user's updateChannel setting.
- */
-async function installVsix(vsixLocation: string): Promise<void> {
-    const userVersion: PackageVersion = new PackageVersion(vscode.version);
-
-    // 1.33.0 introduces workbench.extensions.installExtension.  1.32.3 was immediately prior.
-    const lastVersionWithoutInstallExtensionCommand: PackageVersion = new PackageVersion('1.32.3');
-    if (userVersion.isVsCodeVersionGreaterThan(lastVersionWithoutInstallExtensionCommand)) {
-        return vscode.commands.executeCommand('workbench.extensions.installExtension', vscode.Uri.file(vsixLocation));
-    }
-
-    // Get the path to the VSCode command -- replace logic later when VSCode allows calling of
-    // workbench.extensions.action.installVSIX from TypeScript w/o instead popping up a file dialog
-    return PlatformInformation.GetPlatformInformation().then((platformInfo) => {
-        const getVsCodeScriptPath = (platformInfo: any): string => {
-            if (platformInfo.platform === 'win32') {
-                const vsCodeBinName: string = path.basename(process.execPath);
-                let cmdFile: string; // Windows VS Code Insiders/Exploration breaks VS Code naming conventions
-                if (vsCodeBinName === 'Code - Insiders.exe') {
-                    cmdFile = 'code-insiders.cmd';
-                } else if (vsCodeBinName === 'Code - Exploration.exe') {
-                    cmdFile = 'code-exploration.cmd';
-                } else {
-                    cmdFile = 'code.cmd';
-                }
-                const vsCodeExeDir: string = path.dirname(process.execPath);
-                return path.join(vsCodeExeDir, 'bin', cmdFile);
-            } else if (platformInfo.platform === 'darwin') {
-                return path.join(process.execPath, '..', '..', '..', '..', '..',
-                    'Resources', 'app', 'bin', 'code');
-            } else {
-                const vsCodeBinName: string = path.basename(process.execPath);
-                return which.sync(vsCodeBinName);
-            }
-        };
-        let vsCodeScriptPath: string;
-        try {
-            vsCodeScriptPath = getVsCodeScriptPath(platformInfo);
-        } catch (err) {
-            return Promise.reject(new Error('Failed to find VS Code script'));
-        }
-
-        // 1.28.0 changes the CLI for making installations.  1.27.2 was immediately prior.
-        const oldVersion: PackageVersion = new PackageVersion('1.27.2');
-        if (userVersion.isVsCodeVersionGreaterThan(oldVersion)) {
-            return new Promise<void>((resolve, reject) => {
-                let process: ChildProcess;
-                try {
-                    process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation, '--force']);
-
-                    // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-                    const timer: NodeJS.Timer = global.setTimeout(() => {
-                        process.kill();
-                        reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-                    }, 30000);
-
-                    process.on('exit', (code: number) => {
-                        clearInterval(timer);
-                        if (code !== 0) {
-                            reject(new Error(`VS Code script exited with error code ${code}`));
-                        } else {
-                            resolve();
-                        }
-                    });
-                    if (process.pid === undefined) {
-                        throw new Error();
-                    }
-                } catch (error) {
-                    reject(new Error('Failed to launch VS Code script process for installation'));
-                    return;
-                }
-            });
-        }
-
-        return new Promise<void>((resolve, reject) => {
-            let process: ChildProcess;
-            try {
-                process = spawn(vsCodeScriptPath, ['--install-extension', vsixLocation]);
-                if (process.pid === undefined) {
-                    throw new Error();
-                }
-            } catch (error) {
-                reject(new Error('Failed to launch VS Code script process for installation'));
-                return;
-            }
-
-            // Timeout the process if no response is sent back. Ensures this Promise resolves/rejects
-            const timer: NodeJS.Timer = global.setTimeout(() => {
-                process.kill();
-                reject(new Error('Failed to receive response from VS Code script process for installation within 30s.'));
-            }, 30000);
-
-            // If downgrading, the VS Code CLI will prompt whether the user is sure they would like to downgrade.
-            // Respond to this by writing 0 to stdin (the option to override and install the VSIX package)
-            let sentOverride: boolean = false;
-            const stdout: Readable | null = process.stdout;
-            if (!stdout) {
-                reject(new Error("Failed to communicate with VS Code script process for installation"));
-                return;
-            }
-            stdout.on('data', () => {
-                if (sentOverride) {
-                    return;
-                }
-                const stdin: Writable | null = process.stdin;
-                if (!stdin) {
-                    reject(new Error("Failed to communicate with VS Code script process for installation"));
-                    return;
-                }
-                stdin.write('0\n');
-                sentOverride = true;
-                clearInterval(timer);
-                resolve();
-            });
-        });
-    });
-}
-
-async function suggestInsidersChannel(): Promise<void> {
-    if (util.isCodespaces()) {
-        // Do not prompt users of Codespaces to join Insiders.
-        return;
-    }
-
-    const suggestInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.suggestInsiders", true);
-
-    if (!suggestInsiders.Value) {
-        return;
-    }
-
-    const suggestInsidersCount: PersistentState<number> = new PersistentState<number>("CPP.suggestInsidersCount", 0);
-
-    if (suggestInsidersCount.Value < 10) {
-        suggestInsidersCount.Value = suggestInsidersCount.Value + 1;
-        return;
-    }
-
-    let buildInfo: BuildInfo | undefined;
-    try {
-        buildInfo = await getTargetBuildInfo("Insiders", false);
-    } catch (errJS) {
-        const error: Error = errJS as Error;
-        console.log(`${cppInstallVsixStr}${error.message}`);
-        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-            error.message = "Potential PII hidden";
-        }
-        telemetry.logLanguageServerEvent('suggestInsiders', { 'error': error.message, 'success': 'false' });
-    }
-    if (!buildInfo) {
-        return; // No need to update.
-    }
-    const message: string = localize('insiders.available', "Insiders version {0} is available. Would you like to switch to the Insiders channel and install this update?", buildInfo.name);
-    const yes: string = localize("yes.button", "Yes");
-    const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-    const dontShowAgain: string = localize("dont.show.again.button", "Don't Show Again");
-    vscode.window.showInformationMessage(message, yes, askLater, dontShowAgain).then((selection) => {
-        switch (selection) {
-            case yes:
-                // Cache buildInfo.
-                buildInfoCache = buildInfo;
-                // It will call onDidChangeSettings.
-                vscode.workspace.getConfiguration("C_Cpp").update("updateChannel", "Insiders", vscode.ConfigurationTarget.Global);
-                break;
-            case dontShowAgain:
-                suggestInsiders.Value = false;
-                break;
-            case askLater:
-                break;
-            default:
-                break;
-        }
-    });
-
-}
-
-async function applyUpdate(buildInfo: BuildInfo): Promise<void> {
-    let tempVSIX: any;
-    try {
-        tempVSIX = await util.createTempFileWithPostfix('.vsix');
-
-        // Try to download VSIX
-        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
-        const originalProxySupport: string | undefined = config.inspect<string>('http.proxySupport')?.globalValue;
-        while (true) { // Might need to try again with a different http.proxySupport setting.
-            try {
-                await util.downloadFileToDestination(buildInfo.downloadUrl, tempVSIX.name);
-            } catch {
-                // Try again with the proxySupport to "off".
-                if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
-                    config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                    throw new Error('Failed to download VSIX package with proxySupport off'); // Changing the proxySupport didn't help.
-                }
-                if (config.get('http.proxySupport') !== "off" && originalProxySupport !== "off") {
-                    config.update('http.proxySupport', "off", true);
-                    continue;
-                }
-                throw new Error('Failed to download VSIX package');
-            }
-            if (originalProxySupport !== config.inspect<string>('http.proxySupport')?.globalValue) {
-                config.update('http.proxySupport', originalProxySupport, true); // Reset the http.proxySupport.
-                telemetry.logLanguageServerEvent('installVsix', { 'error': "Success with proxySupport off", 'success': 'true' });
-            }
-            break;
-        }
-
-        // Install VSIX
-        try {
-            await installVsix(tempVSIX.name);
-        } catch (error) {
-            throw new Error('Failed to install VSIX package');
-        }
-
-        // Installation successful
-        clearInterval(insiderUpdateTimer);
-        const message: string = localize("extension.updated",
-            "The C/C++ Extension has been updated to version {0}. Please reload the window for the changes to take effect.",
-            buildInfo.name);
-        util.promptReloadWindow(message);
-        telemetry.logLanguageServerEvent('installVsix', { 'success': 'true' });
-
-    } catch (errJS) {
-        const error: Error = errJS as Error;
-        console.error(`${cppInstallVsixStr}${error.message}`);
-        if (error.message.indexOf('/') !== -1 || error.message.indexOf('\\') !== -1) {
-            error.message = "Potential PII hidden";
-        }
-        telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-    }
-
-    // Delete temp VSIX file
-    if (tempVSIX) {
-        tempVSIX.removeCallback();
-    }
-}
-
-async function checkAndApplyUpdateOnTimer(): Promise<void> {
-    return checkAndApplyUpdate('Insiders', false);
-}
-
-/**
- * Query package.json and the GitHub API to determine whether the user should update, if so then install the update.
- * The update can be an upgrade or downgrade depending on the the updateChannel setting.
- * @param updateChannel The user's updateChannel setting.
- * @param isFromSettingsChange True if the invocation is the result of a settings change.
- */
-async function checkAndApplyUpdate(updateChannel: string, isFromSettingsChange: boolean): Promise<void> {
-    // If we have buildInfo cache, we should use it.
-    let buildInfo: BuildInfo | undefined = buildInfoCache;
-    // clear buildInfo cache.
-    buildInfoCache = undefined;
-
-    if (!buildInfo) {
-        try {
-            buildInfo = await getTargetBuildInfo(updateChannel, isFromSettingsChange);
-        } catch (errJS) {
-            const error: Error = errJS as Error;
-            telemetry.logLanguageServerEvent('installVsix', { 'error': error.message, 'success': 'false' });
-        }
-    }
-    if (!buildInfo) {
-        return; // No need to update.
-    }
-    await applyUpdate(buildInfo);
 }
 
 /**
@@ -1244,7 +924,6 @@ export function deactivate(): Thenable<void> {
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
-    clearInterval(insiderUpdateTimer);
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();

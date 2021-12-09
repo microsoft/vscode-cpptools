@@ -54,10 +54,6 @@ export class PackageVersion {
         return this.isGreaterThan(other, 'insider') || this.isGreaterThan(other, 'exploration');
     }
 
-    public isExtensionVersionGreaterThan(other: PackageVersion): boolean {
-        return this.isGreaterThan(other, 'insiders');
-    }
-
     public isMajorMinorPatchGreaterThan(other: PackageVersion): boolean {
         return this.isGreaterThan(other, "");
     }

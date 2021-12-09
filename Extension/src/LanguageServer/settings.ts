@@ -211,7 +211,6 @@ export class CppSettings extends Settings {
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
-    public get updateChannel(): string | undefined { return super.Section.get<string>("updateChannel"); }
     public get vcpkgEnabled(): boolean | undefined { return super.Section.get<boolean>("vcpkg.enabled"); }
     public get addNodeAddonIncludePaths(): boolean | undefined { return super.Section.get<boolean>("addNodeAddonIncludePaths"); }
     public get renameRequiresIdentifier(): boolean | undefined { return super.Section.get<boolean>("renameRequiresIdentifier"); }
