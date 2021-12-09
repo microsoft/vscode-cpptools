@@ -62,18 +62,7 @@ export function activate(): void {
         if (util.extensionContext) {
             const packageInfo: IPackageInfo = getPackageInfo();
             if (packageInfo) {
-                let targetPopulation: TargetPopulation;
-
-                // If insiders.flag is present, consider this an insiders build.
-                // If release.flag is present, consider this a release build.
-                // Otherwise, consider this an internal build.
-                if (util.checkFileExistsSync(util.getExtensionFilePath("insiders.flag"))) {
-                    targetPopulation = TargetPopulation.Insiders;
-                } else if (util.checkFileExistsSync(util.getExtensionFilePath("release.flag"))) {
-                    targetPopulation = TargetPopulation.Public;
-                } else {
-                    targetPopulation = TargetPopulation.Internal;
-                }
+                const targetPopulation: TargetPopulation = util.getTargetPopulation();
                 experimentationTelemetry = new ExperimentationTelemetry(new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey));
                 initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
             }

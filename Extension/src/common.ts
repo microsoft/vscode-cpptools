@@ -21,6 +21,7 @@ import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import * as jsonc from 'comment-json';
+import { TargetPopulation } from 'vscode-tas-client';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1232,4 +1233,16 @@ export function findPowerShell(): string | undefined {
             }
         }
     }
+}
+
+export function getTargetPopulation(): TargetPopulation {
+    // If insiders.flag is present, consider this an insiders build.
+    // If release.flag is present, consider this a release build.
+    // Otherwise, consider this an internal build.
+    if (checkFileExistsSync(getExtensionFilePath("insiders.flag"))) {
+        return TargetPopulation.Insiders;
+    } else if (checkFileExistsSync(getExtensionFilePath("release.flag"))) {
+        return TargetPopulation.Public;
+    }
+    return TargetPopulation.Internal;
 }

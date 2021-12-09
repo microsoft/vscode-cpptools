@@ -16,6 +16,7 @@ import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { PlatformInformation } from './platform';
 import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
+import { PersistentState } from './LanguageServer/persistentState';
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
@@ -48,8 +49,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     DebuggerExtension.initialize(context);
 
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    await makeBinariesExecutable();
-    sendTelemetry(info);
+
+    const installedVersion: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.installedVersion", undefined);
+    if (!installedVersion.Value || installedVersion.Value !== util.packageJson.version) {
+        installedVersion.Value = util.packageJson.version;
+        await makeBinariesExecutable();
+        sendTelemetry(info);
+    }
 
     // Notify users if debugging may not be supported on their OS.
     util.checkDistro(info);
