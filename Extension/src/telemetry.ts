@@ -7,8 +7,6 @@
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
-import { getExtensionFilePath } from './common';
-import { PackageVersion } from './packageVersion';
 
 interface IPackageInfo {
     name: string;
@@ -69,9 +67,9 @@ export function activate(): void {
                 // If insiders.flag is present, consider this an insiders build.
                 // If release.flag is present, consider this a release build.
                 // Otherwise, consider this an internal build.
-                if (util.checkFileExistsSync(getExtensionFilePath("insiders.flag"))) {
+                if (util.checkFileExistsSync(util.getExtensionFilePath("insiders.flag"))) {
                     targetPopulation = TargetPopulation.Insiders;
-                } else if (util.checkFileExistsSync(getExtensionFilePath("release.flag"))) {
+                } else if (util.checkFileExistsSync(util.getExtensionFilePath("release.flag"))) {
                     targetPopulation = TargetPopulation.Public;
                 } else {
                     targetPopulation = TargetPopulation.Internal;
