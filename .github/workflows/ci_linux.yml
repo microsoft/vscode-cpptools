@@ -40,8 +40,8 @@ jobs:
           run: yarn run unitTests
           working-directory: Extension
 
-      - name: Run languageServer integration tests
-        uses: GabrielBB/xvfb-action@v1.4
-        with:
-          run: yarn run integrationTests
-          working-directory: Extension
+#      - name: Run languageServer integration tests
+#        uses: GabrielBB/xvfb-action@v1.4
+#        with:
+#          run: yarn run integrationTests
+#          working-directory: Extension

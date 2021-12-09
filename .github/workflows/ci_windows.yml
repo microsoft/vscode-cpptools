@@ -38,6 +38,6 @@ jobs:
         run: yarn run unitTests
         working-directory: Extension
 
-      - name: Run languageServer integration tests
-        run: yarn run integrationTests
-        working-directory: Extension
+#      - name: Run languageServer integration tests
+#        run: yarn run integrationTests
+#        working-directory: Extension
