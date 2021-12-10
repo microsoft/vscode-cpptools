@@ -57,7 +57,7 @@
 	"c_cpp.configuration.formatting.description": "Configura o mecanismo de formatação.",
 	"c_cpp.configuration.formatting.clangFormat.markdownDescription": "`clang-format` será usado para formatar o código.",
 	"c_cpp.configuration.formatting.vcFormat.markdownDescription": "O mecanismo de formatação Visual C++ será usado para formatar o código.",
-	"c_cpp.configuration.formatting.Default.markdownDescription": "Por padrão, `clang-format` será usado para formatar o código. No entanto, o mecanismo de formatação Visual C++ será usado se um arquivo `.editorconfig` com configurações relevantes for encontrado próximo ao código sendo formatado e `#C_Cpp.clang_format_style# ` for o valor padrão:`arquivo`.",
+	"c_cpp.configuration.formatting.Default.markdownDescription": "Por padrão, `clang-format` será usado para formatar o código. No entanto, o mecanismo de formatação Visual C++ será usado se um arquivo `.editorconfig` com configurações relevantes for encontrado próximo ao código sendo formatado e `#C_Cpp.clang_format_style#` for o valor padrão:`arquivo`.",
 	"c_cpp.configuration.formatting.Disabled.markdownDescription": "A formatação de código será desabilitada.",
 	"c_cpp.configuration.vcFormat.indent.braces.markdownDescription": "As chaves são recuadas pelo valor especificado na configuração `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Determina a que recuo de nova linha é relativo.",
