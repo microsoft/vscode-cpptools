@@ -4362,6 +4362,7 @@
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "https-proxy-agent": "^2.2.4",
+    "iconv-lite-umd": "^0.6.10",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "plist": "^3.0.4",

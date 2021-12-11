@@ -22,6 +22,7 @@ import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import { PackageManager, IPackage } from './packageManager';
 import * as jsonc from 'comment-json';
+import * as iconv from 'iconv-lite-umd';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1355,4 +1356,79 @@ export function findPowerShell(): string | undefined {
             }
         }
     }
+}
+
+/**
+ * Detect a terminal encoding.
+ * Copied from VS Code.
+ */
+export async function resolveTerminalEncoding(): Promise<string> {
+    let rawEncodingPromise: Promise<string | undefined>;
+
+    // Support a global environment variable to win over other mechanics
+    const cliEncodingEnv: string | undefined = process.env['VSCODE_CLI_ENCODING'];
+    if (cliEncodingEnv) {
+        rawEncodingPromise = Promise.resolve(cliEncodingEnv);
+    } else if (os.platform() === 'win32') {
+        rawEncodingPromise = new Promise<string | undefined>(resolve => {
+            child_process.exec('chcp', (err, stdout, stderr) => {
+                if (stdout) {
+                    const windowsTerminalEncodings: { [key: string]: string } = {
+                        '437': 'cp437', // United States
+                        '850': 'cp850', // Multilingual(Latin I)
+                        '852': 'cp852', // Slavic(Latin II)
+                        '855': 'cp855', // Cyrillic(Russian)
+                        '857': 'cp857', // Turkish
+                        '860': 'cp860', // Portuguese
+                        '861': 'cp861', // Icelandic
+                        '863': 'cp863', // Canadian - French
+                        '865': 'cp865', // Nordic
+                        '866': 'cp866', // Russian
+                        '869': 'cp869', // Modern Greek
+                        '936': 'cp936', // Simplified Chinese
+                        '1252': 'cp1252' // West European Latin
+                    };
+
+                    const windowsTerminalEncodingKeys: (string | number)[] = Object.keys(windowsTerminalEncodings);
+                    for (const key of windowsTerminalEncodingKeys) {
+                        if (stdout.indexOf(key.toString()) >= 0) {
+                            return resolve(windowsTerminalEncodings[key]);
+                        }
+                    }
+                }
+
+                return resolve(undefined);
+            });
+        });
+    } else {
+        rawEncodingPromise = new Promise<string>(resolve => {
+            child_process.exec('locale charmap', (err, stdout, stderr) => resolve(stdout));
+        });
+    }
+
+    const rawEncoding: string | undefined = await rawEncodingPromise;
+    if (!rawEncoding || rawEncoding.toLowerCase() === 'utf-8' || rawEncoding.toLowerCase() === 'utf8') {
+        return 'utf8';
+    }
+
+    // convert to IconvLiteEncoding
+    const normalizedEncodingName: string = rawEncoding.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+    const JSCHARDET_TO_ICONV_ENCODINGS: { [name: string]: string } = {
+        'ibm866': 'cp866',
+        'big5': 'cp950'
+    };
+
+    const mapped: string = JSCHARDET_TO_ICONV_ENCODINGS[normalizedEncodingName];
+    return mapped || normalizedEncodingName;
+}
+
+export function read_encoded_text(encoding: string, text: string | Buffer): string {
+    let use_encoding: string = encoding;
+    if (!iconv.encodingExists(encoding)) {
+        use_encoding = 'utf8';
+    }
+
+    const decoder: iconv.DecoderStream = iconv.getDecoder(use_encoding);
+    return decoder.write(Buffer.isBuffer(text) ? text : Buffer.from(text));
 }

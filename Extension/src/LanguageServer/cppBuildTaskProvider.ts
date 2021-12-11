@@ -386,6 +386,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         };
 
+        const encoding: string = await util.resolveTerminalEncoding();
+
         this.writeEmitter.fire(activeCommand + this.endOfLine);
         let child: cp.ChildProcess | undefined;
         try {
@@ -401,12 +403,12 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         resolve(-1);
                     });
                     child.stdout?.on('data', data => {
-                        const str: string = data.toString("utf8");
+                        const str: string = util.read_encoded_text(encoding, data);
                         splitWriteEmitter(str);
                         stdout += str;
                     });
                     child.stderr?.on('data', data => {
-                        const str: string = data.toString("utf8");
+                        const str: string = util.read_encoded_text(encoding, data);
                         splitWriteEmitter(str);
                         stderr += str;
                     });
