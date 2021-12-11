@@ -131,14 +131,9 @@ export class CppBuildTaskProvider implements TaskProvider {
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))) &&
                 (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
             const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
-                (path.basename(info.path) === "cl.exe") &&
-                compiler_condition(info));
+                ((path.basename(info.path) === "cl.exe") && compiler_condition(info)));
             knownCompilers = knownCompilers.filter(info =>
-                (path.basename(info.path) !== "cl.exe") &&
-                compiler_condition(info));
-            if (cl_to_add) {
-                knownCompilers.push(cl_to_add);
-            }
+                ((info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info))));
             knownCompilers.map<void>(info => {
                 knownCompilerPathsSet.add(info.path);
             });
