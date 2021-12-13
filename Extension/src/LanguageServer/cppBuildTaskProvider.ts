@@ -117,17 +117,23 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const isCompilerValid: boolean = userCompilerPath ? await util.checkFileExists(userCompilerPath) : false;
+        const userCompilerIsCl: boolean = isCompilerValid && !!userCompilerPathAndArgs && userCompilerPathAndArgs.compilerName === "cl.exe";
 
         // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
         // Filter them based on the file type to get a reduced list appropriate for the active file.
+        // Only allow one instance of cl.exe to be included, as the user must launch VS Code using a VS command
+        // prompt in order to build with cl.exe, so only one can apply.
         const knownCompilerPathsSet: Set<string> = new Set();
         let knownCompilers: configs.KnownCompiler[] | undefined = await activeClient.getKnownCompilers();
         if (knownCompilers) {
-            knownCompilers = knownCompilers.filter(info =>
-                ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
-                (!isCompilerValid || (userCompilerPathAndArgs &&
+            const compiler_condition: (info: configs.KnownCompiler) => boolean = info => ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                (!isCompilerValid || (!!userCompilerPathAndArgs &&
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))) &&
-                (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
+                (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
+            const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
+                ((path.basename(info.path) === "cl.exe") && compiler_condition(info)));
+            knownCompilers = knownCompilers.filter(info =>
+                ((info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info))));
             knownCompilers.map<void>(info => {
                 knownCompilerPathsSet.add(info.path);
             });
