@@ -46,7 +46,7 @@
 	"c_cpp.configuration.codeAnalysis.excludeBoolean.markdownDescription": "要符合檔案路徑的 Glob 模式。設為 `true` 或 `false` 可啟用或停用模式。",
 	"c_cpp.configuration.codeAnalysis.excludeWhen.markdownDescription": "對相符檔案同層級進行額外檢查。請使用 `$(basename)` 作為相符檔案名稱的變數。",
 	"c_cpp.configuration.codeAnalysis.runAutomatically.markdownDescription": "若為 `true`，則程式碼分析將會在檔案開啟或儲存之後，自動在該檔案上執行。",
-	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "若為 `true`，則會啟用使用 `clang-tidy` 的程式碼分析，並在`#C_Cpp.codeAnalysis.runAutomatically#` 為 `true` 時自動執行 (預設)。",
+	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "若為 `true`，則會啟用使用 `clang-tidy` 的程式碼分析，並在 `#C_Cpp.codeAnalysis.runAutomatically#` 為 `true` 時自動執行 (預設)。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": "`clang-tidy` 可執行檔的完整路徑。若未指定可執行檔，且可在環境路徑中使用 `clang-tidy`，則會加以使用。若在環境路徑中找不到可執行檔，則會使用與延伸模組搭配的 `clang-tidy`。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription": "以 YAML/JSON 格式指定 `clang-tidy` 組態: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`。當值為空白時，`clang-tidy` 將會嘗試為其父目錄中的每個來源檔案尋找名為 `.clang-tidy` 的檔案。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription": "當 `#C_Cpp.codeAnalysis.clangTidy.config#` 未設定且找不到 `.clang-tidy` 檔案時，指定 YAML/JSON 格式的 `clang-tidy` 組態用作遞補: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`。",
