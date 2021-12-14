@@ -53,9 +53,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const installedVersion: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.installedVersion", undefined);
     if (!installedVersion.Value || installedVersion.Value !== util.packageJson.version) {
         installedVersion.Value = util.packageJson.version;
-        await makeBinariesExecutable();
         sendTelemetry(info);
     }
+
+    // Always attempt to make the binaries executable, not just when installedVersion changes.
+    // The user may have uninstalled and reinstalled the same version.
+    await makeBinariesExecutable();
 
     // Notify users if debugging may not be supported on their OS.
     util.checkDistro(info);
