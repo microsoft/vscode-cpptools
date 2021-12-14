@@ -1535,16 +1535,20 @@ export class DefaultClient implements Client {
 
         const otherSettingsFolder: OtherSettings = new OtherSettings(this.RootUri);
         const otherSettingsWorkspace: OtherSettings = new OtherSettings();
+        const clangTidyConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy", this.RootUri);
 
         // Unlike the LSP message, the event does not contain all settings as a payload, so we need to
         // build a new JSON object with everything we need on the native side.
         const settings: any = {
             C_Cpp: {
                 ...cppSettingsScoped,
+                clang_format_path: util.resolveVariables(cppSettingsScoped.clang_format_path, this.AdditionalEnvironment),
+                intelliSenseCachePath: util.resolveCachePath(cppSettingsScoped.intelliSenseCachePath, this.AdditionalEnvironment),
                 codeAnalysis: {
                     ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis", this.RootUri),
                     clangTidy: {
-                        ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy", this.RootUri),
+                        ...clangTidyConfig,
+                        path: util.resolveVariables(clangTidyConfig.path, this.AdditionalEnvironment),
                         fix: {
                             ...vscode.workspace.getConfiguration("C_Cpp.codeAnalysis.clangTidy.fix", this.RootUri)
                         },
