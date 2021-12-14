@@ -371,7 +371,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private async doBuild(): Promise<any> {
         // Do build.
-        let activeCommand: string = util.resolveVariables(this.command);
+        let command: string = util.resolveVariables(this.command);
+        let activeCommand: string = command;
         this.args.forEach((value, index) => {
             value = util.normalizeArg(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
@@ -387,15 +388,27 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
-            for (const line of lines.toString().split(/\r?\n/g)) {
-                this.writeEmitter.fire(line + this.endOfLine);
+            const splitLines: string[] = lines.toString().split(/\r?\n/g);
+            for (let i: number = 0; i < splitLines.length; i++) {
+                let line: string = splitLines[i];
+
+                // We may not get full lines.
+                // Only output an endOfLine when a full line is detected.
+                if (i !== splitLines.length - 1) {
+                    line += this.endOfLine;
+                }
+                this.writeEmitter.fire(line);
             }
         };
+
+        if (os.platform() === 'win32') {
+            command = `cmd /c chcp 65001>nul && ${command}`;
+        }
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
         let child: cp.ChildProcess | undefined;
         try {
-            child = cp.spawn(this.command, this.args, this.options ? this.options : {});
+            child = cp.spawn(command, this.args, this.options ? this.options : {});
             let error: string = "";
             let stdout: string = "";
             let stderr: string = "";
@@ -407,16 +420,17 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         resolve(-1);
                     });
                     child.stdout?.on('data', data => {
-                        const str: string = data.toString("utf8");
+                        const str: string = data.toString();
                         splitWriteEmitter(str);
                         stdout += str;
                     });
                     child.stderr?.on('data', data => {
-                        const str: string = data.toString("utf8");
+                        const str: string = data.toString();
                         splitWriteEmitter(str);
                         stderr += str;
                     });
                     child.on('close', result => {
+                        this.writeEmitter.fire(this.endOfLine);
                         if (result === null) {
                             this.writeEmitter.fire(localize("build.run.terminated", "Build run was terminated.") + this.endOfLine);
                             resolve(-1);
