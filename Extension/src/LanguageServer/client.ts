@@ -1045,9 +1045,6 @@ export class DefaultClient implements Client {
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
-                    console.log("---------------------");
-                    console.log(String(err));
-                    console.log("---------------------");
                     if (!failureMessageShown) {
                         failureMessageShown = true;
                         vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
@@ -1057,9 +1054,6 @@ export class DefaultClient implements Client {
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
             this.isSupported = false;   // Running on an OS we don't support yet.
-            console.log("---------------------");
-            console.log(String(err));
-            console.log("---------------------");
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 let additionalInfo: string;
