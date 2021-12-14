@@ -430,8 +430,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         stderr += str;
                     });
                     child.on('close', result => {
+                        this.writeEmitter.fire(this.endOfLine);
                         if (result === null) {
-                            this.writeEmitter.fire(this.endOfLine);
                             this.writeEmitter.fire(localize("build.run.terminated", "Build run was terminated.") + this.endOfLine);
                             resolve(-1);
                         }
