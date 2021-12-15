@@ -24,6 +24,7 @@ import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
+import { HandleInsidersPrompt } from '../main';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -290,11 +291,17 @@ export function updateLanguageConfigurations(): void {
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     const activeClient: Client = clients.ActiveClient;
+    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
     clients.forEach(client => {
         if (client !== activeClient) {
             client.onDidChangeSettings(event, false);
         }
     });
+
+    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
+    if (newUpdateChannel) {
+        HandleInsidersPrompt();
+    }
 }
 
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
