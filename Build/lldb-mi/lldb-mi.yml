@@ -1,25 +1,72 @@
+parameters:
+- name: Architecture
+  displayName: Architecture
+  type: string
+  default: x86_64
+
+- name: Build_Type
+  displayName: Build Type
+  type: string
+  default: Release
+
+- name: Build_Machine
+  displayName: Build Machine
+  type: string
+  default: 'macOS-latest'
+
 variables:
-  llvm_repo: https://github.com/llvm/llvm-project.git
-  llvm_branch: release/10.x
-  llvm_build_type: Release
-  llvm_arch: x86_64
-  llvm_additional_parameters: "-DLLDB_RELOCATABLE_PYTHON=1 -DLLDB_INCLUDE_TESTS=OFF -DLLDB_BUILD_FRAMEWORK=1"
-  # TODO: fix lldb_mi_repo and lldb_mi_branch (https://github.com/lldb-tools/lldb-mi/pull/37 and https://github.com/lldb-tools/lldb-mi/pull/39)
-  lldb_mi_repo: https://github.com/WardenGnaw/lldb-mi # TODO: Change to lldb-tools
-  lldb_mi_branch: release/cpptools # TODO: Change to main
-  lldb_mi_additional_parameters: "-DUSE_LLDB_FRAMEWORK=1"
+# Note: Make sure llvm_repo is the same as the one in Extension/cgmanifest.json 
+# 'RepositoryUrl' for llvm-project.
+- name: llvm_repo
+  value: https://github.com/llvm/llvm-project.git
+
+# Note: Make sure llvm_commit is the same as the one in Extension/cgmanifest.json 
+# 'CommitHash' for llvm-project.
+- name: llvm_commit
+  value: 0d44201451f03ba907cdb268ddddfc3fa38a0ebd
+
+- name: llvm_build_type
+  value: ${{parameters.Build_Type}}
+
+- name: llvm_arch
+  value: ${{parameters.Architecture}}
+
+- name: llvm_additional_parameters
+  value: "-DLLDB_USE_SYSTEM_DEBUGSERVER=ON -DLLDB_RELOCATABLE_PYTHON=1 -DLLDB_INCLUDE_TESTS=OFF -DLLDB_BUILD_FRAMEWORK=1"
+
+# Note: Make sure lldb_mi_repo is the same as the one in Extension/cgmanifest.json 
+# 'CommitHash' for lldb-mi.
+- name: lldb_mi_repo
+  value: https://github.com/lldb-tools/lldb-mi.git
+
+# Note: Make sure lldb_mi_commit is the same as the one in Extension/cgmanifest.json 
+# 'CommitHash' for lldb-mi.
+- name: lldb_mi_commit
+  value: 2388bd74133bc21eac59b2e2bf97f2a30770a315
+
+- name: lldb_mi_additional_parameters
+  value: "-DUSE_LLDB_FRAMEWORK=1"
 
 jobs:
 - job: LLDB_MI
   timeoutInMinutes: 360
   pool:
-    vmImage: 'macOS-latest'
+    ${{if eq(variables['llvm_arch'], 'arm64')}}:
+      name: cpptoolsMacM1pool
+    ${{ else }}:
+      vmImage: macOS-latest
   steps:
   - task: CmdLine@2
     displayName: 'Install Dependencies'
     inputs:
       script: brew install cmake ninja swig
     continueOnError: true
+
+  - task: CmdLine@2
+    displayName: 'Make sure buildspace does not exist'
+    inputs:
+      script: rm -rf $(Build.StagingDirectory)/buildspace
+    condition: always()
 
   - task: CmdLine@2
     displayName: 'Build LLVM Project'
@@ -30,12 +77,15 @@ jobs:
           $1
         }
 
+        log_and_exec_cmd "sudo rm -rf /Library/Developer/CommandLineTools"
+        log_and_exec_cmd "sudo xcode-select --switch /Applications/XCode.app"
+
         log_and_exec_cmd "cd $(Build.StagingDirectory)"
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace"
 
         log_and_exec_cmd "git clone $(llvm_repo) llvm-project"
         log_and_exec_cmd "cd llvm-project"
-        log_and_exec_cmd "git checkout $(llvm_branch)"
+        log_and_exec_cmd "git checkout $(llvm_commit)"
 
         log_and_exec_cmd "./lldb/scripts/macos-setup-codesign.sh"
 
@@ -81,12 +131,12 @@ jobs:
         log_and_exec_cmd "cd $(Build.StagingDirectory)/buildspace"
         log_and_exec_cmd "git clone $(lldb_mi_repo) lldb-mi"
         log_and_exec_cmd "cd lldb-mi"
-        log_and_exec_cmd "git checkout $(lldb_mi_branch)"
+        log_and_exec_cmd "git checkout $(lldb_mi_commit)"
 
         # Create a separate build directory for building lldb-mi.
         log_and_exec_cmd "mkdir build"
         log_and_exec_cmd "cd build"
-        log_and_exec_cmd "cmake -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ $(lldb_mi_additional_parameters) -GNinja .."
+        log_and_exec_cmd "cmake -DCMAKE_PREFIX_PATH=$(Build.StagingDirectory)/buildspace/llvm-inst/ -DCMAKE_OSX_ARCHITECTURES=$(llvm_arch) $(lldb_mi_additional_parameters) -GNinja .."
         log_and_exec_cmd "ninja"
         if [[ $? -ne 0 ]]
         then
@@ -113,6 +163,9 @@ jobs:
         # Set rpath next to the lldb-mi executable LLDB.Framework
         log_and_exec_cmd "install_name_tool -add_rpath @executable_path/. ./debugAdapters/lldb-mi/bin/lldb-mi"
 
+        # Add entitlements
+        log_and_exec_cmd "codesign -s - -f --entitlements $(Build.SourcesDirectory)/Build/lldb-mi/debugger-entitlements.plist ./debugAdapters/lldb-mi/bin/lldb-mi"
+
         # Grab NOTICE.TXT
         cp $(Build.SourcesDirectory)/Build/lldb-mi/NOTICE.TXT ./debugAdapters/lldb-mi/.
 
@@ -123,3 +176,9 @@ jobs:
     inputs:
       targetPath: '$(Build.StagingDirectory)/publish'
       artifactName: 'lldb-mi'
+
+  - task: CmdLine@2
+    displayName: 'Clean up'
+    inputs:
+      script: rm -rf $(Build.StagingDirectory)/buildspace
+    condition: always()
