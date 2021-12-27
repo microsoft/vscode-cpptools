@@ -83,7 +83,7 @@ export class UI {
         this.browseEngineStatusBarItem.name = localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status");
         this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files");
-        this.browseEngineStatusBarItem.command = "";
+        this.browseEngineStatusBarItem.command = undefined;
         this.ShowDBIcon = false;
 
         this.codeAnalysisProgram = "clang-tidy";
@@ -117,7 +117,7 @@ export class UI {
         if (val) {
             this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         } else {
-            this.browseEngineStatusBarItem.command = "";
+            this.browseEngineStatusBarItem.command = undefined;
         }
     }
 
