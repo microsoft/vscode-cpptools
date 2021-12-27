@@ -68,22 +68,18 @@ export class UI {
 
         this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
-        this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = false;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
-        this.intelliSenseStatusBarItem.text = "";
         this.intelliSenseStatusBarItem.tooltip = this.updatingIntelliSenseTooltip;
         this.ShowFlameIcon = false;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem("c.cpp.tagparser.statusbar", vscode.StatusBarAlignment.Right, 902);
         this.browseEngineStatusBarItem.name = localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status");
-        this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files");
-        this.browseEngineStatusBarItem.command = undefined;
         this.ShowDBIcon = false;
 
         this.codeAnalysisProgram = "clang-tidy";
