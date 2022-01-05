@@ -16,6 +16,11 @@
     "categories": [
         "Extension Packs"
     ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/microsoft/vscode-cpptools.git",
+        "directory": "ExtensionPack"
+    },
     "keywords": [
         "C",
         "C++",
