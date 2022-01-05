@@ -202,7 +202,10 @@ export class CppBuildTaskProvider implements TaskProvider {
             }
         }
 
-        const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
+        // Need to check this before ${file} is resolved
+        const taskUsesActiveFile: boolean = definition.args.some(arg =>
+            arg.indexOf('${file}') >= 0 || arg.indexOf('${fileBasenameNoExtension}') >= 0);
+
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
