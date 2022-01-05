@@ -4358,7 +4358,7 @@
     "xml2js": "^0.4.19"
   },
   "dependencies": {
-    "comment-json": "^3.0.3",
+    "comment-json": "^4.1.1",
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "https-proxy-agent": "^2.2.4",
