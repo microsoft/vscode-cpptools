@@ -95,7 +95,10 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     return rawElement;
 }
 
-export function fileIsCOrCppSource(file: string): boolean {
+export function fileIsCOrCppSource(file?: string): boolean {
+    if (file === undefined) {
+        return false;
+    }
     const fileExtLower: string = path.extname(file).toLowerCase();
     return [".cu", ".c", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".tcc", ".mm", ".ino", ".ipp", ".inl"].some(ext => fileExtLower === ext);
 }
