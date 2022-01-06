@@ -20,6 +20,7 @@ ui/*.ts
 
 # ignore Azure-Pipelines files
 jobs/**
+cgmanifest.json
 
 # ignore development files
 tsconfig.json
