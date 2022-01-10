@@ -51,8 +51,113 @@
   "contributes": {
     "walkthroughs": [
       {
-        "id": "cppWelcome",
-        "title": "Get Started with C++ Development",
+        "id": "cppWelcomeTestA",
+        "title": "Get Started with C++ Development - A",
+        "description": "Dive into VS Code's rich C++ development experience.",
+        "when": "false",
+        "steps": [
+          {
+            "id": "verify.compiler.mac",
+            "title": "Install a C++ compiler",
+            "description": "The C++ extension requires a C++ compiler to be installed. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "when": "workspacePlatform == mac",
+            "media": {
+              "markdown": "walkthrough/installcompiler/install-clang-macos-short.md"
+            }
+          },
+          {
+            "id": "verify.compiler.linux",
+            "title": "Install a C++ compiler",
+            "description": "The C++ extension requires a C++ compiler to be installed. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "when": "workspacePlatform == linux",
+            "media": {
+              "markdown": "walkthrough/installcompiler/install-gcc-linux-short.md"
+            }
+          },
+          {
+            "id": "verify.compiler.windows",
+            "title": "Install a C++ compiler",
+            "description": "The C++ extension requires a C++ compiler to be installed. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "when": "workspacePlatform == windows",
+            "media": {
+              "markdown": "walkthrough/installcompiler/install-compiler-windows-short.md"
+            }
+          },
+          {
+            "id": "open.project",
+            "title": "Open your project folder",
+            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Pick a folder](command:workbench.action.files.openFolder)",
+            "when": "workspaceFolderCount == 0",
+            "media": {
+              "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
+              "svg": "walkthrough/images/openFolder.svg"
+            }
+          },
+          {
+            "id": "setup.intellisense",
+            "title": "Configure C++ IntelliSense",
+            "description": "Customize your project's IntelliSense configuration to use your C++ compiler. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
+            "media": {
+              "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
+              "svg": "walkthrough/images/configuration.svg"
+            }
+          },
+          {
+            "id": "run.project.mac",
+            "title": "Run and debug your C++ file",
+            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file - make sure to save it as \".cpp\". \n Press F5 when on the file and select \"C++ (GDB/LLDB)\" and \"clang++ - Build and debug active file\" to run with the debugger. \n \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
+            "when": "workspacePlatform == mac",
+            "media": {
+              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "svg": "walkthrough/images/rundebug.svg"
+            }
+          },
+          {
+            "id": "run.project.linux",
+            "title": "Run and debug your C++ file",
+            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file - make sure to save it as \".cpp\". \n Press F5 when on the file and select \"C++ (GDB/LLDB)\" and \"g++ - Build and debug active file\" to run with the debugger. \n \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "when": "workspacePlatform == linux",
+            "media": {
+              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "svg": "walkthrough/images/rundebug.svg"
+            }
+          },
+          {
+            "id": "run.project.windows",
+            "title": "Run and debug your C++ file",
+            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file - make sure to save it as \".cpp\". \n Press F5 when on the file and select \"C++ (Windows)\" and \"cl.exe - Build and debug active file\" to run with the debugger. \n \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
+            "when": "workspacePlatform == windows",
+            "media": {
+              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "svg": "walkthrough/images/rundebug.svg"
+            }
+          },
+          {
+            "id": "install.cmake.tools",
+            "title": "Install CMake Tools",
+            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug your CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
+            "completionEvents": [
+              "extensionInstalled:ms-vscode.cmake-tools"
+            ],
+            "media": {
+              "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
+              "svg": "walkthrough/images/cmake.svg"
+            }
+          },
+          {
+            "id": "watch.tutorials",
+            "title": "Lean back and get started",
+            "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
+            "media": {
+              "altText": "A screenshot with a preview of the video tutorial and a play button.",
+              "svg": "walkthrough/images/learn.svg"
+            }
+          }
+        ]
+      },
+      {
+        "id": "cppWelcomeTestB",
+        "title": "Get Started with C++ Development - B",
         "description": "Dive into VS Code's rich C++ development experience.",
         "when": "false",
         "steps": [
