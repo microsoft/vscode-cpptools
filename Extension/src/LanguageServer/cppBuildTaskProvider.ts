@@ -202,11 +202,12 @@ export class CppBuildTaskProvider implements TaskProvider {
             }
         }
 
+        const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, taskUsesActiveFile)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -349,15 +350,14 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
     private endOfLine: string = "\r\n";
 
-    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined) {
+    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private taskUsesActiveFile: boolean) {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        const editor: TextEditor | undefined = window.activeTextEditor;
-        if (editor && !util.fileIsCOrCppSource(editor.document.fileName)) {
+        if (this.taskUsesActiveFile && !util.fileIsCOrCppSource(window.activeTextEditor?.document.fileName)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
-            return Promise.resolve();
+            return;
         }
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
