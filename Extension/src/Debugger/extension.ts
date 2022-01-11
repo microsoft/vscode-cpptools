@@ -21,7 +21,11 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 const disposables: vscode.Disposable[] = [];
 
 export function buildAndDebugActiveFileStr(): string {
-    return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
+    return `${localize("build.and.debug.active.file", 'Build and debug active file')}`;
+}
+
+export function CppExtensionSourceStr(): string {
+    return `${localize("Cpp.extension.source", 'C/C++')}`;
 }
 
 export function initialize(context: vscode.ExtensionContext): void {
@@ -44,7 +48,7 @@ export function initialize(context: vscode.ExtensionContext): void {
     const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
 
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugActiveFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
             // Not enabled because we do not react to single-file mode correctly yet.

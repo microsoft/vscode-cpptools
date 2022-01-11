@@ -11,7 +11,7 @@ import { CppBuildTask, CppBuildTaskDefinition } from '../LanguageServer/cppBuild
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
-import { buildAndDebugActiveFileStr } from './extension';
+import { buildAndDebugActiveFileStr, CppExtensionSourceStr } from './extension';
 import { cppBuildTaskProvider } from '../LanguageServer/extension';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
@@ -127,16 +127,16 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         const platform: string = platformInfo.platform;
 
         // Import the tasks from tasks.json file.
-        const buildTasksJson: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
+        const buildTasksConfigured: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
 
         // Provide detected tasks by cppBuildTaskProvider.
         const buildTasksDetected: CppBuildTask[] = await cppBuildTaskProvider.getTasks(true);
 
         // Rename the provided tasks that has same name as tasks in tasks.json.
         const buildTasksDetectedRename: CppBuildTask[] = buildTasksDetected.map(taskDetected => {
-            for (const taskJson of buildTasksJson) {
+            for (const taskJson of buildTasksConfigured) {
                 if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
-                    taskDetected.name = cppBuildTaskProvider.provideUniqueTaskLabel(taskJson.definition.label, buildTasksJson);
+                    taskDetected.name = cppBuildTaskProvider.provideUniqueTaskLabel(taskJson.definition.label, buildTasksConfigured);
                     taskDetected.definition.label = taskDetected.name;
                     break;
                 }
@@ -145,7 +145,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
         });
 
         let buildTasks: CppBuildTask[] = [];
-        buildTasks = buildTasks.concat(buildTasksJson, buildTasksDetectedRename);
+        buildTasks = buildTasks.concat(buildTasksConfigured, buildTasksDetectedRename);
 
         if (buildTasks.length === 0) {
             return Promise.resolve(this.provider.getInitialConfigurations(this.type));
@@ -180,7 +180,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             const compilerName: string = path.basename(compilerPath);
             const newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
-            newConfig.name = compilerName + buildAndDebugActiveFileStr();
+            newConfig.name = CppExtensionSourceStr() + ": " + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
             if (newConfig.type === "cppdbg") {
                 newConfig.externalConsole = false;
@@ -192,7 +192,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
-            newConfig.detail = task.detail ? task.detail : definition.command;
+            newConfig.detail = "preLaunch Task: " + task.name;
             const isCl: boolean = compilerName === "cl.exe";
             newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 

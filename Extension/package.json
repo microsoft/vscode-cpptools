@@ -2540,6 +2540,11 @@
             ]
           },
           "scope": "resource"
+        },
+        "C_Cpp.shortcutMenuBar.buildAndDebugFile": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.shortcutMenuBar.buildAndDebugFile.markdownDescription%"
         }
       }
     },
@@ -2597,11 +2602,6 @@
       {
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.BuildAndDebugActiveFile",
-        "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
         "category": "C/C++"
       },
       {
@@ -2681,6 +2681,12 @@
         "command": "C_Cpp.ClearCodeAnalysisSquiggles",
         "title": "%c_cpp.command.ClearCodeAnalysisSquiggles.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.BuildAndDebugFile",
+        "title": "%c_cpp.command.BuildAndDebugFile.title%",
+        "category": "C/C++",
+        "icon": "$(debug-alt)"
       }
     ],
     "keybindings": [
@@ -3797,6 +3803,13 @@
           "group": "navigation"
         }
       ],
+      "editor/title": [
+        {
+          "command": "C_Cpp.BuildAndDebugFile",
+          "when": "(editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp') && C_Cpp.shortcutMenuBar.buildAndDebugFile",
+          "group": "navigation"
+        }
+      ],
       "editor/context": [
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
@@ -3812,11 +3825,6 @@
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
-        },
-        {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2@1"
         },
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
