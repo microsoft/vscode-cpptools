@@ -26,11 +26,7 @@ export class AttachPicker {
 
     // We should not await on this function.
     public async ShowAttachEntries(): Promise<string | undefined> {
-        if (!await util.isExtensionReady()) {
-            util.displayExtensionNotReadyPrompt();
-        } else {
-            return showQuickPick(() => this.attachItemsProvider.getAttachItems());
-        }
+        return showQuickPick(() => this.attachItemsProvider.getAttachItems());
     }
 }
 
@@ -42,64 +38,60 @@ export class RemoteAttachPicker {
     private _channel: vscode.OutputChannel;
 
     public async ShowAttachEntries(config: any): Promise<string | undefined> {
-        if (!await util.isExtensionReady()) {
-            util.displayExtensionNotReadyPrompt();
+        this._channel.clear();
+
+        const pipeTransport: any = config ? config.pipeTransport : undefined;
+
+        if (!pipeTransport) {
+            throw new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport"));
+        }
+
+        let pipeProgram: string | undefined;
+
+        if (os.platform() === 'win32' &&
+            pipeTransport.pipeProgram &&
+            !await util.checkFileExists(pipeTransport.pipeProgram)) {
+            const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
+            const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
+
+            // Check for pipeProgram
+            if (!await util.checkFileExists(config.pipeTransport.pipeProgram)) {
+                pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
+            }
+
+            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+            if (!pipeProgram && config.pipeTransport.pipeCwd) {
+                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
+
+                if (!await util.checkFileExists(newPipeProgramStr)) {
+                    pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
+                }
+            }
+        }
+
+        if (!pipeProgram) {
+            pipeProgram = pipeTransport.pipeProgram;
+        }
+
+        const pipeArgs: string[] = pipeTransport.pipeArgs;
+
+        const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
+
+        const pipeCmd: string = `"${pipeProgram}" ${argList}`;
+
+        const processes: AttachItem[]= await this.getRemoteOSAndProcesses(pipeCmd);
+        const attachPickOptions: vscode.QuickPickOptions = {
+            matchOnDetail: true,
+            matchOnDescription: true,
+            placeHolder: localize("select.process.attach", "Select the process to attach to")
+        };
+
+        const item: AttachItem | undefined = await vscode.window.showQuickPick(processes, attachPickOptions);
+        if (item) {
+            return item.id;
         } else {
-            this._channel.clear();
-
-            const pipeTransport: any = config ? config.pipeTransport : undefined;
-
-            if (!pipeTransport) {
-                throw new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport"));
-            }
-
-            let pipeProgram: string | undefined;
-
-            if (os.platform() === 'win32' &&
-                pipeTransport.pipeProgram &&
-                !await util.checkFileExists(pipeTransport.pipeProgram)) {
-                const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
-                const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
-
-                // Check for pipeProgram
-                if (!await util.checkFileExists(config.pipeTransport.pipeProgram)) {
-                    pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
-                }
-
-                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-                if (!pipeProgram && config.pipeTransport.pipeCwd) {
-                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-
-                    if (!await util.checkFileExists(newPipeProgramStr)) {
-                        pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
-                    }
-                }
-            }
-
-            if (!pipeProgram) {
-                pipeProgram = pipeTransport.pipeProgram;
-            }
-
-            const pipeArgs: string[] = pipeTransport.pipeArgs;
-
-            const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
-
-            const pipeCmd: string = `"${pipeProgram}" ${argList}`;
-
-            const processes: AttachItem[]= await this.getRemoteOSAndProcesses(pipeCmd);
-            const attachPickOptions: vscode.QuickPickOptions = {
-                matchOnDetail: true,
-                matchOnDescription: true,
-                placeHolder: localize("select.process.attach", "Select the process to attach to")
-            };
-
-            const item: AttachItem | undefined = await vscode.window.showQuickPick(processes, attachPickOptions);
-            if (item) {
-                return item.id;
-            } else {
-                throw new Error(localize("process.not.selected", "Process not selected."));
-            }
+            throw new Error(localize("process.not.selected", "Process not selected."));
         }
     }
 
