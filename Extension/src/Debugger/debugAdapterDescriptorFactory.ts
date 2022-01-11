@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from "vscode";
-import * as util from '../common';
 import * as path from 'path';
 import * as os from 'os';
 import * as nls from 'vscode-nls';
@@ -34,16 +33,11 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
     }
 
     async createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
-        if (await util.isExtensionReady()) {
+        const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
 
-            const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
+        const command: string = path.join(this.context.extensionPath, adapter);
 
-            const command: string = path.join(this.context.extensionPath, adapter);
-
-            return new vscode.DebugAdapterExecutable(command, []);
-        } else {
-            throw new Error(util.extensionNotReadyString);
-        }
+        return new vscode.DebugAdapterExecutable(command, []);
     }
 }
 
@@ -59,14 +53,10 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
             vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not avaliable for non-Windows machines.", "cppvsdbg"));
             return null;
         } else {
-            if (await util.isExtensionReady()) {
-                return new vscode.DebugAdapterExecutable(
-                    path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
-                    ['--interpreter=vscode', '--extConfigDir=%USERPROFILE%\\.cppvsdbg\\extensions']
-                );
-            } else {
-                throw new Error(util.extensionNotReadyString);
-            }
+            return new vscode.DebugAdapterExecutable(
+                path.join(this.context.extensionPath, './debugAdapters/vsdbg/bin/vsdbg.exe'),
+                ['--interpreter=vscode', '--extConfigDir=%USERPROFILE%\\.cppvsdbg\\extensions']
+            );
         }
     }
 }
