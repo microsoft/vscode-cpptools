@@ -62,7 +62,7 @@ export function activate(): void {
         if (util.extensionContext) {
             const packageInfo: IPackageInfo = getPackageInfo();
             if (packageInfo) {
-                const targetPopulation: TargetPopulation = util.getTargetPopulation();
+                const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
                 experimentationTelemetry = new ExperimentationTelemetry(new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey));
                 initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
             }

@@ -1238,7 +1238,7 @@ export function findPowerShell(): string | undefined {
     }
 }
 
-export function getTargetPopulation(): TargetPopulation {
+export function getCppToolsTargetPopulation(): TargetPopulation {
     // If insiders.flag is present, consider this an insiders build.
     // If release.flag is present, consider this a release build.
     // Otherwise, consider this an internal build.
@@ -1248,4 +1248,11 @@ export function getTargetPopulation(): TargetPopulation {
         return TargetPopulation.Public;
     }
     return TargetPopulation.Internal;
+}
+
+export function isVsCodeInsiders(): Boolean {
+    return extensionPath.includes(".vscode-insiders") ||
+        extensionPath.includes(".vscode-server-insiders") ||
+        extensionPath.includes(".vscode-exploration") ||
+        extensionPath.includes(".vscode-server-exploration");
 }
