@@ -138,37 +138,34 @@ export function HandleInsidersPrompt(): void {
     // Only display this prompt to users who have updateChannel configured for Insiders,
     // and who are not already configured to receive pre-release extensions.
 
-    // Skip the prompt if using an Insiders build of VS Code, as it will default to using pre-release extensions.
-    if (!util.isVsCodeInsiders()) {
-        const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
-        // Skip the prompt if already using an insiders build of cpptools.
-        if (targetPopulation === TargetPopulation.Public) {
-            const settings: CppSettings = new CppSettings();
-            const displayedInsidersPrompt: PersistentState<boolean> = new PersistentState<boolean>("CPP.displayedInsidersPrompt", false);
-            // Skip the prompt if updateChannel was not set to Insiders.
-            if (settings.updateChannel === "Insiders") {
-                if (!displayedInsidersPrompt.Value) {
-                    displayedInsidersPrompt.Value = true;
-                    const message: string = localize('updateChannel.changed', "The `C_Cpp.updateChannel` setting is deprecated. Do you want to enable install of pre-releases of the C/C++ extension via the Marketplace?");
-                    const yes: string = localize("yes.button", "Yes");
-                    const no: string = localize("no.button", "No");
-                    vscode.window.showInformationMessage(message, yes, no).then((selection) => {
-                        switch (selection) {
-                            case yes:
-                                vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
-                                break;
-                            case no:
-                                break;
-                            default:
-                                break;
-                        }
-                    });
-                }
-            } else {
-                // Reset persistent value, so we prompt again if they switch to "Insiders" again.
-                if (displayedInsidersPrompt.Value) {
-                    displayedInsidersPrompt.Value = false;
-                }
+    const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
+    // Skip the prompt if already using an insiders build of cpptools.
+    if (targetPopulation === TargetPopulation.Public) {
+        const settings: CppSettings = new CppSettings();
+        const displayedInsidersPrompt: PersistentState<boolean> = new PersistentState<boolean>("CPP.displayedInsidersPrompt", false);
+        // Skip the prompt if updateChannel was not set to Insiders.
+        if (settings.updateChannel === "Insiders") {
+            if (!displayedInsidersPrompt.Value) {
+                displayedInsidersPrompt.Value = true;
+                const message: string = localize('updateChannel.changed', "The `C_Cpp.updateChannel` setting is deprecated. Do you want to enable install of pre-releases of the C/C++ extension via the Marketplace?");
+                const yes: string = localize("yes.button", "Yes");
+                const no: string = localize("no.button", "No");
+                vscode.window.showInformationMessage(message, yes, no).then((selection) => {
+                    switch (selection) {
+                        case yes:
+                            vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+                            break;
+                        case no:
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+        } else {
+            // Reset persistent value, so we prompt again if they switch to "Insiders" again.
+            if (displayedInsidersPrompt.Value) {
+                displayedInsidersPrompt.Value = false;
             }
         }
     }
