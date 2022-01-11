@@ -79,7 +79,7 @@ class StaleCloser extends ActionBase_1.ActionBase {
                         console.log(`Closing issue ${hydrated.number}.`);
                     }
                     else {
-                        // Ping 
+                        // Ping
                         if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
                             console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
                             if (this.pingComment) {

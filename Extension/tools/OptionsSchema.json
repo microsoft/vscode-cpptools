@@ -118,10 +118,10 @@
       "default": {},
       "properties": {
         "name": {
-            "type": "string"
+          "type": "string"
         },
         "value": {
-            "type": "string"
+          "type": "string"
         }
       }
     },
@@ -254,8 +254,8 @@
         },
         "launchCompleteCommand": {
           "enum": [
-            "exec-run",
-            "exec-continue",
+            "exec-run", 
+            "exec-continue", 
             "None"
           ],
           "description": "%c_cpp.debuggers.launchCompleteCommand.description%",
@@ -264,6 +264,11 @@
         "visualizerFile": {
           "type": "string",
           "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
+          "default": ""
+        },
+        "svdPath": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description",
           "default": ""
         },
         "showDisplayString": {
@@ -279,9 +284,9 @@
           },
           "default": []
         },
-        "envFile": { 
-          "type": "string", 
-          "description": "%c_cpp.debuggers.envFile.description%", 
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
           "default": "${workspaceFolder}/.env"
         },
         "additionalSOLibSearchPath": {
@@ -551,9 +556,9 @@
           },
           "default": []
         },
-        "envFile": { 
-          "type": "string", 
-          "description": "%c_cpp.debuggers.envFile.description%", 
+        "envFile": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.envFile.description%",
           "default": "${workspaceFolder}/.env"
         },
         "symbolSearchPath": {

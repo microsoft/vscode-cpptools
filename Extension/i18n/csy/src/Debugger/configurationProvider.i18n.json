@@ -25,5 +25,6 @@
 	"open.envfile": "Otevřít {0}",
 	"unexpected.os": "Neočekávaný typ operačního systému",
 	"path.to.pipe.program": "úplná cesta k programu kanálu, třeba {0}",
-	"enable.pretty.printing": "Povolit přehledný výpis pro {0}"
+	"enable.pretty.printing": "Povolit přehledný výpis pro {0}",
+	"enable.intel.disassembly.flavor": "Nastavte variantu zpětného překladu na {0}."
 }

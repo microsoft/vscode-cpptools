@@ -17,13 +17,13 @@ jobs:
   steps:
   - task: CmdLine@2
     displayName: 'Install Dependencies'
-    inputs: 
+    inputs:
       script: brew install cmake ninja swig
     continueOnError: true
 
   - task: CmdLine@2
     displayName: 'Build LLVM Project'
-    inputs: 
+    inputs:
       script: |
         log_and_exec_cmd() {
           echo "##[command] $1"
@@ -32,7 +32,7 @@ jobs:
 
         log_and_exec_cmd "cd $(Build.StagingDirectory)"
         log_and_exec_cmd "mkdir $(Build.StagingDirectory)/buildspace"
-        
+
         log_and_exec_cmd "git clone $(llvm_repo) llvm-project"
         log_and_exec_cmd "cd llvm-project"
         log_and_exec_cmd "git checkout $(llvm_branch)"

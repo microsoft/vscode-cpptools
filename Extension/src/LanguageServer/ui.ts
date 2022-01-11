@@ -46,6 +46,9 @@ export class UI {
     private isParsingFiles: boolean = false;
     private isUpdatingIntelliSense: boolean = false;
     private isRunningCodeAnalysis: boolean = false;
+    private isCodeAnalysisPaused: boolean = false;
+    private codeAnalysisProcessed: number = 0;
+    private codeAnalysisTotal: number = 0;
     private workspaceParsingStatus: string = "";
     private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing open files");
@@ -53,6 +56,7 @@ export class UI {
     private readonly updatingIntelliSenseTooltip: string = localize("updating.intellisense.tooltip", "Updating IntelliSense");
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private runningCodeAnalysisTooltip: string = "";
+    private codeAnalysisPausedTooltip: string = "";
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
@@ -64,27 +68,25 @@ export class UI {
 
         this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
-        this.referencesStatusBarItem.text = "";
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
         this.ShowReferencesIcon = false;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
-        this.intelliSenseStatusBarItem.text = "";
         this.intelliSenseStatusBarItem.tooltip = this.updatingIntelliSenseTooltip;
         this.ShowFlameIcon = false;
 
         this.browseEngineStatusBarItem = vscode.window.createStatusBarItem("c.cpp.tagparser.statusbar", vscode.StatusBarAlignment.Right, 902);
         this.browseEngineStatusBarItem.name = localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status");
-        this.browseEngineStatusBarItem.text = "";
         this.browseEngineStatusBarItem.tooltip = localize("discovering.files.tooltip", "Discovering files");
-        this.browseEngineStatusBarItem.command = "";
         this.ShowDBIcon = false;
 
         this.codeAnalysisProgram = "clang-tidy";
         this.runningCodeAnalysisTooltip = localize(
             { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
+        this.codeAnalysisPausedTooltip = localize(
+            { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
     }
 
     private set ActiveConfig(label: string) {
@@ -107,19 +109,27 @@ export class UI {
             + (val ? this.workspaceParsingStatus : "");
     }
 
-    private setIsParsingWorkspacePausable(val: boolean): void  {
+    private setIsParsingWorkspacePausable(val: boolean): void {
         if (val) {
             this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
         } else {
-            this.browseEngineStatusBarItem.command = "";
+            this.browseEngineStatusBarItem.command = undefined;
         }
     }
 
-    private setIsParsingWorkspacePaused(val: boolean): void  {
+    private setIsParsingWorkspacePaused(val: boolean): void {
         this.isParsingWorkspacePaused = val;
     }
 
-    private setIsParsingFiles(val: boolean): void  {
+    private setIsCodeAnalysisPaused(val: boolean): void {
+        this.isCodeAnalysisPaused = val;
+        const twoStatus: boolean = val && this.isUpdatingIntelliSense;
+        this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
+            + (twoStatus ? " | " : "")
+            + (val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip);
+    }
+
+    private setIsParsingFiles(val: boolean): void {
         this.isParsingFiles = val;
         const showIcon: boolean = val || this.isParsingWorkspace;
         const twoStatus: boolean = val && this.isParsingWorkspace;
@@ -130,7 +140,7 @@ export class UI {
             + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
     }
 
-    private setIsUpdatingIntelliSense(val: boolean): void  {
+    private setIsUpdatingIntelliSense(val: boolean): void {
         this.isUpdatingIntelliSense = val;
         const showIcon: boolean = val || this.isRunningCodeAnalysis;
         const twoStatus: boolean = val && this.isRunningCodeAnalysis;
@@ -141,7 +151,11 @@ export class UI {
             + (this.isRunningCodeAnalysis ? this.runningCodeAnalysisTooltip : "");
     }
 
-    private setIsRunningCodeAnalysis(val: boolean): void  {
+    private setIsRunningCodeAnalysis(val: boolean): void {
+        if (this.isRunningCodeAnalysis && !val) {
+            this.codeAnalysisTotal = 0;
+            this.codeAnalysisProcessed = 0;
+        }
         this.isRunningCodeAnalysis = val;
         const showIcon: boolean = val || this.isUpdatingIntelliSense;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
@@ -150,7 +164,26 @@ export class UI {
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
             + (twoStatus ? " | " : "")
             + (val ? this.runningCodeAnalysisTooltip : "");
-        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : "";
+        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : undefined;
+    }
+
+    private updateCodeAnalysisTooltip(): void {
+        this.runningCodeAnalysisTooltip = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
+            this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
+        this.setIsRunningCodeAnalysis(true);
+    }
+
+    private setCodeAnalysisProcessed(processed: number): void {
+        this.codeAnalysisProcessed = processed;
+        if (this.codeAnalysisProcessed > this.codeAnalysisTotal) {
+            this.codeAnalysisTotal = this.codeAnalysisProcessed + 1;
+        }
+        this.updateCodeAnalysisTooltip();
+    }
+
+    private setCodeAnalysisTotal(total: number): void {
+        this.codeAnalysisTotal = total;
+        this.updateCodeAnalysisTooltip();
     }
 
     private get ReferencesCommand(): ReferencesCommandMode {
@@ -247,6 +280,9 @@ export class UI {
         client.ParsingFilesChanged(value => { this.setIsParsingFiles(value); });
         client.IntelliSenseParsingChanged(value => { this.setIsUpdatingIntelliSense(value); });
         client.RunningCodeAnalysisChanged(value => { this.setIsRunningCodeAnalysis(value); });
+        client.CodeAnalysisPausedChanged(value => { this.setIsCodeAnalysisPaused(value); });
+        client.CodeAnalysisProcessedChanged(value => { this.setCodeAnalysisProcessed(value); });
+        client.CodeAnalysisTotalChanged(value => { this.setCodeAnalysisTotal(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
@@ -326,14 +362,14 @@ export class UI {
         return (selection) ? selection.index : -1;
     }
 
-    public async showAnalysisCommands(): Promise<number> {
+    public async showCodeAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
         items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint]}, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
 
-        if (this.isParsingWorkspacePaused) {
+        if (this.isCodeAnalysisPaused) {
             items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint]}, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
         } else {
             items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });

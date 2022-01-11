@@ -54,11 +54,13 @@
 	"one.file.per.line": "Un fichier par ligne.",
 	"compile.commands": "Commandes de compilation",
 	"compile.commands.description": "Chemin complet du fichier {0} pour l'espace de travail. Les chemins d'inclusion et les définitions découverts dans ce fichier sont utilisés à la place des valeurs définies pour les paramètres {1} et {2}. Si la base de données des commandes de compilation n'a pas d'entrée pour l'unité de traduction qui correspond au fichier que vous avez ouvert dans l'éditeur, un message d'avertissement s'affiche et l'extension utilise les paramètres {3} et {4} à la place.",
+	"merge.configurations": "Fusionner les configurations",
+	"merge.configurations.description": "Lorsque {0} (ou activé), la fusion inclut des chemins d’accès, des définitions et des éléments forcés avec ceux d’un fournisseur de configuration.",
 	"browse.path": "Parcourir : chemin",
 	"browse.path.description": "Liste de chemins dans lesquels l'analyseur de balises doit rechercher les en-têtes inclus par vos fichiers sources. En cas d'omission, {0} est utilisé comme {1}. La recherche dans ces chemins est récursive par défaut. Spécifiez {2} pour indiquer une recherche non récursive. Par exemple : {3} effectue une recherche dans tous les sous-répertoires, contrairement à {4}.",
 	"one.browse.path.per.line": "Un chemin de navigation par ligne.",
 	"limit.symbols": "Parcourir : limiter les symboles aux en-têtes inclus",
-	"limit.symbols.checkbox": "Quand la valeur est true (ou vérifiée), l'analyseur de balises analyse uniquement les fichiers de code qui ont été inclus directement ou indirectement dans un fichier source dans {0}. Quand la valeur est false (ou non vérifiée), l'analyseur de balises analyse tous les fichiers de code trouvés dans les chemins spécifiés dans la liste {1}.",
+	"limit.symbols.checkbox": "Lorsque {0} (ou activé), l’analyseur de balise analyse uniquement les fichiers de code qui ont été inclus directement ou indirectement par un fichier source dans {1}. Lorsque {2} (ou non activé), l’analyseur de balise analyse tous les fichiers de code trouvés dans les chemins d’accès spécifiés dans la liste {3} .",
 	"database.filename": "Parcourir : nom de fichier de base de données",
 	"database.filename.description": "Chemin de la base de données de symboles générée. Cela indique à l'extension d'enregistrer la base de données de symboles de l'analyseur de balises à un emplacement autre que l'emplacement de stockage par défaut de l'espace de travail. Si un chemin relatif est spécifié, il est relatif à l'emplacement de stockage par défaut de l'espace de travail et non au dossier d'espace de travail lui-même. La variable {0} peut être utilisée pour spécifier un chemin relatif au dossier d'espace de travail (par ex., {1})"
 }

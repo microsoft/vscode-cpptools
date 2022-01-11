@@ -54,11 +54,13 @@
 	"one.file.per.line": "Eine Datei pro Zeile.",
 	"compile.commands": "Kompilierungsbefehle",
 	"compile.commands.description": "Der vollständige Pfad zur {0}-Datei für den Arbeitsbereich. Die in dieser Datei ermittelten Includepfade und Define-Anweisungen werden anstelle der für die Einstellungen \"{1}\" und \"{2}\" festgelegten Werte verwendet. Wenn die Datenbank für Kompilierungsbefehle keinen Eintrag für die Übersetzungseinheit enthält, die der im Editor geöffneten Datei entspricht, wird eine Warnmeldung angezeigt, und die Erweiterung verwendet stattdessen die Einstellungen \"{3}\" und \"{4}\".",
+	"merge.configurations": "Konfigurationen zusammenführen",
+	"merge.configurations.description": "Wenn {0} (oder aktiviert) ist, schließen Sie Includepfade, Definitionen und erzwungene Includes mit denen eines Konfigurationsanbieters zusammen.",
 	"browse.path": "Durchsuchen: Pfad",
 	"browse.path.description": "Eine Liste der Pfade, in denen der Tagparser nach Headern suchen kann, die in Ihren Quelldateien enthalten sind. Ohne diese Angabe wird \"{0}\" als \"{1}\" verwendet. Die Suche in diesen Pfaden ist standardmäßig rekursiv. Geben Sie \"{2}\" an, um eine nicht rekursive Suche festzulegen. Beispiel: Bei \"{3}\" werden alle Unterverzeichnisse durchsucht, bei \"{4}\" nicht.",
 	"one.browse.path.per.line": "Ein Suchpfad pro Zeile.",
 	"limit.symbols": "Durchsuchen: Symbole auf eingeschlossene Header begrenzen",
-	"limit.symbols.checkbox": "Bei TRUE (oder wenn aktiviert) analysiert der Tagparser nur Codedateien, die direkt oder indirekt durch eine Quelldatei in \"{0}\" eingeschlossen werden. Bei FALSE (oder wenn deaktiviert) analysiert der Tagparser alle Codedateien, die in den in der Liste \"{1}\" angegebenen Pfaden gefunden werden.",
+	"limit.symbols.checkbox": "Wenn {0} (oder aktiviert) ist, analysiert der Tagparser nur Codedateien, die direkt oder indirekt von einer Quelldatei in {1} eingeschlossen wurden. Wenn {2} (oder nicht aktiviert) ist, analysiert der Tagparser alle Codedateien, die in den in der {3} Liste angegebenen Pfaden gefunden wurden.",
 	"database.filename": "Durchsuchen: Datenbankdateiname",
 	"database.filename.description": "Der Pfad zur generierten Symboldatenbank. Hiermit wird die Erweiterung angewiesen, die Symboldatenbank des Tagparsers an einem anderen Speicherort als dem Standardspeicherort des Arbeitsbereichs zu speichern. Bei Angabe eines relativen Pfads wird dieser relativ zum Standardspeicherort des Arbeitsbereichs und nicht zum Arbeitsbereichsordner selbst erstellt. Mit der Variablen \"{0}\" kann ein Pfad relativ zum Arbeitsbereichsordner angegeben werden (Beispiel: {1})."
 }

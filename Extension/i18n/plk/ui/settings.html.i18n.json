@@ -54,11 +54,13 @@
 	"one.file.per.line": "Jeden plik na wiersz.",
 	"compile.commands": "Polecenia kompilacji",
 	"compile.commands.description": "Pełna ścieżka do pliku {0} dla obszaru roboczego. Ścieżki dołączania i definicje wykryte w tym pliku będą używane zamiast wartości określonych dla ustawień {1} i {2}. Jeśli baza danych poleceń kompilacji nie zawiera wpisu dla jednostki translacji odpowiadającej plikowi, który został otwarty w edytorze, pojawi się komunikat ostrzegawczy, a rozszerzenie użyje zamiast tego ustawień {3} i {4}.",
+	"merge.configurations": "Scal konfiguracje",
+	"merge.configurations.description": "Jeśli wartość jest równa {0} (lub jest zaznaczona), scala ścieżki dołączenia, definiuje i wymusza dołączenie ze ścieżkami od dostawcy konfiguracji.",
 	"browse.path": "Przeglądaj: ścieżka",
 	"browse.path.description": "Lista ścieżek, w których analizator tagów ma wyszukiwać nagłówki dołączane przez pliki źródłowe. W przypadku pominięcia tego ustawienia zostanie użyte ustawienie: {0} jako: {1}. Wyszukiwanie w tych ścieżkach jest domyślnie rekurencyjne. Użyj wartości {2}, aby określić wyszukiwanie nierekurencyjne. Na przykład wartość {3} spowoduje przeszukanie wszystkich podkatalogów, w przeciwieństwie do wartości {4}.",
 	"one.browse.path.per.line": "Jedna ścieżka przeglądania na wiersz.",
 	"limit.symbols": "Przeglądaj: ogranicz symbole do dołączonych nagłówków",
-	"limit.symbols.checkbox": "Jeśli wartość jest równa true (lub jest zaznaczona), analizator tagów analizuje tylko pliki kodu, które zostały bezpośrednio lub pośrednio dołączone przez plik źródłowy w: {0}. Jeśli wartość jest równa false (lub nie jest zaznaczona), analizator tagów będzie analizować wszystkie pliki kodu znalezione w ścieżkach określonych na liście {1}.",
+	"limit.symbols.checkbox": "Jeśli wartość jest równa {0} (lub jest zaznaczona), analizator tagów analizuje tylko pliki kodu, które zostały bezpośrednio lub pośrednio dołączone przez plik źródłowy w {1}. Jeśli wartość jest równa {2} (lub nie jest zaznaczona), analizator tagów będzie analizować wszystkie pliki kodu znalezione w ścieżkach określonych na {3} liście.",
 	"database.filename": "Przeglądaj: nazwa pliku bazy danych",
 	"database.filename.description": "Ścieżka do generowanej bazy danych symboli. Określa ona, że rozszerzenie ma zapisać bazę danych symboli analizatora tagów w innym miejscu niż domyślna lokalizacja magazynowania obszaru roboczego. Jeśli zostanie określona ścieżka względna, będzie to ścieżka względem domyślnej lokalizacji magazynowania obszaru roboczego, a nie folderu obszaru roboczego. Można użyć zmiennej {0} do określenia ścieżki względem folderu obszaru roboczego (np. {1})"
 }

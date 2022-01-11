@@ -21,4 +21,4 @@ This option will generate a tasks.json file for you, build your active source fi
 
 ### F5
 Another way to begin building and debugging your active file is to execute the command by pressing <kbd>F5</kbd>. This method will configure
-both a tasks.json and launch.json file for you, build your active source file, and then launch the debugger. 
+both a tasks.json and launch.json file for you, build your active source file, and then launch the debugger.

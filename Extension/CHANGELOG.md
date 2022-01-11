@@ -1,13 +1,53 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.7.0-insiders2: September 30, 2021
+## Version 1.8.0-insiders2: December 7, 2021
 ### Bug Fixes
-* Reduce required version of glibc to 2.17 on Linux x64 systems. [#8192](https://github.com/microsoft/vscode-cpptools/issues/8192)
+* Fix GCC system include processing on Windows. [#8112](https://github.com/microsoft/vscode-cpptools/issues/8112), [#8496](https://github.com/microsoft/vscode-cpptools/issues/8496)
+* Fix the tag parser getting stuck on certain code. [#8459](https://github.com/microsoft/vscode-cpptools/issues/8459)
+* Fix `C_Cpp.codeAnalysis.maxConcurrentThreads` using the wrong value. [#8471](https://github.com/microsoft/vscode-cpptools/issues/8471)
+* Fix save failing after editing a header that is used by clang-tidy for a TU that is different from the default TU. [#8473](https://github.com/microsoft/vscode-cpptools/issues/8473)
+* Fix inactive region rendering. [#8478](https://github.com/microsoft/vscode-cpptools/issues/8478)
+* Fix CUDA support not working. [#8481](https://github.com/microsoft/vscode-cpptools/issues/8481)
+* Fixes for other IntelliSense issues.
+* Fix some translations.
+
+## Version 1.8.0-insiders: November 29, 2021
+
+### New Features
+* Add multi-threaded code analysis (using `clang-tidy`) based on the IntelliSense configuration. It defaults to using up to half the cores, but it can be changed via the `C_Cpp.codeAnalysis.maxConcurrentThreads` setting. [#2908](https://github.com/microsoft/vscode-cpptools/issues/2908).
 
 ### Enhancements
-* Detect IntelliSenseMode target architecture for `cl.exe` based on its path. [#8044](https://github.com/microsoft/vscode-cpptools/issues/8044)
+* The maximum number of threads to use for Find All References can be configured with the `C_Cpp.references.maxConcurrentThreads` settings. [#4036](https://github.com/microsoft/vscode-cpptools/issues/4036).
+* The IntelliSense processes launched to confirm references during Find All References can be cached via the `C_Cpp.references.maxCachedProcesses` setting. [#4038](https://github.com/microsoft/vscode-cpptools/issues/4038)
+* The maximum number of IntelliSense processes can be configured with the `C_Cpp.intelliSense.maxCachedProcesses` setting, and the number of processes will automatically decreases when the free memory becomes < 256 MB and it can be configured to use less memory via the `maxMemory` settings (memory usage from code analysis is not handled yet). [#4811](https://github.com/microsoft/vscode-cpptools/issues/4811)
+* Add a compiler arg to the generated gcc build task to display colored text. [PR #8165](https://github.com/microsoft/vscode-cpptools/pull/8165)
+* Add `static` and other modifiers to IntelliSense hover results. [#8173](https://github.com/microsoft/vscode-cpptools/issues/8173)
+* Add a configuration warning when the default compiler modifies an explicitly set `intelliSenseMode`.
 
-## Version 1.7.0-insiders: September 27, 2021
+### Bug Fixes
+* Fix newlines not being handled in comments with a Doxygen tag. [#5741](https://github.com/microsoft/vscode-cpptools/issues/5741)
+* Fix `files.exclude` not working for directories external to the active workspace folder. [#6877](https://github.com/microsoft/vscode-cpptools/issues/6877)
+* Fix a bug with vcFormat inserting additional spaces between `}` and `else`. [#7731](https://github.com/microsoft/vscode-cpptools/issues/7731)
+* Fix string elements to render as code in the IntelliSense configuration UI. [PR #8271](https://github.com/microsoft/vscode-cpptools/pull/8271)
+* Fix IntelliSense process crash on AMD Ryzen 3000 series processors without updated drivers. [#8312](https://github.com/microsoft/vscode-cpptools/issues/8312)
+* Fix bug with `wmic` not being recognized during Windows attach debugging. [#8328](https://github.com/microsoft/vscode-cpptools/issues/8328)
+* Fix Go to Type Definition on pointer types. [#8337](https://github.com/microsoft/vscode-cpptools/issues/8337)
+* Fix MS extensions not being enabled by default for Cygwin. [#8353](https://github.com/microsoft/vscode-cpptools/issues/8353)
+* Fix a "Cannot read property" error during deactivation if the language service wasn't fully activated. [#8354](https://github.com/microsoft/vscode-cpptools/issues/8354)
+* Fix an issue in which the language id for header files were not updated to match the source file of its TU. [#8381](https://github.com/microsoft/vscode-cpptools/issues/8381)
+* Fix parsing of `bit_cast` with gcc mode IntelliSense. [#8434](https://github.com/microsoft/vscode-cpptools/issues/8434)
+* Fix an issue in which multiple (potentially different) diagnostics were delivered for headers shared by multiple TUs.
+
+### Other
+* Remove trailing whitespaces in source code.
+  * Alexander (@Gordon01) [PR #8254](https://github.com/microsoft/vscode-cpptools/pull/8254)
+
+## Version 1.7.1: October 19, 2021
+### Bug Fixes
+* Fix an extension crash that occurred on activation while a workspace is open with no folders in it. [#8280](https://github.com/microsoft/vscode-cpptools/issues/8280)
+* Fix an issue in which configuration defaults were not properly applied. [#8298](https://github.com/microsoft/vscode-cpptools/pull/8298)
+
+## Version 1.7.0: October 13, 2021
 ### New Features
 * Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
 * Add support for macOS app bundles [#6726](https://github.com/microsoft/vscode-cpptools/issues/6726)
@@ -15,7 +55,10 @@
 * Add support for Go To / Peek Type Definition. [#7999](https://github.com/microsoft/vscode-cpptools/issues/7999)
 
 ### Enhancements
+* Detect IntelliSenseMode target architecture for `cl.exe` based on its path. [#8044](https://github.com/microsoft/vscode-cpptools/issues/8044)
 * In generated build tasks, add a compiler arg to cause color to be displayed in gcc/clang output in terminal. [PR #8165](https://github.com/microsoft/vscode-cpptools/pull/8165)
+* Add new configuration `mergeConfigurations` that enables include paths, defines, and forced includes from c_cpp_properties.json to be merged with those provided by a configuration provider.
+  *  Thomas Willson (@willson556) [PR #8174](https://github.com/microsoft/vscode-cpptools/pull/8174)
 
 ### Bug Fixes
 * Fix an issue with signature help for overloaded constructors. [#1664](https://github.com/microsoft/vscode-cpptools/issues/1664)
@@ -39,6 +82,7 @@
 * Fix an issue with VC 14.0 headers not being found. [#8078](https://github.com/microsoft/vscode-cpptools/issues/8078)
 * Fix an issue with CUDA support with `compile_commands.json`. [#8091](https://github.com/microsoft/vscode-cpptools/issues/8091)
 * Fix an issue with `/kernel` arg to `cl.exe` for C files. [#8158](https://github.com/microsoft/vscode-cpptools/issues/8158)
+* Fix an issue where inactive regions no longer dimmed after switching between open files. [#8206](https://github.com/microsoft/vscode-cpptools/issues/8206)
 
 ## Version 1.6.0: August 24, 2021
 ### New Features

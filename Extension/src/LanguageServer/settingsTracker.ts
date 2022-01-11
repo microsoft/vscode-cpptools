@@ -177,7 +177,15 @@ export class SettingsTracker {
                     break;
                 }
                 default: {
-                    if (key === "clang_format_path" || key === "intelliSenseCachePath" || key.startsWith("default.")) {
+                    if (key === "clang_format_path" || key === "intelliSenseCachePath" || key.startsWith("default.")
+                        || key === "codeAnalysis.clangTidy.path"
+                        || key === "codeAnalysis.clangTidy.headerFilter" || key === "codeAnalysis.clangTidy.args"
+                        || key === "codeAnalysis.clangTidy.config" || key === "codeAnalysis.clangTidy.fallbackConfig"
+
+                        // Note: An existing bug prevents these settings of type "object" from getting processed here,
+                        // so these checks are here just in case that bug gets fixed later on.
+                        || key === "files.exclude" || key === "codeAnalysis.exclude"
+                    ) {
                         value = this.areEqual(val, settings.inspect(key)?.defaultValue) ? "<default>" : "..."; // Track whether it's being used, but nothing specific about it.
                     } else {
                         value = String(this.previousCppSettings[key]);

@@ -117,17 +117,23 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const isCompilerValid: boolean = userCompilerPath ? await util.checkFileExists(userCompilerPath) : false;
+        const userCompilerIsCl: boolean = isCompilerValid && !!userCompilerPathAndArgs && userCompilerPathAndArgs.compilerName === "cl.exe";
 
         // Get known compiler paths. Do not include the known compiler path that is the same as user compiler path.
         // Filter them based on the file type to get a reduced list appropriate for the active file.
+        // Only allow one instance of cl.exe to be included, as the user must launch VS Code using a VS command
+        // prompt in order to build with cl.exe, so only one can apply.
         const knownCompilerPathsSet: Set<string> = new Set();
         let knownCompilers: configs.KnownCompiler[] | undefined = await activeClient.getKnownCompilers();
         if (knownCompilers) {
-            knownCompilers = knownCompilers.filter(info =>
-                ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
-                (!isCompilerValid || (userCompilerPathAndArgs &&
+            const compiler_condition: (info: configs.KnownCompiler) => boolean = info => ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
+                (!isCompilerValid || (!!userCompilerPathAndArgs &&
                 (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))) &&
-                (!isWindows || !info.path.startsWith("/"))); // TODO: Add WSL compiler support.
+                (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
+            const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
+                ((path.basename(info.path) === "cl.exe") && compiler_condition(info)));
+            knownCompilers = knownCompilers.filter(info =>
+                ((info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info))));
             knownCompilers.map<void>(info => {
                 knownCompilerPathsSet.add(info.path);
             });
@@ -196,11 +202,12 @@ export class CppBuildTaskProvider implements TaskProvider {
             }
         }
 
+        const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, taskUsesActiveFile)
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -343,15 +350,14 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
     private endOfLine: string = "\r\n";
 
-    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined) {
+    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private taskUsesActiveFile: boolean) {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        const editor: TextEditor | undefined = window.activeTextEditor;
-        if (editor && !util.fileIsCOrCppSource(editor.document.fileName)) {
+        if (this.taskUsesActiveFile && !util.fileIsCOrCppSource(window.activeTextEditor?.document.fileName)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
-            return Promise.resolve();
+            return;
         }
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.
@@ -365,7 +371,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private async doBuild(): Promise<any> {
         // Do build.
-        let activeCommand: string = util.resolveVariables(this.command);
+        let command: string = util.resolveVariables(this.command);
+        let activeCommand: string = command;
         this.args.forEach((value, index) => {
             value = util.normalizeArg(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
@@ -381,15 +388,27 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
-            for (const line of lines.toString().split(/\r?\n/g)) {
-                this.writeEmitter.fire(line + this.endOfLine);
+            const splitLines: string[] = lines.toString().split(/\r?\n/g);
+            for (let i: number = 0; i < splitLines.length; i++) {
+                let line: string = splitLines[i];
+
+                // We may not get full lines.
+                // Only output an endOfLine when a full line is detected.
+                if (i !== splitLines.length - 1) {
+                    line += this.endOfLine;
+                }
+                this.writeEmitter.fire(line);
             }
         };
+
+        if (os.platform() === 'win32') {
+            command = `cmd /c chcp 65001>nul && ${command}`;
+        }
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
         let child: cp.ChildProcess | undefined;
         try {
-            child = cp.spawn(this.command, this.args, this.options ? this.options : {});
+            child = cp.spawn(command, this.args, this.options ? this.options : {});
             let error: string = "";
             let stdout: string = "";
             let stderr: string = "";
@@ -401,16 +420,17 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         resolve(-1);
                     });
                     child.stdout?.on('data', data => {
-                        const str: string = data.toString("utf8");
+                        const str: string = data.toString();
                         splitWriteEmitter(str);
                         stdout += str;
                     });
                     child.stderr?.on('data', data => {
-                        const str: string = data.toString("utf8");
+                        const str: string = data.toString();
                         splitWriteEmitter(str);
                         stderr += str;
                     });
                     child.on('close', result => {
+                        this.writeEmitter.fire(this.endOfLine);
                         if (result === null) {
                             this.writeEmitter.fire(localize("build.run.terminated", "Build run was terminated.") + this.endOfLine);
                             resolve(-1);

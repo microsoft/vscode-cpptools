@@ -25,5 +25,6 @@
 	"open.envfile": "Apri {0}",
 	"unexpected.os": "Tipo di sistema operativo imprevisto",
 	"path.to.pipe.program": "percorso completo del programma pipe, ad esempio {0}",
-	"enable.pretty.printing": "Abilita la riformattazione per {0}"
+	"enable.pretty.printing": "Abilita la riformattazione per {0}",
+	"enable.intel.disassembly.flavor": "Imposta Versione Disassembly su {0}"
 }

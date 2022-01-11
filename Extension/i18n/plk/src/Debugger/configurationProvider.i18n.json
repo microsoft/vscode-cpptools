@@ -25,5 +25,6 @@
 	"open.envfile": "Otwórz element {0}",
 	"unexpected.os": "Nieoczekiwany typ systemu operacyjnego",
 	"path.to.pipe.program": "pełna ścieżka do programu potoku, takiego jak {0}",
-	"enable.pretty.printing": "Włącz formatowanie kodu dla {0}"
+	"enable.pretty.printing": "Włącz formatowanie kodu dla {0}",
+	"enable.intel.disassembly.flavor": "Ustaw wariant dezasemblacji na {0}"
 }

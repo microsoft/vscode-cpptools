@@ -14,6 +14,8 @@
 	"c.cpp.tagparser.statusbar": "C/C++ 標記剖析器狀態",
 	"discovering.files.tooltip": "正在探索檔案",
 	"running.analysis.tooltip": "正在執行 {0}",
+	"code.analysis.paused.tooltip": "{0} 已暫停",
+	"running.analysis.processed.tooltip": "正在執行 {0}: {1} / {2} ({3}%)",
 	"select.a.configuration": "選取組態...",
 	"edit.configuration.ui": "編輯組態 (UI)",
 	"edit.configuration.json": "編輯組態 (JSON)",
