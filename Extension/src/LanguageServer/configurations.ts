@@ -697,6 +697,18 @@ export class CppProperties {
         return result;
     }
 
+    private resolve(entries: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] {
+        let result: string[] = [];
+        if (entries) {
+            entries = this.resolveDefaults(entries, defaultValue);
+            entries.forEach(entry => {
+                const entryResolved: string = util.resolveVariables(entry, env);
+                result = result.concat(entryResolved);
+            });
+        }
+        return result;
+    }
+
     private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] {
         let result: string[] = [];
         if (paths) {
@@ -721,12 +733,22 @@ export class CppProperties {
 
     private updateConfigurationStringArray(property: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
         if (property) {
-            return this.resolveAndSplit(property, defaultValue, env);
+            return this.resolve(property, defaultValue, env);
         }
         if (!property && defaultValue) {
-            return this.resolveAndSplit(defaultValue, [], env);
+            return this.resolve(defaultValue, [], env);
         }
         return property;
+    }
+
+    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
+        if (paths) {
+            return this.resolveAndSplit(paths, defaultValue, env);
+        }
+        if (!paths && defaultValue) {
+            return this.resolveAndSplit(defaultValue, [], env);
+        }
+        return paths;
     }
 
     private updateConfigurationStringOrBoolean(property: string | boolean | undefined | null, defaultValue: boolean | undefined | null, env: Environment): string | boolean | undefined {
@@ -774,7 +796,7 @@ export class CppProperties {
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
 
-            configuration.includePath = this.updateConfigurationStringArray(configuration.includePath, settings.defaultIncludePath, env);
+            configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
             const origIncludePath: string[] | undefined = configuration.includePath;
             if (userSettings.addNodeAddonIncludePaths) {
@@ -782,9 +804,9 @@ export class CppProperties {
                 configuration.includePath = includePath.concat(this.nodeAddonIncludes.filter(i => includePath.indexOf(i) < 0));
             }
             configuration.defines = this.updateConfigurationStringArray(configuration.defines, settings.defaultDefines, env);
-            configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
+            configuration.macFrameworkPath = this.updateConfigurationPathsArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
-            configuration.forcedInclude = this.updateConfigurationStringArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
+            configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
@@ -863,7 +885,7 @@ export class CppProperties {
                     }
                 }
             } else {
-                configuration.browse.path = this.updateConfigurationStringArray(configuration.browse.path, settings.defaultBrowsePath, env);
+                configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
             }
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
