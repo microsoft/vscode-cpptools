@@ -20,13 +20,12 @@ import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
-import { PackageManager, IPackage } from './packageManager';
 import * as jsonc from 'comment-json';
+import { TargetPopulation } from 'vscode-tas-client';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseJson: string = localize("failed.to.parse.json", "Failed to parse json file, possibly due to comments or trailing commas.");
-export let supportCuda: boolean = false;
 
 export type Mutable<T> = {
     // eslint-disable-next-line @typescript-eslint/array-type
@@ -95,7 +94,10 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     return rawElement;
 }
 
-export function fileIsCOrCppSource(file: string): boolean {
+export function fileIsCOrCppSource(file?: string): boolean {
+    if (file === undefined) {
+        return false;
+    }
     const fileExtLower: string = path.extname(file).toLowerCase();
     return [".cu", ".c", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".tcc", ".mm", ".ino", ".ipp", ".inl"].some(ext => fileExtLower === ext);
 }
@@ -172,13 +174,6 @@ export function getVcpkgRoot(): string {
 export function isHeader(uri: vscode.Uri): boolean {
     const ext: string = path.extname(uri.fsPath);
     return !ext || ext.startsWith(".h") || ext.startsWith(".H");
-}
-
-// Extension is ready if install.lock exists and debugAdapters folder exist.
-export async function isExtensionReady(): Promise<boolean> {
-    const doesInstallLockFileExist: boolean = await checkInstallLockFile();
-
-    return doesInstallLockFileExist;
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -425,32 +420,6 @@ export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
     return new HttpsProxyAgent(proxyOptions);
 }
 
-export interface InstallLockContents {
-    platform: string;
-    architecture: string;
-};
-
-export function touchInstallLockFile(info: PlatformInformation): Promise<void> {
-    const installLockObject: InstallLockContents = {
-        platform: info.platform,
-        architecture: info.architecture
-    };
-    const content: string = JSON.stringify(installLockObject);
-    return writeFileText(getInstallLockPath(), content);
-}
-
-export function touchExtensionFolder(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.utimes(path.resolve(extensionPath, ".."), new Date(Date.now()), new Date(Date.now()), (err) => {
-            if (err) {
-                reject(err);
-            }
-
-            resolve();
-        });
-    });
-}
-
 /** Test whether a file exists */
 export function checkFileExists(filePath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -529,84 +498,6 @@ export function readDir(dirPath: string): Promise<string[]> {
     });
 }
 
-/** Test whether the lock file exists.*/
-export function checkInstallLockFile(): Promise<boolean> {
-    return checkFileExists(getInstallLockPath());
-}
-
-/** Check if the core binaries exists in extension's installation folder */
-export async function checkInstallBinariesExist(): Promise<boolean> {
-    if (!checkInstallLockFile()) {
-        return false;
-    }
-    let installBinariesExist: boolean = true;
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const packageManager: PackageManager = new PackageManager(info);
-    const packages: Promise<IPackage[]> = packageManager.GetPackages();
-    for (const pkg of await packages) {
-        if (pkg.binaries) {
-            await Promise.all(pkg.binaries.map(async (file: string) => {
-                if (!await checkFileExists(file)) {
-                    installBinariesExist = false;
-                    const fileBase: string = path.basename(file);
-                    console.log(`Extension file ${fileBase} is missing.`);
-                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${fileBase}` });
-                }
-            }));
-        }
-    }
-    return installBinariesExist;
-}
-
-/** Check if the core Json files exists in extension's installation folder */
-export async function checkInstallJsonsExist(): Promise<boolean> {
-    let installJsonsExist: boolean = true;
-    const jsonFiles: string[] = [
-        "bin/common.json",
-        "bin/linux.clang.arm.json",
-        "bin/linux.clang.arm64.json",
-        "bin/linux.clang.x64.json",
-        "bin/linux.clang.x86.json",
-        "bin/linux.gcc.arm.json",
-        "bin/linux.gcc.arm64.json",
-        "bin/linux.gcc.x64.json",
-        "bin/linux.gcc.x86.json",
-        "bin/macos.clang.arm.json",
-        "bin/macos.clang.arm64.json",
-        "bin/macos.clang.x64.json",
-        "bin/macos.clang.x86.json",
-        "bin/macos.gcc.arm.json",
-        "bin/macos.gcc.arm64.json",
-        "bin/macos.gcc.x64.json",
-        "bin/macos.gcc.x86.json",
-        "bin/windows.clang.arm.json",
-        "bin/windows.clang.arm64.json",
-        "bin/windows.clang.x64.json",
-        "bin/windows.clang.x86.json",
-        "bin/windows.gcc.arm.json",
-        "bin/windows.gcc.arm64.json",
-        "bin/windows.gcc.x64.json",
-        "bin/windows.gcc.x86.json",
-        "bin/windows.msvc.arm.json",
-        "bin/windows.msvc.arm64.json",
-        "bin/windows.msvc.x64.json",
-        "bin/windows.msvc.x86.json",
-        "debugAdapters/bin/cppdbg.ad7Engine.json"
-    ];
-    await Promise.all(jsonFiles.map(async (file) => {
-        if (!await checkFileExists(path.join(extensionPath, file))) {
-            installJsonsExist = false;
-            console.log(`Extension file ${file} is missing.`);
-            Telemetry.logLanguageServerEvent("missingJson", { "source": `${file}` });
-        }
-    }));
-    return installJsonsExist;
-}
-
-export async function removeInstallLockFile(): Promise<void> {
-    await unlinkAsync(path.join(extensionPath, "install.lock"));
-}
-
 /** Reads the content of a text file */
 export function readFileText(filePath: string, encoding: string = "utf8"): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -659,11 +550,6 @@ export function deleteFile(filePath: string): Promise<void> {
             resolve();
         }
     });
-}
-
-// Get the path of the lock file. This is used to indicate that the platform-specific dependencies have been downloaded.
-export function getInstallLockPath(): string {
-    return getExtensionFilePath("install.lock");
 }
 
 export function getReadmeMessage(): string {
@@ -1300,11 +1186,6 @@ export function isCodespaces(): boolean {
     return !!process.env["CODESPACES"];
 }
 
-export async function checkCuda(): Promise<void> {
-    const langs: string[] = await vscode.languages.getLanguages();
-    supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
-}
-
 // Sequentially Resolve Promises.
 export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Promise<void>): Promise<void> {
     return items.reduce(async (previousPromise, nextItem) => {
@@ -1355,4 +1236,23 @@ export function findPowerShell(): string | undefined {
             }
         }
     }
+}
+
+export function getCppToolsTargetPopulation(): TargetPopulation {
+    // If insiders.flag is present, consider this an insiders build.
+    // If release.flag is present, consider this a release build.
+    // Otherwise, consider this an internal build.
+    if (checkFileExistsSync(getExtensionFilePath("insiders.flag"))) {
+        return TargetPopulation.Insiders;
+    } else if (checkFileExistsSync(getExtensionFilePath("release.flag"))) {
+        return TargetPopulation.Public;
+    }
+    return TargetPopulation.Internal;
+}
+
+export function isVsCodeInsiders(): Boolean {
+    return extensionPath.includes(".vscode-insiders") ||
+        extensionPath.includes(".vscode-server-insiders") ||
+        extensionPath.includes(".vscode-exploration") ||
+        extensionPath.includes(".vscode-server-exploration");
 }
