@@ -1,5 +1,22 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.8.0 (insiders3): January 12, 2022
+### New Features
+* Add "All Exceptions" Breakpoint for cppdbg [#1800](https://github.com/microsoft/vscode-cpptools/issues/1800)
+* Add support for Alpine Linux [#4827](https://github.com/microsoft/vscode-cpptools/issues/4827)
+* Implement platform-specific VSIX's via the marketplace. [#8152](https://github.com/microsoft/vscode-cpptools/issues/8152)
+
+### Bug Fixes
+* Fix [MSYS2 GDB 10.2] gdb: ERROR: Unable to start debugging. Unexpected GDB output from command "-exec-run". Error creating process [#7706](https://github.com/microsoft/vscode-cpptools/issues/7706)
+* Remove redundant cl.exe from the build and debug active file configuration list. [#8168](https://github.com/microsoft/vscode-cpptools/issues/8168)
+* Stop adding `-fms-extensions` by default for gcc-based compilers on Windows. [#8475](https://github.com/microsoft/vscode-cpptools/issues/8475), [#8487](https://github.com/microsoft/vscode-cpptools/issues/8487)
+* Fix clang-tidy header warnings sometimes not disappearing after the issue is fixed. [#8502](https://github.com/microsoft/vscode-cpptools/issues/8502)
+* Fix clang-tidy processing status indicator getting stuck after editing/saving a header that is currently being analyzed by clang-tidy. [#8504](https://github.com/microsoft/vscode-cpptools/issues/8504)
+* Fix non-ASCII output with `cppbuild` tasks. [#8518](https://github.com/microsoft/vscode-cpptools/issues/8518)
+* Fix 3 settings not getting environment variables resolved after a settings change. [#8531](https://github.com/microsoft/vscode-cpptools/issues/8531)
+* Fixes to translations. [#8536](https://github.com/microsoft/vscode-cpptools/issues/8536)
+* Fix /RTC compiler checks failures don't break into debugger [#8646](https://github.com/microsoft/vscode-cpptools/issues/8646)
+
 ## Version 1.8.0-insiders2: December 7, 2021
 ### Bug Fixes
 * Fix GCC system include processing on Windows. [#8112](https://github.com/microsoft/vscode-cpptools/issues/8112), [#8496](https://github.com/microsoft/vscode-cpptools/issues/8496)
