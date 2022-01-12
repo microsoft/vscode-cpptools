@@ -17,7 +17,6 @@
 * Fixes to translations. [#8536](https://github.com/microsoft/vscode-cpptools/issues/8536)
 * Fix /RTC compiler checks failures don't break into debugger [#8646](https://github.com/microsoft/vscode-cpptools/issues/8646)
 
-
 ## Version 1.8.0-insiders2: December 7, 2021
 ### Bug Fixes
 * Fix GCC system include processing on Windows. [#8112](https://github.com/microsoft/vscode-cpptools/issues/8112), [#8496](https://github.com/microsoft/vscode-cpptools/issues/8496)
