@@ -4391,24 +4391,25 @@
     "xml2js": "^0.4.19"
   },
   "dependencies": {
-    "comment-json": "^3.0.3",
+    "comment-json": "^4.1.1",
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^0.5.5",
     "plist": "^3.0.4",
-    "tmp": "^0.1.0",
+    "tmp": "^0.2.1",
     "vscode-cpptools": "^5.0.0",
-    "vscode-extension-telemetry": "^0.1.7",
+    "vscode-extension-telemetry": "^0.4.4",
     "vscode-languageclient": "^5.2.1",
-    "vscode-nls": "^4.1.1",
-    "vscode-tas-client": "^0.1.22",
+    "vscode-nls": "^5.0.0",
+    "vscode-tas-client": "^0.1.27",
     "which": "^2.0.2",
     "yauzl": "^2.10.0"
   },
   "resolutions": {
     "**/mkdirp/minimist": "^0.2.1",
+    "follow-redirects": "1.14.7",
     "ansi-regex": "^5.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
@@ -4416,7 +4417,6 @@
     "browserslist": "^4.16.6",
     "glob-parent": "^5.1.2",
     "path-parse": "^1.0.7",
-    "axios": "^0.21.4",
     "set-value": "^4.0.1"
   }
 }

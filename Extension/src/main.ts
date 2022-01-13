@@ -11,17 +11,12 @@ import * as path from 'path';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { PlatformInformation } from './platform';
 import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
 import { PersistentState } from './LanguageServer/persistentState';
-import { TargetPopulation } from 'vscode-tas-client';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
@@ -82,7 +77,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     }
     LanguageServer.activate();
 
-    HandleInsidersPrompt();
+    UpdateInsidersAccess();
 
     return cppTools;
 }
@@ -134,39 +129,20 @@ function sendTelemetry(info: PlatformInformation): void {
     Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
 }
 
-export function HandleInsidersPrompt(): void {
-    // Only display this prompt to users who have updateChannel configured for Insiders,
-    // and who are not already configured to receive pre-release extensions.
-
-    const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
-    // Skip the prompt if already using an insiders build of cpptools.
-    if (targetPopulation === TargetPopulation.Public) {
-        const settings: CppSettings = new CppSettings();
-        const displayedInsidersPrompt: PersistentState<boolean> = new PersistentState<boolean>("CPP.displayedInsidersPrompt", false);
-        // Skip the prompt if updateChannel was not set to Insiders.
-        if (settings.updateChannel === "Insiders") {
-            if (!displayedInsidersPrompt.Value) {
-                displayedInsidersPrompt.Value = true;
-                const message: string = localize('updateChannel.changed', "The `C_Cpp.updateChannel` setting is deprecated. Do you want to enable install of pre-releases of the C/C++ extension via the Marketplace?");
-                const yes: string = localize("yes.button", "Yes");
-                const no: string = localize("no.button", "No");
-                vscode.window.showInformationMessage(message, yes, no).then((selection) => {
-                    switch (selection) {
-                        case yes:
-                            vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
-                            break;
-                        case no:
-                            break;
-                        default:
-                            break;
-                    }
-                });
-            }
-        } else {
-            // Reset persistent value, so we prompt again if they switch to "Insiders" again.
-            if (displayedInsidersPrompt.Value) {
-                displayedInsidersPrompt.Value = false;
-            }
+export function UpdateInsidersAccess(): void {
+    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
+    const settings: CppSettings = new CppSettings();
+    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
+    if (settings.updateChannel === "Insiders") {
+        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
+        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+            migratedInsiders.Value = true;
+            vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+        }
+    } else {
+        // Reset persistent value, so we register again if they switch to "Insiders" again.
+        if (migratedInsiders.Value) {
+            migratedInsiders.Value = false;
         }
     }
 }
