@@ -63,6 +63,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const fileExt: string = path.extname(editor.document.fileName);
+        const fileExtLower: string = fileExt.toLowerCase();
         if (!fileExt) {
             return emptyTasks;
         }
