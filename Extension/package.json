@@ -2541,10 +2541,10 @@
           },
           "scope": "resource"
         },
-        "C_Cpp.shortcutMenuBar.buildAndDebugFile": {
+        "C_Cpp.debugShortcut": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "%c_cpp.configuration.shortcutMenuBar.buildAndDebugFile.markdownDescription%"
+          "description": "%c_cpp.configuration.debugShortcut.markdownDescription%"
         }
       }
     },
@@ -3806,7 +3806,7 @@
       "editor/title": [
         {
           "command": "C_Cpp.BuildAndDebugFile",
-          "when": "(editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp') && C_Cpp.shortcutMenuBar.buildAndDebugFile",
+          "when": "(editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp') && C_Cpp.debugShortcut",
           "group": "navigation"
         }
       ],

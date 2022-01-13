@@ -192,7 +192,7 @@ class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
-            newConfig.detail = "preLaunch Task: " + task.name;
+            newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
             const isCl: boolean = compilerName === "cl.exe";
             newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
