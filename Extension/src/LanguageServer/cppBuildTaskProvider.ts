@@ -17,6 +17,7 @@ import * as ext from './extension';
 import * as cp from "child_process";
 import { OtherSettings } from './settings';
 import * as nls from 'vscode-nls';
+import { CppSourceStr } from './extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -35,7 +36,6 @@ export class CppBuildTask extends Task {
 
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
-    static CppBuildSourceStr: string = "C/C++";
 
     constructor() { }
 
@@ -169,8 +169,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
-            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
-                CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
+            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppSourceStr)) ?
+                CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
@@ -204,7 +204,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
-        const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: CppBuildTask = new Task(definition, scope, definition.label, CppSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
                 new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, taskUsesActiveFile)
@@ -230,7 +230,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 args: task.args,
                 options: task.options
             };
-            const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, "C/C++");
+            const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
             return cppBuildTask;
         });

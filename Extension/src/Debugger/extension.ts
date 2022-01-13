@@ -24,10 +24,6 @@ export function buildAndDebugActiveFileStr(): string {
     return `${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
-export function CppExtensionSourceStr(): string {
-    return `${localize("Cpp.extension.source", 'C/C++')}`;
-}
-
 export function initialize(context: vscode.ExtensionContext): void {
     // Activate Process Picker Commands
     const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
