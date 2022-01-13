@@ -68,8 +68,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks for header files.
-        const fileExtLower: string = fileExt.toLowerCase();
-        const isHeader: boolean = !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
+        const isHeader: boolean = util.isHeader (editor.document.uri);
         if (isHeader) {
             return emptyTasks;
         }

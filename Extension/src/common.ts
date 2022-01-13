@@ -173,8 +173,9 @@ export function getVcpkgRoot(): string {
  * @param document The document to check.
  */
 export function isHeader(uri: vscode.Uri): boolean {
-    const ext: string = path.extname(uri.fsPath);
-    return !ext || ext.startsWith(".h") || ext.startsWith(".H");
+    const fileExt: string = path.extname(uri.fsPath);
+    const fileExtLower: string = fileExt.toLowerCase();
+    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
 }
 
 // Extension is ready if install.lock exists and debugAdapters folder exist.
