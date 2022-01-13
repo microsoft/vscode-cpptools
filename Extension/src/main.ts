@@ -140,7 +140,7 @@ export function UpdateInsidersAccess(): void {
             vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
         }
     } else {
-        // Reset persistent value, so we prompt again if they switch to "Insiders" again.
+        // Reset persistent value, so we register again if they switch to "Insiders" again.
         if (migratedInsiders.Value) {
             migratedInsiders.Value = false;
         }
