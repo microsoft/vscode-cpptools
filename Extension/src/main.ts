@@ -11,17 +11,12 @@ import * as path from 'path';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import { PlatformInformation } from './platform';
 import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
 import { PersistentState } from './LanguageServer/persistentState';
-import { TargetPopulation } from 'vscode-tas-client';
-
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
-const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
