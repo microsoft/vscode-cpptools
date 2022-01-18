@@ -6,11 +6,6 @@
 {
 	"learn.how.to.install.a.library": "Découvrir comment installer une bibliothèque pour cet en-tête avec vcpkg",
 	"copy.vcpkg.command": "Copier la commande vcpkg pour installer '{0}' dans le Presse-papiers",
-	"insiders.available": "La version Insiders {0} est disponible. Voulez-vous basculer sur le canal Insiders et installer cette mise à jour ?",
-	"yes.button": "Oui",
-	"ask.me.later.button": "Me demander plus tard",
-	"dont.show.again.button": "Ne plus afficher",
-	"extension.updated": "L'extension C/C++ a été mise à jour vers la version {0}. Rechargez la fenêtre pour appliquer les changements.",
 	"client.not.found": "client introuvable",
 	"configuration.select.first": "Commencer par ouvrir un dossier pour sélectionner une configuration",
 	"configuration.provider.select.first": "Commencer par ouvrir un dossier pour sélectionner un fournisseur de configuration",
