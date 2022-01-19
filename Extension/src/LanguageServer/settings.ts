@@ -704,8 +704,8 @@ export class CppSettings extends Settings {
                         foundEditorConfigWithVcFormatSettings = true;
                         const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                         if (!didEditorConfigNotice.Value) {
-                            vscode.window.showInformationMessage(localize("editorconfig.default.behavior",
-                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the `Default` value of the 'C_Cpp.formatting' setting."));
+                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks."] },
+                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'Default' value of the 'C_Cpp.formatting' setting."));
                             didEditorConfigNotice.Value = true;
                         }
                         return true;
