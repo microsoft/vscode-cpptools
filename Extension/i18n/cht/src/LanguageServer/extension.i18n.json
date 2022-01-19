@@ -6,11 +6,6 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 安裝此標頭的程式庫",
 	"copy.vcpkg.command": "將用於安裝 '{0}' 的 vcpkg 命令複製到剪貼簿",
-	"insiders.available": "測試人員版本 {0} 可用。要切換到測試人員通道並安裝此更新嗎?",
-	"yes.button": "是",
-	"ask.me.later.button": "稍後詢問我",
-	"dont.show.again.button": "不要再顯示",
-	"extension.updated": "C/C++ 延伸模組已更新為版本 {0}。請重新載入視窗以讓變更生效。",
 	"client.not.found": "找不到用戶端",
 	"configuration.select.first": "先開啟資料夾以選取組態",
 	"configuration.provider.select.first": "先開啟資料夾以選取組態提供者",

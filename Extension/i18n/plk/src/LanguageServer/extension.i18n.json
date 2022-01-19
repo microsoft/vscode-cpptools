@@ -6,11 +6,6 @@
 {
 	"learn.how.to.install.a.library": "Dowiedz się, jak zainstalować bibliotekę dla tego nagłówka przy użyciu menedżera vcpkg",
 	"copy.vcpkg.command": "Skopiuj polecenie vcpkg, aby zainstalować element „{0}” w schowku",
-	"insiders.available": "Dostępna jest wersja {0} dla niejawnych testerów. Czy chcesz przełączyć się do kanału niejawnych testerów i zainstalować tę aktualizację?",
-	"yes.button": "Tak",
-	"ask.me.later.button": "Zapytaj mnie później",
-	"dont.show.again.button": "Nie pokazuj ponownie",
-	"extension.updated": "Rozszerzenie języka C/C++ zostało zaktualizowane do wersji {0}. Załaduj ponownie okno, aby zmiany zostały zastosowane.",
 	"client.not.found": "nie znaleziono klienta",
 	"configuration.select.first": "Otwórz najpierw folder, aby wybrać konfigurację",
 	"configuration.provider.select.first": "Otwórz najpierw folder, aby wybrać dostawcę konfiguracji",
