@@ -1719,6 +1719,7 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppFile(document.uri) || util.isCFile(document.uri));
         }
     }
 
@@ -2655,6 +2656,7 @@ export class DefaultClient implements Client {
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppFile(editor.document.uri) || util.isCFile(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {

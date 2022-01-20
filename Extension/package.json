@@ -2544,7 +2544,7 @@
         "C_Cpp.debugShortcut": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.debugShortcut.markdownDescription%"
+          "description": "%c_cpp.configuration.debugShortcut.description%"
         }
       }
     },
@@ -3806,8 +3806,8 @@
       "editor/title": [
         {
           "command": "C_Cpp.BuildAndDebugFile",
-          "when": "(editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp') && C_Cpp.debugShortcut",
-          "group": "navigation"
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
+          "group": "navigation@0"
         }
       ],
       "editor/context": [

@@ -178,6 +178,18 @@ export function isHeader(uri: vscode.Uri): boolean {
     return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
 }
 
+export function isCppFile (uri: vscode.Uri): boolean {
+    const fileExt: string = path.extname(uri.fsPath);
+    const fileExtLower: string = fileExt.toLowerCase();
+    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+}
+
+export function isCFile (uri: vscode.Uri): boolean {
+    const fileExt: string = path.extname(uri.fsPath);
+    const fileExtLower: string = fileExt.toLowerCase();
+    return (fileExt === ".C") || fileExtLower === ".c";
+}
+
 // Extension is ready if install.lock exists and debugAdapters folder exist.
 export async function isExtensionReady(): Promise<boolean> {
     const doesInstallLockFileExist: boolean = await checkInstallLockFile();

@@ -63,7 +63,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         const fileExt: string = path.extname(editor.document.fileName);
-        const fileExtLower: string = fileExt.toLowerCase();
         if (!fileExt) {
             return emptyTasks;
         }
@@ -75,15 +74,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
-        let fileIsCpp: boolean;
-        let fileIsC: boolean;
-        if (fileExt === ".C") { // ".C" file extensions are both C and C++.
-            fileIsCpp = true;
-            fileIsC = true;
-        } else {
-            fileIsCpp = [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
-            fileIsC = fileExtLower === ".c";
-        }
+        const fileIsCpp: boolean = util.isCppFile(editor.document.uri);
+        const fileIsC: boolean = util.isCFile(editor.document.uri);
         if (!(fileIsCpp || fileIsC)) {
             return emptyTasks;
         }
