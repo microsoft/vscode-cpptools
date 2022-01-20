@@ -145,14 +145,16 @@ function sendTelemetry(info: PlatformInformation): void {
 }
 
 export function UpdateInsidersAccess(): void {
+    let installPrerelease: Boolean = false;
+
     // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
     const settings: CppSettings = new CppSettings();
     const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
     if (settings.updateChannel === "Insiders") {
         // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
         if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+            installPrerelease = true;
             migratedInsiders.Value = true;
-            vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
         }
     } else {
         // Reset persistent value, so we register again if they switch to "Insiders" again.
@@ -164,16 +166,19 @@ export function UpdateInsidersAccess(): void {
     // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
     // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
     // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
-    if (util.isVsCodeInsiders()) {
+    if (!installPrerelease && util.isVsCodeInsiders()) {
         const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
         if (!insidersMitigationDone.Value) {
             if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-                const settings: CppSettings = new CppSettings();
                 if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
-                    vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+                    installPrerelease = true;
                 }
             }
             insidersMitigationDone.Value = true;
         }
+    }
+
+    if (installPrerelease) {
+        vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
     }
 }
