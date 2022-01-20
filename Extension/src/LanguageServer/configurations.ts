@@ -702,8 +702,9 @@ export class CppProperties {
         if (entries) {
             entries = this.resolveDefaults(entries, defaultValue);
             entries.forEach(entry => {
-                const entryResolved: string = util.resolveVariables(entry, env);
-                result = result.concat(entryResolved);
+                const entriesResolved: string[] = [];
+                const entryResolved: string = util.resolveVariables(entry, env, entriesResolved);
+                result = result.concat(entriesResolved.length === 0 ? entryResolved : entriesResolved);
             });
         }
         return result;
