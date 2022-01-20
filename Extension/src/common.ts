@@ -304,6 +304,7 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
+// Pass in arrayResults if a string[] result is possible instead of just a string.
 export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
     if (!input) {
         return "";
