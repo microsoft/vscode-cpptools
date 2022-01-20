@@ -17,6 +17,7 @@ import { PlatformInformation } from './platform';
 import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
 import { PersistentState } from './LanguageServer/persistentState';
+import { TargetPopulation } from 'vscode-tas-client';
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
@@ -126,6 +127,20 @@ function sendTelemetry(info: PlatformInformation): void {
     }
     telemetryProperties['osArchitecture'] = os.arch();
     telemetryProperties['infoArchitecture'] = info.architecture;
+    const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
+    switch (targetPopulation) {
+        case TargetPopulation.Public:
+            telemetryProperties['targetPopulation'] = "Public";
+            break;
+        case TargetPopulation.Internal:
+            telemetryProperties['targetPopulation'] = "Internal";
+            break;
+        case TargetPopulation.Insiders:
+            telemetryProperties['targetPopulation'] = "Insiders";
+            break;
+        default:
+            break;
+    }
     Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
 }
 
