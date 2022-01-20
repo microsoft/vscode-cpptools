@@ -160,4 +160,20 @@ export function UpdateInsidersAccess(): void {
             migratedInsiders.Value = false;
         }
     }
+
+    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
+    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
+    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
+    if (util.isVsCodeInsiders()) {
+        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
+        if (!insidersMitigationDone.Value) {
+            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+                const settings: CppSettings = new CppSettings();
+                if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
+                    vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+                }
+            }
+            insidersMitigationDone.Value = true;
+        }
+    }
 }
