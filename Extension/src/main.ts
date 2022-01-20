@@ -145,7 +145,7 @@ function sendTelemetry(info: PlatformInformation): void {
 }
 
 export function UpdateInsidersAccess(): void {
-    let installPrerelease: Boolean = false;
+    let installPrerelease: boolean = false;
 
     // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
     const settings: CppSettings = new CppSettings();
