@@ -304,7 +304,7 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string {
+export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
     if (!input) {
         return "";
     }
@@ -329,7 +329,13 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(envDelimiter);
+                            if (arrayResults !== undefined) {
+                                arrayResults.push(...v);
+                                newValue = "";
+                                break;
+                            } else {
+                                newValue = v.join(envDelimiter);
+                            }
                         }
                     }
                     if (newValue === undefined) {
