@@ -1,0 +1,24 @@
+{
+    "Registrations": [
+        {
+            "Component": {
+                "Type": "git",
+                "Git": {
+                    "RepositoryUrl": "https://github.com/llvm/llvm-project",
+                    "CommitHash": "0d44201451f03ba907cdb268ddddfc3fa38a0ebd"
+                },
+                "DevelopmentDependency": true
+            }
+        },
+        {
+            "Component": {
+                "Type": "git",
+                "Git": {
+                    "RepositoryUrl": "https://github.com/lldb-tools/lldb-mi",
+                    "CommitHash": "2388bd74133bc21eac59b2e2bf97f2a30770a315"
+                }
+            }
+        }
+    ],
+    "Version": 1
+}

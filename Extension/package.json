@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.63.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -45,7 +45,41 @@
     "virtualWorkspaces": false
   },
   "activationEvents": [
-    "*"
+    "onLanguage:c",
+    "onLanguage:cpp",
+    "onLanguage:cuda-cpp",
+    "onCommand:extension.pickNativeProcess",
+    "onCommand:extension.pickRemoteNativeProcess",
+    "onCommand:C_Cpp.BuildAndDebugActiveFile",
+    "onCommand:C_Cpp.RestartIntelliSenseForFile",
+    "onCommand:C_Cpp.ConfigurationEditJSON",
+    "onCommand:C_Cpp.ConfigurationEditUI",
+    "onCommand:C_Cpp.ConfigurationSelect",
+    "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.SwitchHeaderSource",
+    "onCommand:C_Cpp.EnableErrorSquiggles",
+    "onCommand:C_Cpp.DisableErrorSquiggles",
+    "onCommand:C_Cpp.ToggleIncludeFallback",
+    "onCommand:C_Cpp.ToggleDimInactiveRegions",
+    "onCommand:C_Cpp.ResetDatabase",
+    "onCommand:C_Cpp.TakeSurvey",
+    "onCommand:C_Cpp.LogDiagnostics",
+    "onCommand:C_Cpp.RescanWorkspace",
+    "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
+    "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
+    "onCommand:C_Cpp.GenerateEditorConfig",
+    "onCommand:C_Cpp.GoToNextDirectiveInGroup",
+    "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
+    "onCommand:C_Cpp.CheckForCompiler",
+    "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
+    "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
+    "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
+    "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
+    "onDebugInitialConfigurations",
+    "onDebugResolve:cppdbg",
+    "onDebugResolve:cppvsdbg",
+    "workspaceContains:/.vscode/c_cpp_properties.json",
+    "onFileSystem:cpptools-schema"
   ],
   "main": "./dist/main",
   "contributes": {
@@ -2446,7 +2480,8 @@
           ],
           "default": "Default",
           "markdownDescription": "%c_cpp.configuration.updateChannel.markdownDescription%",
-          "scope": "application"
+          "scope": "application",
+          "deprecationMessage": "%c_cpp.configuration.updateChannel.deprecationMessage%"
         },
         "C_Cpp.experimentalFeatures": {
           "type": "string",
@@ -4321,8 +4356,6 @@
     "translations-import": "node ./tools/prepublish.js && gulp translations-import",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
-    "generatePackageHashes": "gulp generate-package-hashes",
-    "pr-check": "gulp pr-check",
     "lint": "gulp lint",
     "unitTests": "tsc -p test.tsconfig.json && node ./out/test/unitTests/runTest.js",
     "integrationTests": "tsc -p test.tsconfig.json && node ./out/test/integrationTests/languageServer/runTest.js",
@@ -4377,24 +4410,25 @@
     "xml2js": "^0.4.19"
   },
   "dependencies": {
-    "comment-json": "^3.0.3",
+    "comment-json": "^4.1.1",
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^0.5.5",
     "plist": "^3.0.4",
-    "tmp": "^0.1.0",
+    "tmp": "^0.2.1",
     "vscode-cpptools": "^5.0.0",
-    "vscode-extension-telemetry": "^0.1.7",
+    "vscode-extension-telemetry": "^0.4.4",
     "vscode-languageclient": "^5.2.1",
-    "vscode-nls": "^4.1.1",
-    "vscode-tas-client": "^0.1.22",
+    "vscode-nls": "^5.0.0",
+    "vscode-tas-client": "^0.1.27",
     "which": "^2.0.2",
     "yauzl": "^2.10.0"
   },
   "resolutions": {
     "**/mkdirp/minimist": "^0.2.1",
+    "follow-redirects": "1.14.7",
     "ansi-regex": "^5.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
@@ -4402,393 +4436,6 @@
     "browserslist": "^4.16.6",
     "glob-parent": "^5.1.2",
     "path-parse": "^1.0.7",
-    "axios": "^0.21.4",
     "set-value": "^4.0.1"
-  },
-  "runtimeDependencies": [
-    {
-      "description": "C/C++ language components (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2175018",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ],
-      "integrity": "2C657DD48E5C327242C912954315098F81329190C72CE4D4FCB228264BE3AA01"
-    },
-    {
-      "description": "C/C++ language components (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2174710",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "arm"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ],
-      "integrity": "22E6BDD91BF0E8592D1101034AE0459E9B103947F246478932650E34C1FAE8C1"
-    },
-    {
-      "description": "C/C++ language components (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2174708",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ],
-      "integrity": "D43ECEC2DCCA9E62B3C3A03C404AC383E570717C4343A3D0C56BADA0991336CD"
-    },
-    {
-      "description": "C/C++ language components (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2175017",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ],
-      "integrity": "3409C9D435F97EBD2F1176124873A675C81A079842F41E6E75EC1A78F454535A"
-    },
-    {
-      "description": "C/C++ language components (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2174709",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./bin/cpptools",
-        "./bin/cpptools-srv"
-      ],
-      "integrity": "3557666DB85407E8CF12BB2C807C83F3ABD55DF811075A91544CC98BC092B9E2"
-    },
-    {
-      "description": "C/C++ language components (Windows)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2175016",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "x64",
-        "x86"
-      ],
-      "binaries": [
-        "./bin/cpptools.exe",
-        "./bin/cpptools-srv.exe"
-      ],
-      "integrity": "40D2953E807B48AB05EDB865F48928B2E09C0C0A84834E4022D6BA6333159F3D"
-    },
-    {
-      "description": "C/C++ language components (Windows ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2174707",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./bin/cpptools.exe",
-        "./bin/cpptools-srv.exe"
-      ],
-      "integrity": "040AC8D9BFD5648C283A567520A0B76871593C0594C5F9266CFB5F321BBE0DA8"
-    },
-    {
-      "description": "Clang tools (Linux / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167549",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format",
-        "./LLVM/bin/clang-tidy"
-      ],
-      "integrity": "0B5F60E1D18B14FFF97EA436A080AC03D7A1B591A835E0F2B39C01C058375E36"
-    },
-    {
-      "description": "Clang tools (Linux / armhf)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167551",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "arm"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format",
-        "./LLVM/bin/clang-tidy"
-      ],
-      "integrity": "80855487EE8E26E16F36A8E45A46366B6EA71AE7CFFB64022612019B014F0ED8"
-    },
-    {
-      "description": "Clang tools (Linux / aarch64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167656",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format",
-        "./LLVM/bin/clang-tidy"
-      ],
-      "integrity": "2B5839C2E26DAE6DE9FF555FD096C517C5AEB003297F6DEFEE5290AB73CD0CE6"
-    },
-    {
-      "description": "Clang tools (macOS / x86_64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167655",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format",
-        "./LLVM/bin/clang-tidy"
-      ],
-      "integrity": "DD9A702A8104D385357D5A192F47E0D8EC516FC6239C8E210C429881F32A21DF"
-    },
-    {
-      "description": "Clang tools (macOS / ARM64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167654",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format",
-        "./LLVM/bin/clang-tidy"
-      ],
-      "integrity": "D5C827306C7AA94B3C2397E592199F1C68ADD4DB4BECF552B3C02CB280AC875B"
-    },
-    {
-      "description": "Clang tools (Windows x86)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167552",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "x86"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format.exe",
-        "./LLVM/bin/clang-tidy.exe"
-      ],
-      "integrity": "66BAAC412988FE1E40CE6F94BDE64BB7A2FB7C4E2493EBDBE6B4F994604A3FBD"
-    },
-    {
-      "description": "Clang tools (Windows x64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167550",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format.exe",
-        "./LLVM/bin/clang-tidy.exe"
-      ],
-      "integrity": "702AF7F679CB943D3D80C2E68FC7B5708ACAA227E84417F835AE9C6A7468808E"
-    },
-    {
-      "description": "Clang tools (Windows arm64)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=2167548",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./LLVM/bin/clang-format.exe",
-        "./LLVM/bin/clang-tidy.exe"
-      ],
-      "integrity": "76032192FE82E8C51A4721E7C9660B3B5755BF75DAF47A71F844F561732A92F5"
-    },
-    {
-      "description": "OpenDebugAD7 (Windows x86/x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/b6f4a97889ec460d5a7cb8e880c802ba/win-x86.zip",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "x86",
-        "x64"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7.exe"
-      ],
-      "integrity": "6E3D9651FF1ACCFB90A5CEF0F4B5C3FEFB4B8D0D68EC1A9E662428C0558BB062"
-    },
-    {
-      "description": "OpenDebugAD7 (Windows ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/10847664407c73081a2b1e77368d1b2e/win10-arm64.zip",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7.exe"
-      ],
-      "integrity": "A583716260318ACA8DDD27E8CAC68A1D1D6F9435871720ABF55740BA7A58096A"
-    },
-    {
-      "description": "OpenDebugAD7 (Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/99f1a2287dcf76cc2ad85b800bba9c01/linux-x64.zip",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7"
-      ],
-      "integrity": "5746E5C1372ACC1CB86D599447FBD4E1F8AA6994590AE5FCC9B961BDD09183E9"
-    },
-    {
-      "description": "OpenDebugAD7 (Linux ARM)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/ed287e8059e08c574952f5231ffbc1ba/linux-arm.zip",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "arm"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7"
-      ],
-      "integrity": "7D6F99793D2824EE996A37357663BDAA6BE929092DD3CEB16C5A532820B0E51D"
-    },
-    {
-      "description": "OpenDebugAD7 (Linux ARM64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/b9dc0e0f12f33d0b88be942cb1ff5ebe/linux-arm64.zip",
-      "platforms": [
-        "linux"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7"
-      ],
-      "integrity": "94BA61786551685D19130F0AE740F6A4EA4D2862B3364E08A53117773CFC1032"
-    },
-    {
-      "description": "OpenDebugAD7 (Alpine Linux x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/f74cb83d6e43dfc2c30a9a0ec46d46b4/linux-musl-x64.zip",
-      "platforms": [
-        "alpine-linux"
-      ],
-      "architectures": [
-        "x64"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7"
-      ],
-      "integrity": "5B0400B1F28E059CC74AEA02174661659C0FF89F4835E9947C9F853212A72984"
-    },
-    {
-      "description": "OpenDebugAD7 (macOS x64)",
-      "url": "https://download.visualstudio.microsoft.com/download/pr/19b0fca0-b008-4b39-9163-6b7a59e50961/7ed17c1525fb70665716366891d2296a/osx-x64.zip",
-      "platforms": [
-        "darwin"
-      ],
-      "architectures": [
-        "x64",
-        "arm64"
-      ],
-      "binaries": [
-        "./debugAdapters/bin/OpenDebugAD7"
-      ],
-      "integrity": "48C36077BD4BE44E2B62246CDD72F90FAAAE26E3D3199CDC980047F41E31B718"
-    },
-    {
-      "description": "LLDB-MI (macOS Mojave and higher)",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2154927",
-      "platforms": [
-        "darwin"
-      ],
-      "versionRegex": "10\\.(1[0-3]|[0-9])(\\..*)*$",
-      "matchVersion": false,
-      "binaries": [
-        "./debugAdapters/lldb-mi/bin/lldb-mi"
-      ],
-      "integrity": "FA76E76C7D8E5D5CD0CC8E68C6FB70A354750D596DF3CED36ABF78AAD5C562C0"
-    },
-    {
-      "description": "LLDB 3.8.0 (macOS High Sierra and lower)",
-      "url": "https://go.microsoft.com/fwlink/?LinkID=817244",
-      "platforms": [
-        "darwin"
-      ],
-      "versionRegex": "10\\.(1[0-3]|[0-9])(\\..*)*$",
-      "matchVersion": true,
-      "binaries": [
-        "./debugAdapters/lldb/bin/debugserver",
-        "./debugAdapters/lldb/bin/lldb-mi",
-        "./debugAdapters/lldb/bin/lldb-argdumper",
-        "./debugAdapters/lldb/bin/lldb-launcher"
-      ],
-      "integrity": "D4ACCD43F562E42CE30879AC15ADF5FB6AA50656795DCE8F3AD32FB108BB3B7E"
-    },
-    {
-      "description": "Visual Studio Windows Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2169833",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "x64",
-        "x86"
-      ],
-      "binaries": [
-        "./debugAdapters/vsdbg/bin/vsdbg.exe"
-      ],
-      "integrity": "0C36EB31D90EC6FE5BFBD02D62222A7FE8E5BD7D238D9DD086BAAEA66C74FF16"
-    },
-    {
-      "description": "Visual Studio Windows ARM64 Debugger",
-      "url": "https://go.microsoft.com/fwlink/?linkid=2169834",
-      "platforms": [
-        "win32"
-      ],
-      "architectures": [
-        "arm64"
-      ],
-      "binaries": [
-        "./debugAdapters/vsdbg/bin/vsdbg.exe"
-      ],
-      "integrity": "7DBD8F522420703AA85435A779CAC29B8226A8B92236BEF27AA41E84E4973458"
-    }
-  ]
+  }
 }

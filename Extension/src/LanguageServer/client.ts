@@ -1481,7 +1481,6 @@ export class DefaultClient implements Client {
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
                 localizedStrings: localizedStrings,
-                supportCuda: util.supportCuda,
                 packageVersion: util.packageJson.version
             },
             middleware: createProtocolFilter(allClients),
@@ -2752,7 +2751,7 @@ export class DefaultClient implements Client {
         this.model.codeAnalysisTotal.Value = total;
     }
 
-    private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
+    private doneInitialCustomBrowseConfigurationCheck: boolean = false;
 
     private onConfigurationsChanged(cppProperties: configs.CppProperties): void {
         if (!cppProperties.Configurations) {
