@@ -44,19 +44,19 @@ export function initialize(context: vscode.ExtensionContext): void {
     const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
     disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
 
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
+    async function buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
             // Not enabled because we do not react to single-file mode correctly yet.
             // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.
             // The DefaultClient will also have its configuration accessed, but since it doesn't exist it errors out.
             vscode.window.showErrorMessage(localize("single_file_mode_not_available", "This command is not available for single-file mode."));
-            return Promise.resolve();
+            return;
         }
 
         if (!util.fileIsCOrCppSource(textEditor.document.uri.fsPath)) {
             vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
-            return Promise.resolve();
+            return;
         }
 
         const configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
@@ -110,23 +110,28 @@ export function initialize(context: vscode.ExtensionContext): void {
         }
 
         // Attempt to use the user's (possibly) modified configuration before using the generated one.
+        const event: string = debugModeOn ? "buildAndDebug" : "buildAndRun";
         try {
             await cppBuildTaskProvider.ensureDebugConfigExists(selection.configuration.name);
             try {
-                await vscode.debug.startDebugging(folder, selection.configuration.name);
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+                await vscode.debug.startDebugging(folder, selection.configuration.name, {noDebug: !debugModeOn});
+                Telemetry.logDebuggerEvent(event, { "success": "true" });
             } catch (e) {
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+                Telemetry.logDebuggerEvent(event, { "success": "false" });
             }
         } catch (e) {
             try {
-                await vscode.debug.startDebugging(folder, selection.configuration);
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
+                await vscode.debug.startDebugging(folder, selection.configuration, {noDebug: !debugModeOn});
+                Telemetry.logDebuggerEvent(event, { "success": "true" });
             } catch (e) {
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+                Telemetry.logDebuggerEvent(event, { "success": "false" });
             }
         }
-    }));
+    }
+
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor); }));
+
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor, false); }));
 
     configurationProvider.getConfigurationSnippets();
 

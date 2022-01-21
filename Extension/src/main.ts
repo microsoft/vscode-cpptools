@@ -425,6 +425,7 @@ function rewriteManifest(): Promise<void> {
         "onCommand:extension.pickNativeProcess",
         "onCommand:extension.pickRemoteNativeProcess",
         "onCommand:C_Cpp.BuildAndDebugFile",
+        "onCommand:C_Cpp.BuildAndRunFile",
         "onCommand:C_Cpp.RestartIntelliSenseForFile",
         "onCommand:C_Cpp.ConfigurationEditJSON",
         "onCommand:C_Cpp.ConfigurationEditUI",
