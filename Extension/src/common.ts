@@ -304,7 +304,9 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string {
+// Pass in 'arrayResults' if a string[] result is possible and a delimited string result is undesirable.
+// The string[] result will be copied into 'arrayResults'.
+export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
     if (!input) {
         return "";
     }
@@ -329,7 +331,13 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(envDelimiter);
+                            if (arrayResults !== undefined) {
+                                arrayResults.push(...v);
+                                newValue = "";
+                                break;
+                            } else {
+                                newValue = v.join(envDelimiter);
+                            }
                         }
                     }
                     if (newValue === undefined) {
@@ -569,7 +577,7 @@ export function execChildProcess(process: string, workingDirectory?: string, cha
         child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error | null, stdout: string, stderr: string) => {
             if (channel) {
                 let message: string = "";
-                let err: Boolean = false;
+                let err: boolean = false;
                 if (stdout && stdout.length > 0) {
                     message += stdout;
                 }
@@ -927,8 +935,8 @@ export function escapeForSquiggles(s: string): string {
     // Replace all \<escape character> with \\<character>, except for \"
     // Otherwise, the JSON.parse result will have the \<escape character> missing.
     let newResults: string = "";
-    let lastWasBackslash: Boolean = false;
-    let lastBackslashWasEscaped: Boolean = false;
+    let lastWasBackslash: boolean = false;
+    let lastBackslashWasEscaped: boolean = false;
     for (let i: number = 0; i < s.length; i++) {
         if (s[i] === '\\') {
             if (lastWasBackslash) {
@@ -1250,7 +1258,7 @@ export function getCppToolsTargetPopulation(): TargetPopulation {
     return TargetPopulation.Internal;
 }
 
-export function isVsCodeInsiders(): Boolean {
+export function isVsCodeInsiders(): boolean {
     return extensionPath.includes(".vscode-insiders") ||
         extensionPath.includes(".vscode-server-insiders") ||
         extensionPath.includes(".vscode-exploration") ||

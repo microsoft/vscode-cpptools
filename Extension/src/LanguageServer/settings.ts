@@ -62,7 +62,7 @@ class Settings {
         return result;
     }
 
-    protected getWithUndefinedDefault<T>(section: string): T | undefined {
+    public getWithUndefinedDefault<T>(section: string): T | undefined {
         const info: any = this.settings.inspect<T>(section);
         if (info.workspaceFolderValue !== undefined) {
             return info.workspaceFolderValue;
