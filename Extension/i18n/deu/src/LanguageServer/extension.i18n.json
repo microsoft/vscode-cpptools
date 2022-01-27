@@ -6,11 +6,6 @@
 {
 	"learn.how.to.install.a.library": "Erfahren Sie, wie Sie mit vcpkg eine Bibliothek für diesen Header installieren.",
 	"copy.vcpkg.command": "vcpkg-Befehl zum Installieren von \"{0}\" in die Zwischenablage kopieren",
-	"insiders.available": "Die Insiders-Version {0} ist verfügbar. Möchten Sie zum Insiders-Kanal wechseln und dieses Update installieren?",
-	"yes.button": "Ja",
-	"ask.me.later.button": "Später nachfragen",
-	"dont.show.again.button": "Nicht mehr anzeigen",
-	"extension.updated": "Die C/C++-Erweiterung wurde auf Version {0} aktualisiert. Laden Sie das Fenster neu, damit die Änderungen wirksam werden.",
 	"client.not.found": "Client nicht gefunden.",
 	"configuration.select.first": "Zum Auswählen einer Konfiguration zuerst einen Ordner öffnen",
 	"configuration.provider.select.first": "Zum Auswählen eines Konfigurationsanbieters zuerst einen Ordner öffnen",

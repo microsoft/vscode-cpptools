@@ -17,6 +17,7 @@ import { PlatformInformation } from './platform';
 import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
 import { PersistentState } from './LanguageServer/persistentState';
+import { TargetPopulation } from 'vscode-tas-client';
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
@@ -126,23 +127,58 @@ function sendTelemetry(info: PlatformInformation): void {
     }
     telemetryProperties['osArchitecture'] = os.arch();
     telemetryProperties['infoArchitecture'] = info.architecture;
+    const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
+    switch (targetPopulation) {
+        case TargetPopulation.Public:
+            telemetryProperties['targetPopulation'] = "Public";
+            break;
+        case TargetPopulation.Internal:
+            telemetryProperties['targetPopulation'] = "Internal";
+            break;
+        case TargetPopulation.Insiders:
+            telemetryProperties['targetPopulation'] = "Insiders";
+            break;
+        default:
+            break;
+    }
     Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
 }
 
 export function UpdateInsidersAccess(): void {
+    let installPrerelease: boolean = false;
+
     // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
     const settings: CppSettings = new CppSettings();
     const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
     if (settings.updateChannel === "Insiders") {
         // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
         if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+            installPrerelease = true;
             migratedInsiders.Value = true;
-            vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
         }
     } else {
         // Reset persistent value, so we register again if they switch to "Insiders" again.
         if (migratedInsiders.Value) {
             migratedInsiders.Value = false;
         }
+    }
+
+    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
+    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
+    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
+    if (util.isVsCodeInsiders()) {
+        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
+        if (!insidersMitigationDone.Value) {
+            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+                if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
+                    installPrerelease = true;
+                }
+            }
+            insidersMitigationDone.Value = true;
+        }
+    }
+
+    if (installPrerelease) {
+        vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
     }
 }

@@ -2749,7 +2749,7 @@ export class DefaultClient implements Client {
         this.model.codeAnalysisTotal.Value = total;
     }
 
-    private doneInitialCustomBrowseConfigurationCheck: Boolean = false;
+    private doneInitialCustomBrowseConfigurationCheck: boolean = false;
 
     private onConfigurationsChanged(cppProperties: configs.CppProperties): void {
         if (!cppProperties.Configurations) {
