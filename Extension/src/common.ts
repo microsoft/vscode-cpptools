@@ -94,22 +94,6 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     return rawElement;
 }
 
-export function fileIsCOrCppSource(file?: string): boolean {
-    if (file === undefined) {
-        return false;
-    }
-    const fileExtLower: string = path.extname(file).toLowerCase();
-    return [".cu", ".c", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".tcc", ".mm", ".ino", ".ipp", ".inl"].some(ext => fileExtLower === ext);
-}
-
-export function isEditorFileCpp(file: string): boolean {
-    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
-    if (!editor) {
-        return false;
-    }
-    return editor.document.languageId === "cpp";
-}
-
 // This function is used to stringify the rawPackageJson.
 // Do not use with util.packageJson or else the expanded
 // package.json will be written back.
@@ -171,7 +155,7 @@ export function getVcpkgRoot(): string {
  * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
  * @param document The document to check.
  */
-export function isHeader(uri: vscode.Uri): boolean {
+export function isHeaderFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
     return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
@@ -187,6 +171,22 @@ export function isCFile (uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
     return (fileExt === ".C") || fileExtLower === ".c";
+}
+
+export function isCppOrCFile(file?: string): boolean {
+    if (file === undefined) {
+        return false;
+    }
+    const fileExtLower: string = path.extname(file).toLowerCase();
+    return [".c", ".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+}
+
+export function isEditorFileCpp(file: string): boolean {
+    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    if (!editor) {
+        return false;
+    }
+    return editor.document.languageId === "cpp";
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;

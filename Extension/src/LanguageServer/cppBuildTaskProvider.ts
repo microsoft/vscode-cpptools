@@ -31,6 +31,8 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
 
 export class CppBuildTask extends Task {
     detail?: string;
+    existing?: boolean;
+    isDefault?: boolean;
 }
 
 export class CppBuildTaskProvider implements TaskProvider {
@@ -67,7 +69,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks for header files.
-        const isHeader: boolean = util.isHeader (editor.document.uri);
+        const isHeader: boolean = util.isHeaderFile (editor.document.uri);
         if (isHeader) {
             return emptyTasks;
         }
@@ -223,6 +225,10 @@ export class CppBuildTaskProvider implements TaskProvider {
             };
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
+            cppBuildTask.existing = true;
+            if (task.group.isDefault) {
+                cppBuildTask.isDefault = true;
+            }
             return cppBuildTask;
         });
         return buildTasksJson.filter((task: CppBuildTask) => task !== null);
@@ -298,23 +304,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         return;
     }
 
-    // Provide a unique name for a newly defined tasks, which is different from tasks' names in tasks.json.
-    public provideUniqueTaskLabel(label: string, buildTasksJson: CppBuildTask[]): string {
-        const taskNameDictionary: {[key: string]: any} = {};
-        buildTasksJson.forEach(task => {
-            taskNameDictionary[task.definition.label] = {};
-        });
-        let newLabel: string = label;
-        let version: number = 0;
-        do {
-            version = version + 1;
-            newLabel = label + ` ver(${version})`;
-
-        } while (taskNameDictionary[newLabel]);
-
-        return newLabel;
-    }
-
     private getLaunchJsonPath(): string | undefined {
         return util.getJsonPath("launch.json");
     }
@@ -345,7 +334,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        if (this.taskUsesActiveFile && !util.fileIsCOrCppSource(window.activeTextEditor?.document.fileName)) {
+        if (this.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.fileName)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
             return;
