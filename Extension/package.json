@@ -4344,7 +4344,7 @@
     "import-edge-strings": "node ./import_edge_strings.js"
   },
   "devDependencies": {
-    "@octokit/rest": "^16.28.9",
+    "@octokit/rest": "^18.12.0",
     "@types/minimatch": "^3.0.3",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^8.2.2",
@@ -4408,15 +4408,16 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
-    "**/mkdirp/minimist": "^0.2.1",
-    "follow-redirects": "1.14.7",
     "ansi-regex": "^5.0.1",
+    "browserslist": "^4.16.6",
+    "follow-redirects": "1.14.7",
+    "glob-parent": "^5.1.2",
+    "hosted-git-info": "^3.0.8",
+    "nanoid": "^3.1.20",
+    "path-parse": "^1.0.7",
+    "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "hosted-git-info": "^3.0.8",
-    "browserslist": "^4.16.6",
-    "glob-parent": "^5.1.2",
-    "path-parse": "^1.0.7",
-    "set-value": "^4.0.1"
+    "**/mkdirp/minimist": "^0.2.1"
   }
 }
