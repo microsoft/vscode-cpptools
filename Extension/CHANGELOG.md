@@ -1,6 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.8.0 (insiders3): January 12, 2022
+## Version 1.8.1 (insiders4): January 27, 2022
+### Bug Fixes
+* Fix several IntelliSense bugs. [#8412](https://github.com/microsoft/vscode-cpptools/issues/8412), [#8487](https://github.com/microsoft/vscode-cpptools/issues/8487), [#8677](https://github.com/microsoft/vscode-cpptools/issues/8677), [#8701](https://github.com/microsoft/vscode-cpptools/issues/8701)
+* Fix code analysis with a long command line on Windows. [#8560](https://github.com/microsoft/vscode-cpptools/issues/8560).
+* Fix code analysis not correctly handling defines with `"`. [#8675](https://github.com/microsoft/vscode-cpptools/issues/8675)
+* Fix `files.exclude` on workspace relative paths (e.g. `"folder"`). [#8676](https://github.com/microsoft/vscode-cpptools/issues/8676)
+* Fix workspace rescanning (tag parsing) not automatically happening after c/cpp associations are added to `files.associations`. [#8687](https://github.com/microsoft/vscode-cpptools/issues/8687)
+* Switch usage of `-dD` to `-dM` when compiler querying. [#8692](https://github.com/microsoft/vscode-cpptools/issues/8692)
+* Fix `�` instead of `…` in logging messages. [#8694](https://github.com/microsoft/vscode-cpptools/issues/8694).
+* Fix forced includes with code analysis. [#8707](https://github.com/microsoft/vscode-cpptools/issues/8707)
+* Fix clang-tidy "notes" applying to excluded files being shown for other non-excluded files and possibly causing some warnings to not appear. [#8723](https://github.com/microsoft/vscode-cpptools/issues/8723)
+* Fix no document symbols appearing in certain cases. [#8276](https://github.com/microsoft/vscode-cpptools/issues/8726)
+
+## Version 1.8.0 (insiders3): January 18, 2022
 ### New Features
 * Add "All Exceptions" Breakpoint for cppdbg [#1800](https://github.com/microsoft/vscode-cpptools/issues/1800)
 * Add support for Alpine Linux [#4827](https://github.com/microsoft/vscode-cpptools/issues/4827)
@@ -15,6 +28,7 @@
 * Fix non-ASCII output with `cppbuild` tasks. [#8518](https://github.com/microsoft/vscode-cpptools/issues/8518)
 * Fix 3 settings not getting environment variables resolved after a settings change. [#8531](https://github.com/microsoft/vscode-cpptools/issues/8531)
 * Fixes to translations. [#8536](https://github.com/microsoft/vscode-cpptools/issues/8536)
+* Fix system defines not being used with clang-tidy. [#8575](https://github.com/microsoft/vscode-cpptools/issues/8575)
 * Fix /RTC compiler checks failures don't break into debugger [#8646](https://github.com/microsoft/vscode-cpptools/issues/8646)
 
 ## Version 1.8.0-insiders2: December 7, 2021
