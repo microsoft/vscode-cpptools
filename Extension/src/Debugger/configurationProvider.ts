@@ -561,6 +561,11 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
         "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/\"/g, "\\\"")}",
         "text": "-enable-pretty-printing",
         "ignoreFailures": true
+    },
+    {
+        "description":  "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "text": "-gdb-set disassembly-flavor intel",
+        "ignoreFailures": true
     }
 ]`;
 
@@ -594,6 +599,11 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     {
         "description": "${localize("enable.pretty.printing", "Enable pretty-printing for {0}", "gdb").replace(/\"/g, "\\\"")}",
         "text": "-enable-pretty-printing",
+        "ignoreFailures": true
+    },
+    {
+        "description":  "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
 ]`;

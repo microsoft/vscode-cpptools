@@ -8,6 +8,7 @@ import * as os from 'os';
 import { AttachItemsProvider } from './attachToProcess';
 import { AttachItem } from './attachQuickPick';
 import * as nls from 'vscode-nls';
+import { findPowerShell } from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -28,7 +29,8 @@ export class Process {
 export class NativeAttachItemsProviderFactory {
     static Get(): AttachItemsProvider {
         if (os.platform() === 'win32') {
-            return new WmicAttachItemsProvider();
+            const pwsh: string | undefined = findPowerShell();
+            return pwsh ? new CimAttachItemsProvider(pwsh) : new WmicAttachItemsProvider();
         } else {
             return new PsAttachItemsProvider();
         }
@@ -252,5 +254,45 @@ export class WmicProcessParser {
                 process.commandLine = value;
             }
         }
+    }
+}
+
+export class CimAttachItemsProvider extends NativeAttachItemsProvider {
+    constructor(private pwsh: string) { super(); }
+
+    // Perf numbers on Win10:
+    // TODO
+
+    protected async getInternalProcessEntries(): Promise<Process[]> {
+        const pwshCommand: string = `${this.pwsh} -NoProfile -Command`;
+        const cimCommand: string = 'Get-CimInstance Win32_Process | Select-Object Name,ProcessId,CommandLine | ConvertTo-JSON';
+        const processes: string = await execChildProcess(`${pwshCommand} "${cimCommand}"`, undefined);
+        return CimProcessParser.ParseProcessFromCim(processes);
+    }
+}
+
+type CimProcessInfo = {
+    Name: string;
+    ProcessId: number;
+    CommandLine: string | null;
+};
+
+export class CimProcessParser {
+    private static get extendedLengthPathPrefix(): string { return '\\\\?\\'; }
+    private static get ntObjectManagerPathPrefix(): string { return '\\??\\'; }
+
+    // Only public for tests.
+    public static ParseProcessFromCim(processes: string): Process[] {
+        const processInfos: CimProcessInfo[] = JSON.parse(processes);
+        return processInfos.map(info => {
+            let cmdline: string | undefined = info.CommandLine || undefined;
+            if (cmdline?.startsWith(this.extendedLengthPathPrefix)) {
+                cmdline = cmdline.slice(this.extendedLengthPathPrefix.length);
+            }
+            if (cmdline?.startsWith(this.ntObjectManagerPathPrefix)) {
+                cmdline = cmdline.slice(this.ntObjectManagerPathPrefix.length);
+            }
+            return new Process(info.Name, `${info.ProcessId}`, cmdline);
+        });
     }
 }

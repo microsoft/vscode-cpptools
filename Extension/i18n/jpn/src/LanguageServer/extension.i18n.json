@@ -6,11 +6,6 @@
 {
 	"learn.how.to.install.a.library": "このヘッダーのライブラリを vcpkg でインストールする方法の詳細",
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
-	"insiders.available": "Insider のバージョン {0} が利用可能です。Insider のチャネルに切り替えて、この更新プログラムをインストールしますか?",
-	"yes.button": "はい",
-	"ask.me.later.button": "後で尋ねる",
-	"dont.show.again.button": "今後は表示しない",
-	"extension.updated": "C/C++ の拡張機能がバージョン {0} に更新されました。変更を有効にするには、ウィンドウを再度読み込んでください。",
 	"client.not.found": "クライアントが見つかりませんでした",
 	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください",
 	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください",

@@ -14,6 +14,8 @@
 	"c.cpp.tagparser.statusbar": "C/C++ Etiket Ayrıştırıcısı Durumu",
 	"discovering.files.tooltip": "Dosyalar bulunuyor",
 	"running.analysis.tooltip": "{0} çalıştırılıyor",
+	"code.analysis.paused.tooltip": "{0} durduruldu",
+	"running.analysis.processed.tooltip": "{0} Çalışıyor: {1} / {2} (%{3})",
 	"select.a.configuration": "Yapılandırma Seçin...",
 	"edit.configuration.ui": "Yapılandırmaları Düzenle (UI)",
 	"edit.configuration.json": "Yapılandırmaları Düzenle (JSON)",

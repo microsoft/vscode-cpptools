@@ -214,5 +214,7 @@
 	"nvcc_host_compile_command_not_found": "Der Hostkompilierbefehl wurde in der Ausgabe von nvcc nicht gefunden.",
 	"unable_to_locate_forced_include": "Erzwungene Includedatei wurde nicht gefunden: {0}",
 	"inline_macro": "Inlinemakro",
-	"unable_to_access_browse_database": "Auf die Suchdatenbank kann nicht zugegriffen werden. ({0})"
+	"unable_to_access_browse_database": "Auf die Suchdatenbank kann nicht zugegriffen werden. ({0})",
+	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode wurde geändert, weil es nicht mit dem erkannten Compiler übereinstimmte. Erwägen Sie stattdessen, \"compilerPath\" festzulegen. Legen Sie \"compilerPath\" auf \"\" fest, um die Erkennung von System-Includes und -Definitionen zu deaktivieren.",
+	"clear_code_analysis_squiggles": "Code Analysis-Wellenlinien löschen"
 }

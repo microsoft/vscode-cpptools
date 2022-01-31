@@ -25,5 +25,6 @@
 	"open.envfile": "{0} を開く",
 	"unexpected.os": "予期しない OS の種類",
 	"path.to.pipe.program": "{0} などのパイプ プログラムへの完全なパス",
-	"enable.pretty.printing": "{0} の再フォーマットを有効にする"
+	"enable.pretty.printing": "{0} の再フォーマットを有効にする",
+	"enable.intel.disassembly.flavor": "逆アセンブリ フレーバーを {0} に設定"
 }

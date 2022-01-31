@@ -213,6 +213,8 @@
 	"invoking_nvcc": "コマンド ラインで nvcc を呼び出しています: {0}",
 	"nvcc_host_compile_command_not_found": "nvcc の出力でホスト コンパイル コマンドが見つかりません。",
 	"unable_to_locate_forced_include": "強制インクルードが見つかりません: {0}",
-	"inline_macro": "インライン マクロ",
-	"unable_to_access_browse_database": "参照データベースにアクセスできません。({0})"
+	"inline_macro": "Inline マクロ",
+	"unable_to_access_browse_database": "参照データベースにアクセスできません。({0})",
+	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode は、検出されたコンパイラと一致しなかったため、変更されました。 代わりに \"compilerPath\" を設定することを検討してください。 システム インクルードと定義の検出を無効にするには、\"compilerPath\" を \"\" に設定します。",
+	"clear_code_analysis_squiggles": "コード分析波線をクリアする"
 }

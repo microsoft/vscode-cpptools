@@ -29,9 +29,9 @@ export function indentJsonString(json: string, numTabs: number = 1): string {
 }
 
 function formatString(format: string, args: string[]): string {
-    for (const arg in args) {
-        format = format.replace("{" + arg + "}", args[arg]);
-    }
+    args.forEach((arg: string, index: number) => {
+        format = format.replace("{" + index + "}", arg);
+    });
     return format;
 }
 

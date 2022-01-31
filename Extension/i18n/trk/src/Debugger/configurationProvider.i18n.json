@@ -25,5 +25,6 @@
 	"open.envfile": "{0} öğesini aç",
 	"unexpected.os": "Beklenmeyen işletim sistemi türü",
 	"path.to.pipe.program": "Kanal programının tam yolu, örneğin {0}",
-	"enable.pretty.printing": "{0} için düzgün yazdırmayı etkinleştir"
+	"enable.pretty.printing": "{0} için düzgün yazdırmayı etkinleştir",
+	"enable.intel.disassembly.flavor": "Ayrıştırılmış Kod Varyantını {0} olarak ayarla"
 }

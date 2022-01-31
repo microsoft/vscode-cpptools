@@ -25,5 +25,6 @@
 	"open.envfile": "Ouvrir {0}",
 	"unexpected.os": "Type de système d'exploitation inattendu",
 	"path.to.pipe.program": "chemin complet du programme de canal, par exemple {0}",
-	"enable.pretty.printing": "Activer l'impression en mode Pretty pour {0}"
+	"enable.pretty.printing": "Activer l'impression en mode Pretty pour {0}",
+	"enable.intel.disassembly.flavor": "Définir la version désassemblage sur {0}"
 }

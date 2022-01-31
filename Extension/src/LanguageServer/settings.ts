@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
@@ -62,7 +62,7 @@ class Settings {
         return result;
     }
 
-    protected getWithUndefinedDefault<T>(section: string): T | undefined {
+    public getWithUndefinedDefault<T>(section: string): T | undefined {
         const info: any = this.settings.inspect<T>(section);
         if (info.workspaceFolderValue !== undefined) {
             return info.workspaceFolderValue;
@@ -80,55 +80,111 @@ export class CppSettings extends Settings {
         super("C_Cpp", resource);
     }
 
+    private get LLVMExtension(): string {
+        return os.platform() === "win32" ? ".exe" : "";
+    }
+
+    private get clangFormatStr(): string {
+        return "clang-format";
+    }
+
+    private get clangTidyStr(): string {
+        return "clang-tidy";
+    }
+
     private get clangFormatName(): string {
-        return "clang-format" + (os.platform() === "win32" ? ".exe" : "");
+        return this.clangFormatStr + this.LLVMExtension;
+    }
+
+    private get clangTidyName(): string {
+        return this.clangTidyStr + this.LLVMExtension;
+    }
+
+    public get clangTidyPath(): string | undefined {
+        return this.getClangPath(false);
     }
 
     public get clangFormatPath(): string | undefined {
-        let path: string | undefined | null = super.Section.get<string>("clang_format_path");
+        return this.getClangPath(true);
+    }
+
+    private getClangPath(isFormat: boolean): string | undefined {
+        let path: string | undefined | null = super.Section.get<string>(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path");
         if (!path) {
-            const cachedClangFormatPath: string | null | undefined = getCachedClangFormatPath();
-            if (cachedClangFormatPath !== undefined) {
-                if (cachedClangFormatPath === null) {
+            const cachedClangPath: string | null | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
+            if (cachedClangPath !== undefined) {
+                if (cachedClangPath === null) {
                     return undefined;
                 }
-                return cachedClangFormatPath;
+                return cachedClangPath;
             }
-            path = which.sync('clang-format', { nothrow: true });
-            setCachedClangFormatPath(path);
+            const clangStr: string = isFormat ? this.clangFormatStr : this.clangTidyStr;
+            const clangName: string = isFormat ? this.clangFormatName : this.clangTidyName;
+            const setCachedClangPath: (path: string | null) => void = isFormat ? setCachedClangFormatPath : setCachedClangTidyPath;
+            path = which.sync(clangName, { nothrow: true });
+            setCachedClangPath(path);
             if (!path) {
                 return undefined;
             } else {
-                // Attempt to invoke both our own version of clang-format to see if we can successfully execute it, and to get it's version.
-                let clangFormatVersion: string;
+                // Attempt to invoke both our own version of clang-* to see if we can successfully execute it, and to get its version.
+                let clangVersion: string;
                 try {
-                    const exePath: string = getExtensionFilePath(`./LLVM/bin/${this.clangFormatName}`);
+                    const exePath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
                     const output: string[] = execSync(`${exePath} --version`).toString().split(" ");
-                    if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || !semver.valid(output[2])) {
-                        return path;
+                    if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || !semver.valid(output[2])) {
+                        if (output.length === 3) {
+                            return path;
+                        }
+                        const versionIndex: number = output.findIndex((value: string) => value === "version");
+                        if (versionIndex < 0 || versionIndex + 1 >= output.length || !semver.valid(output[versionIndex + 1].trim())) {
+                            return path;
+                        }
                     }
-                    clangFormatVersion = output[2];
+                    clangVersion = output[2];
                 } catch (e) {
-                    // Unable to invoke our own clang-format.  Use the system installed clang-format.
+                    // Unable to invoke our own clang-*.  Use the system installed clang-*.
                     return path;
                 }
 
                 // Invoke the version on the system to compare versions.  Use ours if it's more recent.
                 try {
                     const output: string[] = execSync(`"${path}" --version`).toString().split(" ");
-                    if (output.length < 3 || output[0] !== "clang-format" || output[1] !== "version" || semver.ltr(output[2], clangFormatVersion)) {
+                    if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || semver.ltr(output[2], clangVersion)) {
                         path = "";
-                        setCachedClangFormatPath(path);
+                        setCachedClangPath(path);
                     }
                 } catch (e) {
                     path = "";
-                    setCachedClangFormatPath(path);
+                    setCachedClangPath(path);
                 }
             }
         }
         return path;
     }
 
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
+    public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
+    public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
+    public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
+    public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
+    public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
+    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxConcurrentThreads"); }
+    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }
+    public get codeAnalysisUpdateDelay(): number | undefined | null { return super.Section.get<number>("codeAnalysis.updateDelay"); }
+    public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
+    public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
+    public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
+    public get clangTidyEnabled(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.enabled"); }
+    public get clangTidyConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.config"); }
+    public get clangTidyFallbackConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.fallbackConfig"); }
+    public get clangTidyFixWarnings(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.warnings"); }
+    public get clangTidyFixErrors(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.errors"); }
+    public get clangTidyFixNotes(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.notes"); }
+    public get clangTidyHeaderFilter(): string | undefined | null { return super.Section.get<string | null>("codeAnalysis.clangTidy.headerFilter"); }
+    public get clangTidyArgs(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.args"); }
+    public get clangTidyChecksEnabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.enabled"); }
+    public get clangTidyChecksDisabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.disabled"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
@@ -648,8 +704,8 @@ export class CppSettings extends Settings {
                         foundEditorConfigWithVcFormatSettings = true;
                         const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                         if (!didEditorConfigNotice.Value) {
-                            vscode.window.showInformationMessage(localize("editorconfig.default.behavior",
-                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the `Default` value of the 'C_Cpp.formatting' setting."));
+                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks."] },
+                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'Default' value of the 'C_Cpp.formatting' setting."));
                             didEditorConfigNotice.Value = true;
                         }
                         return true;
@@ -717,6 +773,7 @@ export class OtherSettings {
         vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
+    public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 

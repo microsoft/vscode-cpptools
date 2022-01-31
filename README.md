@@ -45,21 +45,6 @@ If someone has already filed an issue that encompasses your feedback, please lea
 <br>
 Let us know what you think of the extension by taking the quick survey.
 
-## Offline installation
-
-The extension has platform-specific binary dependencies, therefore installation via the Marketplace requires an Internet connection in order to download additional dependencies. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our platform-specific packages and install them by running VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases. Expand the "Assets" section to see the releases for a given version.
-
- Package | Platform
-:--- | :---
-`cpptools-linux.vsix` | Linux 64-bit
-`cpptools-linux-armhf.vsix` | Linux ARM 32-bit
-`cpptools-linux-aarch64.vsix` | Linux ARM 64-bit
-`cpptools-osx.vsix` | macOS 64-bit
-`cpptools-osx-arm64.vsix` | macOS ARM64
-`cpptools-win32.vsix` | Windows 64-bit & 32-bit
-`cpptools-win-arm64.vsix` | Windows ARM64
-`cpptools-linux32.vsix` | Linux 32-bit ([available up to version 0.27.0](https://github.com/microsoft/vscode-cpptools/issues/5346))
-
 ## Contribution
 
 Contributions are always welcome. Please see our [contributing guide](CONTRIBUTING.md) for more details.

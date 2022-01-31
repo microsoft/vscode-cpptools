@@ -7,7 +7,6 @@
 import TelemetryReporter from 'vscode-extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
-import { PackageVersion } from './packageVersion';
 
 interface IPackageInfo {
     name: string;
@@ -63,15 +62,7 @@ export function activate(): void {
         if (util.extensionContext) {
             const packageInfo: IPackageInfo = getPackageInfo();
             if (packageInfo) {
-                let targetPopulation: TargetPopulation;
-                const userVersion: PackageVersion = new PackageVersion(packageInfo.version);
-                if (!userVersion.suffix) {
-                    targetPopulation = TargetPopulation.Public;
-                } else if (userVersion.suffix === "insiders") {
-                    targetPopulation = TargetPopulation.Insiders;
-                } else {
-                    targetPopulation = TargetPopulation.Internal;
-                }
+                const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
                 experimentationTelemetry = new ExperimentationTelemetry(new TelemetryReporter(packageInfo.name, packageInfo.version, appInsightsKey));
                 initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
             }
