@@ -44,8 +44,11 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                     }
                 }
 
-                const r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
+                let r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
                 const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
+                if (!r.contains(sr)) {
+                    r = sr;
+                }
                 const vscodeSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(symbol.name, detail, symbol.kind, r, sr);
                 vscodeSymbol.children = this.getChildrenSymbols(symbol.children);
                 documentSymbols.push(vscodeSymbol);
