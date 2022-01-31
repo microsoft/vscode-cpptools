@@ -675,7 +675,7 @@ export function buildAndDebugActiveFileStr(): string {
     return `${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
-export async function buildAndDebugShortCut(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigurationProvider | null, cppDbgProvider: CppDbgConfigurationProvider, debugModeOn: boolean = true): Promise<void> {
+export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigurationProvider | null, cppDbgProvider: CppDbgConfigurationProvider, debugModeOn: boolean = true): Promise<void> {
     const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
 
     if (!util.isCppOrCFile(textEditor.document.uri.fsPath)) {

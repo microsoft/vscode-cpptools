@@ -1719,6 +1719,8 @@ export class DefaultClient implements Client {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
             vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri.fsPath));
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -2676,6 +2678,8 @@ export class DefaultClient implements Client {
                     });
                 }
             }
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
