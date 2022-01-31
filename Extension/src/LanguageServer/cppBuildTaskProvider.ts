@@ -5,7 +5,7 @@
 /* eslint-disable no-unused-expressions */
 import * as path from 'path';
 import {
-    TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
+    TaskDefinition, Task, TaskGroup, ShellExecution, workspace,
     TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder
 } from 'vscode';
 import * as os from 'os';
@@ -183,17 +183,6 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         const editor: TextEditor | undefined = window.activeTextEditor;
         const folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
-        // Check uri exists (single-mode files are ignored).
-        if (folder) {
-            const activeClient: Client = ext.getActiveClient();
-            const uri: Uri | undefined = activeClient.RootUri;
-            if (!uri) {
-                throw new Error("No client URI found in getBuildTasks()");
-            }
-            if (!workspace.getWorkspaceFolder(uri)) {
-                throw new Error("No target WorkspaceFolder found in getBuildTasks()");
-            }
-        }
 
         const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
@@ -234,15 +223,18 @@ export class CppBuildTaskProvider implements TaskProvider {
         return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
-    public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
+    public async checkBuildTaskExists(taskLabel: string, createTask: boolean = false): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson();
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
         // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
-        let selectedTask: any = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-        if (selectedTask) {
-            return;
+        let selectedTask: any;
+        if (!createTask) {
+            selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+            if (selectedTask) {
+                return;
+            }
         }
 
         // Create the task which should be created based on the selected "debug configuration".
@@ -280,16 +272,16 @@ export class CppBuildTaskProvider implements TaskProvider {
         const settings: OtherSettings = new OtherSettings();
         const tasksJsonPath: string | undefined = this.getTasksJsonPath();
         if (!tasksJsonPath) {
-            throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
+            throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
         }
 
         await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
     }
 
-    public async ensureDebugConfigExists(configName: string): Promise<void> {
+    public async checkDebugConfigExists(configName: string): Promise<void> {
         const launchJsonPath: string | undefined = this.getLaunchJsonPath();
         if (!launchJsonPath) {
-            throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+            throw new Error("Failed to get launchJsonPath in checkDebugConfigExists()");
         }
 
         const rawLaunchJson: any = await this.getRawLaunchJson();
@@ -309,7 +301,14 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     private getTasksJsonPath(): string | undefined {
-        return util.getJsonPath("tasks.json");
+        const tasksJsonPath: string | undefined = util.getJsonPath("tasks.json");
+        if (tasksJsonPath) {
+            return tasksJsonPath;
+        } else {
+            // In single mode file, Return the temporary folder where vscode saves user's temporary configured tasks.
+            return process.env['AppData'] ? path.join(process.env['AppData'], "code/user", "tasks.json") : undefined;
+        }
+
     }
 
     public getRawLaunchJson(): Promise<any> {

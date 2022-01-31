@@ -79,7 +79,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
         if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
             try {
-                await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+                await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
                 if (selection.configuration.miDebuggerPath) {
                     if (!await util.checkFileExists(selection.configuration.miDebuggerPath)) {
                         vscode.window.showErrorMessage(localize("miDebuggerPath.not.available", "miDebuggerPath does not exist: {0}. Has a debugger been installed?", selection.configuration.miDebuggerPath));
@@ -104,7 +104,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
     }
 }
 
-export class CppConfigurationProvider {
+export class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
     private type: DebuggerType;
     private provider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
@@ -677,13 +677,6 @@ export function buildAndDebugActiveFileStr(): string {
 
 export async function buildAndDebugShortCut(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigurationProvider | null, cppDbgProvider: CppDbgConfigurationProvider, debugModeOn: boolean = true): Promise<void> {
     const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
-    if (!folder) {
-        // Not enabled because we do not react to single-file mode correctly yet.
-        // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.
-        // The DefaultClient will also have its configuration accessed, but since it doesn't exist it errors out.
-        vscode.window.showErrorMessage(localize("single_file_mode_not_available", "This command is not available for single-file mode."));
-        return;
-    }
 
     if (!util.isCppOrCFile(textEditor.document.uri.fsPath)) {
         vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
@@ -738,32 +731,29 @@ export async function buildAndDebugShortCut(textEditor: vscode.TextEditor, cppVs
         }
     }
     if (selection.configuration.preLaunchTask) {
-        if (folder) {
-            try {
-                await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
+        try {
+            if (folder) {
+                await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
                 CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-            } catch (errJS) {
-                const e: Error = errJS as Error;
-                if (e && e.message === util.failedToParseJson) {
-                    vscode.window.showErrorMessage(util.failedToParseJson);
-                }
-                return;
+            } else {
+                await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask, true);
+                selection.configuration.preLaunchTask = undefined;
             }
-        } else {
+        } catch (errJS) {
+            const e: Error = errJS as Error;
+            if (e && e.message === util.failedToParseJson) {
+                vscode.window.showErrorMessage(util.failedToParseJson);
+            }
+            Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
             return;
-            // TODO uncomment this when single file mode works correctly.
-            // const buildTasks: vscode.Task[] = await getBuildTasks(true);
-            // const task: vscode.Task = buildTasks.find(task => task.name === selection.configuration.preLaunchTask);
-            // await vscode.tasks.executeTask(task);
-            // delete selection.configuration.preLaunchTask;
         }
     }
 
-    // Attempt to use the user's (possibly) modified configuration before using the generated one.
     const event: string = debugModeOn ? "buildAndDebug" : "buildAndRun";
+
     try {
-        await cppBuildTaskProvider.ensureDebugConfigExists(selection.configuration.name);
+        // Check if the debug configuration exists in launch.json.
+        await cppBuildTaskProvider.checkDebugConfigExists(selection.configuration.name);
         try {
             await vscode.debug.startDebugging(folder, selection.configuration.name, {noDebug: !debugModeOn});
             Telemetry.logDebuggerEvent(event, { "success": "true" });
