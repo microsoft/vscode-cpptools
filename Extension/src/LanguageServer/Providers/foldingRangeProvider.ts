@@ -15,14 +15,11 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     }
     async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
         token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
-        const id: number = ++DefaultClient.abortRequestId;
         const params: GetFoldingRangesParams = {
-            id: id,
             uri: document.uri.toString()
         };
         await this.client.awaitUntilLanguageClientReady();
-        token.onCancellationRequested(e => this.client.abortRequest(id));
-        const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
+        const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
         if (ranges.canceled) {
             return undefined;
         }

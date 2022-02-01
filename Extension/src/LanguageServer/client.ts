@@ -416,7 +416,6 @@ interface TextEdit {
 
 export interface GetFoldingRangesParams {
     uri: string;
-    id: number;
 }
 
 export enum FoldingRangeKind {
@@ -436,13 +435,8 @@ export interface GetFoldingRangesResult {
     ranges: CppFoldingRange[];
 }
 
-interface AbortRequestParams {
-    id: number;
-}
-
 export interface GetSemanticTokensParams {
     uri: string;
-    id: number;
 }
 
 interface SemanticToken {
@@ -572,7 +566,6 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
-const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
 const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runCodeAnalysis');
 
 // Notifications from the server
@@ -791,8 +784,6 @@ export class DefaultClient implements Client {
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
-    public static abortRequestId: number = 0;
-
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
     public static referencesPendingCancellations: ReferencesCancellationState[] = [];
@@ -954,7 +945,7 @@ export class DefaultClient implements Client {
                                     uri: document.uri.toString()
                                 };
 
-                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params);
+                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
                                 const resultCodeActions: vscode.CodeAction[] = [];
 
                                 // Convert to vscode.CodeAction array
@@ -3231,13 +3222,6 @@ export class DefaultClient implements Client {
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
-    }
-
-    public abortRequest(id: number): void {
-        const params: AbortRequestParams = {
-            id: id
-        };
-        languageClient.sendNotification(AbortRequestNotification, params);
     }
 }
 
