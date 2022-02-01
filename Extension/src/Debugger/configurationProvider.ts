@@ -56,10 +56,12 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const noDetailConfig: vscode.DebugConfiguration = {...config};
+            const reducedConfig: vscode.DebugConfiguration = {...config};
             // Remove the "detail" property from the DebugConfiguration that will be written in launch.json.
-            noDetailConfig.detail = undefined;
-            const menuItem: MenuItem = { label: config.name, configuration: noDetailConfig, description: config.detail, detail: config.existing };
+            reducedConfig.detail = undefined;
+            reducedConfig.existing = undefined;
+            reducedConfig.isDefault = undefined;
+            const menuItem: MenuItem = { label: config.name, configuration: reducedConfig, description: config.detail, detail: config.existing };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -184,7 +186,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
             const compilerName: string = path.basename(compilerPath);
             const newConfig: vscode.DebugConfiguration = {...defaultConfig}; // Copy enumerables and properties
 
-            newConfig.name = CppSourceStr + ": " + buildAndDebugActiveFileStr();
+            newConfig.name = CppSourceStr + ": " + compilerName + " " + buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
             if (newConfig.type === "cppdbg") {
                 newConfig.externalConsole = false;
@@ -736,7 +738,9 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
                 await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
                 CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
             } else {
-                await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask, true);
+                // In case of single mode file, remove the preLaunch task from the debug configuration and run it here instead.
+                await cppBuildTaskProvider.runBuildTask(selection.configuration.preLaunchTask);
+                CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
                 selection.configuration.preLaunchTask = undefined;
             }
         } catch (errJS) {

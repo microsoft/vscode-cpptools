@@ -6,7 +6,7 @@
 import * as path from 'path';
 import {
     TaskDefinition, Task, TaskGroup, ShellExecution, workspace,
-    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder
+    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks
 } from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
@@ -243,7 +243,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         selectedTask = buildTasks.find(task => task.name === normalizedLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
-            throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+            throw new Error("Failed to get selectedTask in checkBuildTaskExists()");
         } else {
             selectedTask.definition.label = taskLabel;
             selectedTask.name = taskLabel;
@@ -278,6 +278,20 @@ export class CppBuildTaskProvider implements TaskProvider {
         await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
     }
 
+    public async runBuildTask(taskLabel: string): Promise<void> {
+        const buildTasks: CppBuildTask[] = await this.getTasks(true);
+        const task: CppBuildTask | undefined = buildTasks.find(task => task.name === taskLabel);
+        if (!task) {
+            throw new Error("Failed to find task in runBuildTask()");
+        } else {
+            const resolvedTask: CppBuildTask | undefined = this.resolveTask(task);
+            if (resolvedTask) {
+                await tasks.executeTask(resolvedTask);
+            }
+        }
+
+    }
+
     public async checkDebugConfigExists(configName: string): Promise<void> {
         const launchJsonPath: string | undefined = this.getLaunchJsonPath();
         if (!launchJsonPath) {
@@ -301,14 +315,7 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     private getTasksJsonPath(): string | undefined {
-        const tasksJsonPath: string | undefined = util.getJsonPath("tasks.json");
-        if (tasksJsonPath) {
-            return tasksJsonPath;
-        } else {
-            // In single mode file, Return the temporary folder where vscode saves user's temporary configured tasks.
-            return process.env['AppData'] ? path.join(process.env['AppData'], "code/user", "tasks.json") : undefined;
-        }
-
+        return util.getJsonPath("tasks.json");
     }
 
     public getRawLaunchJson(): Promise<any> {
@@ -320,6 +327,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const path: string | undefined = this.getTasksJsonPath();
         return util.getRawJson(path);
     }
+
 }
 
 class CustomBuildTaskTerminal implements Pseudoterminal {
