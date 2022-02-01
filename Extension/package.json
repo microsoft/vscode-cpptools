@@ -2578,7 +2578,10 @@
         },
         "C_Cpp.debugShortcut": {
           "type": "boolean",
-          "default": true,
+          "default": false,
+          "tags": [
+            "experimental"
+          ],
           "description": "%c_cpp.configuration.debugShortcut.description%"
         }
       }
