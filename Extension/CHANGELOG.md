@@ -20,6 +20,7 @@
 ### Bug Fixes
 * Fix several IntelliSense bugs. [#5704](https://github.com/microsoft/vscode-cpptools/issues/5704), [#6759](https://github.com/microsoft/vscode-cpptools/issues/6759), [#8412](https://github.com/microsoft/vscode-cpptools/issues/8412), [#8434](https://github.com/microsoft/vscode-cpptools/issues/8434)
 * Fix newlines not being handled in comments with a Doxygen tag. [#5741](https://github.com/microsoft/vscode-cpptools/issues/5741)
+* Fix Doxygen comments with `\0` being truncated. [#6084](https://github.com/microsoft/vscode-cpptools/issues/6084)
 * Fix `files.exclude` not working for directories external to the active workspace folder. [#6877](https://github.com/microsoft/vscode-cpptools/issues/6877)
 * Fix [MSYS2 GDB 10.2] gdb: ERROR: Unable to start debugging. Unexpected GDB output from command "-exec-run". Error creating process [#7706](https://github.com/microsoft/vscode-cpptools/issues/7706)
 * Fix a bug with vcFormat inserting additional spaces between `}` and `else`. [#7731](https://github.com/microsoft/vscode-cpptools/issues/7731)
