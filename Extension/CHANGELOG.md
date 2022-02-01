@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
-##  Version 1.8.2: January 31, 2022
-### New Features
+##  Version 1.8.2: January 31, 2022### New Features
+* Add data breakpoints, memory read/write interrupts. [#1410](https://github.com/microsoft/vscode-cpptools/issues/1410)
 * Add "All Exceptions" Breakpoint for cppdbg [#1800](https://github.com/microsoft/vscode-cpptools/issues/1800)
 * Add multi-threaded code analysis (using `clang-tidy`) based on the IntelliSense configuration. It defaults to using up to half the cores, but it can be changed via the `C_Cpp.codeAnalysis.maxConcurrentThreads` setting. [#2908](https://github.com/microsoft/vscode-cpptools/issues/2908).
 * Add support for Alpine Linux [#4827](https://github.com/microsoft/vscode-cpptools/issues/4827)
@@ -42,7 +42,8 @@
 * Fix workspace rescanning (tag parsing) not automatically happening after c/cpp associations are added to `files.associations`. [#8687](https://github.com/microsoft/vscode-cpptools/issues/8687)
 * Fix debugging when Windows binaries are linked with /PDBPageSize > 4k. [#8690](https://github.com/microsoft/vscode-cpptools/issues/8690)
 * Switch usage of `-dD` to `-dM` when compiler querying. [#8692](https://github.com/microsoft/vscode-cpptools/issues/8692)
-* Fix no document symbols appearing in certain cases. [#8276](https://github.com/microsoft/vscode-cpptools/issues/8726)
+* Fix no document symbols appearing in certain cases. [#8726](https://github.com/microsoft/vscode-cpptools/issues/8726)
+* Fix breakpoints with msys2 gcc. [#8696](https://github.com/microsoft/vscode-cpptools/issues/8696)
 * Fix an issue in which multiple (potentially different) diagnostics were delivered for headers shared by multiple TUs.
 * Fix some translations.
 
