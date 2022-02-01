@@ -2,7 +2,7 @@
 
 ##  Version 1.8.2: January 31, 2022
 ### New Features
-* Add data breakpoints, memory read/write interrupts with `gdb` debugging. [#1410](https://github.com/microsoft/vscode-cpptools/issues/1410)
+* Add data breakpoints (memory read/write interrupts) with `gdb` debugging. [#1410](https://github.com/microsoft/vscode-cpptools/issues/1410)
 * Add "All Exceptions" Breakpoint for cppdbg [#1800](https://github.com/microsoft/vscode-cpptools/issues/1800)
 * Add multi-threaded code analysis (using `clang-tidy`) based on the IntelliSense configuration. It defaults to using up to half the cores, but it can be changed via the `C_Cpp.codeAnalysis.maxConcurrentThreads` setting. [#2908](https://github.com/microsoft/vscode-cpptools/issues/2908).
 * Add support for Alpine Linux [#4827](https://github.com/microsoft/vscode-cpptools/issues/4827)
