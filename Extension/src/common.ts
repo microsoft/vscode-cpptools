@@ -173,12 +173,11 @@ export function isCFile (uri: vscode.Uri): boolean {
     return (fileExt === ".C") || fileExtLower === ".c";
 }
 
-export function isCppOrCFile(file?: string): boolean {
-    if (file === undefined) {
+export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
+    if (!uri) {
         return false;
     }
-    const fileExtLower: string = path.extname(file).toLowerCase();
-    return [".c", ".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+    return isCppFile(uri) || isCFile(uri);
 }
 
 export function isEditorFileCpp(file: string): boolean {

@@ -48,7 +48,7 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
             throw new Error("Default config not found in provideDebugConfigurations()");
         }
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (!editor || !util.isCppOrCFile(editor.document.fileName) || configs.length <= 1) {
+        if (!editor || !util.isCppOrCFile(editor.document.uri) || configs.length <= 1) {
             return [defaultConfig];
         }
         interface MenuItem extends vscode.QuickPickItem {
@@ -680,7 +680,7 @@ export function buildAndDebugActiveFileStr(): string {
 export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigurationProvider | null, cppDbgProvider: CppDbgConfigurationProvider, debugModeOn: boolean = true): Promise<void> {
     const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
 
-    if (!util.isCppOrCFile(textEditor.document.uri.fsPath)) {
+    if (!util.isCppOrCFile(textEditor.document.uri)) {
         vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
         return;
     }

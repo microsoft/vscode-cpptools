@@ -18,7 +18,7 @@ export class TimeTelemetryCollector {
     private cachedTimeStamps: Map<string, any> = new Map<string, any>(); // a map of uri's string to TimeStampSequence
 
     public setFirstFile(uri: vscode.Uri): void {
-        if (util.isCppOrCFile(uri.path)) {
+        if (util.isCppOrCFile(uri)) {
             const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
             curTimeStamps.firstFile = new Date().getTime();
             this.cachedTimeStamps.set(uri.path, curTimeStamps);

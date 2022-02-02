@@ -341,7 +341,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        if (this.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.fileName)) {
+        if (this.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
             return;
