@@ -56,7 +56,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         }
         return documentSymbols;
     }
-    public async provideDocumentSymbols(document: vscode.TextDocument): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+    public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         if (!this.client.TrackedDocuments.has(document)) {
             processDelayedDidOpen(document);
         }
@@ -64,7 +64,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
-            const symbols: LocalizeDocumentSymbol[] = await this.client.languageClient.sendRequest(GetDocumentSymbolRequest, params);
+            const symbols: LocalizeDocumentSymbol[] = await this.client.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
             const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
             return resultSymbols;
         });
