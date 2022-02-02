@@ -41,6 +41,7 @@
 * Don't block running a task if it doesn't use the active file. [#8586](https://github.com/microsoft/vscode-cpptools/issues/8586)
 * Fix a command not found error message after clicking the database status icon when commands aren't available. [#8599](https://github.com/microsoft/vscode-cpptools/issues/8599)
 * Fix /RTC compiler checks failures don't break into debugger [#8646](https://github.com/microsoft/vscode-cpptools/issues/8646)
+* Fix a bug with conditional breakpoints. [#8515](https://github.com/microsoft/vscode-cpptools/issues/8515)
 * Fix workspace rescanning (tag parsing) not automatically happening after c/cpp associations are added to `files.associations`. [#8687](https://github.com/microsoft/vscode-cpptools/issues/8687)
 * Fix debugging when Windows binaries are linked with /PDBPageSize > 4k. [#8690](https://github.com/microsoft/vscode-cpptools/issues/8690)
 * Switch usage of `-dD` to `-dM` when compiler querying. [#8692](https://github.com/microsoft/vscode-cpptools/issues/8692)
