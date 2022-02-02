@@ -49,7 +49,6 @@ export class PlatformInformation {
     public static GetArchitecture(): string {
         const arch: string = os.arch();
         switch (arch) {
-            case "x64":
             case "arm64":
             case "arm":
                 return arch;
@@ -57,11 +56,7 @@ export class PlatformInformation {
             case "ia32":
                 return "x86";
             default:
-                if (os.platform() === "win32") {
-                    return "x86";
-                } else {
-                    return "x64";
-                }
+                return "x64";
         }
     }
 

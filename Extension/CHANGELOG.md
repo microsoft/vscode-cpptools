@@ -2,6 +2,7 @@
 
 ##  Version 1.8.2: January 31, 2022
 ### New Features
+* Add data breakpoints (memory read/write interrupts) with `gdb` debugging. [#1410](https://github.com/microsoft/vscode-cpptools/issues/1410)
 * Add "All Exceptions" Breakpoint for cppdbg [#1800](https://github.com/microsoft/vscode-cpptools/issues/1800)
 * Add multi-threaded code analysis (using `clang-tidy`) based on the IntelliSense configuration. It defaults to using up to half the cores, but it can be changed via the `C_Cpp.codeAnalysis.maxConcurrentThreads` setting. [#2908](https://github.com/microsoft/vscode-cpptools/issues/2908).
 * Add support for Alpine Linux [#4827](https://github.com/microsoft/vscode-cpptools/issues/4827)
@@ -19,6 +20,7 @@
 ### Bug Fixes
 * Fix several IntelliSense bugs. [#5704](https://github.com/microsoft/vscode-cpptools/issues/5704), [#6759](https://github.com/microsoft/vscode-cpptools/issues/6759), [#8412](https://github.com/microsoft/vscode-cpptools/issues/8412), [#8434](https://github.com/microsoft/vscode-cpptools/issues/8434)
 * Fix newlines not being handled in comments with a Doxygen tag. [#5741](https://github.com/microsoft/vscode-cpptools/issues/5741)
+* Fix Doxygen comments with `\0` being truncated. [#6084](https://github.com/microsoft/vscode-cpptools/issues/6084)
 * Fix `files.exclude` not working for directories external to the active workspace folder. [#6877](https://github.com/microsoft/vscode-cpptools/issues/6877)
 * Fix [MSYS2 GDB 10.2] gdb: ERROR: Unable to start debugging. Unexpected GDB output from command "-exec-run". Error creating process [#7706](https://github.com/microsoft/vscode-cpptools/issues/7706)
 * Fix a bug with vcFormat inserting additional spaces between `}` and `else`. [#7731](https://github.com/microsoft/vscode-cpptools/issues/7731)
@@ -34,6 +36,7 @@
 * Fix the tag parser getting stuck on certain code. [#8459](https://github.com/microsoft/vscode-cpptools/issues/8459)
 * Fix an invalid success message when a build task fails. [#8467](https://github.com/microsoft/vscode-cpptools/issues/8467)
 * Fix compiler querying with certain Cygwin/MSYS2 compilers on Windows. [#8496](https://github.com/microsoft/vscode-cpptools/issues/8496)
+* Fix a bug with conditional breakpoints. [#8515](https://github.com/microsoft/vscode-cpptools/issues/8515)
 * Fix non-ASCII output with `cppbuild` tasks. [#8518](https://github.com/microsoft/vscode-cpptools/issues/8518)
 * Fix 3 settings not getting environment variables resolved after a settings change. [#8531](https://github.com/microsoft/vscode-cpptools/issues/8531)
 * Don't block running a task if it doesn't use the active file. [#8586](https://github.com/microsoft/vscode-cpptools/issues/8586)
@@ -42,7 +45,8 @@
 * Fix workspace rescanning (tag parsing) not automatically happening after c/cpp associations are added to `files.associations`. [#8687](https://github.com/microsoft/vscode-cpptools/issues/8687)
 * Fix debugging when Windows binaries are linked with /PDBPageSize > 4k. [#8690](https://github.com/microsoft/vscode-cpptools/issues/8690)
 * Switch usage of `-dD` to `-dM` when compiler querying. [#8692](https://github.com/microsoft/vscode-cpptools/issues/8692)
-* Fix no document symbols appearing in certain cases. [#8276](https://github.com/microsoft/vscode-cpptools/issues/8726)
+* Fix breakpoints with msys2 gcc. [#8696](https://github.com/microsoft/vscode-cpptools/issues/8696)
+* Fix no document symbols appearing in certain cases. [#8726](https://github.com/microsoft/vscode-cpptools/issues/8726)
 * Fix an issue in which multiple (potentially different) diagnostics were delivered for headers shared by multiple TUs.
 * Fix some translations.
 
