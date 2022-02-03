@@ -29,6 +29,7 @@ import { UpdateInsidersAccess } from '../main';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
+export const CppSourceStr: string = "C/C++";
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -173,7 +174,7 @@ export async function activate(): Promise<void> {
     vscode.tasks.onDidStartTask(event => {
         getActiveClient().PauseCodeAnalysis();
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
-            || event.execution.task.name.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) {
+            || event.execution.task.name.startsWith(CppSourceStr)) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
@@ -181,7 +182,7 @@ export async function activate(): Promise<void> {
     vscode.tasks.onDidEndTask(event => {
         getActiveClient().ResumeCodeAnalysis();
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
-            || event.execution.task.name.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) {
+            || event.execution.task.name.startsWith(CppSourceStr)) {
             telemetry.logLanguageServerEvent('buildTaskFinished');
             if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
                 const folder: vscode.WorkspaceFolder | undefined = event.execution.task.scope;

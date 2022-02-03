@@ -2575,6 +2575,14 @@
             ]
           },
           "scope": "resource"
+        },
+        "C_Cpp.debugShortcut": {
+          "type": "boolean",
+          "default": false,
+          "tags": [
+            "experimental"
+          ],
+          "description": "%c_cpp.configuration.debugShortcut.description%"
         }
       }
     },
@@ -2632,11 +2640,6 @@
       {
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.BuildAndDebugActiveFile",
-        "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
         "category": "C/C++"
       },
       {
@@ -2716,6 +2719,18 @@
         "command": "C_Cpp.ClearCodeAnalysisSquiggles",
         "title": "%c_cpp.command.ClearCodeAnalysisSquiggles.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.BuildAndDebugFile",
+        "title": "%c_cpp.command.BuildAndDebugFile.title%",
+        "category": "C/C++",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "C_Cpp.BuildAndRunFile",
+        "title": "%c_cpp.command.BuildAndRunFile.title%",
+        "category": "C/C++",
+        "icon": "$(run)"
       }
     ],
     "keybindings": [
@@ -3832,6 +3847,18 @@
           "group": "navigation"
         }
       ],
+      "editor/title/run": [
+        {
+          "command": "C_Cpp.BuildAndDebugFile",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
+          "group": "navigation@0"
+        },
+        {
+          "command": "C_Cpp.BuildAndRunFile",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
+          "group": "navigation@1"
+        }
+      ],
       "editor/context": [
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
@@ -3847,11 +3874,6 @@
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
-        },
-        {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2@1"
         },
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",

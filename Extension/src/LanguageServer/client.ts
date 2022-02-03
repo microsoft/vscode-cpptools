@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands } from './extension';
+import { updateLanguageConfigurations, registerCommands, CppSourceStr } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -150,7 +150,7 @@ function showWarning(params: ShowWarningParams): void {
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection("C/C++");
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
@@ -160,7 +160,7 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
         diagnostic.code = d.code;
-        diagnostic.source = "C/C++";
+        diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -201,7 +201,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         } else {
             diagnostic.code = d.code;
         }
-        diagnostic.source = "C/C++";
+        diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -1709,6 +1709,9 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -2076,7 +2079,7 @@ export class DefaultClient implements Client {
 
     private isExternalHeader(uri: vscode.Uri): boolean {
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        return !rootUri || (util.isHeader(uri) && !uri.toString().startsWith(rootUri.toString()));
+        return !rootUri || (util.isHeaderFile(uri) && !uri.toString().startsWith(rootUri.toString()));
     }
 
     public getCurrentConfigName(): Thenable<string | undefined> {
@@ -2645,6 +2648,7 @@ export class DefaultClient implements Client {
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2665,6 +2669,8 @@ export class DefaultClient implements Client {
                     });
                 }
             }
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 

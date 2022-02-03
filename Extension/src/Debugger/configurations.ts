@@ -14,6 +14,12 @@ export enum DebuggerType {
     cppdbg
 }
 
+export enum TaskConfigStatus {
+    recentlyUsed = "Recently Used Task",
+    configured = "Configured Task",
+    detected = "Detected Task"
+}
+
 export interface IConfigurationSnippet {
     label: string;
     description: string;

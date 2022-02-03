@@ -5,8 +5,8 @@
 /* eslint-disable no-unused-expressions */
 import * as path from 'path';
 import {
-    TaskDefinition, Task, TaskGroup, ShellExecution, Uri, workspace,
-    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder
+    TaskDefinition, Task, TaskGroup, ShellExecution, workspace,
+    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks
 } from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
@@ -31,11 +31,12 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
 
 export class CppBuildTask extends Task {
     detail?: string;
+    existing?: boolean;
+    isDefault?: boolean;
 }
 
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
-    static CppBuildSourceStr: string = "C/C++";
 
     constructor() { }
 
@@ -68,22 +69,14 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks for header files.
-        const fileExtLower: string = fileExt.toLowerCase();
-        const isHeader: boolean = !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
+        const isHeader: boolean = util.isHeaderFile (editor.document.uri);
         if (isHeader) {
             return emptyTasks;
         }
 
         // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
-        let fileIsCpp: boolean;
-        let fileIsC: boolean;
-        if (fileExt === ".C") { // ".C" file extensions are both C and C++.
-            fileIsCpp = true;
-            fileIsC = true;
-        } else {
-            fileIsCpp = [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
-            fileIsC = fileExtLower === ".c";
-        }
+        const fileIsCpp: boolean = util.isCppFile(editor.document.uri);
+        const fileIsC: boolean = util.isCFile(editor.document.uri);
         if (!(fileIsCpp || fileIsC)) {
             return emptyTasks;
         }
@@ -169,8 +162,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
-            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(CppBuildTaskProvider.CppBuildSourceStr)) ?
-                CppBuildTaskProvider.CppBuildSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
+            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStr)) ?
+                ext.CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const isWindows: boolean = os.platform() === 'win32';
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
@@ -190,21 +183,10 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         const editor: TextEditor | undefined = window.activeTextEditor;
         const folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
-        // Check uri exists (single-mode files are ignored).
-        if (folder) {
-            const activeClient: Client = ext.getActiveClient();
-            const uri: Uri | undefined = activeClient.RootUri;
-            if (!uri) {
-                throw new Error("No client URI found in getBuildTasks()");
-            }
-            if (!workspace.getWorkspaceFolder(uri)) {
-                throw new Error("No target WorkspaceFolder found in getBuildTasks()");
-            }
-        }
 
         const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
-        const task: CppBuildTask = new Task(definition, scope, definition.label, CppBuildTaskProvider.CppBuildSourceStr,
+        const task: CppBuildTask = new Task(definition, scope, definition.label, ext.CppSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
                 new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, taskUsesActiveFile)
@@ -230,22 +212,29 @@ export class CppBuildTaskProvider implements TaskProvider {
                 args: task.args,
                 options: task.options
             };
-            const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, "C/C++");
+            const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
             cppBuildTask.detail = task.detail;
+            cppBuildTask.existing = true;
+            if (task.group.isDefault) {
+                cppBuildTask.isDefault = true;
+            }
             return cppBuildTask;
         });
         return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
-    public async ensureBuildTaskExists(taskLabel: string): Promise<void> {
+    public async checkBuildTaskExists(taskLabel: string, createTask: boolean = false): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson();
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
         // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
-        let selectedTask: any = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-        if (selectedTask) {
-            return;
+        let selectedTask: any;
+        if (!createTask) {
+            selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+            if (selectedTask) {
+                return;
+            }
         }
 
         // Create the task which should be created based on the selected "debug configuration".
@@ -254,7 +243,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         selectedTask = buildTasks.find(task => task.name === normalizedLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
-            throw new Error("Failed to get selectedTask in ensureBuildTaskExists()");
+            throw new Error("Failed to get selectedTask in checkBuildTaskExists()");
         } else {
             selectedTask.definition.label = taskLabel;
             selectedTask.name = taskLabel;
@@ -283,16 +272,30 @@ export class CppBuildTaskProvider implements TaskProvider {
         const settings: OtherSettings = new OtherSettings();
         const tasksJsonPath: string | undefined = this.getTasksJsonPath();
         if (!tasksJsonPath) {
-            throw new Error("Failed to get tasksJsonPath in ensureBuildTaskExists()");
+            throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
         }
 
         await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
     }
 
-    public async ensureDebugConfigExists(configName: string): Promise<void> {
+    public async runBuildTask(taskLabel: string): Promise<void> {
+        const buildTasks: CppBuildTask[] = await this.getTasks(true);
+        const task: CppBuildTask | undefined = buildTasks.find(task => task.name === taskLabel);
+        if (!task) {
+            throw new Error("Failed to find task in runBuildTask()");
+        } else {
+            const resolvedTask: CppBuildTask | undefined = this.resolveTask(task);
+            if (resolvedTask) {
+                await tasks.executeTask(resolvedTask);
+            }
+        }
+
+    }
+
+    public async checkDebugConfigExists(configName: string): Promise<void> {
         const launchJsonPath: string | undefined = this.getLaunchJsonPath();
         if (!launchJsonPath) {
-            throw new Error("Failed to get launchJsonPath in ensureDebugConfigExists()");
+            throw new Error("Failed to get launchJsonPath in checkDebugConfigExists()");
         }
 
         const rawLaunchJson: any = await this.getRawLaunchJson();
@@ -305,23 +308,6 @@ export class CppBuildTaskProvider implements TaskProvider {
             throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
         }
         return;
-    }
-
-    // Provide a unique name for a newly defined tasks, which is different from tasks' names in tasks.json.
-    public provideUniqueTaskLabel(label: string, buildTasksJson: CppBuildTask[]): string {
-        const taskNameDictionary: {[key: string]: any} = {};
-        buildTasksJson.forEach(task => {
-            taskNameDictionary[task.definition.label] = {};
-        });
-        let newLabel: string = label;
-        let version: number = 0;
-        do {
-            version = version + 1;
-            newLabel = label + ` ver(${version})`;
-
-        } while (taskNameDictionary[newLabel]);
-
-        return newLabel;
     }
 
     private getLaunchJsonPath(): string | undefined {
@@ -341,6 +327,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const path: string | undefined = this.getTasksJsonPath();
         return util.getRawJson(path);
     }
+
 }
 
 class CustomBuildTaskTerminal implements Pseudoterminal {
@@ -354,7 +341,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        if (this.taskUsesActiveFile && !util.fileIsCOrCppSource(window.activeTextEditor?.document.fileName)) {
+        if (this.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
             return;
