@@ -2,9 +2,9 @@
 
 ##  Version 1.8.4: February 7, 2022
 ### Bug Fixes
-* Remove `Offline Installation` section from README.md [#8714](https://github.com/microsoft/vscode-cpptools/pull/8714)
 * Suppress incorrect warnings on ARM64 macOS [#8756](https://github.com/microsoft/vscode-cpptools/issues/8756)
 * Fix debugger regressions [#8760](https://github.com/microsoft/vscode-cpptools/issues/8760)
+* Remove `Offline Installation` section from README.md [#8769](https://github.com/microsoft/vscode-cpptools/pull/8769)
 
 ##  Version 1.8.2: January 31, 2022
 ### New Features
