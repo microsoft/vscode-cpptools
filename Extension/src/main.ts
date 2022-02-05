@@ -107,13 +107,18 @@ async function makeBinariesExecutable(): Promise<void> {
         commonBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
         if (process.platform === "darwin") {
             const macBinaries: string[] = [
-                "./debugAdapters/lldb-mi/bin/lldb-mi",
-                "./debugAdapters/lldb/bin/debugserver",
-                "./debugAdapters/lldb/bin/lldb-mi",
-                "./debugAdapters/lldb/bin/lldb-argdumper",
-                "./debugAdapters/lldb/bin/lldb-launcher"
+                "./debugAdapters/lldb-mi/bin/lldb-mi"
             ];
             macBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+            if (os.arch() === "x64") {
+                const oldMacBinaries: string[] = [
+                    "./debugAdapters/lldb/bin/debugserver",
+                    "./debugAdapters/lldb/bin/lldb-mi",
+                    "./debugAdapters/lldb/bin/lldb-argdumper",
+                    "./debugAdapters/lldb/bin/lldb-launcher"
+                ];
+                oldMacBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+            }
         }
     }
     await Promise.all(promises);
