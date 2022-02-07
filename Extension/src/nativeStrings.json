@@ -235,5 +235,8 @@
     },
     "unable_to_access_browse_database": "Unable to access browse database. ({0})",
     "default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode was changed because it didn't match the detected compiler.  Consider setting \"compilerPath\" instead.  Set \"compilerPath\" to \"\" to disable detection of system includes and defines.",
-    "clear_code_analysis_squiggles": "Clear code analysis squiggles"
+    "clear_code_analysis_squiggles": "Clear code analysis squiggles",
+    "multiple_locations_note": "(Multiple locations)",
+    "folder_tag": "Folder",
+    "file_tag": "File"
 }
