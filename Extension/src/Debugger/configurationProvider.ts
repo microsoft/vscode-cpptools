@@ -142,7 +142,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
         const configuredBuildTasks: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
 
         let buildTasks: CppBuildTask[] = [];
-        // Remove the tasks that are already configured once in in tasks.json.
+        // Remove the tasks that are already configured once in tasks.json.
         this.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
         const dedupDetectedBuildTasks: CppBuildTask[] = this.detectedBuildTasks.filter(taskDetected => {
             let isAlreadyConfigured: boolean = false;
