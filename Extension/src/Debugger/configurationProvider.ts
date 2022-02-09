@@ -756,8 +756,6 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
         }
     }
 
-    
-
     try {
         // Check if the debug configuration exists in launch.json.
         await cppBuildTaskProvider.checkDebugConfigExists(selection.configuration.name);
