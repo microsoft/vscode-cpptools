@@ -689,6 +689,7 @@ export interface Client {
     RootPath: string;
     RootRealPath: string;
     RootUri?: vscode.Uri;
+    RootFolder?: vscode.WorkspaceFolder;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };

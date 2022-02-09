@@ -116,22 +116,29 @@ export class ClientCollection {
         if (key) {
             this.languageClients.delete(key);
 
+            const newClient: cpptools.Client = this.getClientForFolder(client.RootFolder);
+
             if (transferFileOwnership) {
                 // This will create a new Client for the workspace since we removed the old one from this.languageClients.
                 client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
                 client.TrackedDocuments.clear();
-            } else {
-                // Create an empty client that will continue to "own" files matching this workspace, but ignore all messages from VS Code.
-                this.languageClients.set(key, cpptools.createNullClient());
             }
 
-            if (this.activeClient === client && this.activeDocument) {
-                this.activeClient = this.getClientFor(this.activeDocument.uri);
-                this.activeClient.activeDocumentChanged(this.activeDocument);
+            if (this.activeClient === client) {
+                if (this.activeDocument) {
+                    this.activeClient = this.getClientFor(this.activeDocument.uri);
+                    this.activeClient.activeDocumentChanged(this.activeDocument);
+                } else {
+                    this.activeClient = newClient;
+                }
+            }
+
+            if (this.defaultClient === client) {
+                this.defaultClient = newClient;
             }
 
             client.dispose();
-            return this.languageClients.get(key);
+            return newClient;
         } else {
             console.assert(key, "unable to locate language client");
             return undefined;
@@ -164,6 +171,10 @@ export class ClientCollection {
                         // this.activeClient.selectionChanged(Range.create(vscode.window.activeTextEditor.selection.start, vscode.window.activeTextEditor.selection.end);
                     }
 
+                    if (this.defaultClient === client) {
+                        this.defaultClient = this.getClientForFolder();
+                    }
+
                     client.dispose();
                 }
             });
@@ -190,6 +201,10 @@ export class ClientCollection {
 
     public getClientFor(uri: vscode.Uri): cpptools.Client {
         const folder: vscode.WorkspaceFolder | undefined = uri ? vscode.workspace.getWorkspaceFolder(uri) : undefined;
+        return this.getClientForFolder(folder);
+    }
+
+    public getClientForFolder(folder?: vscode.WorkspaceFolder): cpptools.Client {
         if (!folder) {
             return this.defaultClient;
         } else {
