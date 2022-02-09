@@ -104,33 +104,26 @@ export class ClientCollection {
     /**
      * creates a new client to replace one that crashed.
      */
-    public replace(client: cpptools.Client, transferFileOwnership: boolean): cpptools.Client | undefined {
-        let key: string | undefined;
-        for (const pair of this.languageClients) {
-            if (pair[1] === client) {
-                key = pair[0];
-                break;
-            }
-        }
+    public recreateClients(transferFileOwnership: boolean): void {
 
-        if (key) {
-            this.languageClients.delete(key);
+        // Swap out the map, so we are not changing it while iterating over it.
+        const oldLanguageClients: Map<string, cpptools.Client> = this.languageClients;
+        this.languageClients = new Map<string, cpptools.Client>();
 
-            const newClient: cpptools.Client = this.getClientForFolder(client.RootFolder);
+        for (const pair of oldLanguageClients) {
+            const key: string = pair[0];
+            const client: cpptools.Client = pair[1];
 
+            let newClient: cpptools.Client;
             if (transferFileOwnership) {
-                // This will create a new Client for the workspace since we removed the old one from this.languageClients.
+                newClient = this.getClientForFolder(client.RootFolder);
                 client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
-                client.TrackedDocuments.clear();
+            } else {
+                newClient = cpptools.createNullClient();
             }
 
             if (this.activeClient === client) {
-                if (this.activeDocument) {
-                    this.activeClient = this.getClientFor(this.activeDocument.uri);
-                    this.activeClient.activeDocumentChanged(this.activeDocument);
-                } else {
-                    this.activeClient = newClient;
-                }
+                this.activeClient = newClient;
             }
 
             if (this.defaultClient === client) {
@@ -138,10 +131,13 @@ export class ClientCollection {
             }
 
             client.dispose();
-            return newClient;
-        } else {
-            console.assert(key, "unable to locate language client");
-            return undefined;
+            this.languageClients.set(key, newClient);
+        }
+
+        // In case a folder was removed and the active document now needs to be associated with a different folder.
+        if (this.activeDocument) {
+            this.activeClient = this.getClientFor(this.activeDocument.uri);
+            this.activeClient.activeDocumentChanged(this.activeDocument);
         }
     }
 
@@ -161,18 +157,15 @@ export class ClientCollection {
                     // Transfer ownership of the client's documents to another client.
                     // (this includes calling textDocument/didOpen on the new client so that the server knows it's open too)
                     client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
-                    client.TrackedDocuments.clear();
 
                     if (this.activeClient === client && this.activeDocument) {
                         // Need to make a different client the active client.
                         this.activeClient = this.getClientFor(this.activeDocument.uri);
                         this.activeClient.activeDocumentChanged(this.activeDocument);
-                        // may not need this, the navigation UI should not have changed.
-                        // this.activeClient.selectionChanged(Range.create(vscode.window.activeTextEditor.selection.start, vscode.window.activeTextEditor.selection.end);
                     }
 
                     if (this.defaultClient === client) {
-                        this.defaultClient = this.getClientForFolder();
+                        this.defaultClient = this.getClientFor(folder.uri);
                     }
 
                     client.dispose();

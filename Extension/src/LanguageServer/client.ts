@@ -1483,15 +1483,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.forEach(client => { allClients.replace(client, true); });
+                        allClients.recreateClients(true);
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.forEach(client => { allClients.replace(client, false); });
+                            allClients.recreateClients(false);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.forEach(client => { allClients.replace(client, true); });
+                            allClients.recreateClients(true);
                         }
                     }
                     return CloseAction.DoNotRestart;
