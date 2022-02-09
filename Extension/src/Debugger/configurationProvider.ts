@@ -725,7 +725,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
     }
 
     if (!selection) {
-        Telemetry.logDebuggerEvent(event + "UserCancelled");
+        Telemetry.logDebuggerEvent("launchPlayButton", {  "type": event, "cancelled": "true" });
         return; // User canceled it.
     }
     if (selection.label.startsWith("cl.exe")) {
@@ -751,7 +751,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
             if (e && e.message === util.failedToParseJson) {
                 vscode.window.showErrorMessage(util.failedToParseJson);
             }
-            Telemetry.logDebuggerEvent(event , { "success": "false" });
+            Telemetry.logDebuggerEvent("launchPlayButton", {  "type": event, "success": "false" });
             return;
         }
     }
@@ -761,16 +761,16 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
         await cppBuildTaskProvider.checkDebugConfigExists(selection.configuration.name);
         try {
             await vscode.debug.startDebugging(folder, selection.configuration.name, {noDebug: !debugModeOn});
-            Telemetry.logDebuggerEvent(event, { "success": "true" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": event, "success": "true" });
         } catch (e) {
-            Telemetry.logDebuggerEvent(event, { "success": "false" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": event, "success": "false" });
         }
     } catch (e) {
         try {
             await vscode.debug.startDebugging(folder, selection.configuration, {noDebug: !debugModeOn});
-            Telemetry.logDebuggerEvent(event, { "success": "true" });
+            Telemetry.logDebuggerEvent("launchPlayButton", {  "type": event, "success": "true" });
         } catch (e) {
-            Telemetry.logDebuggerEvent(event, { "success": "false" });
+            Telemetry.logDebuggerEvent("launchPlayButton", {  "type": event, "success": "false" });
         }
     }
 }
