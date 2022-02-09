@@ -193,6 +193,10 @@ export class ClientCollection {
                 }
             });
 
+            // Note: VS Code currently reloads the extension whenever the primary (first) workspace folder is added or removed.
+            // So the following handling of changes to defaultClient are likely unnecessary, unless the behavior of
+            // VS Code changes. The handling of changes to activeClient are still needed.
+
             if (oldDefaultClient) {
                 const uri: vscode.Uri | undefined = oldDefaultClient.RootUri;
                 // uri will be set.
