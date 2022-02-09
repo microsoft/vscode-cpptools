@@ -148,6 +148,10 @@ export class ClientCollection {
         }
 
         if (e !== undefined) {
+            let oldDefaultClient: cpptools.Client | undefined;
+            let needNewDefaultClient: boolean = false;
+            let needNewActiveClient: boolean = false;
+
             e.removed.forEach(folder => {
                 const path: string = util.asFolder(folder.uri);
                 const client: cpptools.Client | undefined = this.languageClients.get(path);
@@ -158,19 +162,25 @@ export class ClientCollection {
                     // (this includes calling textDocument/didOpen on the new client so that the server knows it's open too)
                     client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
 
-                    if (this.activeClient === client && this.activeDocument) {
-                        // Need to make a different client the active client.
-                        this.activeClient = this.getClientFor(this.activeDocument.uri);
-                        this.activeClient.activeDocumentChanged(this.activeDocument);
+                    if (this.activeClient === client) {
+                        if (this.activeDocument) {
+                            // Need to make a different client the active client.
+                            this.activeClient = this.getClientFor(this.activeDocument.uri);
+                            this.activeClient.activeDocumentChanged(this.activeDocument);
+                        } else {
+                            needNewActiveClient = true;
+                        }
                     }
 
+                    // Defer selecting a new default client until all adds and removes have been processed.
                     if (this.defaultClient === client) {
-                        this.defaultClient = this.getClientFor(folder.uri);
+                        oldDefaultClient = client;
+                    } else {
+                        client.dispose();
                     }
-
-                    client.dispose();
                 }
             });
+
             e.added.forEach(folder => {
                 const path: string = util.asFolder(folder.uri);
                 const client: cpptools.Client | undefined = this.languageClients.get(path);
@@ -182,6 +192,47 @@ export class ClientCollection {
                     defaultClient.sendAllSettings();
                 }
             });
+
+            if (oldDefaultClient) {
+                const uri: vscode.Uri | undefined = oldDefaultClient.RootUri;
+                // uri will be set.
+                if (uri) {
+                    this.defaultClient = this.getClientFor(uri);
+                    needNewDefaultClient = this.defaultClient === oldDefaultClient;
+                }
+                oldDefaultClient.dispose();
+            } else {
+                const defaultDefaultClient: cpptools.Client | undefined = this.languageClients.get(defaultClientKey);
+                if (defaultDefaultClient) {
+                    // If there is an entry in languageClients for defaultClientKey, we were not previously tracking any workspace folders.
+                    this.languageClients.delete(defaultClientKey);
+                    needNewDefaultClient = true;
+                    needNewActiveClient = this.activeClient === this.defaultClient;
+                }
+            }
+
+            if (needNewDefaultClient || needNewActiveClient) {
+                // Use the first workspaceFolder, if any.
+                if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+                    const key: string = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
+                    const client: cpptools.Client | undefined = this.languageClients.get(key);
+                    if (!client) {
+                        // This should not occur.  If there is a workspace folder, we should have a client for it by now.
+                        throw new Error("Failed to construct default client");
+                    }
+                    if (needNewDefaultClient) {
+                        this.defaultClient = client;
+                    }
+                    if (needNewActiveClient) {
+                        this.activeClient = client;
+                    }
+                } else {
+                    // The user removed the last workspace folder. Create a new default defaultClient/activeClient.
+                    this.activeClient = cpptools.createClient(this);
+                    this.defaultClient = this.activeClient;
+                    this.languageClients.set(defaultClientKey, this.defaultClient);
+                }
+            }
         }
     }
 
