@@ -75,7 +75,6 @@
     "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
     "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
     "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
-    "onDebugInitialConfigurations",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -2757,7 +2756,6 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
-            "default": {},
             "required": [
               "program"
             ],
@@ -3432,7 +3430,6 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
-            "default": {},
             "required": [
               "program",
               "cwd"

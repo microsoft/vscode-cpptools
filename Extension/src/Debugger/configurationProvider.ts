@@ -31,15 +31,15 @@ function isDebugLaunchStr(str: string): boolean {
  * Ensures that the selected configuration's preLaunchTask (if existent) is populated in the user's task.json.
  * Automatically starts debugging for "Build and Debug" configurations.
  */
-export class QuickPickConfigurationProvider implements vscode.DebugConfigurationProvider {
-    private underlyingProvider: CppConfigurationProvider;
+export class CppDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
+    private underlyingDbgConfigProvider: UnderlyingDbgConfigProvider;
 
-    public constructor(provider: CppConfigurationProvider) {
-        this.underlyingProvider = provider;
+    public constructor(dbgConfigprovider: UnderlyingDbgConfigProvider) {
+        this.underlyingDbgConfigProvider = dbgConfigprovider;
     }
 
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let configs: vscode.DebugConfiguration[] | null | undefined = this.underlyingProvider.provideDebugConfigurations ? await this.underlyingProvider.provideDebugConfigurations(folder, token) : undefined;
+        let configs: vscode.DebugConfiguration[] | null | undefined = await this.underlyingDbgConfigProvider.provideDebugConfigurations(folder, token);
         if (!configs) {
             configs = [];
         }
@@ -98,40 +98,45 @@ export class QuickPickConfigurationProvider implements vscode.DebugConfiguration
     }
 
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        return this.underlyingProvider.resolveDebugConfiguration ? this.underlyingProvider.resolveDebugConfiguration(folder, config, token) : undefined;
+        return this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, config, token);
     }
 
     resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        return this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables ? this.underlyingProvider.resolveDebugConfigurationWithSubstitutedVariables(folder, config, token) : undefined;
+        return this.underlyingDbgConfigProvider.resolveDebugConfigurationWithSubstitutedVariables(folder, config, token);
     }
 }
 
-export class CppConfigurationProvider implements vscode.DebugConfigurationProvider {
+export class UnderlyingDbgConfigProvider{
     private type: DebuggerType;
-    private provider: IConfigurationAssetProvider;
+    private assetProvider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
-    private detectedBuildTasks: CppBuildTask[];
+    private static detectedBuildTasks: CppBuildTask[] = [];
     protected static recentBuildTaskLable: string;
 
-    public constructor(provider: IConfigurationAssetProvider, type: DebuggerType) {
-        this.provider = provider;
+    public constructor(assetProvider: IConfigurationAssetProvider, type: DebuggerType) {
+        this.assetProvider = assetProvider;
         this.type = type;
-        this.detectedBuildTasks = [];
+    }
+
+    private async loadDetectedTasks(): Promise<void> {
+        if (!UnderlyingDbgConfigProvider.detectedBuildTasks || UnderlyingDbgConfigProvider.detectedBuildTasks.length === 0) {
+            UnderlyingDbgConfigProvider.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
+        } 
     }
 
     public static get recentBuildTaskLableStr(): string {
-        return CppConfigurationProvider.recentBuildTaskLable;
+        return UnderlyingDbgConfigProvider.recentBuildTaskLable;
     }
 
     public static set recentBuildTaskLableStr(recentTask: string) {
-        CppConfigurationProvider.recentBuildTaskLable = recentTask;
+        UnderlyingDbgConfigProvider.recentBuildTaskLable = recentTask;
     }
 
     /**
 	 * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
 	 */
     async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        const defaultConfig: vscode.DebugConfiguration = this.provider.getInitialConfigurations(this.type).find((config: any) =>
+        const defaultConfig: vscode.DebugConfiguration = this.assetProvider.getInitialConfigurations(this.type).find((config: any) =>
             isDebugLaunchStr(config.name) && config.request === "launch");
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
@@ -142,9 +147,9 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
         const configuredBuildTasks: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
 
         let buildTasks: CppBuildTask[] = [];
+        await this.loadDetectedTasks();
         // Remove the tasks that are already configured once in tasks.json.
-        this.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
-        const dedupDetectedBuildTasks: CppBuildTask[] = this.detectedBuildTasks.filter(taskDetected => {
+        const dedupDetectedBuildTasks: CppBuildTask[] = UnderlyingDbgConfigProvider.detectedBuildTasks.filter(taskDetected => {
             let isAlreadyConfigured: boolean = false;
             for (const taskJson of configuredBuildTasks) {
                 if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
@@ -157,7 +162,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
         buildTasks = buildTasks.concat(configuredBuildTasks, dedupDetectedBuildTasks);
 
         if (buildTasks.length === 0) {
-            return Promise.resolve(this.provider.getInitialConfigurations(this.type));
+            return Promise.resolve([]);
         }
 
         // Filter out build tasks that don't match the currently selected debug configuration type.
@@ -421,7 +426,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
 
                 // show error message if single lines cannot get parsed
                 if (parsedFile.Warning) {
-                    CppConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
+                    UnderlyingDbgConfigProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
                 }
 
                 config.environment = parsedFile.Env;
@@ -500,15 +505,15 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
     }
 }
 
-export class CppVsDbgConfigurationProvider extends CppConfigurationProvider {
-    public constructor(provider: IConfigurationAssetProvider) {
-        super(provider, DebuggerType.cppvsdbg);
+export class CppVsDbgConfigProvider extends UnderlyingDbgConfigProvider {
+    public constructor(assetProvider: IConfigurationAssetProvider) {
+        super(assetProvider, DebuggerType.cppvsdbg);
     }
 }
 
-export class CppDbgConfigurationProvider extends CppConfigurationProvider {
-    public constructor(provider: IConfigurationAssetProvider) {
-        super(provider, DebuggerType.cppdbg);
+export class CppDbgConfigProvider extends UnderlyingDbgConfigProvider {
+    public constructor(assetProvider: IConfigurationAssetProvider) {
+        super(assetProvider, DebuggerType.cppdbg);
     }
 }
 
@@ -677,7 +682,7 @@ export function buildAndDebugActiveFileStr(): string {
     return `${localize("build.and.debug.active.file", 'Build and debug active file')}`;
 }
 
-export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigurationProvider | null, cppDbgProvider: CppDbgConfigurationProvider, debugModeOn: boolean = true): Promise<void> {
+export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigProvider | null, cppDbgProvider: CppDbgConfigProvider, debugModeOn: boolean = true): Promise<void> {
     const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
 
     if (!util.isCppOrCFile(textEditor.document.uri)) {
@@ -711,7 +716,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
     } else {
         let sortedItems: MenuItem[] = [];
         // Find the recently used task and place it at the top of quickpick list.
-        const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === CppConfigurationProvider.recentBuildTaskLableStr);
+        const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === UnderlyingDbgConfigProvider.recentBuildTaskLableStr);
         if (recentTask.length !== 0) {
             recentTask[0].detail = TaskConfigStatus.recentlyUsed;
             sortedItems.push(recentTask[0]);
@@ -736,11 +741,11 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
         try {
             if (folder) {
                 await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
-                CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                UnderlyingDbgConfigProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
             } else {
                 // In case of single mode file, remove the preLaunch task from the debug configuration and run it here instead.
                 await cppBuildTaskProvider.runBuildTask(selection.configuration.preLaunchTask);
-                CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                UnderlyingDbgConfigProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
                 selection.configuration.preLaunchTask = undefined;
             }
         } catch (errJS) {
