@@ -2582,7 +2582,8 @@
           "tags": [
             "experimental"
           ],
-          "description": "%c_cpp.configuration.debugShortcut.description%"
+          "description": "%c_cpp.configuration.debugShortcut.description%",
+          "scope": "application"
         }
       }
     },
