@@ -1667,6 +1667,14 @@ export class DefaultClient implements Client {
                     if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
                         util.promptForReloadWindowDueToSettingsChange();
                     }
+                    if (changedSettings["debugShortcut"]) {
+                        if (changedSettings["debugShortcut"] === "true") {
+                            telemetry.logDebuggerEvent("ShowDebugShortcut");
+                        } else {
+                            telemetry.logDebuggerEvent("HideDebugShortcut");
+                        }
+                    }
+
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
