@@ -203,6 +203,9 @@ export class ClientCollection {
                 if (uri) {
                     this.defaultClient = this.getClientFor(uri);
                     needNewDefaultClient = this.defaultClient === oldDefaultClient;
+                    if (needNewDefaultClient) {
+                        needNewActiveClient = this.activeClient === oldDefaultClient;
+                    }
                 }
                 oldDefaultClient.dispose();
             } else {
