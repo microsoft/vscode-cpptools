@@ -55,6 +55,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         return undefined;
     }
 
+    public resolveInsiderTask(_task: CppBuildTask): CppBuildTask | undefined {
+        const definition: CppBuildTaskDefinition = <any>_task.definition;
+        _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
+        return _task;
+    }
+
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
     public async getTasks(appendSourceToName: boolean): Promise<CppBuildTask[]> {
         const editor: TextEditor | undefined = window.activeTextEditor;
@@ -162,11 +168,18 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
+            const isWindows: boolean = os.platform() === 'win32';
+            const isMacARM64: boolean = (os.platform() === 'darwin' && os.arch() === 'arm64');
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStr)) ?
                 ext.CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-            const isWindows: boolean = os.platform() === 'win32';
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            const programName: string = isWindows ? filePath + '.exe' : filePath;
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+            if (isMacARM64) {
+                // Workaround to build and debug x86_64 on macARM64 by default.
+                // Remove this workaround when native debugging for macARM64 is supported.
+                args.push('--target=x86_64-apple-darwin-gnu');
+            }
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
@@ -284,9 +297,11 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!task) {
             throw new Error("Failed to find task in runBuildTask()");
         } else {
-            const resolvedTask: CppBuildTask | undefined = this.resolveTask(task);
+            const resolvedTask: CppBuildTask | undefined = this.resolveInsiderTask(task);
             if (resolvedTask) {
                 await tasks.executeTask(resolvedTask);
+            } else {
+                throw new Error("Failed to run resolved task in runBuildTask()");
             }
         }
 

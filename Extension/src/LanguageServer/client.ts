@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands, CppSourceStr } from './extension';
+import { updateLanguageConfigurations, CppSourceStr } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -689,6 +689,7 @@ export interface Client {
     RootPath: string;
     RootRealPath: string;
     RootUri?: vscode.Uri;
+    RootFolder?: vscode.WorkspaceFolder;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
@@ -1004,10 +1005,8 @@ export class DefaultClient implements Client {
                         compilerDefaults = inputCompilerDefaults;
                         this.configuration.CompilerDefaults = compilerDefaults;
 
-                        // Only register file watchers, providers, and the real commands after the extension has finished initializing,
+                        // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-
                         this.registerFileWatcher();
 
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
@@ -1482,15 +1481,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.forEach(client => { allClients.replace(client, true); });
+                        allClients.recreateClients(true);
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.forEach(client => { allClients.replace(client, false); });
+                            allClients.recreateClients(false);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.forEach(client => { allClients.replace(client, true); });
+                            allClients.recreateClients(true);
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -3068,6 +3067,7 @@ export class DefaultClient implements Client {
                 next: next
             };
 
+            await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
                 const p: vscode.Position = new vscode.Position(response.line, response.character);
