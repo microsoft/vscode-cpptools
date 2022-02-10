@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands, CppSourceStr } from './extension';
+import { updateLanguageConfigurations, CppSourceStr } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -1004,10 +1004,8 @@ export class DefaultClient implements Client {
                         compilerDefaults = inputCompilerDefaults;
                         this.configuration.CompilerDefaults = compilerDefaults;
 
-                        // Only register file watchers, providers, and the real commands after the extension has finished initializing,
+                        // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-
                         this.registerFileWatcher();
 
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
@@ -3068,6 +3066,7 @@ export class DefaultClient implements Client {
                 next: next
             };
 
+            await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
                 const p: vscode.Position = new vscode.Position(response.line, response.character);
