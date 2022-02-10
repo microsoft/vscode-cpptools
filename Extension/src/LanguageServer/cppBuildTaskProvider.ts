@@ -168,11 +168,18 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         if (!definition) {
+            const isWindows: boolean = os.platform() === 'win32';
+            const isMacARM64: boolean = (os.platform() === 'darwin' && os.arch() === 'arm64');
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStr)) ?
                 ext.CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-            const isWindows: boolean = os.platform() === 'win32';
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', filePath + '.exe', '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', filePath + (isWindows ? '.exe' : '')];
+            const programName: string = isWindows ? filePath + '.exe' : filePath;
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+            if (isMacARM64) {
+                // Workaround to build and debug x86_64 on macARM64 by default.
+                // Remove this workaround when native debugging for macARM64 is supported.
+                args.push('--target=x86_64-apple-darwin-gnu');
+            }
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
