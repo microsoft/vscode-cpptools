@@ -133,7 +133,6 @@ export class ClientCollection {
             client.dispose();
         }
 
-        // In case a folder was removed and the active document now needs to be associated with a different folder.
         if (this.activeDocument) {
             this.activeClient = this.getClientFor(this.activeDocument.uri);
             await this.activeClient.activeDocumentChanged(this.activeDocument);
@@ -150,7 +149,6 @@ export class ClientCollection {
         if (e !== undefined) {
             let oldDefaultClient: cpptools.Client | undefined;
             let needNewDefaultClient: boolean = false;
-            let needNewActiveClient: boolean = false;
 
             e.removed.forEach(folder => {
                 const path: string = util.asFolder(folder.uri);
@@ -164,7 +162,6 @@ export class ClientCollection {
 
                     if (this.activeClient === client) {
                         this.activeClient.deactivate();
-                        needNewActiveClient = true;
                     }
 
                     // Defer selecting a new default client until all adds and removes have been processed.
@@ -203,12 +200,9 @@ export class ClientCollection {
                     // If there is an entry in languageClients for defaultClientKey, we were not previously tracking any workspace folders.
                     this.languageClients.delete(defaultClientKey);
                     needNewDefaultClient = true;
-                    if (!needNewActiveClient) {
-                        needNewActiveClient = this.activeClient === this.defaultClient;
-                        if (needNewActiveClient) {
-                            // Redundant deactivation should be OK.
-                            this.activeClient.deactivate();
-                        }
+                    if (this.activeClient === this.defaultClient) {
+                        // Redundant deactivation should be OK.
+                        this.activeClient.deactivate();
                     }
                 }
             }
@@ -227,16 +221,27 @@ export class ClientCollection {
                     // The user removed the last workspace folder. Create a new default defaultClient/activeClient
                     // using the same approach as used in the constructor.
                     this.defaultClient = cpptools.createClient(this);
-                    this.activeClient.deactivate();
                     this.languageClients.set(defaultClientKey, this.defaultClient);
-                    this.activeClient = this.defaultClient;
+                    this.defaultClient.deactivate();
+                    if (this.activeDocument) {
+                        // Only change activeClient if it would not be changed by the later check.
+                        this.activeClient.deactivate();
+                        this.activeClient = this.defaultClient;
+                    }
                 }
             }
 
-            if (needNewActiveClient && this.activeDocument) {
-                this.activeClient = this.getClientFor(this.activeDocument.uri);
-                await this.activeClient.activeDocumentChanged(this.activeDocument);
-                this.activeClient.activate();
+            // Ensure the best client for the currently active document is activated.
+            if (this.activeDocument) {
+                const newActiveClient: cpptools.Client = this.getClientFor(this.activeDocument.uri);
+                // If a client is newly created here, it will be activated by default.
+                if (this.activeClient !== newActiveClient) {
+                    // Redundant deactivate should be OK.
+                    this.activeClient.deactivate();
+                    this.activeClient = newActiveClient;
+                    await this.activeClient.activeDocumentChanged(this.activeDocument);
+                    this.activeClient.activate();
+                }
             }
         }
     }
