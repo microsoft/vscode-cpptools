@@ -195,7 +195,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
                 newConfig.console = "externalTerminal";
             }
             const isWindows: boolean = platform === 'win32';
-            const isMacARM64: boolean = (platform === 'macOS' && architecture === 'arm64');
+            const isMacARM64: boolean = (platform === 'darwin' && architecture === 'arm64');
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
