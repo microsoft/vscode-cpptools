@@ -678,7 +678,10 @@ export function buildAndDebugActiveFileStr(): string {
 }
 
 export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvider: CppVsDbgConfigurationProvider | null, cppDbgProvider: CppDbgConfigurationProvider, debugModeOn: boolean = true): Promise<void> {
+
     const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+    const eventType: string = debugModeOn ? "buildAndDebug" : "buildAndRun";
+    const mode: string = folder ? "folder" : "singleMode";
 
     if (!util.isCppOrCFile(textEditor.document.uri)) {
         vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
@@ -724,6 +727,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
     }
 
     if (!selection) {
+        Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "cancelled": "true" });
         return; // User canceled it.
     }
     if (selection.label.startsWith("cl.exe")) {
@@ -732,6 +736,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
             return;
         }
     }
+
     if (selection.configuration.preLaunchTask) {
         try {
             if (folder) {
@@ -748,28 +753,26 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
             if (e && e.message === util.failedToParseJson) {
                 vscode.window.showErrorMessage(util.failedToParseJson);
             }
-            Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "success": "false" });
             return;
         }
     }
-
-    const event: string = debugModeOn ? "buildAndDebug" : "buildAndRun";
 
     try {
         // Check if the debug configuration exists in launch.json.
         await cppBuildTaskProvider.checkDebugConfigExists(selection.configuration.name);
         try {
             await vscode.debug.startDebugging(folder, selection.configuration.name, {noDebug: !debugModeOn});
-            Telemetry.logDebuggerEvent(event, { "success": "true" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "success": "true" });
         } catch (e) {
-            Telemetry.logDebuggerEvent(event, { "success": "false" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "success": "false" });
         }
     } catch (e) {
         try {
             await vscode.debug.startDebugging(folder, selection.configuration, {noDebug: !debugModeOn});
-            Telemetry.logDebuggerEvent(event, { "success": "true" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "success": "true" });
         } catch (e) {
-            Telemetry.logDebuggerEvent(event, { "success": "false" });
+            Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "success": "false" });
         }
     }
 }
