@@ -797,7 +797,8 @@ export class CppProperties {
             try {
                 const configContent: string[] = fs.readFileSync(path, "utf-8").split("\n");
                 return configContent.filter(i => !i.startsWith("#") && i !== "");
-            } catch (err) {
+            } catch (errJS) {
+                const err: Error = errJS as Error;
                 getOutputChannelLogger().appendLine(`Invalid input, cannot resolve .config path: ${err.message}`);
             }
         }
