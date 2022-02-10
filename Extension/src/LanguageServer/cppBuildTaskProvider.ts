@@ -55,6 +55,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         return undefined;
     }
 
+    public resolveInsiderTask(_task: CppBuildTask): CppBuildTask | undefined {
+        const definition: CppBuildTaskDefinition = <any>_task.definition;
+        _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
+        return _task;
+    }
+
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
     public async getTasks(appendSourceToName: boolean): Promise<CppBuildTask[]> {
         const editor: TextEditor | undefined = window.activeTextEditor;
@@ -291,9 +297,11 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!task) {
             throw new Error("Failed to find task in runBuildTask()");
         } else {
-            const resolvedTask: CppBuildTask | undefined = this.resolveTask(task);
+            const resolvedTask: CppBuildTask | undefined = this.resolveInsiderTask(task);
             if (resolvedTask) {
                 await tasks.executeTask(resolvedTask);
+            } else {
+                throw new Error("Failed to run resolved task in runBuildTask()");
             }
         }
 
