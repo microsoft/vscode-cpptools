@@ -166,7 +166,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const isMacARM64: boolean = (os.platform() === 'darwin' && os.arch() === 'arm64');
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStr)) ?
                 ext.CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
-            const filePath = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const programName: string = isWindows ? filePath + '.exe' : filePath;
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
             if (isMacARM64) {
