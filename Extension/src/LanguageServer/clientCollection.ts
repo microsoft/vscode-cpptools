@@ -115,14 +115,13 @@ export class ClientCollection {
 
             let newClient: cpptools.Client;
             if (transferFileOwnership) {
-                newClient = this.createClient(client.RootFolder);
+                newClient = this.createClient(client.RootFolder, true);
                 client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
             } else {
                 newClient = cpptools.createNullClient();
             }
 
             if (this.activeClient === client) {
-                this.activeClient.deactivate();
                 // It cannot be undefined. If there is an active document, we activate it later.
                 this.activeClient = newClient;
             }
@@ -228,6 +227,7 @@ export class ClientCollection {
                     // The user removed the last workspace folder. Create a new default defaultClient/activeClient
                     // using the same approach as used in the constructor.
                     this.defaultClient = cpptools.createClient(this);
+                    this.activeClient.deactivate();
                     this.languageClients.set(defaultClientKey, this.defaultClient);
                     this.activeClient = this.defaultClient;
                 }
