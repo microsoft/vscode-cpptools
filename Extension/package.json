@@ -2475,7 +2475,7 @@
         "C_Cpp.default.dotConfig": {
           "type": "string",
           "default": null,
-          "description": "%c_cpp.configuration.default.dotConfig.description%",
+          "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.updateChannel": {
