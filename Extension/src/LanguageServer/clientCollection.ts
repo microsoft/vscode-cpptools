@@ -163,13 +163,7 @@ export class ClientCollection {
                     client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
 
                     if (this.activeClient === client) {
-                        if (this.activeDocument) {
-                            // Need to make a different client the active client.
-                            this.activeClient = this.getClientFor(this.activeDocument.uri);
-                            this.activeClient.activeDocumentChanged(this.activeDocument);
-                        } else {
-                            needNewActiveClient = true;
-                        }
+                        needNewActiveClient = true;
                     }
 
                     // Defer selecting a new default client until all adds and removes have been processed.
@@ -192,6 +186,12 @@ export class ClientCollection {
                     defaultClient.sendAllSettings();
                 }
             });
+
+            if (needNewActiveClient && this.activeDocument) {
+                this.activeClient = this.getClientFor(this.activeDocument.uri);
+                this.activeClient.activeDocumentChanged(this.activeDocument);
+                needNewActiveClient = false;
+            }
 
             // Note: VS Code currently reloads the extension whenever the primary (first) workspace folder is added or removed.
             // So the following handling of changes to defaultClient are likely unnecessary, unless the behavior of
