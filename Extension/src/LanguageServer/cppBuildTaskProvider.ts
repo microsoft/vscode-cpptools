@@ -163,7 +163,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
-            const isMacARM64: boolean = (os.platform() === 'macOS' && os.architecture() === 'arm64');
+            const isMacARM64: boolean = (os.platform() === 'darwin' && os.arch() === 'arm64');
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStr)) ?
                 ext.CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath = path.join('${fileDirname}', '${fileBasenameNoExtension}');
