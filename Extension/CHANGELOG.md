@@ -3,6 +3,7 @@
 ##  Version 1.9.0: February 10, 2022
 ### New Features
 * Add a build and debug button when `C_Cpp.debugShortcut` is `true`. [#7497](https://github.com/microsoft/vscode-cpptools/issues/7497)
+* The "Build and Debug Active File" command has been split into "Debug C++ file" and "Run C++ file", and has been removed from the context menu.
 
 ### Enhancements
 * Rework how cancelation is processed for semantic tokens and folding operations. [PR #8739](https://github.com/microsoft/vscode-cpptools/pull/8739)
