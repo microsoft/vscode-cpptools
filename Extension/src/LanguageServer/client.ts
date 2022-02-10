@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands } from './extension';
+import { updateLanguageConfigurations, CppSourceStr } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -150,7 +150,7 @@ function showWarning(params: ShowWarningParams): void {
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection("C/C++");
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
@@ -160,7 +160,7 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
         diagnostic.code = d.code;
-        diagnostic.source = "C/C++";
+        diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -201,7 +201,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         } else {
             diagnostic.code = d.code;
         }
-        diagnostic.source = "C/C++";
+        diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -416,7 +416,6 @@ interface TextEdit {
 
 export interface GetFoldingRangesParams {
     uri: string;
-    id: number;
 }
 
 export enum FoldingRangeKind {
@@ -436,13 +435,8 @@ export interface GetFoldingRangesResult {
     ranges: CppFoldingRange[];
 }
 
-interface AbortRequestParams {
-    id: number;
-}
-
 export interface GetSemanticTokensParams {
     uri: string;
-    id: number;
 }
 
 interface SemanticToken {
@@ -572,7 +566,6 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
-const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
 const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runCodeAnalysis');
 
 // Notifications from the server
@@ -696,6 +689,7 @@ export interface Client {
     RootPath: string;
     RootRealPath: string;
     RootUri?: vscode.Uri;
+    RootFolder?: vscode.WorkspaceFolder;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
@@ -790,8 +784,6 @@ export class DefaultClient implements Client {
         { scheme: 'file', language: 'cuda-cpp' }
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
-
-    public static abortRequestId: number = 0;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -954,7 +946,7 @@ export class DefaultClient implements Client {
                                     uri: document.uri.toString()
                                 };
 
-                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params);
+                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
                                 const resultCodeActions: vscode.CodeAction[] = [];
 
                                 // Convert to vscode.CodeAction array
@@ -1013,10 +1005,8 @@ export class DefaultClient implements Client {
                         compilerDefaults = inputCompilerDefaults;
                         this.configuration.CompilerDefaults = compilerDefaults;
 
-                        // Only register file watchers, providers, and the real commands after the extension has finished initializing,
+                        // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-
                         this.registerFileWatcher();
 
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
@@ -1491,15 +1481,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.forEach(client => { allClients.replace(client, true); });
+                        allClients.recreateClients(true);
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.forEach(client => { allClients.replace(client, false); });
+                            allClients.recreateClients(false);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.forEach(client => { allClients.replace(client, true); });
+                            allClients.recreateClients(true);
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -1718,6 +1708,9 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -2085,7 +2078,7 @@ export class DefaultClient implements Client {
 
     private isExternalHeader(uri: vscode.Uri): boolean {
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        return !rootUri || (util.isHeader(uri) && !uri.toString().startsWith(rootUri.toString()));
+        return !rootUri || (util.isHeaderFile(uri) && !uri.toString().startsWith(rootUri.toString()));
     }
 
     public getCurrentConfigName(): Thenable<string | undefined> {
@@ -2654,6 +2647,7 @@ export class DefaultClient implements Client {
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2674,6 +2668,8 @@ export class DefaultClient implements Client {
                     });
                 }
             }
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -3071,6 +3067,7 @@ export class DefaultClient implements Client {
                 next: next
             };
 
+            await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
                 const p: vscode.Position = new vscode.Position(response.line, response.character);
@@ -3231,13 +3228,6 @@ export class DefaultClient implements Client {
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
-    }
-
-    public abortRequest(id: number): void {
-        const params: AbortRequestParams = {
-            id: id
-        };
-        languageClient.sendNotification(AbortRequestNotification, params);
     }
 }
 

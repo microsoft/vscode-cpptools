@@ -1,5 +1,27 @@
 # C/C++ for Visual Studio Code Change Log
 
+=======
+##  Version 1.9.0: February 10, 2022
+### New Features
+* Add a build and debug button when `C_Cpp.debugShortcut` is `true`. [#7497](https://github.com/microsoft/vscode-cpptools/issues/7497)
+
+### Enhancements
+* Rework how cancelation is processed for semantic tokens and folding operations. [PR #8739](https://github.com/microsoft/vscode-cpptools/pull/8739)
+
+### Workarounds
+* Temporarily make x86_64 as default build and debugging target to unblock debugging on Apple Silicon (M1 chip). [#8755](https://github.com/microsoft/vscode-cpptools/issues/8755)
+
+### Bug Fixes
+* Fix some IntelliSense parsing bugs. [#5117](https://github.com/microsoft/vscode-cpptools/issues/5117)
+* Fix IntelliSense process crashes caused by a stack overflow on Mac. [#7215](https://github.com/microsoft/vscode-cpptools/issues/7215), [#8653](https://github.com/microsoft/vscode-cpptools/issues/8653)
+* Fix exclusions not applying during tag parsing of non-recursive dependent includes. [#8702](https://github.com/microsoft/vscode-cpptools/issues/8702).
+* Fix excludes applying to cases it should not when running code analysis. [#8724](https://github.com/microsoft/vscode-cpptools/issues/8724)
+* Fix some system defines being incorrectly removed when running code analysis. [#8740](https://github.com/microsoft/vscode-cpptools/issues/8740)
+* Fix random compiler query, clang-tidy, or clang-format failure on Windows. [#8764](https://github.com/microsoft/vscode-cpptools/issues/8764)
+* Fix incorrect crash recovery with multiroot. [#8762](https://github.com/microsoft/vscode-cpptools/issues/8762)
+* Fix invoking commands before cpptools is activated. [#8785](https://github.com/microsoft/vscode-cpptools/issues/8785)
+* Fix some IntelliSense crashes.
+
 ##  Version 1.8.4: February 7, 2022
 ### Bug Fixes
 * Suppress incorrect warnings on ARM64 macOS. [#8756](https://github.com/microsoft/vscode-cpptools/issues/8756)

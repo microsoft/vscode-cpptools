@@ -19,18 +19,15 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
         await this.client.awaitUntilLanguageClientReady();
         const uriString: string = document.uri.toString();
-        // First check the token cache to see if we already have results for that file and version
+        // First check the semantic token cache to see if we already have results for that file and version
         const cache: [number, vscode.SemanticTokens] | undefined = this.tokenCaches.get(uriString);
         if (cache && cache[0] === document.version) {
             return cache[1];
         } else {
-            token.onCancellationRequested(_e => this.client.abortRequest(id));
-            const id: number = ++DefaultClient.abortRequestId;
             const params: GetSemanticTokensParams = {
-                id: id,
                 uri: uriString
             };
-            const tokensResult: GetSemanticTokensResult = await this.client.languageClient.sendRequest(GetSemanticTokensRequest, params);
+            const tokensResult: GetSemanticTokensResult = await this.client.languageClient.sendRequest(GetSemanticTokensRequest, params, token);
             if (tokensResult.canceled) {
                 throw new vscode.CancellationError();
             } else {
@@ -38,8 +35,8 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
                     throw new vscode.CancellationError();
                 } else {
                     const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
-                    tokensResult.tokens.forEach((token) => {
-                        builder.push(token.line, token.character, token.length, token.type, token.modifiers);
+                    tokensResult.tokens.forEach((semanticToken) => {
+                        builder.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
                     });
                     const tokens: vscode.SemanticTokens = builder.build();
                     this.tokenCaches.set(uriString, [tokensResult.fileVersion, tokens]);
