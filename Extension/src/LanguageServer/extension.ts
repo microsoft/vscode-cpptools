@@ -276,6 +276,8 @@ export async function activate(): Promise<void> {
     clients.ActiveClient.notifyWhenLanguageClientReady(() => {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
+
+    registerCommands();
 }
 
 export function updateLanguageConfigurations(): void {
@@ -401,14 +403,7 @@ function onInterval(): void {
 /**
  * registered commands
  */
-let commandsRegistered: boolean = false;
-
 export function registerCommands(): void {
-    if (commandsRegistered) {
-        return;
-    }
-
-    commandsRegistered = true;
     disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
