@@ -36,6 +36,10 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                     }
                 }
             };
+            // We do not currently pass the CancellationToken to sendRequest
+            // because there is not currently cancellation logic for formatting
+            // in the native process. Formatting is currently done directly in
+            // message handling thread.
             const textEdits: any = await this.client.languageClient.sendRequest(FormatDocumentRequest, params);
             const results: vscode.TextEdit[] = [];
             textEdits.forEach((textEdit: any) => {
