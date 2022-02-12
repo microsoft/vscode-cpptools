@@ -746,6 +746,7 @@ export interface Client {
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
+    sendAllSettings(): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -1481,15 +1482,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.recreateClients(true);
+                        allClients.recreateClients();
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.recreateClients(false);
+                            allClients.recreateClients(true);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.recreateClients(true);
+                            allClients.recreateClients();
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -3319,5 +3320,6 @@ class NullClient implements Client {
         this.stringEvent.dispose();
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
+    sendAllSettings(): void { }
     sendDidChangeSettings(settings: any): void { }
 }
