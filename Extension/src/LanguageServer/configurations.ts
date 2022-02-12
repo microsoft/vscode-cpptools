@@ -88,6 +88,7 @@ export interface ConfigurationErrors {
     macFrameworkPath?: string;
     forcedInclude?: string;
     compileCommands?: string;
+    dotConfig?: string;
     browsePath?: string;
     databaseFilename?: string;
 }
@@ -1472,6 +1473,7 @@ export class CppProperties {
         // Validate files
         errors.forcedInclude = this.validatePath(config.forcedInclude, false, true);
         errors.compileCommands = this.validatePath(config.compileCommands, false);
+        errors.dotConfig = this.validatePath(config.dotConfig, false);
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
         // Validate intelliSenseMode

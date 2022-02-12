@@ -41,6 +41,7 @@ const elementId: { [key: string]: string } = {
     forcedIncludeInvalid: "forcedIncludeInvalid",
     mergeConfigurations: "mergeConfigurations",
     dotConfig: "dotConfig",
+    dotConfigInvalid: "dotConfigInvalid",
 
     // Browse properties
     browsePath: "browsePath",
@@ -303,6 +304,7 @@ class SettingsApp {
             this.showErrorWithInfo(elementId.compileCommandsInvalid, errors.compileCommands);
             this.showErrorWithInfo(elementId.browsePathInvalid, errors.browsePath);
             this.showErrorWithInfo(elementId.databaseFilenameInvalid, errors.databaseFilename);
+            this.showErrorWithInfo(elementId.dotConfigInvalid, errors.dotConfig);
         } finally {
             this.updating = false;
         }
