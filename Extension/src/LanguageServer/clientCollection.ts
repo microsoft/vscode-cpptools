@@ -25,7 +25,7 @@ export class ClientCollection {
     private activeDocument?: vscode.TextDocument;
     public timeTelemetryCollector: TimeTelemetryCollector = new TimeTelemetryCollector();
 
-    // This is a one-time switch to a mode that suppressed launching of the cpptools client process.
+    // This is a one-time switch to a mode that suppresses launching of the cpptools client process.
     private useFailsafeMode: boolean = false;
 
     public get ActiveClient(): cpptools.Client { return this.activeClient; }
@@ -274,17 +274,14 @@ export class ClientCollection {
     }
 
     public createClient(folder?: vscode.WorkspaceFolder, deactivated?: boolean): cpptools.Client {
-        const newClient: cpptools.Client = this.useFailsafeMode ? cpptools.createNullClient() :  cpptools.createClient(this, folder);
+        const newClient: cpptools.Client = this.useFailsafeMode ? cpptools.createNullClient() : cpptools.createClient(this, folder);
         if (deactivated) {
             newClient.deactivate(); // e.g. prevent the current config from switching.
         }
         const key: string = folder ? util.asFolder(folder.uri) : defaultClientKey;
         this.languageClients.set(key, newClient);
-        if (!this.useFailsafeMode) {
-            getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
-            const defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
-            defaultClient.sendAllSettings();
-        }
+        getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
+        newClient.sendAllSettings();
         return newClient;
     }
 

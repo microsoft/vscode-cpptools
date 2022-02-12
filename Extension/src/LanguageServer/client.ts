@@ -746,6 +746,7 @@ export interface Client {
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
+    sendAllSettings(): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -3319,5 +3320,6 @@ class NullClient implements Client {
         this.stringEvent.dispose();
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
+    sendAllSettings(): void { }
     sendDidChangeSettings(settings: any): void { }
 }
