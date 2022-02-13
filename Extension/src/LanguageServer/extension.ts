@@ -484,14 +484,18 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+    const settings: CppSettings = new CppSettings();
     let foundEditor: boolean = false;
-    // If the document is already visible in another column, open it there.
-    vscode.window.visibleTextEditors.forEach((editor, index, array) => {
-        if (editor.document === document && !foundEditor) {
-            foundEditor = true;
-            vscode.window.showTextDocument(document, editor.viewColumn);
-        }
-    });
+    if (settings.headerSourcePaneJumping) {
+        // If the document is already visible in another column, open it there.
+        vscode.window.visibleTextEditors.forEach((editor, index, array) => {
+            if (editor.document === document && !foundEditor) {
+                foundEditor = true;
+                vscode.window.showTextDocument(document, editor.viewColumn);
+            }
+        });
+    }
+
     if (!foundEditor) {
         vscode.window.showTextDocument(document);
     }

@@ -197,6 +197,7 @@ export class CppSettings extends Settings {
     public get intelliSenseMemoryLimit(): number | undefined { return super.Section.get<number>("intelliSenseMemoryLimit"); }
     public get intelliSenseUpdateDelay(): number | undefined { return super.Section.get<number>("intelliSenseUpdateDelay"); }
     public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles"); }
+    public get headerSourcePaneJumping(): boolean | undefined { return super.Section.get<boolean>("headerSourcePaneJumping"); }
     public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
