@@ -122,9 +122,11 @@ export class CppDebugConfigurationProvider implements vscode.DebugConfigurationP
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
         if (!config || !config.type) {
             this.provideDebugConfigurations(folder).then(configs => {
-                return (!configs || configs.length === 0) ?
-                undefined :
-                this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, configs[0], token)
+                if (!configs || configs.length === 0) {
+                    return undefined;
+                } else {
+                    this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, configs[0], token);
+                }
             });
         } else {
             return this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, config, token);
@@ -136,7 +138,7 @@ export class CppDebugConfigurationProvider implements vscode.DebugConfigurationP
     }
 }
 
-export class UnderlyingDbgConfigProvider{
+export class UnderlyingDbgConfigProvider {
     private type: DebuggerType;
     private assetProvider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
@@ -151,7 +153,7 @@ export class UnderlyingDbgConfigProvider{
     private async loadDetectedTasks(): Promise<void> {
         if (!UnderlyingDbgConfigProvider.detectedBuildTasks || UnderlyingDbgConfigProvider.detectedBuildTasks.length === 0) {
             UnderlyingDbgConfigProvider.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
-        } 
+        }
     }
 
     public static get recentBuildTaskLableStr(): string {
