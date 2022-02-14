@@ -774,7 +774,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
         Telemetry.logDebuggerEvent("launchPlayButton", { "type": eventType, "mode": mode, "cancelled": "true" });
         return; // User canceled it.
     }
-    if (selection.label.startsWith("cl.exe")) {
+    if (selection.label.startsWith("C/C++: cl.exe")) {
         if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
             vscode.window.showErrorMessage(localize("cl.exe.not.available", '{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.', "cl.exe"));
             return;
