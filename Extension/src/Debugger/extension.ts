@@ -28,10 +28,10 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     let cppVsDbgProvider: CppVsDbgConfigProvider | null = null;
     if (os.platform() === 'win32') {
         cppVsDbgProvider = new CppVsDbgConfigProvider(assetProvider);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppDebugConfigurationProvider(cppVsDbgProvider), vscode.DebugConfigurationProviderTriggerKind.Initial));
+        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppDebugConfigurationProvider(cppVsDbgProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
     }
     const cppDbgProvider: CppDbgConfigProvider = new CppDbgConfigProvider(assetProvider);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new CppDebugConfigurationProvider(cppDbgProvider), vscode.DebugConfigurationProviderTriggerKind.Initial));
+    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new CppDebugConfigurationProvider(cppDbgProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
 
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor, cppVsDbgProvider, cppDbgProvider); }));
 

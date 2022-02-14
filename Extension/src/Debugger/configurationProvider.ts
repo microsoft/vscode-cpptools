@@ -79,29 +79,59 @@ export class CppDebugConfigurationProvider implements vscode.DebugConfigurationP
                 return [selection.configuration];
             }
         }
-        if (selection.label.indexOf(buildAndDebugActiveFileStr()) !== -1 && selection.configuration.preLaunchTask) {
+        if (selection.configuration.preLaunchTask) {
             try {
-                await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
-                if (selection.configuration.miDebuggerPath) {
-                    if (!await util.checkFileExists(selection.configuration.miDebuggerPath)) {
-                        vscode.window.showErrorMessage(localize("miDebuggerPath.not.available", "miDebuggerPath does not exist: {0}. Has a debugger been installed?", selection.configuration.miDebuggerPath));
-                        throw new Error();
-                    }
+                if (folder) {
+                    await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
+                    // UnderlyingDbgConfigProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                } else {
+                    // In case of single mode file, remove the preLaunch task from the debug configuration and run it here instead.
+                    await cppBuildTaskProvider.runBuildTask(selection.configuration.preLaunchTask);
+                    // UnderlyingDbgConfigProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                    selection.configuration.preLaunchTask = undefined;
                 }
-                await vscode.debug.startDebugging(folder, selection.configuration);
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-            } catch (e) {
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
+            } catch (errJS) {
+                const e: Error = errJS as Error;
+                if (e && e.message === util.failedToParseJson) {
+                    vscode.window.showErrorMessage(util.failedToParseJson);
+                }
+                Telemetry.logDebuggerEvent("buildAndDebug", { "type": "noBuildConfig", "success": "false" });
             }
         }
-        return [selection.configuration];
+        try {
+            // Check if the debug configuration exists in launch.json.
+            await cppBuildTaskProvider.checkDebugConfigExists(selection.configuration.name);
+            try {
+                await vscode.debug.startDebugging(folder, selection.configuration.name);
+                Telemetry.logDebuggerEvent("buildAndDebug", { "type": "launchConfig", "success": "true" });
+            } catch (e) {
+                Telemetry.logDebuggerEvent("buildAndDebug", { "type": "launchConfig", "success": "false" });
+            }
+        } catch (e) {
+            try {
+                await vscode.debug.startDebugging(folder, selection.configuration);
+                Telemetry.logDebuggerEvent("buildAndDebug", { "type": "noLaunchConfig", "success": "true" });
+            } catch (e) {
+                Telemetry.logDebuggerEvent("buildAndDebug", { "type": "noLaunchConfig", "success": "false" });
+            }
+        }
+
+        return Promise.resolve([selection.configuration]);
     }
 
-    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
-        return this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, config, token);
+    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
+        if (!config || !config.type) {
+            this.provideDebugConfigurations(folder).then(configs => {
+                return (!configs || configs.length === 0) ?
+                undefined :
+                this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, configs[0], token)
+            });
+        } else {
+            return this.underlyingDbgConfigProvider.resolveDebugConfiguration(folder, config, token);
+        }
     }
 
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
         return this.underlyingDbgConfigProvider.resolveDebugConfigurationWithSubstitutedVariables(folder, config, token);
     }
 }
@@ -270,10 +300,10 @@ export class UnderlyingDbgConfigProvider{
     /**
 	 * Error checks the provided 'config' without any variables substituted.
 	 */
-    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
         // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
         if (!config || !config.type) {
-            return null;
+            return undefined;
         }
 
         if (config.type === 'cppvsdbg') {
@@ -293,7 +323,7 @@ export class UnderlyingDbgConfigProvider{
             }
         }
 
-        return config;
+        return Promise.resolve(config);
     }
 
     /**
@@ -302,10 +332,10 @@ export class UnderlyingDbgConfigProvider{
      *
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
         // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
         if (!config || !config.type) {
-            return null;
+            return undefined;
         }
 
         if (config.type === 'cppvsdbg') {
@@ -386,7 +416,7 @@ export class UnderlyingDbgConfigProvider{
             // logger.showOutputChannel();
         }
 
-        return config;
+        return Promise.resolve(config);
     }
 
     private getLLDBFrameworkPath(): string | undefined {
