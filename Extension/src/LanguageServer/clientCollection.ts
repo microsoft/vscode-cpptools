@@ -25,6 +25,9 @@ export class ClientCollection {
     private activeDocument?: vscode.TextDocument;
     public timeTelemetryCollector: TimeTelemetryCollector = new TimeTelemetryCollector();
 
+    // This is a one-time switch to a mode that suppresses launching of the cpptools client process.
+    private useFailsafeMode: boolean = false;
+
     public get ActiveClient(): cpptools.Client { return this.activeClient; }
     public get Names(): ClientKey[] {
         const result: ClientKey[] = [];
@@ -104,22 +107,21 @@ export class ClientCollection {
     /**
      * creates a new client to replace one that crashed.
      */
-    public async recreateClients(transferFileOwnership: boolean): Promise<void> {
+    public async recreateClients(switchToFailsafeMode?: boolean): Promise<void> {
 
         // Swap out the map, so we are not changing it while iterating over it.
         const oldLanguageClients: Map<string, cpptools.Client> = this.languageClients;
         this.languageClients = new Map<string, cpptools.Client>();
 
+        if (switchToFailsafeMode) {
+            this.useFailsafeMode = true;
+        }
+
         for (const pair of oldLanguageClients) {
             const client: cpptools.Client = pair[1];
 
-            let newClient: cpptools.Client;
-            if (transferFileOwnership) {
-                newClient = this.createClient(client.RootFolder, true);
-                client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
-            } else {
-                newClient = cpptools.createNullClient();
-            }
+            const newClient: cpptools.Client = this.createClient(client.RootFolder, true);
+            client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
 
             if (this.activeClient === client) {
                 // It cannot be undefined. If there is an active document, we activate it later.
@@ -272,15 +274,14 @@ export class ClientCollection {
     }
 
     public createClient(folder?: vscode.WorkspaceFolder, deactivated?: boolean): cpptools.Client {
-        const newClient: cpptools.Client = cpptools.createClient(this, folder);
+        const newClient: cpptools.Client = this.useFailsafeMode ? cpptools.createNullClient() : cpptools.createClient(this, folder);
         if (deactivated) {
             newClient.deactivate(); // e.g. prevent the current config from switching.
         }
         const key: string = folder ? util.asFolder(folder.uri) : defaultClientKey;
         this.languageClients.set(key, newClient);
         getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
-        const defaultClient: cpptools.DefaultClient = <cpptools.DefaultClient>newClient;
-        defaultClient.sendAllSettings();
+        newClient.sendAllSettings();
         return newClient;
     }
 
