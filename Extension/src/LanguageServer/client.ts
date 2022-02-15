@@ -334,6 +334,7 @@ interface CodeActionCommand {
     command: string;
     arguments?: any[];
     edit?: TextEdit;
+    workspaceEdit?: WorkspaceEdit;
 }
 
 interface ShowMessageWindowParams {
@@ -412,6 +413,10 @@ export interface FormatParams {
 interface TextEdit {
     range: Range;
     newText: string;
+}
+
+interface WorkspaceEdit {
+    changes: { [uri: string]: TextEdit[] };
 }
 
 export interface GetFoldingRangesParams {
@@ -954,12 +959,29 @@ export class DefaultClient implements Client {
                                 commands.forEach((command) => {
                                     const title: string = util.getLocalizedString(command.localizeStringParams);
                                     let edit: vscode.WorkspaceEdit | undefined;
+                                    let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
                                     if (command.edit) {
+                                        codeActionKind = vscode.CodeActionKind.RefactorInline;
                                         edit = new vscode.WorkspaceEdit();
                                         edit.replace(document.uri, new vscode.Range(
                                             new vscode.Position(command.edit.range.start.line, command.edit.range.start.character),
                                             new vscode.Position(command.edit.range.end.line, command.edit.range.end.character)),
                                         command.edit.newText);
+                                    } else if (command.workspaceEdit) {
+                                        edit = new vscode.WorkspaceEdit();
+                                        for (const [uri, edits] of Object.entries(command.workspaceEdit.changes)) {
+                                            const vsEdits: vscode.TextEdit[] = [];
+                                            for (const edit of edits) {
+                                                vsEdits.push(new vscode.TextEdit(
+                                                    new vscode.Range(
+                                                        new vscode.Position(edit.range.start.line, edit.range.start.character),
+                                                        new vscode.Position(edit.range.end.line, edit.range.end.character)
+                                                    ),
+                                                    edit.newText)
+                                                );
+                                            }
+                                            edit.set(vscode.Uri.file(uri), vsEdits);
+                                        }
                                     }
                                     const vscodeCodeAction: vscode.CodeAction = {
                                         title: title,
@@ -969,7 +991,7 @@ export class DefaultClient implements Client {
                                             arguments: command.arguments
                                         },
                                         edit: edit,
-                                        kind: edit === undefined ? vscode.CodeActionKind.QuickFix : vscode.CodeActionKind.RefactorInline
+                                        kind: codeActionKind
                                     };
                                     resultCodeActions.push(vscodeCodeAction);
                                 });
