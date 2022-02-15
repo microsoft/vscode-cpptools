@@ -2115,7 +2115,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.headerSourcePaneJumping.description%",
-          "scope": "resource"
+          "scope": "application"
         },
         "C_Cpp.dimInactiveRegions": {
           "type": "boolean",
