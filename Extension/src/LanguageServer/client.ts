@@ -1109,7 +1109,6 @@ export class DefaultClient implements Client {
         const settings_intelliSenseEngine: (string | undefined)[] = [];
         const settings_intelliSenseEngineFallback: (string | undefined)[] = [];
         const settings_errorSquiggles: (string | undefined)[] = [];
-        const settings_headerSourcePaneJumping: (boolean | undefined)[] = [];
         const settings_dimInactiveRegions: boolean[] = [];
         const settings_enhancedColorization: string[] = [];
         const settings_suggestSnippets: (boolean | undefined)[] = [];
@@ -1275,7 +1274,6 @@ export class DefaultClient implements Client {
                 settings_intelliSenseEngine.push(setting.intelliSenseEngine);
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
                 settings_errorSquiggles.push(setting.errorSquiggles);
-                settings_headerSourcePaneJumping.push(setting.headerSourcePaneJumping);
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
                 settings_enhancedColorization.push(workspaceSettings.enhancedColorization ? "Enabled" : "Disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
@@ -1458,7 +1456,6 @@ export class DefaultClient implements Client {
                 autocomplete: settings_autocomplete,
                 autocompleteAddParentheses: settings_autocompleteAddParentheses,
                 errorSquiggles: settings_errorSquiggles,
-                headerSourcePaneJumping: settings_headerSourcePaneJumping,
                 dimInactiveRegions: settings_dimInactiveRegions,
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
