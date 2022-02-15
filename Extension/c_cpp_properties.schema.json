@@ -88,6 +88,10 @@
                         "type": "string",
                         "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$"
                     },
+                    "dotConfig": {
+                        "description": "A path to a .config file created by Kconfig system. Kconfig system generates a file with all the defines to build a project. Examples of projects that use Kconfig system are the Linux Kernel and NuttX RTOS.",
+                        "type": "string"
+                    },
                     "defines": {
                         "markdownDescription": "A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use `=` to set a value, e.g. `VERSION=1`.",
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",

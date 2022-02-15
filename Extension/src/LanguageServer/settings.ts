@@ -219,6 +219,7 @@ export class CppSettings extends Settings {
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("files.exclude"); }
     public get defaultIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.includePath"); }
     public get defaultDefines(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.defines"); }
+    public get defaultDotconfig(): string | undefined { return super.Section.get<string>("default.dotConfig"); }
     public get defaultMacFrameworkPath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.macFrameworkPath"); }
     public get defaultWindowsSdkVersion(): string | undefined { return super.Section.get<string>("default.windowsSdkVersion"); }
     public get defaultCompileCommands(): string | undefined { return super.Section.get<string>("default.compileCommands"); }
