@@ -19,7 +19,9 @@ schedules:
   always: true
 
 pool:
-  vmImage: 'windows-latest'
+  name: 'AzurePipelines-EO'
+  demands:
+  - ImageOverride -equals AzurePipelinesWindows2022compliant
 
 steps:
 - task: CmdLine@2
