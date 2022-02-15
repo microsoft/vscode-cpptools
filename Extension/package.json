@@ -2478,6 +2478,12 @@
           "markdownDescription": "%c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.default.dotConfig": {
+          "type": "string",
+          "default": null,
+          "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.updateChannel": {
           "type": "string",
           "enum": [
@@ -4437,9 +4443,10 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
+    "ajv": "^6.12.3",
     "ansi-regex": "^5.0.1",
     "browserslist": "^4.16.6",
-    "follow-redirects": "1.14.7",
+    "follow-redirects": "1.14.8",
     "glob-parent": "^5.1.2",
     "hosted-git-info": "^3.0.8",
     "nanoid": "^3.1.20",
