@@ -116,7 +116,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     resolveDebugConfigurationInternal(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
         if (!config || !config.type) {
-            return undefined; // aborts debugging silently
+            return undefined;
         }
 
         if (config.type === 'cppvsdbg') {
@@ -545,7 +545,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         } else {
             let sortedItems: MenuItem[] = [];
             // Find the recently used task and place it at the top of quickpick list.
-            const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLableStr);
+            const recentTask: MenuItem[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLableStr));
             if (recentTask.length !== 0) {
                 recentTask[0].detail = TaskConfigStatus.recentlyUsed;
                 sortedItems.push(recentTask[0]);
@@ -565,8 +565,16 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!this.isClAvailable(selection.label)) {
             return;
         }
-        
-        await this.startDebugging(folder, selection.configuration, debuggerEvent, debugModeOn);
+        let resolvedConfig: vscode.DebugConfiguration | undefined;
+        if (selection.configuration && selection.configuration.type) {
+            resolvedConfig = await this.resolveDebugConfigurationInternal(folder, selection.configuration);
+            if (resolvedConfig) {
+                resolvedConfig = await this.resolveDebugConfigurationWithSubstitutedVariables(folder, resolvedConfig);
+            }
+        }
+        if (resolvedConfig) {
+            await this.startDebugging(folder, resolvedConfig, debuggerEvent, debugModeOn);
+        }
     }
     
     private async startDebugging(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debuggerEvent: string, debugModeOn: boolean = true) {
