@@ -7,8 +7,9 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { CppDebugConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigProvider, CppDbgConfigProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider, buildAndDebug } from './configurationProvider';
+import { myDebugConfigurationProvider, ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { DebuggerType } from './configurations';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
@@ -23,19 +24,21 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
 
     // Activate ConfigurationProvider
     const assetProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
-    // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
-    // This will cause it to not show up on the dropdown list.
-    let cppVsDbgProvider: CppVsDbgConfigProvider | null = null;
+
+    // Register DebugConfigurationProviders for "Run and Debug" in Debug Panel.
+    // On windows platforms, the cppvsdbg debugger will also be registered for initial configurations.
+    let cppVsDebugProvider: myDebugConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
-        cppVsDbgProvider = new CppVsDbgConfigProvider(assetProvider);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new CppDebugConfigurationProvider(cppVsDbgProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+        cppVsDebugProvider = new myDebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
+        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', cppVsDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
     }
-    const cppDbgProvider: CppDbgConfigProvider = new CppDbgConfigProvider(assetProvider);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new CppDebugConfigurationProvider(cppDbgProvider), vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+    const cppDebugProvider: myDebugConfigurationProvider = new myDebugConfigurationProvider(assetProvider, DebuggerType.cppdbg);
+    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', cppDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
 
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor, cppVsDbgProvider, cppDbgProvider); }));
-
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor, cppVsDbgProvider, cppDbgProvider, false); }));
+    // Register DebugConfigurationProviders for "Run and Debug" play button.
+    const debugProvider: myDebugConfigurationProvider = new myDebugConfigurationProvider(assetProvider, DebuggerType.all);
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor, false); }));
 
     assetProvider.getConfigurationSnippets();
 
