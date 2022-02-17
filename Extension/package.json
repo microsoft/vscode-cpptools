@@ -2111,12 +2111,6 @@
           "description": "%c_cpp.configuration.errorSquiggles.description%",
           "scope": "resource"
         },
-        "C_Cpp.headerSourcePaneJumping": {
-          "type": "boolean",
-          "default": true,
-          "description": "%c_cpp.configuration.headerSourcePaneJumping.description%",
-          "scope": "application"
-        },
         "C_Cpp.dimInactiveRegions": {
           "type": "boolean",
           "default": true,
