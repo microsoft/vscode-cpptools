@@ -64,6 +64,20 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             configuration: vscode.DebugConfiguration;
         }
 
+        // Find the recently used task and place it at the top of quickpick list.
+        let recentlyUsedConfig: vscode.DebugConfiguration | undefined;
+        configs = configs.filter(config => {
+            if (config.detail !== TaskConfigStatus.recentlyUsed) {
+                return true;
+            } else {
+                recentlyUsedConfig = config;
+                return false;
+            }
+        });
+        if (recentlyUsedConfig) {
+            configs.unshift(recentlyUsedConfig);
+        }
+
         const items: MenuItem[] = configs.map<MenuItem>(config => {
             const reducedConfig: vscode.DebugConfiguration = {...config};
             // Remove the "detail" property from the DebugConfiguration that will be written in launch.json.
@@ -355,7 +369,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             });
         }));
         configs.push(defaultConfig);
-        // Sort tasks.
         return configs;
     }
 
