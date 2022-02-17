@@ -390,8 +390,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return `${localize("build.and.debug.active.file", 'build and debug active file')}`;
     }
 
-    private isClConfiguration(configurationLabel: string) : boolean{
-        return configurationLabel.startsWith("C/C++: cl.exe")? true : false;    
+    private isClConfiguration(configurationLabel: string): boolean {
+        return configurationLabel.startsWith("C/C++: cl.exe") ? true : false;
     }
 
     private showErrorClNotAvailable(configurationLabel: string): boolean {
@@ -608,7 +608,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
                     DebugConfigurationProvider.recentBuildTaskLableStr = configuration.preLaunchTask;
-                    
                 }
             } catch (errJS) {
                 const e: Error = errJS as Error;
