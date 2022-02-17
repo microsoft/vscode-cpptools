@@ -110,7 +110,6 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
         } else {
             return this.resolveDebugConfigurationInternal(folder, config, token);
         }
-
     }
 
     resolveDebugConfigurationInternal(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
