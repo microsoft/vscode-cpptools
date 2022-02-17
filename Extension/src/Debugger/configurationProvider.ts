@@ -94,7 +94,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     /**
 	 * Error checks the provided 'config' without any variables substituted.
 	 */
-    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration > | undefined {
+    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, resolveDebugConfiguration will be called with an empty config.
             // Providing debug configs, and debugging should be called manually.
@@ -109,34 +109,25 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             });
         } else {
             // When launch.json with debug configuration exists, resolveDebugConfiguration will be called with a config selected by provideDebugConfigurations.
-            return this.resolveDebugConfigurationInternal(folder, config, token);
             // resolveDebugConfigurationWithSubstitutedVariables will be called automatically after this.
-        }
-    }
-
-    resolveDebugConfigurationInternal(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
-        if (!config || !config.type) {
-            return undefined;
-        }
-
-        if (config.type === 'cppvsdbg') {
-            // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-            if (config.hasOwnProperty("externalConsole")) {
-                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
-                if (config.externalConsole && !config.console) {
-                    config.console = "externalTerminal";
+            if (config.type === 'cppvsdbg') {
+                // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
+                if (config.hasOwnProperty("externalConsole")) {
+                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
+                    if (config.externalConsole && !config.console) {
+                        config.console = "externalTerminal";
+                    }
+                    delete config.externalConsole;
                 }
-                delete config.externalConsole;
+    
+                // Fail if cppvsdbg type is running on non-Windows
+                if (os.platform() !== 'win32') {
+                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                    return undefined; // Stop debugging
+                }
             }
-
-            // Fail if cppvsdbg type is running on non-Windows
-            if (os.platform() !== 'win32') {
-                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
-                return undefined; // Stop debugging
-            }
+            return config;
         }
-
-        return Promise.resolve(config);
     }
 
     /**
@@ -145,7 +136,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      *
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (!config || !config.type) {
             return undefined;
         }
@@ -228,7 +219,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // logger.showOutputChannel();
         }
 
-        return Promise.resolve(config);
+        return config;
     }
 
     async provideDebugConfigurationsTypeSpecific(type: DebuggerType, folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
@@ -563,9 +554,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!this.isClAvailable(selection.label)) {
             return;
         }
-        let resolvedConfig: vscode.DebugConfiguration | undefined;
+        let resolvedConfig: vscode.DebugConfiguration | undefined | null;
         if (selection.configuration && selection.configuration.type) {
-            resolvedConfig = await this.resolveDebugConfigurationInternal(folder, selection.configuration);
+            resolvedConfig = await this.resolveDebugConfiguration(folder, selection.configuration);
             if (resolvedConfig) {
                 resolvedConfig = await this.resolveDebugConfigurationWithSubstitutedVariables(folder, resolvedConfig);
             }
@@ -602,14 +593,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Check if the debug configuration exists in launch.json.
             await cppBuildTaskProvider.checkDebugConfigExists(configuration.name);
             try {
-                await vscode.debug.startDebugging(folder, configuration.name);
+                await vscode.debug.startDebugging(folder, configuration.name, {noDebug: !debugModeOn});
                 Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "launchConfig", "success": "true" });
             } catch (e) {
                 Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "launchConfig", "success": "false" });
             }
         } catch (e) {
             try {
-                await vscode.debug.startDebugging(folder, configuration);
+                await vscode.debug.startDebugging(folder, configuration, {noDebug: !debugModeOn});
                 Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "noLaunchConfig", "success": "true" });
             } catch (e) {
                 Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "noLaunchConfig", "success": "false" });
