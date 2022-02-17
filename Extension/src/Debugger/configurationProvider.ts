@@ -89,7 +89,6 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
             return [selection.configuration];
         }
 
-        await this.startDebugging(folder, selection.configuration, debuggerEvent);
         return [selection.configuration];
     }
 
@@ -99,16 +98,29 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration > | undefined {
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, resolveDebugConfiguration will be called with an empty config.
-            this.provideDebugConfigurations(folder).then(configs => {
+            // Providing debug configs, and debugging should be called manually.
+            this.provideDebugConfigurations(folder).then(async configs => {
                 if (!configs || configs.length === 0) {
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleMode", "cancelled": "true" });
                     return undefined; // aborts debugging silently
                 } else {
-                    this.resolveDebugConfigurationInternal(folder, configs[0], token);
+                    /*let resolvedConfig: vscode.DebugConfiguration | undefined = await this.resolveDebugConfigurationInternal(folder, configs[0], token);
+                    if (resolvedConfig) {
+                        resolvedConfig = await this.resolveDebugConfigurationWithSubstitutedVariables(folder, resolvedConfig, token);
+                    }
+                    if (resolvedConfig) {
+                        let debuggerEvent: string = DebuggerEvent.debugPanel;
+                        await this.startDebugging(folder, resolvedConfig, debuggerEvent);
+                    }
+                    return undefined;*/
+                    await this.startDebugging(folder, configs[0], DebuggerEvent.debugPanel);
+                    return configs[0];
                 }
             });
         } else {
+            // When launch.json with debug configuration exists, resolveDebugConfiguration will be called with a config selected by provideDebugConfigurations.
             return this.resolveDebugConfigurationInternal(folder, config, token);
+            // resolveDebugConfigurationWithSubstitutedVariables will be called automatically after this.
         }
     }
 
@@ -144,7 +156,6 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
 	 * Try to add all missing attributes to the debug configuration being launched.
 	 */
     resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration> | undefined {
-        // [Microsoft/vscode#54213] If config or type is not specified, return null to trigger VS Code to call provideDebugConfigurations
         if (!config || !config.type) {
             return undefined;
         }
