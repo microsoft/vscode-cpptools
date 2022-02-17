@@ -228,7 +228,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // logger.showOutputChannel();
         }
 
-        return Promise.resolve(config);    
+        return Promise.resolve(config);
     }
 
     async provideDebugConfigurationsTypeSpecific(type: DebuggerType, folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
@@ -302,7 +302,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
-            newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLableStr)? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
+            newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLableStr) ? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
             if (isMacARM64) {
                 // Workaround to build and debug x86_64 on macARM64 by default.
                 // Remove this workaround when native debugging for macARM64 is supported.
@@ -384,7 +384,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     private isClAvailable(configurationLabel: string): boolean {
         if (configurationLabel.startsWith("C/C++: cl.exe")) {
-            if (!process.env.DevEnvDir|| process.env.DevEnvDir.length === 0) {
+            if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
                 vscode.window.showErrorMessage(localize("cl.exe.not.available", "{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.", "cl.exe"));
                 return false;
             }
@@ -517,12 +517,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     public async buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
 
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
-    
         if (!util.isCppOrCFile(textEditor.document.uri)) {
             vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
             return;
         }
-    
+
         // Get debug configurations for all debugger types.
         let configs: vscode.DebugConfiguration[] = [];
         if (os.platform() === 'win32') {
@@ -530,16 +529,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         configs = configs.concat(await this.provideDebugConfigurationsTypeSpecific(DebuggerType.cppdbg, folder));
 
-
         const defaultConfig: vscode.DebugConfiguration[] = configs.filter((config: vscode.DebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
         interface MenuItem extends vscode.QuickPickItem {
             configuration: vscode.DebugConfiguration;
         }
-    
+
         const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail, detail: config.existing }));
-    
+
         let selection: MenuItem | undefined;
-    
+
         if (defaultConfig.length !== 0) {
             selection = { label: defaultConfig[0].name, configuration: defaultConfig[0], description: defaultConfig[0].detail, detail: defaultConfig[0].existing };
         } else {
@@ -556,8 +554,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
             });
         }
-    
-        let debuggerEvent: string = DebuggerEvent.launchPlayButton;
+
+        const debuggerEvent: string = DebuggerEvent.launchPlayButton;
         if (!selection) {
             Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugModeOn ? "debug" : "run", "folderMode": folder ? "folder" : "singleMode", "cancelled": "true" });
             return; // User canceled it.
@@ -576,8 +574,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             await this.startDebugging(folder, resolvedConfig, debuggerEvent, debugModeOn);
         }
     }
-    
-    private async startDebugging(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debuggerEvent: string, debugModeOn: boolean = true) {
+
+    private async startDebugging(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debuggerEvent: string, debugModeOn: boolean = true): Promise<void> {
 
         const debugType: string = debugModeOn ? "debug" : "run";
         const folderMode: string = folder ? "folder" : "singleMode";
@@ -780,5 +778,3 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
         return Promise.resolve(new vscode.CompletionList(items, true));
     }
 }
-
-
