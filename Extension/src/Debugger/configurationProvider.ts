@@ -119,7 +119,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     }
                     delete config.externalConsole;
                 }
-    
+
                 // Fail if cppvsdbg type is running on non-Windows
                 if (os.platform() !== 'win32') {
                     logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
