@@ -31,7 +31,7 @@ function isDebugLaunchStr(str: string): boolean {
  * Ensures that the selected configuration's preLaunchTask (if existent) is populated in the user's task.json.
  * Automatically starts debugging for "Build and Debug" configurations.
  */
-export class myDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
+export class DebugConfigurationProvider implements vscode.DebugConfigurationProvider {
 
     private type: DebuggerType;
     private assetProvider: IConfigurationAssetProvider;
@@ -79,10 +79,9 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
         });
 
         const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
-        let debuggerEvent: string = DebuggerEvent.debugPanel;
         if (!selection) {
             // throw Error(localize("debug.configuration.selection.canceled", "Debug configuration selection canceled")); // User canceled it.
-            Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": "debug", "folderMode": folder ? "folder" : "singleMode", "cancelled": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleMode", "cancelled": "true" });
             return []; // User canceled it.
         }
         if (!this.isClAvailable(selection.label)) {
@@ -104,15 +103,6 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
                     Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleMode", "cancelled": "true" });
                     return undefined; // aborts debugging silently
                 } else {
-                    /*let resolvedConfig: vscode.DebugConfiguration | undefined = await this.resolveDebugConfigurationInternal(folder, configs[0], token);
-                    if (resolvedConfig) {
-                        resolvedConfig = await this.resolveDebugConfigurationWithSubstitutedVariables(folder, resolvedConfig, token);
-                    }
-                    if (resolvedConfig) {
-                        let debuggerEvent: string = DebuggerEvent.debugPanel;
-                        await this.startDebugging(folder, resolvedConfig, debuggerEvent);
-                    }
-                    return undefined;*/
                     await this.startDebugging(folder, configs[0], DebuggerEvent.debugPanel);
                     return configs[0];
                 }
@@ -256,7 +246,7 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
         let buildTasks: CppBuildTask[] = [];
         await this.loadDetectedTasks();
         // Remove the tasks that are already configured once in tasks.json.
-        const dedupDetectedBuildTasks: CppBuildTask[] = myDebugConfigurationProvider.detectedBuildTasks.filter(taskDetected => {
+        const dedupDetectedBuildTasks: CppBuildTask[] = DebugConfigurationProvider.detectedBuildTasks.filter(taskDetected => {
             let isAlreadyConfigured: boolean = false;
             for (const taskJson of configuredBuildTasks) {
                 if ((taskDetected.definition.label as string) === (taskJson.definition.label as string)) {
@@ -312,7 +302,7 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
-            newConfig.existing = task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected;
+            newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLableStr)? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
             if (isMacARM64) {
                 // Workaround to build and debug x86_64 on macARM64 by default.
                 // Remove this workaround when native debugging for macARM64 is supported.
@@ -370,21 +360,22 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
             });
         }));
         configs.push(defaultConfig);
+        // Sort tasks.
         return configs;
     }
 
     private async loadDetectedTasks(): Promise<void> {
-        if (!myDebugConfigurationProvider.detectedBuildTasks || myDebugConfigurationProvider.detectedBuildTasks.length === 0) {
-            myDebugConfigurationProvider.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
+        if (!DebugConfigurationProvider.detectedBuildTasks || DebugConfigurationProvider.detectedBuildTasks.length === 0) {
+            DebugConfigurationProvider.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
         }
     }
 
     public static get recentBuildTaskLableStr(): string {
-        return myDebugConfigurationProvider.recentBuildTaskLable;
+        return DebugConfigurationProvider.recentBuildTaskLable;
     }
 
     public static set recentBuildTaskLableStr(recentTask: string) {
-        myDebugConfigurationProvider.recentBuildTaskLable = recentTask;
+        DebugConfigurationProvider.recentBuildTaskLable = recentTask;
     }
 
     private buildAndDebugActiveFileStr(): string {
@@ -445,7 +436,7 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
 
                 // show error message if single lines cannot get parsed
                 if (parsedFile.Warning) {
-                    myDebugConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
+                    DebugConfigurationProvider.showFileWarningAsync(parsedFile.Warning, config.envFile);
                 }
 
                 config.environment = parsedFile.Env;
@@ -554,7 +545,7 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
         } else {
             let sortedItems: MenuItem[] = [];
             // Find the recently used task and place it at the top of quickpick list.
-            const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === myDebugConfigurationProvider.recentBuildTaskLableStr);
+            const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLableStr);
             if (recentTask.length !== 0) {
                 recentTask[0].detail = TaskConfigStatus.recentlyUsed;
                 sortedItems.push(recentTask[0]);
@@ -586,11 +577,11 @@ export class myDebugConfigurationProvider implements vscode.DebugConfigurationPr
             try {
                 if (folder) {
                     await cppBuildTaskProvider.checkBuildTaskExists(configuration.preLaunchTask);
-                    // UnderlyingDbgConfigProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                    DebugConfigurationProvider.recentBuildTaskLableStr = configuration.preLaunchTask;
                 } else {
                     // In case of single mode file, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
-                    // UnderlyingDbgConfigProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                    DebugConfigurationProvider.recentBuildTaskLableStr = configuration.preLaunchTask;
                     configuration.preLaunchTask = undefined;
                 }
             } catch (errJS) {
