@@ -30,15 +30,15 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     let cppVsDebugProvider: DebugConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
         cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', cppVsDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+        disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppvsdbg, cppVsDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
     }
     const cppDebugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppdbg);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', cppDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+    disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppdbg, cppDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
 
     // Register DebugConfigurationProviders for "Run and Debug" play button.
     const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor, false); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
 
     assetProvider.getConfigurationSnippets();
 
@@ -52,8 +52,8 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(assetProvider)));
 
     // Register Debug Adapters
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory('cppvsdbg' , new CppvsdbgDebugAdapterDescriptorFactory(context)));
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory('cppdbg', new CppdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg , new CppvsdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
 
     vscode.Disposable.from(...disposables);
 }

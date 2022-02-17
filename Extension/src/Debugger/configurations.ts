@@ -10,9 +10,9 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export enum DebuggerType {
-    cppvsdbg,
-    cppdbg,
-    all
+    cppvsdbg = "cppvsdbg",
+    cppdbg = "cppdbg",
+    all = "all"
 }
 
 export enum DebuggerEvent {
