@@ -2471,6 +2471,12 @@
           "markdownDescription": "%c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.default.dotConfig": {
+          "type": "string",
+          "default": null,
+          "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.updateChannel": {
           "type": "string",
           "enum": [
