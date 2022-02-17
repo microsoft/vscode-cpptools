@@ -96,7 +96,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 	 */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (!config || !config.type) {
-            // When DebugConfigurationProviderTriggerKind is Dynamic, resolveDebugConfiguration will be called with an empty config.
+            // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
             // Providing debug configs, and debugging should be called manually.
             this.provideDebugConfigurations(folder).then(async configs => {
                 if (!configs || configs.length === 0) {
@@ -108,7 +108,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 }
             });
         } else {
-            // When launch.json with debug configuration exists, resolveDebugConfiguration will be called with a config selected by provideDebugConfigurations.
             // resolveDebugConfigurationWithSubstitutedVariables will be called automatically after this.
             if (config.type === 'cppvsdbg') {
                 // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
