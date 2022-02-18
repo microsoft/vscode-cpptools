@@ -488,7 +488,7 @@ async function onSwitchHeaderSource(): Promise<void> {
     let foundEditor: boolean = false;
     if (workbenchConfig.get("editor.revealIfOpen")) {
         // If the document is already visible in another column, open it there.
-        vscode.window.visibleTextEditors.forEach((editor, index, array) => {
+        vscode.window.visibleTextEditors.forEach(editor => {
             if (editor.document === document && !foundEditor) {
                 foundEditor = true;
                 vscode.window.showTextDocument(document, editor.viewColumn);
