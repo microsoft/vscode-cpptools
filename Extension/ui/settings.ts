@@ -40,6 +40,8 @@ const elementId: { [key: string]: string } = {
     forcedInclude: "forcedInclude",
     forcedIncludeInvalid: "forcedIncludeInvalid",
     mergeConfigurations: "mergeConfigurations",
+    dotConfig: "dotConfig",
+    dotConfigInvalid: "dotConfigInvalid",
 
     // Browse properties
     browsePath: "browsePath",
@@ -273,6 +275,7 @@ class SettingsApp {
             (<HTMLInputElement>document.getElementById(elementId.mergeConfigurations)).checked = config.mergeConfigurations;
             (<HTMLInputElement>document.getElementById(elementId.configurationProvider)).value = config.configurationProvider ? config.configurationProvider : "";
             (<HTMLInputElement>document.getElementById(elementId.forcedInclude)).value = joinEntries(config.forcedInclude);
+            (<HTMLInputElement>document.getElementById(elementId.dotConfig)).value = config.dotConfig ? config.dotConfig : "";
 
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = joinEntries(config.browse.path);
@@ -301,6 +304,7 @@ class SettingsApp {
             this.showErrorWithInfo(elementId.compileCommandsInvalid, errors.compileCommands);
             this.showErrorWithInfo(elementId.browsePathInvalid, errors.browsePath);
             this.showErrorWithInfo(elementId.databaseFilenameInvalid, errors.databaseFilename);
+            this.showErrorWithInfo(elementId.dotConfigInvalid, errors.dotConfig);
         } finally {
             this.updating = false;
         }

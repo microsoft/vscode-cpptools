@@ -657,6 +657,15 @@
         </div>
 
         <div class="section">
+            <div class="section-title" data-loc-id="dot.config">Dot Config</div>
+            <div class="section-text" data-loc-id="dot.config.description">A path to a .config file created by Kconfig system. Kconfig system generates a file with all the defines to build a project. Examples of projects that use Kconfig system are the Linux Kernel and NuttX RTOS.</div>
+            <div>
+                <input name="inputValue" id="dotConfig" style="width: 798px"></input>
+                <div id="dotConfigInvalid" class="error" style="width: 800px"></div>
+            </div>
+        </div>
+
+        <div class="section">
             <div class="section-title" data-loc-id="compile.commands">Compile commands</div>
             <div class="section-text">
                 <span data-loc-id="compile.commands.description">The full path to the <code>compile_commands.json</code> file for the workspace. The include paths and defines discovered in this file will be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.</span>
