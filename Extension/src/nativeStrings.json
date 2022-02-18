@@ -238,5 +238,6 @@
     "clear_code_analysis_squiggles": "Clear code analysis squiggles",
     "multiple_locations_note": "(Multiple locations)",
     "folder_tag": "Folder",
-    "file_tag": "File"
+    "file_tag": "File",
+    "apply_code_analysis_fix": "Apply code analysis fix"
 }
