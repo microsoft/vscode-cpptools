@@ -484,7 +484,7 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
-    const workbenchConfig = vscode.workspace.getConfiguration("workbench");
+    const workbenchConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("workbench");
     let foundEditor: boolean = false;
     if (workbenchConfig.get("editor.revealIfOpen")) {
         // If the document is already visible in another column, open it there.
