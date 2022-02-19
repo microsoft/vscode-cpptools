@@ -958,26 +958,34 @@ export class DefaultClient implements Client {
                                 // Convert to vscode.CodeAction array
                                 commands.forEach((command) => {
                                     const title: string = util.getLocalizedString(command.localizeStringParams);
-                                    let edit: vscode.WorkspaceEdit | undefined;
+                                    let wsEdit: vscode.WorkspaceEdit | undefined;
                                     let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
                                     if (command.edit) {
                                         codeActionKind = vscode.CodeActionKind.RefactorInline;
-                                        edit = new vscode.WorkspaceEdit();
-                                        edit.replace(document.uri, new vscode.Range(
+                                        wsEdit = new vscode.WorkspaceEdit();
+                                        wsEdit.replace(document.uri, new vscode.Range(
                                             new vscode.Position(command.edit.range.start.line, command.edit.range.start.character),
                                             new vscode.Position(command.edit.range.end.line, command.edit.range.end.character)),
                                         command.edit.newText);
                                     } else if (command.workspaceEdit) {
-                                        edit = new vscode.WorkspaceEdit();
-                                        for (const [uri, edits] of Object.entries(command.workspaceEdit.changes)) {
-                                            const vsEdits: vscode.TextEdit[] = [];
+                                        wsEdit = new vscode.WorkspaceEdit();
+                                        for (const [uriStr, edits] of Object.entries(command.workspaceEdit.changes)) {
+                                            // const vsEdits: vscode.TextEdit[] = [];
+                                            const uri: vscode.Uri = vscode.Uri.file(uriStr);
                                             for (const edit of edits) {
+                                                wsEdit.replace(uri, new vscode.Range(
+                                                    new vscode.Position(edit.range.start.line, edit.range.start.character),
+                                                    new vscode.Position(edit.range.end.line, edit.range.end.character)),
+                                                edit.newText);
+                                            }
+                                            /*
                                                 vsEdits.push(new vscode.TextEdit(new vscode.Range(
                                                     new vscode.Position(edit.range.start.line, edit.range.start.character),
                                                     new vscode.Position(edit.range.end.line, edit.range.end.character)
                                                 ), edit.newText));
                                             }
                                             edit.set(vscode.Uri.file(uri), vsEdits);
+                                            */
                                         }
                                     }
                                     const vscodeCodeAction: vscode.CodeAction = {
@@ -987,7 +995,7 @@ export class DefaultClient implements Client {
                                             command: command.command,
                                             arguments: command.arguments
                                         },
-                                        edit: edit,
+                                        edit: wsEdit,
                                         kind: codeActionKind
                                     };
                                     resultCodeActions.push(vscodeCodeAction);
