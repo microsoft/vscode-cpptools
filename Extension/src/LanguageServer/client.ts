@@ -971,7 +971,7 @@ export class DefaultClient implements Client {
                                         wsEdit = new vscode.WorkspaceEdit();
                                         for (const [uriStr, edits] of Object.entries(command.workspaceEdit.changes)) {
                                             // const vsEdits: vscode.TextEdit[] = [];
-                                            const uri: vscode.Uri = vscode.Uri.file(uriStr);
+                                            const uri: vscode.Uri = vscode.Uri.parse(uriStr, true);
                                             for (const edit of edits) {
                                                 wsEdit.replace(uri, new vscode.Range(
                                                     new vscode.Position(edit.range.start.line, edit.range.start.character),
