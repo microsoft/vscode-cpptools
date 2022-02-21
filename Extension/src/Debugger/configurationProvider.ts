@@ -247,7 +247,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
                         return resolve(newConfig);
                     } else {
                         fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                            if (!err && stats && stats.isFile) {
+                            if (!err && stats && stats.isFile()) {
                                 newConfig.miDebuggerPath = debuggerPath;
                             } else {
                                 newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
