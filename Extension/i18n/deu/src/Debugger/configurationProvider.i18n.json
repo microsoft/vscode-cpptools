@@ -17,7 +17,7 @@
 	"lldb.find.failed": "Fehlende Abhängigkeit \"{0}\" für ausführbare LLDB-MI-Datei.",
 	"lldb.search.paths": "Gesucht in:",
 	"lldb.install.help": "Um dieses Problem zu beheben, installieren Sie entweder XCode über den Apple App Store, oder installieren Sie die XCode-Befehlszeilentools, indem Sie \"{0}\" in einem Terminalfenster ausführen.",
-	"envfale.failed": "Fehler beim Verwenden von \"{0}\". Grund: {1}",
+	"envfile.failed": "Fehler beim Verwenden von \"{0}\". Grund: {1}",
 	"replacing.sourcepath": "{0} \"{1}\" wird durch \"{2}\" ersetzt.",
 	"replacing.targetpath": "{0} \"{1}\" wird durch \"{2}\" ersetzt.",
 	"replacing.editorPath": "{0} \"{1}\" wird durch \"{2}\" ersetzt.",

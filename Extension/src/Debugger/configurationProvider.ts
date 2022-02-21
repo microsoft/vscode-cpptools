@@ -111,7 +111,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
     private provider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
     private detectedBuildTasks: CppBuildTask[];
-    protected static recentBuildTaskLable: string;
+    protected static recentBuildTaskLabel: string;
 
     public constructor(provider: IConfigurationAssetProvider, type: DebuggerType) {
         this.provider = provider;
@@ -119,12 +119,12 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
         this.detectedBuildTasks = [];
     }
 
-    public static get recentBuildTaskLableStr(): string {
-        return CppConfigurationProvider.recentBuildTaskLable;
+    public static get recentBuildTaskLabelStr(): string {
+        return CppConfigurationProvider.recentBuildTaskLabel;
     }
 
-    public static set recentBuildTaskLableStr(recentTask: string) {
-        CppConfigurationProvider.recentBuildTaskLable = recentTask;
+    public static set recentBuildTaskLabelStr(recentTask: string) {
+        CppConfigurationProvider.recentBuildTaskLabel = recentTask;
     }
 
     /**
@@ -205,7 +205,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
             if (isMacARM64) {
                 // Workaround to build and debug x86_64 on macARM64 by default.
                 // Remove this workaround when native debugging for macARM64 is supported.
-                newConfig.targetArchtecture = "x86_64";
+                newConfig.targetArchitecture = "x86_64";
             }
             if (task.isDefault) {
                 newConfig.isDefault = true;
@@ -436,7 +436,7 @@ export class CppConfigurationProvider implements vscode.DebugConfigurationProvid
                 delete config.envFile;
             } catch (errJS) {
                 const e: Error = errJS as Error;
-                throw new Error(localize("envfale.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
+                throw new Error(localize("envfile.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
             }
         }
     }
@@ -561,8 +561,8 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
         const completionItems: vscode.CompletionItem[] = [];
 
         this.configurations.forEach(configuration => {
-            completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetLaunchConfiguration()));
-            completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetAttachConfiguration()));
+            completionItems.push(convertConfigurationSnippetToCompletionItem(configuration.GetLaunchConfiguration()));
+            completionItems.push(convertConfigurationSnippetToCompletionItem(configuration.GetAttachConfiguration()));
         });
 
         return completionItems;
@@ -636,7 +636,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     }
 }
 
-function convertConfigurationSnippetToCompetionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
+function convertConfigurationSnippetToCompletionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
     const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
 
     item.insertText = snippet.bodyText;
@@ -721,7 +721,7 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
     } else {
         let sortedItems: MenuItem[] = [];
         // Find the recently used task and place it at the top of quickpick list.
-        const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === CppConfigurationProvider.recentBuildTaskLableStr);
+        const recentTask: MenuItem[] = items.filter(item => item.configuration.preLaunchTask === CppConfigurationProvider.recentBuildTaskLabelStr);
         if (recentTask.length !== 0) {
             recentTask[0].detail = TaskConfigStatus.recentlyUsed;
             sortedItems.push(recentTask[0]);
@@ -748,11 +748,11 @@ export async function buildAndDebug(textEditor: vscode.TextEditor, cppVsDbgProvi
         try {
             if (folder) {
                 await cppBuildTaskProvider.checkBuildTaskExists(selection.configuration.preLaunchTask);
-                CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                CppConfigurationProvider.recentBuildTaskLabelStr = selection.configuration.preLaunchTask;
             } else {
                 // In case of single mode file, remove the preLaunch task from the debug configuration and run it here instead.
                 await cppBuildTaskProvider.runBuildTask(selection.configuration.preLaunchTask);
-                CppConfigurationProvider.recentBuildTaskLableStr = selection.configuration.preLaunchTask;
+                CppConfigurationProvider.recentBuildTaskLabelStr = selection.configuration.preLaunchTask;
                 selection.configuration.preLaunchTask = undefined;
             }
         } catch (errJS) {
