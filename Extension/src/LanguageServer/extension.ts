@@ -30,7 +30,7 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
 export const CppSourceStr: string = "C/C++";
-export const CppSourceStrPrefix = "C/C++: "
+export const CppSourceStrPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
 let clients: ClientCollection;
