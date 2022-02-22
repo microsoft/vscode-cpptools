@@ -257,8 +257,7 @@
         "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
-          "autoDetect",
-          "${workspaceFolder}"
+          "autoDetect"
         ],
         "pattern": {
           "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
