@@ -11,7 +11,7 @@ import { CppBuildTask, CppBuildTaskDefinition } from '../LanguageServer/cppBuild
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
-import { cppBuildTaskProvider, CppSourceStr } from '../LanguageServer/extension';
+import { cppBuildTaskProvider, CppSourceStrPrefix } from '../LanguageServer/extension';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations, TaskConfigStatus } from './configurations';
@@ -297,7 +297,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             const compilerName: string = path.basename(compilerPath);
             const newConfig: vscode.DebugConfiguration = { ...defaultConfig }; // Copy enumerables and properties
 
-            newConfig.name = CppSourceStr + ": " + compilerName + " " + this.buildAndDebugActiveFileStr();
+            newConfig.name = CppSourceStrPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
             if (newConfig.type === "cppdbg") {
                 newConfig.externalConsole = false;
