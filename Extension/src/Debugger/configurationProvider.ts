@@ -67,7 +67,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Find the recently used task and place it at the top of quickpick list.
         let recentlyUsedConfig: vscode.DebugConfiguration | undefined;
         configs = configs.filter(config => {
-            if (config.detail !== TaskConfigStatus.recentlyUsed) {
+            if (config.existing !== TaskConfigStatus.recentlyUsed) {
                 return true;
             } else {
                 recentlyUsedConfig = config;
