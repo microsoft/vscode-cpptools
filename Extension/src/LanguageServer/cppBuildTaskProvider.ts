@@ -57,7 +57,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     public resolveInsiderTask(_task: CppBuildTask): CppBuildTask | undefined {
         const definition: CppBuildTaskDefinition = <any>_task.definition;
-        definition.label = definition.label.replace(ext.CppSourceStrPrefix, "");
+        definition.label = definition.label.replace(ext.configPrefix, "");
         _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
         return _task;
     }
@@ -171,8 +171,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
             const isMacARM64: boolean = (os.platform() === 'darwin' && os.arch() === 'arm64');
-            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStrPrefix)) ?
-                ext.CppSourceStrPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
+            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
+                ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const programName: string = isWindows ? filePath + '.exe' : filePath;
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];

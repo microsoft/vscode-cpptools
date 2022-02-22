@@ -11,7 +11,7 @@ import { CppBuildTask, CppBuildTaskDefinition } from '../LanguageServer/cppBuild
 import * as util from '../common';
 import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
-import { cppBuildTaskProvider, CppSourceStrPrefix } from '../LanguageServer/extension';
+import { cppBuildTaskProvider, configPrefix } from '../LanguageServer/extension';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations, TaskConfigStatus } from './configurations';
@@ -99,7 +99,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         if (this.isClConfiguration(selection.label)) {
-            this.showErrorClNotAvailable(selection.label);
+            this.showErrorIfClNotAvailable(selection.label);
         }
 
         return [selection.configuration];
@@ -297,7 +297,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             const compilerName: string = path.basename(compilerPath);
             const newConfig: vscode.DebugConfiguration = { ...defaultConfig }; // Copy enumerables and properties
 
-            newConfig.name = CppSourceStrPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
+            newConfig.name = configPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
             if (newConfig.type === "cppdbg") {
                 newConfig.externalConsole = false;
@@ -391,18 +391,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private isClConfiguration(configurationLabel: string): boolean {
-        return configurationLabel.startsWith("C/C++: cl.exe") ? true : false;
+        return configurationLabel.startsWith("C/C++: cl.exe");
     }
 
-    private showErrorClNotAvailable(configurationLabel: string): boolean {
-        if (this.isClConfiguration(configurationLabel)) {
-            if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-                vscode.window.showErrorMessage(localize("cl.exe.not.available", "{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.", "cl.exe"));
-                return true;
-            }
-            return false;
+    private showErrorIfClNotAvailable(configurationLabel: string): boolean {
+        if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
+            vscode.window.showErrorMessage(localize("cl.exe.not.available", "{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.", "cl.exe"));
+            return true;
         }
-        throw new Error("Config is not a cl.exe config.");
+        return false;
     }
 
     private getLLDBFrameworkPath(): string | undefined {
@@ -578,7 +575,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return; // User canceled it.
         }
 
-        if (this.isClConfiguration(selection.label) && this.showErrorClNotAvailable(selection.label)) {
+        if (this.isClConfiguration(selection.label) && this.showErrorIfClNotAvailable(selection.label)) {
             return;
         }
 
