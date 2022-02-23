@@ -1276,11 +1276,3 @@ export function isVsCodeInsiders(): boolean {
         extensionPath.includes(".vscode-exploration") ||
         extensionPath.includes(".vscode-server-exploration");
 }
-
-export function isAlpine(): boolean {
-    const output: string = child_process.spawnSync('ldd', ['--version']).stderr.toString();
-    if (output.indexOf('musl') > -1) {
-        return true;
-    }
-    return false;
-}
