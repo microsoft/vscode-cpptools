@@ -195,7 +195,6 @@
     },
     "CppdbgLaunchOptions": {
       "type": "object",
-      "default": {},
       "required": [
         "program"
       ],
@@ -519,7 +518,6 @@
     },
     "CppvsdbgLaunchOptions": {
       "type": "object",
-      "default": {},
       "required": [
         "program",
         "cwd"
