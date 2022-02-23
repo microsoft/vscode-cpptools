@@ -28,7 +28,7 @@
 * Clarify how to get binaries when debugging the source from GitHub.
   * Hamir Mahal (@hamirmahal) [PR #8788](https://github.com/microsoft/vscode-cpptools/pull/8788)
 
-##  Version 1.9.0: February 10, 2022
+##  Version 1.9.0 (insiders): February 10, 2022
 ### New Features
 * Add a build and debug button when `C_Cpp.debugShortcut` is `true`. [#7497](https://github.com/microsoft/vscode-cpptools/issues/7497)
 * The "Build and Debug Active File" command has been split into "Debug C++ File" and "Run C++ File", and it has been removed from the context menu.
