@@ -26,6 +26,7 @@ import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
 import { PlatformInformation } from '../platform';
+import * as semver from 'semver';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -172,7 +173,7 @@ async function checkVsixCompatibility(): Promise<void> {
                 case "win32-x64":
                     isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x64";
                     // x64 binaries can also be run on arm64 Windows 11.
-                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || (platformInfo.architecture === "arm64" && semver.gte(os.release(), "10.0.22000")));
                     break;
                 case "win32-ia32":
                     isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
