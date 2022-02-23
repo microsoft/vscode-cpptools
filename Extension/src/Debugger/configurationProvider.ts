@@ -37,7 +37,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     private assetProvider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
     private static detectedBuildTasks: CppBuildTask[] = [];
-    protected static recentBuildTaskLable: string;
+    protected static recentBuildTaskLabel: string;
 
     public constructor(assetProvider: IConfigurationAssetProvider, type: DebuggerType) {
         this.assetProvider = assetProvider;
@@ -313,11 +313,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
-            newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLableStr) ? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
+            newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
             if (isMacARM64) {
                 // Workaround to build and debug x86_64 on macARM64 by default.
                 // Remove this workaround when native debugging for macARM64 is supported.
-                newConfig.targetArchtecture = "x86_64";
+                newConfig.targetArchitecture = "x86_64";
             }
             if (task.isDefault) {
                 newConfig.isDefault = true;
@@ -359,7 +359,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         return resolve(newConfig);
                     } else {
                         fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                            if (!err && stats && stats.isFile) {
+                            if (!err && stats && stats.isFile()) {
                                 newConfig.miDebuggerPath = debuggerPath;
                             } else {
                                 newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
@@ -380,12 +380,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    public static get recentBuildTaskLableStr(): string {
-        return DebugConfigurationProvider.recentBuildTaskLable;
+    public static get recentBuildTaskLabelStr(): string {
+        return DebugConfigurationProvider.recentBuildTaskLabel;
     }
 
-    public static set recentBuildTaskLableStr(recentTask: string) {
-        DebugConfigurationProvider.recentBuildTaskLable = recentTask;
+    public static set recentBuildTaskLabelStr(recentTask: string) {
+        DebugConfigurationProvider.recentBuildTaskLabel = recentTask;
     }
 
     private buildAndDebugActiveFileStr(): string {
@@ -456,7 +456,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 delete config.envFile;
             } catch (errJS) {
                 const e: Error = errJS as Error;
-                throw new Error(localize("envfale.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
+                throw new Error(localize("envfile.failed", "Failed to use {0}. Reason: {1}", "envFile", e.message));
             }
         }
     }
@@ -559,7 +559,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         } else {
             let sortedItems: MenuItem[] = [];
             // Find the recently used task and place it at the top of quickpick list.
-            const recentTask: MenuItem[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLableStr));
+            const recentTask: MenuItem[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr));
             if (recentTask.length !== 0) {
                 recentTask[0].detail = TaskConfigStatus.recentlyUsed;
                 sortedItems.push(recentTask[0]);
@@ -602,11 +602,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             try {
                 if (folder) {
                     await cppBuildTaskProvider.checkBuildTaskExists(configuration.preLaunchTask);
-                    DebugConfigurationProvider.recentBuildTaskLableStr = configuration.preLaunchTask;
+                    DebugConfigurationProvider.recentBuildTaskLabelStr = configuration.preLaunchTask;
                 } else {
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
-                    DebugConfigurationProvider.recentBuildTaskLableStr = configuration.preLaunchTask;
+                    DebugConfigurationProvider.recentBuildTaskLabelStr = configuration.preLaunchTask;
                 }
             } catch (errJS) {
                 const e: Error = errJS as Error;
@@ -687,8 +687,8 @@ abstract class DefaultConfigurationProvider implements IConfigurationAssetProvid
         const completionItems: vscode.CompletionItem[] = [];
 
         this.configurations.forEach(configuration => {
-            completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetLaunchConfiguration()));
-            completionItems.push(convertConfigurationSnippetToCompetionItem(configuration.GetAttachConfiguration()));
+            completionItems.push(convertConfigurationSnippetToCompletionItem(configuration.GetLaunchConfiguration()));
+            completionItems.push(convertConfigurationSnippetToCompletionItem(configuration.GetAttachConfiguration()));
         });
 
         return completionItems;
@@ -762,7 +762,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
     }
 }
 
-function convertConfigurationSnippetToCompetionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
+function convertConfigurationSnippetToCompletionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
     const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
 
     item.insertText = snippet.bodyText;
