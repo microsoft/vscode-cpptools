@@ -25,6 +25,7 @@ import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
+import { PlatformInformation } from '../platform';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -154,10 +155,85 @@ function sendActivationTelemetry(): void {
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
 
+function checkVsixCompatibility(): void {
+    // Check to ensure the correct platform-specific VSIX was installed.
+    const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
+    // Skip the check if the file does not exist, such as when debugging cpptools.
+    if (fs.existsSync(vsixManifestPath)) {
+        const content: string = fs.readFileSync(vsixManifestPath).toString();
+        const matches: RegExpMatchArray | null = content.match(/TargetPlatform="(?<platform>[^"]*)"/);
+        if (matches && matches.length > 0 && matches.groups) {
+            const vsixTargetPlatform: string = matches.groups['platform'];
+            const platform: string = os.platform();
+            const arch: string = PlatformInformation.GetArchitecture();
+            let isPlatformCompatible: boolean = true;
+            let isPlatformMatching: boolean = true;
+            switch (vsixTargetPlatform) {
+                case "win32-x64":
+                    isPlatformMatching = platform === "win32" && arch === "x64";
+                    // x64 binaries can also be run on arm64 Windows 11.
+                    isPlatformCompatible = platform === "win32" && (arch === "x64" || arch === "arm64");
+                    break;
+                case "win32-ia32":
+                    isPlatformMatching = platform === "win32" && arch === "x32";
+                    // x86 binaries can also be run on x64 and arm64 Windows.
+                    isPlatformCompatible = platform === "win32" && (arch === "x32" || arch === "x64" || arch === "arm64");
+                    break;
+                case "win32-arm64":
+                    isPlatformMatching = platform === "win32" && arch === "arm64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-x64":
+                    isPlatformMatching = platform === "linux" && arch === "x64" && !util.isAlpine();
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-arm64":
+                    isPlatformMatching = platform === "linux" && arch === "arm64" && !util.isAlpine();
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-armhf":
+                    isPlatformMatching = platform === "linux" && arch === "arm" && !util.isAlpine();
+                    // armhf binaries can also be run on aarch64 linux.
+                    isPlatformCompatible = platform === "linux" && (arch === "arm" || arch === "arm64");
+                    break;
+                case "alpine-x64":
+                    isPlatformMatching = platform === "linux" && arch === "x64" && util.isAlpine();
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "alpine-arm64":
+                    isPlatformMatching = platform === "linux" && arch === "arm64" && util.isAlpine();
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-x64":
+                    isPlatformMatching = platform === "darwin" && arch === "x64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-arm64":
+                    isPlatformMatching = platform === "darwin" && arch === "arm64";
+                    // x64 binaries can also be run on arm64 macOS.
+                    isPlatformCompatible = platform === "darwin" && (arch === "x64" || arch === "arm64");
+                    break;
+                default:
+                    console.log("Unrecognized TargetPlatform in .vsixmanifest");
+                    break;
+            }
+            if (!isPlatformCompatible) {
+                vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The target platform {0} specifed in the C/C++ Extension VSIX is not compatible with your system.", vsixTargetPlatform));
+            } else if (!isPlatformMatching) {
+                vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The target platform {0} specifed in the C/C++ Extension VSIX does not match VS Code.", vsixTargetPlatform));
+            }
+        } else {
+            console.log("Unable to find TargetPlatform in .vsixmanifest");
+        }
+    }
+}
+
 /**
  * activate: set up the extension for language services
  */
 export async function activate(): Promise<void> {
+
+    checkVsixCompatibility();
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
