@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.9.1 (insiders2): February 23, 2022
+## Version 1.9.1 (insiders2): February 24, 2022
 ### New Features
 * Ship x64 debugger for CppVsdbg on Windows x64.
 
