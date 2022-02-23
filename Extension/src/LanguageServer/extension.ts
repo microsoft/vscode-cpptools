@@ -170,6 +170,50 @@ export async function activate(): Promise<void> {
         }
     }
 
+    if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
+        throw new Error(intelliSenseDisabledError);
+    } else {
+        console.log("activating extension");
+        sendActivationTelemetry();
+        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
+        if (checkForConflictingExtensions.Value) {
+            checkForConflictingExtensions.Value = false;
+            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+                extension.isActive && extension.id === "mitaki28.vscode-clang");
+            if (clangCommandAdapterActive) {
+                telemetry.logLanguageServerEvent("conflictingExtension");
+            }
+        }
+    }
+
+    console.log("starting language server");
+    clients = new ClientCollection();
+    ui = getUI();
+
+    // There may have already been registered CustomConfigurationProviders.
+    // Request for configurations from those providers.
+    clients.forEach(client => {
+        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+    });
+
+    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+
+    updateLanguageConfigurations();
+
+    reportMacCrashes();
+
+    vcpkgDbPromise = initVcpkgDatabase();
+
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        intervalTimer = global.setInterval(onInterval, 2500);
+    });
+
+    registerCommands();
+
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {
@@ -230,55 +274,11 @@ export async function activate(): Promise<void> {
         }
     });
 
-    if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
-        throw new Error(intelliSenseDisabledError);
-    } else {
-        console.log("activating extension");
-        sendActivationTelemetry();
-        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
-        if (checkForConflictingExtensions.Value) {
-            checkForConflictingExtensions.Value = false;
-            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
-                extension.isActive && extension.id === "mitaki28.vscode-clang");
-            if (clangCommandAdapterActive) {
-                telemetry.logLanguageServerEvent("conflictingExtension");
-            }
-        }
-    }
-
-    console.log("starting language server");
-    clients = new ClientCollection();
-    ui = getUI();
-
     // Log cold start.
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (activeEditor) {
         clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
     }
-
-    // There may have already been registered CustomConfigurationProviders.
-    // Request for configurations from those providers.
-    clients.forEach(client => {
-        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
-    });
-
-    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
-
-    updateLanguageConfigurations();
-
-    reportMacCrashes();
-
-    vcpkgDbPromise = initVcpkgDatabase();
-
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        intervalTimer = global.setInterval(onInterval, 2500);
-    });
-
-    registerCommands();
 }
 
 export function updateLanguageConfigurations(): void {
