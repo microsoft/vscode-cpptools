@@ -257,6 +257,7 @@
         "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
+          "autoDetect",
           "{$cwd}"
         ],
         "pattern": {
