@@ -26,7 +26,8 @@ const https = require('https');
 
 // Patterns to find HTML files
 const htmlFilesPatterns = [
-    "ui/**/*.html"
+    "ui/**/*.html",
+    "Reinstalling the Extension.md"
 ];
 
 // HTML files for walkthroughs are handled differently, as localization support
@@ -370,11 +371,6 @@ const generateLocalizedHtmlFiles = () => {
                 contents: Buffer.from(newContent, 'utf8')
             }));
         });
-        // Put the original in an 'en' directory.
-        this.queue(new vinyl({
-            path: path.join("html/en", relativePath),
-            contents: file.contents
-        }));
     });
 };
 

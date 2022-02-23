@@ -26,6 +26,7 @@ import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
 import { PlatformInformation } from '../platform';
+import * as semver from 'semver';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -157,6 +158,9 @@ function sendActivationTelemetry(): void {
 }
 
 async function checkVsixCompatibility(): Promise<void> {
+    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP.ignoreMismatchedCompatibleVsix", false);
+    let resetIgnoreMismatchedCompatibleVsix: boolean = true;
+
     // Check to ensure the correct platform-specific VSIX was installed.
     const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
     // Skip the check if the file does not exist, such as when debugging cpptools.
@@ -172,12 +176,12 @@ async function checkVsixCompatibility(): Promise<void> {
                 case "win32-x64":
                     isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x64";
                     // x64 binaries can also be run on arm64 Windows 11.
-                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || (platformInfo.architecture === "arm64" && semver.gte(os.release(), "10.0.22000")));
                     break;
                 case "win32-ia32":
-                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x32";
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
                     // x86 binaries can also be run on x64 and arm64 Windows.
-                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x32" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x86" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
                     break;
                 case "win32-arm64":
                     isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "arm64";
@@ -217,14 +221,32 @@ async function checkVsixCompatibility(): Promise<void> {
                     console.log("Unrecognized TargetPlatform in .vsixmanifest");
                     break;
             }
+            const moreInfoButton: string = localize("more.info.button", "More Info");
+            const ignoreButton: string = localize("ignore.button", "Ignore");
+            let promise: Thenable<string | undefined> | undefined;
             if (!isPlatformCompatible) {
-                vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The target platform {0} specifed in the C/C++ Extension VSIX is not compatible with your system.", vsixTargetPlatform));
+                promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
             } else if (!isPlatformMatching) {
-                vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The target platform {0} specifed in the C/C++ Extension VSIX does not match VS Code.", vsixTargetPlatform));
+                if (!ignoreMismatchedCompatibleVsix.Value) {
+                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
+                    resetIgnoreMismatchedCompatibleVsix = false;
+                }
+            }
+            if (promise) {
+                promise.then(async (value) => {
+                    if (value === moreInfoButton) {
+                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(util.getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                    } else if (value === ignoreButton) {
+                        ignoreMismatchedCompatibleVsix.Value = true;
+                    }
+                });
             }
         } else {
             console.log("Unable to find TargetPlatform in .vsixmanifest");
         }
+    }
+    if (resetIgnoreMismatchedCompatibleVsix) {
+        ignoreMismatchedCompatibleVsix.Value = false;
     }
 }
 
