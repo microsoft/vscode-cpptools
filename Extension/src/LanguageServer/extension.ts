@@ -194,7 +194,7 @@ function checkVsixCompatibility(): void {
                 case "linux-armhf":
                     isPlatformMatching = platform === "linux" && arch === "arm" && !util.isAlpine();
                     // armhf binaries can also be run on aarch64 linux.
-                    isPlatformCompatible = platform === "linux" && (arch === "arm" || arch === "arm64");
+                    isPlatformCompatible = platform === "linux" && (arch === "arm" || arch === "arm64") && !util.isAlpine();
                     break;
                 case "alpine-x64":
                     isPlatformMatching = platform === "linux" && arch === "x64" && util.isAlpine();
