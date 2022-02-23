@@ -257,7 +257,7 @@
         "source": "gcc",
         "owner": "cpptools",
         "fileLocation": [
-          "absolute"
+          "{$cwd}"
         ],
         "pattern": {
           "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
