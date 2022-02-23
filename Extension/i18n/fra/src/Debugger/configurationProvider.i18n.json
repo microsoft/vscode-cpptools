@@ -17,7 +17,7 @@
 	"lldb.find.failed": "La dépendance '{0}' est manquante pour l'exécutable lldb-mi.",
 	"lldb.search.paths": "Recherche effectuée dans :",
 	"lldb.install.help": "Pour résoudre ce problème, installez XCode via l'Apple App Store ou installez les outils en ligne de commande XCode en exécutant '{0}' dans une fenêtre de terminal.",
-	"envfale.failed": "L'utilisation de {0} a échoué. Motif : {1}",
+	"envfile.failed": "L'utilisation de {0} a échoué. Motif : {1}",
 	"replacing.sourcepath": "Remplacement de {0} '{1}' par '{2}'.",
 	"replacing.targetpath": "Remplacement de {0} '{1}' par '{2}'.",
 	"replacing.editorPath": "Remplacement de {0} '{1}' par '{2}'.",

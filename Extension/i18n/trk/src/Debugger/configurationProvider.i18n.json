@@ -17,7 +17,7 @@
 	"lldb.find.failed": "lldb-mi yürütülebilir dosyası için '{0}' bağımlılığı eksik.",
 	"lldb.search.paths": "Şurada arandı:",
 	"lldb.install.help": "Bu sorunu çözmek için, Apple App Store üzerinden XCode'u yükleyin ya da bir Terminal penceresinde '{0}' çalıştırarak XCode Komut Satırı Araçları'nı yükleyin.",
-	"envfale.failed": "{0} kullanılamadı. Neden: {1}",
+	"envfile.failed": "{0} kullanılamadı. Neden: {1}",
 	"replacing.sourcepath": "{0} değişkeninin '{1}' olan değeri '{2}' olarak değiştiriliyor.",
 	"replacing.targetpath": "{0} değişkeninin '{1}' olan değeri '{2}' olarak değiştiriliyor.",
 	"replacing.editorPath": "'{1}' adlı {0}, '{2}' ile değiştiriliyor.",
