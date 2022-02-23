@@ -17,7 +17,7 @@
 	"lldb.find.failed": "Chybí závislosti {0} pro spustitelný soubor lldb-mi.",
 	"lldb.search.paths": "Prohledáno:",
 	"lldb.install.help": "Pokud chcete tento problém vyřešit, buď nainstalujte XCode přes obchod Apple App Store, nebo v okně terminálu spusťte {0}, aby se nainstalovaly nástroje příkazového řádku XCode.",
-	"envfale.failed": "Nepovedlo se použít {0}. Příčina: {1}",
+	"envfile.failed": "Nepovedlo se použít {0}. Příčina: {1}",
 	"replacing.sourcepath": "{1} v {0} se nahrazuje za {2}.",
 	"replacing.targetpath": "{1} v {0} se nahrazuje za {2}.",
 	"replacing.editorPath": "Nahrazuje se {0} {1} za {2}.",

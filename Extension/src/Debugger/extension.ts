@@ -7,8 +7,9 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider, buildAndDebug } from './configurationProvider';
+import { DebugConfigurationProvider, ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { DebuggerType } from './configurations';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
@@ -22,22 +23,24 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.commands.registerCommand('extension.pickRemoteNativeProcess', (any) => remoteAttacher.ShowAttachEntries(any)));
 
     // Activate ConfigurationProvider
-    const configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
-    // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
-    // This will cause it to not show up on the dropdown list.
-    let cppVsDbgProvider: CppVsDbgConfigurationProvider | null = null;
+    const assetProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
+
+    // Register DebugConfigurationProviders for "Run and Debug" in Debug Panel.
+    // On windows platforms, the cppvsdbg debugger will also be registered for initial configurations.
+    let cppVsDebugProvider: DebugConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
-        cppVsDbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(cppVsDbgProvider)));
+        cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
+        disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppvsdbg, cppVsDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
     }
-    const cppDbgProvider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(cppDbgProvider)));
+    const cppDebugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppdbg);
+    disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppdbg, cppDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
 
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor, cppVsDbgProvider, cppDbgProvider); }));
+    // Register DebugConfigurationProviders for "Run and Debug" play button.
+    const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
 
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await buildAndDebug(textEditor, cppVsDbgProvider, cppDbgProvider, false); }));
-
-    configurationProvider.getConfigurationSnippets();
+    assetProvider.getConfigurationSnippets();
 
     const launchJsonDocumentSelector: vscode.DocumentSelector = [{
         scheme: 'file',
@@ -46,11 +49,11 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     }];
 
     // ConfigurationSnippetProvider needs to be initiallized after configurationProvider calls getConfigurationSnippets.
-    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(configurationProvider)));
+    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(assetProvider)));
 
     // Register Debug Adapters
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppvsdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppvsdbgDebugAdapterDescriptorFactory(context)));
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg , new CppvsdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
 
     vscode.Disposable.from(...disposables);
 }
