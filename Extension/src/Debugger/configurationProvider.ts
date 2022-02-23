@@ -153,6 +153,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * This is also ran after the tasks.json has completed.
      *
 	 * Try to add all missing attributes to the debug configuration being launched.
+     * If return "undefined", the debugging will be aborted silently.
+     * If return "null", the debugging will be aborted and launch.json will be opened.
 	 */
     resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (!config || !config.type) {
