@@ -1,5 +1,33 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.9.1 (insiders2): February 23, 2022
+### New Features
+* Ship x64 debugger for CppVsdbg on Windows x64.
+
+### Enhancements
+* Add `dotConfig` property to IntelliSense Configuration (c_cpp_properties.json) to use .config file created by Kconfig system.
+   * Matheus Castello (@microhobby) [PR #7845](https://github.com/microsoft/vscode-cpptools/pull/7845)
+* Make SwitchHeaderSource use the `workbench.editor.revealIfOpen` setting.
+  * Joel Smith (@joelmsmith) [PR #8857](https://github.com/microsoft/vscode-cpptools/pull/8857)
+* Add error and warning messages if the VSIX for an incompatible or mismatching platform or architecture is installed. [#8908](https://github.com/microsoft/vscode-cpptools/issues/8908)
+
+### Bug Fixes
+* Fix issue that could cause a hang when clicking on a preprocessor conditional directive. [#8717](https://github.com/microsoft/vscode-cpptools/issues/8717)
+* Fix Crash when visualizing local variables for Microsoft Edge (msedge.exe) [#8738](https://github.com/microsoft/vscode-cpptools/issues/8738)
+* Prevent error from being logged due to custom configuration processing prior to the provider being ready. [#8752](https://github.com/microsoft/vscode-cpptools/issues/8752)
+* Fix a bug on Windows with semantic tokens updating. [#8799](https://github.com/microsoft/vscode-cpptools/issues/8799)
+* Fix code analysis showing "Error while processing" on line 1 col 1 (when it shouldn't) when there's an error in a source file. [#8849](https://github.com/microsoft/vscode-cpptools/issues/8849)
+* Fix issue with cpptools restarting when it should not. [PR #8850](https://github.com/microsoft/vscode-cpptools/pull/8850)
+* Fix semantic tokens getting cleared for all other files in a TU after editing a file. [#8867](https://github.com/microsoft/vscode-cpptools/issues/8867)
+* Fix a bug with IntelliSense updating not working if a file was closed and reopened while its TU was processing an update.
+* Fix a bug and typos with cppbuild task providers.
+  * InLAnn (@inlann) [PR #8897](https://github.com/microsoft/vscode-cpptools/pull/8897)
+* Fix issue that could cause the extension to fail to start up properly. [PR #8906](https://github.com/microsoft/vscode-cpptools/pull/8906)
+
+### Documentation
+* Clarify how to get binaries when debugging the source from GitHub.
+  * Hamir Mahal (@hamirmahal) [PR #8788](https://github.com/microsoft/vscode-cpptools/pull/8788)
+
 ##  Version 1.9.0: February 10, 2022
 ### New Features
 * Add a build and debug button when `C_Cpp.debugShortcut` is `true`. [#7497](https://github.com/microsoft/vscode-cpptools/issues/7497)
