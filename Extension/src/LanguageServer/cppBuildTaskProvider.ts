@@ -58,7 +58,6 @@ export class CppBuildTaskProvider implements TaskProvider {
     public resolveInsiderTask(_task: CppBuildTask): CppBuildTask | undefined {
         const definition: CppBuildTaskDefinition = <any>_task.definition;
         definition.label = definition.label.replace(ext.configPrefix, "");
-        _task.isBackground = false;
         _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
         return _task;
     }
@@ -301,9 +300,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         } else {
             const resolvedTask: CppBuildTask | undefined = this.resolveInsiderTask(task);
             if (resolvedTask) {
-                event register task event
                 await tasks.executeTask(resolvedTask);
-                unregister task
             } else {
                 throw new Error("Failed to run resolved task in runBuildTask()");
             }
