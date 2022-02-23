@@ -175,9 +175,9 @@ async function checkVsixCompatibility(): Promise<void> {
                     isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
                     break;
                 case "win32-ia32":
-                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x32";
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
                     // x86 binaries can also be run on x64 and arm64 Windows.
-                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x32" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x86" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
                     break;
                 case "win32-arm64":
                     isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "arm64";
