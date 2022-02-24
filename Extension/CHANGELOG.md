@@ -10,6 +10,7 @@
 * Make SwitchHeaderSource use the `workbench.editor.revealIfOpen` setting.
   * Joel Smith (@joelmsmith) [PR #8857](https://github.com/microsoft/vscode-cpptools/pull/8857)
 * Add error and warning messages if the VSIX for an incompatible or mismatching platform or architecture is installed. [#8908](https://github.com/microsoft/vscode-cpptools/issues/8908)
+* Improvements to `Run and Debug` in the debug panel to make it consistent with our play button. [#8773](https://github.com/microsoft/vscode-cpptools/issues/8773)
 
 ### Bug Fixes
 * Fix issue that could cause a hang when clicking on a preprocessor conditional directive. [#8717](https://github.com/microsoft/vscode-cpptools/issues/8717)
@@ -24,7 +25,6 @@
   * InLAnn (@inlann) [PR #8897](https://github.com/microsoft/vscode-cpptools/pull/8897)
 * Fix a failure when parsing `.editorconfig` files. [#8900](https://github.com/microsoft/vscode-cpptools/issues/8900)
 * Fix issue that could cause the extension to fail to start up properly. [PR #8906](https://github.com/microsoft/vscode-cpptools/pull/8906)
-
 
 ### Documentation
 * Clarify how to get binaries when debugging the source from GitHub.
