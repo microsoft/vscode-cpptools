@@ -22,7 +22,9 @@
 * Fix a bug with IntelliSense updating not working if a file was closed and reopened while its TU was processing an update.
 * Fix a bug and typos with cppbuild task providers.
   * InLAnn (@inlann) [PR #8897](https://github.com/microsoft/vscode-cpptools/pull/8897)
+* Fix a failure when parsing `.editorconfig` files. [#8900](https://github.com/microsoft/vscode-cpptools/issues/8900)
 * Fix issue that could cause the extension to fail to start up properly. [PR #8906](https://github.com/microsoft/vscode-cpptools/pull/8906)
+
 
 ### Documentation
 * Clarify how to get binaries when debugging the source from GitHub.
