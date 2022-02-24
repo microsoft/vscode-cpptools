@@ -6,7 +6,7 @@
 import * as path from 'path';
 import {
     TaskDefinition, Task, TaskGroup, ShellExecution, workspace,
-    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks
+    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks, TaskExecution, TaskEndEvent, Disposable
 } from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
@@ -300,12 +300,19 @@ export class CppBuildTaskProvider implements TaskProvider {
         } else {
             const resolvedTask: CppBuildTask | undefined = this.resolveInsiderTask(task);
             if (resolvedTask) {
-                await tasks.executeTask(resolvedTask);
+                const execution: TaskExecution = await tasks.executeTask(resolvedTask);
+                return new Promise<void>((resolve) => {
+                    const disposable: Disposable = tasks.onDidEndTask((endEvent: TaskEndEvent) => {
+                        if (endEvent.execution.task.group === TaskGroup.Build && endEvent.execution === execution) {
+                            disposable.dispose();
+                            resolve();
+                        }
+                    });
+                });
             } else {
                 throw new Error("Failed to run resolved task in runBuildTask()");
             }
         }
-
     }
 
     public async checkDebugConfigExists(configName: string): Promise<void> {
