@@ -712,8 +712,16 @@ export class CppSettings extends Settings {
                         return true;
                     }
                 }
-                if (editorConfigSettings.root?.toLowerCase() === "true") {
-                    return true;
+                if (editorConfigSettings.root !== undefined) {
+                    if (typeof editorConfigSettings.root === "boolean") {
+                        if (editorConfigSettings.root) {
+                            return true;
+                        }
+                    } else if (typeof editorConfigSettings.root === "string") {
+                        if (editorConfigSettings.root.toLowerCase() === "true") {
+                            return true;
+                        }
+                    }
                 }
             } else {
                 const clangFormatPath1: string = path.join(parentPath, ".clang-format");
