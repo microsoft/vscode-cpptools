@@ -17,7 +17,7 @@
 	"lldb.find.failed": "lldb-mi 실행 파일에 대한 '{0}' 종속성이 없습니다.",
 	"lldb.search.paths": "다음에서 검색됨:",
 	"lldb.install.help": "이 문제를 해결하려면 Apple App Store를 통해 XCode를 설치하거나, 터미널 창에서 '{0}'을(를) 실행하여 XCode 명령줄 도구를 설치하세요.",
-	"envfale.failed": "{0}을(를) 사용하지 못했습니다. 이유: {1}",
+	"envfile.failed": "{0}을(를) 사용하지 못했습니다. 이유: {1}",
 	"replacing.sourcepath": "{0} '{1}'을(를) '{2}'(으)로 바꾸는 중입니다.",
 	"replacing.targetpath": "{0} '{1}'을(를) '{2}'(으)로 바꾸는 중입니다.",
 	"replacing.editorPath": "{0} '{1}'을(를) '{2}'(으)로 바꾸는 중입니다.",

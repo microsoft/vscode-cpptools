@@ -25,11 +25,14 @@ import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
+import { PlatformInformation } from '../platform';
+import * as semver from 'semver';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
 export const CppSourceStr: string = "C/C++";
+export const configPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
 let clients: ClientCollection;
@@ -154,10 +157,84 @@ function sendActivationTelemetry(): void {
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
 
+async function checkVsixCompatibility(): Promise<void> {
+    // Check to ensure the correct platform-specific VSIX was installed.
+    const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
+    // Skip the check if the file does not exist, such as when debugging cpptools.
+    if (await util.checkFileExists(vsixManifestPath)) {
+        const content: string = await util.readFileText(vsixManifestPath);
+        const matches: RegExpMatchArray | null = content.match(/TargetPlatform="(?<platform>[^"]*)"/);
+        if (matches && matches.length > 0 && matches.groups) {
+            const vsixTargetPlatform: string = matches.groups['platform'];
+            const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+            let isPlatformCompatible: boolean = true;
+            let isPlatformMatching: boolean = true;
+            switch (vsixTargetPlatform) {
+                case "win32-x64":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x64";
+                    // x64 binaries can also be run on arm64 Windows 11.
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || (platformInfo.architecture === "arm64" && semver.gte(os.release(), "10.0.22000")));
+                    break;
+                case "win32-ia32":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
+                    // x86 binaries can also be run on x64 and arm64 Windows.
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x86" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    break;
+                case "win32-arm64":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "arm64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-x64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name !== "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-arm64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name !== "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-armhf":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm" && platformInfo.distribution?.name !== "alpine";
+                    // armhf binaries can also be run on aarch64 linux.
+                    isPlatformCompatible = platformInfo.platform === "linux" && (platformInfo.architecture === "arm" || platformInfo.architecture === "arm64") && platformInfo.distribution?.name !== "alpine";
+                    break;
+                case "alpine-x64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name === "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "alpine-arm64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name === "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-x64":
+                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "x64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-arm64":
+                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "arm64";
+                    // x64 binaries can also be run on arm64 macOS.
+                    isPlatformCompatible = platformInfo.platform === "darwin" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    break;
+                default:
+                    console.log("Unrecognized TargetPlatform in .vsixmanifest");
+                    break;
+            }
+            if (!isPlatformCompatible) {
+                vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The target platform {0} specifed in the C/C++ Extension VSIX is not compatible with your system.", vsixTargetPlatform));
+            } else if (!isPlatformMatching) {
+                vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The target platform {0} specifed in the C/C++ Extension VSIX does not match VS Code.", vsixTargetPlatform));
+            }
+        } else {
+            console.log("Unable to find TargetPlatform in .vsixmanifest");
+        }
+    }
+}
+
 /**
  * activate: set up the extension for language services
  */
 export async function activate(): Promise<void> {
+
+    await checkVsixCompatibility();
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
@@ -169,12 +246,56 @@ export async function activate(): Promise<void> {
         }
     }
 
+    if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
+        throw new Error(intelliSenseDisabledError);
+    } else {
+        console.log("activating extension");
+        sendActivationTelemetry();
+        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
+        if (checkForConflictingExtensions.Value) {
+            checkForConflictingExtensions.Value = false;
+            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+                extension.isActive && extension.id === "mitaki28.vscode-clang");
+            if (clangCommandAdapterActive) {
+                telemetry.logLanguageServerEvent("conflictingExtension");
+            }
+        }
+    }
+
+    console.log("starting language server");
+    clients = new ClientCollection();
+    ui = getUI();
+
+    // There may have already been registered CustomConfigurationProviders.
+    // Request for configurations from those providers.
+    clients.forEach(client => {
+        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+    });
+
+    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
+    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+
+    updateLanguageConfigurations();
+
+    reportMacCrashes();
+
+    vcpkgDbPromise = initVcpkgDatabase();
+
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        intervalTimer = global.setInterval(onInterval, 2500);
+    });
+
+    registerCommands();
+
     taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
 
     vscode.tasks.onDidStartTask(event => {
         getActiveClient().PauseCodeAnalysis();
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
-            || event.execution.task.name.startsWith(CppSourceStr)) {
+            || event.execution.task.name.startsWith(configPrefix)) {
             telemetry.logLanguageServerEvent('buildTaskStarted');
         }
     });
@@ -182,7 +303,7 @@ export async function activate(): Promise<void> {
     vscode.tasks.onDidEndTask(event => {
         getActiveClient().ResumeCodeAnalysis();
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
-            || event.execution.task.name.startsWith(CppSourceStr)) {
+            || event.execution.task.name.startsWith(configPrefix)) {
             telemetry.logLanguageServerEvent('buildTaskFinished');
             if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
                 const folder: vscode.WorkspaceFolder | undefined = event.execution.task.scope;
@@ -229,55 +350,11 @@ export async function activate(): Promise<void> {
         }
     });
 
-    if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
-        throw new Error(intelliSenseDisabledError);
-    } else {
-        console.log("activating extension");
-        sendActivationTelemetry();
-        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
-        if (checkForConflictingExtensions.Value) {
-            checkForConflictingExtensions.Value = false;
-            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
-                extension.isActive && extension.id === "mitaki28.vscode-clang");
-            if (clangCommandAdapterActive) {
-                telemetry.logLanguageServerEvent("conflictingExtension");
-            }
-        }
-    }
-
-    console.log("starting language server");
-    clients = new ClientCollection();
-    ui = getUI();
-
     // Log cold start.
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (activeEditor) {
         clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
     }
-
-    // There may have already been registered CustomConfigurationProviders.
-    // Request for configurations from those providers.
-    clients.forEach(client => {
-        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
-    });
-
-    disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
-
-    updateLanguageConfigurations();
-
-    reportMacCrashes();
-
-    vcpkgDbPromise = initVcpkgDatabase();
-
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        intervalTimer = global.setInterval(onInterval, 2500);
-    });
-
-    registerCommands();
 }
 
 export function updateLanguageConfigurations(): void {
@@ -484,14 +561,18 @@ async function onSwitchHeaderSource(): Promise<void> {
         }
     });
     const document: vscode.TextDocument = await vscode.workspace.openTextDocument(targetFileName);
+    const workbenchConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("workbench");
     let foundEditor: boolean = false;
-    // If the document is already visible in another column, open it there.
-    vscode.window.visibleTextEditors.forEach((editor, index, array) => {
-        if (editor.document === document && !foundEditor) {
-            foundEditor = true;
-            vscode.window.showTextDocument(document, editor.viewColumn);
-        }
-    });
+    if (workbenchConfig.get("editor.revealIfOpen")) {
+        // If the document is already visible in another column, open it there.
+        vscode.window.visibleTextEditors.forEach(editor => {
+            if (editor.document === document && !foundEditor) {
+                foundEditor = true;
+                vscode.window.showTextDocument(document, editor.viewColumn);
+            }
+        });
+    }
+
     if (!foundEditor) {
         vscode.window.showTextDocument(document);
     }

@@ -746,6 +746,7 @@ export interface Client {
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
+    sendAllSettings(): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -1481,15 +1482,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.recreateClients(true);
+                        allClients.recreateClients();
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.recreateClients(false);
+                            allClients.recreateClients(true);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.recreateClients(true);
+                            allClients.recreateClients();
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -1803,6 +1804,9 @@ export class DefaultClient implements Client {
                 // If we are being called by a configuration provider other than the current one, ignore it.
                 return;
             }
+            if (!currentProvider.isReady) {
+                return;
+            }
 
             this.clearCustomConfigurations();
             if (diagnosticsCollectionCodeAnalysis) {
@@ -1821,7 +1825,7 @@ export class DefaultClient implements Client {
             }
             console.log("updateCustomBrowseConfiguration");
             const currentProvider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
+            if (!currentProvider || !currentProvider.isReady || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
                 return;
             }
 
@@ -1950,13 +1954,9 @@ export class DefaultClient implements Client {
             return;
         }
         const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
-        if (!provider) {
+        if (!provider || !provider.isReady) {
             onFinished();
             return;
-        }
-        if (!provider.isReady) {
-            onFinished();
-            throw new Error(`${this.configurationProvider} is not ready`);
         }
         return this.queueBlockingTask(async () => {
             const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
@@ -1978,58 +1978,56 @@ export class DefaultClient implements Client {
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
             // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
             const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
-                if (provider) {
-                    for (let i: number = 0; i < response.candidates.length; ++i) {
-                        try {
-                            const candidate: string = response.candidates[i];
-                            const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
-                            if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                                const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
-                                if (configs && configs.length > 0 && configs[0]) {
-                                    const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
-                                    if (fileConfiguration?.mergeConfigurations) {
-                                        configs.forEach(config => {
-                                            if (fileConfiguration.includePath) {
-                                                fileConfiguration.includePath.forEach(p => {
-                                                    if (!config.configuration.includePath.includes(p)) {
-                                                        config.configuration.includePath.push(p);
+                for (let i: number = 0; i < response.candidates.length; ++i) {
+                    try {
+                        const candidate: string = response.candidates[i];
+                        const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
+                        if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                            const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
+                            if (configs && configs.length > 0 && configs[0]) {
+                                const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
+                                if (fileConfiguration?.mergeConfigurations) {
+                                    configs.forEach(config => {
+                                        if (fileConfiguration.includePath) {
+                                            fileConfiguration.includePath.forEach(p => {
+                                                if (!config.configuration.includePath.includes(p)) {
+                                                    config.configuration.includePath.push(p);
+                                                }
+                                            });
+                                        }
+
+                                        if (fileConfiguration.defines) {
+                                            fileConfiguration.defines.forEach(d => {
+                                                if (!config.configuration.defines.includes(d)) {
+                                                    config.configuration.defines.push(d);
+                                                }
+                                            });
+                                        }
+
+                                        if (!config.configuration.forcedInclude) {
+                                            config.configuration.forcedInclude = [];
+                                        }
+
+                                        if (fileConfiguration.forcedInclude) {
+                                            fileConfiguration.forcedInclude.forEach(i => {
+                                                if (config.configuration.forcedInclude) {
+                                                    if (!config.configuration.forcedInclude.includes(i)) {
+                                                        config.configuration.forcedInclude.push(i);
                                                     }
-                                                });
-                                            }
-
-                                            if (fileConfiguration.defines) {
-                                                fileConfiguration.defines.forEach(d => {
-                                                    if (!config.configuration.defines.includes(d)) {
-                                                        config.configuration.defines.push(d);
-                                                    }
-                                                });
-                                            }
-
-                                            if (!config.configuration.forcedInclude) {
-                                                config.configuration.forcedInclude = [];
-                                            }
-
-                                            if (fileConfiguration.forcedInclude) {
-                                                fileConfiguration.forcedInclude.forEach(i => {
-                                                    if (config.configuration.forcedInclude) {
-                                                        if (!config.configuration.forcedInclude.includes(i)) {
-                                                            config.configuration.forcedInclude.push(i);
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-
-                                    return configs as SourceFileConfigurationItem[];
+                                                }
+                                            });
+                                        }
+                                    });
                                 }
+
+                                return configs as SourceFileConfigurationItem[];
                             }
-                            if (tokenSource.token.isCancellationRequested) {
-                                return null;
-                            }
-                        } catch (err) {
-                            console.warn("Caught exception request configuration");
                         }
+                        if (tokenSource.token.isCancellationRequested) {
+                            return null;
+                        }
+                    } catch (err) {
+                        console.warn("Caught exception request configuration");
                     }
                 }
             };
@@ -3322,5 +3320,6 @@ class NullClient implements Client {
         this.stringEvent.dispose();
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
+    sendAllSettings(): void { }
     sendDidChangeSettings(settings: any): void { }
 }
