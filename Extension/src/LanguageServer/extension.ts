@@ -158,7 +158,7 @@ function sendActivationTelemetry(): void {
 }
 
 async function checkVsixCompatibility(): Promise<void> {
-    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP.ignoreMismatchedCompatibleVsix", false);
+    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".ignoreMismatchedCompatibleVsix", false);
     let resetIgnoreMismatchedCompatibleVsix: boolean = true;
 
     // Check to ensure the correct platform-specific VSIX was installed.
@@ -228,8 +228,8 @@ async function checkVsixCompatibility(): Promise<void> {
                 promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
             } else if (!isPlatformMatching) {
                 if (!ignoreMismatchedCompatibleVsix.Value) {
-                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
                     resetIgnoreMismatchedCompatibleVsix = false;
+                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
                 }
             }
             if (promise) {

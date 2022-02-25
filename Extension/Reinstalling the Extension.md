@@ -8,7 +8,7 @@
 
 <p data-loc-id="reinstall.extension.text1">When reinstalling an equivalent version of an extension, VS Code may reuse the existing extension directory. To prevent this from occuring when reinstalling the C/C++ extension, it may be necessary to first delete the existing extension directory.</p>
 
-<p data-loc-id="reinstall.extension.text2">Installed extension directories can be found under one of the following path under your user directory (`%USERPROFILE%` on Windows, or `$HOME` on Linux and macOS)</p>
+<p data-loc-id="reinstall.extension.text2">Installed extension directories can be found under one of the following paths under your user directory (`%USERPROFILE%` on Windows, or `$HOME` on Linux and macOS)</p>
 
 <pre><code class="lang-bash">%USERPROFILE%\.vscode\extensions</code></pre>
 <pre><code class="lang-bash">%USERPROFILE%\.vscode-insiders\extensions</code></pre>
@@ -29,4 +29,4 @@
 
 <p data-loc-id="reinstall.extension.text7">Then reinstall via the marketplace UI in VS Code.</p>
 
-<p data-loc-id="reinstall.extension.text8">If the correct version of the extension fails to be deployed by VS Code, the correct VSIX for your system can be <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools" data-loc-id="download.vsix.link.title">downloaded from the VS Code marketplace web site</a> and installed using the `Install from VSIX...` option in under the '...' menu in the marketplace UI in VS Code.</p>
+<p data-loc-id="reinstall.extension.text8">If the correct version of the extension fails to be deployed by VS Code, the correct VSIX for your system can be <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools" data-loc-id="download.vsix.link.title">downloaded from the VS Code marketplace web site</a> and installed using the `Install from VSIX...` option under the '...' menu in the marketplace UI in VS Code.</p>
