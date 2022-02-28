@@ -6,7 +6,7 @@
 
 <h1 data-loc-id="reinstalling.extension.heading">Reinstalling the C/C++ Extension</h1>
 
-<p data-loc-id="reinstall.extension.text1">When reinstalling an equivalent version of an extension, VS Code may reuse the existing extension directory. To prevent this from occuring when reinstalling the C/C++ extension, it may be necessary to first delete the existing extension directory.</p>
+<p data-loc-id="reinstall.extension.text1">When reinstalling an equivalent version of an extension, VS Code may reuse the existing extension directory. To prevent this from occurring when reinstalling the C/C++ extension, it may be necessary to first delete the existing extension directory.</p>
 
 <p data-loc-id="reinstall.extension.text2">Installed extension directories can be found under one of the following paths under your user directory (`%USERPROFILE%` on Windows, or `$HOME` on Linux and macOS)</p>
 
