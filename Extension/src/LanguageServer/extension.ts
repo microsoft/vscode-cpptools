@@ -158,6 +158,9 @@ function sendActivationTelemetry(): void {
 }
 
 async function checkVsixCompatibility(): Promise<void> {
+    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".ignoreMismatchedCompatibleVsix", false);
+    let resetIgnoreMismatchedCompatibleVsix: boolean = true;
+
     // Check to ensure the correct platform-specific VSIX was installed.
     const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
     // Skip the check if the file does not exist, such as when debugging cpptools.
@@ -218,14 +221,32 @@ async function checkVsixCompatibility(): Promise<void> {
                     console.log("Unrecognized TargetPlatform in .vsixmanifest");
                     break;
             }
+            const moreInfoButton: string = localize("more.info.button", "More Info");
+            const ignoreButton: string = localize("ignore.button", "Ignore");
+            let promise: Thenable<string | undefined> | undefined;
             if (!isPlatformCompatible) {
-                vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The target platform {0} specifed in the C/C++ Extension VSIX is not compatible with your system.", vsixTargetPlatform));
+                promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
             } else if (!isPlatformMatching) {
-                vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The target platform {0} specifed in the C/C++ Extension VSIX does not match VS Code.", vsixTargetPlatform));
+                if (!ignoreMismatchedCompatibleVsix.Value) {
+                    resetIgnoreMismatchedCompatibleVsix = false;
+                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
+                }
+            }
+            if (promise) {
+                promise.then(async (value) => {
+                    if (value === moreInfoButton) {
+                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(util.getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                    } else if (value === ignoreButton) {
+                        ignoreMismatchedCompatibleVsix.Value = true;
+                    }
+                });
             }
         } else {
             console.log("Unable to find TargetPlatform in .vsixmanifest");
         }
+    }
+    if (resetIgnoreMismatchedCompatibleVsix) {
+        ignoreMismatchedCompatibleVsix.Value = false;
     }
 }
 
