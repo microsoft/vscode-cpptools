@@ -712,21 +712,29 @@ export class CppSettings extends Settings {
                         return true;
                     }
                 }
-                switch (typeof editorConfigSettings.root) {
-                    case "boolean":
-                        return editorConfigSettings.root;
-                    case "string":
-                        return editorConfigSettings.root.toLowerCase() === "true";
-                    default:
-                        return false;
+                if (editorConfigSettings.root !== undefined) {
+                    if (typeof editorConfigSettings.root === "boolean") {
+                        if (editorConfigSettings.root) {
+                            return true;
+                        }
+                    } else if (typeof editorConfigSettings.root === "string") {
+                        if (editorConfigSettings.root.toLowerCase() === "true") {
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                const clangFormatPath1: string = path.join(parentPath, ".clang-format");
+                if (fs.existsSync(clangFormatPath1)) {
+                    return true;
+                } else {
+                    const clangFormatPath2: string = path.join(parentPath, "_clang-format");
+                    if (fs.existsSync(clangFormatPath2)) {
+                        return true;
+                    }
                 }
             }
-            const clangFormatPath1: string = path.join(parentPath, ".clang-format");
-            if (fs.existsSync(clangFormatPath1)) {
-                return true;
-            }
-            const clangFormatPath2: string = path.join(parentPath, "_clang-format");
-            return fs.existsSync(clangFormatPath2);
+            return false;
         };
         // Scan parent paths to see which we find first, ".clang-format" or ".editorconfig"
         const fsPath: string = document.uri.fsPath;

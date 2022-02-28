@@ -526,15 +526,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    public async getLaunchConfigs(folder: vscode.WorkspaceFolder | undefined): Promise<vscode.WorkspaceConfiguration[] | undefined> {
-        let configs: vscode.WorkspaceConfiguration[] | undefined = vscode.workspace.getConfiguration('launch', folder).get('configurations');
-        if (!configs) {
-            return undefined;
-        }
-        configs = configs.filter(config => (config.name && config.type === DebuggerType.cppvsdbg || config.type === DebuggerType.cppdbg) && config.request === "launch");
-        return configs;
-    }
-
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
         // Turn off the debug mode.
         return this.buildAndDebug(textEditor, false);
@@ -552,36 +543,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         let configs: vscode.DebugConfiguration[] = await this.provideDebugConfigurationsForType(DebuggerType.cppdbg, folder);
         if (os.platform() === 'win32') {
             configs = configs.concat(await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
-        }
-        
-        if (folder) {
-            // Get existing debug configurations from launch.json.
-            let existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs(folder))?.map(config =>
-                ({name: config.name,
-                    type: config.type,
-                    request: config.request,
-                    detail: config.detail ? config.detail : localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask),
-                    preLaunchTask: config.preLaunchTask,
-                    existing: TaskConfigStatus.configured
-                }));
-            
-            // Remove the detected configs that are already configured once in launch.json.
-            const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => {
-                let isAlreadyConfigured: boolean = false;
-                if (existingConfigs && existingConfigs.length !== 0) {
-                    for (const config of existingConfigs) {
-                        if (config.name === detectedConfig.name &&
-                            (config.preLaunchTask as string) === (detectedConfig.preLaunchTask as string) &&
-                            config.type === detectedConfig.type &&
-                            config.request === detectedConfig.request) {
-                            isAlreadyConfigured = true;
-                            break;
-                        }
-                    }
-                }
-                return !isAlreadyConfigured;
-            });
-            configs = existingConfigs ? existingConfigs.concat(dedupExistingConfigs) : dedupExistingConfigs;
         }
 
         const defaultConfig: vscode.DebugConfiguration[] = configs.filter((config: vscode.DebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
