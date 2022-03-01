@@ -568,19 +568,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
             // Remove the detected configs that are already configured once in launch.json.
             const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => {
-                let isAlreadyConfigured: boolean = false;
-                if (existingConfigs && existingConfigs.length !== 0) {
-                    for (const config of existingConfigs) {
-                        if (config.name === detectedConfig.name &&
-                            (config.preLaunchTask as string) === (detectedConfig.preLaunchTask as string) &&
-                            config.type === detectedConfig.type &&
-                            config.request === detectedConfig.request) {
-                            isAlreadyConfigured = true;
-                            break;
-                        }
-                    }
-                }
-                return !isAlreadyConfigured;
+                return existingConfigs ? !existingConfigs.some(config => (config.name === detectedConfig.name &&
+                    (config.preLaunchTask as string) === (detectedConfig.preLaunchTask as string) &&
+                    config.type === detectedConfig.type &&
+                    config.request === detectedConfig.request)) : true;
             });
             configs = existingConfigs ? existingConfigs.concat(dedupExistingConfigs) : dedupExistingConfigs;
         }
