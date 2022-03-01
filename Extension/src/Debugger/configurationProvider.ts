@@ -553,18 +553,19 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (os.platform() === 'win32') {
             configs = configs.concat(await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
         }
-        
+
         if (folder) {
             // Get existing debug configurations from launch.json.
             let existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs(folder))?.map(config =>
-                ({name: config.name,
-                    type: config.type,
-                    request: config.request,
-                    detail: config.detail ? config.detail : localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask),
-                    preLaunchTask: config.preLaunchTask,
-                    existing: TaskConfigStatus.configured
-                }));
-            
+            ({
+                name: config.name,
+                type: config.type,
+                request: config.request,
+                detail: config.detail ? config.detail : localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask),
+                preLaunchTask: config.preLaunchTask,
+                existing: TaskConfigStatus.configured
+            }));
+
             // Remove the detected configs that are already configured once in launch.json.
             const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => {
                 let isAlreadyConfigured: boolean = false;
