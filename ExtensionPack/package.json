@@ -9,12 +9,15 @@
       "name": "Microsoft Corporation"
     },
     "license": "SEE LICENSE IN LICENSE.txt",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "engines": {
         "vscode": "^1.48.0"
     },
     "categories": [
         "Extension Packs"
+    ],
+    "extensionKind": [
+        "workspace"
     ],
     "repository": {
         "type": "git",
@@ -42,9 +45,6 @@
         "twxs.cmake",
         "ms-vscode.cmake-tools",
         "cschlosser.doxdocgen",
-        "jeff-hykin.better-cpp-syntax",
-        "ms-vscode-remote.remote-wsl",
-        "ms-vscode-remote.remote-containers",
-        "ms-vscode-remote.remote-ssh"
+        "jeff-hykin.better-cpp-syntax"
     ]
 }
