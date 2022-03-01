@@ -556,8 +556,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (folder) {
             // Get existing debug configurations from launch.json.
-            let existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs(folder))?.map(config =>
-            ({
+            const existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs(folder))?.map(config => ({
                 name: config.name,
                 type: config.type,
                 request: config.request,
