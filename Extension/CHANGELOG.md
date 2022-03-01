@@ -4,7 +4,8 @@
 ### New Feature
 * Add Alpine Linux arm64 support (VSIX).
 
-### Enhancement
+### Enhancements
+* Read an existing `launch.json` when the `Run and Debug` button is used. [#8930](https://github.com/microsoft/vscode-cpptools/issues/8930)
 * Add `;` to `break` and `continue` completion keywords. [#8932](https://github.com/microsoft/vscode-cpptools/issues/8932)
 
 ### Bug Fixes
