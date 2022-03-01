@@ -258,8 +258,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         await this.loadDetectedTasks();
         // Remove the tasks that are already configured once in tasks.json.
         const dedupDetectedBuildTasks: CppBuildTask[] = DebugConfigurationProvider.detectedBuildTasks.filter(taskDetected =>
-            (configuredBuildTasks ? !configuredBuildTasks.some(taskJson => (taskJson.definition.label === taskDetected.definition.label)) : true));
-
+            (!configuredBuildTasks.some(taskJson => (taskJson.definition.label === taskDetected.definition.label))));
         buildTasks = buildTasks.concat(configuredBuildTasks, dedupDetectedBuildTasks);
 
         if (buildTasks.length === 0) {
@@ -524,7 +523,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!configs) {
             return undefined;
         }
-        configs = configs.filter(config => (config.name && config.type === DebuggerType.cppvsdbg || config.type === DebuggerType.cppdbg) && config.request === "launch");
+        configs = configs.filter(config => (config.name && config.request === "launch" && (config.type === DebuggerType.cppvsdbg || config.type === DebuggerType.cppdbg)));
         return configs;
     }
 
@@ -557,13 +556,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 preLaunchTask: config.preLaunchTask,
                 existing: TaskConfigStatus.configured
             }));
-
-            const areEqual = (config1: vscode.DebugConfiguration, config2: vscode.DebugConfiguration): boolean =>
-                (config1.name === config2.name && config1.preLaunchTask === config2.preLaunchTask
-                && config1.type === config2.type && config1.request === config2.request);
-            // Remove the detected configs that are already configured once in launch.json.
-            const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => existingConfigs ? !existingConfigs.some(config => areEqual(config, detectedConfig)) : true);
-            configs = existingConfigs ? existingConfigs.concat(dedupExistingConfigs) : dedupExistingConfigs;
+            if (existingConfigs) {
+                const areEqual = (config1: vscode.DebugConfiguration, config2: vscode.DebugConfiguration): boolean =>
+                    (config1.name === config2.name && config1.preLaunchTask === config2.preLaunchTask
+                    && config1.type === config2.type && config1.request === config2.request);
+                // Remove the detected configs that are already configured once in launch.json.
+                const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => !existingConfigs.some(config => areEqual(config, detectedConfig)));
+                configs = existingConfigs.concat(dedupExistingConfigs);
+            }
         }
 
         const defaultConfig: vscode.DebugConfiguration[] = configs.filter((config: vscode.DebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
