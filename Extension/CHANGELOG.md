@@ -1,5 +1,18 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.9.2 (insiders3): March 1, 2022
+### New Feature
+* Add Alpine Linux arm64 support (VSIX).
+
+### Enhancements
+* Read an existing `launch.json` when the `Run and Debug` button is used. [#8930](https://github.com/microsoft/vscode-cpptools/issues/8930)
+* Add `;` to `break` and `continue` completion keywords. [#8932](https://github.com/microsoft/vscode-cpptools/issues/8932)
+
+### Bug Fixes
+* Add a "More Info" option when an incompatible VSIX is encountered. [PR #8920](https://github.com/microsoft/vscode-cpptools/pull/8920)
+* Fix a random crash on file open.
+* Fix some IntelliSense parsing bugs.
+
 ## Version 1.9.1 (insiders2): February 24, 2022
 ### New Features
 * Ship x64 debugger for CppVsdbg on Windows x64.
