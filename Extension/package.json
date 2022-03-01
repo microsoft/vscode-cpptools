@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.8.2-main",
+  "version": "1.9.2-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -75,7 +75,6 @@
     "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
     "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
     "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
-    "onDebugInitialConfigurations",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -259,7 +258,7 @@
         "owner": "cpptools",
         "fileLocation": [
           "autoDetect",
-          "${workspaceFolder}"
+          "{$cwd}"
         ],
         "pattern": {
           "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
@@ -2763,7 +2762,6 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
-            "default": {},
             "required": [
               "program"
             ],
@@ -3438,7 +3436,6 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
-            "default": {},
             "required": [
               "program",
               "cwd"

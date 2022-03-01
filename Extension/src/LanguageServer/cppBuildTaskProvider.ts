@@ -6,7 +6,7 @@
 import * as path from 'path';
 import {
     TaskDefinition, Task, TaskGroup, ShellExecution, workspace,
-    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks
+    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks, TaskExecution, TaskEndEvent, Disposable
 } from 'vscode';
 import * as os from 'os';
 import * as util from '../common';
@@ -57,12 +57,13 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     public resolveInsiderTask(_task: CppBuildTask): CppBuildTask | undefined {
         const definition: CppBuildTaskDefinition = <any>_task.definition;
+        definition.label = definition.label.replace(ext.configPrefix, "");
         _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
         return _task;
     }
 
     // Generate tasks to build the current file based on the user's detected compilers, the user's compilerPath setting, and the current file's extension.
-    public async getTasks(appendSourceToName: boolean): Promise<CppBuildTask[]> {
+    public async getTasks(appendSourceToName: boolean = false): Promise<CppBuildTask[]> {
         const editor: TextEditor | undefined = window.activeTextEditor;
         const emptyTasks: CppBuildTask[] = [];
         if (!editor) {
@@ -170,8 +171,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
             const isMacARM64: boolean = (os.platform() === 'darwin' && os.arch() === 'arm64');
-            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.CppSourceStr)) ?
-                ext.CppSourceStr + ": " : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
+            const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
+                ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
             const programName: string = isWindows ? filePath + '.exe' : filePath;
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
@@ -299,12 +300,19 @@ export class CppBuildTaskProvider implements TaskProvider {
         } else {
             const resolvedTask: CppBuildTask | undefined = this.resolveInsiderTask(task);
             if (resolvedTask) {
-                await tasks.executeTask(resolvedTask);
+                const execution: TaskExecution = await tasks.executeTask(resolvedTask);
+                return new Promise<void>((resolve) => {
+                    const disposable: Disposable = tasks.onDidEndTask((endEvent: TaskEndEvent) => {
+                        if (endEvent.execution.task.group === TaskGroup.Build && endEvent.execution === execution) {
+                            disposable.dispose();
+                            resolve();
+                        }
+                    });
+                });
             } else {
                 throw new Error("Failed to run resolved task in runBuildTask()");
             }
         }
-
     }
 
     public async checkDebugConfigExists(configName: string): Promise<void> {

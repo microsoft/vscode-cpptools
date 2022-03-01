@@ -1031,11 +1031,13 @@ export function getLocaleId(): string {
 
 export function getLocalizedHtmlPath(originalPath: string): string {
     const locale: string = getLocaleId();
-    const localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
-    if (!fs.existsSync(localizedFilePath)) {
-        return getExtensionFilePath(originalPath);
+    if (!locale.startsWith("en")) {
+        const localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
+        if (fs.existsSync(localizedFilePath)) {
+            return localizedFilePath;
+        }
     }
-    return localizedFilePath;
+    return getExtensionFilePath(originalPath);
 }
 
 export interface LocalizeStringParams {
