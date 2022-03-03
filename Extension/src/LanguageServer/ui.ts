@@ -174,6 +174,9 @@ export class UI {
     }
 
     private setCodeAnalysisProcessed(processed: number): void {
+        if (!this.isRunningCodeAnalysis) {
+            return; // Occurs when a multi-root workspace is activated.
+        }
         this.codeAnalysisProcessed = processed;
         if (this.codeAnalysisProcessed > this.codeAnalysisTotal) {
             this.codeAnalysisTotal = this.codeAnalysisProcessed + 1;
@@ -182,6 +185,9 @@ export class UI {
     }
 
     private setCodeAnalysisTotal(total: number): void {
+        if (!this.isRunningCodeAnalysis) {
+            return; // Occurs when a multi-root workspace is activated.
+        }
         this.codeAnalysisTotal = total;
         this.updateCodeAnalysisTooltip();
     }
