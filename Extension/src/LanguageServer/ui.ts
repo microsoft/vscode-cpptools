@@ -122,6 +122,9 @@ export class UI {
     }
 
     private setIsCodeAnalysisPaused(val: boolean): void {
+        if (!this.isRunningCodeAnalysis) {
+            return;
+        }
         this.isCodeAnalysisPaused = val;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
