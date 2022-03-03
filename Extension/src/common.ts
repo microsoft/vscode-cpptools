@@ -910,51 +910,8 @@ function extractArgs(argsString: string): string[] {
         return result;
     } else {
         const wordexp = require('wordexp');
+        return wordexp.wordexp(argsString);
     }
-    const isWindows: boolean = os.platform() === 'win32';
-    const result: string[] = [];
-    let currentArg: string = "";
-    let isWithinDoubleQuote: boolean = false;
-    let isWithinSingleQuote: boolean = false;
-    for (let i: number = 0; i < argsString.length; i++) {
-        const c: string = argsString[i];
-        if (c === '\\') {
-            currentArg += c;
-            if (++i === argsString.length) {
-                if (currentArg !== "") {
-                    result.push(currentArg);
-                }
-                return result;
-            }
-            currentArg += argsString[i];
-            continue;
-        }
-        if (c === '"') {
-            if (!isWithinSingleQuote) {
-                isWithinDoubleQuote = !isWithinDoubleQuote;
-            }
-        } else if (c === '\'') {
-            // On Windows, a single quote string is not allowed to join multiple args into a single arg
-            if (!isWindows) {
-                if (!isWithinDoubleQuote) {
-                    isWithinSingleQuote = !isWithinSingleQuote;
-                }
-            }
-        } else if (c === ' ') {
-            if (!isWithinDoubleQuote && !isWithinSingleQuote) {
-                if (currentArg !== "") {
-                    result.push(currentArg);
-                    currentArg = "";
-                }
-                continue;
-            }
-        }
-        currentArg += c;
-    }
-    if (currentArg !== "") {
-        result.push(currentArg);
-    }
-    return result;
 }
 
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
