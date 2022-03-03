@@ -4433,6 +4433,9 @@
     "which": "^2.0.2",
     "yauzl": "^2.10.0"
   },
+  "optionalDependencies": {
+    "wordexp": "^1.0.3"
+  },
   "resolutions": {
     "ajv": "^6.12.3",
     "ansi-regex": "^5.0.1",

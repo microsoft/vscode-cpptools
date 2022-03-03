@@ -841,6 +841,76 @@ export interface CompilerPathAndArgs {
 }
 
 function extractArgs(argsString: string): string[] {
+    if (os.platform() === 'win32') {
+        const result: string[] = [];
+        let currentArg: string = "";
+        let isInQuote: boolean = false;
+        let i: number = 0;
+        while (i < argsString.length) {
+            let c: string = argsString[i];
+            if (c === '\"') {
+                if (!isInQuote) {
+                    isInQuote = true;
+                    ++i;
+                    continue;
+                }
+                // Need to peek at next character.
+                if (++i === argsString.length) {
+                    break;
+                }
+                c = argsString[i];
+                if (c !== '\"') {
+                    isInQuote = false;
+                }
+                // Fall through. If c was a quote character, it will be added as a literal.
+            }
+            if (c === '\\') {
+                let backslashCount: number = 1;
+                let reachedEnd: boolean = true;
+                while (++i !== argsString.length) {
+                    c = argsString[i];
+                    if (c !== '\\') {
+                        reachedEnd = false;
+                        break;
+                    }
+                    ++backslashCount;
+                }
+                const still_escaping: boolean = (backslashCount % 2) !== 0;
+                if (!reachedEnd && c === '\"') {
+                    backslashCount /= 2;
+                }
+                while (backslashCount--) {
+                    currentArg += '\\';
+                }
+                if (reachedEnd) {
+                    break;
+                }
+                // If not still escaping and a quote was found, it needs to be handled above.
+                if (!still_escaping && c === '\"') {
+                    continue;
+                }
+                // Otherwise, fall through to handle c as a literal.
+            }
+            if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
+                if (!isInQuote) {
+                    if (!currentArg.length) {
+                        result.push(currentArg);
+                        currentArg = "";
+                    }
+                    i++;
+                    continue;
+                }
+            }
+            currentArg += c;
+            i++;
+        }
+        if (currentArg !== "") {
+            result.push(currentArg);
+        }
+        return result;
+    } else {
+        const wordexp = require('wordexp');
+    }
     const isWindows: boolean = os.platform() === 'win32';
     const result: string[] = [];
     let currentArg: string = "";
