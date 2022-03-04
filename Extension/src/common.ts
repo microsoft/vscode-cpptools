@@ -909,8 +909,8 @@ function extractArgs(argsString: string): string[] {
         }
         return result;
     } else {
-        let buffer: string = child_process.execFileSync(getExtensionFilePath("bin/cpptools_wordexp"), [argsString]).toString();
-        return jsonc.parse(buffer);
+        const jsonText: string = child_process.execFileSync(getExtensionFilePath("bin/cpptools_wordexp"), [argsString]).toString();
+        return jsonc.parse(jsonText);
     }
 }
 
