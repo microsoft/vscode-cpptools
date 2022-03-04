@@ -22,6 +22,7 @@ import * as nls from 'vscode-nls';
 import { Readable } from 'stream';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
+import { createRequire } from 'module';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -909,8 +910,9 @@ function extractArgs(argsString: string): string[] {
         }
         return result;
     } else {
-        const wordexp = require('wordexp');
-        return wordexp.wordexp(argsString);
+        const localRequire = createRequire(getExtensionFilePath("node_modules/wordexp/build/Release"));
+        const wordexp = localRequire('wordexp');
+        return wordexp(argsString);
     }
 }
 
