@@ -845,12 +845,14 @@ function extractArgs(argsString: string): string[] {
         const result: string[] = [];
         let currentArg: string = "";
         let isInQuote: boolean = false;
+        let wasInQuote: boolean = false;
         let i: number = 0;
         while (i < argsString.length) {
             let c: string = argsString[i];
             if (c === '\"') {
                 if (!isInQuote) {
                     isInQuote = true;
+                    wasInQuote = true;
                     ++i;
                     continue;
                 }
@@ -893,7 +895,8 @@ function extractArgs(argsString: string): string[] {
             }
             if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
                 if (!isInQuote) {
-                    if (!currentArg.length) {
+                    if (!currentArg.length || wasInQuote) {
+                        wasInQuote = false;
                         result.push(currentArg);
                         currentArg = "";
                     }
@@ -904,7 +907,7 @@ function extractArgs(argsString: string): string[] {
             currentArg += c;
             i++;
         }
-        if (currentArg !== "") {
+        if (currentArg !== "" || wasInQuote) {
             result.push(currentArg);
         }
         return result;
