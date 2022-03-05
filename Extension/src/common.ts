@@ -87,7 +87,7 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     const fileContents: string = await readFileText(path);
     let rawElement: any = {};
     try {
-        rawElement = jsonc.parse(fileContents);
+        rawElement = jsonc.parse(fileContents, undefined, true);
     } catch (error) {
         throw new Error(failedToParseJson);
     }
@@ -912,8 +912,12 @@ function extractArgs(argsString: string): string[] {
         }
         return result;
     } else {
-        const jsonText: string = child_process.execFileSync(getExtensionFilePath("bin/cpptools_wordexp"), [argsString]).toString();
-        return jsonc.parse(jsonText);
+        const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools_wordexp"), [argsString]);
+        if (wordexpResult === undefined) {
+            return [];
+        }
+        const jsonText: string = wordexpResult.toString();
+        return jsonc.parse(jsonText, undefined, true);
     }
 }
 

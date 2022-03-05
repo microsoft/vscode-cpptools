@@ -1235,7 +1235,7 @@ export class CppProperties {
             }
 
             // Try to use the same configuration as before the change.
-            const newJson: ConfigurationJson = jsonc.parse(readResults);
+            const newJson: ConfigurationJson = jsonc.parse(readResults, undefined, true);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
                 throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
@@ -1589,7 +1589,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>, except for \"
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             const configurationsText: string = util.escapeForSquiggles(curText);
-            const configurations: ConfigurationJson = jsonc.parse(configurationsText);
+            const configurations: ConfigurationJson = jsonc.parse(configurationsText, undefined, true);
             const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
             let curTextStartOffset: number = 0;
