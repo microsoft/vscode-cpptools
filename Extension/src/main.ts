@@ -100,7 +100,7 @@ async function makeBinariesExecutable(): Promise<void> {
         const commonBinaries: string[] = [
             "./bin/cpptools",
             "./bin/cpptools-srv",
-            "./bin/cpptools_wordexp",
+            "./bin/cpptools-wordexp",
             "./LLVM/bin/clang-format",
             "./LLVM/bin/clang-tidy",
             "./debugAdapters/bin/OpenDebugAD7"

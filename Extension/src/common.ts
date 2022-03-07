@@ -912,7 +912,7 @@ function extractArgs(argsString: string): string[] {
         }
         return result;
     } else {
-        const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools_wordexp"), [argsString]);
+        const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString]);
         if (wordexpResult === undefined) {
             return [];
         }
