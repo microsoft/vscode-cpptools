@@ -16,9 +16,10 @@
     "categories": [
         "Extension Packs"
     ],
-    "extensionKind": [
-        "workspace"
+    "activationEvents": [
+        "onCommand:ms-vscode.cpptools-extension-pack.dummyCommand"
     ],
+    "main": "main.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/microsoft/vscode-cpptools.git",
