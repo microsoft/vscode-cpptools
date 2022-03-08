@@ -295,6 +295,7 @@ interface CompileCommandsPaths extends WorkspaceFolderParams {
 
 interface QueryTranslationUnitSourceParams extends WorkspaceFolderParams {
     uri: string;
+    ignoreExisting: boolean;
 }
 
 interface QueryTranslationUnitSourceResult {
@@ -700,7 +701,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void>;
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
@@ -1813,7 +1814,7 @@ export class DefaultClient implements Client {
                 diagnosticsCollectionCodeAnalysis.clear();
             }
             this.trackedDocuments.forEach(document => {
-                this.provideCustomConfiguration(document.uri, undefined);
+                this.provideCustomConfiguration(document.uri, undefined, true);
             });
         });
     }
@@ -1942,7 +1943,7 @@ export class DefaultClient implements Client {
         await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
-    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
+    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
         const onFinished: () => void = () => {
             if (requestFile) {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
@@ -1966,6 +1967,7 @@ export class DefaultClient implements Client {
 
             const params: QueryTranslationUnitSourceParams = {
                 uri: docUri.toString(),
+                ignoreExisting: !!replaceExisting,
                 workspaceFolderUri: this.RootPath
             };
             const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
@@ -3271,7 +3273,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> { return Promise.resolve(); }
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }
