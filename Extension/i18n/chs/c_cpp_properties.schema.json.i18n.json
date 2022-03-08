@@ -13,6 +13,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "搜索包含的标头时，IntelliSense 引擎要使用的路径列表。在这些路径上进行搜索为非递归搜索。指定 `**` 以指示递归搜索。例如，`${workspaceFolder}/**` 将搜索所有子目录，而 `${workspaceFolder}` 则不会。通常，此操作不应包含系统包含项；请改为设置 `C_Cpp.default.compilerPath`。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "Intellisense 引擎在 Mac 框架中搜索包含的标头时要使用的路径的列表。仅在 Mac 配置中受支持。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.windowsSdkVersion": "要在 Windows 上使用的 Windows SDK 包含路径的版本，例如 `10.0.17134.0`。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.dotConfig": "Kconfig 系统创建的 .config 文件的路径。Kconfig 系统生成包含所有定义的文件以生成项目。使用 Kconfig 系统的项目示例包括 Linux 内核和 NuttX RTOS。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.defines": "分析文件时要使用的 IntelliSense 引擎的预处理器定义列表。(可选)使用 `=` 设置值，例如 `VERSION=1`。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.intelliSenseMode": "要使用的、映射到 MSVC、gcc 或 Clang 的平台和体系结构变体的 IntelliSense 模式。如果未设置或设置为`${default}`，则扩展将为该平台选择默认值。Windows 默认为 `windows-msvc-x64`，Linux 默认为`linux-gcc-x64`，macOS 默认为 `macos-clang-x64`。仅指定 `<编译器>-<体系结构>` 变体(例如 `gcc-x64`)的 IntelliSense 模式为旧模式，且会根据主机平台上的 `<平台>-<编译器>-<体系结构>` 变体进行自动转换。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.forcedInclude": "应在翻译单元中包括在任何包含文件之前的文件的列表。",

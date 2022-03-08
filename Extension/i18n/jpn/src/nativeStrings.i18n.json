@@ -216,5 +216,8 @@
 	"inline_macro": "Inline マクロ",
 	"unable_to_access_browse_database": "参照データベースにアクセスできません。({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode は、検出されたコンパイラと一致しなかったため、変更されました。 代わりに \"compilerPath\" を設定することを検討してください。 システム インクルードと定義の検出を無効にするには、\"compilerPath\" を \"\" に設定します。",
-	"clear_code_analysis_squiggles": "コード分析波線をクリアする"
+	"clear_code_analysis_squiggles": "コード分析波線をクリアする",
+	"multiple_locations_note": "(複数の場所)",
+	"folder_tag": "フォルダー",
+	"file_tag": "ファイル"
 }
