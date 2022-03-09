@@ -52,6 +52,8 @@
 	"forced.include": "Inclusione forzata",
 	"forced.include.description": "Elenco di file che devono essere inclusi prima dell'elaborazione di altri caratteri nel file di origine. I file vengono inclusi nell'ordine elencato.",
 	"one.file.per.line": "Un file per riga.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Il percorso a un file .config creato dal sistema Kconfig. Il sistema Kconfig genera un file con tutte le define per compilare un progetto. Esempi di progetti che usano il sistema Kconfig sono Kernel Linux e NuttX RTOS.",
 	"compile.commands": "Comandi di compilazione",
 	"compile.commands.description": "Percorso completo del file {0} per l'area di lavoro. Verranno usati i percorsi di inclusione e le direttive define individuati in questo file invece dei valori specificati per le impostazioni {1} e {2}. Se il database dei comandi di compilazione non contiene una voce per l'unità di conversione corrispondente al file aperto nell'editor, verrà visualizzato un messaggio di avviso e l'estensione userà le impostazioni {3} e {4}.",
 	"merge.configurations": "Unire configurazioni",

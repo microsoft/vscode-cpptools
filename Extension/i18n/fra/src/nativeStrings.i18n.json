@@ -216,5 +216,8 @@
 	"inline_macro": "Inline macro",
 	"unable_to_access_browse_database": "Impossible d’accéder à la base de données Browse. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode a été modifié car il ne correspondait pas au compilateur détecté.  Envisagez de définir \"compilerPath\" à la place.  Définissez \"compilerPath\" à \"\" pour désactiver la détection des includes et defines du système.",
-	"clear_code_analysis_squiggles": "Effacer les tildes d’analyse du code"
+	"clear_code_analysis_squiggles": "Effacer les tildes d’analyse du code",
+	"multiple_locations_note": "(Plusieurs emplacements)",
+	"folder_tag": "Dossier",
+	"file_tag": "Fichier"
 }

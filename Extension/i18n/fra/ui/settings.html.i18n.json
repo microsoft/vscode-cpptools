@@ -52,6 +52,8 @@
 	"forced.include": "Inclusion forcée",
 	"forced.include.description": "Liste des fichiers qui doivent être inclus avant le traitement de tous les autres caractères du fichier source. Les fichiers sont inclus dans l'ordre indiqué.",
 	"one.file.per.line": "Un fichier par ligne.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Chemin d’accès à un fichier .config créé par le système Kconfig. Le système Kconfig génère un fichier avec toutes les définitions pour générer un projet. Les exemples de projets qui utilisent le système Kconfig sont le noyau Linux et NuttX RTOS.",
 	"compile.commands": "Commandes de compilation",
 	"compile.commands.description": "Chemin complet du fichier {0} pour l'espace de travail. Les chemins d'inclusion et les définitions découverts dans ce fichier sont utilisés à la place des valeurs définies pour les paramètres {1} et {2}. Si la base de données des commandes de compilation n'a pas d'entrée pour l'unité de traduction qui correspond au fichier que vous avez ouvert dans l'éditeur, un message d'avertissement s'affiche et l'extension utilise les paramètres {3} et {4} à la place.",
 	"merge.configurations": "Fusionner les configurations",

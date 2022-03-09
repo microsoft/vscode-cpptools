@@ -216,5 +216,8 @@
 	"inline_macro": "Satır içi makro",
 	"unable_to_access_browse_database": "Göz atma veritabanına erişilemiyor. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Algılanan derleyici ile eşleşmediğinden IntelliSenseMode değiştirildi. Bunun yerine \"compilerPath\" öğesini ayarlamayı deneyin. Sistem içeriklerinin ve tanımlarının algılanmasını devre dışı bırakmak için \"compilerPath\" öğesini \"\" olarak ayarlayın.",
-	"clear_code_analysis_squiggles": "Code analysis dalgalarını temizle"
+	"clear_code_analysis_squiggles": "Code analysis dalgalarını temizle",
+	"multiple_locations_note": "(Birden fazla konum)",
+	"folder_tag": "Klasör",
+	"file_tag": "Dosya"
 }

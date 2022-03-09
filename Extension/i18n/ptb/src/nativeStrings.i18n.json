@@ -216,5 +216,8 @@
 	"inline_macro": "Macro embutida",
 	"unable_to_access_browse_database": "Não é possível acessar o banco de dados de navegação. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "O IntelliSenseMode foi alterado porque não correspondeu ao compilador detectado. Considere configurar \"compilerPath\" em vez disso. Defina \"compilerPath\" como \"\" para desabilitar a detecção de inserções e definições do sistema.",
-	"clear_code_analysis_squiggles": "Limpar rabiscos de análise de código"
+	"clear_code_analysis_squiggles": "Limpar rabiscos de análise de código",
+	"multiple_locations_note": "Vários locais",
+	"folder_tag": "Pasta",
+	"file_tag": "Arquivo"
 }

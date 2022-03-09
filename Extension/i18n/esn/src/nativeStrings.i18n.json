@@ -216,5 +216,8 @@
 	"inline_macro": "Insertar macro",
 	"unable_to_access_browse_database": "No se puede acceder a la base de datos de exploración. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Se ha cambiado IntelliSenseMode porque no coincidía con el compilador detectado.  Considere la posibilidad de establecer \"compilerPath\" en su lugar.  Establezca \"compilerPath\" en \"\" para deshabilitar la detección de las inclusión y definiciones del sistema.",
-	"clear_code_analysis_squiggles": "Borrar el subrayado ondulado del análisis de código"
+	"clear_code_analysis_squiggles": "Borrar el subrayado ondulado del análisis de código",
+	"multiple_locations_note": "(Varias ubicaciones)",
+	"folder_tag": "Carpeta",
+	"file_tag": "Archivo"
 }
