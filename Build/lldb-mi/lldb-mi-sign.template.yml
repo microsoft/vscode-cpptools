@@ -1,0 +1,30 @@
+---
+parameters:
+  archs: ["x86_64", "arm64"]
+
+jobs:
+- job:
+  pool:
+    name: VSEngSS-MicroBuild2022-1ES
+  steps:
+  - checkout: none
+
+  - ${{ each arch in parameters.archs }}:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Downloading unsigned_lldb-mi_${{ arch }}'
+      inputs:
+        targetPath: '$(Pipeline.Workspace)/Artifacts' 
+        artifactName: 'unsigned_lldb-mi_${{ arch }}'
+
+    - task: MicroBuildSignMacFiles@1
+      displayName: 'ESRP Sign'
+      inputs:
+        SigningTarget: '$(Pipeline.Workspace)\Artifacts\lldb-mi_${{ arch }}.zip'
+        SigningCert: 8023
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish signed LLDB-MI'
+      inputs:
+        targetPath: '$(Pipeline.Workspace)\Artifacts\lldb-mi_${{ arch }}.zip'
+        artifactName: 'lldb-mi_${{ arch }}_zip'
+...

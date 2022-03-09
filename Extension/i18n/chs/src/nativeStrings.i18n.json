@@ -216,5 +216,8 @@
 	"inline_macro": "内联宏",
 	"unable_to_access_browse_database": "无法访问浏览数据库。({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode 已更改，因为它与检测到的编译器不匹配。请考虑改为设置 \"compilerPath\"。将 \"compilerPath\" 设为 \"\" 以禁用系统包含和定义的检测。",
-	"clear_code_analysis_squiggles": "清除代码分析波形曲线"
+	"clear_code_analysis_squiggles": "清除代码分析波形曲线",
+	"multiple_locations_note": "(多个位置)",
+	"folder_tag": "文件夹",
+	"file_tag": "文件"
 }

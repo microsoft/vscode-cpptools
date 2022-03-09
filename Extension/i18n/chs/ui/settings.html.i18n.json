@@ -52,6 +52,8 @@
 	"forced.include": "强制包含",
 	"forced.include.description": "在处理源文件中的任何其他字符之前应包含的文件的列表。按列出的顺序包含文件。",
 	"one.file.per.line": "每行一个文件。",
+	"dot.config": "点配置",
+	"dot.config.description": "Kconfig 系统创建的 .config 文件的路径。Kconfig 系统生成包含所有定义的文件以生成项目。使用 Kconfig 系统的项目示例包括 Linux 内核和 NuttX RTOS。",
 	"compile.commands": "编译命令",
 	"compile.commands.description": "工作区的 {0} 文件的完整路径。将使用在此文件中所发现的包含路径和定义，而不是为 {1} 和 {2} 设置设定的值。如果编译命令数据库不包含与你在编辑器中打开的文件对应的翻译单元条目，则将显示一条警告消息，并且扩展将改用 {3} 和 {4} 设置。",
 	"merge.configurations": "合并配置",
