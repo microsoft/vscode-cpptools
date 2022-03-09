@@ -52,6 +52,8 @@
 	"forced.include": "Inclusión forzada",
 	"forced.include.description": "Lista de los archivos que deben incluirse antes de que se procesen más caracteres en el archivo de código fuente. Los archivos se incluyen en el orden indicado.",
 	"one.file.per.line": "Un archivo por línea.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Ruta de acceso a un archivo .config creado por el sistema Kconfig. El sistema Kconfig genera un archivo con todas las definiciones para compilar un proyecto. Algunos ejemplos de proyectos que usan el sistema Kconfig son Kernel Linux y NuttX RTOS.",
 	"compile.commands": "Comandos de compilación",
 	"compile.commands.description": "Ruta de acceso completa al archivo {0} del área de trabajo. Se usarán las definiciones y rutas de acceso de inclusión detectadas en el archivo, en lugar de los valores establecidos para las opciones {1} y {2}. Si la base de datos de comandos de compilación no contiene una entrada para la unidad de traducción que se corresponda con el archivo que ha abierto en el editor, se mostrará un mensaje de advertencia y la extensión usará las opciones {3} y {4} en su lugar.",
 	"merge.configurations": "Combinar configuraciones",

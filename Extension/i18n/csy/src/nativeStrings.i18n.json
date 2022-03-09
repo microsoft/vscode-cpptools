@@ -216,5 +216,8 @@
 	"inline_macro": "Vložit makro",
 	"unable_to_access_browse_database": "Nedá se získat přístup k procházení databáze. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Režim IntelliSenseMode se změnil, protože neodpovídá zjištěnému kompilátoru. Zvažte místo toho nastavení \"compilerPath\". Nastavte \"compilerPath\" na \"\", aby byla zakázána detekce systémových parametrů include a define.",
-	"clear_code_analysis_squiggles": "Vymazat podtržení analýzy kódu vlnovkou"
+	"clear_code_analysis_squiggles": "Vymazat podtržení analýzy kódu vlnovkou",
+	"multiple_locations_note": "Víc umístění",
+	"folder_tag": "Složka",
+	"file_tag": "Soubor"
 }

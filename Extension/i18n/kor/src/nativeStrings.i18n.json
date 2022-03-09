@@ -216,5 +216,8 @@
 	"inline_macro": "인라인 매크로",
 	"unable_to_access_browse_database": "찾아보기 데이터베이스에 액세스할 수 없습니다({0}).",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode가 검색된 컴파일러와 일치하지 않아 변경되었습니다.  \"compilerPath\"를 대신 설정하는 것이 좋습니다.  \"compilerPath\"를 \"\"(으)로 설정하여 시스템 포함 및 정의 검색을 사용하지 않도록 설정합니다.",
-	"clear_code_analysis_squiggles": "명확한 코드 분석 물결선"
+	"clear_code_analysis_squiggles": "명확한 코드 분석 물결선",
+	"multiple_locations_note": "여러 위치",
+	"folder_tag": "폴더",
+	"file_tag": "파일"
 }

@@ -216,5 +216,8 @@
 	"inline_macro": "Inlinemakro",
 	"unable_to_access_browse_database": "Auf die Suchdatenbank kann nicht zugegriffen werden. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode wurde geändert, weil es nicht mit dem erkannten Compiler übereinstimmte. Erwägen Sie stattdessen, \"compilerPath\" festzulegen. Legen Sie \"compilerPath\" auf \"\" fest, um die Erkennung von System-Includes und -Definitionen zu deaktivieren.",
-	"clear_code_analysis_squiggles": "Code Analysis-Wellenlinien löschen"
+	"clear_code_analysis_squiggles": "Code Analysis-Wellenlinien löschen",
+	"multiple_locations_note": "(Mehrere Standorte)",
+	"folder_tag": "Ordner",
+	"file_tag": "Datei"
 }
