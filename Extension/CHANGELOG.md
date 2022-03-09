@@ -10,7 +10,7 @@
 * Prevent stripping of format specifiers from -exec commands.
   * Gareth Rees (@gareth-rees) [MIEngine#1277](https://github.com/microsoft/MIEngine/pull/1278)
 * Improve messages for unknown breakpoints and watchpoints.
-  * Gareth Ree (@gareth-rees) [MIEngine#1282](https://github.com/microsoft/MIEngine/pull/1283)
+  * Gareth Rees (@gareth-rees) [MIEngine#1282](https://github.com/microsoft/MIEngine/pull/1283)
 
 ### Bug Fixes
 * Fix handling of `-B` with compiler querying. [#8962](https://github.com/microsoft/vscode-cpptools/issues/8962)
