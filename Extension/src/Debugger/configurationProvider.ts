@@ -248,8 +248,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         console.assert(defaultConfig, "Could not find default debug configuration.");
 
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-        const platform: string = platformInfo.platform;
-        const architecture: string = platformInfo.architecture;
 
         // Import the existing configured tasks from tasks.json file.
         const configuredBuildTasks: CppBuildTask[] = await cppBuildTaskProvider.getJsonTasks();
@@ -298,19 +296,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             } else {
                 newConfig.console = "externalTerminal";
             }
-            const isWindows: boolean = platform === 'win32';
-            const isMacARM64: boolean = (platform === 'darwin' && architecture === 'arm64');
+            const isWindows: boolean = platformInfo.platform === 'win32';
             const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
             newConfig.program = isWindows ? exeName + ".exe" : exeName;
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
             newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
-            if (isMacARM64) {
-                // Workaround to build and debug x86_64 on macARM64 by default.
-                // Remove this workaround when native debugging for macARM64 is supported.
-                newConfig.targetArchitecture = "x86_64";
-            }
             if (task.isDefault) {
                 newConfig.isDefault = true;
             }
@@ -318,7 +310,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
             return new Promise<vscode.DebugConfiguration>(resolve => {
-                if (platform === "darwin") {
+                if (platformInfo.platform === "darwin") {
                     return resolve(newConfig);
                 } else {
                     let debuggerName: string;

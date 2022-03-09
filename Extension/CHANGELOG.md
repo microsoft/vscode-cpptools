@@ -1,5 +1,26 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.9.3: March 9, 2022
+### New Feature
+* Add debugger support for Apple M1 (osx-arm64). [#7035](https://github.com/microsoft/vscode-cpptools/issues/7035)
+   * Resolves issue "[Big Sur M1] ERROR: Unable to start debugging. Unexpected LLDB output from command "-exec-run". process exited with status -1 (attach failed ((os/kern) invalid argument))". [#6779](https://github.com/microsoft/vscode-cpptools/issues/6779)
+
+### Enhancements
+* Add tag parser error logging. [#8907](https://github.com/microsoft/vscode-cpptools/issues/8907)
+* Prevent stripping of format specifiers from -exec commands.
+  * Gareth Rees (@gareth-rees) [MIEngine#1277](https://github.com/microsoft/MIEngine/pull/1278)
+* Improve messages for unknown breakpoints and watchpoints.
+  * Gareth Rees (@gareth-rees) [MIEngine#1282](https://github.com/microsoft/MIEngine/pull/1283)
+
+### Bug Fixes
+* Fix handling of `-B` with compiler querying. [#8962](https://github.com/microsoft/vscode-cpptools/issues/8962)
+* Fix incorrect "Running clang-tidy" status indications with multi-root workspaces. [#8964](https://github.com/microsoft/vscode-cpptools/issues/8964)
+* Fix a crash during shutdown and potential database resetting due to shutdown being aborted too soon. [PR #8969](https://github.com/microsoft/vscode-cpptools/pull/8969)
+* Fix an issue that could cause the active file to not be configured by a configuration provider when custom configurations are reset. [#8974](https://github.com/microsoft/vscode-cpptools/issues/8974)
+* Fix detection of Visual Studio 2015. [#8975](https://github.com/microsoft/vscode-cpptools/issues/8975)
+* Fix a bug with relative paths with the gcc problem matcher. [#8988](https://github.com/microsoft/vscode-cpptools/issues/8988)
+* Update translated text.
+
 ## Version 1.9.2 (insiders3): March 1, 2022
 ### New Feature
 * Add Alpine Linux arm64 support (VSIX).

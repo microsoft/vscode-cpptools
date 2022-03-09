@@ -52,6 +52,8 @@
 	"forced.include": "Wymuszone dołączanie",
 	"forced.include.description": "Lista plików, które powinny zostać uwzględnione przed przetworzeniem każdego innego znaku w pliku źródłowym. Pliki są uwzględniane w podanej kolejności.",
 	"one.file.per.line": "Jeden plik na wiersz.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Ścieżka do pliku .config utworzonego przez system Kconfig. System Kconfig generuje plik ze wszystkimi definicjami na potrzeby kompilowania projektu. Przykłady projektów używających systemu Kconfig to jądro systemu Linux i system NuttX RTOS.",
 	"compile.commands": "Polecenia kompilacji",
 	"compile.commands.description": "Pełna ścieżka do pliku {0} dla obszaru roboczego. Ścieżki dołączania i definicje wykryte w tym pliku będą używane zamiast wartości określonych dla ustawień {1} i {2}. Jeśli baza danych poleceń kompilacji nie zawiera wpisu dla jednostki translacji odpowiadającej plikowi, który został otwarty w edytorze, pojawi się komunikat ostrzegawczy, a rozszerzenie użyje zamiast tego ustawień {3} i {4}.",
 	"merge.configurations": "Scal konfiguracje",

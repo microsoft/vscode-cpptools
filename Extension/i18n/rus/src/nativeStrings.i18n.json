@@ -216,5 +216,8 @@
 	"inline_macro": "Встроенный макрос",
 	"unable_to_access_browse_database": "Не удалось получить доступ к базе данных просмотра. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Режим IntelliSenseMode изменен, поскольку он не совпал с обнаруженным компилятором. Попробуйте указать \"compilerPath\" вместо этого.  Установите для \"compilerPath\" значение \"\", чтобы отключить обнаружение элементов, включаемых системой и определяемых системой.",
-	"clear_code_analysis_squiggles": "Очистить волнистые подчеркивания анализа кода"
+	"clear_code_analysis_squiggles": "Очистить волнистые подчеркивания анализа кода",
+	"multiple_locations_note": "(Несколько расположений)",
+	"folder_tag": "Папка",
+	"file_tag": "Файл"
 }
