@@ -216,7 +216,7 @@
 	"c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription": "Wenn `true` festgelegt ist, verwendet die Befehlsersetzung der Debugger-Shell veraltete Backtick-Zeichen ``(`)``.",
 	"c_cpp.contributes.views.cppReferencesView.title": "C/C++: Andere Verweisergebnisse.",
 	"c_cpp.contributes.viewsWelcome.contents": "Weitere Informationen zu launch.json finden Sie unter [Konfigurieren des C/C++-Debuggings](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
-	"c_cpp.configuration.debugShortcut.description": "Schaltfläche \\\"Wiedergabe ausführen und debuggen\\\" in der Titelleiste des Editors für C++-Dateien anzeigen",
+	"c_cpp.configuration.debugShortcut.description": "Schaltfläche \"Wiedergabe ausführen und debuggen\" in der Titelleiste des Editors für C++-Dateien anzeigen",
 	"c_cpp.debuggers.pipeTransport.description": "Falls angegeben, weist diese Option den Debugger an, eine Verbindung mit einem Remotecomputer mithilfe einer anderen ausführbaren Datei als Pipe herzustellen, die Standardeingaben/-ausgaben zwischen VS Code und der ausführbaren Back-End-Datei für den MI-fähigen Debugger weiterleitet (z. B. gdb).",
 	"c_cpp.debuggers.pipeTransport.default.pipeProgram": "Geben Sie den vollqualifizierten Pfad für den Pipeprogrammnamen ein, z. B. `/usr/bin/ssh`.",
 	"c_cpp.debuggers.pipeTransport.default.debuggerPath": "Der vollständige Pfad zum Debugger auf dem Zielcomputer, z. B. \"/usr/bin/gdb\".",
