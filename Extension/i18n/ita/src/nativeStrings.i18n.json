@@ -216,5 +216,8 @@
 	"inline_macro": "Macro inline",
 	"unable_to_access_browse_database": "Impossibile accedere al database di esplorazione. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode è stato modificato perché non corrisponde al compilatore rilevato.  Provare a impostare \"compilerPath\".  Impostare \"compilerPath\" su \"\" per disabilitare il rilevamento delle inclusioni e delle definizioni del sistema.",
-	"clear_code_analysis_squiggles": "Cancella segni di revisione di analisi del codice"
+	"clear_code_analysis_squiggles": "Cancella segni di revisione di analisi del codice",
+	"multiple_locations_note": "(Più località)",
+	"folder_tag": "Cartella",
+	"file_tag": "File"
 }
