@@ -52,6 +52,8 @@
 	"forced.include": "強制包含",
 	"forced.include.description": "處理來源檔案中的任何其他字元前，應包含的檔案清單。檔案會包含在列出的清單中。",
 	"one.file.per.line": "每行一個檔案。",
+	"dot.config": "點設定",
+	"dot.config.description": "Kconfig 系統所建立之 .config 檔案的路徑。Kconfig 系統會產生具有建置專案之所有定義的檔案。使用 Kconfig 系統的專案範例為 Linux 核心與 NuttX RTOS。",
 	"compile.commands": "編譯命令",
 	"compile.commands.description": "工作區 {0} 檔案的完整路徑。系統會使用在這個檔案中找到的 include 路徑和 define，而不是為 {1} 與 {2} 設定所指定的值。如果在編譯命令資料庫中，對應到您在編輯器中開啟之檔案的編譯單位，沒有任何項目，就會出現警告訊息，而延伸模組會改為使用 {3} 和 {4} 設定。",
 	"merge.configurations": "合併設定",

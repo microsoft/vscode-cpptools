@@ -216,5 +216,8 @@
 	"inline_macro": "內嵌巨集",
 	"unable_to_access_browse_database": "無法存取瀏覽資料庫。({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode 已變更，因為它不符合偵測到的編譯器。請考慮改為設定 \"compilerPath\"。 將 \"compilerPath\" 設定為 \"\" 以停用系統包含和定義的偵測。",
-	"clear_code_analysis_squiggles": "清除程式碼分析曲線"
+	"clear_code_analysis_squiggles": "清除程式碼分析曲線",
+	"multiple_locations_note": "(多個位置)",
+	"folder_tag": "資料夾",
+	"file_tag": "檔案"
 }
