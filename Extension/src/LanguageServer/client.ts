@@ -1076,8 +1076,8 @@ export class DefaultClient implements Client {
         }
         const serverName: string = this.getName(this.rootFolder);
         const serverOptions: ServerOptions = {
-            run: { command: serverModule },
-            debug: { command: serverModule, args: [serverName] }
+            run: { command: serverModule, options: { detached: true } },
+            debug: { command: serverModule, args: [serverName], options: { detached: true } }
         };
 
         // Get all the per-workspace settings.
