@@ -258,7 +258,7 @@
         "owner": "cpptools",
         "fileLocation": [
           "autoDetect",
-          "{$cwd}"
+          "${cwd}"
         ],
         "pattern": {
           "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
