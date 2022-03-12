@@ -1,5 +1,14 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.9.4-debug: March 11, 2022
+* This is a debug build for Windows x64 intended to be used to get assertion failure information for bug [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851).
+
+## Enhancement
+* Show "Catastrophic error" during tag parsing with an Error logging severity and report the number of occurrences via telemetry. [#9013](https://github.com/microsoft/vscode-cpptools/issues/9013)
+
+## Bug Fix
+* Fix temp files randomly not getting deleted on Windows with a `C_Cpp.loggingLevel` of `Warning` or greater. [#9008](https://github.com/microsoft/vscode-cpptools/issues/9008)
+
 ## Version 1.9.3: March 9, 2022
 ### New Feature
 * Add debugger support for Apple M1 (osx-arm64). [#7035](https://github.com/microsoft/vscode-cpptools/issues/7035)
