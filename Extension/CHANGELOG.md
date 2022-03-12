@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 1.9.4-debug: March 11, 2022
-*  This is a debug build for Windows x64 intended to be used to get assertion failure information for bug [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851).
+* This is a debug build for Windows x64 intended to be used to get assertion failure information for bug [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851).
 
 ## Enhancement
 * Show "Catastrophic error" during tag parsing with an Error logging severity and report the number of occurrences via telemetry. [#9013](https://github.com/microsoft/vscode-cpptools/issues/9013)
