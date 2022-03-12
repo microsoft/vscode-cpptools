@@ -9,7 +9,6 @@
 ## Bug Fix
 * Fix temp files randomly not getting deleted on Windows with a `C_Cpp.loggingLevel` of `Warning` or greater. [#9008](https://github.com/microsoft/vscode-cpptools/issues/9008)
 
-
 ## Version 1.9.3: March 9, 2022
 ### New Feature
 * Add debugger support for Apple M1 (osx-arm64). [#7035](https://github.com/microsoft/vscode-cpptools/issues/7035)
