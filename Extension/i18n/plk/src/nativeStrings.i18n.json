@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "Zygzaki sygnalizujące błędy są włączane, jeśli zostaną rozwiązane wszystkie zależności nagłówka.",
 	"replaced_placeholder_file_record": "Zamieniono rekord pliku zastępczego",
 	"tag_parsing_file": "plik analizowania tagów: {0}",
-	"tag_parsing_error": "Podczas analizowania tagów wystąpił błąd, ale może on nie być istotny. Poinformuj nas, jeśli nie można odnaleźć symboli w pliku: {0}",
+	"tag_parsing_error": "błąd analizy tagu (można go zignorować, chyba że nie można odnaleźć symboli):",
 	"reset_timestamp_for": "Resetuj znacznik czasu dla {0}",
 	"remove_file_failed": "Nie można usunąć pliku: {0}",
 	"regex_parse_error": "Błąd analizy wyrażenia regularnego — wzorzec vscode: {0}, wyrażenie regularne: {1}, komunikat o błędzie: {2}",

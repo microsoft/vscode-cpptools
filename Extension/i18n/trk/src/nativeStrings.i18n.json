@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "Tüm üst bilgi bağımlılıkları çözümlenmişse hata ilişkilendirmeleri etkinleştirilir.",
 	"replaced_placeholder_file_record": "Yer tutucu dosya kaydı değiştirildi",
 	"tag_parsing_file": "etiket ayrıştırma dosyası: {0}",
-	"tag_parsing_error": "Etiket ayrıştırma bir hatayla karşılaştı ancak bu önemli bir sorun olmayabilir. Dosyadaki semboller bulunamıyorsa bize bildirin: {0}",
+	"tag_parsing_error": "etiket ayrıştırma hatası (simgeler bulunamadığı takdirde bu hata yoksayılabilir):",
 	"reset_timestamp_for": "{0} için zaman damgasını sıfırla",
 	"remove_file_failed": "{0} dosyası kaldırılamadı",
 	"regex_parse_error": "Normal ifade ayrıştırma hatası - vscode deseni: {0}, normal ifade: {1}, hata iletisi: {2}",
