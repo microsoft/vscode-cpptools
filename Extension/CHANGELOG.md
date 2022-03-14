@@ -1,13 +1,15 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.9.4-debug: March 11, 2022
+## Version 1.9.4-debug: March 14, 2022
 * This is a debug build for Windows x64 intended to be used to get assertion failure information for bug [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851).
 
-## Enhancement
+## Enhancements
 * Show "Catastrophic error" during tag parsing with an Error logging severity and report the number of occurrences via telemetry. [#9013](https://github.com/microsoft/vscode-cpptools/issues/9013)
+* Reserved identifiers with characters that match typed characters in the correct order but not contiguously are initially filtered in the auto-completion list. Doing a `ctrl` + `space` in the same location will show all auto-complete suggestions. [#4939](https://github.com/microsoft/vscode-cpptools/issues/4939)
 
-## Bug Fix
+## Bug Fixes
 * Fix temp files randomly not getting deleted on Windows with a `C_Cpp.loggingLevel` of `Warning` or greater. [#9008](https://github.com/microsoft/vscode-cpptools/issues/9008)
+* Fix mingw clang being detected as gcc. [#9024](https://github.com/microsoft/vscode-cpptools/issues/9024)
 
 ## Version 1.9.3: March 9, 2022
 ### New Feature
