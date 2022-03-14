@@ -4,8 +4,8 @@
 * This is a debug build for Windows x64 intended to be used to get assertion failure information for bug [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851).
 
 ## Enhancements
-* Show "Catastrophic error" during tag parsing with an Error logging severity and report the number of occurrences via telemetry. [#9013](https://github.com/microsoft/vscode-cpptools/issues/9013)
 * Reserved identifiers with characters that match typed characters in the correct order but not contiguously are initially filtered in the auto-completion list. Doing a `ctrl` + `space` in the same location will show all auto-complete suggestions. [#4939](https://github.com/microsoft/vscode-cpptools/issues/4939)
+* Show "Catastrophic error" during tag parsing with an Error logging severity and report the number of occurrences via telemetry. [#9013](https://github.com/microsoft/vscode-cpptools/issues/9013)
 
 ## Bug Fixes
 * Fix temp files randomly not getting deleted on Windows with a `C_Cpp.loggingLevel` of `Warning` or greater. [#9008](https://github.com/microsoft/vscode-cpptools/issues/9008)
