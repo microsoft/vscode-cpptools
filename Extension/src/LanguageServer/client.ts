@@ -1076,8 +1076,10 @@ export class DefaultClient implements Client {
         }
         const serverName: string = this.getName(this.rootFolder);
         const serverOptions: ServerOptions = {
-            run: { command: serverModule, options: { detached: true } },
-            debug: { command: serverModule, args: [serverName], options: { detached: true } }
+            // Running detached would be preferred; however, that causes cpptools-srv to create a console window
+            // on Windows and that can't seem to be suppressed without suppressing assertion dialog boxes.
+            run: { command: serverModule, options: { detached: false } },
+            debug: { command: serverModule, args: [serverName], options: { detached: false } }
         };
 
         // Get all the per-workspace settings.
