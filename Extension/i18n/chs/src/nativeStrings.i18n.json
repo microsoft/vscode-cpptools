@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "如果已解决所有标头依赖项，则启用错误波形曲线。",
 	"replaced_placeholder_file_record": "已替换占位符文件记录",
 	"tag_parsing_file": "标记分析文件: {0}",
-	"tag_parsing_error": "标记分析遇到错误，但这可能不影响操作。如果在文件中找不到符号，请告诉我们: {0}",
+	"tag_parsing_error": "标记分析错误(除非找不到符号，否则可以忽略此错误):",
 	"reset_timestamp_for": "重置 {0} 的时间戳",
 	"remove_file_failed": "未能删除文件: {0}",
 	"regex_parse_error": "Regex 分析错误 - vscode 模式: {0}，regex: {1}，错误消息: {2}",

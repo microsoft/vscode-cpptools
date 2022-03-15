@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "I segni di revisione per gli errori sono abilitati se vengono risolte tutte le dipendenze dell'intestazione.",
 	"replaced_placeholder_file_record": "Record del file segnaposto sostituito",
 	"tag_parsing_file": "analisi dei tag del file: {0}",
-	"tag_parsing_error": "Si è verificato un errore durante l'analisi dei tag, ma potrebbe non essere rilevante. Specificare se non è stato possibile trovare i simboli nel file: {0}",
+	"tag_parsing_error": "errore di analisi dei tag (questa operazione può essere ignorata a meno che non vengano trovati simboli):",
 	"reset_timestamp_for": "Reimposta il timestamp per {0}",
 	"remove_file_failed": "Non è stato possibile rimuovere il file {0}",
 	"regex_parse_error": "Errore di analisi regex. Criterio vscode: {0}. Regex: {1}. Messaggio di errore: {2}",

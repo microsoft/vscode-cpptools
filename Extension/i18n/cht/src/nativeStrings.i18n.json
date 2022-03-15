@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "如果所有標頭相依性皆已解決，就會啟用錯誤波浪線。",
 	"replaced_placeholder_file_record": "已取代預留位置檔案記錄",
 	"tag_parsing_file": "標籤剖析檔案: {0}",
-	"tag_parsing_error": "標籤剖析發生錯誤，但可能無關緊要。如果找不到檔案中的符號，請通知我們: {0}",
+	"tag_parsing_error": "標籤剖析錯誤 (除非找不到符號，否則可以忽略):",
 	"reset_timestamp_for": "重設 {0} 的時間戳記",
 	"remove_file_failed": "無法移除檔案: {0}",
 	"regex_parse_error": "Regex 剖析錯誤 - vscode 模式: {0}，RegEx: {1}，錯誤訊息: {2}",
