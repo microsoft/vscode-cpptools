@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "すべてのヘッダーの依存関係が解決されると、エラーの波線が有効になります。",
 	"replaced_placeholder_file_record": "プレースホルダー ファイル レコードを置換しました",
 	"tag_parsing_file": "ファイルのタグを解析中: {0}",
-	"tag_parsing_error": "タグの解析でエラーが見つかりましたが、問題ない可能性があります。ファイル内のシンボルが見つからない場合は、お問い合わせください。{0}",
+	"tag_parsing_error": "tag parsing error (this can be ignored unless symbols can't be found):",
 	"reset_timestamp_for": "{0} のタイムスタンプのリセット",
 	"remove_file_failed": "ファイルを削除できませんでした: {0}",
 	"regex_parse_error": "RegEx 解析エラー - vscode パターン: {0}、RegEx: {1}、エラー メッセージ: {2}",

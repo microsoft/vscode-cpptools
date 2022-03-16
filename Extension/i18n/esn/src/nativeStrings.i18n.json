@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "El subrayado ondulado de errores se habilita si se resuelven todas las dependencias de encabezado.",
 	"replaced_placeholder_file_record": "Se ha reemplazado el registro del archivo de marcadores de posición",
 	"tag_parsing_file": "Archivo de análisis de etiquetas: {0}",
-	"tag_parsing_error": "El análisis de etiquetas encontró un error, pero puede que no tenga importancia. Díganos si no se encuentran los símbolos en el archivo: {0}",
+	"tag_parsing_error": "error de análisis de etiquetas (se puede omitir a menos que no se encuentren símbolos):",
 	"reset_timestamp_for": "Restablecer la marca de tiempo para {0}",
 	"remove_file_failed": "No se pudo quitar el archivo {0}",
 	"regex_parse_error": "Error de análisis de Regex: patrón de vscode: {0}, regex: {1}, mensaje de error: {2}",
