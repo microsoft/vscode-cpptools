@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.9.5: March 17, 2022
+## Bug Fixes
+* Undo the 1.9.4 changes to fix the file corruption issue. [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041).
+  * Issue [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851) should still be fixed though.
+
 ## Version 1.9.4: March 16, 2022
 ## Enhancements
 * Reserved identifiers with characters that match typed characters in the correct order but not contiguously are initially filtered in the auto-completion list. Doing a `ctrl` + `space` in the same location will show all auto-complete suggestions. [#4939](https://github.com/microsoft/vscode-cpptools/issues/4939)
