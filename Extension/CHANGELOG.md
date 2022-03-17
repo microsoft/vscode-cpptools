@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-##Version 1.9.5: March 17, 2022
+## Version 1.9.5: March 17, 2022
 ## Bug Fixes
 * Undo the 1.9.4 changes to fix the file corruption issue. [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041).
   * Issue [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851) should still be fixed though.
