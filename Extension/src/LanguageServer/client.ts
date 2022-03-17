@@ -1101,6 +1101,7 @@ export class DefaultClient implements Client {
         const settings_clangTidyFixNotes: (boolean | undefined)[] = [];
         const settings_clangTidyHeaderFilter: (string | undefined | null)[] = [];
         const settings_clangTidyArgs: (string[] | undefined)[] = [];
+        const settings_clangTidyUseDashP: (boolean | undefined)[] = [];
         const settings_clangTidyChecksEnabled: (string[] | undefined)[] = [];
         const settings_clangTidyChecksDisabled: (string[] | undefined)[] = [];
         const settings_filesEncoding: (string | undefined)[] = [];
@@ -1211,6 +1212,7 @@ export class DefaultClient implements Client {
                 settings_clangTidyFixNotes.push(setting.clangTidyFixNotes);
                 settings_clangTidyHeaderFilter.push(setting.clangTidyHeaderFilter);
                 settings_clangTidyArgs.push(setting.clangTidyArgs);
+                settings_clangTidyUseDashP.push(setting.clangTidyUseDashP);
                 settings_clangTidyChecksEnabled.push(setting.clangTidyChecksEnabled);
                 settings_clangTidyChecksDisabled.push(setting.clangTidyChecksDisabled);
                 settings_indentBraces.push(setting.vcFormatIndentBraces);
@@ -1352,6 +1354,7 @@ export class DefaultClient implements Client {
                         },
                         headerFilter: settings_clangTidyHeaderFilter,
                         args: settings_clangTidyArgs,
+                        useDashP: settings_clangTidyUseDashP,
                         checks: {
                             enabled: settings_clangTidyChecksEnabled,
                             disabled: settings_clangTidyChecksDisabled

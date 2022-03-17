@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.9.4-main",
+  "version": "1.10.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -459,6 +459,12 @@
             "type": "string"
           },
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
+          "scope": "resource"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.useDashP": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.useDashP.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.codeAnalysis.clangTidy.checks.enabled": {
