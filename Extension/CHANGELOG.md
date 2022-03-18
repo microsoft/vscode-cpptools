@@ -2,11 +2,11 @@
 
 ## Version 1.9.6: March 18, 2022
 ### Bug Fix
-* Redo 1.9.4 changes with a fix for issue [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041)
+* Redo 1.9.4 changes with a fix for issue [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041).
 
 ## Version 1.9.5: March 17, 2022
 ### Bug Fixes
-* Undo the 1.9.4 changes to fix the file corruption issue. [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041).
+* Undo the 1.9.4 changes to fix the file corruption issue. [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041)
   * Issue [#8851](https://github.com/microsoft/vscode-cpptools/issues/8851) should still be fixed though.
 
 ## Version 1.9.4: March 16, 2022
