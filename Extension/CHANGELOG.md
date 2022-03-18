@@ -1,8 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.9.6: March 18, 2022
+## Version 1.9.6: March 21, 2022
 ### Bug Fix
 * Redo 1.9.4 changes with a fix for issue [#9041](https://github.com/microsoft/vscode-cpptools/issues/9041).
+* Fix a potential heap corruption when `files.associations` are changed.
 
 ## Version 1.9.5: March 17, 2022
 ### Bug Fixes
