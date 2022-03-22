@@ -4401,7 +4401,7 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "mocha": "^8.3.2",
     "parse-git-config": "^3.0.0",
     "parse5": "^5.1.0",
