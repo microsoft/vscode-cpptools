@@ -76,7 +76,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
             }
         }));
     }
-    LanguageServer.activate();
+    await LanguageServer.activate();
 
     UpdateInsidersAccess();
 

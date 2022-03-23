@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.8.2-main",
+  "version": "1.9.7-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -75,7 +75,6 @@
     "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
     "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
     "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
-    "onDebugInitialConfigurations",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -259,7 +258,7 @@
         "owner": "cpptools",
         "fileLocation": [
           "autoDetect",
-          "${workspaceFolder}"
+          "${cwd}"
         ],
         "pattern": {
           "regexp": "^(.*?):(\\d+):(\\d*):?\\s+(?:fatal\\s+)?(warning|error):\\s+(.*)$",
@@ -2472,6 +2471,12 @@
           "markdownDescription": "%c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.default.dotConfig": {
+          "type": "string",
+          "default": null,
+          "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.updateChannel": {
           "type": "string",
           "enum": [
@@ -2575,6 +2580,15 @@
             ]
           },
           "scope": "resource"
+        },
+        "C_Cpp.debugShortcut": {
+          "type": "boolean",
+          "default": false,
+          "tags": [
+            "experimental"
+          ],
+          "description": "%c_cpp.configuration.debugShortcut.description%",
+          "scope": "application"
         }
       }
     },
@@ -2632,11 +2646,6 @@
       {
         "command": "C_Cpp.TakeSurvey",
         "title": "%c_cpp.command.takeSurvey.title%",
-        "category": "C/C++"
-      },
-      {
-        "command": "C_Cpp.BuildAndDebugActiveFile",
-        "title": "%c_cpp.command.buildAndDebugActiveFile.title%",
         "category": "C/C++"
       },
       {
@@ -2716,6 +2725,18 @@
         "command": "C_Cpp.ClearCodeAnalysisSquiggles",
         "title": "%c_cpp.command.ClearCodeAnalysisSquiggles.title%",
         "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.BuildAndDebugFile",
+        "title": "%c_cpp.command.BuildAndDebugFile.title%",
+        "category": "C/C++",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "C_Cpp.BuildAndRunFile",
+        "title": "%c_cpp.command.BuildAndRunFile.title%",
+        "category": "C/C++",
+        "icon": "$(run)"
       }
     ],
     "keybindings": [
@@ -2741,7 +2762,6 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
-            "default": {},
             "required": [
               "program"
             ],
@@ -3416,7 +3436,6 @@
         "configurationAttributes": {
           "launch": {
             "type": "object",
-            "default": {},
             "required": [
               "program",
               "cwd"
@@ -3832,6 +3851,18 @@
           "group": "navigation"
         }
       ],
+      "editor/title/run": [
+        {
+          "command": "C_Cpp.BuildAndDebugFile",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
+          "group": "navigation@0"
+        },
+        {
+          "command": "C_Cpp.BuildAndRunFile",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
+          "group": "navigation@1"
+        }
+      ],
       "editor/context": [
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
@@ -3847,11 +3878,6 @@
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
           "group": "other1_navigation@4"
-        },
-        {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
-          "command": "C_Cpp.BuildAndDebugActiveFile",
-          "group": "other2@1"
         },
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
@@ -4375,7 +4401,7 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
     "http-proxy-agent": "^2.1.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "mocha": "^8.3.2",
     "parse-git-config": "^3.0.0",
     "parse5": "^5.1.0",
@@ -4408,9 +4434,10 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
+    "ajv": "^6.12.3",
     "ansi-regex": "^5.0.1",
     "browserslist": "^4.16.6",
-    "follow-redirects": "1.14.7",
+    "follow-redirects": "1.14.8",
     "glob-parent": "^5.1.2",
     "hosted-git-info": "^3.0.8",
     "nanoid": "^3.1.20",

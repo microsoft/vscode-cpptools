@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "Podtrhávání chyb vlnovkou se povolí, když se přeloží všechny závislosti hlaviček.",
 	"replaced_placeholder_file_record": "Nahradil se záznam souboru zástupného symbolu.",
 	"tag_parsing_file": "analyzují se značky v souboru: {0}",
-	"tag_parsing_error": "Při analýze značek došlo k chybě, ale je možné, že nebude významná. Dejte nám vědět, pokud se v souboru nepovede najít nějaké symboly: {0}",
+	"tag_parsing_error": "chyba analýzy značka (toto lze ignorovat, pokud se nedají najít symboly):",
 	"reset_timestamp_for": "Resetovat časové razítko pro {0}",
 	"remove_file_failed": "Nepovedlo se odebrat soubor: {0}",
 	"regex_parse_error": "Chyba parsování regulárního výrazu – vzor VS Code: {0}, regulární výraz: {1}, chybová zpráva: {2}",
@@ -216,5 +216,8 @@
 	"inline_macro": "Vložit makro",
 	"unable_to_access_browse_database": "Nedá se získat přístup k procházení databáze. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Režim IntelliSenseMode se změnil, protože neodpovídá zjištěnému kompilátoru. Zvažte místo toho nastavení \"compilerPath\". Nastavte \"compilerPath\" na \"\", aby byla zakázána detekce systémových parametrů include a define.",
-	"clear_code_analysis_squiggles": "Vymazat podtržení analýzy kódu vlnovkou"
+	"clear_code_analysis_squiggles": "Vymazat podtržení analýzy kódu vlnovkou",
+	"multiple_locations_note": "Víc umístění",
+	"folder_tag": "Složka",
+	"file_tag": "Soubor"
 }

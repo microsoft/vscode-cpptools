@@ -33,7 +33,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import * as logger from '../logger';
-import { updateLanguageConfigurations, registerCommands } from './extension';
+import { updateLanguageConfigurations, CppSourceStr } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -150,7 +150,7 @@ function showWarning(params: ShowWarningParams): void {
 
 function publishDiagnostics(params: PublishDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection("C/C++");
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
@@ -160,7 +160,7 @@ function publishDiagnostics(params: PublishDiagnosticsParams): void {
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
         diagnostic.code = d.code;
-        diagnostic.source = "C/C++";
+        diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -201,7 +201,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         } else {
             diagnostic.code = d.code;
         }
-        diagnostic.source = "C/C++";
+        diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -295,6 +295,7 @@ interface CompileCommandsPaths extends WorkspaceFolderParams {
 
 interface QueryTranslationUnitSourceParams extends WorkspaceFolderParams {
     uri: string;
+    ignoreExisting: boolean;
 }
 
 interface QueryTranslationUnitSourceResult {
@@ -416,7 +417,6 @@ interface TextEdit {
 
 export interface GetFoldingRangesParams {
     uri: string;
-    id: number;
 }
 
 export enum FoldingRangeKind {
@@ -436,13 +436,8 @@ export interface GetFoldingRangesResult {
     ranges: CppFoldingRange[];
 }
 
-interface AbortRequestParams {
-    id: number;
-}
-
 export interface GetSemanticTokensParams {
     uri: string;
-    id: number;
 }
 
 interface SemanticToken {
@@ -572,7 +567,6 @@ const FinishedRequestCustomConfig: NotificationType<string, void> = new Notifica
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
-const AbortRequestNotification: NotificationType<AbortRequestParams, void> = new NotificationType<AbortRequestParams, void>('cpptools/abortRequest');
 const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runCodeAnalysis');
 
 // Notifications from the server
@@ -696,6 +690,7 @@ export interface Client {
     RootPath: string;
     RootRealPath: string;
     RootUri?: vscode.Uri;
+    RootFolder?: vscode.WorkspaceFolder;
     Name: string;
     TrackedDocuments: Set<vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent, isFirstClient: boolean): { [key: string]: string };
@@ -706,7 +701,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void>;
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
@@ -752,6 +747,7 @@ export interface Client {
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
+    sendAllSettings(): void;
     sendDidChangeSettings(settings: any): void;
 }
 
@@ -790,8 +786,6 @@ export class DefaultClient implements Client {
         { scheme: 'file', language: 'cuda-cpp' }
     ];
     public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
-
-    public static abortRequestId: number = 0;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -954,7 +948,7 @@ export class DefaultClient implements Client {
                                     uri: document.uri.toString()
                                 };
 
-                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params);
+                                const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
                                 const resultCodeActions: vscode.CodeAction[] = [];
 
                                 // Convert to vscode.CodeAction array
@@ -1013,10 +1007,8 @@ export class DefaultClient implements Client {
                         compilerDefaults = inputCompilerDefaults;
                         this.configuration.CompilerDefaults = compilerDefaults;
 
-                        // Only register file watchers, providers, and the real commands after the extension has finished initializing,
+                        // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
-                        registerCommands();
-
                         this.registerFileWatcher();
 
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
@@ -1084,8 +1076,10 @@ export class DefaultClient implements Client {
         }
         const serverName: string = this.getName(this.rootFolder);
         const serverOptions: ServerOptions = {
-            run: { command: serverModule },
-            debug: { command: serverModule, args: [serverName] }
+            // Running detached would be preferred; however, that causes cpptools-srv to create a console window
+            // on Windows and that can't seem to be suppressed without suppressing assertion dialog boxes.
+            run: { command: serverModule, options: { detached: false } },
+            debug: { command: serverModule, args: [serverName], options: { detached: false } }
         };
 
         // Get all the per-workspace settings.
@@ -1491,15 +1485,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.forEach(client => { allClients.replace(client, true); });
+                        allClients.recreateClients();
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.forEach(client => { allClients.replace(client, false); });
+                            allClients.recreateClients(true);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.forEach(client => { allClients.replace(client, true); });
+                            allClients.recreateClients();
                         }
                     }
                     return CloseAction.DoNotRestart;
@@ -1718,6 +1712,9 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -1810,13 +1807,16 @@ export class DefaultClient implements Client {
                 // If we are being called by a configuration provider other than the current one, ignore it.
                 return;
             }
+            if (!currentProvider.isReady) {
+                return;
+            }
 
             this.clearCustomConfigurations();
             if (diagnosticsCollectionCodeAnalysis) {
                 diagnosticsCollectionCodeAnalysis.clear();
             }
             this.trackedDocuments.forEach(document => {
-                this.provideCustomConfiguration(document.uri, undefined);
+                this.provideCustomConfiguration(document.uri, undefined, true);
             });
         });
     }
@@ -1828,7 +1828,7 @@ export class DefaultClient implements Client {
             }
             console.log("updateCustomBrowseConfiguration");
             const currentProvider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(this.configurationProvider);
-            if (!currentProvider || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
+            if (!currentProvider || !currentProvider.isReady || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
                 return;
             }
 
@@ -1945,7 +1945,7 @@ export class DefaultClient implements Client {
         await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(RescanFolderNotification));
     }
 
-    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> {
+    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
         const onFinished: () => void = () => {
             if (requestFile) {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
@@ -1957,13 +1957,9 @@ export class DefaultClient implements Client {
             return;
         }
         const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
-        if (!provider) {
+        if (!provider || !provider.isReady) {
             onFinished();
             return;
-        }
-        if (!provider.isReady) {
-            onFinished();
-            throw new Error(`${this.configurationProvider} is not ready`);
         }
         return this.queueBlockingTask(async () => {
             const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
@@ -1973,6 +1969,7 @@ export class DefaultClient implements Client {
 
             const params: QueryTranslationUnitSourceParams = {
                 uri: docUri.toString(),
+                ignoreExisting: !!replaceExisting,
                 workspaceFolderUri: this.RootPath
             };
             const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
@@ -1985,58 +1982,56 @@ export class DefaultClient implements Client {
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
             // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
             const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
-                if (provider) {
-                    for (let i: number = 0; i < response.candidates.length; ++i) {
-                        try {
-                            const candidate: string = response.candidates[i];
-                            const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
-                            if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                                const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
-                                if (configs && configs.length > 0 && configs[0]) {
-                                    const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
-                                    if (fileConfiguration?.mergeConfigurations) {
-                                        configs.forEach(config => {
-                                            if (fileConfiguration.includePath) {
-                                                fileConfiguration.includePath.forEach(p => {
-                                                    if (!config.configuration.includePath.includes(p)) {
-                                                        config.configuration.includePath.push(p);
+                for (let i: number = 0; i < response.candidates.length; ++i) {
+                    try {
+                        const candidate: string = response.candidates[i];
+                        const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
+                        if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                            const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
+                            if (configs && configs.length > 0 && configs[0]) {
+                                const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
+                                if (fileConfiguration?.mergeConfigurations) {
+                                    configs.forEach(config => {
+                                        if (fileConfiguration.includePath) {
+                                            fileConfiguration.includePath.forEach(p => {
+                                                if (!config.configuration.includePath.includes(p)) {
+                                                    config.configuration.includePath.push(p);
+                                                }
+                                            });
+                                        }
+
+                                        if (fileConfiguration.defines) {
+                                            fileConfiguration.defines.forEach(d => {
+                                                if (!config.configuration.defines.includes(d)) {
+                                                    config.configuration.defines.push(d);
+                                                }
+                                            });
+                                        }
+
+                                        if (!config.configuration.forcedInclude) {
+                                            config.configuration.forcedInclude = [];
+                                        }
+
+                                        if (fileConfiguration.forcedInclude) {
+                                            fileConfiguration.forcedInclude.forEach(i => {
+                                                if (config.configuration.forcedInclude) {
+                                                    if (!config.configuration.forcedInclude.includes(i)) {
+                                                        config.configuration.forcedInclude.push(i);
                                                     }
-                                                });
-                                            }
-
-                                            if (fileConfiguration.defines) {
-                                                fileConfiguration.defines.forEach(d => {
-                                                    if (!config.configuration.defines.includes(d)) {
-                                                        config.configuration.defines.push(d);
-                                                    }
-                                                });
-                                            }
-
-                                            if (!config.configuration.forcedInclude) {
-                                                config.configuration.forcedInclude = [];
-                                            }
-
-                                            if (fileConfiguration.forcedInclude) {
-                                                fileConfiguration.forcedInclude.forEach(i => {
-                                                    if (config.configuration.forcedInclude) {
-                                                        if (!config.configuration.forcedInclude.includes(i)) {
-                                                            config.configuration.forcedInclude.push(i);
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-
-                                    return configs as SourceFileConfigurationItem[];
+                                                }
+                                            });
+                                        }
+                                    });
                                 }
+
+                                return configs as SourceFileConfigurationItem[];
                             }
-                            if (tokenSource.token.isCancellationRequested) {
-                                return null;
-                            }
-                        } catch (err) {
-                            console.warn("Caught exception request configuration");
                         }
+                        if (tokenSource.token.isCancellationRequested) {
+                            return null;
+                        }
+                    } catch (err) {
+                        console.warn("Caught exception request configuration");
                     }
                 }
             };
@@ -2085,7 +2080,7 @@ export class DefaultClient implements Client {
 
     private isExternalHeader(uri: vscode.Uri): boolean {
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        return !rootUri || (util.isHeader(uri) && !uri.toString().startsWith(rootUri.toString()));
+        return !rootUri || (util.isHeaderFile(uri) && !uri.toString().startsWith(rootUri.toString()));
     }
 
     public getCurrentConfigName(): Thenable<string | undefined> {
@@ -2654,6 +2649,7 @@ export class DefaultClient implements Client {
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2674,6 +2670,8 @@ export class DefaultClient implements Client {
                     });
                 }
             }
+        } else {
+            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -3071,6 +3069,7 @@ export class DefaultClient implements Client {
                 next: next
             };
 
+            await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
                 const p: vscode.Position = new vscode.Position(response.line, response.character);
@@ -3232,13 +3231,6 @@ export class DefaultClient implements Client {
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
     }
-
-    public abortRequest(id: number): void {
-        const params: AbortRequestParams = {
-            id: id
-        };
-        languageClient.sendNotification(AbortRequestNotification, params);
-    }
 }
 
 function getLanguageServerFileName(): string {
@@ -3283,7 +3275,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string): Promise<void> { return Promise.resolve(); }
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }
@@ -3332,5 +3324,6 @@ class NullClient implements Client {
         this.stringEvent.dispose();
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
+    sendAllSettings(): void { }
     sendDidChangeSettings(settings: any): void { }
 }

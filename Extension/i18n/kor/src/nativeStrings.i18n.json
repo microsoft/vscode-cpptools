@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "모든 헤더 종속성이 확인되면 오류 표시선을 사용할 수 있습니다.",
 	"replaced_placeholder_file_record": "바뀐 자리 표시자 파일 레코드",
 	"tag_parsing_file": "태그 구문 분석 파일: {0}",
-	"tag_parsing_error": "태그 구문 분석에 오류가 발생했지만 중요하지 않을 수 있습니다. 파일에서 기호를 찾을 수 없으면 알려 주세요. {0}",
+	"tag_parsing_error": "태그 구문 분석 오류(기호를 찾을 수 없는 경우 무시할 수 있음):",
 	"reset_timestamp_for": "{0}에 대한 타임스탬프 다시 설정",
 	"remove_file_failed": "파일을 제거하지 못했습니다. {0}",
 	"regex_parse_error": "Regex 구문 분석 오류 - vscode 패턴: {0}, regex: {1}, 오류 메시지: {2}",
@@ -216,5 +216,8 @@
 	"inline_macro": "인라인 매크로",
 	"unable_to_access_browse_database": "찾아보기 데이터베이스에 액세스할 수 없습니다({0}).",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode가 검색된 컴파일러와 일치하지 않아 변경되었습니다.  \"compilerPath\"를 대신 설정하는 것이 좋습니다.  \"compilerPath\"를 \"\"(으)로 설정하여 시스템 포함 및 정의 검색을 사용하지 않도록 설정합니다.",
-	"clear_code_analysis_squiggles": "명확한 코드 분석 물결선"
+	"clear_code_analysis_squiggles": "명확한 코드 분석 물결선",
+	"multiple_locations_note": "여러 위치",
+	"folder_tag": "폴더",
+	"file_tag": "파일"
 }

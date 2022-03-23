@@ -657,6 +657,15 @@
         </div>
 
         <div class="section">
+            <div class="section-title" data-loc-id="dot.config">Dot Config</div>
+            <div class="section-text" data-loc-id="dot.config.description">A path to a .config file created by Kconfig system. Kconfig system generates a file with all the defines to build a project. Examples of projects that use Kconfig system are the Linux Kernel and NuttX RTOS.</div>
+            <div>
+                <input name="inputValue" id="dotConfig" style="width: 798px"></input>
+                <div id="dotConfigInvalid" class="error" style="width: 800px"></div>
+            </div>
+        </div>
+
+        <div class="section">
             <div class="section-title" data-loc-id="compile.commands">Compile commands</div>
             <div class="section-text">
                 <span data-loc-id="compile.commands.description">The full path to the <code>compile_commands.json</code> file for the workspace. The include paths and defines discovered in this file will be used instead of the values set for <code>includePath</code> and <code>defines</code> settings. If the compile commands database does not contain an entry for the translation unit that corresponds to the file you opened in the editor, then a warning message will appear and the extension will use the <code>includePath</code> and <code>defines</code> settings instead.</span>
@@ -700,7 +709,7 @@
         <div class="section">
             <div class="section-title" data-loc-id="database.filename">Browse: database filename</div>
             <div class="section-text">
-                <span data-loc-id="database.filename.description">The path to the generated symbol database. This instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The <code>${workspaceFolder}</code> variable can be used to specify a path relative to the workspace folder (e.g. <code>${workspaceFolder}/.vscode/browse.vc.db</code>)</span>
+                <span data-loc-id="database.filename.description">The path to the generated symbol database. This instructs the extension to save the Tag Parser's symbol database somewhere other than the workspace's default storage location. If a relative path is specified, it will be made relative to the workspace's default storage location, not the workspace folder itself. The <code>${workspaceFolder}</code> variable can be used to specify a path relative to the workspace folder (e.g. <code>${workspaceFolder}/.vscode/browse.vc.db</code>).</span>
             </div>
             <div>
                 <input name="inputValue" id="databaseFilename" style="width: 798px"></input>
