@@ -52,6 +52,8 @@
 	"forced.include": "Vynucené zahrnutí",
 	"forced.include.description": "Seznam souborů, které by se měly zahrnout dříve, než se zpracují jakékoli jiné znaky ve zdrojovém souboru. Soubory se zahrnují v uvedeném pořadí.",
 	"one.file.per.line": "Na každý řádek jeden soubor",
+	"dot.config": "Konfigurace tečky",
+	"dot.config.description": "Cesta k souboru .config vytvořenému systémem Kconfig. Systém Kconfig vygeneruje soubor se všemi definicemi pro sestavení projektu. Příkladem projektů, které používají systém Kconfig, jsou Linux Kernel a NuttX RTOS.",
 	"compile.commands": "Příkazy kompilace",
 	"compile.commands.description": "Úplná cesta k souboru {0} pro pracovní prostor. Cesty pro vložené soubory a direktivy define v tomto souboru se použijí namísto hodnot nastavených pro nastavení {1} a {2}. Pokud databáze příkazů pro kompilaci neobsahuje položku pro jednotku překladu, která odpovídá souboru otevřenému v editoru, zobrazí se zpráva upozornění a rozšíření místo toho použije nastavení {3} a {4}.",
 	"merge.configurations": "Sloučit konfigurace",

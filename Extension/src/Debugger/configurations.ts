@@ -5,19 +5,26 @@
 
 import * as os from 'os';
 import * as nls from 'vscode-nls';
+import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export enum DebuggerType {
-    cppvsdbg,
-    cppdbg
+    cppvsdbg = "cppvsdbg",
+    cppdbg = "cppdbg",
+    all = "all"
+}
+
+export enum DebuggerEvent {
+    debugPanel = "debugPanel",
+    launchPlayButton = "launchPlayButton"
 }
 
 export enum TaskConfigStatus {
     recentlyUsed = "Recently Used Task",
-    configured = "Configured Task",
-    detected = "Detected Task"
+    configured = "Configured Task", // The tasks that are configured in tasks.json file.
+    detected = "Detected Task"      // The tasks that are available based on detected compilers.
 }
 
 export interface IConfigurationSnippet {
@@ -89,7 +96,6 @@ export interface IConfiguration {
 }
 
 abstract class Configuration implements IConfiguration {
-    public snippetPrefix = "C/C++: ";
 
     public executable: string;
     public pipeProgram: string;
@@ -122,7 +128,7 @@ export class MIConfigurations extends Configuration {
             this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("launch.with", "Launch with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
@@ -140,7 +146,7 @@ export class MIConfigurations extends Configuration {
             this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("attach.with", "Attach with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
@@ -162,7 +168,7 @@ export class PipeTransportConfigurations extends Configuration {
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("pipe.launch.with", "Pipe Launch with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
@@ -180,7 +186,7 @@ export class PipeTransportConfigurations extends Configuration {
 \t"MIMode": "${this.MIMode}"{0}
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("pipe.attach.with", "Pipe Attach with {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
@@ -200,7 +206,7 @@ export class WindowsConfigurations extends Configuration {
 }`;
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("launch.with.vs.debugger", "Launch with the Visual Studio C/C++ debugger.").replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "isInitialConfiguration": true,
@@ -218,7 +224,7 @@ export class WindowsConfigurations extends Configuration {
 }`;
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("attach.with.vs.debugger", "Attach to a process with the Visual Studio C/C++ debugger.").replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppvsdbg
@@ -241,7 +247,7 @@ export class WSLConfigurations extends Configuration {
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("launch.bash.windows", "Launch in Bash on Windows using {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg
@@ -258,7 +264,7 @@ export class WSLConfigurations extends Configuration {
 }`, [this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
 
         return {
-            "label": this.snippetPrefix + name,
+            "label": configPrefix + name,
             "description": localize("remote.attach.bash.windows", "Attach to a remote process running in Bash on Windows using {0}.", this.MIMode).replace(/\"/g, "\\\""),
             "bodyText": body.trim(),
             "debuggerType": DebuggerType.cppdbg

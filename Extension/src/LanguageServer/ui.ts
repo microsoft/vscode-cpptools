@@ -122,6 +122,9 @@ export class UI {
     }
 
     private setIsCodeAnalysisPaused(val: boolean): void {
+        if (!this.isRunningCodeAnalysis) {
+            return;
+        }
         this.isCodeAnalysisPaused = val;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
@@ -174,6 +177,9 @@ export class UI {
     }
 
     private setCodeAnalysisProcessed(processed: number): void {
+        if (!this.isRunningCodeAnalysis) {
+            return; // Occurs when a multi-root workspace is activated.
+        }
         this.codeAnalysisProcessed = processed;
         if (this.codeAnalysisProcessed > this.codeAnalysisTotal) {
             this.codeAnalysisTotal = this.codeAnalysisProcessed + 1;
@@ -182,6 +188,9 @@ export class UI {
     }
 
     private setCodeAnalysisTotal(total: number): void {
+        if (!this.isRunningCodeAnalysis) {
+            return; // Occurs when a multi-root workspace is activated.
+        }
         this.codeAnalysisTotal = total;
         this.updateCodeAnalysisTooltip();
     }
