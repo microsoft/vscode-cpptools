@@ -38,9 +38,9 @@ export enum TaskConfigStatus {
 
 const localizeConfigs = (items: MenuItem[]): MenuItem[] => {
     items.map((item: MenuItem) => {
-        item.detail = (item.detail === TaskConfigStatus.recentlyUsed) ? localize("recently.used.task", TaskConfigStatus.recentlyUsed) :
-            (item.detail === TaskConfigStatus.configured) ? localize("configured.task", TaskConfigStatus.configured) :
-                (item.detail === TaskConfigStatus.detected) ? localize("detected.task", TaskConfigStatus.detected) : item.detail;
+        item.detail = (item.detail === TaskConfigStatus.recentlyUsed) ? localize("recently.used.task", "Recently Used Task") :
+            (item.detail === TaskConfigStatus.configured) ? localize("configured.task", "Configured Task") :
+                (item.detail === TaskConfigStatus.detected) ? localize("detected.task", "Detected Task") : item.detail;
 
     });
     return items;
