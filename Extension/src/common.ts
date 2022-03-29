@@ -476,6 +476,16 @@ export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     });
 }
 
+export function createDirIfNotExistsSync(filePath: string | undefined): void {
+    if (!filePath) {
+        return;
+    }
+    const dirPath: string = path.dirname(filePath);
+    if (!checkDirectoryExistsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+}
+
 export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
@@ -1288,3 +1298,4 @@ export function isVsCodeInsiders(): boolean {
         extensionPath.includes(".vscode-exploration") ||
         extensionPath.includes(".vscode-server-exploration");
 }
+

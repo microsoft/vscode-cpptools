@@ -409,6 +409,11 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
+
+        // Create the exe folder path if it doesn't exists.
+        const exePath: string | undefined = util.findExePathInArgs(this.args);
+        util.createDirIfNotExistsSync(exePath);
+
         let child: cp.ChildProcess | undefined;
         try {
             child = cp.spawn(command, this.args, this.options ? this.options : {});
