@@ -52,6 +52,8 @@
 	"forced.include": "Erzwungene Include-Anweisung",
 	"forced.include.description": "Eine Liste der Dateien, die eingefügt werden sollen, bevor andere Zeichen in der Quelldatei verarbeitet werden. Die Dateien sind in der aufgelisteten Reihenfolge enthalten.",
 	"one.file.per.line": "Eine Datei pro Zeile.",
+	"dot.config": "„dotConfig“",
+	"dot.config.description": "Ein Pfad zu einer „.config“-Datei, die vom „Kconfig“-System erstellt wurde. Das „Kconfig“-System generiert eine Datei mit allen Definitionen zum Erstellen eines Projekts. Beispiele für Projekte, die das „Kconfig“-System verwenden, sind Linux-Kernel und NuttX-RTOS.",
 	"compile.commands": "Kompilierungsbefehle",
 	"compile.commands.description": "Der vollständige Pfad zur {0}-Datei für den Arbeitsbereich. Die in dieser Datei ermittelten Includepfade und Define-Anweisungen werden anstelle der für die Einstellungen \"{1}\" und \"{2}\" festgelegten Werte verwendet. Wenn die Datenbank für Kompilierungsbefehle keinen Eintrag für die Übersetzungseinheit enthält, die der im Editor geöffneten Datei entspricht, wird eine Warnmeldung angezeigt, und die Erweiterung verwendet stattdessen die Einstellungen \"{3}\" und \"{4}\".",
 	"merge.configurations": "Konfigurationen zusammenführen",

@@ -52,6 +52,8 @@
 	"forced.include": "Zorlamalı ekleme",
 	"forced.include.description": "Kaynak dosyadaki başka herhangi bir karakter işlenmeden önce eklenmesi gereken dosyaların listesi. Dosyalar listelendikleri sırada eklenir.",
 	"one.file.per.line": "Satır başına bir dosya.",
+	"dot.config": "Nokta Yapılandırması",
+	"dot.config.description": "Kconfig sistemi tarafından oluşturulan bir .config dosyasının yolu. Kconfig sistemi, bir proje oluşturmak için tüm tanımlamaları içeren bir dosya oluşturur. Kconfig sistemini kullanan projelere örnek olarak Linux Çekirdeği ve NuttX RTOS verilebilir.",
 	"compile.commands": "Derleme komutları",
 	"compile.commands.description": "Çalışma alanı için {0} dosyasının tam yolu. {1} ve {2} ayarları için ayarlanan değerler yerine bu dosyada bulunan içerme yolları ve tanımlar kullanılır. Derleme komutları veritabanı, düzenleyicide açtığınız dosyaya karşılık gelen çeviri birimi için bir giriş içermiyorsa, bir uyarı mesajı görüntülenir ve uzantı bunun yerine {3} ve {4} ayarlarını kullanır.",
 	"merge.configurations": "Yapılandırmaları birleştir",

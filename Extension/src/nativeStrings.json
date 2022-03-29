@@ -76,7 +76,7 @@
     "error_squiggles_enabled_if_all_headers_resolve": "Error squiggles are enabled if all header dependencies are resolved.",
     "replaced_placeholder_file_record": "Replaced placeholder file record",
     "tag_parsing_file": "tag parsing file: {0}",
-    "tag_parsing_error": "Tag parsing encountered an error, but it may not matter. Let us know if symbols in the file can't be found: {0}",
+    "tag_parsing_error": "tag parsing error (this can be ignored unless symbols can't be found):",
     "reset_timestamp_for": "Reset time stamp for {0}",
     "remove_file_failed": "Failed to remove file: {0}",
     "regex_parse_error": "Regex parse error - vscode pattern: {0}, regex: {1}, error message: {2}",
@@ -238,5 +238,6 @@
     "clear_code_analysis_squiggles": "Clear code analysis squiggles",
     "multiple_locations_note": "(Multiple locations)",
     "folder_tag": "Folder",
-    "file_tag": "File"
+    "file_tag": "File",
+    "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default."
 }

@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "Os rabiscos de erro serão habilitados se todas as dependências de cabeçalho forem resolvidas.",
 	"replaced_placeholder_file_record": "Registro de arquivo de espaço reservado substituído",
 	"tag_parsing_file": "arquivo de análise de marca: {0}",
-	"tag_parsing_error": "A análise de tag encontrou um erro, mas isso pode não ser relevante. Informe-nos caso não seja possível encontrar os símbolos no arquivo: {0}",
+	"tag_parsing_error": "erro de análise de marca (isso pode ser ignorado, a menos que não seja possível encontrar símbolos):",
 	"reset_timestamp_for": "Redefinir carimbo de data/hora para {0}",
 	"remove_file_failed": "Falha ao remover o arquivo: {0}",
 	"regex_parse_error": "Erro de análise de regex – padrão vscode: {0}, regex: {1}, mensagem de erro: {2}",
@@ -216,5 +216,8 @@
 	"inline_macro": "Macro embutida",
 	"unable_to_access_browse_database": "Não é possível acessar o banco de dados de navegação. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "O IntelliSenseMode foi alterado porque não correspondeu ao compilador detectado. Considere configurar \"compilerPath\" em vez disso. Defina \"compilerPath\" como \"\" para desabilitar a detecção de inserções e definições do sistema.",
-	"clear_code_analysis_squiggles": "Limpar rabiscos de análise de código"
+	"clear_code_analysis_squiggles": "Limpar rabiscos de análise de código",
+	"multiple_locations_note": "Vários locais",
+	"folder_tag": "Pasta",
+	"file_tag": "Arquivo"
 }
