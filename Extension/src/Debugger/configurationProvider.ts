@@ -510,8 +510,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    public async getLaunchConfigs(folder: vscode.WorkspaceFolder | undefined): Promise<vscode.WorkspaceConfiguration[] | undefined> {
-        let configs: vscode.WorkspaceConfiguration[] | undefined = vscode.workspace.getConfiguration('launch', folder).get('configurations');
+    public async getLaunchConfigs(): Promise<vscode.WorkspaceConfiguration[] | undefined> {
+        let configs: vscode.WorkspaceConfiguration[] | undefined = vscode.workspace.getConfiguration('launch').get('configurations');
         if (!configs) {
             return undefined;
         }
@@ -540,7 +540,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (folder) {
             // Get existing debug configurations from launch.json.
-            const existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs(folder))?.map(config => ({
+            const existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs())?.map(config => ({
                 name: config.name,
                 type: config.type,
                 request: config.request,
