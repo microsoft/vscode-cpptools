@@ -383,7 +383,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 request: config.request,
                 detail: config.detail ? config.detail :
                     config.preLaunchTask ? localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask) : undefined,
-                existing: localize("configured.task", TaskConfigStatus.configured),
+                existing: TaskConfigStatus.configured,
                 preLaunchTask: config.preLaunchTask
             }));
             if (existingConfigs) {
