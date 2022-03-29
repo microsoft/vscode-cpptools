@@ -316,6 +316,16 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
+export function defaultExePath(): string {
+    const isWindows: boolean = os.platform() === 'win32';
+    const exePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+    return isWindows ? exePath + '.exe' : exePath;
+}
+
+export function findExePathInArgs(args: string[]): string | undefined {
+    return args.find((arg: string, index: number) => (arg.includes(".exe") || (index > 0 && args[index - 1] === "-o")));
+}
+
 // Pass in 'arrayResults' if a string[] result is possible and a delimited string result is undesirable.
 // The string[] result will be copied into 'arrayResults'.
 export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
