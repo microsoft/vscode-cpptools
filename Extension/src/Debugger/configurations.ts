@@ -21,12 +21,6 @@ export enum DebuggerEvent {
     launchPlayButton = "launchPlayButton"
 }
 
-export enum TaskConfigStatus {
-    recentlyUsed = "Recently Used Task",
-    configured = "Configured Task", // The tasks that are configured in tasks.json file.
-    detected = "Detected Task"      // The tasks that are available based on detected compilers.
-}
-
 export interface IConfigurationSnippet {
     label: string;
     description: string;
