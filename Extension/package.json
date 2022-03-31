@@ -461,6 +461,12 @@
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.useBuildPath": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.codeAnalysis.clangTidy.checks.enabled": {
           "type": "array",
           "items": {
