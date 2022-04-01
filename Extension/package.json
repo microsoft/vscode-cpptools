@@ -4429,7 +4429,7 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.5",
-    "plist": "^3.0.4",
+    "plist": "^3.0.5",
     "tmp": "^0.2.1",
     "vscode-cpptools": "^5.0.0",
     "vscode-extension-telemetry": "^0.4.4",
