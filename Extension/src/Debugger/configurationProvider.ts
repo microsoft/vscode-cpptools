@@ -341,7 +341,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
                             const suffixIndex: number = compilerName.indexOf("-");
                             if (suffixIndex !== -1) {
-                                const suffix: string = compilerName.substr(suffixIndex);
+                                const suffix: string = compilerName.substring(suffixIndex);
                                 debuggerName += suffix;
                             }
                         }
