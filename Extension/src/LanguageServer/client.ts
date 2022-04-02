@@ -318,6 +318,7 @@ interface Diagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: CppDiagnosticRelatedInformation[];
+    workspaceEdit?: WorkspaceEdit;
 }
 
 interface PublishDiagnosticsParams {

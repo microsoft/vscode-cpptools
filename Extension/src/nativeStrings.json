@@ -240,5 +240,14 @@
     "folder_tag": "Folder",
     "file_tag": "File",
     "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default.",
-    "apply_code_analysis_fix": "Apply code analysis fix"
+    "apply_code_analysis_fix": {
+        "text": "Apply code analysis fix for {0}",
+        "hint": "The '{0}' is an warning type, e.g. '[readability-const-return-type]'."
+    },
+    "apply_code_analysis_fixes_for_all": {
+        "text": "Apply code analysis fixes for all {0}",
+        "hint": "The '{0}' is a warning type, e.g. '[readability-const-return-type]'."
+    },
+    "apply_all_code_analysis_fixes": "Apply all code analysis fixes",
+    "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}"
 }
