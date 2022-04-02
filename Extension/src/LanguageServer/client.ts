@@ -1922,7 +1922,7 @@ export class DefaultClient implements Client {
         if (tuSearchStart >= 0) {
             const tuSearchEnd: number = response.diagnostics.indexOf("Translation Unit Configurations:");
             if (tuSearchEnd >= 0 && tuSearchEnd > tuSearchStart) {
-                let tuSearchString: string = response.diagnostics.substr(tuSearchStart, tuSearchEnd - tuSearchStart);
+                let tuSearchString: string = response.diagnostics.substring(tuSearchStart, tuSearchEnd - tuSearchStart);
                 let tuSearchIndex: number = tuSearchString.indexOf("[");
                 while (tuSearchIndex >= 0) {
                     const tuMatch: RegExpMatchArray | null = tuSearchString.match(/\[\s(.*)\s\]/);
@@ -1935,7 +1935,7 @@ export class DefaultClient implements Client {
                             configurationLoggingStr += `[ ${tuMatch[1]} ]\n${this.configurationLogging.get(tuPath)}\n`;
                         }
                     }
-                    tuSearchString = tuSearchString.substr(tuSearchIndex + 1);
+                    tuSearchString = tuSearchString.substring(tuSearchIndex + 1);
                     tuSearchIndex = tuSearchString.indexOf("[");
                 }
             }
@@ -2271,7 +2271,7 @@ export class DefaultClient implements Client {
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
             const is_cuda: boolean = languageStr.startsWith("cu;");
-            languageStr = languageStr.substr(is_c ? 2 : (is_cuda ? 3 : 1));
+            languageStr = languageStr.substring(is_c ? 2 : (is_cuda ? 3 : 1));
             this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
         }
     }
@@ -2323,7 +2323,7 @@ export class DefaultClient implements Client {
             for (const assoc in assocs) {
                 const dotIndex: number = assoc.lastIndexOf('.');
                 if (dotIndex !== -1) {
-                    const ext: string = assoc.substr(dotIndex + 1);
+                    const ext: string = assoc.substring(dotIndex + 1);
                     this.associations_for_did_change.add(ext);
                 }
             }
@@ -2339,7 +2339,7 @@ export class DefaultClient implements Client {
                     await this.updateActiveDocumentTextOptions();
                 }
                 if (dotIndex !== -1) {
-                    const ext: string = uri.fsPath.substr(dotIndex + 1);
+                    const ext: string = uri.fsPath.substring(dotIndex + 1);
                     if (this.associations_for_did_change?.has(ext)) {
                         // VS Code has a bug that causes onDidChange events to happen to files that aren't changed,
                         // which causes a large backlog of "files to parse" to accumulate.
@@ -2395,7 +2395,7 @@ export class DefaultClient implements Client {
                 }
                 const j: number = file.lastIndexOf('.');
                 if (j !== -1) {
-                    const ext: string = file.substr(j);
+                    const ext: string = file.substring(j);
                     if ((("*" + ext) in assocs) || (("**/*" + ext) in assocs)) {
                         continue; // Extension already has an association.
                     }

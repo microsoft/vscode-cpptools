@@ -919,10 +919,10 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             compilerName = path.basename(compilerPath);
         } else if (compilerPath.startsWith("\"")) {
             // Input has quotes around compiler path
-            const endQuote: number = compilerPath.substr(1).search("\"") + 1;
+            const endQuote: number = compilerPath.substring(1).search("\"") + 1;
             if (endQuote !== -1) {
-                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
-                compilerPath = compilerPath.substr(1, endQuote - 1);
+                additionalArgs = extractArgs(compilerPath.substring(endQuote + 1));
+                compilerPath = compilerPath.substring(1, endQuote - 1);
                 compilerName = path.basename(compilerPath);
             }
         } else {
@@ -934,7 +934,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             } else if (spaceStart !== -1 && !checkFileExistsSync(compilerPath)) {
                 // Get compiler name if compiler path has spaces and args.
                 // Go from right to left checking if a valid path is to the left of a space.
-                let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
+                let potentialCompilerPath: string = compilerPath.substring(0, spaceStart);
                 while (!checkFileExistsSync(potentialCompilerPath)) {
                     spaceStart = potentialCompilerPath.lastIndexOf(" ");
                     if (spaceStart === -1) {
@@ -942,11 +942,11 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                         potentialCompilerPath = compilerPath;
                         break;
                     }
-                    potentialCompilerPath = potentialCompilerPath.substr(0, spaceStart);
+                    potentialCompilerPath = potentialCompilerPath.substring(0, spaceStart);
                 }
                 if (compilerPath !== potentialCompilerPath) {
                     // Found a valid compilerPath and args.
-                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
+                    additionalArgs = extractArgs(compilerPath.substring(spaceStart + 1));
                     compilerPath = potentialCompilerPath;
                     compilerName = path.basename(potentialCompilerPath);
                 }

@@ -193,7 +193,7 @@ export class SettingsTracker {
                 }
             }
             if (value && value.length > maxSettingLengthForTelemetry) {
-                value = value.substr(0, maxSettingLengthForTelemetry) + "...";
+                value = value.substring(0, maxSettingLengthForTelemetry) + "...";
             }
             return {key: key, value: value};
         }

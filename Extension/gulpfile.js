@@ -94,11 +94,11 @@ function removePathPrefix(path, prefix) {
     }
     let ch = prefix.charAt(prefix.length - 1);
     if (ch === '/' || ch === '\\') {
-        return path.substr(prefix.length);
+        return path.substring(prefix.length);
     }
     ch = path.charAt(prefix.length);
     if (ch === '/' || ch === '\\') {
-        return path.substr(prefix.length + 1);
+        return path.substring(prefix.length + 1);
     }
     return path;
 }
@@ -378,7 +378,7 @@ const generateLocalizedWalkthroughHtmlFiles = () => {
     return es.through(function (file) {
         let relativePath = removePathPrefix(file.path, file.cwd);
         languages.map((language) => {
-            let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + `.nls.${language.id}.md`;
+            let newPath = relativePath.substring(0, relativePath.lastIndexOf(".")) + `.nls.${language.id}.md`;
             let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language, true);
             this.queue(new vinyl({
                 path: newPath,
@@ -386,7 +386,7 @@ const generateLocalizedWalkthroughHtmlFiles = () => {
             }));
         });
         // Put the original in an 'en' file.
-        let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + ".nls.en.md";
+        let newPath = relativePath.substring(0, relativePath.lastIndexOf(".")) + ".nls.en.md";
         this.queue(new vinyl({
             path: newPath,
             contents: file.contents
