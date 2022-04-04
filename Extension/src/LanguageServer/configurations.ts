@@ -1600,8 +1600,12 @@ export class CppProperties {
             // Get env text
             let envText: string = "";
             const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
-            const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
-            envText = curText.substr(envStart, envEnd); // TODO: Replace with substring.
+            if (envStart >= 0) {
+                const envEnd: number = curText.indexOf("},", envStart);
+                if (envEnd >= 0) {
+                    envText = curText.substring(envStart, envEnd);
+                }
+            }
             const envTextStartOffSet: number = envStart + 1;
 
             // Check if all config names are unique.
@@ -1901,6 +1905,7 @@ export class CppProperties {
                         diagnostics.push(diagnostic);
                     }
                 } else if (envText) {
+                    // TODO: This never matches. https://github.com/microsoft/vscode-cpptools/issues/9140
                     const envMatches: string[] | null = envText.match(pattern);
                     if (envMatches) {
                         let curOffset: number = 0;
