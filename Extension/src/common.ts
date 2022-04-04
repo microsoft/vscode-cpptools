@@ -853,15 +853,17 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
     });
 }
 
-/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
-export interface CompilerPathAndArgs {
-    compilerPath?: string;
-    compilerName: string;
-    additionalArgs: string[];
+function resolveWindowsEnvironmentVariables(str: string): string {
+    return str.replace(/%([^%]+)%/g, (withPercents, withoutPercents) => {
+        const found: string | undefined = process.env[withoutPercents];
+        return found || withPercents;
+    });
 }
 
 function extractArgs(argsString: string): string[] {
+    argsString = argsString.trim();
     if (os.platform() === 'win32') {
+        argsString = resolveWindowsEnvironmentVariables(argsString);
         const result: string[] = [];
         let currentArg: string = "";
         let isInQuote: boolean = false;
@@ -915,7 +917,7 @@ function extractArgs(argsString: string): string[] {
             }
             if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
                 if (!isInQuote) {
-                    if (!currentArg.length || wasInQuote) {
+                    if (currentArg !== "" || wasInQuote) {
                         wasInQuote = false;
                         result.push(currentArg);
                         currentArg = "";
@@ -941,58 +943,56 @@ function extractArgs(argsString: string): string[] {
     }
 }
 
+function isCl(compilerPath: string): boolean {
+    const compilerPathLowercase: string = compilerPath.toLowerCase();
+    return (compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
+        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl") || (compilerPathLowercase === "cl"));
+}
+
+/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
+export interface CompilerPathAndArgs {
+    compilerPath?: string;
+    compilerName: string;
+    additionalArgs: string[];
+}
+
 export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
-    const compilerPathLowercase: string | undefined = inputCompilerPath?.toLowerCase();
     let compilerName: string = "";
     let additionalArgs: string[] = [];
-
     if (compilerPath) {
-        if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {
+        compilerPath = compilerPath.trim();
+        if (isCl(compilerPath) || checkFileExistsSync(compilerPath)) {
+            // If the path ends with cl, or if a file is found at that path, accept it without further validation.
             compilerName = path.basename(compilerPath);
-        } else if (compilerPath.startsWith("\"")) {
-            // Input has quotes around compiler path
-            const endQuote: number = compilerPath.substr(1).search("\"") + 1;
-            if (endQuote !== -1) {
-                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
-                compilerPath = compilerPath.substr(1, endQuote - 1);
-                compilerName = path.basename(compilerPath);
+        } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
+            // If the string starts with a quote, treat it as a command line.
+            // Otherwise, a path with a leading quote would not be valid.
+            additionalArgs = extractArgs(compilerPath);
+            if (additionalArgs.length > 0) {
+                compilerPath = additionalArgs.shift();
             }
         } else {
-            // Input has no quotes around compiler path
-            let spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (checkFileExistsSync(compilerPath)) {
-                // Get compiler name if there are no args but path is valid.
-                compilerName = path.basename(compilerPath);
-            } else if (spaceStart !== -1 && !checkFileExistsSync(compilerPath)) {
-                // Get compiler name if compiler path has spaces and args.
-                // Go from right to left checking if a valid path is to the left of a space.
-                let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
-                while (!checkFileExistsSync(potentialCompilerPath)) {
-                    spaceStart = potentialCompilerPath.lastIndexOf(" ");
-                    if (spaceStart === -1) {
-                        // Reached the start without finding a valid path. Use the original value.
-                        potentialCompilerPath = compilerPath;
-                        break;
+            const spaceStart: number = compilerPath.lastIndexOf(" ");
+            if (spaceStart !== -1) {
+                // There is no leading quote, but a space suggests it might be a command line.
+                // Try processing it as a command line, and validate that by checking for the executable.
+                const potentialAdditionalArgs: string[] = extractArgs(compilerPath);
+                let potentialCompilerPath: string | undefined = potentialAdditionalArgs.shift();
+                if (potentialCompilerPath) {
+                    potentialCompilerPath = potentialCompilerPath.trim();
+                    if (isCl(potentialCompilerPath) || checkFileExistsSync(potentialCompilerPath)) {
+                        additionalArgs = potentialAdditionalArgs;
+                        compilerPath = potentialCompilerPath;
+                        compilerName = path.basename(compilerPath);
                     }
-                    potentialCompilerPath = potentialCompilerPath.substr(0, spaceStart);
-                }
-                if (compilerPath !== potentialCompilerPath) {
-                    // Found a valid compilerPath and args.
-                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
-                    compilerPath = potentialCompilerPath;
-                    compilerName = path.basename(potentialCompilerPath);
                 }
             }
         }
     }
-    // Combine args from inputCompilerPath and inputCompilerArgs and remove duplicates
+    // Combine args from inputCompilerPath and inputCompilerArgs
     if (inputCompilerArgs && inputCompilerArgs.length) {
-        additionalArgs = inputCompilerArgs.concat(additionalArgs.filter(
-            function (item: string): boolean {
-                return inputCompilerArgs.indexOf(item) < 0;
-            }));
+        additionalArgs = additionalArgs.concat(inputCompilerArgs);
     }
     return { compilerPath, compilerName, additionalArgs };
 }
@@ -1271,7 +1271,7 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 }
 
 export function normalizeArg(arg: string): string {
-    arg = arg.trimLeft().trimRight();
+    arg = arg.trim();
     // Check if the arg is enclosed in backtick,
     // or includes unescaped double-quotes (or single-quotes on windows),
     // or includes unescaped single-quotes on mac and linux.
