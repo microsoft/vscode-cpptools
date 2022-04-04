@@ -172,8 +172,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const isWindows: boolean = os.platform() === 'win32';
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
-            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-            const programName: string = isWindows ? filePath + '.exe' : filePath;
+            const programName: string = util.defaultExePath();
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
@@ -410,6 +409,11 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
+
+        // Create the exe folder path if it doesn't exists.
+        const exePath: string | undefined = util.findExePathInArgs(this.args);
+        util.createDirIfNotExistsSync(exePath);
+
         let child: cp.ChildProcess | undefined;
         try {
             child = cp.spawn(command, this.args, this.options ? this.options : {});

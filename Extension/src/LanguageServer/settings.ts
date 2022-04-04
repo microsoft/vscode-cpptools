@@ -183,6 +183,7 @@ export class CppSettings extends Settings {
     public get clangTidyFixNotes(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.notes"); }
     public get clangTidyHeaderFilter(): string | undefined | null { return super.Section.get<string | null>("codeAnalysis.clangTidy.headerFilter"); }
     public get clangTidyArgs(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.args"); }
+    public get clangTidyUseBuildPath(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.enabled"); }
     public get clangTidyChecksDisabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.disabled"); }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
