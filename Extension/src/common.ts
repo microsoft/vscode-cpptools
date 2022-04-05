@@ -463,6 +463,25 @@ export function checkFileExists(filePath: string): Promise<boolean> {
     });
 }
 
+/** Test whether a file exists */
+export async function checkExecutableExists(filePath: string): Promise<boolean> {
+    if (await checkFileExists(filePath)) {
+        return true;
+    }
+    if (os.platform() === 'win32') {
+        if (await checkFileExists(filePath + ".exe")) {
+            return true;
+        }
+        if (await checkFileExists(filePath + ".cmd")) {
+            return true;
+        }
+        if (await checkFileExists(filePath + ".bat")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** Test whether a directory exists */
 export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -490,6 +509,24 @@ export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
     } catch (e) {
+    }
+    return false;
+}
+
+export function checkExecutableExistsSync(filePath: string): boolean {
+    if (checkFileExistsSync(filePath)) {
+        return true;
+    }
+    if (os.platform() === 'win32') {
+        if (checkFileExistsSync(filePath + ".exe")) {
+            return true;
+        }
+        if (checkFileExistsSync(filePath + ".cmd")) {
+            return true;
+        }
+        if (checkFileExistsSync(filePath + ".bat")) {
+            return true;
+        }
     }
     return false;
 }
@@ -962,7 +999,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
     let additionalArgs: string[] = [];
     if (compilerPath) {
         compilerPath = compilerPath.trim();
-        if (isCl(compilerPath) || checkFileExistsSync(compilerPath)) {
+        if (isCl(compilerPath) || checkExecutableExistsSync(compilerPath)) {
             // If the path ends with cl, or if a file is found at that path, accept it without further validation.
             compilerName = path.basename(compilerPath);
         } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
@@ -981,7 +1018,7 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
                 let potentialCompilerPath: string | undefined = potentialAdditionalArgs.shift();
                 if (potentialCompilerPath) {
                     potentialCompilerPath = potentialCompilerPath.trim();
-                    if (isCl(potentialCompilerPath) || checkFileExistsSync(potentialCompilerPath)) {
+                    if (isCl(potentialCompilerPath) || checkExecutableExistsSync(potentialCompilerPath)) {
                         additionalArgs = potentialAdditionalArgs;
                         compilerPath = potentialCompilerPath;
                         compilerName = path.basename(compilerPath);

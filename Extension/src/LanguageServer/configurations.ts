@@ -1454,7 +1454,7 @@ export class CppProperties {
                 } else if (compilerPathAndArgs.compilerPath === "") {
                     const message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
                     compilerPathErrors.push(message);
-                } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
+                } else if (!util.checkExecutableExistsSync(resolvedCompilerPath)) {
                     const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
                     compilerPathErrors.push(message);
                 }
@@ -1760,7 +1760,7 @@ export class CppProperties {
                     if (compilerPathNeedsQuotes) {
                         compilerMessage = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                         newSquiggleMetrics.CompilerPathMissingQuotes++;
-                    } else if (!util.checkFileExistsSync(compilerPath)) {
+                    } else if (!util.checkExecutableExistsSync(compilerPath)) {
                         compilerMessage = localize("path.is.not.a.file", "Path is not a file: {0}", compilerPath);
                         newSquiggleMetrics.PathNotAFile++;
                     }
