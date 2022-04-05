@@ -46,7 +46,8 @@ const localizeConfigs = (items: MenuItem[]): MenuItem[] => {
     return items;
 };
 
-const findDefaultConfig = (configs: vscode.DebugConfiguration[]): vscode.DebugConfiguration[] => configs.filter((config: vscode.DebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
+const findDefaultConfig = (configs: vscode.DebugConfiguration[]): vscode.DebugConfiguration[] =>
+    configs.filter((config: vscode.DebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
@@ -132,11 +133,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     /**
-	 * Error checks the provided 'config' without any variables substituted.
+     * Error checks the provided 'config' without any variables substituted.
      * If return "undefined", the debugging will be aborted silently.
      * If return "null", the debugging will be aborted and launch.json will be opened.
      * resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this function.
-	 */
+     */
     resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
