@@ -43,7 +43,7 @@ function escape(chars: string): string {
 
 function getMLBeginPattern(insert: string): string | undefined {
     if (insert.startsWith("/*")) {
-        const match: string = escape(insert.substr(2)); // trim the leading '/*' and escape any troublesome characters.
+        const match: string = escape(insert.substring(2)); // trim the leading '/*' and escape any troublesome characters.
         return `^\\s*\\/\\*${match}(?!\\/)([^\\*]|\\*(?!\\/))*$`;
     }
     return undefined;
@@ -64,7 +64,7 @@ function getMLContinuePattern(insert: string): string | undefined {
     if (insert) {
         const match: string = escape(insert.trimRight());
         if (match) {
-            const right: string = escape(insert.substr(insert.trimRight().length));
+            const right: string = escape(insert.substring(insert.trimRight().length));
             return `^(\\t|[ ])*${match}(${right}([^\\*]|\\*(?!\\/))*)?$`;
         }
         // else: if the continuation is just whitespace, vscode already does indentation preservation.
@@ -76,7 +76,7 @@ function getMLEmptyEndPattern(insert: string): string | undefined {
     insert = insert.trimRight();
     if (insert !== "") {
         if (insert.endsWith('*')) {
-            insert = insert.substr(0, insert.length - 1);
+            insert = insert.substring(0, insert.length - 1);
         }
         const match: string = escape(insert.trimRight());
         return `^(\\t|[ ])*${match}\\*\\/\\s*$`;

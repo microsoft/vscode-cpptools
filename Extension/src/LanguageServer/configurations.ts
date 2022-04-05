@@ -1378,11 +1378,11 @@ export class CppProperties {
         // resolve WSL paths
         if (isWindows && result.startsWith("/")) {
             const mntStr: string = "/mnt/";
-            if (result.length > "/mnt/c/".length && result.substr(0, mntStr.length) === mntStr) {
-                result = result.substr(mntStr.length);
-                result = result.substr(0, 1) + ":" + result.substr(1);
+            if (result.length > "/mnt/c/".length && result.substring(0, mntStr.length) === mntStr) {
+                result = result.substring(mntStr.length);
+                result = result.substring(0, 1) + ":" + result.substring(1);
             } else if (this.rootfs && this.rootfs.length > 0) {
-                result = this.rootfs + result.substr(1);
+                result = this.rootfs + result.substring(1);
                 // TODO: Handle WSL symlinks.
             }
         }
@@ -1600,8 +1600,12 @@ export class CppProperties {
             // Get env text
             let envText: string = "";
             const envStart: number = curText.search(/\"env\"\s*:\s*\{/);
-            const envEnd: number = envStart === -1 ? -1 : curText.indexOf("},", envStart);
-            envText = curText.substr(envStart, envEnd);
+            if (envStart >= 0) {
+                const envEnd: number = curText.indexOf("},", envStart);
+                if (envEnd >= 0) {
+                    envText = curText.substring(envStart, envEnd);
+                }
+            }
             const envTextStartOffSet: number = envStart + 1;
 
             // Check if all config names are unique.
@@ -1615,11 +1619,11 @@ export class CppProperties {
             const configNames: Map<string, vscode.Range[]> = new Map<string, []>();
             let dupErrorMsg: string;
             while (configStart !== -1) {
-                allConfigText = allConfigText.substr(configStart);
+                allConfigText = allConfigText.substring(configStart);
                 allConfigTextOffset += configStart;
                 configNameStart = allConfigText.indexOf('"', allConfigText.indexOf(':') + 1) + 1;
                 configNameEnd = allConfigText.indexOf('"', configNameStart);
-                configName = allConfigText.substr(configNameStart, configNameEnd - configNameStart);
+                configName = allConfigText.substring(configNameStart, configNameEnd);
                 const newRange: vscode.Range = new vscode.Range(0, allConfigTextOffset + configNameStart, 0, allConfigTextOffset + configNameEnd);
                 const allRanges: vscode.Range[] | undefined = configNames.get(configName);
                 if (allRanges) {
@@ -1628,7 +1632,7 @@ export class CppProperties {
                 } else {
                     configNames.set(configName, [newRange]);
                 }
-                allConfigText = allConfigText.substr(configNameEnd + 1);
+                allConfigText = allConfigText.substring(configNameEnd + 1);
                 allConfigTextOffset += configNameEnd + 1;
                 configStart = allConfigText.search(new RegExp(nameRegex));
             }
@@ -1652,19 +1656,19 @@ export class CppProperties {
                 return;
             }
             curTextStartOffset = configStart + 1;
-            curText = curText.substr(curTextStartOffset); // Remove earlier configs.
+            curText = curText.substring(curTextStartOffset); // Remove earlier configs.
             const nameEnd: number = curText.indexOf(":");
             curTextStartOffset += nameEnd + 1;
-            curText = curText.substr(nameEnd + 1);
+            curText = curText.substring(nameEnd + 1);
             const nextNameStart: number = curText.search(new RegExp('"name"\\s*:\\s*"'));
             if (nextNameStart !== -1) {
-                curText = curText.substr(0, nextNameStart + 6); // Remove later configs.
+                curText = curText.substring(0, nextNameStart + 6); // Remove later configs.
                 const nextNameStart2: number = curText.search(new RegExp('\\s*}\\s*,\\s*{\\s*"name"'));
                 if (nextNameStart2 === -1) {
                     telemetry.logLanguageServerEvent("ConfigSquiggles", { "error": "next config name not first" });
                     return;
                 }
-                curText = curText.substr(0, nextNameStart2);
+                curText = curText.substring(0, nextNameStart2);
             }
             if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
                 this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
@@ -1864,7 +1868,7 @@ export class CppProperties {
                     let curOffset: number = 0;
                     let endOffset: number = 0;
                     for (const curMatch of configMatches) {
-                        curOffset = curText.substr(endOffset).search(pattern) + endOffset;
+                        curOffset = curText.substring(endOffset).search(pattern) + endOffset;
                         endOffset = curOffset + curMatch.length;
                         if (curOffset >= compilerPathStart && curOffset <= compilerPathEnd) {
                             continue;
@@ -1901,12 +1905,13 @@ export class CppProperties {
                         diagnostics.push(diagnostic);
                     }
                 } else if (envText) {
+                    // TODO: This never matches. https://github.com/microsoft/vscode-cpptools/issues/9140
                     const envMatches: string[] | null = envText.match(pattern);
                     if (envMatches) {
                         let curOffset: number = 0;
                         let endOffset: number = 0;
                         for (const curMatch of envMatches) {
-                            curOffset = envText.substr(endOffset).search(pattern) + endOffset;
+                            curOffset = envText.substring(endOffset).search(pattern) + endOffset;
                             endOffset = curOffset + curMatch.length;
                             let message: string;
                             if (!pathExists) {
