@@ -64,6 +64,17 @@ let debugChannel: vscode.OutputChannel;
 let warningChannel: vscode.OutputChannel;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
+const codeAnalysisAllCodeActions: vscode.CodeAction = {
+    title: localize("apply_all_code_analysis_fixes", "Apply all code analysis fixes"),
+    edit: new vscode.WorkspaceEdit(),
+    kind: vscode.CodeActionKind.QuickFix,
+    diagnostics: []
+};
+const codeAnalysisSourceToFilesWithWorkspaceEdits: Map<string, Set<string>> = new Map<string, Set<string>>();
+const codeAnalysisFilesToSourceToWorkspaceEdits: Map<string, Map<string, WorkspaceEdit[]>> = new Map<string, Map<string, WorkspaceEdit[]>>();
+const codeAnalysisSourceUriToWorkspaceEdits: Map<string, WorkspaceEdit> = new Map<string, WorkspaceEdit>();
+let codeAnalysisCodeActionsByCode: Map<string, vscode.CodeAction>;
+let codeAnalysisCodeActionsByLocation: Map<string, vscode.CodeAction[]>;
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
@@ -186,6 +197,9 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
     const diagnosticsCodeAnalysis: vscode.Diagnostic[] = [];
+    const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    const filesWithWorkspaceEdits: Set<string> = new Set<string>();
+    //const Map<string, WorkspaceEdit[];
     params.diagnostics.forEach((d) => {
         const message: string = util.getLocalizedString(d.localizeStringParams);
         const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
@@ -197,7 +211,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 codeIndex = 0;
             }
             diagnostic.code = { value: d.code,
-                target: vscode.Uri.parse(`https://releases.llvm.org/13.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${codes[codeIndex]}.html`) };
+                target: vscode.Uri.parse(`https://releases.llvm.org/14.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${codes[codeIndex]}.html`) };
         } else {
             diagnostic.code = d.code;
         }
@@ -210,12 +224,54 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                     new vscode.Location(vscode.Uri.parse(info.location.uri), infoRange), info.message));
             }
         }
-
+        if (d.workspaceEdit) {
+            //codeAnalysisSourceUriToWorkspaceEdits.// params.uri
+            for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
+                filesWithWorkspaceEdits.add(uriStr);
+                codeAnalysisFilesToSourceToWorkspaceEdits
+                const uri: vscode.Uri = vscode.Uri.parse(uriStr, true);
+                for (const edit of edits) {
+                    wsEdit.replace(uri, new vscode.Range(
+                        new vscode.Position(edit.range.start.line, edit.range.start.character),
+                        new vscode.Position(edit.range.end.line, edit.range.end.character)),
+                    edit.newText);
+                }
+                codeAnalysisAllCodeActions.edit?.set(uri, edits)
+            }
+        }
         diagnosticsCodeAnalysis.push(diagnostic);
     });
 
-    const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    codeAnalysisSourceToFilesWithWorkspaceEdits.set(params.uri, filesWithWorkspaceEdits);
+    for (const file in filesWithWorkspaceEdits) {
+        
+    }
+    /*
+        "apply_code_analysis_fix": {
+    "text": "Apply code analysis fix for {0}",
+    "hint": "The '{0}' is an warning type, e.g. '[readability-const-return-type]'."
+},
+"apply_code_analysis_fixes_for_all": {
+    "text": "Apply code analysis fixes for all {0}",
+    "hint": "The '{0}' is a warning type, e.g. '[readability-const-return-type]'."
+},
+
+ommand.workspaceEdit.changes)) {
+                                            // const vsEdits: vscode.TextEdit[] = [];
+                                            const uri: vscode.Uri = vscode.Uri.parse(uriStr, true);
+                                            for (const edit of edits) {
+                                                wsEdit.replace(uri, new vscode.Range(
+                                                    new vscode.Position(edit.range.start.line, edit.range.start.character),
+                                                    new vscode.Position(edit.range.end.line, edit.range.end.character)),
+                                                edit.newText);
+*/
+
     diagnosticsCollectionCodeAnalysis.set(realUri, diagnosticsCodeAnalysis);
+
+    codeAnalysisAllCodeActions.diagnostics = [];
+    diagnosticsCollectionCodeAnalysis.forEach((uri: vscode.Uri, diagnostics: readonly vscode.Diagnostic[]) => {
+        codeAnalysisAllCodeActions.diagnostics?.push(...diagnostics);
+    });
 }
 
 interface WorkspaceFolderParams {
@@ -336,7 +392,6 @@ interface CodeActionCommand {
     command: string;
     arguments?: any[];
     edit?: TextEdit;
-    workspaceEdit?: WorkspaceEdit;
 }
 
 interface ShowMessageWindowParams {
@@ -969,8 +1024,10 @@ export class DefaultClient implements Client {
                                             new vscode.Position(command.edit.range.start.line, command.edit.range.start.character),
                                             new vscode.Position(command.edit.range.end.line, command.edit.range.end.character)),
                                         command.edit.newText);
-                                    } else if (command.workspaceEdit) {
-                                        wsEdit = new vscode.WorkspaceEdit();
+                                    } else if (command.localizeStringParams.text === "clear_code_analysis_squiggles") {
+                                        resultCodeActions.push(codeAnalysisAllCodeActions);
+                                        // codeAnalysisWorkspaceEdits
+                                        /*
                                         for (const [uriStr, edits] of Object.entries(command.workspaceEdit.changes)) {
                                             // const vsEdits: vscode.TextEdit[] = [];
                                             const uri: vscode.Uri = vscode.Uri.parse(uriStr, true);
@@ -979,8 +1036,8 @@ export class DefaultClient implements Client {
                                                     new vscode.Position(edit.range.start.line, edit.range.start.character),
                                                     new vscode.Position(edit.range.end.line, edit.range.end.character)),
                                                 edit.newText);
-                                            }
-                                            /*
+                                            }*/
+                                        /*
                                                 vsEdits.push(new vscode.TextEdit(new vscode.Range(
                                                     new vscode.Position(edit.range.start.line, edit.range.start.character),
                                                     new vscode.Position(edit.range.end.line, edit.range.end.character)
@@ -988,7 +1045,8 @@ export class DefaultClient implements Client {
                                             }
                                             edit.set(vscode.Uri.file(uri), vsEdits);
                                             */
-                                        }
+                                        // }
+                                        return;
                                     }
                                     const vscodeCodeAction: vscode.CodeAction = {
                                         title: title,
@@ -1842,6 +1900,12 @@ export class DefaultClient implements Client {
             this.clearCustomConfigurations();
             if (diagnosticsCollectionCodeAnalysis) {
                 diagnosticsCollectionCodeAnalysis.clear();
+                codeAnalysisSourceToFilesWithWorkspaceEdits.clear();
+                codeAnalysisFilesToSourceToWorkspaceEdits.clear();
+                codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
+                codeAnalysisAllCodeActions.diagnostics = [];
+                codeAnalysisCodeActionsByCode.clear();
+                codeAnalysisCodeActionsByLocation.clear();
             }
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, undefined, true);
@@ -3160,6 +3224,12 @@ export class DefaultClient implements Client {
         await this.awaitUntilLanguageClientReady();
         if (diagnosticsCollectionCodeAnalysis) {
             diagnosticsCollectionCodeAnalysis.clear();
+            codeAnalysisSourceToFilesWithWorkspaceEdits.clear();
+            codeAnalysisFilesToSourceToWorkspaceEdits.clear();
+            codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
+            codeAnalysisAllCodeActions.diagnostics = [];
+            codeAnalysisCodeActionsByCode.clear();
+            codeAnalysisCodeActionsByLocation.clear();
         }
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
     }
