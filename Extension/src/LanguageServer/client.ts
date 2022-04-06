@@ -70,9 +70,7 @@ const codeAnalysisAllCodeActions: vscode.CodeAction = {
     kind: vscode.CodeActionKind.QuickFix,
     diagnostics: []
 };
-const codeAnalysisSourceToFilesWithWorkspaceEdits: Map<string, Set<string>> = new Map<string, Set<string>>();
-const codeAnalysisFilesToSourceToWorkspaceEdits: Map<string, Map<string, WorkspaceEdit[]>> = new Map<string, Map<string, WorkspaceEdit[]>>();
-const codeAnalysisSourceUriToWorkspaceEdits: Map<string, WorkspaceEdit> = new Map<string, WorkspaceEdit>();
+const codeAnalysisFilesToSourceToTextEdits: Map<string, Map<string, TextEdit[]>> = new Map<string, Map<string, TextEdit[]>>();
 let codeAnalysisCodeActionsByCode: Map<string, vscode.CodeAction>;
 let codeAnalysisCodeActionsByLocation: Map<string, vscode.CodeAction[]>;
 let workspaceDisposables: vscode.Disposable[] = [];
@@ -198,12 +196,11 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
     const diagnosticsCodeAnalysis: vscode.Diagnostic[] = [];
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
-    const filesWithWorkspaceEdits: Set<string> = new Set<string>();
-    //const Map<string, WorkspaceEdit[];
+    const filesWithTextEdits: Set<string> = new Set<string>();
     params.diagnostics.forEach((d) => {
         const message: string = util.getLocalizedString(d.localizeStringParams);
-        const r: vscode.Range = new vscode.Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
-        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(r, message, d.severity);
+        // const r: Range = new Range(d.range.start.line, d.range.start.character, d.range.end.line, d.range.end.character);
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(d.range, message, d.severity);
         if (typeof d.code === "string" && d.code.length !== 0 && !d.code.startsWith("clang-diagnostic-")) {
             const codes: string[] = d.code.split(',');
             let codeIndex: number = codes.length - 1;
@@ -225,26 +222,34 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
             }
         }
         if (d.workspaceEdit) {
-            //codeAnalysisSourceUriToWorkspaceEdits.// params.uri
             for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
-                filesWithWorkspaceEdits.add(uriStr);
-                codeAnalysisFilesToSourceToWorkspaceEdits
-                const uri: vscode.Uri = vscode.Uri.parse(uriStr, true);
-                for (const edit of edits) {
-                    wsEdit.replace(uri, new vscode.Range(
-                        new vscode.Position(edit.range.start.line, edit.range.start.character),
-                        new vscode.Position(edit.range.end.line, edit.range.end.character)),
-                    edit.newText);
+                let sourceToTextEdits: Map<string, TextEdit[]> | undefined = codeAnalysisFilesToSourceToTextEdits.get(uriStr);
+                if (sourceToTextEdits === undefined) {
+                    sourceToTextEdits = new Map<string, TextEdit[]>();
                 }
-                codeAnalysisAllCodeActions.edit?.set(uri, edits)
+                if (!filesWithTextEdits.has(uriStr)) {
+                    filesWithTextEdits.add(uriStr);
+                    sourceToTextEdits.set(params.uri, []);
+                }
+                sourceToTextEdits.get(params.uri)?.push(...edits);
             }
         }
         diagnosticsCodeAnalysis.push(diagnostic);
     });
 
-    codeAnalysisSourceToFilesWithWorkspaceEdits.set(params.uri, filesWithWorkspaceEdits);
-    for (const file in filesWithWorkspaceEdits) {
-        
+    for (const file in filesWithTextEdits) {
+        const sourceToTextEdits: Map<string, TextEdit[]> | undefined = codeAnalysisFilesToSourceToTextEdits.get(file);
+        if (sourceToTextEdits === undefined) {
+            continue; // Impossible
+        }
+        const edits: vscode.TextEdit[] = [];
+        for (const [, TextEdits] of sourceToTextEdits) {
+            for (const edit of TextEdits) {
+                edits.push(new vscode.TextEdit(edit.range, edit.newText));
+            }
+        }
+        const uri: vscode.Uri = vscode.Uri.parse(file, true);
+        codeAnalysisAllCodeActions.edit?.set(uri, edits);
     }
     /*
         "apply_code_analysis_fix": {
@@ -368,7 +373,7 @@ interface CppDiagnosticRelatedInformation {
 }
 
 interface Diagnostic {
-    range: Range;
+    range: vscode.Range;
     code?: number | string;
     source?: string;
     severity: vscode.DiagnosticSeverity;
@@ -468,7 +473,7 @@ export interface FormatParams {
 }
 
 interface TextEdit {
-    range: Range;
+    range: vscode.Range;
     newText: string;
 }
 
@@ -1900,8 +1905,7 @@ export class DefaultClient implements Client {
             this.clearCustomConfigurations();
             if (diagnosticsCollectionCodeAnalysis) {
                 diagnosticsCollectionCodeAnalysis.clear();
-                codeAnalysisSourceToFilesWithWorkspaceEdits.clear();
-                codeAnalysisFilesToSourceToWorkspaceEdits.clear();
+                codeAnalysisFilesToSourceToTextEdits.clear();
                 codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
                 codeAnalysisAllCodeActions.diagnostics = [];
                 codeAnalysisCodeActionsByCode.clear();
@@ -3224,8 +3228,7 @@ export class DefaultClient implements Client {
         await this.awaitUntilLanguageClientReady();
         if (diagnosticsCollectionCodeAnalysis) {
             diagnosticsCollectionCodeAnalysis.clear();
-            codeAnalysisSourceToFilesWithWorkspaceEdits.clear();
-            codeAnalysisFilesToSourceToWorkspaceEdits.clear();
+            codeAnalysisFilesToSourceToTextEdits.clear();
             codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
             codeAnalysisAllCodeActions.diagnostics = [];
             codeAnalysisCodeActionsByCode.clear();
