@@ -86,7 +86,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         const defaultConfig: vscode.DebugConfiguration[] = findDefaultConfig(configs);
-        // if there was only one config defined for the default task, choose that config, otherwise ask the user to choose.
+        // If there was only one config defined for the default task, choose that config, otherwise ask the user to choose.
         if (defaultConfig.length === 1) {
             return defaultConfig;
         }
@@ -129,6 +129,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             this.showErrorIfClNotAvailable(selection.label);
         }
 
+        await this.resolvePreLaunchTask(folder, configs[0], DebuggerEvent.debugPanel);
+        if (!folder) {
+            // In case of singleFile, remove the preLaunch task.
+            selection.configuration.preLaunchTask = undefined;
+        }
         return [selection.configuration];
     }
 
@@ -150,8 +155,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 } else {
                     // Currently, we expect only one debug config to be selected.
                     console.assert(configs.length === 1, "More than one debug config is selected.");
-                    await this.resolvePreLaunchTask(folder, configs[0], DebuggerEvent.debugPanel);
-                    await this.startDebugging(folder, configs[0], DebuggerEvent.debugPanel);
+                    // await this.resolvePreLaunchTask(folder, configs[0], DebuggerEvent.debugPanel);
+                    // await this.startDebugging(folder, configs[0], DebuggerEvent.debugPanel);
                     return configs[0];
                 }
             });
