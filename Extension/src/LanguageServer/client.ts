@@ -66,9 +66,7 @@ let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 const codeAnalysisAllCodeActions: vscode.CodeAction = {
     title: localize("apply_all_code_analysis_fixes", "Apply all code analysis fixes"),
-    edit: new vscode.WorkspaceEdit(),
-    kind: vscode.CodeActionKind.QuickFix,
-    diagnostics: []
+    kind: vscode.CodeActionKind.QuickFix
 };
 const codeAnalysisFilesToSourceToTextEdits: Map<string, Map<string, TextEdit[]>> = new Map<string, Map<string, TextEdit[]>>();
 let codeAnalysisCodeActionsByCode: Map<string, vscode.CodeAction>;
@@ -242,6 +240,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         diagnosticsCodeAnalysis.push(diagnostic);
     });
 
+    codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
     for (const file of filesWithTextEdits) {
         const sourceToTextEdits: Map<string, TextEdit[]> | undefined = codeAnalysisFilesToSourceToTextEdits.get(file);
         if (sourceToTextEdits === undefined) {
@@ -254,7 +253,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
             }
         }
         const uri: vscode.Uri = vscode.Uri.parse(file, true);
-        codeAnalysisAllCodeActions.edit?.set(uri, edits);
+        codeAnalysisAllCodeActions.edit.set(uri, edits);
     }
     /*
         "apply_code_analysis_fix": {
@@ -1883,8 +1882,6 @@ export class DefaultClient implements Client {
             if (diagnosticsCollectionCodeAnalysis) {
                 diagnosticsCollectionCodeAnalysis.clear();
                 codeAnalysisFilesToSourceToTextEdits.clear();
-                codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
-                codeAnalysisAllCodeActions.diagnostics = [];
                 codeAnalysisCodeActionsByCode.clear();
                 codeAnalysisCodeActionsByLocation.clear();
             }
@@ -3206,8 +3203,6 @@ export class DefaultClient implements Client {
         if (diagnosticsCollectionCodeAnalysis) {
             diagnosticsCollectionCodeAnalysis.clear();
             codeAnalysisFilesToSourceToTextEdits.clear();
-            codeAnalysisAllCodeActions.edit = new vscode.WorkspaceEdit();
-            codeAnalysisAllCodeActions.diagnostics = [];
             codeAnalysisCodeActionsByCode.clear();
             codeAnalysisCodeActionsByLocation.clear();
         }
