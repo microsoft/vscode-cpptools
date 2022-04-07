@@ -236,12 +236,13 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                     sourceToTextEdits.get(params.uri)?.push(...edits);
                     diagnosticsWithTextEdits.push(diagnostic);
                 }
+                codeAnalysisFilesToSourceToTextEdits.set(uriStr, sourceToTextEdits);
             }
         }
         diagnosticsCodeAnalysis.push(diagnostic);
     });
 
-    for (const file in filesWithTextEdits) {
+    for (const file of filesWithTextEdits) {
         const sourceToTextEdits: Map<string, TextEdit[]> | undefined = codeAnalysisFilesToSourceToTextEdits.get(file);
         if (sourceToTextEdits === undefined) {
             continue; // Impossible
@@ -1024,9 +1025,10 @@ export class DefaultClient implements Client {
                                             new vscode.Position(command.edit.range.start.line, command.edit.range.start.character),
                                             new vscode.Position(command.edit.range.end.line, command.edit.range.end.character)),
                                         command.edit.newText);
-                                    } else if (command.command === "C_Cpp.ClearcodeAnalysisSquiggles") {
-                                        resultCodeActions.push(codeAnalysisAllCodeActions);
-                                        return;
+                                    } else if (command.command === "C_Cpp.ClearCodeAnalysisSquiggles") {
+                                        if (codeAnalysisAllCodeActions.edit && codeAnalysisAllCodeActions.edit.size > 0) {
+                                            resultCodeActions.push(codeAnalysisAllCodeActions);
+                                        }
                                     }
                                     const vscodeCodeAction: vscode.CodeAction = {
                                         title: title,
