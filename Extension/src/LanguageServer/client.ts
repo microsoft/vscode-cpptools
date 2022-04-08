@@ -66,7 +66,8 @@ let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 const codeAnalysisAllCodeActions: vscode.CodeAction = {
     title: localize("apply_all_code_analysis_fixes", "Apply all code analysis fixes"),
-    kind: vscode.CodeActionKind.QuickFix
+    kind: vscode.CodeActionKind.QuickFix,
+    isPreferred: true
 };
 const codeAnalysisFilesToSourceToTextEdits: Map<string, Map<string, TextEdit[]>> = new Map<string, Map<string, TextEdit[]>>();
 let codeAnalysisCodeActionsByCode: Map<string, vscode.CodeAction>;
@@ -267,11 +268,13 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
 */
 
     diagnosticsCollectionCodeAnalysis.set(realUri, diagnosticsCodeAnalysis);
-
     codeAnalysisAllCodeActions.diagnostics = [];
     for (const diagnostic of diagnosticsWithTextEdits) {
         codeAnalysisAllCodeActions.diagnostics.push(diagnostic);
     };
+
+    codeAnalysisAllCodeActions.command = { title: 'ClearCodeAnalysisSquiggles',
+        command: 'C_Cpp.ClearCodeAnalysisSquiggles' };
 }
 
 interface WorkspaceFolderParams {
@@ -572,7 +575,8 @@ enum CodeAnalysisScope {
     ActiveFile,
     OpenFiles,
     AllFiles,
-    ClearSquiggles
+    ClearSquiggles,
+    RefreshSquiggles
 };
 
 interface IntervalTimerParams {
@@ -805,6 +809,7 @@ export interface Client {
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
     handleRunCodeAnalysisOnAllFiles(): Promise<void>;
     handleClearCodeAnalysisSquiggles(): Promise<void>;
+    handleRefreshCodeAnalysisSquiggles(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3203,10 +3208,19 @@ export class DefaultClient implements Client {
         if (diagnosticsCollectionCodeAnalysis) {
             diagnosticsCollectionCodeAnalysis.clear();
             codeAnalysisFilesToSourceToTextEdits.clear();
-            codeAnalysisCodeActionsByCode.clear();
-            codeAnalysisCodeActionsByLocation.clear();
+            // codeAnalysisCodeActionsByCode.clear();
+            // codeAnalysisCodeActionsByLocation.clear();
         }
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
+    }
+
+    public async handleRefreshCodeAnalysisSquiggles(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        if (diagnosticsCollectionCodeAnalysis) {
+            diagnosticsCollectionCodeAnalysis.clear();
+            codeAnalysisFilesToSourceToTextEdits.clear();
+        }
+        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.RefreshSquiggles);
     }
 
     public onInterval(): void {
@@ -3391,6 +3405,7 @@ class NullClient implements Client {
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }
     handleClearCodeAnalysisSquiggles(): Promise<void> { return Promise.resolve(); }
+    handleRefreshCodeAnalysisSquiggles(): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
