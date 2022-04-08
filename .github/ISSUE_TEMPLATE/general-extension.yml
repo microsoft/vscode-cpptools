@@ -1,6 +1,8 @@
 name: Bug Report - General Extension
 description: Create a bug report for downloading, installing, or building the extension.
 body:
+- type: markdown
+  value: "## Bug Report - General Extension"
 - type: checkboxes
   attributes:
     label: Is there an existing issue for this?
