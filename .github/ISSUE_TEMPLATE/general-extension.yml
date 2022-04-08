@@ -4,9 +4,9 @@ body:
 - type: checkboxes
   attributes:
     label: Is there an existing issue for this?
-    description: Please search to see if an issue already exists for the bug you encountered.
+    description: Please search our [existing issues](https://github.com/microsoft/vscode-cpptools/issues) to see if an issue already exists for the bug you encountered.
     options:
-    - label: I have searched the existing issues
+    - label: I have searched the existing issues.
       required: true
 - type: textarea
   attributes:
@@ -29,9 +29,9 @@ body:
   attributes:
     label: Does the issue persist after disabling any other extensions?
     options:
-      - label: Yes
-      - label: No
-      - label: Not applicable, only the C/C++ extension is enabled/installed.
+      - Yes
+      - No
+      - Not applicable, only the C/C++ extension is enabled/installed.
   validations:
     required: true
 - type: textarea
@@ -45,13 +45,13 @@ body:
     label: Current Behavior
     description: A concise description of what you're experiencing.
   validations:
-    required: false
+    required: true
 - type: textarea
   attributes:
     label: Expected Behavior
     description: A concise description of what you expected to happen.
   validations:
-    required: false
+    required: true
 - type: textarea
   attributes:
     label: Steps To Reproduce
