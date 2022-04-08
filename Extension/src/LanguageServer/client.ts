@@ -790,6 +790,19 @@ export interface FormatParams {
 interface WorkspaceEdit {
     changes: { [uri: string]: TextEdit[] };
 }
+export interface CreateDeclarationOrDefinitionParams {
+    uri: string;
+    range: Range;
+}
+
+export interface CreateDeclarationOrDefinitionResult {
+    changes: { [key: string]: any[] };
+}
+
+interface TextEdit {
+    range: Range;
+    newText: string;
+}
 
 export interface GetFoldingRangesParams {
     uri: string;
@@ -908,9 +921,10 @@ export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParam
 export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
 export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
 export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
-export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
-export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
+export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, vscode.TextEdit[], void, void>('cpptools/formatDocument');
+export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, vscode.TextEdit[], void, void>('cpptools/formatRange');
+export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, vscode.TextEdit[], void, void>('cpptools/formatOnType');
+const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void, void>('cpptools/createDeclDef');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
 
 // Notifications to the server
@@ -1125,6 +1139,8 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
+    handleClearCodeAnalysisSquiggles(): Promise<void>;
+    handleCreateDeclarationOrDefinition(uri: vscode.Uri | undefined, line: number | undefined, character: number | undefined): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3555,6 +3571,62 @@ export class DefaultClient implements Client {
             settings.addClangTidyChecksDisabled(code);
         }
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
+    public async handleCreateDeclarationOrDefinition(uri: vscode.Uri | undefined, line: number | undefined, character: number | undefined): Promise<void> {
+        let range: vscode.Range | undefined;
+        if (uri) {
+            // If uri is specified, line and column must also be specified.
+            if (line === undefined || character === undefined) {
+                return;
+            }
+            range = new vscode.Range(line, character, line, character);
+        } else {
+            // If file is not specified, range will always be based on the cursor position.
+            const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+            if (editor) {
+                uri = editor.document.uri;
+                if (editor.selection.isEmpty) {
+                    range = new vscode.Range(editor.selection.active, editor.selection.active);
+                } else if (editor.selection.isReversed) {
+                    range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+                } else {
+                    range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+                }
+            }
+        }
+        if (uri && range) {
+            const params: CreateDeclarationOrDefinitionParams = {
+                uri: uri.toString(),
+                range: {
+                    start: {
+                        character: range.start.character,
+                        line: range.start.line
+                    },
+                    end: {
+                        character: range.end.character,
+                        line: range.end.line
+                    }
+                }
+            };
+            const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
+            // TODO: return specific errors info in result.
+            if (result.changes) {
+                let workspaceEdit : vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                for (const file in result.changes) {
+                    const uri: vscode.Uri = vscode.Uri.file(file);
+                    let edits : vscode.TextEdit[] = [];
+                    for (const edit of result.changes[file]) {
+                        const range: vscode.Range = new vscode.Range(
+                            new vscode.Position(edit.range.start.line, edit.range.start.character),
+                            new vscode.Position(edit.range.end.line, edit.range.end.character));
+                        edits.push(new vscode.TextEdit(range, edit.newText));
+                    }
+                    workspaceEdit.set(uri, edits);
+                };
+                // TODO: If the file requiring edits was not already open, open it?
+                // Apply edit, only if file version has not changed (if was already open).
+                await vscode.workspace.applyEdit(workspaceEdit);
+            }
+        }
     }
 
     public onInterval(): void {
@@ -3742,6 +3814,8 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
+    handleClearCodeAnalysisSquiggles(): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(uri: vscode.Uri | undefined, line: number | undefined, character: number | undefined): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

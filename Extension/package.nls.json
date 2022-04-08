@@ -21,6 +21,7 @@
     "c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
     "c_cpp.command.GoToNextDirectiveInGroup.title": "Go to next preprocessor directive in conditional group",
     "c_cpp.command.GoToPrevDirectiveInGroup.title": "Go to previous preprocessor directive in conditional group",
+    "c_cpp.command.createDeclarationOrDefinition.title": "Create Declaration/Definition",
     "c_cpp.command.RunCodeAnalysisOnActiveFile.title": "Run Code Analysis on Active File",
     "c_cpp.command.RunCodeAnalysisOnOpenFiles.title": "Run Code Analysis on Open Files",
     "c_cpp.command.RunCodeAnalysisOnAllFiles.title": "Run Code Analysis on All Files",

@@ -425,6 +425,8 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', onFixAllCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.DisableAllTypeCodeAnalysisProblems', onDisableAllTypeCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisDocumentation', (uri) => vscode.env.openExternal(uri)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ClearCodeAnalysisSquiggles', onClearCodeAnalysisSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', onCreateDeclarationOrDefinition));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -650,6 +652,10 @@ async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vsco
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
+}
+
+async function onCreateDeclarationOrDefinition(uri: vscode.Uri | undefined, line: number | undefined, character: number | undefined): Promise<void> {
+    getActiveClient().handleCreateDeclarationOrDefinition(uri, line, character);
 }
 
 function onAddToIncludePath(path: string): void {

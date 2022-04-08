@@ -70,6 +70,7 @@
     "onCommand:C_Cpp.GoToNextDirectiveInGroup",
     "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
     "onCommand:C_Cpp.CheckForCompiler",
+    "onComamnd:C_Cpp.CreateDeclarationOrDefinition",
     "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
     "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
     "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
@@ -2787,6 +2788,11 @@
       {
         "command": "C_Cpp.GoToPrevDirectiveInGroup",
         "title": "%c_cpp.command.GoToPrevDirectiveInGroup.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.CreateDeclarationOrDefinition",
+        "title": "%c_cpp.command.createDeclarationOrDefinition.title%",
         "category": "C/C++"
       },
       {
