@@ -1,7 +1,5 @@
 name: Bug Report - General Extension
 description: Create a bug report for downloading, installing, or building the extension.
-title: ""
-labels: ""
 body:
 - type: checkboxes
   attributes:
