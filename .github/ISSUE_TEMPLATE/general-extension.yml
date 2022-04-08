@@ -29,8 +29,8 @@ body:
   attributes:
     label: Does the issue persist after disabling any other extensions?
     options:
-      - Yes
-      - No
+      - "Yes"
+      - "No"
       - Not applicable, only the C/C++ extension is enabled/installed.
   validations:
     required: true
