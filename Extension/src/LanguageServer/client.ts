@@ -3610,10 +3610,10 @@ export class DefaultClient implements Client {
             const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
             // TODO: return specific errors info in result.
             if (result.changes) {
-                let workspaceEdit : vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 for (const file in result.changes) {
                     const uri: vscode.Uri = vscode.Uri.file(file);
-                    let edits : vscode.TextEdit[] = [];
+                    const edits: vscode.TextEdit[] = [];
                     for (const edit of result.changes[file]) {
                         const range: vscode.Range = new vscode.Range(
                             new vscode.Position(edit.range.start.line, edit.range.start.character),
