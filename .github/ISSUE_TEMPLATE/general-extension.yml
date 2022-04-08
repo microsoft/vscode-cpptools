@@ -3,7 +3,9 @@ description: Create a bug report for downloading, installing, or building the ex
 body:
 - type: markdown
   attributes:
-    value: "## Bug Report - General Extension"
+    value: |
+      "## Bug Report - General Extension"
+      Report for downloading, installing, or building the extension.
 - type: checkboxes
   attributes:
     label: Is there an existing issue for this?
