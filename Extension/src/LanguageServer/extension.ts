@@ -12,7 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions } from './client';
+import { Client, openFileVersions, CodeAnalysisDiagnosticFileIdentifier } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
@@ -538,7 +538,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ClearCodeAnalysisSquiggles', onClearCodeAnalysisSquiggles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RefreshCodeAnalysisSquiggles', onRefreshCodeAnalysisSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveCodeAnalysisDiagnostics', onRemoveCodeAnalysisDiagnostics));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -719,8 +719,8 @@ async function onClearCodeAnalysisSquiggles(): Promise<void> {
     getActiveClient().handleClearCodeAnalysisSquiggles();
 }
 
-async function onRefreshCodeAnalysisSquiggles(): Promise<void> {
-    getActiveClient().handleRefreshCodeAnalysisSquiggles();
+async function onRemoveCodeAnalysisDiagnostics(codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> {
+    getActiveClient().handleRemoveCodeAnalysisDiagnostics(codeAnalysisDiagnosticFileIdentifiers);
 }
 
 function onAddToIncludePath(path: string): void {
