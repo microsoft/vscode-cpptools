@@ -1678,6 +1678,9 @@ export class DefaultClient implements Client {
                             this.semanticTokensProvider = undefined;
                         }
                     }
+                    if (changedSettings["legacyCompilerArgsBehavior"]) {
+                        this.configuration.handleConfigurationChange();
+                    }
                     // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
                     // or node-addon-api was installed so prompt for reload.
                     if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
