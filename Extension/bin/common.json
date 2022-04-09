@@ -18,6 +18,10 @@
       "replace": "-I\n$1"
     },
     {
+      "match": "^[-/]external:I(.*)",
+      "replace": "-I\n$1"
+    },
+    {
       "match": "^/D(.*)",
       "replace": "-D$1"
     },
