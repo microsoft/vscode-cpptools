@@ -19,7 +19,7 @@ import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
-import { WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -61,6 +61,7 @@ export interface Configuration {
     compilerPath?: string;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
+    compilerArgsLegacy?: string[];
     cStandard?: string;
     cStandardIsExplicit?: boolean;
     cppStandard?: string;
@@ -151,6 +152,7 @@ export class CppProperties {
     private settingsPanel?: SettingsPanel;
     private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
+    private lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -163,6 +165,7 @@ export class CppProperties {
             this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
             this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
             this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
+            this.lastCustomBrowseConfigurationProviderVersion = new PersistentFolderState<Version>("CPP.lastCustomBrowseConfigurationProviderVersion", Version.v5, workspaceFolder);
         }
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
@@ -184,6 +187,7 @@ export class CppProperties {
 
     public get LastCustomBrowseConfiguration(): PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined { return this.lastCustomBrowseConfiguration; }
     public get LastCustomBrowseConfigurationProviderId(): PersistentFolderState<string | undefined> | undefined { return this.lastCustomBrowseConfigurationProviderId; }
+    public get LastCustomBrowseConfigurationProviderVersion(): PersistentFolderState<Version> | undefined { return this.lastCustomBrowseConfigurationProviderVersion; }
 
     public get CurrentConfigurationProvider(): string | undefined {
         if (this.CurrentConfiguration?.configurationProvider) {
@@ -1413,7 +1417,7 @@ export class CppProperties {
             // Error when the compiler's path has spaces without quotes but args are used.
             // Except, exclude cl.exe paths because it could be for an older preview build.
             const compilerPathNeedsQuotes: boolean =
-                (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0) &&
+                (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
@@ -1751,7 +1755,7 @@ export class CppProperties {
             // Don't squiggle for invalid cl and cl.exe paths.
             if (compilerPathAndArgs.compilerPath && !isClCompiler) {
                 // Squiggle when the compiler's path has spaces without quotes but args are used.
-                compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
+                compilerPathNeedsQuotes = (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0)
                     && !compilerPath.startsWith('"')
                     && compilerPathAndArgs.compilerPath.includes(" ");
                 compilerPath = compilerPathAndArgs.compilerPath;

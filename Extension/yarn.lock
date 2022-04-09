@@ -5782,10 +5782,10 @@ vinyl@^2.2.1:
     remove-trailing-separator "^1.0.1"
     replace-ext "^1.0.0"
 
-vscode-cpptools@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-5.0.0.tgz#f1195736af1cfa10727482be57093a3997c8f63b"
-  integrity sha512-TPG6/o9+DisDj2U4AiTOihtfjEzBb/4CErYaB1JIWFMZTQE7zlNTdsgCs+l4xIS2Y34us0RMBIC6On1mBuwxww==
+vscode-cpptools@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/vscode-cpptools/-/vscode-cpptools-6.1.0.tgz#d89bb225f91da45dbee6acbf45f6940aa3926df1"
+  integrity sha512-+40xMmzSlvaMwWEDIjhHl9+W1RH9xaEbiFAAgLWgyL1FXxQWBguWRHgS91qBJbuFAB9H4UBuK94iFMs+7BFclA==
 
 vscode-debugadapter@^1.35.0:
   version "1.38.0"

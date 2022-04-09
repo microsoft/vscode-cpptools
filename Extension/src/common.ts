@@ -990,13 +990,15 @@ function isCl(compilerPath: string): boolean {
 export interface CompilerPathAndArgs {
     compilerPath?: string;
     compilerName: string;
-    additionalArgs: string[];
+    compilerArgs?: string[];
+    compilerArgsFromCommandLineInPath: string[];
+    allCompilerArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
+export function extractCompilerPathAndArgs(inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
-    let additionalArgs: string[] = [];
+    let compilerArgsFromCommandLineInPath: string[] = [];
     if (compilerPath) {
         compilerPath = compilerPath.trim();
         if (isCl(compilerPath) || checkExecutableExistsSync(compilerPath)) {
@@ -1005,21 +1007,21 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
         } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
             // If the string starts with a quote, treat it as a command line.
             // Otherwise, a path with a leading quote would not be valid.
-            additionalArgs = extractArgs(compilerPath);
-            if (additionalArgs.length > 0) {
-                compilerPath = additionalArgs.shift();
+            compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
+            if (compilerArgsFromCommandLineInPath.length > 0) {
+                compilerPath = compilerArgsFromCommandLineInPath.shift();
             }
         } else {
             const spaceStart: number = compilerPath.lastIndexOf(" ");
             if (spaceStart !== -1) {
                 // There is no leading quote, but a space suggests it might be a command line.
                 // Try processing it as a command line, and validate that by checking for the executable.
-                const potentialAdditionalArgs: string[] = extractArgs(compilerPath);
-                let potentialCompilerPath: string | undefined = potentialAdditionalArgs.shift();
+                const potentialArgs: string[] = extractArgs(compilerPath);
+                let potentialCompilerPath: string | undefined = potentialArgs.shift();
                 if (potentialCompilerPath) {
                     potentialCompilerPath = potentialCompilerPath.trim();
                     if (isCl(potentialCompilerPath) || checkExecutableExistsSync(potentialCompilerPath)) {
-                        additionalArgs = potentialAdditionalArgs;
+                        compilerArgsFromCommandLineInPath = potentialArgs;
                         compilerPath = potentialCompilerPath;
                         compilerName = path.basename(compilerPath);
                     }
@@ -1027,11 +1029,9 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputComp
             }
         }
     }
-    // Combine args from inputCompilerPath and inputCompilerArgs
-    if (inputCompilerArgs && inputCompilerArgs.length) {
-        additionalArgs = additionalArgs.concat(inputCompilerArgs);
-    }
-    return { compilerPath, compilerName, additionalArgs };
+    let allCompilerArgs: string[] = !compilerArgs ? [] : compilerArgs;
+    allCompilerArgs = allCompilerArgs.concat(compilerArgsFromCommandLineInPath);
+    return { compilerPath, compilerName, compilerArgs, compilerArgsFromCommandLineInPath, allCompilerArgs };
 }
 
 export function escapeForSquiggles(s: string): string {

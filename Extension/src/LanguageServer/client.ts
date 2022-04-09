@@ -243,7 +243,7 @@ interface QueryCompilerDefaultsParams {
 
 interface CppPropertiesParams extends WorkspaceFolderParams {
     currentConfiguration: number;
-    configurations: any[];
+    configurations: configs.Configuration[];
     isReady?: boolean;
 }
 
@@ -275,10 +275,20 @@ interface InactiveRegionParams {
     regions: InputRegion[];
 }
 
+interface InternalSourceFileConfiguration extends SourceFileConfiguration {
+    compilerFragments?: string[];
+    compilerArgsLegacy?: string[];
+};
+
+interface InternalWorkspaceBrowseConfiguration extends WorkspaceBrowseConfiguration {
+    compilerFragments?: string[];
+    compilerArgsLegacy?: string[];
+}
+
 // Need to convert vscode.Uri to a string before sending it to the language server.
 interface SourceFileConfigurationItemAdapter {
     uri: string;
-    configuration: SourceFileConfiguration;
+    configuration: InternalSourceFileConfiguration;
 }
 
 interface CustomConfigurationParams extends WorkspaceFolderParams {
@@ -286,7 +296,7 @@ interface CustomConfigurationParams extends WorkspaceFolderParams {
 }
 
 interface CustomBrowseConfigurationParams extends WorkspaceFolderParams {
-    browseConfiguration: WorkspaceBrowseConfiguration;
+    browseConfiguration: InternalWorkspaceBrowseConfiguration;
 }
 
 interface CompileCommandsPaths extends WorkspaceFolderParams {
@@ -1860,12 +1870,12 @@ export class DefaultClient implements Client {
                     // This is to get around the (fixed) CMake Tools bug: https://github.com/microsoft/vscode-cmake-tools/issues/1073
                     for (const c of config.browsePath) {
                         if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(c)) === this.RootFolder) {
-                            this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                            this.sendCustomBrowseConfiguration(config, currentProvider.extensionId, currentProvider.version);
                             break;
                         }
                     }
                 } else {
-                    this.sendCustomBrowseConfiguration(config, currentProvider.extensionId);
+                    this.sendCustomBrowseConfiguration(config, currentProvider.extensionId, currentProvider.version);
                 }
                 if (!hasCompleted) {
                     hasCompleted = true;
@@ -1886,7 +1896,7 @@ export class DefaultClient implements Client {
             global.setTimeout(async () => {
                 if (!hasCompleted) {
                     hasCompleted = true;
-                    this.sendCustomBrowseConfiguration(null, undefined, true);
+                    this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
                     if (currentProvider.version >= Version.v2) {
                         console.warn("Configuration Provider timed out in {0}ms.", configProviderTimeout);
                         this.resumeParsing();
@@ -2758,28 +2768,40 @@ export class DefaultClient implements Client {
         }
         const configurations: configs.Configuration[] = cppProperties.Configurations;
         const params: CppPropertiesParams = {
-            configurations: configurations,
+            configurations: [],
             currentConfiguration: this.configuration.CurrentConfigurationIndex,
             workspaceFolderUri: this.RootPath,
             isReady: true
         };
-        // Separate compiler path and args before sending to language client
-        params.configurations.forEach((c: configs.Configuration) => {
+        const settings: CppSettings = new CppSettings(this.RootUri);
+        // Clone each entry, as we make modifcations before sending it, and don't
+        // want to add those modifications to the original objects.
+        configurations.forEach((c) => {
+            const modifiedConfig: configs.Configuration = { ...c };
+            // Separate compiler path and args before sending to language client
             const compilerPathAndArgs: util.CompilerPathAndArgs =
                 util.extractCompilerPathAndArgs(c.compilerPath, c.compilerArgs);
-            c.compilerPath = compilerPathAndArgs.compilerPath;
-            c.compilerArgs = compilerPathAndArgs.additionalArgs;
+            modifiedConfig.compilerPath = compilerPathAndArgs.compilerPath;
+            if (settings.legacyCompilerArgsBehavior) {
+                modifiedConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
+                modifiedConfig.compilerArgs = undefined;
+            } else {
+                modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
+            }
+            params.configurations.push(modifiedConfig);
         });
+
         this.languageClient.sendNotification(ChangeCppPropertiesNotification, params);
         const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined = cppProperties.LastCustomBrowseConfigurationProviderId;
+        const lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined = cppProperties.LastCustomBrowseConfigurationProviderVersion;
         const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined = cppProperties.LastCustomBrowseConfiguration;
-        if (!!lastCustomBrowseConfigurationProviderId && !!lastCustomBrowseConfiguration) {
+        if (!!lastCustomBrowseConfigurationProviderId && !!lastCustomBrowseConfiguration && !!lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
                 // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
                 // Should only execute on launch, for the initial delivery of configurations
                 if (lastCustomBrowseConfiguration.Value) {
-                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value);
+                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value, lastCustomBrowseConfigurationProviderVersion.Value);
                     params.isReady = false;
                 }
                 this.doneInitialCustomBrowseConfigurationCheck = true;
@@ -2863,13 +2885,20 @@ export class DefaultClient implements Client {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
                 // Separate compiler path and args before sending to language client
-                const itemConfig: util.Mutable<SourceFileConfiguration> = { ...item.configuration };
+                const itemConfig: util.Mutable<InternalSourceFileConfiguration> = { ...item.configuration };
                 if (util.isString(itemConfig.compilerPath)) {
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
                         itemConfig.compilerPath,
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
-                    itemConfig.compilerArgs = compilerPathAndArgs.additionalArgs;
+                    if (providerVersion < Version.v6) {
+                        itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
+                    } else {
+                        itemConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
+                        if (util.isArrayOfString(itemConfig.compilerFragments)) {
+                            itemConfig.compilerFragments = itemConfig.compilerFragments;
+                        }
+                    }
                 }
                 sanitized.push({
                     uri: item.uri.toString(),
@@ -2903,14 +2932,14 @@ export class DefaultClient implements Client {
             util.isOptionalString(input.windowsSdkVersion);
     }
 
-    private sendCustomBrowseConfiguration(config: any, providerId?: string, timeoutOccured?: boolean): void {
+    private sendCustomBrowseConfiguration(config: any, providerId: string | undefined, providerVersion: Version, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder) {
             return;
         }
         const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, rootFolder);
         const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
-        let sanitized: util.Mutable<WorkspaceBrowseConfiguration>;
+        let sanitized: util.Mutable<InternalWorkspaceBrowseConfiguration>;
 
         this.browseConfigurationLogging = "";
 
@@ -2931,7 +2960,7 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            sanitized = { ...<WorkspaceBrowseConfiguration>config };
+            sanitized = { ...<InternalWorkspaceBrowseConfiguration>config };
             if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
                 console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
                 const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
@@ -2955,7 +2984,14 @@ export class DefaultClient implements Client {
                     sanitized.compilerPath,
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;
-                sanitized.compilerArgs = compilerPathAndArgs.additionalArgs;
+                if (providerVersion < Version.v6) {
+                    sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
+                } else {
+                    sanitized.compilerArgs = compilerPathAndArgs.allCompilerArgs;
+                    if (util.isArrayOfString(sanitized.compilerFragments)) {
+                        sanitized.compilerFragments = sanitized.compilerFragments;
+                    }
+                }
             }
 
             lastCustomBrowseConfiguration.Value = sanitized;

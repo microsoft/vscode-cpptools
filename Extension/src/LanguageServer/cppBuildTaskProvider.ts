@@ -154,7 +154,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
         // Task for valid user compiler path setting
         if (isCompilerValid && userCompilerPath) {
-            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.allCompilerArgs));
         }
         return result;
     }
