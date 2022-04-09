@@ -3438,6 +3438,7 @@
       {
         "type": "cppvsdbg",
         "label": "C++ (Windows)",
+        "when": "workspacePlatform == windows",
         "languages": [
           "c",
           "cpp",

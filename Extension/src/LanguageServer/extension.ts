@@ -577,7 +577,7 @@ async function onSwitchHeaderSource(): Promise<void> {
     clients.forEach(client => {
         if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
             && targetFileName.indexOf(client.RootRealPath) === 0) {
-            targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
+            targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
             targetFileNameReplaced = true;
         }
     });
@@ -966,7 +966,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     let binaryVersion: string = "";
     const startVersion: number = data.indexOf("Version:");
     if (startVersion >= 0) {
-        data = data.substr(startVersion);
+        data = data.substring(startVersion);
         const binaryVersionMatches: string[] | null = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
         binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
     }
@@ -985,7 +985,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     if (endCrash <= startCrash) {
         return logMacCrashTelemetry("No crash end");
     }
-    data = data.substr(startCrash, endCrash - startCrash);
+    data = data.substring(startCrash, endCrash);
 
     // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
     data = data.replace(/0x................ /g, "");
@@ -1018,7 +1018,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.trimRight();
 
     if (data.length > 8192) { // The API has an 8k limit.
-        data = data.substr(0, 8189) + "...";
+        data = data.substring(0, 8189) + "...";
     }
 
     logMacCrashTelemetry(data);
