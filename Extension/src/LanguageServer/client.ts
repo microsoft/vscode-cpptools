@@ -456,6 +456,7 @@ interface CodeActionCommand {
     command: string;
     arguments?: any[];
     edit?: TextEdit;
+    uri?: string;
 }
 
 interface ShowMessageWindowParams {
@@ -1092,14 +1093,14 @@ export class DefaultClient implements Client {
                                             new vscode.Position(command.edit.range.start.line, command.edit.range.start.character),
                                             new vscode.Position(command.edit.range.end.line, command.edit.range.end.character)),
                                         command.edit.newText);
-                                    } else if (command.command === "C_Cpp.ClearCodeAnalysisSquiggles") {
+                                    } else if (command.command === "C_Cpp.ClearCodeAnalysisSquiggles" && command.uri !== undefined) {
                                         /* if (codeAnalysisAllCodeActions.edit && codeAnalysisAllCodeActions.edit.size > 0) {
                                             resultCodeActions.push(codeAnalysisAllCodeActions);
                                         } */
                                         const vsCodeRange: vscode.Range = new vscode.Range(
                                             new vscode.Position(r.start.line, r.start.character),
                                             new vscode.Position(r.end.line, r.end.character));
-                                        const fixes: vscode.CodeAction[] | undefined = codeAnalysisFileToFixes.get(params.uri);
+                                        const fixes: vscode.CodeAction[] | undefined = codeAnalysisFileToFixes.get(command.uri);
                                         if (fixes !== undefined) {
                                             for (const fix of fixes) {
                                                 if (fix.diagnostics === undefined || fix.diagnostics.length === 0) {
