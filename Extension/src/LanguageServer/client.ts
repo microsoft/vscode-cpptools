@@ -1194,6 +1194,7 @@ export class DefaultClient implements Client {
         const settings_spacePointerReferenceAlignment: (string | undefined)[] = [];
         const settings_spaceAroundTernaryOperator: (string | undefined)[] = [];
         const settings_wrapPreserveBlocks: (string | undefined)[] = [];
+        const settings_legacyCompilerArgsBehavior: (boolean | undefined)[] = [];
 
         {
             const settings: CppSettings[] = [];
@@ -1301,6 +1302,7 @@ export class DefaultClient implements Client {
                 settings_autocomplete.push(setting.autocomplete);
                 settings_autocompleteAddParentheses.push(setting.autocompleteAddParentheses);
                 settings_cppFilesExclude.push(setting.filesExclude);
+                settings_legacyCompilerArgsBehavior.push(setting.legacyCompilerArgsBehavior);
             }
 
             for (const otherSetting of otherSettings) {
@@ -1488,7 +1490,8 @@ export class DefaultClient implements Client {
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
                 edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
                 localizedStrings: localizedStrings,
-                packageVersion: util.packageJson.version
+                packageVersion: util.packageJson.version,
+                legacyCompilerArgsBehavior: settings_legacyCompilerArgsBehavior
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
@@ -2119,8 +2122,9 @@ export class DefaultClient implements Client {
     }
 
     public getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> {
+        const settings: CppSettings = new CppSettings(this.RootUri);
         return this.queueTask(() => Promise.resolve(
-            util.extractCompilerPathAndArgs(
+            util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior,
                 this.configuration.CurrentConfiguration?.compilerPath,
                 this.configuration.CurrentConfiguration?.compilerArgs)
         ));
@@ -2780,7 +2784,7 @@ export class DefaultClient implements Client {
             const modifiedConfig: configs.Configuration = { ...c };
             // Separate compiler path and args before sending to language client
             const compilerPathAndArgs: util.CompilerPathAndArgs =
-                util.extractCompilerPathAndArgs(c.compilerPath, c.compilerArgs);
+                util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
             modifiedConfig.compilerPath = compilerPathAndArgs.compilerPath;
             if (settings.legacyCompilerArgsBehavior) {
                 modifiedConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
@@ -2888,6 +2892,7 @@ export class DefaultClient implements Client {
                 const itemConfig: util.Mutable<InternalSourceFileConfiguration> = { ...item.configuration };
                 if (util.isString(itemConfig.compilerPath)) {
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
+                        providerVersion < Version.v6,
                         itemConfig.compilerPath,
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
@@ -2981,6 +2986,7 @@ export class DefaultClient implements Client {
             // Separate compiler path and args before sending to language client
             if (util.isString(sanitized.compilerPath)) {
                 const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
+                    providerVersion < Version.v6,
                     sanitized.compilerPath,
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;

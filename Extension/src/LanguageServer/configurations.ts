@@ -578,7 +578,8 @@ export class CppProperties {
             return "";
         }
         const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
         const isValid: boolean = ((compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe" || compilerPathAndArgs.compilerName.toLowerCase() === "cl") === configuration.intelliSenseMode.includes("msvc")
             // We can't necessarily determine what host compiler nvcc will use, without parsing command line args (i.e. for -ccbin)
@@ -1407,7 +1408,8 @@ export class CppProperties {
 
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath
             // Don't error cl.exe paths because it could be for an older preview build.
             && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
@@ -1753,7 +1755,7 @@ export class CppProperties {
             // Validate compiler paths
             let compilerPathNeedsQuotes: boolean = false;
             let compilerMessage: string | undefined;
-            const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
+            const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, compilerPath);
             const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
             const isClCompiler: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
             // Don't squiggle for invalid cl and cl.exe paths.

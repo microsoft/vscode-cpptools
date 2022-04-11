@@ -897,6 +897,53 @@ function resolveWindowsEnvironmentVariables(str: string): string {
     });
 }
 
+function legacyExtractArgs(argsString: string): string[] {
+    const isWindows: boolean = os.platform() === 'win32';
+    const result: string[] = [];
+    let currentArg: string = "";
+    let isWithinDoubleQuote: boolean = false;
+    let isWithinSingleQuote: boolean = false;
+    for (let i: number = 0; i < argsString.length; i++) {
+        const c: string = argsString[i];
+        if (c === '\\') {
+            currentArg += c;
+            if (++i === argsString.length) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                }
+                return result;
+            }
+            currentArg += argsString[i];
+            continue;
+        }
+        if (c === '"') {
+            if (!isWithinSingleQuote) {
+                isWithinDoubleQuote = !isWithinDoubleQuote;
+            }
+        } else if (c === '\'') {
+            // On Windows, a single quote string is not allowed to join multiple args into a single arg
+            if (!isWindows) {
+                if (!isWithinDoubleQuote) {
+                    isWithinSingleQuote = !isWithinSingleQuote;
+                }
+            }
+        } else if (c === ' ') {
+            if (!isWithinDoubleQuote && !isWithinSingleQuote) {
+                if (currentArg !== "") {
+                    result.push(currentArg);
+                    currentArg = "";
+                }
+                continue;
+            }
+        }
+        currentArg += c;
+    }
+    if (currentArg !== "") {
+        result.push(currentArg);
+    }
+    return result;
+}
+
 function extractArgs(argsString: string): string[] {
     argsString = argsString.trim();
     if (os.platform() === 'win32') {
@@ -995,7 +1042,7 @@ export interface CompilerPathAndArgs {
     allCompilerArgs: string[];
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
     let compilerPath: string | undefined = inputCompilerPath;
     let compilerName: string = "";
     let compilerArgsFromCommandLineInPath: string[] = [];
@@ -1007,19 +1054,44 @@ export function extractCompilerPathAndArgs(inputCompilerPath?: string, compilerA
         } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
             // If the string starts with a quote, treat it as a command line.
             // Otherwise, a path with a leading quote would not be valid.
-            compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
-            if (compilerArgsFromCommandLineInPath.length > 0) {
-                compilerPath = compilerArgsFromCommandLineInPath.shift();
+            if (useLegacyBehavior) {
+                compilerArgsFromCommandLineInPath = legacyExtractArgs(compilerPath);
+                if (compilerArgsFromCommandLineInPath.length > 0) {
+                    compilerPath = compilerArgsFromCommandLineInPath.shift();
+                    if (compilerPath) {
+                        // Try to trim quotes from compiler path.
+                        const tempCompilerPath: string[] | undefined = extractArgs(compilerPath);
+                        if (tempCompilerPath && compilerPath.length > 0) {
+                            compilerPath = tempCompilerPath[0];
+                        }
+                        compilerName = path.basename(compilerPath);
+                    }
+                }
+            } else {
+                compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
+                if (compilerArgsFromCommandLineInPath.length > 0) {
+                    compilerPath = compilerArgsFromCommandLineInPath.shift();
+                    if (compilerPath) {
+                        compilerName = path.basename(compilerPath);
+                    }
+                }
             }
         } else {
             const spaceStart: number = compilerPath.lastIndexOf(" ");
             if (spaceStart !== -1) {
                 // There is no leading quote, but a space suggests it might be a command line.
                 // Try processing it as a command line, and validate that by checking for the executable.
-                const potentialArgs: string[] = extractArgs(compilerPath);
+                const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
                 let potentialCompilerPath: string | undefined = potentialArgs.shift();
+                if (useLegacyBehavior) {
+                    if (potentialCompilerPath) {
+                        const tempCompilerPath: string[] | undefined = extractArgs(potentialCompilerPath);
+                        if (tempCompilerPath && compilerPath.length > 0) {
+                            potentialCompilerPath = tempCompilerPath[0];
+                        }
+                    }
+                }
                 if (potentialCompilerPath) {
-                    potentialCompilerPath = potentialCompilerPath.trim();
                     if (isCl(potentialCompilerPath) || checkExecutableExistsSync(potentialCompilerPath)) {
                         compilerArgsFromCommandLineInPath = potentialArgs;
                         compilerPath = potentialCompilerPath;
