@@ -3,8 +3,9 @@ description: Create a bug report for downloading, installing, or building the ex
 body:
 - type: markdown
   attributes:
-    label: Is there an existing issue for this?
-    description: Please search our [existing issues](https://github.com/microsoft/vscode-cpptools/issues) to see if an issue already exists for the bug you encountered.
+    value: |
+      ### Is there an existing issue for this?
+      Please search our [existing issues](https://github.com/microsoft/vscode-cpptools/issues) to see if an issue already exists for the bug you encountered.
 - type: textarea
   attributes:
     label: Environment
@@ -43,7 +44,7 @@ body:
 - type: textarea
   attributes:
     label: Other Extensions
-    description: If applicable, please list other extensions installed and if the issue persist after disabling other extensions.
+    description: If applicable, please list other extensions installed and if the issue persists after disabling other extensions.
   validations:
     required: false
 - type: textarea
