@@ -4459,6 +4459,6 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "**/mkdirp/minimist": "^0.2.1"
+    "minimist": "^1.2.6"
   }
 }
