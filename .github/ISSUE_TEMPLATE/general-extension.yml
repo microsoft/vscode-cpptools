@@ -1,13 +1,10 @@
 name: Bug Report - General Extension
 description: Create a bug report for downloading, installing, or building the extension.
 body:
-- type: checkboxes
+- type: markdown
   attributes:
     label: Is there an existing issue for this?
     description: Please search our [existing issues](https://github.com/microsoft/vscode-cpptools/issues) to see if an issue already exists for the bug you encountered.
-    options:
-    - label: I have searched the existing issues.
-      required: true
 - type: textarea
   attributes:
     label: Environment
@@ -25,44 +22,30 @@ body:
     render: markdown
   validations:
     required: true
-- type: dropdown
-  attributes:
-    label: Does the issue persist after disabling any other extensions?
-    options:
-      - "Yes"
-      - "No"
-      - Not applicable, only the C/C++ extension is enabled/installed.
-  validations:
-    required: true
 - type: textarea
   attributes:
-    label: Other extensions
-    description: If applicable, please list other extensions installed.
-  validations:
-    required: false
-- type: textarea
-  attributes:
-    label: Current Behavior
-    description: A concise description of the issue you are encountering.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: Expected Behavior
-    description: A concise description of what you expected to happen.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: Steps To Reproduce
-    description: Steps to reproduce the behavior.
-    placeholder: |
+    label: Bug Summary and Steps to Reproduce
+    description: |
+      Please give a description of the issue you are encountering and what you expected to happen.
+
+      Include clear steps on how to reproduce the issue.
+    value: |
+      Bug Summary:
+
+
+      Steps to reproduce:
       1. In this environment...
       2. With this config...
       3. Do '...'
       4. See error...
   validations:
     required: true
+- type: textarea
+  attributes:
+    label: Other Extensions
+    description: If applicable, please list other extensions installed and if the issue persist after disabling other extensions.
+  validations:
+    required: false
 - type: textarea
   attributes:
     label: Additional Information

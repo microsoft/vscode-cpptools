@@ -1,9 +1,10 @@
 name: Feature Request
-description: Suggest an idea for this extension.
+description: Suggest an idea for the C/C++ extension.
 body:
 - type: markdown
   attributes:
-    value: Prior to creating a new feature request, please review our [existing requests](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature+Request%22) to avoid duplicates.
+    label: Is there an existing request for this feature?
+    value: Prior to creating a new feature request, please review our [existing feature requests](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature+Request%22) to avoid duplicates.
 - type: textarea
   attributes:
     label: Feature Request
