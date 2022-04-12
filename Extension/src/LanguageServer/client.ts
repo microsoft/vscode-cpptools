@@ -88,16 +88,26 @@ export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 
-export function vscodeRange(lspRange: Range): vscode.Range {
-    return new vscode.Range(lspRange.start.line, lspRange.start.character, lspRange.end.line, lspRange.end.character);
+export function vscodeRange(cpptoolsRange: Range): vscode.Range {
+    return new vscode.Range(cpptoolsRange.start.line, cpptoolsRange.start.character, cpptoolsRange.end.line, cpptoolsRange.end.character);
 }
 
-export function vscodeLocation(lspLocation: Location): vscode.Location {
-    return new vscode.Location(vscode.Uri.parse(lspLocation.uri), vscodeRange(lspLocation.range));
+export function cpptoolsRange(vscRange: vscode.Range): Range {
+    return { start: { line: vscRange.start.line, character: vscRange.start.character },
+        end: { line: vscRange.end.line, character: vscRange.end.character } };
 }
 
-export function vscodeTextEdits(lspTextEdits: TextEdit[]): vscode.TextEdit[] {
-    return lspTextEdits.map(textEdit => new vscode.TextEdit(vscodeRange(textEdit.range), textEdit.newText));
+export function rangeEquals(vscodeRange: vscode.Range, cpptoolRange: Range): boolean {
+    return vscodeRange.start.line === cpptoolRange.start.line && vscodeRange.start.character === cpptoolRange.start.character &&
+        vscodeRange.end.line === cpptoolRange.end.line && vscodeRange.end.character === cpptoolRange.end.character;
+}
+
+export function vscodeLocation(cpptoolsLocation: Location): vscode.Location {
+    return new vscode.Location(vscode.Uri.parse(cpptoolsLocation.uri), vscodeRange(cpptoolsLocation.range));
+}
+
+export function vscodeTextEdits(cpptoolsTextEdits: TextEdit[]): vscode.TextEdit[] {
+    return cpptoolsTextEdits.map(textEdit => new vscode.TextEdit(vscodeRange(textEdit.range), textEdit.newText));
 }
 
 export function disposeWorkspaceData(): void {
@@ -244,13 +254,13 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 workspaceEdit.set(vscode.Uri.parse(uriStr, true), vscodeTextEdits(edits));
             }
             const fileIdentifier: CodeAnalysisDiagnosticFileIdentifier = { uri: params.uri, diagnosticIdentifiers:
-                [ { range: diagnostic.range, code: (d.code === undefined || typeof d.code === "number" ? "" : d.code) } ] };
+                [ { range: d.range, code: (d.code === undefined || typeof d.code === "number" ? "" : d.code) } ] };
             const codeAction: vscode.CodeAction = {
                 title: localize("apply_code_analysis_fix_for", "Apply code analysis fix for {0}", d.code),
                 edit: workspaceEdit,
                 diagnostics: [ diagnostic ],
                 command: { title: 'RemoveCodeAnalysisDiagnostics', command: 'C_Cpp.RemoveCodeAnalysisDiagnostics',
-                    arguments: [ fileIdentifier ] },
+                    arguments: [ [ fileIdentifier ] ] },
                 kind: vscode.CodeActionKind.QuickFix
             };
             codeActions.push(codeAction);
@@ -3291,9 +3301,33 @@ export class DefaultClient implements Client {
     public async handleRemoveCodeAnalysisDiagnostics(codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> {
         await this.awaitUntilLanguageClientReady();
         if (diagnosticsCollectionCodeAnalysis) {
-            // diagnosticsCollectionCodeAnalysis.clear();
-            // codeAnalysisFilesToSourceToTextEdits.clear();
+            // Remove the diagnostics directly.
+            for (const diagnosticFileIdentifier of codeAnalysisDiagnosticFileIdentifiers) {
+                const uri: vscode.Uri = vscode.Uri.parse(diagnosticFileIdentifier.uri);
+                const diagnostics: readonly vscode.Diagnostic[] | undefined = diagnosticsCollectionCodeAnalysis.get(uri);
+                if (diagnostics === undefined) {
+                    continue;
+                }
+                const newDiagnostics: vscode.Diagnostic[] = [];
+                for (const diagnostic of diagnostics) {
+                    const code: string = typeof diagnostic.code === "string" ? diagnostic.code :
+                        (typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
+                            diagnostic.code.value : "");
+                    let removed: boolean = false;
+                    for (const diagnosticIdentifier of diagnosticFileIdentifier.diagnosticIdentifiers) {
+                        if (code === diagnosticIdentifier.code && rangeEquals(diagnostic.range, diagnosticIdentifier.range)) {
+                            removed = true;
+                            break;
+                        }
+                    }
+                    if (!removed) {
+                        newDiagnostics.push(diagnostic);
+                    }
+                }
+                diagnosticsCollectionCodeAnalysis.set(uri, newDiagnostics);
+            }
         }
+        // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
         this.languageClient.sendNotification(RemoveCodeAnalysisDiagnosticsNotification, {
             diagnosticFileIdentifiers: codeAnalysisDiagnosticFileIdentifiers });
     }

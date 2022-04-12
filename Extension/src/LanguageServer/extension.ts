@@ -12,13 +12,12 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions, CodeAnalysisDiagnosticFileIdentifier } from './client';
+import { Client, openFileVersions, CodeAnalysisDiagnosticFileIdentifier, cpptoolsRange } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
-import { Range } from 'vscode-languageclient';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
@@ -418,7 +417,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(Range.create(editor.selection.start, editor.selection.end));
+        clients.ActiveClient.selectionChanged(cpptoolsRange(editor.selection));
     }
     ui.activeDocumentChanged();
 }
@@ -437,7 +436,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
+    clients.ActiveClient.selectionChanged(cpptoolsRange(event.selections[0]));
 }
 
 export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
