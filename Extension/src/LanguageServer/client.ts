@@ -276,12 +276,10 @@ interface InactiveRegionParams {
 }
 
 interface InternalSourceFileConfiguration extends SourceFileConfiguration {
-    compilerFragments?: string[];
     compilerArgsLegacy?: string[];
 };
 
 interface InternalWorkspaceBrowseConfiguration extends WorkspaceBrowseConfiguration {
-    compilerFragments?: string[];
     compilerArgsLegacy?: string[];
 }
 
@@ -2903,9 +2901,6 @@ export class DefaultClient implements Client {
                         itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
                     } else {
                         itemConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
-                        if (util.isArrayOfString(itemConfig.compilerFragments)) {
-                            itemConfig.compilerFragments = itemConfig.compilerFragments;
-                        }
                     }
                 }
                 sanitized.push({
@@ -2997,9 +2992,6 @@ export class DefaultClient implements Client {
                     sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
                 } else {
                     sanitized.compilerArgs = compilerPathAndArgs.allCompilerArgs;
-                    if (util.isArrayOfString(sanitized.compilerFragments)) {
-                        sanitized.compilerFragments = sanitized.compilerFragments;
-                    }
                 }
             }
 

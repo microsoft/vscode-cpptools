@@ -464,11 +464,17 @@ export function checkFileExists(filePath: string): Promise<boolean> {
 }
 
 /** Test whether a file exists */
-export async function checkExecutableExists(filePath: string): Promise<boolean> {
+export async function checkExecutableWithoutExtensionExists(filePath: string): Promise<boolean> {
     if (await checkFileExists(filePath)) {
         return true;
     }
     if (os.platform() === 'win32') {
+        if (filePath.length > 4) {
+            const possibleExtension: string = filePath.substring(filePath.length - 4).toLowerCase();
+            if (possibleExtension === ".exe" || possibleExtension === ".cmd" || possibleExtension === ".bat") {
+                return false;
+            }
+        }
         if (await checkFileExists(filePath + ".exe")) {
             return true;
         }
@@ -513,11 +519,17 @@ export function checkFileExistsSync(filePath: string): boolean {
     return false;
 }
 
-export function checkExecutableExistsSync(filePath: string): boolean {
+export function checkExecutableWithoutExtensionExistsSync(filePath: string): boolean {
     if (checkFileExistsSync(filePath)) {
         return true;
     }
     if (os.platform() === 'win32') {
+        if (filePath.length > 4) {
+            const possibleExtension: string = filePath.substring(filePath.length - 4).toLowerCase();
+            if (possibleExtension === ".exe" || possibleExtension === ".cmd" || possibleExtension === ".bat") {
+                return false;
+            }
+        }
         if (checkFileExistsSync(filePath + ".exe")) {
             return true;
         }
@@ -1048,7 +1060,7 @@ export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputComp
     let compilerArgsFromCommandLineInPath: string[] = [];
     if (compilerPath) {
         compilerPath = compilerPath.trim();
-        if (isCl(compilerPath) || checkExecutableExistsSync(compilerPath)) {
+        if (isCl(compilerPath) || checkExecutableWithoutExtensionExistsSync(compilerPath)) {
             // If the path ends with cl, or if a file is found at that path, accept it without further validation.
             compilerName = path.basename(compilerPath);
         } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
@@ -1092,7 +1104,7 @@ export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputComp
                     }
                 }
                 if (potentialCompilerPath) {
-                    if (isCl(potentialCompilerPath) || checkExecutableExistsSync(potentialCompilerPath)) {
+                    if (isCl(potentialCompilerPath) || checkExecutableWithoutExtensionExistsSync(potentialCompilerPath)) {
                         compilerArgsFromCommandLineInPath = potentialArgs;
                         compilerPath = potentialCompilerPath;
                         compilerName = path.basename(compilerPath);
