@@ -268,18 +268,18 @@ export async function activate(): Promise<void> {
     }
 
     if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
-        throw new Error(intelliSenseDisabledError);
-    } else {
-        console.log("activating extension");
-        sendActivationTelemetry();
-        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
-        if (checkForConflictingExtensions.Value) {
-            checkForConflictingExtensions.Value = false;
-            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
-                extension.isActive && extension.id === "mitaki28.vscode-clang");
-            if (clangCommandAdapterActive) {
-                telemetry.logLanguageServerEvent("conflictingExtension");
-            }
+        return;
+    }
+
+    console.log("activating extension");
+    sendActivationTelemetry();
+    const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
+    if (checkForConflictingExtensions.Value) {
+        checkForConflictingExtensions.Value = false;
+        const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+            extension.isActive && extension.id === "mitaki28.vscode-clang");
+        if (clangCommandAdapterActive) {
+            telemetry.logLanguageServerEvent("conflictingExtension");
         }
     }
 

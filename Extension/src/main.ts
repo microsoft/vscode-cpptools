@@ -62,20 +62,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
-        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && settings.intelliSenseEngine !== "Disabled") {
-                reloadMessageShown = true;
-                util.promptForReloadWindowDueToSettingsChange();
-            }
-        }));
-    } else {
-        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && settings.intelliSenseEngine === "Disabled") {
-                reloadMessageShown = true;
-                util.promptForReloadWindowDueToSettingsChange();
-            }
-        }));
     }
+    const currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
+    disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+        if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
+            reloadMessageShown = true;
+            util.promptForReloadWindowDueToSettingsChange();
+        }
+    }));
     await LanguageServer.activate();
 
     UpdateInsidersAccess();

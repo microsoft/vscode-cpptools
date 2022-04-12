@@ -94,10 +94,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         try {
             activeClient = ext.getActiveClient();
         } catch (errJS) {
-            const e: Error = errJS as Error;
-            if (!e || e.message !== ext.intelliSenseDisabledError) {
-                console.error("Unknown error calling getActiveClient().");
-            }
             return emptyTasks; // Language service features may be disabled.
         }
 
