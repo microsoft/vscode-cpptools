@@ -308,24 +308,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
     }
 
-    public async checkDebugConfigExists(configName: string): Promise<void> {
-        const launchJsonPath: string | undefined = this.getLaunchJsonPath();
-        if (!launchJsonPath) {
-            throw new Error("Failed to get launchJsonPath in checkDebugConfigExists()");
-        }
-
-        const rawLaunchJson: any = await this.getRawLaunchJson();
-        // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
-        if (!rawLaunchJson || !rawLaunchJson.configurations) {
-            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
-        }
-        const selectedConfig: any | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
-        if (!selectedConfig) {
-            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
-        }
-        return;
-    }
-
     private getLaunchJsonPath(): string | undefined {
         return util.getJsonPath("launch.json");
     }
