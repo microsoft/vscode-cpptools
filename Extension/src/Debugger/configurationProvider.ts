@@ -18,6 +18,7 @@ import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIC
 import { parse } from 'comment-json';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
+import { CppSettings } from '../LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -139,6 +140,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this function.
      */
     async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | null | undefined> {
+        const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
             // Hence, providing debug configs, and start debugging should be done manually.
@@ -150,10 +152,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 } else {
                     // Currently, we expect only one debug config to be selected.
                     console.assert(configs.length === 1, "More than one debug config is selected.");
-                    await this.resolvePreLaunchTask(folder, configs[0], DebuggerEvent.debugPanel);
-                    if (!folder && configs[0].preLaunchTask) {
+                    if ((!folder || isIntelliSenseDisabled) && configs[0].preLaunchTask) {
+                        await this.resolvePreLaunchTask(undefined, configs[0], DebuggerEvent.debugPanel);
                         // In case of singleFile, remove the preLaunch task.
                         configs[0].preLaunchTask = undefined;
+                    } else {
+                        await this.resolvePreLaunchTask(folder, configs[0], DebuggerEvent.debugPanel);
                     }
                     await this.startDebugging(folder, configs[0], DebuggerEvent.debugPanel);
                     return configs[0];
@@ -176,12 +180,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     return undefined; // Stop debugging
                 }
             }
-            if (!folder && config.preLaunchTask) {
+            if ((!folder || isIntelliSenseDisabled) && config.preLaunchTask) {
                 /* There are two cases where folder is undefined:
                  when debugging is done on a single file where there is no folder open,
                  or when the debug configuration is defined at the User level.
                  */
-                await this.resolvePreLaunchTask(folder, config, DebuggerEvent.debugPanel);
+                await this.resolvePreLaunchTask(undefined, config, DebuggerEvent.debugPanel);
                 config.preLaunchTask = undefined;
             }
             // resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this return.

@@ -286,8 +286,13 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     public async runBuildTask(taskLabel: string): Promise<void> {
-        const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const task: CppBuildTask | undefined = buildTasks.find(task => task.name === taskLabel);
+        let task: CppBuildTask | undefined;
+        const configuredBuildTasks: CppBuildTask[] = await this.getJsonTasks();
+        task = configuredBuildTasks.find(task => task.name === taskLabel);
+        if (!task) {
+            const detectedBuildTasks: CppBuildTask[] = await this.getTasks(true);
+            task = detectedBuildTasks.find(task => task.name === taskLabel);
+        }
         if (!task) {
             throw new Error("Failed to find task in runBuildTask()");
         } else {
