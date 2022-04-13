@@ -261,7 +261,8 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 diagnostics: [ diagnostic ],
                 command: { title: 'RemoveCodeAnalysisDiagnostics', command: 'C_Cpp.RemoveCodeAnalysisDiagnostics',
                     arguments: [ [ fileIdentifier ] ] },
-                kind: vscode.CodeActionKind.QuickFix
+                kind: vscode.CodeActionKind.QuickFix,
+                isPreferred: true
             };
             codeActions.push(codeAction);
             /*
@@ -3317,6 +3318,20 @@ export class DefaultClient implements Client {
                     for (const diagnosticIdentifier of diagnosticFileIdentifier.diagnosticIdentifiers) {
                         if (code === diagnosticIdentifier.code && rangeEquals(diagnostic.range, diagnosticIdentifier.range)) {
                             removed = true;
+                            // Also remove the code action.
+                            const codeActions: vscode.CodeAction[] | undefined = codeAnalysisFileToFixes.get(diagnosticFileIdentifier.uri);
+                            if (codeActions === undefined) {
+                                break;
+                            }
+                            const updatedCodeActions: vscode.CodeAction[] = [];
+                            for (const codeAction of codeActions) {
+                                if (codeAction.diagnostics === undefined || codeAction.diagnostics.length === 0 ||
+                                    codeAction.diagnostics[0] === diagnostic) {
+                                    continue;
+                                }
+                                updatedCodeActions.push(codeAction);
+                            }
+                            codeAnalysisFileToFixes.set(diagnosticFileIdentifier.uri, updatedCodeActions);
                             break;
                         }
                     }
@@ -3330,6 +3345,8 @@ export class DefaultClient implements Client {
         // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
         this.languageClient.sendNotification(RemoveCodeAnalysisDiagnosticsNotification, {
             diagnosticFileIdentifiers: codeAnalysisDiagnosticFileIdentifiers });
+
+        // Need to requeue a code analysis for the updated files.
     }
 
     public onInterval(): void {
