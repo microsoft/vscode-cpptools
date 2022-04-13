@@ -2779,7 +2779,7 @@ export class DefaultClient implements Client {
             isReady: true
         };
         const settings: CppSettings = new CppSettings(this.RootUri);
-        // Clone each entry, as we make modifcations before sending it, and don't
+        // Clone each entry, as we make modifications before sending it, and don't
         // want to add those modifications to the original objects.
         configurations.forEach((c) => {
             const modifiedConfig: configs.Configuration = { ...c };
