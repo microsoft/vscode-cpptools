@@ -29,7 +29,6 @@ const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
 const disposables: vscode.Disposable[] = [];
-let taskProvider: vscode.Disposable;
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     util.setExtensionContext(context);
@@ -79,6 +78,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
             if (currentIntelliSenseEngineValue === "Disabled") {
                 // If switching from disabled to enabled, we can continue activation.
                 currentIntelliSenseEngineValue = settings.intelliSenseEngine;
+                languageServiceDisabled = false;
                 LanguageServer.activate();
             } else {
                 // We can't deactivate or change engines on the fly, so prompt for window reload.
@@ -98,7 +98,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         }
     }
 
-    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
+    disposables.push(vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider));
 
     vscode.tasks.onDidStartTask(event => {
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
@@ -125,9 +125,6 @@ export function deactivate(): Thenable<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
     disposables.forEach(d => d.dispose());
-    if (taskProvider) {
-        taskProvider.dispose();
-    }
     if (languageServiceDisabled) {
         return Promise.resolve();
     }
