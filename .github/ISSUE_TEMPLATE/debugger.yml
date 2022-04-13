@@ -55,7 +55,7 @@ body:
   attributes:
     label: Debugger Logs
     description: |
-      If applicable, please include logging by adding `"logging": { "engineLogging": true, "trace": true, "traceResponse": true }` in the **launch.json** file.
+      If applicable, please include [logging for the debugger adapter](https://code.visualstudio.com/docs/cpp/enable-logging-cpp#_enable-logging-for-the-debug-adapter) by adding `"logging": { "engineLogging": true, "trace": true, "traceResponse": true }` in the **launch.json** file.
 
       Include logs or error messages from the Debug Console or Output windows.
     render: shell
