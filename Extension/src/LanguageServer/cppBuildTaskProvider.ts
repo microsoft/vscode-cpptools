@@ -94,10 +94,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         try {
             activeClient = ext.getActiveClient();
         } catch (errJS) {
-            const e: Error = errJS as Error;
-            if (!e || e.message !== ext.intelliSenseDisabledError) {
-                console.error("Unknown error calling getActiveClient().");
-            }
             return emptyTasks; // Language service features may be disabled.
         }
 
@@ -345,6 +341,8 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
 }
+
+export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
 
 class CustomBuildTaskTerminal implements Pseudoterminal {
     private writeEmitter = new EventEmitter<string>();
