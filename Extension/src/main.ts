@@ -18,11 +18,18 @@ import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
 import { PersistentState } from './LanguageServer/persistentState';
 import { TargetPopulation } from 'vscode-tas-client';
+import * as semver from 'semver';
+import * as nls from 'vscode-nls';
+import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const cppTools: CppTools1 = new CppTools1();
 let languageServiceDisabled: boolean = false;
 let reloadMessageShown: boolean = false;
 const disposables: vscode.Disposable[] = [];
+let taskProvider: vscode.Disposable;
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
     util.setExtensionContext(context);
@@ -58,22 +65,58 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     // Notify users if debugging may not be supported on their OS.
     util.checkDistro(info);
+    await checkVsixCompatibility();
+    UpdateInsidersAccess();
 
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     if (settings.intelliSenseEngine === "Disabled") {
         languageServiceDisabled = true;
     }
-    const currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
+    let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
     disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
         if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
-            reloadMessageShown = true;
-            util.promptForReloadWindowDueToSettingsChange();
+            if (currentIntelliSenseEngineValue === "Disabled") {
+                // If switching from disabled to enabled, we can continue activation.
+                currentIntelliSenseEngineValue = settings.intelliSenseEngine;
+                LanguageServer.activate();
+            } else {
+                // We can't deactivate or change engines on the fly, so prompt for window reload.
+                reloadMessageShown = true;
+                util.promptForReloadWindowDueToSettingsChange();
+            }
         }
     }));
-    await LanguageServer.activate();
 
-    UpdateInsidersAccess();
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (await util.checkFileExists(config)) {
+                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
+                vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+            }
+        }
+    }
+
+    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
+
+    vscode.tasks.onDidStartTask(event => {
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(LanguageServer.configPrefix)) {
+            Telemetry.logLanguageServerEvent('buildTaskStarted');
+        }
+    });
+
+    vscode.tasks.onDidEndTask(event => {
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(LanguageServer.configPrefix)) {
+            Telemetry.logLanguageServerEvent('buildTaskFinished');
+        }
+    });
+
+    if (settings.intelliSenseEngine !== "Disabled") {
+        await LanguageServer.activate();
+    }
 
     return cppTools;
 }
@@ -82,7 +125,9 @@ export function deactivate(): Thenable<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
     disposables.forEach(d => d.dispose());
-
+    if (taskProvider) {
+        taskProvider.dispose();
+    }
     if (languageServiceDisabled) {
         return Promise.resolve();
     }
@@ -180,5 +225,98 @@ export function UpdateInsidersAccess(): void {
 
     if (installPrerelease) {
         vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+    }
+}
+
+async function checkVsixCompatibility(): Promise<void> {
+    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".ignoreMismatchedCompatibleVsix", false);
+    let resetIgnoreMismatchedCompatibleVsix: boolean = true;
+
+    // Check to ensure the correct platform-specific VSIX was installed.
+    const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
+    // Skip the check if the file does not exist, such as when debugging cpptools.
+    if (await util.checkFileExists(vsixManifestPath)) {
+        const content: string = await util.readFileText(vsixManifestPath);
+        const matches: RegExpMatchArray | null = content.match(/TargetPlatform="(?<platform>[^"]*)"/);
+        if (matches && matches.length > 0 && matches.groups) {
+            const vsixTargetPlatform: string = matches.groups['platform'];
+            const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+            let isPlatformCompatible: boolean = true;
+            let isPlatformMatching: boolean = true;
+            switch (vsixTargetPlatform) {
+                case "win32-x64":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x64";
+                    // x64 binaries can also be run on arm64 Windows 11.
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || (platformInfo.architecture === "arm64" && semver.gte(os.release(), "10.0.22000")));
+                    break;
+                case "win32-ia32":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
+                    // x86 binaries can also be run on x64 and arm64 Windows.
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x86" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    break;
+                case "win32-arm64":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "arm64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-x64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name !== "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-arm64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name !== "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-armhf":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm" && platformInfo.distribution?.name !== "alpine";
+                    // armhf binaries can also be run on aarch64 linux.
+                    isPlatformCompatible = platformInfo.platform === "linux" && (platformInfo.architecture === "arm" || platformInfo.architecture === "arm64") && platformInfo.distribution?.name !== "alpine";
+                    break;
+                case "alpine-x64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name === "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "alpine-arm64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name === "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-x64":
+                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "x64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-arm64":
+                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "arm64";
+                    // x64 binaries can also be run on arm64 macOS.
+                    isPlatformCompatible = platformInfo.platform === "darwin" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    break;
+                default:
+                    console.log("Unrecognized TargetPlatform in .vsixmanifest");
+                    break;
+            }
+            const moreInfoButton: string = localize("more.info.button", "More Info");
+            const ignoreButton: string = localize("ignore.button", "Ignore");
+            let promise: Thenable<string | undefined> | undefined;
+            if (!isPlatformCompatible) {
+                promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
+            } else if (!isPlatformMatching) {
+                if (!ignoreMismatchedCompatibleVsix.Value) {
+                    resetIgnoreMismatchedCompatibleVsix = false;
+                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
+                }
+            }
+            if (promise) {
+                promise.then(async (value) => {
+                    if (value === moreInfoButton) {
+                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(util.getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                    } else if (value === ignoreButton) {
+                        ignoreMismatchedCompatibleVsix.Value = true;
+                    }
+                });
+            }
+        } else {
+            console.log("Unable to find TargetPlatform in .vsixmanifest");
+        }
+    }
+    if (resetIgnoreMismatchedCompatibleVsix) {
+        ignoreMismatchedCompatibleVsix.Value = false;
     }
 }

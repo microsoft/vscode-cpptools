@@ -342,6 +342,8 @@ export class CppBuildTaskProvider implements TaskProvider {
 
 }
 
+export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
+
 class CustomBuildTaskTerminal implements Pseudoterminal {
     private writeEmitter = new EventEmitter<string>();
     private closeEmitter = new EventEmitter<number>();
