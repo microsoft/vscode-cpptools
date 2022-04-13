@@ -11,6 +11,5 @@ body:
     label: Feature Request
     description: |
       Describe the feature you'd like.
-    render: markdown
   validations:
     required: true
