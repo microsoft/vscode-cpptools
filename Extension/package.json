@@ -2409,12 +2409,14 @@
             "c++14",
             "c++17",
             "c++20",
+            "c++23",
             "gnu++98",
             "gnu++03",
             "gnu++11",
             "gnu++14",
             "gnu++17",
-            "gnu++20"
+            "gnu++20",
+            "gnu++23"
           ],
           "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
           "scope": "resource"
@@ -4452,6 +4454,6 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "**/mkdirp/minimist": "^0.2.1"
+    "minimist": "^1.2.6"
   }
 }
