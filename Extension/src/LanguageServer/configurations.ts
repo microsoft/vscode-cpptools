@@ -19,7 +19,7 @@ import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
-import { WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -61,6 +61,7 @@ export interface Configuration {
     compilerPath?: string;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
+    compilerArgsLegacy?: string[];
     cStandard?: string;
     cStandardIsExplicit?: boolean;
     cppStandard?: string;
@@ -151,6 +152,7 @@ export class CppProperties {
     private settingsPanel?: SettingsPanel;
     private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
+    private lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -163,6 +165,7 @@ export class CppProperties {
             this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
             this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
             this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
+            this.lastCustomBrowseConfigurationProviderVersion = new PersistentFolderState<Version>("CPP.lastCustomBrowseConfigurationProviderVersion", Version.v5, workspaceFolder);
         }
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
@@ -184,6 +187,7 @@ export class CppProperties {
 
     public get LastCustomBrowseConfiguration(): PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined { return this.lastCustomBrowseConfiguration; }
     public get LastCustomBrowseConfigurationProviderId(): PersistentFolderState<string | undefined> | undefined { return this.lastCustomBrowseConfigurationProviderId; }
+    public get LastCustomBrowseConfigurationProviderVersion(): PersistentFolderState<Version> | undefined { return this.lastCustomBrowseConfigurationProviderVersion; }
 
     public get CurrentConfigurationProvider(): string | undefined {
         if (this.CurrentConfiguration?.configurationProvider) {
@@ -574,7 +578,8 @@ export class CppProperties {
             return "";
         }
         const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
         const isValid: boolean = ((compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe" || compilerPathAndArgs.compilerName.toLowerCase() === "cl") === configuration.intelliSenseMode.includes("msvc")
             // We can't necessarily determine what host compiler nvcc will use, without parsing command line args (i.e. for -ccbin)
@@ -1235,7 +1240,7 @@ export class CppProperties {
             }
 
             // Try to use the same configuration as before the change.
-            const newJson: ConfigurationJson = jsonc.parse(readResults);
+            const newJson: ConfigurationJson = jsonc.parse(readResults, undefined, true);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
                 throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
             }
@@ -1403,7 +1408,8 @@ export class CppProperties {
 
         // Validate compilerPath
         let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
-        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(resolvedCompilerPath);
+        const settings: CppSettings = new CppSettings(this.rootUri);
+        const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath
             // Don't error cl.exe paths because it could be for an older preview build.
             && compilerPathAndArgs.compilerName.toLowerCase() !== "cl.exe"
@@ -1413,7 +1419,7 @@ export class CppProperties {
             // Error when the compiler's path has spaces without quotes but args are used.
             // Except, exclude cl.exe paths because it could be for an older preview build.
             const compilerPathNeedsQuotes: boolean =
-                (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0) &&
+                (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0) &&
                 !resolvedCompilerPath.startsWith('"') &&
                 compilerPathAndArgs.compilerPath !== undefined &&
                 compilerPathAndArgs.compilerPath.includes(" ");
@@ -1454,7 +1460,7 @@ export class CppProperties {
                 } else if (compilerPathAndArgs.compilerPath === "") {
                     const message: string = localize("cannot.resolve.compiler.path", "Invalid input, cannot resolve compiler path");
                     compilerPathErrors.push(message);
-                } else if (!util.checkFileExistsSync(resolvedCompilerPath)) {
+                } else if (!util.checkExecutableWithoutExtensionExistsSync(resolvedCompilerPath)) {
                     const message: string = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedCompilerPath);
                     compilerPathErrors.push(message);
                 }
@@ -1589,7 +1595,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>, except for \"
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             const configurationsText: string = util.escapeForSquiggles(curText);
-            const configurations: ConfigurationJson = jsonc.parse(configurationsText);
+            const configurations: ConfigurationJson = jsonc.parse(configurationsText, undefined, true);
             const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
             let curTextStartOffset: number = 0;
@@ -1749,13 +1755,13 @@ export class CppProperties {
             // Validate compiler paths
             let compilerPathNeedsQuotes: boolean = false;
             let compilerMessage: string | undefined;
-            const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(compilerPath);
+            const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, compilerPath);
             const compilerLowerCase: string = compilerPathAndArgs.compilerName.toLowerCase();
             const isClCompiler: boolean = compilerLowerCase === "cl" || compilerLowerCase === "cl.exe";
             // Don't squiggle for invalid cl and cl.exe paths.
             if (compilerPathAndArgs.compilerPath && !isClCompiler) {
                 // Squiggle when the compiler's path has spaces without quotes but args are used.
-                compilerPathNeedsQuotes = (compilerPathAndArgs.additionalArgs && compilerPathAndArgs.additionalArgs.length > 0)
+                compilerPathNeedsQuotes = (compilerPathAndArgs.compilerArgsFromCommandLineInPath && compilerPathAndArgs.compilerArgsFromCommandLineInPath.length > 0)
                     && !compilerPath.startsWith('"')
                     && compilerPathAndArgs.compilerPath.includes(" ");
                 compilerPath = compilerPathAndArgs.compilerPath;
@@ -1764,7 +1770,7 @@ export class CppProperties {
                     if (compilerPathNeedsQuotes) {
                         compilerMessage = localize("path.with.spaces", 'Compiler path with spaces and arguments is missing double quotes " around the path.');
                         newSquiggleMetrics.CompilerPathMissingQuotes++;
-                    } else if (!util.checkFileExistsSync(compilerPath)) {
+                    } else if (!util.checkExecutableWithoutExtensionExistsSync(compilerPath)) {
                         compilerMessage = localize("path.is.not.a.file", "Path is not a file: {0}", compilerPath);
                         newSquiggleMetrics.PathNotAFile++;
                     }
