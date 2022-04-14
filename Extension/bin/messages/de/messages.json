@@ -3445,5 +3445,10 @@
   "%d1 Parameter wurden im IFC-Parameterdefinitionschart angegeben, während %d2 Parameter in der IFC-Deklaration angegeben wurden.",
   "%d1 Parameter wurde im IFC-Parameterdefinitionschart angegeben, während %d2 Parameter in der IFC-Deklaration angegeben wurden.",
   "%d1 Parameter wurden im IFC-Parameterdefinitionschart angegeben, während %d2 Parameter in der IFC-Deklaration angegeben wurde.",
-  "Die IFC-Darstellung der Definition der Funktion %sq fehlt."
+  "Die IFC-Darstellung der Definition der Funktion %sq fehlt.",
+  "Funktionsmodifizierer gilt nicht für eine statische Mitgliedervorlagendeklaration",
+  "Die Mitgliederauswahl umfasst zu viele geschachtelte anonyme Typen",
+  "Es gibt keinen gemeinsamen Typ zwischen den Operanden",
+  "Es wurde ein Pointer-to-Member erwartet",
+  "Ein flexibles Arrayelement kann nicht in einem ansonsten leeren Typ deklariert werden."
 ]

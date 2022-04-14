@@ -1904,7 +1904,7 @@
   "un initialiseur ne peut pas être spécifié pour un membre de tableau flexible à durée de stockage automatique",
   null,
   "un type de classe 'final' ne peut pas être utilisé comme une classe de base",
-  "les modèles exportés ne sont plus en langage C++ standard",
+  "les modèles exportés ne sont pus en langage C++ standard",
   "un désignateur dépendant du modèle n'est pas autorisé",
   "le second opérande de offsetof ne peut pas être un champ avec type référence",
   "les temporaires à durée de vie longue sont incompatibles avec les autres fonctionnalités de langage plus récentes demandées",
@@ -3445,5 +3445,10 @@
   "%d1 paramètre a été spécifié par le graphique de définition de paramètres IFC alors que %d2 paramètres ont été spécifiés par la déclaration IFC.",
   "%d1 paramètre a été spécifié par le graphique de définition de paramètres IFC alors que %d2 paramètres ont été spécifiés par la déclaration IFC.",
   "%d1 paramètre a été spécifié par le graphique de définition de paramètres IFC alors que %d2 paramètres ont été spécifiés par la déclaration IFC.",
-  "La représentation IFC de la définition de la fonction %sq est manquante."
+  "La représentation IFC de la définition de la fonction %sq est manquante.",
+  "Le modificateur de fonction ne s'applique pas à la déclaration du modèle de membre.",
+  "la sélection de membre implique un trop grand nombre de types anonymes imbriqués",
+  "il n’existe aucun type commun entre les opérandes",
+  "pointeur vers membre attendu",
+  "un membre de tableau flexible ne peut pas être déclaré dans un type autrement vide."
 ]
