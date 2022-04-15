@@ -3445,5 +3445,10 @@
   "%d1 parametri specificati dal grafico di definizione dei parametri IFC mentre %d2 parametri sono stati specificati dalla dichiarazione IFC",
   "%d1 parametro è stato specificato dal grafico di definizione del parametro IFC mentre %d2 parametri sono stati specificati dalla dichiarazione IFC",
   "%d1 parametri sono stati specificati dal grafico di definizione del parametro IFC mentre %d2 parametro è stato specificato dalla dichiarazione IFC",
-  "Manca la rappresentazione IFC della definizione della funzione %sq"
+  "Manca la rappresentazione IFC della definizione della funzione %sq",
+  "il modificatore di funzione non si applica alla dichiarazione del modello di membro",
+  "la selezione dei membri implica troppi tipi anonimi annidati",
+  "non esiste alcun tipo comune tra gli operandi",
+  "è previsto un puntatore a membro",
+  "un membro di matrice flessibile non può essere dichiarato in un tipo altrimenti vuoto"
 ]

@@ -3445,5 +3445,10 @@
   "el gráfico de definición de parámetros IFC especificó %d1 parámetros, mientras que la declaración IFC especificó %d2 parámetros",
   "el gráfico de definición de parámetros IFC especificó %d1 parámetro, mientras que la declaración IFC especificó %d2 parámetros",
   "el gráfico de definición de parámetros IFC especificó %d1 parámetros, mientras que la declaración IFC especificó %d2 parámetro",
-  "Falta la representación IFC de la definición de la función %sq"
+  "Falta la representación IFC de la definición de la función %sq",
+  "el modificador de función no se aplica a la declaración de plantilla de miembro",
+  "la selección de miembros implica demasiados tipos anónimos anidados",
+  "no hay ningún tipo común entre los operandos",
+  "se esperaba un puntero a miembro",
+  "un miembro de matriz flexible no se puede declarar en un tipo que de otro modo estaría vacío"
 ]
