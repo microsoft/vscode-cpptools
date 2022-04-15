@@ -12,7 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions, CodeAnalysisDiagnosticFileIdentifier, cpptoolsRange } from './client';
+import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndFile, cpptoolsRange } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
@@ -719,7 +719,7 @@ async function onRemoveAllCodeAnalysisProblems(): Promise<void> {
     getActiveClient().handleRemoveAllCodeAnalysisProblems();
 }
 
-async function onRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> {
+async function onRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void> {
     getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquiggles, codeAnalysisDiagnosticFileIdentifiers);
 }
 

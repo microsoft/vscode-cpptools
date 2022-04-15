@@ -81,13 +81,33 @@ interface CodeAnalysisFixInfo {
 
 // This is used to work around https://github.com/microsoft/vscode/issues/126393.
 // If that bug were fixed, then we could use the vscode.CodeAction.diagnostic directly.
-interface CodeActionInfo {
-    codeAction: vscode.CodeAction;
-    diagnostics?: vscode.Diagnostic[];
+
+interface CodeActionDiagnosticInfo {
+    diagnostic: vscode.Diagnostic;
+    fixCodeAction?: vscode.CodeAction;
+    // suppressCodeAction?: vscode.CodeAction; // TODO?
+    removeCodeAction: vscode.CodeAction;
 }
-const codeAnalysisFileToFixes: Map<string, CodeActionInfo[]> = new Map<string, CodeActionInfo[]>();
-let codeAnalysisCodeActionsByCode: Map<string, vscode.CodeAction>;
-let codeAnalysisCodeActionsByLocation: Map<string, vscode.CodeAction[]>;
+interface CodeActionCodeInfo {
+    // fixAllTypeCodeAction?: vscode.CodeAction;
+    // disableAllTypeCodeActions? vscode.CodeAction[];
+    // removeAllTypeCodeAction?: vscode.CodeAction;
+    docCodeAction?: vscode.CodeAction;
+}
+interface CodeActionAllInfo {
+    // fixAllCodeAction?: vscode.CodeAction;
+    removeAllCodeAction: vscode.CodeAction;
+}
+const codeAnalysisFileToFixes: Map<string, CodeActionDiagnosticInfo[]> = new Map<string, CodeActionDiagnosticInfo[]>();
+const codeAnalysisCodeToFixes: Map<string, CodeActionCodeInfo> = new Map<string, CodeActionCodeInfo>();
+const codeAnalysisRemoveAllTitle: string = localize("remove_all_code_analysis_problems", "Remove all code analysis problems");
+const codeAnalysisAllFixes: CodeActionAllInfo = {
+    removeAllCodeAction: {
+        title: codeAnalysisRemoveAllTitle,
+        command: { title: codeAnalysisRemoveAllTitle, command: "C_Cpp.RemoveAllCodeAnalysisProblems" },
+        kind: vscode.CodeActionKind.QuickFix
+    }
+};
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -233,23 +253,66 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
     // const diagnosticsWithTextEdits: vscode.Diagnostic[] = [];
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
     // const filesWithTextEdits: Set<string> = new Set<string>();
-    const codeActions: CodeActionInfo[] = [];
-    const removeCodeActions: CodeActionInfo[] = [];
-    const docCodeActions: CodeActionInfo[] = [];
+    const codeActions: CodeActionDiagnosticInfo[] = [];
     for (const d of params.diagnostics) {
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(vscodeRange(d.range),
             util.getLocalizedString(d.localizeStringParams), d.severity);
-        let primaryCode: string | undefined;
-        let primaryDocUri: vscode.Uri | undefined;
-        if (typeof d.code === "string" && d.code.length !== 0 && !d.code.startsWith("clang-diagnostic-")) {
-            const codes: string[] = d.code.split(',');
-            let codeIndex: number = codes.length - 1;
-            if (codes[codeIndex] === "cert-dcl51-cpp") { // Handle aliasing
-                codeIndex = 0;
+        const diagnosticFileIdentifier: CodeAnalysisDiagnosticIdentifiersAndFile = { uri: params.uri, diagnosticIdentifiers:
+            [ { range: d.range, code: (d.code === undefined || typeof d.code === "number" ? "" : d.code) } ] };
+        const codeAction: CodeActionDiagnosticInfo = {
+            diagnostic: diagnostic,
+            removeCodeAction: {
+                title: localize("remove_this_problem", "Remove this {0} problem", d.code),
+                command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                    arguments: [ false, [ diagnosticFileIdentifier ] ] },
+                kind: vscode.CodeActionKind.QuickFix
             }
-            primaryCode = codes[codeIndex];
-            primaryDocUri = vscode.Uri.parse(`https://releases.llvm.org/14.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${primaryCode}.html`);
-            diagnostic.code = { value: d.code, target: primaryDocUri };
+        };
+        if (typeof d.code === "string" && d.code.length !== 0) {
+            let codeActionCodeInfo: CodeActionCodeInfo | undefined;
+            if (!codeAnalysisCodeToFixes.has(d.code)) {
+                codeActionCodeInfo = {};
+            } else {
+                codeActionCodeInfo = codeAnalysisCodeToFixes.get(d.code) ?? {};
+            }
+            if (!d.code.startsWith("clang-diagnostic-")) {
+                const codes: string[] = d.code.split(',');
+                let codeIndex: number = codes.length - 1;
+                if (codes[codeIndex] === "cert-dcl51-cpp") { // Handle aliasing
+                    codeIndex = 0;
+                }
+                // TODO: Is the ideal code always selected as the primary one?
+                const primaryCode: string = codes[codeIndex];
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/14.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${primaryCode}.html`);
+                diagnostic.code = { value: d.code, target: primaryDocUri };
+
+                // TODO: Disable all type.
+                /*
+                const disableAllCodeAction: vscode.CodeAction = {
+                    title: localize("disable_all_type_problems", "Disable all {0} problems", primaryCode),
+                    diagnostics: [ diagnostic ],
+                    command: { title: 'DisableAllTypeCodeAnalysisProblems', command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
+                        arguments: [ [ primaryCode, diagnosticFileIdentifier ] ] },
+                    kind: vscode.CodeActionKind.QuickFix
+                };
+                codeActions.push(disableAllCodeAction);
+                */
+
+                if (new CppSettings().codeAnalysisCodeActionShowDocumentation) {
+                    if (codeActionCodeInfo.docCodeAction === undefined) {
+                        codeActionCodeInfo.docCodeAction = {
+                            title: localize("show_documentation_for", "Show documentation for {0}", primaryCode),
+                            command: { title: 'ShowDocumentation', command: 'C_Cpp.ShowCodeAnalysisDocumentation',
+                                arguments: [ primaryDocUri ] },
+                            kind: vscode.CodeActionKind.QuickFix
+                        };
+                    }
+                }
+            } else {
+                diagnostic.code = d.code;
+            }
+            // TODO: Remove all type
+            codeAnalysisCodeToFixes.set(d.code, codeActionCodeInfo);
         } else {
             diagnostic.code = d.code;
         }
@@ -260,25 +323,20 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(vscodeLocation(info.location), info.message));
             }
         }
-        const diagnosticFileIdentifier: CodeAnalysisDiagnosticFileIdentifier = { uri: params.uri, diagnosticIdentifiers:
-            [ { range: d.range, code: (d.code === undefined || typeof d.code === "number" ? "" : d.code) } ] };
         if (d.workspaceEdit) {
             const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
                 workspaceEdit.set(vscode.Uri.parse(uriStr, true), vscodeTextEdits(edits));
             }
-            const codeAction: CodeActionInfo = {
-                codeAction: {
-                    title: localize("fix_this_problem", "Fix this {0} problem", d.code),
-                    edit: workspaceEdit,
-                    command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                        arguments: [ true, [ diagnosticFileIdentifier ] ] },
-                    kind: vscode.CodeActionKind.QuickFix,
-                    isPreferred: true
-                },
-                diagnostics: [ diagnostic ]
+            const fixThisCodeAction: vscode.CodeAction = {
+                title: localize("fix_this_problem", "Fix this {0} problem", d.code),
+                edit: workspaceEdit,
+                command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                    arguments: [ true, [ diagnosticFileIdentifier ] ] },
+                kind: vscode.CodeActionKind.QuickFix,
+                isPreferred: true
             };
-            codeActions.push(codeAction);
+            codeAction.fixCodeAction = fixThisCodeAction;
             /*
             for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
                 let sourceToTextEdits: Map<string, TextEdit[]> | undefined = codeAnalysisFilesToSourceToTextEdits.get(uriStr);
@@ -296,59 +354,9 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 codeAnalysisFilesToSourceToTextEdits.set(uriStr, sourceToTextEdits);
             }*/
         }
-        {
-            const removeCodeAction: CodeActionInfo = {
-                codeAction: {
-                    title: localize("remove_this_problem", "Remove this {0} problem", d.code),
-                    command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                        arguments: [ false, [ diagnosticFileIdentifier ] ] },
-                    kind: vscode.CodeActionKind.QuickFix
-                },
-                diagnostics: [ diagnostic ]
-            };
-            removeCodeActions.push(removeCodeAction);
-        }
-        if (primaryCode !== undefined && primaryDocUri !== undefined) {
-            // TODO: Remove all type.
-            /*
-            const disableAllCodeAction: vscode.CodeAction = {
-                title: localize("disable_all_type_problems", "Disable all {0} problems", primaryCode),
-                diagnostics: [ diagnostic ],
-                command: { title: 'DisableAllTypeCodeAnalysisProblems', command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
-                    arguments: [ [ primaryCode, diagnosticFileIdentifier ] ] },
-                kind: vscode.CodeActionKind.QuickFix
-            };
-            codeActions.push(disableAllCodeAction);
-            */
-            if (new CppSettings()?.codeAnalysisCodeActionShowDocumentation) {
-                const docCodeAction: CodeActionInfo = {
-                    codeAction: {
-                        title: localize("show_documentation_for", "Show documentation for {0}", primaryCode),
-                        command: { title: 'ShowDocumentation', command: 'C_Cpp.ShowCodeAnalysisDocumentation',
-                            arguments: [ primaryDocUri ] },
-                        kind: vscode.CodeActionKind.QuickFix
-                    },
-                    diagnostics: [ diagnostic ]
-                };
-                docCodeActions.push(docCodeAction);
-            }
-        }
+        codeActions.push(codeAction);
         diagnosticsCodeAnalysis.push(diagnostic);
     }
-
-    codeActions.push(...removeCodeActions);
-    {
-        const removeAllTitle: string = localize("remove_all_code_analysis_problems", "Remove all code analysis problems");
-        const removeAllCodeAction: CodeActionInfo = {
-            codeAction: {
-                title: removeAllTitle,
-                command: { title: removeAllTitle, command: "C_Cpp.RemoveAllCodeAnalysisProblems" },
-                kind: vscode.CodeActionKind.QuickFix
-            }
-        };
-        codeActions.push(removeAllCodeAction);
-    }
-    codeActions.push(...docCodeActions);
 
     if (codeActions.length === 0) {
         codeAnalysisFileToFixes.delete(params.uri);
@@ -402,6 +410,24 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
 
     // codeAnalysisAllCodeActions.command = { title: 'Remove Code Analysis Squiggles',
     //      command: 'C_Cpp.RemoveCodeAnalysisSquiggles', arguments: CodeAnalysisDiagnosticFileIdentifier };
+}
+
+function publishRemoveCodeAnalysisCodeActions(params: CodeAnalysisDiagnosticIdentifierAndFiles): void {
+    for (const diagnosticIdentifierAndFile of params.diagnosticIdentifierAndFiles) {
+        const codeActions: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToFixes.get(diagnosticIdentifierAndFile.uri);
+        if (codeActions === undefined) {
+            continue;
+        }
+        const range: vscode.Range = vscodeRange(diagnosticIdentifierAndFile.diagnosticIdentifier.range);
+        for (const codeAction of codeActions) {
+            if (codeAction.fixCodeAction !== undefined) {
+                if (codeAction.diagnostic.code === diagnosticIdentifierAndFile.diagnosticIdentifier.code &&
+                    codeAction.diagnostic.range.contains(range)) {
+                    codeAction.fixCodeAction = undefined;
+                }
+            }
+        }
+    }
 }
 
 interface WorkspaceFolderParams {
@@ -512,13 +538,22 @@ interface CodeAnalysisDiagnosticIdentifier {
     code: string;
 }
 
-export interface CodeAnalysisDiagnosticFileIdentifier {
+export interface CodeAnalysisDiagnosticIdentifiersAndFile {
     uri: string;
     diagnosticIdentifiers: CodeAnalysisDiagnosticIdentifier[];
 }
 
-interface RemoveCodeAnalysisProblemsParam {
-    diagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[];
+interface CodeAnalysisDiagnosticIdentifiersAndFiles {
+    diagnosticIdentifiersAndFiles: CodeAnalysisDiagnosticIdentifiersAndFile[];
+};
+
+interface CodeAnalysisDiagnosticIdentifierAndFile {
+    uri: string;
+    diagnosticIdentifier: CodeAnalysisDiagnosticIdentifier;
+}
+
+interface CodeAnalysisDiagnosticIdentifierAndFiles {
+    diagnosticIdentifierAndFiles: CodeAnalysisDiagnosticIdentifierAndFile[];
 };
 
 interface PublishDiagnosticsParams {
@@ -776,7 +811,7 @@ const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new 
 const PauseCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseCodeAnalysis');
 const ResumeCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeCodeAnalysis');
 const CancelCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelCodeAnalysis');
-const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysisProblemsParam, void> = new NotificationType<RemoveCodeAnalysisProblemsParam, void>('cpptools/removeCodeAnalysisProblems');
+const RemoveCodeAnalysisProblemsNotification: NotificationType<CodeAnalysisDiagnosticIdentifiersAndFiles, void> = new NotificationType<CodeAnalysisDiagnosticIdentifiersAndFiles, void>('cpptools/removeCodeAnalysisProblems');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -800,6 +835,7 @@ const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> =
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisProcessed');
 const ReportCodeAnalysisTotalNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisTotal');
+const PublishRemoveCodeAnalysisCodeActionsNotification: NotificationType<CodeAnalysisDiagnosticIdentifierAndFiles, void> = new NotificationType<CodeAnalysisDiagnosticIdentifierAndFiles, void>('cpptools/publishRemoveCodeAnalysisCodeActions');
 
 let failureMessageShown: boolean = false;
 
@@ -953,8 +989,8 @@ export interface Client {
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
     handleRunCodeAnalysisOnAllFiles(): Promise<void>;
     handleRemoveAllCodeAnalysisProblems(): Promise<void>;
-    handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void>;
-    handleDisableAllTypeCodeAnalysisProblems(primaryCode: string, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void>;
+    handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void>;
+    handleDisableAllTypeCodeAnalysisProblems(primaryCode: string, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -1176,14 +1212,29 @@ export class DefaultClient implements Client {
                                             resultCodeActions.push(codeAnalysisAllCodeActions);
                                         } */
                                         const vsCodeRange: vscode.Range = vscodeRange(r);
-                                        const fixes: CodeActionInfo[] | undefined = codeAnalysisFileToFixes.get(command.uri);
-                                        if (fixes !== undefined) {
-                                            for (const fix of fixes) {
-                                                if (fix.diagnostics === undefined || fix.diagnostics.length === 0 ||
-                                                    fix.diagnostics[0].range.contains(vsCodeRange)) {
-                                                    resultCodeActions.push(fix.codeAction);
-                                                }
+                                        const fixes: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToFixes.get(command.uri);
+                                        if (fixes === undefined) {
+                                            return;
+                                        }
+                                        for (const fix of fixes) {
+                                            if (!fix.diagnostic.range.contains(vsCodeRange)) {
+                                                continue;
                                             }
+                                            let codeActionCodeInfo: CodeActionCodeInfo | undefined;
+                                            if (fix.diagnostic.code === "string" &&
+                                                codeAnalysisCodeToFixes.has(fix.diagnostic.code)) {
+                                                codeActionCodeInfo = codeAnalysisCodeToFixes.get(fix.diagnostic.code);
+                                            }
+                                            if (fix.fixCodeAction !== undefined) {
+                                                resultCodeActions.push(fix.fixCodeAction);
+                                            }
+                                            resultCodeActions.push(fix.removeCodeAction);
+                                            resultCodeActions.push(codeAnalysisAllFixes.removeAllCodeAction);
+                                            if (codeActionCodeInfo === undefined || codeActionCodeInfo.docCodeAction === undefined) {
+                                                continue;
+                                            }
+                                            resultCodeActions.push(codeActionCodeInfo.docCodeAction);
+                                            break;
                                         }
                                         return;
                                     }
@@ -2038,9 +2089,7 @@ export class DefaultClient implements Client {
             this.clearCustomConfigurations();
             if (diagnosticsCollectionCodeAnalysis) {
                 diagnosticsCollectionCodeAnalysis.clear();
-                // codeAnalysisFilesToSourceToTextEdits.clear();
-                codeAnalysisCodeActionsByCode.clear();
-                codeAnalysisCodeActionsByLocation.clear();
+                codeAnalysisFileToFixes.clear();
             }
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, undefined, true);
@@ -2479,6 +2528,7 @@ export class DefaultClient implements Client {
         });
         this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
         this.languageClient.onNotification(PublishCodeAnalysisDiagnosticsNotification, publishCodeAnalysisDiagnostics);
+        this.languageClient.onNotification(PublishRemoveCodeAnalysisCodeActionsNotification, publishRemoveCodeAnalysisCodeActions);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
@@ -3355,18 +3405,16 @@ export class DefaultClient implements Client {
         await this.awaitUntilLanguageClientReady();
         if (diagnosticsCollectionCodeAnalysis) {
             diagnosticsCollectionCodeAnalysis.clear();
-            // codeAnalysisFilesToSourceToTextEdits.clear();
-            // codeAnalysisCodeActionsByCode.clear();
-            // codeAnalysisCodeActionsByLocation.clear();
+            codeAnalysisFileToFixes.clear();
         }
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
     }
 
-    public async handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> {
+    public async handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticIdentifiersAndFiles: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void> {
         await this.awaitUntilLanguageClientReady();
         if (diagnosticsCollectionCodeAnalysis) {
             // Remove the diagnostics directly.
-            for (const diagnosticFileIdentifier of codeAnalysisDiagnosticFileIdentifiers) {
+            for (const diagnosticFileIdentifier of codeAnalysisDiagnosticIdentifiersAndFiles) {
                 const uri: vscode.Uri = vscode.Uri.parse(diagnosticFileIdentifier.uri);
                 const diagnostics: readonly vscode.Diagnostic[] | undefined = diagnosticsCollectionCodeAnalysis.get(uri);
                 if (diagnostics === undefined) {
@@ -3382,14 +3430,13 @@ export class DefaultClient implements Client {
                         if (code === diagnosticIdentifier.code && rangeEquals(diagnostic.range, diagnosticIdentifier.range)) {
                             removed = true;
                             // Also remove the code action.
-                            const codeActions: CodeActionInfo[] | undefined = codeAnalysisFileToFixes.get(diagnosticFileIdentifier.uri);
+                            const codeActions: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToFixes.get(diagnosticFileIdentifier.uri);
                             if (codeActions === undefined) {
                                 break;
                             }
-                            const updatedCodeActions: CodeActionInfo[] = [];
+                            const updatedCodeActions: CodeActionDiagnosticInfo[] = [];
                             for (const codeAction of codeActions) {
-                                if (codeAction.diagnostics !== undefined && codeAction.diagnostics.length !== 0 &&
-                                    codeAction.diagnostics[0] === diagnostic) {
+                                if (codeAction.diagnostic === diagnostic) {
                                     continue;
                                 }
                                 updatedCodeActions.push(codeAction);
@@ -3407,13 +3454,13 @@ export class DefaultClient implements Client {
         }
         // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
         this.languageClient.sendNotification(RemoveCodeAnalysisProblemsNotification, {
-            diagnosticFileIdentifiers: codeAnalysisDiagnosticFileIdentifiers });
+            diagnosticIdentifiersAndFiles: codeAnalysisDiagnosticIdentifiersAndFiles });
 
         // Need to requeue a code analysis for the updated files.
     }
 
     public async handleDisableAllTypeCodeAnalysisProblems(primaryCode: string,
-        codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> {
+        codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void> {
         const settings: CppSettings = new CppSettings(this.RootUri);
         settings.addClangTidyChecksDisabled(primaryCode);
         this.handleRemoveCodeAnalysisProblems(false, codeAnalysisDiagnosticFileIdentifiers);
@@ -3601,8 +3648,8 @@ class NullClient implements Client {
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }
     handleRemoveAllCodeAnalysisProblems(): Promise<void> { return Promise.resolve(); }
-    handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> { return Promise.resolve(); }
-    handleDisableAllTypeCodeAnalysisProblems(primaryCode: string, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticFileIdentifier[]): Promise<void> { return Promise.resolve(); }
+    handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void> { return Promise.resolve(); }
+    handleDisableAllTypeCodeAnalysisProblems(primaryCode: string, codeAnalysisDiagnosticFileIdentifiers: CodeAnalysisDiagnosticIdentifiersAndFile[]): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
