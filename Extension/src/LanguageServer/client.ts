@@ -555,8 +555,9 @@ export interface CodeAnalysisDiagnosticIdentifiersAndUri {
     identifiers: CodeAnalysisDiagnosticIdentifier[];
 }
 
-interface CodeAnalysisDiagnosticIdentifiersAndUris {
+interface RemoveCodeAnalysisProblemsParams {
     identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[];
+    refreshSquigglesOnSave: boolean;
 };
 
 interface CodeAnalysisDiagnosticIdentifierAndUri {
@@ -823,7 +824,7 @@ const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new 
 const PauseCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseCodeAnalysis');
 const ResumeCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeCodeAnalysis');
 const CancelCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelCodeAnalysis');
-const RemoveCodeAnalysisProblemsNotification: NotificationType<CodeAnalysisDiagnosticIdentifiersAndUris, void> = new NotificationType<CodeAnalysisDiagnosticIdentifiersAndUris, void>('cpptools/removeCodeAnalysisProblems');
+const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysisProblemsParams, void> = new NotificationType<RemoveCodeAnalysisProblemsParams, void>('cpptools/removeCodeAnalysisProblems');
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
@@ -1001,7 +1002,7 @@ export interface Client {
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
     handleRunCodeAnalysisOnAllFiles(): Promise<void>;
     handleRemoveAllCodeAnalysisProblems(): Promise<void>;
-    handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
+    handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(primaryCode: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     onInterval(): void;
     dispose(): void;
@@ -3458,7 +3459,7 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
     }
 
-    public async handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    public async handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
         await this.awaitUntilLanguageClientReady();
         if (diagnosticsCollectionCodeAnalysis) {
             // Remove the diagnostics directly.
@@ -3503,9 +3504,7 @@ export class DefaultClient implements Client {
         }
         // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
         this.languageClient.sendNotification(RemoveCodeAnalysisProblemsNotification, {
-            identifiersAndUris: identifiersAndUris });
-
-        // Need to requeue a code analysis for the updated files.
+            identifiersAndUris: identifiersAndUris, refreshSquigglesOnSave: refreshSquigglesOnSave });
     }
 
     public async handleDisableAllTypeCodeAnalysisProblems(primaryCode: string,
@@ -3697,7 +3696,7 @@ class NullClient implements Client {
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }
     handleRemoveAllCodeAnalysisProblems(): Promise<void> { return Promise.resolve(); }
-    handleRemoveCodeAnalysisProblems(refreshSquiggles: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
+    handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(primaryCode: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {

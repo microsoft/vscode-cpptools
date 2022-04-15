@@ -599,8 +599,8 @@ async function onRemoveAllCodeAnalysisProblems(): Promise<void> {
     getActiveClient().handleRemoveAllCodeAnalysisProblems();
 }
 
-async function onRemoveCodeAnalysisProblems(refreshSquiggles: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
-    getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquiggles, identifiersAndUris);
+async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
 }
 
 function onAddToIncludePath(path: string): void {
