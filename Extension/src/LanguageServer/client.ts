@@ -125,9 +125,9 @@ export function cpptoolsRange(vscRange: vscode.Range): Range {
         end: { line: vscRange.end.line, character: vscRange.end.character } };
 }
 
-export function rangeEquals(vscodeRange: vscode.Range, cpptoolRange: Range): boolean {
-    return vscodeRange.start.line === cpptoolRange.start.line && vscodeRange.start.character === cpptoolRange.start.character &&
-        vscodeRange.end.line === cpptoolRange.end.line && vscodeRange.end.character === cpptoolRange.end.character;
+export function rangeEquals(range1: vscode.Range | Range, range2: vscode.Range | Range): boolean {
+    return range1.start.line === range2.start.line && range1.start.character === range2.start.character &&
+    range1.end.line === range2.end.line && range1.end.character === range2.end.character;
 }
 
 export function vscodeLocation(cpptoolsLocation: Location): vscode.Location {
@@ -1228,6 +1228,9 @@ export class DefaultClient implements Client {
                                         if (fixes === undefined) {
                                             return;
                                         }
+                                        const fixCodeActions: vscode.CodeAction[] = [];
+                                        const removeCodeActions: vscode.CodeAction[] = [];
+                                        const docCodeActions: vscode.CodeAction[] = [];
                                         for (const fix of fixes) {
                                             if (!fix.range.contains(vsCodeRange)) {
                                                 continue;
@@ -1237,16 +1240,18 @@ export class DefaultClient implements Client {
                                                 codeActionCodeInfo = codeAnalysisCodeToFixes.get(fix.code);
                                             }
                                             if (fix.fixCodeAction !== undefined) {
-                                                resultCodeActions.push(fix.fixCodeAction);
+                                                fixCodeActions.push(fix.fixCodeAction);
                                             }
-                                            resultCodeActions.push(fix.removeCodeAction);
-                                            resultCodeActions.push(codeAnalysisAllFixes.removeAllCodeAction);
+                                            removeCodeActions.push(fix.removeCodeAction);
                                             if (codeActionCodeInfo === undefined || codeActionCodeInfo.docCodeAction === undefined) {
                                                 continue;
                                             }
-                                            resultCodeActions.push(codeActionCodeInfo.docCodeAction);
-                                            break;
+                                            docCodeActions.push(codeActionCodeInfo.docCodeAction);
                                         }
+                                        resultCodeActions.push(...fixCodeActions);
+                                        resultCodeActions.push(...removeCodeActions);
+                                        resultCodeActions.push(codeAnalysisAllFixes.removeAllCodeAction);
+                                        resultCodeActions.push(...docCodeActions);
                                         return;
                                     }
                                     const vscodeCodeAction: vscode.CodeAction = {
@@ -3481,7 +3486,7 @@ export class DefaultClient implements Client {
                         }
                         const updatedCodeActions: CodeActionDiagnosticInfo[] = [];
                         for (const codeAction of codeActions) {
-                            if (codeAction.range === diagnostic.range && codeAction.code === code) {
+                            if (rangeEquals(codeAction.range, diagnostic.range) && codeAction.code === code) {
                                 continue;
                             }
                             updatedCodeActions.push(codeAction);
