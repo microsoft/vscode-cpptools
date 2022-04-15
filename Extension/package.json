@@ -2597,6 +2597,13 @@
           ],
           "description": "%c_cpp.configuration.debugShortcut.description%",
           "scope": "application"
+        },
+        "C_Cpp.legacyCompilerArgsBehavior": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
+          "scope": "resource",
+          "deprecationMessage": "%c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage%"
         }
       }
     },
@@ -4438,7 +4445,7 @@
     "mkdirp": "^0.5.5",
     "plist": "^3.0.5",
     "tmp": "^0.2.1",
-    "vscode-cpptools": "^5.0.0",
+    "vscode-cpptools": "^6.1.0",
     "vscode-extension-telemetry": "^0.4.4",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^5.0.0",

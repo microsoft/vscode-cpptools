@@ -3445,5 +3445,10 @@
   "%d1 parâmetros foram especificados pelo gráfico de definição de parâmetro IFC, enquanto %d2 parâmetros foram especificados pela declaração IFC",
   "O parâmetro %d1 foi especificado pelo gráfico de definição de parâmetro IFC, enquanto %d2 parâmetros foram especificados pela declaração IFC",
   "%d1 parâmetros foram especificados pelo gráfico de definição de parâmetro IFC, enquanto o parâmetro %d2 foi especificado pela declaração IFC",
-  "A representação IFC da definição da função %sq está ausente"
+  "A representação IFC da definição da função %sq está ausente",
+  "o modificador de função não se aplica à declaração de modelo do membro",
+  "a seleção de membro envolve muitos tipos anônimos aninhados",
+  "não há nenhum tipo comum entre os operandos",
+  "esperava-se um ponteiro para membro",
+  "um membro da matriz flexível não pode ser declarado em um tipo de outro modo vazio"
 ]

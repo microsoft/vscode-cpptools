@@ -239,6 +239,7 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
+    public get legacyCompilerArgsBehavior(): boolean | undefined  { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
