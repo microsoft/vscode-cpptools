@@ -24,12 +24,9 @@ import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
-import { PlatformInformation } from '../platform';
-import * as semver from 'semver';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
 export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
@@ -40,7 +37,6 @@ let ui: UI;
 const disposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
-let taskProvider: vscode.Disposable;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
@@ -156,129 +152,20 @@ function sendActivationTelemetry(): void {
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
 
-async function checkVsixCompatibility(): Promise<void> {
-    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".ignoreMismatchedCompatibleVsix", false);
-    let resetIgnoreMismatchedCompatibleVsix: boolean = true;
-
-    // Check to ensure the correct platform-specific VSIX was installed.
-    const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
-    // Skip the check if the file does not exist, such as when debugging cpptools.
-    if (await util.checkFileExists(vsixManifestPath)) {
-        const content: string = await util.readFileText(vsixManifestPath);
-        const matches: RegExpMatchArray | null = content.match(/TargetPlatform="(?<platform>[^"]*)"/);
-        if (matches && matches.length > 0 && matches.groups) {
-            const vsixTargetPlatform: string = matches.groups['platform'];
-            const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-            let isPlatformCompatible: boolean = true;
-            let isPlatformMatching: boolean = true;
-            switch (vsixTargetPlatform) {
-                case "win32-x64":
-                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x64";
-                    // x64 binaries can also be run on arm64 Windows 11.
-                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || (platformInfo.architecture === "arm64" && semver.gte(os.release(), "10.0.22000")));
-                    break;
-                case "win32-ia32":
-                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
-                    // x86 binaries can also be run on x64 and arm64 Windows.
-                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x86" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
-                    break;
-                case "win32-arm64":
-                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "arm64";
-                    isPlatformCompatible = isPlatformMatching;
-                    break;
-                case "linux-x64":
-                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name !== "alpine";
-                    isPlatformCompatible = isPlatformMatching;
-                    break;
-                case "linux-arm64":
-                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name !== "alpine";
-                    isPlatformCompatible = isPlatformMatching;
-                    break;
-                case "linux-armhf":
-                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm" && platformInfo.distribution?.name !== "alpine";
-                    // armhf binaries can also be run on aarch64 linux.
-                    isPlatformCompatible = platformInfo.platform === "linux" && (platformInfo.architecture === "arm" || platformInfo.architecture === "arm64") && platformInfo.distribution?.name !== "alpine";
-                    break;
-                case "alpine-x64":
-                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name === "alpine";
-                    isPlatformCompatible = isPlatformMatching;
-                    break;
-                case "alpine-arm64":
-                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name === "alpine";
-                    isPlatformCompatible = isPlatformMatching;
-                    break;
-                case "darwin-x64":
-                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "x64";
-                    isPlatformCompatible = isPlatformMatching;
-                    break;
-                case "darwin-arm64":
-                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "arm64";
-                    // x64 binaries can also be run on arm64 macOS.
-                    isPlatformCompatible = platformInfo.platform === "darwin" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
-                    break;
-                default:
-                    console.log("Unrecognized TargetPlatform in .vsixmanifest");
-                    break;
-            }
-            const moreInfoButton: string = localize("more.info.button", "More Info");
-            const ignoreButton: string = localize("ignore.button", "Ignore");
-            let promise: Thenable<string | undefined> | undefined;
-            if (!isPlatformCompatible) {
-                promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
-            } else if (!isPlatformMatching) {
-                if (!ignoreMismatchedCompatibleVsix.Value) {
-                    resetIgnoreMismatchedCompatibleVsix = false;
-                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
-                }
-            }
-            if (promise) {
-                promise.then(async (value) => {
-                    if (value === moreInfoButton) {
-                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(util.getLocalizedHtmlPath("Reinstalling the Extension.md")));
-                    } else if (value === ignoreButton) {
-                        ignoreMismatchedCompatibleVsix.Value = true;
-                    }
-                });
-            }
-        } else {
-            console.log("Unable to find TargetPlatform in .vsixmanifest");
-        }
-    }
-    if (resetIgnoreMismatchedCompatibleVsix) {
-        ignoreMismatchedCompatibleVsix.Value = false;
-    }
-}
-
 /**
  * activate: set up the extension for language services
  */
 export async function activate(): Promise<void> {
 
-    await checkVsixCompatibility();
-
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
-            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
-            if (await util.checkFileExists(config)) {
-                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
-                vscode.languages.setTextDocumentLanguage(doc, "jsonc");
-            }
-        }
-    }
-
-    if (new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled") {
-        throw new Error(intelliSenseDisabledError);
-    } else {
-        console.log("activating extension");
-        sendActivationTelemetry();
-        const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
-        if (checkForConflictingExtensions.Value) {
-            checkForConflictingExtensions.Value = false;
-            const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
-                extension.isActive && extension.id === "mitaki28.vscode-clang");
-            if (clangCommandAdapterActive) {
-                telemetry.logLanguageServerEvent("conflictingExtension");
-            }
+    console.log("activating extension");
+    sendActivationTelemetry();
+    const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
+    if (checkForConflictingExtensions.Value) {
+        checkForConflictingExtensions.Value = false;
+        const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+            extension.isActive && extension.id === "mitaki28.vscode-clang");
+        if (clangCommandAdapterActive) {
+            telemetry.logLanguageServerEvent("conflictingExtension");
         }
     }
 
@@ -310,21 +197,14 @@ export async function activate(): Promise<void> {
 
     registerCommands();
 
-    taskProvider = vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider);
-
     vscode.tasks.onDidStartTask(event => {
         getActiveClient().PauseCodeAnalysis();
-        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
-            || event.execution.task.name.startsWith(configPrefix)) {
-            telemetry.logLanguageServerEvent('buildTaskStarted');
-        }
     });
 
     vscode.tasks.onDidEndTask(event => {
         getActiveClient().ResumeCodeAnalysis();
         if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
             || event.execution.task.name.startsWith(configPrefix)) {
-            telemetry.logLanguageServerEvent('buildTaskFinished');
             if (event.execution.task.scope !== vscode.TaskScope.Global && event.execution.task.scope !== vscode.TaskScope.Workspace) {
                 const folder: vscode.WorkspaceFolder | undefined = event.execution.task.scope;
                 if (folder) {
@@ -578,7 +458,7 @@ async function onSwitchHeaderSource(): Promise<void> {
     clients.forEach(client => {
         if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
             && targetFileName.indexOf(client.RootRealPath) === 0) {
-            targetFileName = client.RootPath + targetFileName.substr(client.RootRealPath.length);
+            targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
             targetFileNameReplaced = true;
         }
     });
@@ -971,7 +851,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     let binaryVersion: string = "";
     const startVersion: number = data.indexOf("Version:");
     if (startVersion >= 0) {
-        data = data.substr(startVersion);
+        data = data.substring(startVersion);
         const binaryVersionMatches: string[] | null = data.match(/^Version:\s*(\d*\.\d*\.\d*\.\d*|\d)/);
         binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
     }
@@ -990,7 +870,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     if (endCrash <= startCrash) {
         return logMacCrashTelemetry("No crash end");
     }
-    data = data.substr(startCrash, endCrash - startCrash);
+    data = data.substring(startCrash, endCrash);
 
     // Get rid of the memory addresses (which breaks being able get a hit count for each crash call stack).
     data = data.replace(/0x................ /g, "");
@@ -1023,7 +903,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.trimRight();
 
     if (data.length > 8192) { // The API has an 8k limit.
-        data = data.substr(0, 8189) + "...";
+        data = data.substring(0, 8189) + "...";
     }
 
     logMacCrashTelemetry(data);
@@ -1037,9 +917,6 @@ export function deactivate(): Thenable<void> {
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
-    if (taskProvider) {
-        taskProvider.dispose();
-    }
     if (codeActionProvider) {
         codeActionProvider.dispose();
     }

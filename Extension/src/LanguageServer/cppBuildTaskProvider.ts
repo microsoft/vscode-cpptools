@@ -94,10 +94,6 @@ export class CppBuildTaskProvider implements TaskProvider {
         try {
             activeClient = ext.getActiveClient();
         } catch (errJS) {
-            const e: Error = errJS as Error;
-            if (!e || e.message !== ext.intelliSenseDisabledError) {
-                console.error("Unknown error calling getActiveClient().");
-            }
             return emptyTasks; // Language service features may be disabled.
         }
 
@@ -154,7 +150,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
         // Task for valid user compiler path setting
         if (isCompilerValid && userCompilerPath) {
-            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.allCompilerArgs));
         }
         return result;
     }
@@ -172,8 +168,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const isWindows: boolean = os.platform() === 'win32';
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
-            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-            const programName: string = isWindows ? filePath + '.exe' : filePath;
+            const programName: string = util.defaultExePath();
             let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
@@ -210,7 +205,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const rawJson: any = await this.getRawTasksJson();
         const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
-            if (!task.label) {
+            if (!task.label || !task.type || task.type !== CppBuildTaskProvider.CppBuildScriptType) {
                 return null;
             }
             const definition: CppBuildTaskDefinition = {
@@ -347,6 +342,8 @@ export class CppBuildTaskProvider implements TaskProvider {
 
 }
 
+export const cppBuildTaskProvider: CppBuildTaskProvider = new CppBuildTaskProvider();
+
 class CustomBuildTaskTerminal implements Pseudoterminal {
     private writeEmitter = new EventEmitter<string>();
     private closeEmitter = new EventEmitter<number>();
@@ -410,6 +407,11 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
+
+        // Create the exe folder path if it doesn't exists.
+        const exePath: string | undefined = util.findExePathInArgs(this.args);
+        util.createDirIfNotExistsSync(exePath);
+
         let child: cp.ChildProcess | undefined;
         try {
             child = cp.spawn(command, this.args, this.options ? this.options : {});

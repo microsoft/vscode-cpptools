@@ -467,6 +467,12 @@
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.useBuildPath": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.codeAnalysis.clangTidy.checks.enabled": {
           "type": "array",
           "items": {
@@ -2451,12 +2457,14 @@
             "c++14",
             "c++17",
             "c++20",
+            "c++23",
             "gnu++98",
             "gnu++03",
             "gnu++11",
             "gnu++14",
             "gnu++17",
-            "gnu++20"
+            "gnu++20",
+            "gnu++23"
           ],
           "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
           "scope": "resource"
@@ -2637,6 +2645,13 @@
           ],
           "description": "%c_cpp.configuration.debugShortcut.description%",
           "scope": "application"
+        },
+        "C_Cpp.legacyCompilerArgsBehavior": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
+          "scope": "resource",
+          "deprecationMessage": "%c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage%"
         }
       }
     },
@@ -2803,6 +2818,8 @@
           "cpp",
           "cuda-cpp"
         ],
+        "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
+        "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess",
           "pickRemoteProcess": "extension.pickRemoteNativeProcess"
@@ -3473,11 +3490,14 @@
       {
         "type": "cppvsdbg",
         "label": "C++ (Windows)",
+        "when": "workspacePlatform == windows",
         "languages": [
           "c",
           "cpp",
           "cuda-cpp"
         ],
+        "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
+        "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
         "variables": {
           "pickProcess": "extension.pickNativeProcess"
         },
@@ -4471,9 +4491,9 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.5",
-    "plist": "^3.0.4",
+    "plist": "^3.0.5",
     "tmp": "^0.2.1",
-    "vscode-cpptools": "^5.0.0",
+    "vscode-cpptools": "^6.1.0",
     "vscode-extension-telemetry": "^0.4.4",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^5.0.0",
@@ -4493,6 +4513,6 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "**/mkdirp/minimist": "^0.2.1"
+    "minimist": "^1.2.6"
   }
 }

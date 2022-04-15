@@ -3445,5 +3445,10 @@
   "V grafu definice parametrů IFC byl zadán tento počet parametrů: %d1, zatímco deklarace IFC určovala tento počet parametrů: %d2.",
   "V grafu definice parametrů IFC byl zadán %d1 parametr, zatímco deklarace IFC určovala tento počet parametrů: %d2.",
   "V grafu definice parametrů IFC byl zadán tento počet parametrů: %d1, zatímco deklarace IFC určovala %d2 parametr.",
-  "Chybí reprezentace IFC definice funkce %sq."
+  "Chybí reprezentace IFC definice funkce %sq.",
+  "modifikátor funkce se nevztahuje na deklaraci členské šablony.",
+  "výběr člena zahrnuje příliš mnoho vnořených anonymních typů",
+  "mezi operandy není žádný společný typ",
+  "očekával se ukazatel na člen",
+  "flexibilní člen pole nelze deklarovat v jinak prázdném typu"
 ]

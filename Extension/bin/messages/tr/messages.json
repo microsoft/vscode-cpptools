@@ -3445,5 +3445,10 @@
   "%d1 parametre IFC parametre tanım grafiği tarafından belirtilirken %d2 parametre IFC bildirimi tarafından belirtildi",
   "%d1 parametre IFC parametre tanım grafiği tarafından belirtilirken %d2 parametre IFC bildirimi tarafından belirtildi",
   "%d1 parametre IFC parametre tanım grafiği tarafından belirtilirken %d2 parametre IFC bildirimi tarafından belirtildi",
-  "%sq işlevine ait tanımın IFC gösterimi eksik"
+  "%sq işlevine ait tanımın IFC gösterimi eksik",
+  "işlev değiştirici, üye şablonu bildirimi için geçerli değil",
+  "üye seçimi çok fazla iç içe anonim tür içeriyor",
+  "işlenenler arasında ortak tür yok",
+  "üye işaretçisi bekleniyordu",
+  "esnek bir dizi üyesi diğer türlü boş olan bir türde bildirilemez"
 ]
