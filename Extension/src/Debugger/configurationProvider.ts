@@ -182,8 +182,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             if ((!folder || isIntelliSenseDisabled) && config.preLaunchTask) {
                 /* There are two cases where folder is undefined:
-                 when debugging is done on a single file where there is no folder open,
-                 or when the debug configuration is defined at the User level.
+                 * when debugging is done on a single file where there is no folder open,
+                 * or when the debug configuration is defined at the User level.
                  */
                 await this.resolvePreLaunchTask(undefined, config, DebuggerEvent.debugPanel);
                 config.preLaunchTask = undefined;
@@ -411,12 +411,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return config;
         });
         if (existingConfigs) {
-            const areEqual = (config1: vscode.DebugConfiguration, config2: vscode.DebugConfiguration): boolean =>
-                (config1.preLaunchTask === config2.preLaunchTask
-                && config1.type === config2.type && config1.request === config2.request);
             // Remove the detected configs that are already configured once in launch.json.
             const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => !existingConfigs.some(config => {
-                if (areEqual(config, detectedConfig)) {
+                if (config.preLaunchTask === detectedConfig.preLaunchTask && config.type === detectedConfig.type && config.request === detectedConfig.request) {
                     // Carry the default task information.
                     config.isDefault = detectedConfig.isDefault ? detectedConfig.isDefault : undefined;
                     return true;
@@ -658,8 +655,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Resolve config before start debugging.
         let resolvedConfig: vscode.DebugConfiguration | undefined | null = selection.configuration;
+        await this.resolvePreLaunchTask(folder, resolvedConfig, debuggerEvent, debugModeOn);
         if (!folder && resolvedConfig.preLaunchTask) {
-            await this.resolvePreLaunchTask(folder, resolvedConfig, debuggerEvent, debugModeOn);
             resolvedConfig.preLaunchTask = undefined;
         }
         resolvedConfig = await this.resolveDebugConfiguration(folder, resolvedConfig);
