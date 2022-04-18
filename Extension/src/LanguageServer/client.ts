@@ -400,7 +400,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
     if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments?.[1] !== undefined) {
         codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = [];
     }
-    const identifiersAndUrisForAll: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
+    const identifiersAndUrisForAllFixes: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
     const uriToEditsForAll: Map<vscode.Uri, vscode.TextEdit[]> = new Map<vscode.Uri, vscode.TextEdit[]>();
     let numFixTypes: number = 0;
     for (const codeToFixes of codeAnalysisCodeToFixes) {
@@ -409,10 +409,10 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         codeToFixes[1].uriToInfo.forEach((perUriInfo: CodeActionPerUriInfo, uri: string) => {
             const newIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = { uri: uri, identifiers: perUriInfo.identifiers };
             identifiersAndUris.push(newIdentifiersAndUri);
-            identifiersAndUrisForAll.push(newIdentifiersAndUri);
             if (perUriInfo.workspaceEdits === undefined) {
                 return;
             }
+            identifiersAndUrisForAllFixes.push(newIdentifiersAndUri);
             for (const edit of perUriInfo.workspaceEdits) {
                 for (const [uri, edits] of edit.entries()) {
                     const textEdits: vscode.TextEdit[] = uriToEdits.get(uri) ?? [];
@@ -453,7 +453,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
         }
         codeAnalysisAllFixes.fixAllCodeAction.edit = allWorkspaceEdit;
         if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments?.[1] !== undefined) {
-            codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = identifiersAndUrisForAll;
+            codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = identifiersAndUrisForAllFixes;
         }
     } else {
         codeAnalysisAllFixes.fixAllCodeAction.edit = undefined;
@@ -1332,10 +1332,14 @@ export class DefaultClient implements Client {
                                                 codeActionCodeInfo = codeAnalysisCodeToFixes.get(codeAction.code);
                                             }
                                             if (codeAction.fixCodeAction !== undefined) {
+                                                codeAction.fixCodeAction.isPreferred = true;
                                                 if (codeActionCodeInfo !== undefined) {
                                                     if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                                         (codeActionCodeInfo.uriToInfo.size > 1 ||
                                                         codeActionCodeInfo.uriToInfo.values().next().value.workspaceEdits?.length > 1)) {
+                                                        codeActionCodeInfo.fixAllTypeCodeAction.isPreferred =
+                                                            codeAnalysisAllFixes.fixAllCodeAction.edit === undefined;
+                                                        codeAction.fixCodeAction.isPreferred = false;
                                                         fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                                                     }
                                                 }
