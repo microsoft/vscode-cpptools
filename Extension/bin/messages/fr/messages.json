@@ -1904,7 +1904,7 @@
   "un initialiseur ne peut pas être spécifié pour un membre de tableau flexible à durée de stockage automatique",
   null,
   "un type de classe 'final' ne peut pas être utilisé comme une classe de base",
-  "les modèles exportés ne sont pus en langage C++ standard",
+  "les modèles exportés ne sont plus en langage C++ standard",
   "un désignateur dépendant du modèle n'est pas autorisé",
   "le second opérande de offsetof ne peut pas être un champ avec type référence",
   "les temporaires à durée de vie longue sont incompatibles avec les autres fonctionnalités de langage plus récentes demandées",
