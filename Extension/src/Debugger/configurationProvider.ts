@@ -589,14 +589,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     public async checkDebugConfigExists(configName: string, folder?: vscode.WorkspaceFolder, type?: DebuggerType): Promise<void> {
         const configs: vscode.DebugConfiguration[] | undefined = await this.getLaunchConfigs(folder, type);
-        if (!configs || configs.length === 0) {
-            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
+        if (configs && configs.length > 0) {
+            const selectedConfig: any | undefined = configs.find((config: any) => config.name && config.name === configName);
+            if (!selectedConfig) {
+                return;
+            }
         }
-        const selectedConfig: any | undefined = configs.find((config: any) => config.name && config.name === configName);
-        if (!selectedConfig) {
-            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
-        }
-        return;
+        throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
     }
 
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
