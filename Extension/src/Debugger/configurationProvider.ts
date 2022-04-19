@@ -156,7 +156,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 // Keep track of the entry point where the debug config has been selected, for telemetry purposes.
                 config.debuggerEvent = DebuggerEvent.debugPanel;
             }
-        } 
+        }
         if ((!folder || isIntelliSenseDisabled) && config.preLaunchTask) {
             /* There are two cases where folder is undefined:
                 * when debugging is done on a single file where there is no folder open,
@@ -658,7 +658,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         const folderMode: string = folder ? "folder" : "singleFile";
         // if configuration.debuggerEvent === undefined, it means this configuration is elready defined in launch.json and is shown in debugPanel.
         // All the other configs that are selected by user, have a debuggerEvent element.
-        const debuggerEvent: string = configuration.debuggerEvent? configuration.debuggerEvent : DebuggerEvent.debugPanel;
+        const debuggerEvent: string = configuration.debuggerEvent ? configuration.debuggerEvent : DebuggerEvent.debugPanel;
         if (configuration.preLaunchTask) {
             try {
                 if (folder) {
@@ -682,7 +682,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         const debugType: string = debugModeOn ? "debug" : "run";
         const folderMode: string = folder ? "folder" : "singleFile";
         const configMode: string = this.checkDebugConfigExists(configuration.name) ? "launchConfig" : "noLaunchConfig";
-        const debuggerEvent: string = configuration.debuggerEvent? configuration.debuggerEvent : "unknownDebuggerEvent"
+        const debuggerEvent: string = configuration.debuggerEvent ? configuration.debuggerEvent : "unknownDebuggerEvent";
         Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": configMode });
     }
 
