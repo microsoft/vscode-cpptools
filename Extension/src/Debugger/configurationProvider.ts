@@ -656,7 +656,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     private async resolvePreLaunchTask(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debugModeOn: boolean = true): Promise<void> {
         const debugType: string = debugModeOn ? "debug" : "run";
         const folderMode: string = folder ? "folder" : "singleFile";
-        // if configuration.debuggerEvent === undefined, it means this configuration is elready defined in launch.json and is shown in debugPanel.
+        // if configuration.debuggerEvent === undefined, it means this configuration is already defined in launch.json and is shown in debugPanel.
         // All the other configs that are selected by user, have a debuggerEvent element.
         const debuggerEvent: string = configuration.debuggerEvent ? configuration.debuggerEvent : DebuggerEvent.debugPanel;
         if (configuration.preLaunchTask) {
