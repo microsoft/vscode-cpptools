@@ -418,7 +418,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             let error: string = "";
             let stdout: string = "";
             let stderr: string = "";
-            const result: number = await new Promise<number>(resolve => {
+            const spawnResult: number = await new Promise<number>(resolve => {
                 if (child) {
                     child.on('error', err => {
                         splitWriteEmitter(err.message);
@@ -445,24 +445,31 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                     });
                 }
             });
-            this.printBuildSummary(error, stdout, stderr);
+            let result: number = this.printBuildSummary(error, stdout, stderr);
+            if (spawnResult === -1) {
+                result = -1;
+            }
             this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
+            return -1;
         }
     }
 
-    private printBuildSummary(error: string, stdout: string, stderr: string): void {
+    private printBuildSummary(error: string, stdout: string, stderr: string): number {
         if (error || (!stdout && stderr && stderr.includes("error")) ||
             (stdout && stdout.includes("error C"))) { // cl.exe compiler errors
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
+            return -1;
         } else if ((!stdout && stderr) || // gcc/clang
             (stdout && stdout.includes("warning C"))) { // cl.exe compiler warnings
             telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
             this.writeEmitter.fire(localize("build.finished.with.warnings", "Build finished with warning(s).") + this.endOfLine);
+            return 0;
         } else {
             this.writeEmitter.fire(localize("build.finished.successfully", "Build finished successfully.") + this.endOfLine);
+            return 0;
         }
     }
 }
