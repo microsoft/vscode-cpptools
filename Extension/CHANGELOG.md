@@ -2,7 +2,7 @@
 
 ## Version 1.9.8: March 20, 2022
 ### Bug Fixes
-* Fix issue with extension activation failing if IntelliSenseEngine was set to Disabled. [#9083](https://github.com/microsoft/vscode-cpptools/issues/9083)
+* Fix an issue with extension activation failing if `C_Cpp.intelliSenseEngine` was set to `Disabled`. [#9083](https://github.com/microsoft/vscode-cpptools/issues/9083)
 
 ## Version 1.9.7: March 23, 2022
 ### New Features
