@@ -317,7 +317,7 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/14.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${primaryCode}.html`);
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
-                if (new CppSettings().codeAnalysisCodeActionShowDocumentation) {
+                if (new CppSettings().clangTidyCodeActionShowDocumentation) {
                     if (codeActionCodeInfo.docCodeAction === undefined) {
                         codeActionCodeInfo.docCodeAction = {
                             title: localize("show_documentation_for", "Show documentation for {0}", primaryCode),
@@ -326,6 +326,8 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                             kind: vscode.CodeActionKind.QuickFix
                         };
                     }
+                } else {
+                    codeActionCodeInfo.docCodeAction = undefined;
                 }
             } else {
                 diagnostic.code = d.code;
@@ -395,12 +397,16 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
             };
         }
 
-        codeToFixes[1].disableAllTypeCodeAction = {
-            title: localize("disable_all_type_problems", "Disable all {0} problems",  codeToFixes[0]),
-            command: { title: 'DisableAllTypeCodeAnalysisProblems', command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
-                arguments: [ codeToFixes[0], identifiersAndUris ] },
-            kind: vscode.CodeActionKind.QuickFix
-        };
+        if (new CppSettings().clangTidyCodeActionShowDisable) {
+            codeToFixes[1].disableAllTypeCodeAction = {
+                title: localize("disable_all_type_problems", "Disable all {0} problems",  codeToFixes[0]),
+                command: { title: 'DisableAllTypeCodeAnalysisProblems', command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
+                    arguments: [ codeToFixes[0], identifiersAndUris ] },
+                kind: vscode.CodeActionKind.QuickFix
+            };
+        } else {
+            codeToFixes[1].disableAllTypeCodeAction = undefined;
+        }
 
         codeToFixes[1].removeAllTypeCodeAction = {
             title: localize("remove_all_type_problems", "Remove all {0} problems", codeToFixes[0]),
@@ -1309,6 +1315,7 @@ export class DefaultClient implements Client {
                                                 }
                                                 fixCodeActions.push(codeAction.fixCodeAction);
                                             }
+                                            let removeAllAdded: boolean = false;
                                             if (codeActionCodeInfo !== undefined) {
                                                 if (codeActionCodeInfo.disableAllTypeCodeAction !== undefined) {
                                                     disableCodeActions.push(codeActionCodeInfo.disableAllTypeCodeAction);
@@ -1317,9 +1324,13 @@ export class DefaultClient implements Client {
                                                     (codeActionCodeInfo.uriToInfo.size > 1 ||
                                                     codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
                                                     removeCodeActions.push(codeActionCodeInfo.removeAllTypeCodeAction);
+                                                    removeAllAdded = true;
                                                 }
                                             }
-                                            removeCodeActions.push(codeAction.removeCodeAction);
+                                            // Remove "this" doesn't seem likely to be useful if there's a "Remove all" available.
+                                            if (!removeAllAdded) {
+                                                removeCodeActions.push(codeAction.removeCodeAction);
+                                            }
 
                                             if (codeActionCodeInfo === undefined || codeActionCodeInfo.docCodeAction === undefined) {
                                                 continue;

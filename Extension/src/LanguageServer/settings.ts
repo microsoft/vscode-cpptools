@@ -174,7 +174,6 @@ export class CppSettings extends Settings {
     public get codeAnalysisUpdateDelay(): number | undefined | null { return super.Section.get<number>("codeAnalysis.updateDelay"); }
     public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
     public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
-    public get codeAnalysisCodeActionShowDocumentation(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.codeAction.showDocumentation"); }
     public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
     public get clangTidyEnabled(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.enabled"); }
     public get clangTidyConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.config"); }
@@ -187,6 +186,8 @@ export class CppSettings extends Settings {
     public get clangTidyUseBuildPath(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.useBuildPath"); }
     public get clangTidyChecksEnabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.enabled"); }
     public get clangTidyChecksDisabled(): string[] | undefined { return super.Section.get<string[]>("codeAnalysis.clangTidy.checks.disabled"); }
+    public get clangTidyCodeActionShowDisable(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDisable"); }
+    public get clangTidyCodeActionShowDocumentation(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
     public addClangTidyChecksDisabled(value: string): void {
         const checks: string[] | undefined = this.clangTidyChecksDisabled;
         if (checks === undefined) {

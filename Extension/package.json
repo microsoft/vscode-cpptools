@@ -417,9 +417,15 @@
           },
           "scope": "resource"
         },
-        "C_Cpp.codeAnalysis.codeAction.showDocumentation": {
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.showDisable": {
             "type": "boolean",
-            "markdownDescription": "%c_cpp.configuration.codeAnalysis.codeAction.showDocumentation.markdownDescription%",
+            "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDisable.markdownDescription%",
+            "default": false,
+            "scope": "application"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.showDocumentation": {
+            "type": "boolean",
+            "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDocumentation.markdownDescription%",
             "default": true,
             "scope": "application"
         },
