@@ -1271,7 +1271,7 @@ export class DefaultClient implements Client {
                                                     }
                                                 }
                                             }
-                                            let removeAllTypeAdded: boolean = false;
+                                            let removeAllTypeAvailable: boolean = false;
                                             if (codeActionCodeInfo !== undefined) {
                                                 if (codeActionCodeInfo.disableAllTypeCodeAction !== undefined) {
                                                     disableCodeActions.push(codeActionCodeInfo.disableAllTypeCodeAction);
@@ -1279,14 +1279,16 @@ export class DefaultClient implements Client {
                                                 if (codeActionCodeInfo.removeAllTypeCodeAction !== undefined &&
                                                     (codeActionCodeInfo.uriToInfo.size > 1 ||
                                                     codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
-                                                    removeAllTypeAdded = true;
+                                                    removeAllTypeAvailable = true;
                                                 }
                                             }
-                                            if (!removeAllTypeAdded || showClear === "AllAndAllTypeAndThis") {
-                                                removeCodeActions.push(codeAction.removeCodeAction);
-                                            }
-                                            if (removeAllTypeAdded && codeActionCodeInfo?.removeAllTypeCodeAction) {
-                                                removeCodeActions.push(codeActionCodeInfo.removeAllTypeCodeAction);
+                                            if (showClear !== "None") {
+                                                if (!removeAllTypeAvailable || showClear === "AllAndAllTypeAndThis") {
+                                                    removeCodeActions.push(codeAction.removeCodeAction);
+                                                }
+                                                if (removeAllTypeAvailable && codeActionCodeInfo?.removeAllTypeCodeAction) {
+                                                    removeCodeActions.push(codeActionCodeInfo.removeAllTypeCodeAction);
+                                                }
                                             }
 
                                             if (codeActionCodeInfo === undefined || codeActionCodeInfo.docCodeAction === undefined) {
@@ -1301,8 +1303,14 @@ export class DefaultClient implements Client {
                                             }
                                         }
                                         if (showClear !== "None") {
-                                            resultCodeActions.push(...removeCodeActions);
+                                            let showClearAllAvailable: boolean = false;
                                             if ((codeActions.length > 1 || codeAnalysisFileToCodeActions.size > 1)) {
+                                                showClearAllAvailable = true;
+                                            }
+                                            if (!showClearAllAvailable || showClear !== "AllOnly") {
+                                                resultCodeActions.push(...removeCodeActions);
+                                            }
+                                            if (showClearAllAvailable) {
                                                 resultCodeActions.push(codeAnalysisAllFixes.removeAllCodeAction);
                                             }
                                         }
@@ -3576,6 +3584,11 @@ export class DefaultClient implements Client {
                         if (removedCodeActionInfoIndex !== -1) {
                             codeActionInfo.identifiers.splice(removedCodeActionInfoIndex, 1);
                             codeActionInfo.workspaceEdits?.splice(removedCodeActionInfoIndex, 1);
+                            if (codeActionInfo.identifiers.length === 0) {
+                                codeFixes[1].uriToInfo.delete(identifiersAndUri.uri);
+                            } else {
+                                codeFixes[1].uriToInfo.set(identifiersAndUri.uri, codeActionInfo);
+                            }
                         }
                     }
 
