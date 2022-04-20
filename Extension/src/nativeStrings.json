@@ -238,5 +238,6 @@
     "clear_code_analysis_squiggles": "Clear code analysis squiggles",
     "multiple_locations_note": "(Multiple locations)",
     "folder_tag": "Folder",
-    "file_tag": "File"
+    "file_tag": "File",
+    "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default."
 }

@@ -87,7 +87,7 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     const fileContents: string = await readFileText(path);
     let rawElement: any = {};
     try {
-        rawElement = jsonc.parse(fileContents);
+        rawElement = jsonc.parse(fileContents, undefined, true);
     } catch (error) {
         throw new Error(failedToParseJson);
     }
@@ -316,6 +316,16 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
+export function defaultExePath(): string {
+    const isWindows: boolean = os.platform() === 'win32';
+    const exePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+    return isWindows ? exePath + '.exe' : exePath;
+}
+
+export function findExePathInArgs(args: string[]): string | undefined {
+    return args.find((arg: string, index: number) => (arg.includes(".exe") || (index > 0 && args[index - 1] === "-o")));
+}
+
 // Pass in 'arrayResults' if a string[] result is possible and a delimited string result is undesirable.
 // The string[] result will be copied into 'arrayResults'.
 export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
@@ -453,6 +463,31 @@ export function checkFileExists(filePath: string): Promise<boolean> {
     });
 }
 
+/** Test whether a file exists */
+export async function checkExecutableWithoutExtensionExists(filePath: string): Promise<boolean> {
+    if (await checkFileExists(filePath)) {
+        return true;
+    }
+    if (os.platform() === 'win32') {
+        if (filePath.length > 4) {
+            const possibleExtension: string = filePath.substring(filePath.length - 4).toLowerCase();
+            if (possibleExtension === ".exe" || possibleExtension === ".cmd" || possibleExtension === ".bat") {
+                return false;
+            }
+        }
+        if (await checkFileExists(filePath + ".exe")) {
+            return true;
+        }
+        if (await checkFileExists(filePath + ".cmd")) {
+            return true;
+        }
+        if (await checkFileExists(filePath + ".bat")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** Test whether a directory exists */
 export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -466,10 +501,44 @@ export function checkDirectoryExists(dirPath: string): Promise<boolean> {
     });
 }
 
+export function createDirIfNotExistsSync(filePath: string | undefined): void {
+    if (!filePath) {
+        return;
+    }
+    const dirPath: string = path.dirname(filePath);
+    if (!checkDirectoryExistsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+}
+
 export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
     } catch (e) {
+    }
+    return false;
+}
+
+export function checkExecutableWithoutExtensionExistsSync(filePath: string): boolean {
+    if (checkFileExistsSync(filePath)) {
+        return true;
+    }
+    if (os.platform() === 'win32') {
+        if (filePath.length > 4) {
+            const possibleExtension: string = filePath.substring(filePath.length - 4).toLowerCase();
+            if (possibleExtension === ".exe" || possibleExtension === ".cmd" || possibleExtension === ".bat") {
+                return false;
+            }
+        }
+        if (checkFileExistsSync(filePath + ".exe")) {
+            return true;
+        }
+        if (checkFileExistsSync(filePath + ".cmd")) {
+            return true;
+        }
+        if (checkFileExistsSync(filePath + ".bat")) {
+            return true;
+        }
     }
     return false;
 }
@@ -833,14 +902,14 @@ export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders)
     });
 }
 
-/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
-export interface CompilerPathAndArgs {
-    compilerPath?: string;
-    compilerName: string;
-    additionalArgs: string[];
+function resolveWindowsEnvironmentVariables(str: string): string {
+    return str.replace(/%([^%]+)%/g, (withPercents, withoutPercents) => {
+        const found: string | undefined = process.env[withoutPercents];
+        return found || withPercents;
+    });
 }
 
-function extractArgs(argsString: string): string[] {
+function legacyExtractArgs(argsString: string): string[] {
     const isWindows: boolean = os.platform() === 'win32';
     const result: string[] = [];
     let currentArg: string = "";
@@ -887,60 +956,166 @@ function extractArgs(argsString: string): string[] {
     return result;
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined = inputCompilerPath;
-    const compilerPathLowercase: string | undefined = inputCompilerPath?.toLowerCase();
-    let compilerName: string = "";
-    let additionalArgs: string[] = [];
-
-    if (compilerPath) {
-        if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {
-            compilerName = path.basename(compilerPath);
-        } else if (compilerPath.startsWith("\"")) {
-            // Input has quotes around compiler path
-            const endQuote: number = compilerPath.substr(1).search("\"") + 1;
-            if (endQuote !== -1) {
-                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
-                compilerPath = compilerPath.substr(1, endQuote - 1);
-                compilerName = path.basename(compilerPath);
+function extractArgs(argsString: string): string[] {
+    argsString = argsString.trim();
+    if (os.platform() === 'win32') {
+        argsString = resolveWindowsEnvironmentVariables(argsString);
+        const result: string[] = [];
+        let currentArg: string = "";
+        let isInQuote: boolean = false;
+        let wasInQuote: boolean = false;
+        let i: number = 0;
+        while (i < argsString.length) {
+            let c: string = argsString[i];
+            if (c === '\"') {
+                if (!isInQuote) {
+                    isInQuote = true;
+                    wasInQuote = true;
+                    ++i;
+                    continue;
+                }
+                // Need to peek at next character.
+                if (++i === argsString.length) {
+                    break;
+                }
+                c = argsString[i];
+                if (c !== '\"') {
+                    isInQuote = false;
+                }
+                // Fall through. If c was a quote character, it will be added as a literal.
             }
-        } else {
-            // Input has no quotes around compiler path
-            let spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (checkFileExistsSync(compilerPath)) {
-                // Get compiler name if there are no args but path is valid.
-                compilerName = path.basename(compilerPath);
-            } else if (spaceStart !== -1 && !checkFileExistsSync(compilerPath)) {
-                // Get compiler name if compiler path has spaces and args.
-                // Go from right to left checking if a valid path is to the left of a space.
-                let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
-                while (!checkFileExistsSync(potentialCompilerPath)) {
-                    spaceStart = potentialCompilerPath.lastIndexOf(" ");
-                    if (spaceStart === -1) {
-                        // Reached the start without finding a valid path. Use the original value.
-                        potentialCompilerPath = compilerPath;
+            if (c === '\\') {
+                let backslashCount: number = 1;
+                let reachedEnd: boolean = true;
+                while (++i !== argsString.length) {
+                    c = argsString[i];
+                    if (c !== '\\') {
+                        reachedEnd = false;
                         break;
                     }
-                    potentialCompilerPath = potentialCompilerPath.substr(0, spaceStart);
+                    ++backslashCount;
                 }
-                if (compilerPath !== potentialCompilerPath) {
-                    // Found a valid compilerPath and args.
-                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
-                    compilerPath = potentialCompilerPath;
-                    compilerName = path.basename(potentialCompilerPath);
+                const still_escaping: boolean = (backslashCount % 2) !== 0;
+                if (!reachedEnd && c === '\"') {
+                    backslashCount /= 2;
+                }
+                while (backslashCount--) {
+                    currentArg += '\\';
+                }
+                if (reachedEnd) {
+                    break;
+                }
+                // If not still escaping and a quote was found, it needs to be handled above.
+                if (!still_escaping && c === '\"') {
+                    continue;
+                }
+                // Otherwise, fall through to handle c as a literal.
+            }
+            if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
+                if (!isInQuote) {
+                    if (currentArg !== "" || wasInQuote) {
+                        wasInQuote = false;
+                        result.push(currentArg);
+                        currentArg = "";
+                    }
+                    i++;
+                    continue;
+                }
+            }
+            currentArg += c;
+            i++;
+        }
+        if (currentArg !== "" || wasInQuote) {
+            result.push(currentArg);
+        }
+        return result;
+    } else {
+        const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString]);
+        if (wordexpResult === undefined) {
+            return [];
+        }
+        const jsonText: string = wordexpResult.toString();
+        return jsonc.parse(jsonText, undefined, true);
+    }
+}
+
+function isCl(compilerPath: string): boolean {
+    const compilerPathLowercase: string = compilerPath.toLowerCase();
+    return (compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
+        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl") || (compilerPathLowercase === "cl"));
+}
+
+/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
+export interface CompilerPathAndArgs {
+    compilerPath?: string;
+    compilerName: string;
+    compilerArgs?: string[];
+    compilerArgsFromCommandLineInPath: string[];
+    allCompilerArgs: string[];
+}
+
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
+    let compilerPath: string | undefined = inputCompilerPath;
+    let compilerName: string = "";
+    let compilerArgsFromCommandLineInPath: string[] = [];
+    if (compilerPath) {
+        compilerPath = compilerPath.trim();
+        if (isCl(compilerPath) || checkExecutableWithoutExtensionExistsSync(compilerPath)) {
+            // If the path ends with cl, or if a file is found at that path, accept it without further validation.
+            compilerName = path.basename(compilerPath);
+        } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
+            // If the string starts with a quote, treat it as a command line.
+            // Otherwise, a path with a leading quote would not be valid.
+            if (useLegacyBehavior) {
+                compilerArgsFromCommandLineInPath = legacyExtractArgs(compilerPath);
+                if (compilerArgsFromCommandLineInPath.length > 0) {
+                    compilerPath = compilerArgsFromCommandLineInPath.shift();
+                    if (compilerPath) {
+                        // Try to trim quotes from compiler path.
+                        const tempCompilerPath: string[] | undefined = extractArgs(compilerPath);
+                        if (tempCompilerPath && compilerPath.length > 0) {
+                            compilerPath = tempCompilerPath[0];
+                        }
+                        compilerName = path.basename(compilerPath);
+                    }
+                }
+            } else {
+                compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
+                if (compilerArgsFromCommandLineInPath.length > 0) {
+                    compilerPath = compilerArgsFromCommandLineInPath.shift();
+                    if (compilerPath) {
+                        compilerName = path.basename(compilerPath);
+                    }
+                }
+            }
+        } else {
+            const spaceStart: number = compilerPath.lastIndexOf(" ");
+            if (spaceStart !== -1) {
+                // There is no leading quote, but a space suggests it might be a command line.
+                // Try processing it as a command line, and validate that by checking for the executable.
+                const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
+                let potentialCompilerPath: string | undefined = potentialArgs.shift();
+                if (useLegacyBehavior) {
+                    if (potentialCompilerPath) {
+                        const tempCompilerPath: string[] | undefined = extractArgs(potentialCompilerPath);
+                        if (tempCompilerPath && compilerPath.length > 0) {
+                            potentialCompilerPath = tempCompilerPath[0];
+                        }
+                    }
+                }
+                if (potentialCompilerPath) {
+                    if (isCl(potentialCompilerPath) || checkExecutableWithoutExtensionExistsSync(potentialCompilerPath)) {
+                        compilerArgsFromCommandLineInPath = potentialArgs;
+                        compilerPath = potentialCompilerPath;
+                        compilerName = path.basename(compilerPath);
+                    }
                 }
             }
         }
     }
-    // Combine args from inputCompilerPath and inputCompilerArgs and remove duplicates
-    if (inputCompilerArgs && inputCompilerArgs.length) {
-        additionalArgs = inputCompilerArgs.concat(additionalArgs.filter(
-            function (item: string): boolean {
-                return inputCompilerArgs.indexOf(item) < 0;
-            }));
-    }
-    return { compilerPath, compilerName, additionalArgs };
+    let allCompilerArgs: string[] = !compilerArgs ? [] : compilerArgs;
+    allCompilerArgs = allCompilerArgs.concat(compilerArgsFromCommandLineInPath);
+    return { compilerPath, compilerName, compilerArgs, compilerArgsFromCommandLineInPath, allCompilerArgs };
 }
 
 export function escapeForSquiggles(s: string): string {
@@ -1217,7 +1392,7 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 }
 
 export function normalizeArg(arg: string): string {
-    arg = arg.trimLeft().trimRight();
+    arg = arg.trim();
     // Check if the arg is enclosed in backtick,
     // or includes unescaped double-quotes (or single-quotes on windows),
     // or includes unescaped single-quotes on mac and linux.
@@ -1278,3 +1453,4 @@ export function isVsCodeInsiders(): boolean {
         extensionPath.includes(".vscode-exploration") ||
         extensionPath.includes(".vscode-server-exploration");
 }
+

@@ -39,8 +39,8 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                     }
                     const offset_scope: number = symbol.name.lastIndexOf("::", offset_paren - 2);
                     if (offset_scope > 0) {
-                        detail = symbol.name.substr(0, offset_scope);
-                        symbol.name = symbol.name.substr(offset_scope + 2);
+                        detail = symbol.name.substring(0, offset_scope);
+                        symbol.name = symbol.name.substring(offset_scope + 2);
                     }
                 }
 

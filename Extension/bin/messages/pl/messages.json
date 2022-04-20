@@ -3445,5 +3445,10 @@
   "Parametry (%d1) zostały określone przez wykres definicji parametru IFC, podczas gdy parametry (%d2) zostały określone przez deklarację IFC",
   "Parametry (%d1) zostały określone przez wykres definicji parametru IFC, podczas gdy parametry (%d2) zostały określone przez deklarację IFC",
   "Parametry (%d1) zostały określone przez wykres definicji parametru IFC, podczas gdy parametry (%d2) zostały określone przez deklarację IFC",
-  "Brak reprezentacji IFC definicji funkcji %sq"
+  "Brak reprezentacji IFC definicji funkcji %sq",
+  "modyfikator funkcji nie ma zastosowania do deklaracji szablonu elementu członkowskiego",
+  "wybór elementu członkowskiego obejmuje zbyt wiele zagnieżdżonych typów anonimowych",
+  "nie ma wspólnego typu między argumentami operacji",
+  "oczekiwano wskaźnika do składowej",
+  "elastyczna składowa tablicy nie może być zadeklarowana w typie pustym w inny sposób"
 ]
