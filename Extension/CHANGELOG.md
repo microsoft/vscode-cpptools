@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.9.8: April 20, 2022
+### Bug Fixes
+* Fix an issue with extension activation failing if `C_Cpp.intelliSenseEngine` was set to `Disabled`. [#9083](https://github.com/microsoft/vscode-cpptools/issues/9083)
+
 ## Version 1.9.7: March 23, 2022
 ### New Features
 * Add debugger support for Apple M1 (osx-arm64). [#7035](https://github.com/microsoft/vscode-cpptools/issues/7035)
