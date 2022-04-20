@@ -453,7 +453,6 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
-            return -1;
         }
     }
 
