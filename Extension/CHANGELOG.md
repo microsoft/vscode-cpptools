@@ -2,7 +2,7 @@
 
 ## Version 1.10.0: April 21, 2022
 ### New Feature
-* Added support for setting values on top level watch window expressions. [#9019](https://github.com/microsoft/vscode-cpptools/issues/9019)
+* Added support for setting values on top-level watch window expressions. [#9019](https://github.com/microsoft/vscode-cpptools/issues/9019)
 
 ### Enhancements
 * Add `C_Cpp.clangTidy.useBuildPath` setting to enable using `-p` with clang-tidy. [#8740](https://github.com/microsoft/vscode-cpptools/issues/8740), [#8952](https://github.com/microsoft/vscode-cpptools/issues/8952)
