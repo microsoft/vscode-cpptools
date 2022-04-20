@@ -3583,7 +3583,9 @@ export class DefaultClient implements Client {
                         }
                         if (removedCodeActionInfoIndex !== -1) {
                             codeActionInfo.identifiers.splice(removedCodeActionInfoIndex, 1);
-                            codeActionInfo.workspaceEdits?.splice(removedCodeActionInfoIndex, 1);
+                            if (codeActionInfo.workspaceEdits !== undefined) {
+                                codeActionInfo.workspaceEdits.splice(removedCodeActionInfoIndex, 1);
+                            }
                             if (codeActionInfo.identifiers.length === 0) {
                                 codeFixes[1].uriToInfo.delete(identifiersAndUri.uri);
                             } else {
