@@ -445,7 +445,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private printBuildSummary(error: string, stdout: string, stderr: string): number {
         if (error || (!stdout && stderr && stderr.includes("error")) ||
-            (stdout && stdout.includes("error C"))) { // cl.exe compiler errors
+            (stdout && (stdout.includes("error C") || stdout.includes("LINK : fatal error")))) { // cl.exe compiler errors
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
             return -1;
