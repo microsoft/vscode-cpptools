@@ -1,23 +1,23 @@
 # C/C++ for Visual Studio Code Change Log
 
 ## Version 1.10.0: April 21, 2022
-### New Features
-* Added support for setting values on top level watch window expressions.[#9019](https://github.com/microsoft/vscode-cpptools/issues/9019)
+### New Feature
+* Added support for setting values on top level watch window expressions. [#9019](https://github.com/microsoft/vscode-cpptools/issues/9019)
 
 ### Enhancements
 * Add `C_Cpp.clangTidy.useBuildPath` setting to enable using `-p` with clang-tidy. [#8740](https://github.com/microsoft/vscode-cpptools/issues/8740), [#8952](https://github.com/microsoft/vscode-cpptools/issues/8952)
 * Update the bundled clang-format and clang-tidy to version 14.0.0.
 
 ### Bug Fixes
-* Fix 'System.NullReferenceException when continuing after adding breakpoint.' [#1297](https://github.com/microsoft/MIEngine/issues/1297)
+* Fix System.NullReferenceException when continuing after adding breakpoint. [#1297](https://github.com/microsoft/MIEngine/issues/1297)
 * Fix issue with shell processing incorrectly occurring for `arguments` fields in `compile_commands.json` files. [#8649](https://github.com/microsoft/vscode-cpptools/issues/8649)
-* Fix issue with inconsistent handling of shell escaping in compiler arg fields.  All compiler arg array fields are now assumed to not include shell quoting, escaping or shell variables. Added a `C_Cpp.legacyCompilerArgsBehavior` to restore the legacy behavior. [#8963](https://github.com/microsoft/vscode-cpptools/issues/8963)
+* Fix issue with inconsistent handling of shell escaping in compiler arg fields. All compiler arg array fields are now assumed to not include shell quoting, escaping or shell variables. Added a `C_Cpp.legacyCompilerArgsBehavior` to restore the legacy behavior. [#8963](https://github.com/microsoft/vscode-cpptools/issues/8963)
 * Fix completion not working in `#define` definitions and in definition names when manually invoked. [#4662](https://github.com/microsoft/vscode-cpptools/issues/4662), [#8973](https://github.com/microsoft/vscode-cpptools/issues/8973), [#9078](https://github.com/microsoft/vscode-cpptools/issues/9078)
 * Add localized strings for build tasks. [#9051](https://github.com/microsoft/vscode-cpptools/issues/9051)
 * Fix Go to Definition with C for identifiers that are C++ keywords. [#9081](https://github.com/microsoft/vscode-cpptools/issues/9081)
 * Fix the new Run/Debug Code button not working with a modified program location. [#9082](https://github.com/microsoft/vscode-cpptools/issues/9082)
 * Fix `__GNUC__` system defines causing clang-tidy to undefine `_Float32`. [#9091](https://github.com/microsoft/vscode-cpptools/issues/9091)
-* Fix 'breakpoints set before launch in shared objects cannot be disabled/deleted' [#9095]([https://github.com/microsoft/vscode-cpptools/issues/9095)
+* Fix breakpoints set before launch in shared objects cannot be disabled/deleted. [#9095](https://github.com/microsoft/vscode-cpptools/issues/9095)
 * Fix compiler querying failing for compilers that don't output system includes. [#9099](https://github.com/microsoft/vscode-cpptools/issues/9099)
 * Fix completion occurring (when it shouldn't) after the comma in a definition list. [#9101](https://github.com/microsoft/vscode-cpptools/issues/9101)
 * Fix `;` incorrectly matching for `break;` and `continue;` completion. [#9115](https://github.com/microsoft/vscode-cpptools/issues/9115)
