@@ -3528,6 +3528,14 @@ export class DefaultClient implements Client {
         if (!diagnosticsCollectionCodeAnalysis) {
             return;
         }
+
+        // A deep copy is needed because the call to identifiers.splice below can
+        // remove elements in identifiersAndUris[...].identifiers.
+        const identifiersAndUrisCopy: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
+        for (const identifiersAndUri of identifiersAndUris) {
+            identifiersAndUrisCopy.push({ uri: identifiersAndUri.uri, identifiers: [...identifiersAndUri.identifiers] });
+        }
+
         // Remove the diagnostics directly.
         let codeActionsChanged: boolean = false;
         for (const identifiersAndUri of identifiersAndUris) {
@@ -3609,7 +3617,7 @@ export class DefaultClient implements Client {
 
         // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
         this.languageClient.sendNotification(RemoveCodeAnalysisProblemsNotification, {
-            identifiersAndUris: identifiersAndUris, refreshSquigglesOnSave: refreshSquigglesOnSave });
+            identifiersAndUris: identifiersAndUrisCopy, refreshSquigglesOnSave: refreshSquigglesOnSave });
     }
 
     public async handleDisableAllTypeCodeAnalysisProblems(code: string,
