@@ -419,13 +419,19 @@
         },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.showClear": {
             "type": "string",
-            "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.markdownDescription%",
+            "description": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.description%",
             "enum": [
                 "None",
-                "All",
+                "AllOnly",
                 "AllAndAllType",
                 "AllAndAllTypeAndThis"
               ],
+            "enumDescriptions": [
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.None.description%",
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllOnly.description%",
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description%",
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description%"
+            ],
             "default": "AllAndAllType",
             "scope": "application"
         },
