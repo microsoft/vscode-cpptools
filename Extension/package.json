@@ -417,10 +417,22 @@
           },
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.showClear": {
+            "type": "string",
+            "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.markdownDescription%",
+            "enum": [
+                "None",
+                "All",
+                "AllAndAllType",
+                "AllAndAllTypeAndThis"
+              ],
+            "default": "AllAndAllType",
+            "scope": "application"
+        },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.showDisable": {
             "type": "boolean",
             "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDisable.markdownDescription%",
-            "default": false,
+            "default": true,
             "scope": "application"
         },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.showDocumentation": {
