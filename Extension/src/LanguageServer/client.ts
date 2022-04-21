@@ -394,7 +394,9 @@ function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void 
                 }
                 // TODO: Is the ideal code always selected as the primary one?
                 const primaryCode: string = codes[codeIndex];
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/14.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/${primaryCode}.html`);
+                const docPage: string = primaryCode === "clang-tidy-nolint" ? "#suppressing-undesired-diagnostics" :
+                    `checks/${primaryCode}.html`;
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/14.0.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {
