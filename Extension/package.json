@@ -2752,6 +2752,12 @@
         "title": "%c_cpp.command.BuildAndRunFile.title%",
         "category": "C/C++",
         "icon": "$(run)"
+      },
+      {
+        "command": "C_Cpp.AddConfiguration",
+        "title": "%c_cpp.command.AddConfiguration.title%",
+        "category": "C/C++",
+        "icon": "$(add)"
       }
     ],
     "keybindings": [
@@ -3881,7 +3887,12 @@
           "command": "C_Cpp.BuildAndRunFile",
           "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
           "group": "navigation@1"
-        }
+        },
+        {
+          "command": "C_Cpp.AddConfiguration",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
+          "group": "navigation@2"
+        }        
       ],
       "editor/context": [
         {
