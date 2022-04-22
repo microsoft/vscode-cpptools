@@ -51,46 +51,106 @@
   "contributes": {
     "walkthroughs": [
       {
-        "id": "cppWelcomeTestA",
-        "title": "Get Started with C++ Development - A",
+        "id": "cppWelcome",
+        "title": "Get Started with C++ Development",
         "description": "Dive into VS Code's rich C++ development experience.",
         "when": "false",
         "steps": [
           {
             "id": "verify.compiler.mac",
-            "title": "Install a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "title": "Check for a C++ compiler",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == mac",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-clang-macos-short.md"
+              "markdown": "walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
             "id": "verify.compiler.linux",
-            "title": "Install a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "title": "Check for a C++ compiler",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == linux",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-gcc-linux-short.md"
+              "markdown": "walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
             "id": "verify.compiler.windows",
-            "title": "Install a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "title": "Check for a C++ compiler",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
             "when": "workspacePlatform == windows",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-compiler-windows-short.md"
+              "markdown": "walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
-            "id": "open.project",
-            "title": "Open your project folder",
-            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Pick a folder](command:workbench.action.files.openFolder)",
-            "when": "workspaceFolderCount == 0",
+            "id": "create.cpp.file",
+            "title": "Create a C++ file",
+            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file. Be sure to save it as \".cpp\".\n[Create C++ File](command:toSide:welcome.showNewFileEntries)",
             "media": {
-              "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
-              "svg": "walkthrough/images/openFolder.svg"
+              "svg": "walkthrough/images/openFolder.svg",
+              "altText": "Open a C++ file or a folder with a C++ project."
+            },
+            "when": ""
+          },
+          {
+            "id": "run.project.mac",
+            "title": "Run and debug your C++ file",
+            "description": "Open your C++ file and click on the play button in the top right corner of the editor, or press F5 when on the file. Select \"clang++ - Build and debug active file\".",
+            "when": "workspacePlatform == mac",
+            "media": {
+              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "svg": "walkthrough/images/rundebug.svg"
+            }
+          },
+          {
+            "id": "run.project.linux",
+            "title": "Run and debug your C++ file",
+            "description": "Open your C++ file and click on the play button in the top right corner of the editor, or press F5 when on the file. Select \"g++ - Build and debug active file\".",
+            "when": "workspacePlatform == linux",
+            "media": {
+              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "svg": "walkthrough/images/rundebug.svg"
+            }
+          },
+          {
+            "id": "run.project.windows",
+            "title": "Run and debug your C++ file",
+            "description": "Open your C++ file and click on the play button in the top right corner of the editor, or press F5 when on the file. Select \"cl.exe - Build and debug active file\" to run with the debugger.",
+            "when": "workspacePlatform == windows",
+            "media": {
+              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "svg": "walkthrough/images/rundebug.svg"
+            }
+          },
+          {
+            "id": "customize.debugging.linux",
+            "title": "Customize debugging",
+            "when": "workspacePlatform == linux",
+            "description": "Sometimes you need to customize your debug configuration (like if you need to pass args to your program at runtime). To customize debugging, select \"Add Debug Configuration\" from the play button dropdown. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "media": {
+              "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
+              "svg": ""
+            }
+          },
+          {
+            "id": "customize.debugging.windows",
+            "title": "Customize debugging",
+            "when": "workspacePlatform == windows",
+            "description": "Sometimes you need to customize your debug configuration (like if you need to pass args to your program at runtime). To customize debugging, select \"Add Debug Configuration\" from the play button dropdown. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
+            "media": {
+              "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
+              "svg": ""
+            }
+          },
+          {
+            "id": "customize.debugging.mac",
+            "title": "Customize debugging",
+            "when": "workspacePlatform == mac",
+            "description": "Sometimes you need to customize your debug configuration (like if you need to pass args to your program at runtime). To customize debugging, select \"Add Debug Configuration\" from the play button dropdown. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
+            "media": {
+              "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
+              "svg": ""
             }
           },
           {
@@ -100,171 +160,6 @@
             "media": {
               "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
               "svg": "walkthrough/images/configuration.svg"
-            }
-          },
-          {
-            "id": "run.project.mac",
-            "title": "Run and debug your C++ file",
-            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file - make sure to save it as \".cpp\". \n Press F5 when on the file and select \"C++ (GDB/LLDB)\" and \"clang++ - Build and debug active file\" to run with the debugger. \n \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
-            "when": "workspacePlatform == mac",
-            "media": {
-              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
-              "svg": "walkthrough/images/rundebug.svg"
-            }
-          },
-          {
-            "id": "run.project.linux",
-            "title": "Run and debug your C++ file",
-            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file - make sure to save it as \".cpp\". \n Press F5 when on the file and select \"C++ (GDB/LLDB)\" and \"g++ - Build and debug active file\" to run with the debugger. \n \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
-            "when": "workspacePlatform == linux",
-            "media": {
-              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
-              "svg": "walkthrough/images/rundebug.svg"
-            }
-          },
-          {
-            "id": "run.project.windows",
-            "title": "Run and debug your C++ file",
-            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file - make sure to save it as \".cpp\". \n Press F5 when on the file and select \"C++ (Windows)\" and \"cl.exe - Build and debug active file\" to run with the debugger. \n \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
-            "when": "workspacePlatform == windows",
-            "media": {
-              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
-              "svg": "walkthrough/images/rundebug.svg"
-            }
-          },
-          {
-            "id": "install.cmake.tools",
-            "title": "Install CMake Tools",
-            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug your CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
-            "completionEvents": [
-              "extensionInstalled:ms-vscode.cmake-tools"
-            ],
-            "media": {
-              "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
-              "svg": "walkthrough/images/cmake.svg"
-            }
-          },
-          {
-            "id": "watch.tutorials",
-            "title": "Lean back and get started",
-            "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
-            "media": {
-              "altText": "A screenshot with a preview of the video tutorial and a play button.",
-              "svg": "walkthrough/images/learn.svg"
-            }
-          }
-        ]
-      },
-      {
-        "id": "cppWelcomeTestB",
-        "title": "Get Started with C++ Development - B",
-        "description": "Dive into VS Code's rich C++ development experience.",
-        "when": "false",
-        "steps": [
-          {
-            "id": "verify.compiler.mac",
-            "title": "Install a C++ compiler",
-            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
-            "when": "workspacePlatform == mac",
-            "media": {
-              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
-            }
-          },
-          {
-            "id": "verify.compiler.linux",
-            "title": "Install a C++ compiler",
-            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
-            "when": "workspacePlatform == linux",
-            "media": {
-              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
-            }
-          },
-          {
-            "id": "verify.compiler.windows",
-            "title": "Install a C++ compiler",
-            "description": "The C++ extension uses the C++ compiler on your system to configure IntelliSense for your project. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
-            "when": "workspacePlatform == windows",
-            "media": {
-              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
-            }
-          },
-          {
-            "id": "open.project",
-            "title": "Open your project folder",
-            "description": "Open an existing folder that contains your C++ project, or create a new folder. \n[Pick a folder](command:workbench.action.files.openFolder)",
-            "when": "workspaceFolderCount == 0",
-            "media": {
-              "altText": "A screenshot that shows a C++ project opened in the file Explorer.",
-              "image": {
-                "light": "walkthrough/images/cpp-folder-explorer-light.png",
-                "dark": "walkthrough/images/cpp-folder-explorer-dark.png",
-                "hc": "walkthrough/images/cpp-folder-explorer-hc.png"
-              }
-            }
-          },
-          {
-            "id": "setup.intellisense",
-            "title": "Configure C++ IntelliSense",
-            "description": "Verify important IntelliSense settings like Compiler Path, Compiler Args, IntelliSense Mode, and Include Path. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
-            "media": {
-              "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
-              "image": {
-                "light": "walkthrough/images/intellisense-config-light.png",
-                "dark": "walkthrough/images/intellisense-config-dark.png",
-                "hc": "walkthrough/images/intellisense-config-hc.png"
-              }
-            }
-          },
-          {
-            "id": "run.project.mac",
-            "title": "Run and debug your C++ file",
-            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
-            "when": "workspacePlatform == mac",
-            "media": {
-              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-mac.md"
-            }
-          },
-          {
-            "id": "run.project.linux",
-            "title": "Run and debug your C++ file",
-            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
-            "when": "workspacePlatform == linux",
-            "media": {
-              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-linux.md"
-            }
-          },
-          {
-            "id": "run.project.windows",
-            "title": "Run and debug your C++ file",
-            "description": "Create a default build task and debug configuration for your project. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
-            "when": "workspacePlatform == windows",
-            "media": {
-              "markdown": "dist/walkthrough/debugconfig/run-and-debug-project-windows.md"
-            }
-          },
-          {
-            "id": "install.cmake.tools",
-            "title": "Install CMake Tools",
-            "description": "Do you build your project with CMake? Install the CMake Tools extension to seamlessly build and debug your CMake project. \n[Install CMake Tools](command:workbench.extensions.installExtension?%22ms-vscode.cmake-tools%22)",
-            "completionEvents": [
-              "extensionInstalled:ms-vscode.cmake-tools"
-            ],
-            "media": {
-              "altText": "A screenshot of the CMake Tools extension page in the Marketplace.",
-              "image": {
-                "light": "walkthrough/images/cmake-tools-light.png",
-                "dark": "walkthrough/images/cmake-tools-dark.png",
-                "hc": "walkthrough/images/cmake-tools-hc.png"
-              }
-            }
-          },
-          {
-            "id": "watch.tutorials",
-            "title": "Lean back and get started",
-            "description": "Watch this series of short and practical videos about setting up C++ IntelliSense and building and debugging C++ projects. \n[Watch Tutorials](https://code.visualstudio.com/docs/cpp/introvideos-cpp)",
-            "media": {
-              "altText": "A screenshot with a preview of the video tutorial and a play button.",
-              "image": "walkthrough/images/getting-started-video.png"
             }
           }
         ]
