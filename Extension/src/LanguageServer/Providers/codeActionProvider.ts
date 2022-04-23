@@ -93,7 +93,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                             if (codeActionCodeInfo !== undefined) {
                                 if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                     (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                    codeActionCodeInfo.uriToInfo.values().next().value.workspaceEdits?.length > 1)) {
+                                    codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
                                     fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                                 }
                             }
