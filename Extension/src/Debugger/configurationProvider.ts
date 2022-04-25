@@ -14,7 +14,7 @@ import * as Telemetry from '../telemetry';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
-import { parse } from 'comment-json';
+import * as jsonc from 'comment-json';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
@@ -632,7 +632,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
         }
 
-        await util.writeFileText(launchJsonPath, JSON.stringify(rawLaunchJson, null, settings.editorTabSize));
+        await util.writeFileText(launchJsonPath, jsonc.stringify(rawLaunchJson, null, settings.editorTabSize));
         await vscode.workspace.openTextDocument(launchJsonPath);
         const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(launchJsonPath);
         if (doc) {
@@ -658,7 +658,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (selectedConfig.preLaunchTask) {
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
         }
-
         // Write debug configuraion in launch.json file.
         await this.writeDebugConfig(selectedConfig, folder);
 
@@ -685,7 +684,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         selectedConfig.debuggerEvent = DebuggerEvent.launchPlayButton;
         // startDebugging will trigger a call to resolveDebugConfiguration.
         await vscode.debug.startDebugging(folder, selectedConfig, {noDebug: !debugModeOn});
-
     }
 
     private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = false): Promise<vscode.DebugConfiguration | undefined> {
@@ -907,7 +905,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
         let items: vscode.CompletionItem[] = this.snippets;
 
-        const launch: any = parse(document.getText());
+        const launch: any = jsonc.parse(document.getText());
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
         if (launch.configurations.length !== 0) {
             items = [];

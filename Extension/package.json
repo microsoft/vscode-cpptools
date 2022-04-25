@@ -2754,11 +2754,10 @@
         "icon": "$(run)"
       },
       {
-        "command": "C_Cpp.AddConfiguration",
-        "title": "%c_cpp.command.AddConfiguration.title%",
+        "command": "C_Cpp.AddDebugConfiguration",
+        "title": "%c_cpp.command.AddDebugConfiguration.title%",
         "category": "C/C++",
-        "icon": "$(add)"
-      }
+        "icon": "$(add)"      }
     ],
     "keybindings": [
       {
@@ -3887,12 +3886,14 @@
           "command": "C_Cpp.BuildAndRunFile",
           "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
           "group": "navigation@1"
-        },
+        }
+      ],
+      "editor/title": [
         {
-          "command": "C_Cpp.AddConfiguration",
+          "command": "C_Cpp.AddDebugConfiguration",
           "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
-          "group": "navigation@2"
-        }        
+          "group": "navigation"
+        }
       ],
       "editor/context": [
         {
