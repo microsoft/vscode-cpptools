@@ -640,10 +640,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    public async addConfiguration(textEditor: vscode.TextEditor): Promise<void> {
+    public async addDebugConfiguration(textEditor: vscode.TextEditor): Promise<void> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
-            vscode.window.showWarningMessage(localize("add.configuration.not.available.for.single.file", "Add configuration is not available for single file."));
+            return;
         }
         const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, true);
         if (!selectedConfig) {
