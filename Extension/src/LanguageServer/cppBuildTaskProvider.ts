@@ -287,7 +287,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!tasksJsonPath) {
             throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
         }
-
+        // Vs Code removes the comments in tasks.json, microsoft/vscode#29453
         await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
     }
 

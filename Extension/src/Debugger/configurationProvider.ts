@@ -651,9 +651,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return; // User canceled it.
         }
 
-        if (this.isClConfiguration(selectedConfig.name) && this.showErrorIfClNotAvailable(selectedConfig.name)) {
-            return;
-        }
         // Write preLaunchTask into tasks.json file.
         if (selectedConfig.preLaunchTask) {
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
@@ -674,10 +671,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.launchPlayButton, { "debugType": debugModeOn ? "debug" : "run", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
             return; // User canceled it.
-        }
-
-        if (this.isClConfiguration(selectedConfig.name) && this.showErrorIfClNotAvailable(selectedConfig.name)) {
-            return;
         }
 
         // Keep track of the entry point where the debug has been selected, for telemetry purposes.
@@ -722,6 +715,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             selection = await vscode.window.showQuickPick(localizeConfigs(sortedItems), {
                 placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
             });
+        }
+        if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {
+            return;
         }
         return selection?.configuration;
     }
