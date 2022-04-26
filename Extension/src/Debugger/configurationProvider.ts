@@ -603,7 +603,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     public async writeDebugConfig(config: vscode.DebugConfiguration, folder?: vscode.WorkspaceFolder): Promise<void> {
-        const settings: OtherSettings = new OtherSettings();
         const launchJsonPath: string | undefined = this.getLaunchJsonPath();
 
         if (this.checkDebugConfigExists(config.name, folder)) {
@@ -632,6 +631,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
         }
 
+        const settings: OtherSettings = new OtherSettings();
         await util.writeFileText(launchJsonPath, jsonc.stringify(rawLaunchJson, null, settings.editorTabSize));
         await vscode.workspace.openTextDocument(launchJsonPath);
         const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(launchJsonPath);
