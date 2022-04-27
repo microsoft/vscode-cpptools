@@ -2756,7 +2756,7 @@
         "command": "C_Cpp.AddDebugConfiguration",
         "title": "%c_cpp.command.AddDebugConfiguration.title%",
         "category": "C/C++",
-        "icon": "$(add)"      
+        "icon": "$(debug-configure)"      
       }
     ],
     "keybindings": [
@@ -3886,11 +3886,6 @@
           "command": "C_Cpp.BuildAndRunFile",
           "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile",
           "group": "navigation@1"
-        },
-        {
-          "command": "C_Cpp.AddDebugConfiguration",
-          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen",
-          "group": "navigation@3"
         }
       ],
       "editor/title": [
