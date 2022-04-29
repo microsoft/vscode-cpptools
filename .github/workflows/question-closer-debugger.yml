@@ -24,6 +24,6 @@ jobs:
           ignoreLabels: language service,internal
           involves: wardengnaw,pieandcakes,calgagi
           closeDays: 14
-          closeComment: "For housekeeping purposes, this issue has been closed because it is a question and has not had recent activity."
+          closeComment: "This issue has been closed because it is a question and has not had recent activity."
           pingDays: 7
           pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the question has been answered."

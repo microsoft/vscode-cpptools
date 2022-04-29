@@ -23,4 +23,4 @@ jobs:
           labels: by design,debugger
           ignoreLabels: language service,internal
           closeDays: 0
-          closeComment: "This issue has been closed because the described behavior was determined as by design."
+          closeComment: "This issue has been closed because the described behavior was determined to be by design."
