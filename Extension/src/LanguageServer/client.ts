@@ -221,7 +221,7 @@ function showWarning(params: ShowWarningParams): void {
     }
 }
 
-function publishDiagnostics(params: PublishDiagnosticsParams): void {
+function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
         diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
     }
@@ -331,7 +331,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
     }
 }
 
-function publishCodeAnalysisDiagnostics(params: PublishDiagnosticsParams): void {
+function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsParams): void {
     if (!diagnosticsCollectionCodeAnalysis) {
         diagnosticsCollectionCodeAnalysis = vscode.languages.createDiagnosticCollection("clang-tidy");
     }
@@ -611,18 +611,31 @@ interface GetDiagnosticsResult {
     diagnostics: string;
 }
 
-interface CppDiagnosticRelatedInformation {
+interface IntelliSenseDiagnosticRelatedInformation {
     location: Location;
     message: string;
 }
 
-interface Diagnostic {
+interface CodeAnalysisDiagnosticRelatedInformation {
+    location: Location;
+    message: string;
+    workspaceEdit?: WorkspaceEdit;
+}
+
+interface IntelliSenseDiagnostic {
     range: Range;
-    code?: number | string;
-    source?: string;
+    code?: number;
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
-    relatedInformation?: CppDiagnosticRelatedInformation[];
+    relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
+}
+
+interface CodeAnalysisDiagnostic {
+    range: Range;
+    code: string;
+    severity: vscode.DiagnosticSeverity;
+    localizeStringParams: LocalizeStringParams;
+    relatedInformation?: CodeAnalysisDiagnosticRelatedInformation[];
     workspaceEdit?: WorkspaceEdit;
 }
 
@@ -645,9 +658,14 @@ interface RemoveCodeAnalysisCodeActionFixesParams {
     identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[];
 };
 
-interface PublishDiagnosticsParams {
+interface PublishIntelliSenseDiagnosticsParams {
     uri: string;
-    diagnostics: Diagnostic[];
+    diagnostics: IntelliSenseDiagnostic[];
+}
+
+interface PublishCodeAnalysisDiagnosticsParams {
+    uri: string;
+    diagnostics: CodeAnalysisDiagnostic[];
 }
 
 interface ShowMessageWindowParams {
@@ -899,8 +917,8 @@ const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths, v
 const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
-const PublishDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishDiagnostics');
-const PublishCodeAnalysisDiagnosticsNotification: NotificationType<PublishDiagnosticsParams, void> = new NotificationType<PublishDiagnosticsParams, void>('cpptools/publishCodeAnalysisDiagnostics');
+const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams, void> = new NotificationType<PublishIntelliSenseDiagnosticsParams, void>('cpptools/publishIntelliSenseDiagnostics');
+const PublishCodeAnalysisDiagnosticsNotification: NotificationType<PublishCodeAnalysisDiagnosticsParams, void> = new NotificationType<PublishCodeAnalysisDiagnosticsParams, void>('cpptools/publishCodeAnalysisDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
@@ -2526,7 +2544,7 @@ export class DefaultClient implements Client {
             const client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(requestFile));
             client.handleRequestCustomConfig(requestFile);
         });
-        this.languageClient.onNotification(PublishDiagnosticsNotification, publishDiagnostics);
+        this.languageClient.onNotification(PublishIntelliSenseDiagnosticsNotification, publishIntelliSenseDiagnostics);
         this.languageClient.onNotification(PublishCodeAnalysisDiagnosticsNotification, publishCodeAnalysisDiagnostics);
         this.languageClient.onNotification(PublishRemoveCodeAnalysisCodeActionFixesNotification, publishRemoveCodeAnalysisCodeActionFixes);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
