@@ -328,7 +328,11 @@ export function defaultExePath(): string {
 }
 
 export function findExePathInArgs(args: string[]): string | undefined {
-    return args.find((arg: string, index: number) => (arg.includes(".exe") || (index > 0 && args[index - 1] === "-o")));
+    const exePath: string | undefined = args.find((arg: string, index: number) => (arg.includes(".exe") || (index > 0 && args[index - 1] === "-o")));
+    if (exePath?.startsWith("/Fe")) {
+        return exePath.substring(3);
+    }
+    return exePath;
 }
 
 // Pass in 'arrayResults' if a string[] result is possible and a delimited string result is undesirable.
