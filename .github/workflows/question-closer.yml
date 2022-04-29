@@ -23,6 +23,6 @@ jobs:
           labels: question
           ignoreLabels: debugger,internal
           closeDays: 60
-          closeComment: "This issue has been closed automatically because it's labeled as a 'question' and has not had recent activity."
+          closeComment: "For housekeeping purposes, this issue has been closed because it is a question and has not had recent activity."
           pingDays: 80
           pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the question has been answered."

@@ -23,6 +23,6 @@ jobs:
           labels: duplicate
           ignoreLabels: debugger,Feature Request,more info needed,by design,internal
           closeDays: 60
-          closeComment: "This issue has been closed automatically because it's labeled as a 'duplicate' and has not had recent activity."
+          closeComment: "This issue has been closed because it is a duplicate of another one."
           pingDays: 80
           pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if it is no longer relevant."
