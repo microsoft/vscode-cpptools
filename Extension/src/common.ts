@@ -180,6 +180,11 @@ export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
     return isCppFile(uri) || isCFile(uri);
 }
 
+export function isFolderOpen(uri: vscode.Uri): boolean {
+    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
+    return folder ? true : false;
+}
+
 export function isEditorFileCpp(file: string): boolean {
     const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
     if (!editor) {
