@@ -351,10 +351,8 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
     for (const d of params.diagnostics) {
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(vscodeRange(d.range),
             util.getLocalizedString(d.localizeStringParams), d.severity);
-        const identifier: CodeAnalysisDiagnosticIdentifier = {
-            range: d.range, code: d.code !== undefined && typeof d.code === "string" ? d.code : "" };
-        const identifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {
-            uri: params.uri, identifiers: [ identifier ] };
+        const identifier: CodeAnalysisDiagnosticIdentifier = { range: d.range, code: d.code };
+        const identifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = { uri: params.uri, identifiers: [ identifier ] };
         const codeAction: CodeActionDiagnosticInfo = {
             range: vscodeRange(identifier.range),
             code: identifier.code,
@@ -380,22 +378,68 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
             };
             codeAction.fixCodeAction = fixThisCodeAction;
         }
+
+        const relatedCodeActions: CodeActionDiagnosticInfo[] = [];
+        const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [ workspaceEdit ];
+        const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [ identifiersAndUri ];
+        if (d.relatedInformation) {
+            diagnostic.relatedInformation = [];
+            for (const info of d.relatedInformation) {
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(vscodeLocation(info.location), info.message));
+                if (info.workspaceEdit === undefined) {
+                    continue;
+                }
+                const relatedWorkspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                for (const [uriStr, edits] of Object.entries(info.workspaceEdit.changes)) {
+                    relatedWorkspaceEdit.set(vscode.Uri.parse(uriStr, true), vscodeTextEdits(edits));
+                }
+                const relatedIdentifier: CodeAnalysisDiagnosticIdentifier = { range: info.location.range, code: d.code };
+                const relatedIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {
+                    uri: info.location.uri, identifiers: [ relatedIdentifier ] };
+                const relatedCodeAction: CodeActionDiagnosticInfo = {
+                    range: vscodeRange(relatedIdentifier.range),
+                    code: relatedIdentifier.code,
+                    removeCodeAction: {
+                        title: localize("clear_this_problem", "Clear this {0} problem", d.code),
+                        command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                            arguments: [ false, [ relatedIdentifiersAndUri ] ] },
+                        kind: vscode.CodeActionKind.QuickFix
+                    },
+                    fixCodeAction: {
+                        title: localize("fix_this_problem", "Fix this {0} problem", d.code),
+                        edit: relatedWorkspaceEdit,
+                        command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                            arguments: [ true, [ relatedIdentifiersAndUri ] ] },
+                        kind: vscode.CodeActionKind.QuickFix
+                    }
+                };
+                relatedCodeActions.push(relatedCodeAction);
+                rootAndRelatedWorkspaceEdits.push({ workspaceEdit: relatedWorkspaceEdit});
+                rootAndRelatedIdentifiersAndUris.push(relatedIdentifiersAndUri);
+            }
+        }
         if (identifier.code.length !== 0) {
             const codeActionCodeInfo: CodeActionCodeInfo = !codeAnalysisCodeToFixes.has(identifier.code) ?
                 { uriToInfo: new Map<string, CodeActionPerUriInfo>() } :
                 codeAnalysisCodeToFixes.get(identifier.code) ??
                 { uriToInfo: new Map<string, CodeActionPerUriInfo>() };
-            const existingInfo: CodeActionPerUriInfo = codeActionCodeInfo.uriToInfo.get(params.uri) ?? { identifiers: [], numValidWorkspaceEdits: 0 };
-            existingInfo.identifiers.push(identifier);
-            if (workspaceEdit !== undefined) {
-                if (existingInfo.workspaceEdits === undefined) {
-                    existingInfo.workspaceEdits = [ workspaceEdit ];
-                } else {
-                    existingInfo.workspaceEdits.push(workspaceEdit);
+            let rootAndRelatedWorkspaceEditsIndex: number = 0;
+            for (const rootAndRelatedIdentifiersAndUri of rootAndRelatedIdentifiersAndUris) {
+                const existingInfo: CodeActionPerUriInfo = codeActionCodeInfo.uriToInfo.get(rootAndRelatedIdentifiersAndUri.uri) ??
+                    { identifiers: [], numValidWorkspaceEdits: 0 };
+                existingInfo.identifiers.push(...rootAndRelatedIdentifiersAndUri.identifiers);
+                const rootAndRelatedWorkspaceEdit: CodeActionWorkspaceEdit = rootAndRelatedWorkspaceEdits[rootAndRelatedWorkspaceEditsIndex];
+                if (rootAndRelatedWorkspaceEdit !== undefined) {
+                    if (existingInfo.workspaceEdits === undefined) {
+                        existingInfo.workspaceEdits = [ rootAndRelatedWorkspaceEdit ];
+                    } else {
+                        existingInfo.workspaceEdits.push(rootAndRelatedWorkspaceEdit);
+                    }
+                    ++existingInfo.numValidWorkspaceEdits;
                 }
-                ++existingInfo.numValidWorkspaceEdits;
+                codeActionCodeInfo.uriToInfo.set(rootAndRelatedIdentifiersAndUri.uri, existingInfo);
+                ++rootAndRelatedWorkspaceEditsIndex;
             }
-            codeActionCodeInfo.uriToInfo.set(params.uri, existingInfo);
             if (!identifier.code.startsWith("clang-diagnostic-")) {
                 const codes: string[] = identifier.code.split(',');
                 let codeIndex: number = codes.length - 1;
@@ -429,13 +473,10 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
             diagnostic.code = d.code;
         }
         diagnostic.source = CppSourceStr;
-        if (d.relatedInformation) {
-            diagnostic.relatedInformation = [];
-            for (const info of d.relatedInformation) {
-                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(vscodeLocation(info.location), info.message));
-            }
-        }
         codeActions.push(codeAction);
+        if (relatedCodeActions.length > 0) {
+            codeActions.push(...relatedCodeActions);
+        }
         diagnosticsCodeAnalysis.push(diagnostic);
     }
 
