@@ -53,12 +53,13 @@ const addDetailToConfigs = (items: MenuItem[]): MenuItem[] => {
                 break;
             }
             default : {
-                item.detail = "";
                 break;
             }
         }
-        // Add the compiler path of the preLaunchTask to the description of the debug configuration.
-        item.detail = item.detail + (item.configuration.taskDetail ? " (" + item.configuration.taskDetail + ")" : undefined);
+        if (item.configuration.taskDetail) {
+            // Add the compiler path of the preLaunchTask to the description of the debug configuration.
+            item.detail = (item.detail ? item.detail : "") + " (" + item.configuration.taskDetail + ")";
+        }
 
     });
     return items;
