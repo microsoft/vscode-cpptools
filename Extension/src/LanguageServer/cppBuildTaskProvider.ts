@@ -433,17 +433,19 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                     });
                 }
             });
-            let result: number = this.printBuildSummary(error, stdout, stderr);
-            if (spawnResult === -1) {
-                result = -1;
-            }
+            const result: number = this.printBuildSummary(error, stdout, stderr, spawnResult);
             this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
         }
     }
 
-    private printBuildSummary(error: string, stdout: string, stderr: string): number {
+    private printBuildSummary(error: string, stdout: string, stderr: string, spawnResult: number): number {
+        if (spawnResult === -1) {
+            telemetry.logLanguageServerEvent("cppBuildTaskError");
+            this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
+            return -1;
+        }
         if (error || (!stdout && stderr && stderr.includes("error")) ||
             (stdout && (stdout.includes("error C") || stdout.includes("LINK : fatal error")))) { // cl.exe compiler errors
             telemetry.logLanguageServerEvent("cppBuildTaskError");
