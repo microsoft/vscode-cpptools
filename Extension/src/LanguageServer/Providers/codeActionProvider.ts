@@ -107,6 +107,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                                 disableCodeActions.push(codeActionCodeInfo.disableAllTypeCodeAction);
                             }
                             if (codeActionCodeInfo.removeAllTypeCodeAction !== undefined &&
+                                codeActionCodeInfo.uriToInfo.size > 0 &&
                                 (codeActionCodeInfo.uriToInfo.size > 1 ||
                                 codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
                                 removeAllTypeAvailable = true;
