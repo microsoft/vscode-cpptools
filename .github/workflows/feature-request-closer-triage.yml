@@ -25,6 +25,6 @@ jobs:
           addLabels: more votes needed
           closeDays: 60
           maximumVotes: 2
-          closeComment: "This feature request is being closed due to insufficient upvotes.  When enough upvotes are received, this issue will be eligible for our backlog."
+          closeComment: "This feature request is being closed due to insufficient upvotes. Please leave a 👍-upvote or 👎-downvote reaction on the issue to help us prioritize it. When enough upvotes are received, this issue will be eligible for our backlog."
           milestoneName: Triage
           milestoneId: 30
