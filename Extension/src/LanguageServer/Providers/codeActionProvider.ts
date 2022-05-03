@@ -98,6 +98,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                                 }
                             }
                         }
+                        if (codeAction.removeCodeAction === undefined) {
+                            continue;
+                        }
                         let removeAllTypeAvailable: boolean = false;
                         if (codeActionCodeInfo !== undefined) {
                             if (codeActionCodeInfo.disableAllTypeCodeAction !== undefined) {

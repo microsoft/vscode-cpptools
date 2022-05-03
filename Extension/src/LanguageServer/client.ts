@@ -73,7 +73,7 @@ export interface CodeActionDiagnosticInfo {
     code: string;
     fixCodeAction?: vscode.CodeAction;
     // suppressCodeAction?: vscode.CodeAction; // TODO?
-    removeCodeAction: vscode.CodeAction;
+    removeCodeAction?: vscode.CodeAction;
 }
 
 interface CodeActionWorkspaceEdit {
@@ -380,8 +380,12 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
         }
 
         const relatedCodeActions: CodeActionDiagnosticInfo[] = [];
-        const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [ workspaceEdit ];
-        const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [ identifiersAndUri ];
+        const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [];
+        const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
+        if (workspaceEdit.workspaceEdit !== undefined) {
+            rootAndRelatedWorkspaceEdits.push(workspaceEdit);
+            rootAndRelatedIdentifiersAndUris.push(identifiersAndUri);
+        }
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
@@ -396,24 +400,23 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
                 const relatedIdentifier: CodeAnalysisDiagnosticIdentifier = { range: info.location.range, code: d.code };
                 const relatedIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {
                     uri: info.location.uri, identifiers: [ relatedIdentifier ] };
-                const relatedCodeAction: CodeActionDiagnosticInfo = {
-                    range: vscodeRange(relatedIdentifier.range),
-                    code: relatedIdentifier.code,
-                    removeCodeAction: {
-                        title: localize("clear_this_problem", "Clear this {0} problem", d.code),
-                        command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                            arguments: [ false, [ relatedIdentifiersAndUri ] ] },
-                        kind: vscode.CodeActionKind.QuickFix
-                    },
-                    fixCodeAction: {
-                        title: localize("fix_this_problem", "Fix this {0} problem", d.code),
-                        edit: relatedWorkspaceEdit,
-                        command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                            arguments: [ true, [ relatedIdentifiersAndUri ] ] },
-                        kind: vscode.CodeActionKind.QuickFix
-                    }
+                const relatedCodeAction: vscode.CodeAction = {
+                    title: localize("fix_this_problem", "Fix this {0} problem", d.code),
+                    edit: relatedWorkspaceEdit,
+                    command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                        arguments: [ true, [ relatedIdentifiersAndUri ] ] },
+                    kind: vscode.CodeActionKind.QuickFix
                 };
-                relatedCodeActions.push(relatedCodeAction);
+                if (codeAction.fixCodeAction === undefined) {
+                    codeAction.fixCodeAction = relatedCodeAction;
+                } else {
+                    const relatedCodeActionInfo: CodeActionDiagnosticInfo = {
+                        range: vscodeRange(relatedIdentifier.range),
+                        code: relatedIdentifier.code,
+                        fixCodeAction: relatedCodeAction
+                    };
+                    relatedCodeActions.push(relatedCodeActionInfo);
+                }
                 rootAndRelatedWorkspaceEdits.push({ workspaceEdit: relatedWorkspaceEdit});
                 rootAndRelatedIdentifiersAndUris.push(relatedIdentifiersAndUri);
             }
