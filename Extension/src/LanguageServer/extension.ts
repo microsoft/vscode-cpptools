@@ -12,7 +12,8 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndUri, cpptoolsRange } from './client';
+import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisCodeToFixes,
+    codeAnalysisFileToCodeActions, codeAnalysisAllFixes, cpptoolsRange } from './client';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
@@ -418,6 +419,9 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveAllCodeAnalysisProblems', onRemoveAllCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveCodeAnalysisProblems', onRemoveCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', onFixAllCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllTypeCodeAnalysisProblems', onFixAllTypeCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixThisCodeAnalysisProblem', onFixThisCodeAnalysisProblem));
     disposables.push(vscode.commands.registerCommand('C_Cpp.DisableAllTypeCodeAnalysisProblems', onDisableAllTypeCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisDocumentation', (uri) => vscode.env.openExternal(uri)));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -602,6 +606,24 @@ async function onRemoveAllCodeAnalysisProblems(): Promise<void> {
 
 async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
+}
+
+async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisAllFixes.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    }
+}
+
+async function onFixAllTypeCodeAnalysisProblems(type: string, version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisCodeToFixes.get(type)?.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    }
+}
+
+async function onFixThisCodeAnalysisProblem(uri: string, version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisFileToCodeActions.get(uri)?.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    }
 }
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
