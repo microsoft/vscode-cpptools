@@ -363,7 +363,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         let command: string = util.resolveVariables(this.command);
         let activeCommand: string = command;
 
-        // Create the exe folder path if it doesn't exists.
+        // Create the exe folder path if it doesn't exist.
         const exePath: string | undefined = util.resolveVariables(util.findExePathInArgs(this.args));
         util.createDirIfNotExistsSync(exePath);
 
