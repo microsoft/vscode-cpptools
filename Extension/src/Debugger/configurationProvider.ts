@@ -58,7 +58,7 @@ const addDetailToConfigs = (items: MenuItem[]): MenuItem[] => {
         }
         if (item.configuration.taskDetail) {
             // Add the compiler path of the preLaunchTask to the description of the debug configuration.
-            item.detail = (item.detail ? item.detail : "") + " (" + item.configuration.taskDetail + ")";
+            item.detail = (item.detail ?? "") + " (" + item.configuration.taskDetail + ")";
         }
 
     });
