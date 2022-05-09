@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.10.1: May 10, 2022
+### Enhancements
+* Generate launch.json when adding a new debug configuration. [#9100](https://github.com/microsoft/vscode-cpptools/issues/9100)
+* Prioritize the "folder" option when doing a `#include` completion. [#9222](https://github.com/microsoft/vscode-cpptools/issues/9222)
+* Add compiler path to debug configuration details. [PR #9264](https://github.com/microsoft/vscode-cpptools/pull/9264)
+
+### Bug Fixes
+* Fix handling of `@response` files for clang-tidy on Windows. [#8843](https://github.com/microsoft/vscode-cpptools/issues/8843),  [#9032](https://github.com/microsoft/vscode-cpptools/issues/9032), [#9102](https://github.com/microsoft/vscode-cpptools/issues/9102)
+* Fix cpptools-srv zombie processes. [#9261](https://github.com/microsoft/vscode-cpptools/issues/9261)
+* Fix `C_Cpp.codeAnalysis.clangTidy.useBuildPath` adding "compile_commands.json" to the `-p` argument. [#9273](https://github.com/microsoft/vscode-cpptools/issues/9273)
+* Fix Go to Definition on a `#include` with an absolute path. [#9287](https://github.com/microsoft/vscode-cpptools/issues/9287)
+
 ## Version 1.10.0: April 21, 2022
 ### New Feature
 * Added support for setting values on top-level watch window expressions. [#9019](https://github.com/microsoft/vscode-cpptools/issues/9019)
