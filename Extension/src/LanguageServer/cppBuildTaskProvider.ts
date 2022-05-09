@@ -169,7 +169,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const programName: string = util.defaultExePath();
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', `/Fe${programName}`, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
@@ -362,6 +362,11 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         // Do build.
         let command: string = util.resolveVariables(this.command);
         let activeCommand: string = command;
+
+        // Create the exe folder path if it doesn't exist.
+        const exePath: string | undefined = util.resolveVariables(util.findExePathInArgs(this.args));
+        util.createDirIfNotExistsSync(exePath);
+
         this.args.forEach((value, index) => {
             value = util.normalizeArg(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
@@ -396,10 +401,6 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
 
-        // Create the exe folder path if it doesn't exists.
-        const exePath: string | undefined = util.findExePathInArgs(this.args);
-        util.createDirIfNotExistsSync(exePath);
-
         let child: cp.ChildProcess | undefined;
         try {
             child = cp.spawn(command, this.args, this.options ? this.options : {});
@@ -429,24 +430,26 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                             this.writeEmitter.fire(localize("build.run.terminated", "Build run was terminated.") + this.endOfLine);
                             resolve(-1);
                         } else {
-                            resolve(0);
+                            resolve(result);
                         }
                     });
                 }
             });
-            let result: number = this.printBuildSummary(error, stdout, stderr);
-            if (spawnResult === -1) {
-                result = -1;
-            }
+            const result: number = this.printBuildSummary(error, stdout, stderr, spawnResult);
             this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
         }
     }
 
-    private printBuildSummary(error: string, stdout: string, stderr: string): number {
+    private printBuildSummary(error: string, stdout: string, stderr: string, spawnResult: number): number {
+        if (spawnResult !== 0) {
+            telemetry.logLanguageServerEvent("cppBuildTaskError");
+            this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
+            return -1;
+        }
         if (error || (!stdout && stderr && stderr.includes("error")) ||
-            (stdout && stdout.includes("error C"))) { // cl.exe compiler errors
+            (stdout && (stdout.includes("error C") || stdout.includes("LINK : fatal error")))) { // cl.exe compiler errors
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
             return -1;

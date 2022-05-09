@@ -12,7 +12,7 @@ import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFact
 import { DebuggerType } from './configurations';
 import * as nls from 'vscode-nls';
 
-// The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
+// The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 

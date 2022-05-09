@@ -675,7 +675,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (selectedConfig.preLaunchTask) {
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
         }
-        // Write debug configuraion in launch.json file.
+        // Write debug configuration in launch.json file.
         await this.writeDebugConfig(selectedConfig, folder);
 
     }
