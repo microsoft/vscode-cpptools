@@ -431,7 +431,7 @@
                 "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description%",
                 "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description%"
             ],
-            "default": "AllAndAllType",
+            "default": "AllAndAllTypeAndThis",
             "scope": "application"
         },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.showDisable": {
