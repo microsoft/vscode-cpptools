@@ -7,7 +7,7 @@
 * Add compiler path to debug configuration details. [PR #9264](https://github.com/microsoft/vscode-cpptools/pull/9264)
 
 ### Bug Fixes
-* Fix handling of `@response` file for clang-tidy on Windows. [#8843](https://github.com/microsoft/vscode-cpptools/issues/8843),  [#9032](https://github.com/microsoft/vscode-cpptools/issues/9032), [#9102](https://github.com/microsoft/vscode-cpptools/issues/9102)
+* Fix handling of `@response` files for clang-tidy on Windows. [#8843](https://github.com/microsoft/vscode-cpptools/issues/8843),  [#9032](https://github.com/microsoft/vscode-cpptools/issues/9032), [#9102](https://github.com/microsoft/vscode-cpptools/issues/9102)
 * Fix cpptools-srv zombie processes. [#9261](https://github.com/microsoft/vscode-cpptools/issues/9261)
 * Fix `C_Cpp.codeAnalysis.clangTidy.useBuildPath` adding "compile_commands.json" to the `-p` argument. [#9273](https://github.com/microsoft/vscode-cpptools/issues/9273)
 * Fix Go to Definition on a `#include` with an absolute path. [#9287](https://github.com/microsoft/vscode-cpptools/issues/9287)
