@@ -14,10 +14,10 @@ import * as Telemetry from '../telemetry';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
 import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
-import { parse } from 'comment-json';
+import * as jsonc from 'comment-json';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
-import { CppSettings } from '../LanguageServer/settings';
+import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -37,11 +37,29 @@ export enum TaskConfigStatus {
     detected = "Detected Task"      // The tasks that are available based on detected compilers.
 }
 
-const localizeConfigs = (items: MenuItem[]): MenuItem[] => {
+const addDetailToConfigs = (items: MenuItem[]): MenuItem[] => {
     items.map((item: MenuItem) => {
-        item.detail = (item.detail === TaskConfigStatus.recentlyUsed) ? localize("recently.used.task", "Recently Used Task") :
-            (item.detail === TaskConfigStatus.configured) ? localize("configured.task", "Configured Task") :
-                (item.detail === TaskConfigStatus.detected) ? localize("detected.task", "Detected Task") : item.detail;
+        switch (item.detail) {
+            case TaskConfigStatus.recentlyUsed : {
+                item.detail = localize("recently.used.task", "Recently Used Task");
+                break;
+            }
+            case TaskConfigStatus.configured : {
+                item.detail = localize("configured.task", "Configured Task");
+                break;
+            }
+            case TaskConfigStatus.detected : {
+                item.detail = localize("detected.task", "Detected Task");
+                break;
+            }
+            default : {
+                break;
+            }
+        }
+        if (item.configuration.taskDetail) {
+            // Add the compiler path of the preLaunchTask to the description of the debug configuration.
+            item.detail = (item.detail ?? "") + " (" + item.configuration.taskDetail + ")";
+        }
 
     });
     return items;
@@ -120,7 +138,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return menuItem;
         });
 
-        const selection: MenuItem | undefined = await vscode.window.showQuickPick(localizeConfigs(items), {placeHolder: localize("select.configuration", "Select a configuration")});
+        const selection: MenuItem | undefined = await vscode.window.showQuickPick(addDetailToConfigs(items), {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
             Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
             return []; // User canceled it.
@@ -343,6 +361,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
+            newConfig.taskDetail = task.detail;
             newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ?
                 TaskConfigStatus.recentlyUsed :
                 (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
@@ -593,13 +612,94 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return false;
     }
 
+    private getLaunchJsonPath(): string | undefined {
+        return util.getJsonPath("launch.json");
+    }
+
+    public getRawLaunchJson(): Promise<any> {
+        const path: string | undefined = this.getLaunchJsonPath();
+        return util.getRawJson(path);
+    }
+
+    public async writeDebugConfig(config: vscode.DebugConfiguration, folder?: vscode.WorkspaceFolder): Promise<void> {
+        const launchJsonPath: string | undefined = this.getLaunchJsonPath();
+
+        if (this.checkDebugConfigExists(config.name, folder)) {
+            if (launchJsonPath) {
+                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(launchJsonPath);
+                if (doc) {
+                    vscode.window.showTextDocument(doc);
+                }
+            }
+            return;
+        }
+        const rawLaunchJson: any = await this.getRawLaunchJson();
+        if (!rawLaunchJson.configurations) {
+            rawLaunchJson.configurations = new Array();
+        }
+        if (!rawLaunchJson.version) {
+            rawLaunchJson.version = "2.0.0";
+        }
+
+        config.detail = undefined;
+        config.existing = undefined;
+        config.isDefault = undefined;
+        config.taskDetail = undefined;
+        rawLaunchJson.configurations.push(config);
+
+        if (!launchJsonPath) {
+            throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
+        }
+
+        const settings: OtherSettings = new OtherSettings();
+        await util.writeFileText(launchJsonPath, jsonc.stringify(rawLaunchJson, null, settings.editorTabSize));
+        await vscode.workspace.openTextDocument(launchJsonPath);
+        const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(launchJsonPath);
+        if (doc) {
+            vscode.window.showTextDocument(doc);
+        }
+    }
+
+    public async addDebugConfiguration(textEditor: vscode.TextEditor): Promise<void> {
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        if (!folder) {
+            return;
+        }
+        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, true);
+        if (!selectedConfig) {
+            Telemetry.logDebuggerEvent(DebuggerEvent.launchPlayButton, { "debugType": "AddConfigurationOnly", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
+            return; // User canceled it.
+        }
+
+        // Write preLaunchTask into tasks.json file.
+        if (selectedConfig.preLaunchTask) {
+            await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
+        }
+        // Write debug configuration in launch.json file.
+        await this.writeDebugConfig(selectedConfig, folder);
+
+    }
+
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
         // Turn off the debug mode.
         return this.buildAndDebug(textEditor, false);
     }
 
     public async buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, true);
+        if (!selectedConfig) {
+            Telemetry.logDebuggerEvent(DebuggerEvent.launchPlayButton, { "debugType": debugModeOn ? "debug" : "run", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
+            return; // User canceled it.
+        }
 
+        // Keep track of the entry point where the debug has been selected, for telemetry purposes.
+        selectedConfig.debuggerEvent = DebuggerEvent.launchPlayButton;
+        // startDebugging will trigger a call to resolveDebugConfiguration.
+        await vscode.debug.startDebugging(folder, selectedConfig, {noDebug: !debugModeOn});
+    }
+
+    private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = false): Promise<vscode.DebugConfiguration | undefined> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!util.isCppOrCFile(textEditor.document.uri)) {
             vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
@@ -612,14 +712,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             configs = configs.concat(await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
         }
 
-        const defaultConfig: vscode.DebugConfiguration[] = findDefaultConfig(configs);
+        const defaultConfig: vscode.DebugConfiguration[] | undefined = pickDefault ? findDefaultConfig(configs) : undefined;
 
         const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail, detail: config.existing }));
 
         let selection: MenuItem | undefined;
 
         // if there was only one config for the default task, choose that config, otherwise ask the user to choose.
-        if (defaultConfig.length === 1) {
+        if (defaultConfig && defaultConfig.length === 1) {
             selection = { label: defaultConfig[0].name, configuration: defaultConfig[0], description: defaultConfig[0].detail, detail: defaultConfig[0].existing };
         } else {
             let sortedItems: MenuItem[] = [];
@@ -632,25 +732,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskConfigStatus.configured));
             sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskConfigStatus.detected));
 
-            selection = await vscode.window.showQuickPick(localizeConfigs(sortedItems), {
+            selection = await vscode.window.showQuickPick(addDetailToConfigs(sortedItems), {
                 placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
             });
         }
-
-        if (!selection) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.launchPlayButton, { "debugType": debugModeOn ? "debug" : "run", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
-            return; // User canceled it.
-        }
-
-        if (this.isClConfiguration(selection.label) && this.showErrorIfClNotAvailable(selection.label)) {
+        if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {
             return;
         }
-
-        // Keep track of the entry point where the debug has been selected, for telemetry purposes.
-        selection.configuration.debuggerEvent = DebuggerEvent.launchPlayButton;
-        // startDebugging will trigger a call to resolveDebugConfiguration.
-        await vscode.debug.startDebugging(folder, selection.configuration, {noDebug: !debugModeOn});
-
+        return selection?.configuration;
     }
 
     private async resolvePreLaunchTask(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debugModeOn: boolean = true): Promise<void> {
@@ -662,7 +751,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (configuration.preLaunchTask) {
             try {
                 if (folder) {
-                    await cppBuildTaskProvider.checkBuildTaskExists(configuration.preLaunchTask);
+                    await cppBuildTaskProvider.writeBuildTask(configuration.preLaunchTask);
                 } else {
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
@@ -832,7 +921,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
         let items: vscode.CompletionItem[] = this.snippets;
 
-        const launch: any = parse(document.getText());
+        const launch: any = jsonc.parse(document.getText());
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
         if (launch.configurations.length !== 0) {
             items = [];
