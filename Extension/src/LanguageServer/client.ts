@@ -66,11 +66,14 @@ let warningChannel: vscode.OutputChannel;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionCodeAnalysis: vscode.DiagnosticCollection;
 
-interface CodeActionDiagnosticInfo {
-    // range/code are used to work around https://github.com/microsoft/vscode/issues/126393.
+export interface CodeActionDiagnosticInfo {
+    version: number; // Needed due to https://github.com/microsoft/vscode/issues/148723 .
+
+    // Used to work around https://github.com/microsoft/vscode/issues/126393.
     // If that bug were fixed, then we could use the vscode.CodeAction.diagnostic directly.
     range: vscode.Range;
     code: string;
+
     fixCodeAction?: vscode.CodeAction;
     // suppressCodeAction?: vscode.CodeAction; // TODO?
     removeCodeAction?: vscode.CodeAction;
@@ -101,12 +104,7 @@ interface CodeActionAllInfo {
     removeAllCodeAction: vscode.CodeAction;
 }
 
-export interface VersionedCodeActionDiagnosticInfo {
-    version: number; // Needed due to https://github.com/microsoft/vscode/issues/148723 .
-    codeActionDiagnostics: CodeActionDiagnosticInfo[];
-}
-
-export const codeAnalysisFileToCodeActions: Map<string, VersionedCodeActionDiagnosticInfo> = new Map<string, VersionedCodeActionDiagnosticInfo>();
+export const codeAnalysisFileToCodeActions: Map<string, CodeActionDiagnosticInfo[]> = new Map<string, CodeActionDiagnosticInfo[]>();
 export const codeAnalysisCodeToFixes: Map<string, CodeActionCodeInfo> = new Map<string, CodeActionCodeInfo>();
 export const codeAnalysisAllFixes: CodeActionAllInfo = {
     version: 0,
@@ -300,7 +298,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
             codeToFixes[1].fixAllTypeCodeAction = {
                 title: localize("fix_all_type_problems", "Fix all {0} problems", codeToFixes[0]),
                 command: { title: 'FixAllTypeCodeAnalysisProblems', command: 'C_Cpp.FixAllTypeCodeAnalysisProblems',
-                    arguments: [ codeToFixes[0], codeToFixes[1].version, allTypeWorkspaceEdit, true, identifiersAndUris ] },
+                    arguments: [ codeToFixes[0], ++codeToFixes[1].version, allTypeWorkspaceEdit, true, identifiersAndUris ] },
                 kind: vscode.CodeActionKind.QuickFix
             };
         }
@@ -356,14 +354,24 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
         }
     }
 
-    const version: number = (codeAnalysisFileToCodeActions.get(params.uri)?.version ?? 0) + 1;
-    const versionedCodeActionDiagnosticInfo: VersionedCodeActionDiagnosticInfo = { version: version, codeActionDiagnostics: [] };
+    const previousDiagnostics: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(params.uri);
+    let nextVersion: number = 0;
+    if (previousDiagnostics !== undefined) {
+        for (const diagnostic of previousDiagnostics) {
+            if (diagnostic.version > nextVersion) {
+                nextVersion = diagnostic.version;
+            }
+        }
+    }
+    ++nextVersion;
+    const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] = [];
     for (const d of params.diagnostics) {
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(vscodeRange(d.range),
             util.getLocalizedString(d.localizeStringParams), d.severity);
         const identifier: CodeAnalysisDiagnosticIdentifier = { range: d.range, code: d.code };
         const identifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = { uri: params.uri, identifiers: [ identifier ] };
         const codeAction: CodeActionDiagnosticInfo = {
+            version: nextVersion,
             range: vscodeRange(identifier.range),
             code: identifier.code,
             removeCodeAction: {
@@ -382,7 +390,7 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
             const fixThisCodeAction: vscode.CodeAction = {
                 title: localize("fix_this_problem", "Fix this {0} problem", d.code),
                 command: { title: 'FixThisCodeAnalysisProblem', command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                    arguments: [ identifiersAndUri.uri, version, workspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ] },
+                    arguments: [ nextVersion, workspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ] },
                 kind: vscode.CodeActionKind.QuickFix
             };
             codeAction.fixCodeAction = fixThisCodeAction;
@@ -412,13 +420,14 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
                 const relatedCodeAction: vscode.CodeAction = {
                     title: localize("fix_this_problem", "Fix this {0} problem", d.code),
                     command: { title: 'FixThisCodeAnalysisProblem', command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                        arguments: [ relatedIdentifiersAndUri.uri, version, relatedWorkspaceEdit, true, [ relatedIdentifiersAndUri ] ] },
+                        arguments: [ nextVersion, relatedWorkspaceEdit, true, [ relatedIdentifiersAndUri ] ] },
                     kind: vscode.CodeActionKind.QuickFix
                 };
                 if (codeAction.fixCodeAction === undefined) {
                     codeAction.fixCodeAction = relatedCodeAction;
                 } else {
                     const relatedCodeActionInfo: CodeActionDiagnosticInfo = {
+                        version: nextVersion,
                         range: vscodeRange(relatedIdentifier.range),
                         code: relatedIdentifier.code,
                         fixCodeAction: relatedCodeAction
@@ -482,14 +491,14 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
             diagnostic.code = d.code;
         }
         diagnostic.source = CppSourceStr;
-        versionedCodeActionDiagnosticInfo.codeActionDiagnostics.push(codeAction);
+        codeActionDiagnosticInfo.push(codeAction);
         if (relatedCodeActions.length > 0) {
-            versionedCodeActionDiagnosticInfo.codeActionDiagnostics.push(...relatedCodeActions);
+            codeActionDiagnosticInfo.push(...relatedCodeActions);
         }
         diagnosticsCodeAnalysis.push(diagnostic);
     }
 
-    codeAnalysisFileToCodeActions.set(params.uri, versionedCodeActionDiagnosticInfo);
+    codeAnalysisFileToCodeActions.set(params.uri, codeActionDiagnosticInfo);
 
     rebuildCodeAnalysisCodeAndAllFixes();
 
@@ -499,25 +508,26 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
 function removeCodeAnalysisCodeActions(identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[],
     removeFixesOnly: boolean): void {
     for (const identifiersAndUri of identifiersAndUris) {
-        const versionedCodeActionDiagnosticInfo: VersionedCodeActionDiagnosticInfo | undefined = codeAnalysisFileToCodeActions.get(identifiersAndUri.uri);
-        if (versionedCodeActionDiagnosticInfo === undefined) {
+        const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(identifiersAndUri.uri);
+        if (codeActionDiagnosticInfo === undefined) {
             return;
         }
         for (const identifier of identifiersAndUri.identifiers) {
-            const updatedCodeActions: VersionedCodeActionDiagnosticInfo = {
-                version: versionedCodeActionDiagnosticInfo.version + 1, codeActionDiagnostics: [] };
-            for (const codeAction of versionedCodeActionDiagnosticInfo.codeActionDiagnostics) {
+            const updatedCodeActions: CodeActionDiagnosticInfo[] = [];
+            for (const codeAction of codeActionDiagnosticInfo) {
                 if (rangeEquals(codeAction.range, identifier.range) && codeAction.code === identifier.code) {
                     if (removeFixesOnly) {
+                        ++codeAction.version;
                         codeAction.fixCodeAction = undefined;
                     } else {
                         continue;
                     }
                 }
-                updatedCodeActions.codeActionDiagnostics.push(codeAction);
+                updatedCodeActions.push(codeAction);
             }
             codeAnalysisFileToCodeActions.set(identifiersAndUri.uri, updatedCodeActions);
 
+            let codeActionInfoChanged: boolean = false;
             for (const codeFixes of codeAnalysisCodeToFixes) {
                 const codeActionInfo: CodeActionPerUriInfo | undefined = codeFixes[1].uriToInfo.get(identifiersAndUri.uri);
                 if (codeActionInfo === undefined) {
@@ -528,6 +538,7 @@ function removeCodeAnalysisCodeActions(identifiersAndUris: CodeAnalysisDiagnosti
                     if (identifier.code === codeActionInfo.identifiers[codeActionInfoIndex].code &&
                         rangeEquals(identifier.range, codeActionInfo.identifiers[codeActionInfoIndex].range)) {
                         removedCodeActionInfoIndex = codeActionInfoIndex;
+                        codeActionInfoChanged = true;
                         break;
                     }
                 }
@@ -549,6 +560,9 @@ function removeCodeAnalysisCodeActions(identifiersAndUris: CodeAnalysisDiagnosti
                         codeFixes[1].uriToInfo.set(identifiersAndUri.uri, codeActionInfo);
                     }
                 }
+            }
+            if (codeActionInfoChanged) {
+                rebuildCodeAnalysisCodeAndAllFixes();
             }
         }
     }

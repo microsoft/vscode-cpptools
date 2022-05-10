@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import {  Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import * as util from '../../common';
-import { CodeActionCodeInfo, VersionedCodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
+import { CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
     codeAnalysisAllFixes, DefaultClient, vscodeRange } from '../client';
 import { CppSettings } from '../settings';
 
@@ -70,8 +70,8 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     wsEdit.replace(document.uri, vscodeRange(command.edit.range), command.edit.newText);
                 } else if (command.command === "C_Cpp.RemoveAllCodeAnalysisProblems" && command.uri !== undefined) {
                     const vsCodeRange: vscode.Range = vscodeRange(r);
-                    const versionedCodeActionDiagnosticInfo: VersionedCodeActionDiagnosticInfo | undefined = codeAnalysisFileToCodeActions.get(command.uri);
-                    if (versionedCodeActionDiagnosticInfo === undefined) {
+                    const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(command.uri);
+                    if (codeActionDiagnosticInfo === undefined) {
                         return;
                     }
                     const fixCodeActions: vscode.CodeAction[] = [];
@@ -79,7 +79,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     const removeCodeActions: vscode.CodeAction[] = [];
                     const docCodeActions: vscode.CodeAction[] = [];
                     const showClear: string = new CppSettings().clangTidyCodeActionShowClear;
-                    for (const codeAction of versionedCodeActionDiagnosticInfo.codeActionDiagnostics) {
+                    for (const codeAction of codeActionDiagnosticInfo) {
                         if (!codeAction.range.contains(vsCodeRange)) {
                             continue;
                         }
@@ -135,7 +135,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     }
                     if (showClear !== "None") {
                         let showClearAllAvailable: boolean = false;
-                        if ((versionedCodeActionDiagnosticInfo.codeActionDiagnostics.length > 1 || codeAnalysisFileToCodeActions.size > 1)) {
+                        if ((codeActionDiagnosticInfo.length > 1 || codeAnalysisFileToCodeActions.size > 1)) {
                             showClearAllAvailable = true;
                         }
                         if (!showClearAllAvailable || showClear !== "AllOnly") {
