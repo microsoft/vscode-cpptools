@@ -37,11 +37,29 @@ export enum TaskConfigStatus {
     detected = "Detected Task"      // The tasks that are available based on detected compilers.
 }
 
-const localizeConfigs = (items: MenuItem[]): MenuItem[] => {
+const addDetailToConfigs = (items: MenuItem[]): MenuItem[] => {
     items.map((item: MenuItem) => {
-        item.detail = (item.detail === TaskConfigStatus.recentlyUsed) ? localize("recently.used.task", "Recently Used Task") :
-            (item.detail === TaskConfigStatus.configured) ? localize("configured.task", "Configured Task") :
-                (item.detail === TaskConfigStatus.detected) ? localize("detected.task", "Detected Task") : item.detail;
+        switch (item.detail) {
+            case TaskConfigStatus.recentlyUsed : {
+                item.detail = localize("recently.used.task", "Recently Used Task");
+                break;
+            }
+            case TaskConfigStatus.configured : {
+                item.detail = localize("configured.task", "Configured Task");
+                break;
+            }
+            case TaskConfigStatus.detected : {
+                item.detail = localize("detected.task", "Detected Task");
+                break;
+            }
+            default : {
+                break;
+            }
+        }
+        if (item.configuration.taskDetail) {
+            // Add the compiler path of the preLaunchTask to the description of the debug configuration.
+            item.detail = (item.detail ?? "") + " (" + item.configuration.taskDetail + ")";
+        }
 
     });
     return items;
@@ -120,7 +138,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return menuItem;
         });
 
-        const selection: MenuItem | undefined = await vscode.window.showQuickPick(localizeConfigs(items), {placeHolder: localize("select.configuration", "Select a configuration")});
+        const selection: MenuItem | undefined = await vscode.window.showQuickPick(addDetailToConfigs(items), {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
             Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
             return []; // User canceled it.
@@ -343,6 +361,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
+            newConfig.taskDetail = task.detail;
             newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ?
                 TaskConfigStatus.recentlyUsed :
                 (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
@@ -625,6 +644,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         config.detail = undefined;
         config.existing = undefined;
         config.isDefault = undefined;
+        config.taskDetail = undefined;
         rawLaunchJson.configurations.push(config);
 
         if (!launchJsonPath) {
@@ -712,7 +732,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskConfigStatus.configured));
             sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskConfigStatus.detected));
 
-            selection = await vscode.window.showQuickPick(localizeConfigs(sortedItems), {
+            selection = await vscode.window.showQuickPick(addDetailToConfigs(sortedItems), {
                 placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
             });
         }
