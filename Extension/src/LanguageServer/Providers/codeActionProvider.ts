@@ -129,7 +129,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     }
                     if (fixCodeActions.length > 0) {
                         resultCodeActions.push(...fixCodeActions);
-                        if (codeAnalysisAllFixes.fixAllCodeAction.edit !== undefined) {
+                        if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments?.[1] !== undefined) {
                             resultCodeActions.push(codeAnalysisAllFixes.fixAllCodeAction);
                         }
                     }

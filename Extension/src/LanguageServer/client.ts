@@ -257,11 +257,12 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
 
 // Rebuild codeAnalysisCodeToFixes and codeAnalysisAllFixes.fixAllCodeActions.
 function rebuildCodeAnalysisCodeAndAllFixes(): void {
-    ++codeAnalysisAllFixes.version;
-    codeAnalysisAllFixes.fixAllCodeAction.edit = undefined;
-    if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments?.[1] !== undefined) {
-        codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = [];
+    if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments !== undefined) {
+        codeAnalysisAllFixes.fixAllCodeAction.command.arguments[0] = ++codeAnalysisAllFixes.version;
+        codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = undefined;
+        codeAnalysisAllFixes.fixAllCodeAction.command.arguments[3] = [];
     }
+
     const identifiersAndUrisForAllFixes: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
     const uriToEditsForAll: Map<vscode.Uri, vscode.TextEdit[]> = new Map<vscode.Uri, vscode.TextEdit[]>();
     let numFixTypes: number = 0;
@@ -328,12 +329,14 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
         for (const [uri, edits] of uriToEditsForAll.entries()) {
             allWorkspaceEdit.set(uri, edits);
         }
-        codeAnalysisAllFixes.fixAllCodeAction.edit = allWorkspaceEdit;
-        if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments?.[1] !== undefined) {
-            codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = identifiersAndUrisForAllFixes;
+        if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments !== undefined) {
+            codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = allWorkspaceEdit;
+            codeAnalysisAllFixes.fixAllCodeAction.command.arguments[3] = identifiersAndUrisForAllFixes;
         }
     } else {
-        codeAnalysisAllFixes.fixAllCodeAction.edit = undefined;
+        if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments !== undefined) {
+            codeAnalysisAllFixes.fixAllCodeAction.command.arguments[1] = undefined;
+        }
     }
 }
 
@@ -552,6 +555,7 @@ function removeCodeAnalysisCodeActions(identifiersAndUris: CodeAnalysisDiagnosti
                         codeActionInfo.identifiers.splice(removedCodeActionInfoIndex, 1);
                         if (codeActionInfo.workspaceEdits !== undefined) {
                             codeActionInfo.workspaceEdits.splice(removedCodeActionInfoIndex, 1);
+                            --codeActionInfo.numValidWorkspaceEdits;
                         }
                     }
                     if (codeActionInfo.identifiers.length === 0) {
@@ -3508,6 +3512,8 @@ export class DefaultClient implements Client {
         }
         diagnosticsCollectionCodeAnalysis.clear();
         codeAnalysisFileToCodeActions.clear();
+        codeAnalysisCodeToFixes.clear();
+        rebuildCodeAnalysisCodeAndAllFixes();
         this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
     }
 
