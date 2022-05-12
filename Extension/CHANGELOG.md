@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.10.2: May 12, 2022
+### Bug Fix
+* Fix abnormal process termination (causing core dump creation on some systems) during process creation on Linux/Mac. [#9301](https://github.com/microsoft/vscode-cpptools/issues/9301)
+
 ## Version 1.10.1: May 10, 2022
 ### Enhancements
 * Generate launch.json when adding a new debug configuration. [#9100](https://github.com/microsoft/vscode-cpptools/issues/9100)
