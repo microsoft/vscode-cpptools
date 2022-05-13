@@ -245,12 +245,10 @@ export class CppSettings extends Settings {
             this.forceLegacyCompilerArgs = false;
             if (os.platform() === "darwin") {
                 const releaseParts: string[] = os.release().split(".");
-                if (releaseParts.length >= 1) {
-                    // wordexp doesn't work for older Mac OS's.
-                    if (parseInt(releaseParts[0]) < 16) {
-                        this.forceLegacyCompilerArgs = true;
-                        return true;
-                    }
+                // wordexp doesn't work for Mac OS 10.15 (Darwin 15.x) or older.
+                if (releaseParts.length >= 1 && parseInt(releaseParts[0]) < 16) {
+                    this.forceLegacyCompilerArgs = true;
+                    return true;
                 }
             }
         } else if (this.forceLegacyCompilerArgs) {
