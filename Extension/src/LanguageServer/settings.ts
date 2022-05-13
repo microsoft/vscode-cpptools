@@ -239,7 +239,23 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
-    public get legacyCompilerArgsBehavior(): boolean | undefined  { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
+    private forceLegacyCompilerArgs: boolean | undefined;
+    public get legacyCompilerArgsBehavior(): boolean | undefined  {
+        if (this.forceLegacyCompilerArgs === undefined) {
+            this.forceLegacyCompilerArgs = false;
+            if (os.platform() === "darwin") {
+                const releaseParts: string[] = os.release().split(".");
+                if (releaseParts.length >= 1) {
+                    // wordexp doesn't work for older Mac OS's.
+                    if (parseInt(releaseParts[0]) < 16) {
+                        this.forceLegacyCompilerArgs = true;
+                        return true;
+                    }
+                }
+            }
+        }
+        return super.Section.get<boolean>("legacyCompilerArgsBehavior");
+    }
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
