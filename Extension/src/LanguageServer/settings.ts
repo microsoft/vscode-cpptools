@@ -253,6 +253,8 @@ export class CppSettings extends Settings {
                     }
                 }
             }
+        } else if (this.forceLegacyCompilerArgs) {
+            return true;
         }
         return super.Section.get<boolean>("legacyCompilerArgsBehavior");
     }
