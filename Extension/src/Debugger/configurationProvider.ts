@@ -665,7 +665,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!folder) {
             return;
         }
-        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, true);
+        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, false);
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.launchPlayButton, { "debugType": "AddConfigurationOnly", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
             return; // User canceled it.
@@ -751,7 +751,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (configuration.preLaunchTask) {
             try {
                 if (folder) {
-                    await cppBuildTaskProvider.writeBuildTask(configuration.preLaunchTask);
+                    await cppBuildTaskProvider.writeDefaultBuildTask(configuration.preLaunchTask);
                 } else {
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
