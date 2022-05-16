@@ -245,7 +245,8 @@ export class CppSettings extends Settings {
             this.forceLegacyCompilerArgs = false;
             if (os.platform() === "darwin") {
                 const releaseParts: string[] = os.release().split(".");
-                // wordexp doesn't work for Mac OS 10.15 (Darwin 15.x) or older.
+                // wordexp doesn't work for Mac OS 10.11 (Darwin 15.x) or older,
+                // given our minimum build target of Mac OS 10.12.
                 if (releaseParts.length >= 1 && parseInt(releaseParts[0]) < 16) {
                     this.forceLegacyCompilerArgs = true;
                     return true;
