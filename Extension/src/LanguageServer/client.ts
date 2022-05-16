@@ -79,19 +79,30 @@ export interface CodeActionDiagnosticInfo {
     removeCodeAction?: vscode.CodeAction;
 }
 
+// Used to handle fix invalidation after an edit,
+// i.e. it's set to undefined if it becomes invalid.
 interface CodeActionWorkspaceEdit {
     workspaceEdit?: vscode.WorkspaceEdit;
 }
 
 interface CodeActionPerUriInfo {
+    // These two arrays have the same length, i.e. index i of identifiers
+    // is usee to index into workspaceEdits to get the corresponding edit.
     identifiers: CodeAnalysisDiagnosticIdentifier[];
     workspaceEdits?: CodeActionWorkspaceEdit[];
+
+    // Used to quickly determine how many non-undefined entries are in "workspaceEdits"
+    // (so the array doesn't have to be iterated through).
     numValidWorkspaceEdits: number;
 }
 
+// Tracks the "type" code actions (i.e. "code" is a synonym for "type" in this context).
 export interface CodeActionCodeInfo {
     version: number; // Needed due to https://github.com/microsoft/vscode/issues/148723 .
+
+    // Needed to quickly update the "type" action for a file.
     uriToInfo: Map<string, CodeActionPerUriInfo>;
+
     fixAllTypeCodeAction?: vscode.CodeAction;
     disableAllTypeCodeAction?: vscode.CodeAction;
     removeAllTypeCodeAction?: vscode.CodeAction;
@@ -399,6 +410,7 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
             codeAction.fixCodeAction = fixThisCodeAction;
         }
 
+        // Edits from clang-tidy can be associated with the related information instead of the root diagnostic.
         const relatedCodeActions: CodeActionDiagnosticInfo[] = [];
         const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [];
         const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
@@ -2167,10 +2179,7 @@ export class DefaultClient implements Client {
             }
 
             this.clearCustomConfigurations();
-            if (diagnosticsCollectionCodeAnalysis) {
-                diagnosticsCollectionCodeAnalysis.clear();
-                codeAnalysisFileToCodeActions.clear();
-            }
+            this.handleRemoveAllCodeAnalysisProblems();
             this.trackedDocuments.forEach(document => {
                 this.provideCustomConfiguration(document.uri, undefined, true);
             });

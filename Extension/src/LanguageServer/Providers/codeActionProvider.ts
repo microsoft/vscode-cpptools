@@ -65,10 +65,12 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 let wsEdit: vscode.WorkspaceEdit | undefined;
                 let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
                 if (command.edit) {
+                    // Inline macro feature.
                     codeActionKind = vscode.CodeActionKind.RefactorInline;
                     wsEdit = new vscode.WorkspaceEdit();
                     wsEdit.replace(document.uri, vscodeRange(command.edit.range), command.edit.newText);
                 } else if (command.command === "C_Cpp.RemoveAllCodeAnalysisProblems" && command.uri !== undefined) {
+                    // The "RemoveAll" message is sent for all code analysis squiggles.
                     const vsCodeRange: vscode.Range = vscodeRange(r);
                     const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(command.uri);
                     if (codeActionDiagnosticInfo === undefined) {
@@ -79,6 +81,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     const removeCodeActions: vscode.CodeAction[] = [];
                     const docCodeActions: vscode.CodeAction[] = [];
                     const showClear: string = new CppSettings().clangTidyCodeActionShowClear;
+
+                    // Check which code actions to show.  This can get called a lot
+                    // (after every cursor change) so all the checks should be relatively fast.
                     for (const codeAction of codeActionDiagnosticInfo) {
                         if (!codeAction.range.contains(vsCodeRange)) {
                             continue;
@@ -88,12 +93,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                             codeActionCodeInfo = codeAnalysisCodeToFixes.get(codeAction.code);
                         }
                         if (codeAction.fixCodeAction !== undefined) {
+                            // Potentially we could make the "fix all" or "fix all type" preferred instead.
                             codeAction.fixCodeAction.isPreferred = true;
                             fixCodeActions.push(codeAction.fixCodeAction);
                             if (codeActionCodeInfo !== undefined) {
                                 if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                     (codeActionCodeInfo.uriToInfo.size > 1 ||
                                     codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
+                                    // Only show the "fix all type" if there is more than one fix for the type.
                                     fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                                 }
                             }
@@ -110,11 +117,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                                 codeActionCodeInfo.uriToInfo.size > 0 &&
                                 (codeActionCodeInfo.uriToInfo.size > 1 ||
                                 codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
+                                // Only show the "clear all type" if there is more than one fix for the type.
                                 removeAllTypeAvailable = true;
                             }
                         }
                         if (showClear !== "None") {
                             if (!removeAllTypeAvailable || showClear === "AllAndAllTypeAndThis") {
+                                // The "Clear this" command is useful when you need to manually fix
+                                // some of the cases, and then run "fix all type" for the rest.
                                 removeCodeActions.push(codeAction.removeCodeAction);
                             }
                             if (removeAllTypeAvailable && codeActionCodeInfo?.removeAllTypeCodeAction) {
@@ -130,6 +140,8 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     if (fixCodeActions.length > 0) {
                         resultCodeActions.push(...fixCodeActions);
                         if (codeAnalysisAllFixes.fixAllCodeAction.command?.arguments?.[1] !== undefined) {
+                            // Only show "fix all" if there are multiple types of fixes.
+                            // The arguments[1] only gets set when there are multiple types.
                             resultCodeActions.push(codeAnalysisAllFixes.fixAllCodeAction);
                         }
                     }

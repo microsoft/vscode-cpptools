@@ -417,11 +417,11 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveAllCodeAnalysisProblems', onRemoveAllCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveCodeAnalysisProblems', onRemoveCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', onFixAllCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllTypeCodeAnalysisProblems', onFixAllTypeCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveAllCodeAnalysisProblems', onRemoveAllCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.FixThisCodeAnalysisProblem', onFixThisCodeAnalysisProblem));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllTypeCodeAnalysisProblems', onFixAllTypeCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', onFixAllCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.DisableAllTypeCodeAnalysisProblems', onDisableAllTypeCodeAnalysisProblems));
     disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisDocumentation', (uri) => vscode.env.openExternal(uri)));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
@@ -608,23 +608,8 @@ async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, ide
     getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
 }
 
+// Needed due to https://github.com/microsoft/vscode/issues/148723 .
 const codeActionAbortedString: string = localize('code.action.aborted', "The code action fix was skipped because it was generated from an older document version.");
-
-async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
-    if (version === codeAnalysisAllFixes.version) {
-        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
-    } else {
-        vscode.window.showErrorMessage(codeActionAbortedString);
-    }
-}
-
-async function onFixAllTypeCodeAnalysisProblems(type: string, version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
-    if (version === codeAnalysisCodeToFixes.get(type)?.version) {
-        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
-    } else {
-        vscode.window.showErrorMessage(codeActionAbortedString);
-    }
-}
 
 async function onFixThisCodeAnalysisProblem(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     if (identifiersAndUris.length < 1) {
@@ -644,6 +629,22 @@ async function onFixThisCodeAnalysisProblem(version: number, workspaceEdit: vsco
         }
     }
     getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+}
+
+async function onFixAllTypeCodeAnalysisProblems(type: string, version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisCodeToFixes.get(type)?.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    } else {
+        vscode.window.showErrorMessage(codeActionAbortedString);
+    }
+}
+
+async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisAllFixes.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    } else {
+        vscode.window.showErrorMessage(codeActionAbortedString);
+    }
 }
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
