@@ -925,17 +925,19 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const process1: string = "cpptools-srv";
-    const process2: string = "cpptools";
-    if (data.includes(process1)) {
-        data = data.replace(new RegExp(process1 + "\\s+", "g"), "");
-        data = `${process1}\t${binaryVersion}\n${data}`;
-    } else if (data.includes(process2)) {
-        data = data.replace(new RegExp(process2 + "\\s+", "g"), "");
-        data = `${process2}\t${binaryVersion}\n${data}`;
-    } else {
-        // Not expected, but just in case.
-        data = `cpptools?\t${binaryVersion}\n${data}`;
+    const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools" ];
+    let processNameFound: boolean = false;
+    for (const processName of processNames) {
+        if (data.includes(processName)) {
+            data = data.replace(new RegExp(processName + "\\s+", "g"), "");
+            data = `${processName}\t${binaryVersion}\n${data}`;
+            processNameFound = true;
+            break;
+        }
+    }
+    if (!processNameFound) {
+        // Not expected, but just in case a new binary gets added.
+        data = `cpptools???\t${binaryVersion}\n${data}`;
     }
 
     // Remove runtime lines because they can be different on different machines.
