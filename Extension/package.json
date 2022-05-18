@@ -3953,9 +3953,6 @@
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true
-      },
-      "[Log]": {
-        "editor.wordWrap": "off"
       }
     },
     "semanticTokenTypes": [
