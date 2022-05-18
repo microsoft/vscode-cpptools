@@ -610,7 +610,7 @@ async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, ide
 }
 
 // Needed due to https://github.com/microsoft/vscode/issues/148723 .
-const codeActionAbortedString: string = localize('code.action.aborted', "The code action fix was skipped because it was generated from an older document version.");
+const codeActionAbortedString: string = localize('code.action.aborted', "The code analysis fix could not be applied because the document has changed.");
 
 async function onFixThisCodeAnalysisProblem(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     if (identifiersAndUris.length < 1) {
