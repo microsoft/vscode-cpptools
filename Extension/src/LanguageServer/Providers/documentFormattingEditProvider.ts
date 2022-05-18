@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import { DefaultClient, FormatParams, FormatDocumentRequest } from '../client';
 import { CppSettings, getEditorConfigSettings } from '../settings';
+import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
     private client: DefaultClient;
@@ -40,14 +41,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
             // because there is not currently cancellation logic for formatting
             // in the native process. Formatting is currently done directly in
             // message handling thread.
-            const textEdits: any = await this.client.languageClient.sendRequest(FormatDocumentRequest, params);
-            const results: vscode.TextEdit[] = [];
-            textEdits.forEach((textEdit: any) => {
-                results.push({
-                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
-                    newText: textEdit.newText
-                });
-            });
+            const results: vscode.TextEdit[] = makeVscodeTextEdits(await this.client.languageClient.sendRequest(FormatDocumentRequest, params));
             // Apply insert_final_newline from .editorconfig
             if (document.lineCount > 0 && editorConfigSettings !== undefined && editorConfigSettings.insert_final_newline) {
                 // Check if there is already a newline at the end.  If so, formatting edits should not replace it.
