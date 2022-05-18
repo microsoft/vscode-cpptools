@@ -24,6 +24,7 @@ import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType,
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as util from '../common';
+import { Location, makeVscodeRange, makeVscodeLocation, makeVscodeTextEdits, rangeEquals, TextEdit } from './utils';
 import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
@@ -138,28 +139,6 @@ export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
 
-export function vscodeRange(cpptoolsRange: Range): vscode.Range {
-    return new vscode.Range(cpptoolsRange.start.line, cpptoolsRange.start.character, cpptoolsRange.end.line, cpptoolsRange.end.character);
-}
-
-export function cpptoolsRange(vscRange: vscode.Range): Range {
-    return { start: { line: vscRange.start.line, character: vscRange.start.character },
-        end: { line: vscRange.end.line, character: vscRange.end.character } };
-}
-
-export function rangeEquals(range1: vscode.Range | Range, range2: vscode.Range | Range): boolean {
-    return range1.start.line === range2.start.line && range1.start.character === range2.start.character &&
-    range1.end.line === range2.end.line && range1.end.character === range2.end.character;
-}
-
-export function vscodeLocation(cpptoolsLocation: Location): vscode.Location {
-    return new vscode.Location(vscode.Uri.parse(cpptoolsLocation.uri), vscodeRange(cpptoolsLocation.range));
-}
-
-export function vscodeTextEdits(cpptoolsTextEdits: TextEdit[]): vscode.TextEdit[] {
-    return cpptoolsTextEdits.map(textEdit => new vscode.TextEdit(vscodeRange(textEdit.range), textEdit.newText));
-}
-
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
     workspaceDisposables = [];
@@ -247,13 +226,13 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
     const diagnosticsIntelliSense: vscode.Diagnostic[] = [];
     params.diagnostics.forEach((d) => {
         const message: string = util.getLocalizedString(d.localizeStringParams);
-        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(vscodeRange(d.range), message, d.severity);
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
         diagnostic.code = d.code;
         diagnostic.source = CppSourceStr;
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
-                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(vscodeLocation(info.location), info.message));
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
             }
         }
 
@@ -380,13 +359,13 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
     ++nextVersion;
     const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] = [];
     for (const d of params.diagnostics) {
-        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(vscodeRange(d.range),
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range),
             util.getLocalizedString(d.localizeStringParams), d.severity);
         const identifier: CodeAnalysisDiagnosticIdentifier = { range: d.range, code: d.code };
         const identifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = { uri: params.uri, identifiers: [ identifier ] };
         const codeAction: CodeActionDiagnosticInfo = {
             version: nextVersion,
-            range: vscodeRange(identifier.range),
+            range: makeVscodeRange(identifier.range),
             code: identifier.code,
             removeCodeAction: {
                 title: localize("clear_this_problem", "Clear this {0} problem", d.code),
@@ -399,7 +378,7 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
         if (d.workspaceEdit) {
             workspaceEdit.workspaceEdit = new vscode.WorkspaceEdit();
             for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
-                workspaceEdit.workspaceEdit.set(vscode.Uri.parse(uriStr, true), vscodeTextEdits(edits));
+                workspaceEdit.workspaceEdit.set(vscode.Uri.parse(uriStr, true), makeVscodeTextEdits(edits));
             }
             const fixThisCodeAction: vscode.CodeAction = {
                 title: localize("fix_this_problem", "Fix this {0} problem", d.code),
@@ -421,13 +400,13 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
-                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(vscodeLocation(info.location), info.message));
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
                 if (info.workspaceEdit === undefined) {
                     continue;
                 }
                 const relatedWorkspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 for (const [uriStr, edits] of Object.entries(info.workspaceEdit.changes)) {
-                    relatedWorkspaceEdit.set(vscode.Uri.parse(uriStr, true), vscodeTextEdits(edits));
+                    relatedWorkspaceEdit.set(vscode.Uri.parse(uriStr, true), makeVscodeTextEdits(edits));
                 }
                 const relatedIdentifier: CodeAnalysisDiagnosticIdentifier = { range: info.location.range, code: d.code };
                 const relatedIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {
@@ -443,7 +422,7 @@ function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagnosticsPa
                 } else {
                     const relatedCodeActionInfo: CodeActionDiagnosticInfo = {
                         version: nextVersion,
-                        range: vscodeRange(relatedIdentifier.range),
+                        range: makeVscodeRange(relatedIdentifier.range),
                         code: relatedIdentifier.code,
                         fixCodeAction: relatedCodeAction
                     };
@@ -774,12 +753,6 @@ export interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
-/** Differs from vscode.Location, which has a uri of type vscode.Uri. */
-interface Location {
-    uri: string;
-    range: Range;
-}
-
 export interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
@@ -812,11 +785,6 @@ export interface FormatParams {
     tabSize: number;
     editorConfigSettings: any;
     useVcFormat: boolean;
-}
-
-interface TextEdit {
-    range: Range;
-    newText: string;
 }
 
 interface WorkspaceEdit {

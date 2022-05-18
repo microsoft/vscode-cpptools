@@ -3,7 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope, vscodeLocation } from '../client';
+import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope } from '../client';
+import { makeVscodeLocation } from '../utils';
 import * as util from '../../common';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
@@ -42,7 +43,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                 name,
                 symbol.kind,
                 symbol.containerName,
-                vscodeLocation(symbol.location)
+                makeVscodeLocation(symbol.location)
             );
             resultSymbols.push(vscodeSymbol);
         });

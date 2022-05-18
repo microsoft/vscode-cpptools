@@ -13,7 +13,8 @@ import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
 import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
-    codeAnalysisFileToCodeActions, codeAnalysisAllFixes, cpptoolsRange, rangeEquals } from './client';
+    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './client';
+import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
@@ -298,7 +299,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(cpptoolsRange(editor.selection));
+        clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     }
     ui.activeDocumentChanged();
 }
@@ -317,7 +318,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(cpptoolsRange(event.selections[0]));
+    clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
 
 export function processDelayedDidOpen(document: vscode.TextDocument): boolean {

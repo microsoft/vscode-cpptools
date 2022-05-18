@@ -6,7 +6,8 @@ import * as vscode from 'vscode';
 import {  Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import * as util from '../../common';
 import { CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
-    codeAnalysisAllFixes, DefaultClient, vscodeRange } from '../client';
+    codeAnalysisAllFixes, DefaultClient } from '../client';
+import { makeVscodeRange } from '../utils';
 import { CppSettings } from '../settings';
 
 type LocalizeStringParams = util.LocalizeStringParams;
@@ -68,10 +69,10 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     // Inline macro feature.
                     codeActionKind = vscode.CodeActionKind.RefactorInline;
                     wsEdit = new vscode.WorkspaceEdit();
-                    wsEdit.replace(document.uri, vscodeRange(command.edit.range), command.edit.newText);
+                    wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
                 } else if (command.command === "C_Cpp.RemoveAllCodeAnalysisProblems" && command.uri !== undefined) {
                     // The "RemoveAll" message is sent for all code analysis squiggles.
-                    const vsCodeRange: vscode.Range = vscodeRange(r);
+                    const vsCodeRange: vscode.Range = makeVscodeRange(r);
                     const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(command.uri);
                     if (codeActionDiagnosticInfo === undefined) {
                         return;

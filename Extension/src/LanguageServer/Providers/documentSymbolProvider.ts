@@ -3,9 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope, vscodeRange } from '../client';
+import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
 import * as util from '../../common';
 import { processDelayedDidOpen } from '../extension';
+import { makeVscodeRange } from '../utils';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private client: DefaultClient;
@@ -44,8 +45,8 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                     }
                 }
 
-                let r: vscode.Range = vscodeRange(symbol.range);
-                const sr: vscode.Range = vscodeRange(symbol.selectionRange);
+                let r: vscode.Range = makeVscodeRange(symbol.range);
+                const sr: vscode.Range = makeVscodeRange(symbol.selectionRange);
                 if (!r.contains(sr)) {
                     r = sr;
                 }
