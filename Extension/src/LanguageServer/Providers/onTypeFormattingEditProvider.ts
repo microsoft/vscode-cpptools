@@ -3,8 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import {DefaultClient,  FormatParams, FormatOnTypeRequest} from '../client';
+import { DefaultClient, FormatParams, FormatOnTypeRequest } from '../client';
 import { CppSettings, getEditorConfigSettings } from '../settings';
+import { makeVscodeTextEdits } from '../utils';
 
 export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEditProvider {
     private client: DefaultClient;
@@ -40,15 +41,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
             // because there is not currently cancellation logic for formatting
             // in the native process. Formatting is currently done directly in
             // message handling thread.
-            const textEdits: any[] = await this.client.languageClient.sendRequest(FormatOnTypeRequest, params);
-            const result: vscode.TextEdit[] = [];
-            textEdits.forEach((textEdit) => {
-                result.push({
-                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
-                    newText: textEdit.newText
-                });
-            });
-            return result;
+            return makeVscodeTextEdits(await this.client.languageClient.sendRequest(FormatOnTypeRequest, params));
         };
         if (!useVcFormat) {
             // If not using vcFormat, only process on-type requests for ';'
