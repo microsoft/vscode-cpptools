@@ -72,7 +72,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     if (info.platform === 'darwin') {
         const releaseParts: string[] = os.release().split(".");
         if (releaseParts.length >= 1) {
-            // AutoPCH doesn't work for older Mac OS's.
             isOldMacOs = parseInt(releaseParts[0]) < 16;
         }
     }
