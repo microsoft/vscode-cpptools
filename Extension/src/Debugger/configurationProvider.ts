@@ -175,14 +175,27 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 config.debuggerEvent = DebuggerEvent.debugPanel;
             }
         }
-        if ((!folder || isIntelliSenseDisabled) && config.preLaunchTask) {
-            /* There are two cases where folder is undefined:
-                * when debugging is done on a single file where there is no folder open,
-                * or when the debug configuration is defined at the User level.
-                */
-            await this.resolvePreLaunchTask(undefined, config);
-            config.preLaunchTask = undefined;
-        } else {
+        /**  Actually, when user use a "*.code-workspace" file to open a workspace and start debug, 
+         *   the argument "folder" is "undefind", but it doesn't mean there is no folder to handle,
+         *   so the code below is for handle this case.
+         */
+        if (!folder) {
+            // When user open a single file, "vscode.workspace.workspaceFolders" will be "undefined"
+            if (vscode.workspace.workspaceFolders) {
+                for (let oneFolder of vscode.workspace.workspaceFolders) {
+                    await this.resolvePreLaunchTask(oneFolder, config);
+                }
+            }
+            else if ((!folder || isIntelliSenseDisabled) && config.preLaunchTask) {
+                /* There are two cases where folder is undefined:
+                    * when debugging is done on a single file where there is no folder open,
+                    * or when the debug configuration is defined at the User level.
+                    */
+                await this.resolvePreLaunchTask(undefined, config);
+                config.preLaunchTask = undefined;
+            }
+        }
+        else {
             await this.resolvePreLaunchTask(folder, config);
         }
         await this.sendDebugTelemetry(folder, config);
