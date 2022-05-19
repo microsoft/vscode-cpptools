@@ -83,7 +83,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
-        vscode.window.showErrorMessage(localize("macos.version.deprecated", "This version of the C/C++ extension requires at least macOS version {0}.", "10.12"));
+        vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
     } else {
         if (settings.intelliSenseEngine === "Disabled") {
             languageServiceDisabled = true;
