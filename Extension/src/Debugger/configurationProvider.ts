@@ -125,12 +125,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const reducedConfig: vscode.DebugConfiguration = {...config};
-            // Remove the extra properties that are not a part of the DebugConfiguration.
-            reducedConfig.detail = undefined;
-            reducedConfig.existing = undefined;
-            reducedConfig.isDefault = undefined;
-            const menuItem: MenuItem = { label: config.name, configuration: reducedConfig, description: config.detail, detail: config.existing };
+            const quickPickConfig: vscode.DebugConfiguration = {...config};
+            const menuItem: MenuItem = { label: config.name, configuration: quickPickConfig, description: config.detail, detail: config.existing };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -148,6 +144,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             this.showErrorIfClNotAvailable(selection.label);
         }
 
+        // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
+        selection.configuration.detail = undefined;
+        selection.configuration.existing = undefined;
+        selection.configuration.isDefault = undefined;
         return [selection.configuration];
     }
 
@@ -676,7 +676,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!folder) {
             return;
         }
-        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, true);
+        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, false);
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.launchPlayButton, { "debugType": "AddConfigurationOnly", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
             return; // User canceled it.
@@ -762,7 +762,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (configuration.preLaunchTask) {
             try {
                 if (folder) {
-                    await cppBuildTaskProvider.writeBuildTask(configuration.preLaunchTask);
+                    await cppBuildTaskProvider.writeDefaultBuildTask(configuration.preLaunchTask);
                 } else {
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
