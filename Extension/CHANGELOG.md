@@ -1,5 +1,13 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.10.3: May 23, 2022
+### New Feature
+* Add code actions to apply clang-tidy fixes. [#8476](https://github.com/microsoft/vscode-cpptools/issues/8476)
+* Make the "Run and Debug" button feature available to all users. [#9306](https://github.com/microsoft/vscode-cpptools/issues/9306)
+
+### Bug Fixes
+* Fix several IntelliSense bugs. [#6226](https://github.com/microsoft/vscode-cpptools/issues/6226), [#8294](https://github.com/microsoft/vscode-cpptools/issues/8294), [#8530](https://github.com/microsoft/vscode-cpptools/issues/8530), [#8725](https://github.com/microsoft/vscode-cpptools/issues/8725), [#8751](https://github.com/microsoft/vscode-cpptools/issues/8751), [#9076](https://github.com/microsoft/vscode-cpptools/issues/9076), [#9224](https://github.com/microsoft/vscode-cpptools/issues/9224), [#9336](https://github.com/microsoft/vscode-cpptools/issues/9336)
+
 ## Version 1.10.2: May 12, 2022
 ### Bug Fix
 * Fix abnormal process termination (causing core dump creation on some systems) during process creation on Linux/Mac. [#9301](https://github.com/microsoft/vscode-cpptools/issues/9301)
