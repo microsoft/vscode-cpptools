@@ -3450,5 +3450,12 @@
   "wybór elementu członkowskiego obejmuje zbyt wiele zagnieżdżonych typów anonimowych",
   "nie ma wspólnego typu między argumentami operacji",
   "oczekiwano wskaźnika do składowej",
-  "elastyczna składowa tablicy nie może być zadeklarowana w typie pustym w inny sposób"
+  "elastyczna składowa tablicy nie może być zadeklarowana w typie pustym w inny sposób",
+  "oczekiwano zdefiniowania elementu „std::source_location::__impl” w klasie z tylko składowymi danych „_M_function_name”, „_M_file_name”, „_M_column”, „_M_line”",
+  "podczas inicjowania elementu „std::source_location::__impl” liczba kolumn przepełnia składową „_M_column” typu %t",
+  "podczas inicjowania elementu „std::source_location::__impl” liczba wierszy przepełnia składową „_M_line” typu %t",
+  "stała znaków UTF-16 nie może zajmować więcej niż jednej jednostki kodu; obcięta wartość",
+  "oba argumenty muszą mieć ten sam typ",
+  "typ %t jest nieprawidłowy jako argument dla tej wbudowanej",
+  "wywołano z %nd:"
 ]

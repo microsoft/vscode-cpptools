@@ -3450,5 +3450,12 @@
   "výběr člena zahrnuje příliš mnoho vnořených anonymních typů",
   "mezi operandy není žádný společný typ",
   "očekával se ukazatel na člen",
-  "flexibilní člen pole nelze deklarovat v jinak prázdném typu"
+  "flexibilní člen pole nelze deklarovat v jinak prázdném typu",
+  "Očekávalo se, že std::source_location::__impl bude definováno pro třídu pouze s datovými členy _M_function_name, _M_file_name, _M_column a _M_line.",
+  "během inicializace std::source_location::__impl přeteklo číslo sloupce člena _M_column typu %t",
+  "během inicializace std::source_location::__impl přeteklo číslo řádku člena _M_line typu %t",
+  "znaková konstanta UTF-16 nemůže zabírat více než jednu jednotku kódu; hodnota byla zkrácena",
+  "oba argumenty musí mít stejný typ",
+  "typ %t není platný jako argument pro tento předdefinovan.",
+  "voláno z %nd:"
 ]
