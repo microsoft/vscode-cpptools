@@ -7,6 +7,7 @@
 
 ### Bug Fixes
 * Fix several IntelliSense bugs. [#6226](https://github.com/microsoft/vscode-cpptools/issues/6226), [#8294](https://github.com/microsoft/vscode-cpptools/issues/8294), [#8530](https://github.com/microsoft/vscode-cpptools/issues/8530), [#8725](https://github.com/microsoft/vscode-cpptools/issues/8725), [#8751](https://github.com/microsoft/vscode-cpptools/issues/8751), [#9076](https://github.com/microsoft/vscode-cpptools/issues/9076), [#9224](https://github.com/microsoft/vscode-cpptools/issues/9224), [#9336](https://github.com/microsoft/vscode-cpptools/issues/9336)
+* Prevent language service activation for macOS older than 10.12. [PR #9328](https://github.com/microsoft/vscode-cpptools/pull/9328)
 
 ## Version 1.10.2: May 12, 2022
 ### Bug Fix
