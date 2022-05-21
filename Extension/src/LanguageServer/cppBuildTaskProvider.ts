@@ -227,25 +227,19 @@ export class CppBuildTaskProvider implements TaskProvider {
     }
 
     public async writeDefaultBuildTask(taskLabel: string): Promise<void> {
-        return this.checkBuildTaskExists(taskLabel, true, true);
+        return this.writeBuildTask(taskLabel, true);
     }
 
-    public async writeBuildTask(taskLabel: string): Promise<void> {
-        return this.checkBuildTaskExists(taskLabel, true);
-    }
-
-    public async checkBuildTaskExists(taskLabel: string, createTask: boolean = false, setAsDefault: boolean = false): Promise<void> {
+    public async writeBuildTask(taskLabel: string, setAsDefault: boolean = false): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson();
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
-        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
+        // Check if the task exists in the user's task.json.
         let selectedTask: any;
-        if (!createTask) {
-            selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-            if (selectedTask) {
-                return;
-            }
+        selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+        if (selectedTask) {
+            return;
         }
 
         // Create the task which should be created based on the selected "debug configuration".
@@ -261,7 +255,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
         rawTasksJson.version = "2.0.0";
 
-        // Modify the current default task
+        // If the new task should be set as the default task, modify the current default task.
         if (setAsDefault) {
             rawTasksJson.tasks.forEach((task: any) => {
                 if (task.label === selectedTask?.definition.label) {

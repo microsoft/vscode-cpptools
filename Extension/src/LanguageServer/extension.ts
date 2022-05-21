@@ -12,13 +12,14 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions } from './client';
+import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
+    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './client';
+import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
-import { Range } from 'vscode-languageclient';
 import * as rd from 'readline';
 import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
@@ -298,7 +299,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     } else {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(Range.create(editor.selection.start, editor.selection.end));
+        clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     }
     ui.activeDocumentChanged();
 }
@@ -317,7 +318,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         clients.activeDocumentChanged(event.textEditor.document);
         ui.activeDocumentChanged();
     }
-    clients.ActiveClient.selectionChanged(Range.create(event.selections[0].start, event.selections[0].end));
+    clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
 
 export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
@@ -417,7 +418,13 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ClearCodeAnalysisSquiggles', onClearCodeAnalysisSquiggles));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveCodeAnalysisProblems', onRemoveCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveAllCodeAnalysisProblems', onRemoveAllCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixThisCodeAnalysisProblem', onFixThisCodeAnalysisProblem));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllTypeCodeAnalysisProblems', onFixAllTypeCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', onFixAllCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.DisableAllTypeCodeAnalysisProblems', onDisableAllTypeCodeAnalysisProblems));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisDocumentation', (uri) => vscode.env.openExternal(uri)));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
@@ -594,8 +601,55 @@ async function onRunCodeAnalysisOnAllFiles(): Promise<void> {
     getActiveClient().handleRunCodeAnalysisOnAllFiles();
 }
 
-async function onClearCodeAnalysisSquiggles(): Promise<void> {
-    getActiveClient().handleClearCodeAnalysisSquiggles();
+async function onRemoveAllCodeAnalysisProblems(): Promise<void> {
+    getActiveClient().handleRemoveAllCodeAnalysisProblems();
+}
+
+async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
+}
+
+// Needed due to https://github.com/microsoft/vscode/issues/148723 .
+const codeActionAbortedString: string = localize('code.action.aborted', "The code analysis fix could not be applied because the document has changed.");
+
+async function onFixThisCodeAnalysisProblem(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (identifiersAndUris.length < 1) {
+        return;
+    }
+    const codeActions: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(identifiersAndUris[0].uri);
+    if (codeActions === undefined) {
+        return;
+    }
+    for (const codeAction of codeActions) {
+        if (codeAction.code === identifiersAndUris[0].identifiers[0].code && rangeEquals(codeAction.range, identifiersAndUris[0].identifiers[0].range)) {
+            if (version !== codeAction.version) {
+                vscode.window.showErrorMessage(codeActionAbortedString);
+                return;
+            }
+            break;
+        }
+    }
+    getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+}
+
+async function onFixAllTypeCodeAnalysisProblems(type: string, version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisCodeToFixes.get(type)?.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    } else {
+        vscode.window.showErrorMessage(codeActionAbortedString);
+    }
+}
+
+async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    if (version === codeAnalysisAllFixes.version) {
+        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    } else {
+        vscode.window.showErrorMessage(codeActionAbortedString);
+    }
+}
+
+async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
+    getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
 function onAddToIncludePath(path: string): void {
@@ -872,17 +926,19 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const process1: string = "cpptools-srv";
-    const process2: string = "cpptools";
-    if (data.includes(process1)) {
-        data = data.replace(new RegExp(process1 + "\\s+", "g"), "");
-        data = `${process1}\t${binaryVersion}\n${data}`;
-    } else if (data.includes(process2)) {
-        data = data.replace(new RegExp(process2 + "\\s+", "g"), "");
-        data = `${process2}\t${binaryVersion}\n${data}`;
-    } else {
-        // Not expected, but just in case.
-        data = `cpptools?\t${binaryVersion}\n${data}`;
+    const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools" ];
+    let processNameFound: boolean = false;
+    for (const processName of processNames) {
+        if (data.includes(processName)) {
+            data = data.replace(new RegExp(processName + "\\s+", "g"), "");
+            data = `${processName}\t${binaryVersion}\n${data}`;
+            processNameFound = true;
+            break;
+        }
+    }
+    if (!processNameFound) {
+        // Not expected, but just in case a new binary gets added.
+        data = `cpptools???\t${binaryVersion}\n${data}`;
     }
 
     // Remove runtime lines because they can be different on different machines.

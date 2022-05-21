@@ -3450,5 +3450,12 @@
   "la selezione dei membri implica troppi tipi anonimi annidati",
   "non esiste alcun tipo comune tra gli operandi",
   "è previsto un puntatore a membro",
-  "un membro di matrice flessibile non può essere dichiarato in un tipo altrimenti vuoto"
+  "un membro di matrice flessibile non può essere dichiarato in un tipo altrimenti vuoto",
+  "previsto 'std::source_location::__impl' da definire in una classe con solo i membri dati '_M_function_name', '_M_file_name', '_M_column', '_M_line'",
+  "durante l'inizializzazione di 'std::source_location::__impl', il membro '_M_column' in overflow del numero di colonna è di tipo %t",
+  "durante l'inizializzazione di 'std::source_location::__impl', il membro '_M_line' in overflow del numero di riga è di tipo %t",
+  "una costante di caratteri UTF-16 non può occupare più di un'unità di codice; valore troncato",
+  "entrambi gli argomenti devono avere lo stesso tipo",
+  "il tipo %t non è valido come argomento per questa compilazione",
+  "chiamato da %nd:"
 ]
