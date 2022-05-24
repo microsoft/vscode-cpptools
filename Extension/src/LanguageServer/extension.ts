@@ -926,7 +926,10 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     data = data.replace(/0x1........ \+ 0/g, "");
 
     // Get rid of the process names on each line and just add it to the start.
-    const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools" ];
+    const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools",
+        // Since only crash logs that start with "cpptools" are reported, the cases below would only occur
+        // if the crash were to happen before the new process had fully started and renamed itself.
+        "clang-tidy", "clang-format", "clang", "gcc" ];
     let processNameFound: boolean = false;
     for (const processName of processNames) {
         if (data.includes(processName)) {
@@ -938,7 +941,8 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     }
     if (!processNameFound) {
         // Not expected, but just in case a new binary gets added.
-        data = `cpptools???\t${binaryVersion}\n${data}`;
+        // Warning: Don't use ??? because that is checked below.
+        data = `cpptools??\t${binaryVersion}\n${data}`;
     }
 
     // Remove runtime lines because they can be different on different machines.
