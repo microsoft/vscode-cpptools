@@ -171,25 +171,25 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
          * 1: The configs that comes from playButton and are already defined, these configs should already have their PreLaunchTask defined.
          * 2: The configs that comes from debugPanel where the folder is undefined but task can not be found.
          */
-        let resolveByVsCode: boolean = false;
-        const debugPanelConfig: boolean = this.isDebugPanelConfig(config);
-        const existingConfig: boolean = this.isExistingConfig(config, folder);
-        let isExistingTask: boolean | undefined;
-        if (!debugPanelConfig && existingConfig) {
-            resolveByVsCode = true;
-        } else if (debugPanelConfig && !folder && config.preLaunchTask) {
-            isExistingTask = await cppBuildTaskProvider.isExistingTask(config.preLaunchTask);
-            if (!isExistingTask) {
+        if (config.preLaunchTask) {
+            let resolveByVsCode: boolean = false;
+            const debugPanelConfig: boolean = this.isDebugPanelConfig(config);
+            const existingConfig: boolean = this.isExistingConfig(config, folder);
+            let isExistingTask: boolean | undefined;
+            if (!debugPanelConfig && existingConfig) {
                 resolveByVsCode = true;
+            } else if (debugPanelConfig && !folder) {
+                isExistingTask = await cppBuildTaskProvider.isExistingTask(config.preLaunchTask);
+                if (!isExistingTask) {
+                    resolveByVsCode = true;
+                }
             }
-        }
 
-        // Send Telemetry before writing into files.
-        await this.sendDebugTelemetry(folder, config, existingConfig, debugPanelConfig);
+            // Send Telemetry before writing into files.
+            await this.sendDebugTelemetry(folder, config, existingConfig, debugPanelConfig);
 
-        if (!resolveByVsCode) {
-            const singleFile: boolean = !folder && !config.source;
-            if (config.preLaunchTask) {
+            if (!resolveByVsCode) {
+                const singleFile: boolean = !folder && !config.source;
                 if ((singleFile || isIntelliSenseDisabled ||
                     (debugPanelConfig && !folder && config.preLaunchTask && isExistingTask))) {
                     await this.resolvePreLaunchTask(undefined, config);
@@ -198,6 +198,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     await this.resolvePreLaunchTask(folder, config);
                 }
             }
+            DebugConfigurationProvider.recentBuildTaskLabelStr = config.preLaunchTask;
         }
 
         // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
@@ -853,7 +854,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
                     await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
                 }
-                DebugConfigurationProvider.recentBuildTaskLabelStr = configuration.preLaunchTask;
             } catch (errJS) {
                 const e: Error = errJS as Error;
                 if (e && e.message === util.failedToParseJson) {
