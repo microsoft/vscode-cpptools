@@ -169,30 +169,34 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         /** Do not resolve PreLaunchTask for these two cases, and let the VsCode resolve it:
          * 1: The configs that comes from playButton and are already defined, these configs should already have their PreLaunchTask defined.
-         * 2: The configs that comes from debugPanel when the workspace folder is defined but the folder is undefined.
+         * 2: The configs that comes from debugPanel where the folder is undefined but task can not be found.
          */
         let resolveByVsCode: boolean = false;
         const debugPanelConfig: boolean = this.isDebugPanelConfig(config);
         const existingConfig: boolean = this.isExistingConfig(config, folder);
-        if ((!debugPanelConfig && existingConfig) ||
-            (debugPanelConfig && !folder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0)) {
+        let isExistingTask: boolean | undefined;
+        if (!debugPanelConfig && existingConfig) {
             resolveByVsCode = true;
+        } else if (debugPanelConfig && !folder && config.preLaunchTask) {
+            isExistingTask = await cppBuildTaskProvider.isExistingTask(config.preLaunchTask);
+            if (!isExistingTask) {
+                resolveByVsCode = true;
+            }
         }
+
         // Send Telemetry before writing into files.
         await this.sendDebugTelemetry(folder, config, existingConfig, debugPanelConfig);
 
         if (!resolveByVsCode) {
             const singleFile: boolean = !folder && !config.source;
-            if ((singleFile || isIntelliSenseDisabled) && config.preLaunchTask) {
-                /** There are three cases where folder is undefined:
-                 * 1. when debugging is done on a single file where there is no folder open,
-                 * 2. when the debug configuration is defined at the User level,
-                 * 3. when the debug configuration is defined at the workspace level.
-                 */
-                await this.resolvePreLaunchTask(undefined, config);
-                config.preLaunchTask = undefined;
-            } else {
-                await this.resolvePreLaunchTask(folder, config);
+            if (config.preLaunchTask) {
+                if ((singleFile || isIntelliSenseDisabled ||
+                    (debugPanelConfig && !folder && config.preLaunchTask && isExistingTask))) {
+                    await this.resolvePreLaunchTask(undefined, config);
+                    config.preLaunchTask = undefined;
+                } else {
+                    await this.resolvePreLaunchTask(folder, config);
+                }
             }
         }
 
