@@ -230,6 +230,19 @@ export class CppBuildTaskProvider implements TaskProvider {
         return this.writeBuildTask(taskLabel, true);
     }
 
+    public async isExistingTask(taskLabel: string): Promise<any> {
+        const rawTasksJson: any = await this.getRawTasksJson();
+        if (!rawTasksJson.tasks) {
+            rawTasksJson.tasks = new Array();
+        }
+        // Check if the task exists in the user's task.json.
+        const selectedTask: any = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+        if (selectedTask) {
+            return true;
+        }
+        return false;
+    }
+
     public async writeBuildTask(taskLabel: string, setAsDefault: boolean = false): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson();
         if (!rawTasksJson.tasks) {

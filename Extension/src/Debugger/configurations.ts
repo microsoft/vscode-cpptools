@@ -17,8 +17,8 @@ export enum DebuggerType {
 }
 
 export enum DebuggerEvent {
-    debugPanel = "debugPanel",
-    launchPlayButton = "launchPlayButton"
+    debugPanel = "debugPanel",  // F5 or "Run and Debug" Panel
+    playButton = "playButton"   // "Run and Debug" play button
 }
 
 export interface IConfigurationSnippet {
