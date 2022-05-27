@@ -757,7 +757,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!folder) {
             return;
         }
-        const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor, false);
+        const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor, false, true);
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": "AddConfigurationOnly", "configSource": folder ? "folder" : "singleFile", "cancelled": "true" });
             return; // User canceled it.
@@ -779,7 +779,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     public async buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
         let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
-        const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor, true);
+        const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor);
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? "debug" : "run", "configSource": folder ? "folder" : "singleFile", "cancelled": "true" });
             return; // User canceled it.
@@ -797,7 +797,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         await vscode.debug.startDebugging(folder, selectedConfig, {noDebug: !debugModeOn});
     }
 
-    private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = false): Promise<CppDebugConfiguration | undefined> {
+    private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = true, onlyWorkspaceFolder: boolean = false): Promise<CppDebugConfiguration | undefined> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!util.isCppOrCFile(textEditor.document.uri)) {
             vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
@@ -808,6 +808,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         let configs: CppDebugConfiguration[] = await this.provideDebugConfigurationsForType(DebuggerType.cppdbg, folder);
         if (os.platform() === 'win32') {
             configs = configs.concat(await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
+        }
+        if (onlyWorkspaceFolder) {
+            configs = configs.filter(item => !item.source || item.source === DebugConfigSource.workspaceFolder);
         }
 
         const defaultConfig: CppDebugConfiguration[] | undefined = pickDefault ? this.findDefaultConfig(configs) : undefined;
