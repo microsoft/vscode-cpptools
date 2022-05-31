@@ -725,18 +725,25 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!folder) {
             return;
         }
-        const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor, false, true);
+        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, false, true);
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": "AddConfigurationOnly", "configSource": folder ? "folder" : "singleFile", "cancelled": "true" });
             return; // User canceled it.
         }
 
+        const isExistingConfig: boolean = this.isExistingConfig(selectedConfig, folder);
         // Write preLaunchTask into tasks.json file.
-        if (selectedConfig.preLaunchTask) {
+        if (! isExistingConfig && selectedConfig.preLaunchTask && (selectedConfig.taskStatus && selectedConfig.taskStatus === TaskConfigStatus.detected)) {
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
         }
+        // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
+        selectedConfig.detail = undefined;
+        selectedConfig.taskStatus = undefined;
+        selectedConfig.isDefault = undefined;
+        selectedConfig.source = undefined;
+        selectedConfig.debuggerEvent = undefined;
         // Write debug configuration in launch.json file.
-        await this.writeDebugConfig(selectedConfig, false, folder);
+        await this.writeDebugConfig(selectedConfig, isExistingConfig, folder);
 
     }
 
