@@ -13,7 +13,11 @@ import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
-import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations } from './configurations';
+import {
+    IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations,
+    WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations, CppDebugConfiguration,
+    DebugConfigSource, TaskConfigStatus, isDebugLaunchStr, ConfigMenu
+} from './configurations';
 import * as jsonc from 'comment-json';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
@@ -22,36 +26,6 @@ import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-
-function isDebugLaunchStr(str: string): boolean {
-    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
-}
-
-interface MenuItem extends vscode.QuickPickItem {
-    configuration: CppDebugConfiguration;
-}
-
-export enum TaskConfigStatus {
-    recentlyUsed = "Recently Used Task",
-    configured = "Configured Task", // The tasks that are configured in tasks.json file.
-    detected = "Detected Task"      // The tasks that are available based on detected compilers.
-}
-
-export enum DebugConfigSource {
-    singleFile = "singleFile",              // a debug config defiend for a single mode file
-    workspaceFolder = "workspaceFolder",    // a debug config defiend in launch.json
-    workspace = "workspace",                // a debug config defiend in workspace level
-    global = "global",                      // a debug config defiend in user level
-    unknown = "unknown"
-}
-
-interface CppDebugConfiguration extends vscode.DebugConfiguration {
-    detail?: string;
-    taskStatus?: TaskConfigStatus;
-    isDefault?: boolean; // The debug configuration is considered as default, if the prelaunch task is set as default.
-    source?: DebugConfigSource;
-    debuggerEvent?: DebuggerEvent;
-}
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
@@ -109,9 +83,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             configs.unshift(recentlyUsedConfig);
         }
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => {
+        const items: ConfigMenu[] = configs.map<ConfigMenu>(config => {
             const quickPickConfig: CppDebugConfiguration = {...config};
-            const menuItem: MenuItem = { label: config.name, configuration: quickPickConfig, description: config.detail, detail: config.taskStatus };
+            const menuItem: ConfigMenu = { label: config.name, configuration: quickPickConfig, description: config.detail, detail: config.taskStatus };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -119,7 +93,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return menuItem;
         });
 
-        const selection: MenuItem | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), {placeHolder: localize("select.configuration", "Select a configuration")});
+        const selection: ConfigMenu | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
             Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": folder ? "folder" : "singleFile", "cancelled": "true" });
             return []; // User canceled it.
@@ -157,15 +131,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
 
-        /** If the config is coming from debug Panel, there are three cases where the folder is undefined:
+        /** If the config is coming from "Run and Debug" debugPanel, there are three cases where the folder is undefined:
          * 1. when debugging is done on a single file where there is no folder open,
-         * 2. when the debug configuration is defined at the User level (fails, needs defined folder)
-         * 3. when the debug configuration is defined at the workspace level (succeeds, needs undefined folder)
-         * If the config is coming from "Run and Debug" play button, there is one case where the folder is undefined:
-         * 1. when debugging is done on a single file where there is no folder open,
+         * 2. when the debug configuration is defined at the User level (global).
+         * 3. when the debug configuration is defined at the workspace level.
+         * If the config is coming from "Run and Debug" playButton, there is one case where the folder is undefined:
+         * 1. when debugging is done on a single file where there is no folder open.
          */
-        // when config is coming from debugPanel, and it is at the user level, add the folder.
-        // when  from playButton, and it is at the workspace level, remove the folder.
 
         /** Do not resolve PreLaunchTask for these two cases, and let the VsCode resolve it:
          * 1: The configs that comes from playButton and are already defined, these configs should already have their PreLaunchTask defined.
@@ -201,10 +173,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             DebugConfigurationProvider.recentBuildTaskLabelStr = config.preLaunchTask;
         }
 
-        // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
-        config.detail = undefined;
-        config.taskStatus = undefined;
-        config.isDefault = undefined;
         // resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this return.
         return config;
     }
@@ -609,8 +577,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    private localizeConfigDetail(items: MenuItem[]): MenuItem[] {
-        items.map((item: MenuItem) => {
+    private localizeConfigDetail(items: ConfigMenu[]): ConfigMenu[] {
+        items.map((item: ConfigMenu) => {
             switch (item.detail) {
                 case TaskConfigStatus.recentlyUsed : {
                     item.detail = localize("recently.used.task", "Recently Used Task");
@@ -815,17 +783,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         const defaultConfig: CppDebugConfiguration[] | undefined = pickDefault ? this.findDefaultConfig(configs) : undefined;
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail, detail: config.taskStatus }));
+        const items: ConfigMenu[] = configs.map<ConfigMenu>(config => ({ label: config.name, configuration: config, description: config.detail, detail: config.taskStatus }));
 
-        let selection: MenuItem | undefined;
+        let selection: ConfigMenu | undefined;
 
         // if there was only one config for the default task, choose that config, otherwise ask the user to choose.
         if (defaultConfig && defaultConfig.length === 1) {
             selection = { label: defaultConfig[0].name, configuration: defaultConfig[0], description: defaultConfig[0].detail, detail: defaultConfig[0].taskStatus };
         } else {
-            let sortedItems: MenuItem[] = [];
+            let sortedItems: ConfigMenu[] = [];
             // Find the recently used task and place it at the top of quickpick list.
-            const recentTask: MenuItem[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr));
+            const recentTask: ConfigMenu[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr));
             if (recentTask.length !== 0 && recentTask[0].detail !== TaskConfigStatus.detected) {
                 recentTask[0].detail = TaskConfigStatus.recentlyUsed;
                 sortedItems.push(recentTask[0]);

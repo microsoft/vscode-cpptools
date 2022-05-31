@@ -5,10 +5,19 @@
 
 import * as os from 'os';
 import * as nls from 'vscode-nls';
+import * as vscode from 'vscode';
 import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+export function isDebugLaunchStr(str: string): boolean {
+    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
+}
+
+export interface ConfigMenu extends vscode.QuickPickItem {
+    configuration: CppDebugConfiguration;
+}
 
 export enum DebuggerType {
     cppvsdbg = "cppvsdbg",
@@ -19,6 +28,28 @@ export enum DebuggerType {
 export enum DebuggerEvent {
     debugPanel = "debugPanel",  // F5 or "Run and Debug" Panel
     playButton = "playButton"   // "Run and Debug" play button
+}
+
+export enum TaskConfigStatus {
+    recentlyUsed = "Recently Used Task",
+    configured = "Configured Task", // The tasks that are configured in tasks.json file.
+    detected = "Detected Task"      // The tasks that are available based on detected compilers.
+}
+
+export enum DebugConfigSource {
+    singleFile = "singleFile",              // a debug config defiend for a single mode file
+    workspaceFolder = "workspaceFolder",    // a debug config defiend in launch.json
+    workspace = "workspace",                // a debug config defiend in workspace level
+    global = "global",                      // a debug config defiend in user level
+    unknown = "unknown"
+}
+
+export interface CppDebugConfiguration extends vscode.DebugConfiguration {
+    detail?: string;
+    taskStatus?: TaskConfigStatus;
+    isDefault?: boolean; // The debug configuration is considered as default, if the prelaunch task is set as default.
+    source?: DebugConfigSource;
+    debuggerEvent?: DebuggerEvent;
 }
 
 export interface IConfigurationSnippet {

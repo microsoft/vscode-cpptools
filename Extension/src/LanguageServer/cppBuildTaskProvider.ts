@@ -230,8 +230,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         return this.writeBuildTask(taskLabel, true);
     }
 
-    public async isExistingTask(taskLabel: string): Promise<any> {
-        const rawTasksJson: any = await this.getRawTasksJson();
+    public async isExistingTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<any> {
+        const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
@@ -326,12 +326,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
     }
 
-    private getTasksJsonPath(): string | undefined {
-        return util.getJsonPath("tasks.json");
+    private getTasksJsonPath(workspaceFolder?: WorkspaceFolder): string | undefined {
+        return util.getJsonPath("tasks.json", workspaceFolder);
     }
 
-    public getRawTasksJson(): Promise<any> {
-        const path: string | undefined = this.getTasksJsonPath();
+    public getRawTasksJson(workspaceFolder?: WorkspaceFolder): Promise<any> {
+        const path: string | undefined = this.getTasksJsonPath(workspaceFolder);
         return util.getRawJson(path);
     }
 
