@@ -37,10 +37,10 @@ export enum TaskConfigStatus {
 }
 
 export enum DebugConfigSource {
-    singleFile = "singleFile",              // a debug config defiend for a single mode file
-    workspaceFolder = "workspaceFolder",    // a debug config defiend in launch.json
-    workspace = "workspace",                // a debug config defiend in workspace level
-    global = "global",                      // a debug config defiend in user level
+    singleFile = "singleFile",              // a debug config defined for a single mode file
+    workspaceFolder = "workspaceFolder",    // a debug config defined in launch.json
+    workspace = "workspace",                // a debug config defined in workspace level
+    global = "global",                      // a debug config defined in user level
     unknown = "unknown"
 }
 
