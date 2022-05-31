@@ -613,12 +613,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             (config.detail === undefined && config.source === undefined && config.taskStatus === undefined);
     }
 
-    private isExistingConfig(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder): boolean {
-        if (this.isDebugPanelConfig(config) || (config.taskStatus && (config.taskStatus !== TaskConfigStatus.detected))) {
+    private isExistingConfig(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder, searchLaunchJsonOnly: boolean = false): boolean {
+        if (this.isDebugPanelConfig(config) || (!searchLaunchJsonOnly && config.taskStatus && (config.taskStatus !== TaskConfigStatus.detected))) {
             return true;
         } else if (config.taskStatus && (config.taskStatus === TaskConfigStatus.detected)) {
             return false;
         }
+
         const configs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, config.type);
         if (configs && configs.length > 0) {
             const selectedConfig: any | undefined = configs.find((item: any) => item.name && item.name === config.name);
@@ -731,9 +732,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return; // User canceled it.
         }
 
-        const isExistingConfig: boolean = this.isExistingConfig(selectedConfig, folder);
+        const isExistingConfig: boolean = this.isExistingConfig(selectedConfig, folder, true);
         // Write preLaunchTask into tasks.json file.
-        if (! isExistingConfig && selectedConfig.preLaunchTask && (selectedConfig.taskStatus && selectedConfig.taskStatus === TaskConfigStatus.detected)) {
+        if (!isExistingConfig && selectedConfig.preLaunchTask && (selectedConfig.taskStatus && selectedConfig.taskStatus === TaskConfigStatus.detected)) {
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
         }
         // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
