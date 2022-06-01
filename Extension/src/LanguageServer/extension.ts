@@ -905,11 +905,24 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
     }
 
+    // Extract any message indicating missing dynamically loaded symbols.
+    let dynamicLoadError: string = "";
+    const dynamicLoadErrorStart: string = "Dyld Error Message:";
+    const startDynamicLoadError: number = data.indexOf(dynamicLoadErrorStart);
+    if (startDynamicLoadError >= 0) {
+        // Scan until the next blank line.
+        const dynamicLoadErrorEnd: string = "\n\n";
+        const endDynamicLoadError: number = data.indexOf(dynamicLoadErrorEnd, startDynamicLoadError);
+        if (endDynamicLoadError >= 0) {
+            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError) + "\n\n";
+        }
+    }
+
     // Extract the crashing thread's call stack.
     const crashStart: string = " Crashed:";
     let startCrash: number = data.indexOf(crashStart);
     if (startCrash < 0) {
-        return logMacCrashTelemetry("No crash start");
+        return logMacCrashTelemetry(dynamicLoadError + "No crash start");
     }
     startCrash += crashStart.length + 1; // Skip past crashStart.
     let endCrash: number = data.indexOf("Thread ", startCrash);
@@ -917,7 +930,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         endCrash = data.length - 1; // Not expected, but just in case.
     }
     if (endCrash <= startCrash) {
-        return logMacCrashTelemetry("No crash end");
+        return logMacCrashTelemetry(dynamicLoadError + "No crash end");
     }
     data = data.substring(startCrash, endCrash);
 
@@ -956,6 +969,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         }
     });
     data = data.trimRight();
+
+    // Prepend the dynamic load error.
+    data = dynamicLoadError + data;
 
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substring(0, 8189) + "...";
