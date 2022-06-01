@@ -908,11 +908,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     // Extract any message indicating missing dynamically loaded symbol.
     let dynamicLoadError: string = "";
     const dynamicLoadErrorStart: string = "Dyld Error Message:";
-    let startDynamicLoadError: number = data.indexOf(dynamicLoadErrorStart);
+    const startDynamicLoadError: number = data.indexOf(dynamicLoadErrorStart);
     if (startDynamicLoadError >= 0) {
         // Scan until the next blank line.
         const dynamicLoadErrorEnd: string = "\n\n";
-        let endDynamicLoadError: number = data.indexOf(dynamicLoadErrorEnd, startDynamicLoadError);
+        const endDynamicLoadError: number = data.indexOf(dynamicLoadErrorEnd, startDynamicLoadError);
         if (endDynamicLoadError >= 0) {
             dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError) + "\n\n";
         }
