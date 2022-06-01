@@ -230,17 +230,13 @@ export class CppBuildTaskProvider implements TaskProvider {
         return this.writeBuildTask(taskLabel, true);
     }
 
-    public async isExistingTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<any> {
+    public async isExistingTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<boolean> {
         const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
         if (!rawTasksJson.tasks) {
-            rawTasksJson.tasks = new Array();
+            return false;
         }
         // Check if the task exists in the user's task.json.
-        const selectedTask: any = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-        if (selectedTask) {
-            return true;
-        }
-        return false;
+        return rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
     }
 
     public async writeBuildTask(taskLabel: string, setAsDefault: boolean = false): Promise<void> {
@@ -249,16 +245,13 @@ export class CppBuildTaskProvider implements TaskProvider {
             rawTasksJson.tasks = new Array();
         }
         // Check if the task exists in the user's task.json.
-        let selectedTask: any;
-        selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-        if (selectedTask) {
+        if (rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel)) {
             return;
         }
 
         // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const normalizedLabel: string = (taskLabel.indexOf("ver(") !== -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
-        selectedTask = buildTasks.find(task => task.name === normalizedLabel);
+        const selectedTask: any = buildTasks.find(task => task.name === taskLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in checkBuildTaskExists()");

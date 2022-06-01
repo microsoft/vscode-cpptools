@@ -131,17 +131,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
 
-        /** If the config is coming from "Run and Debug" debugPanel, there are three cases where the folder is undefined:
+        /** If the config is coming from the "Run and Debug" debugPanel, there are three cases where the folder is undefined:
          * 1. when debugging is done on a single file where there is no folder open,
          * 2. when the debug configuration is defined at the User level (global).
          * 3. when the debug configuration is defined at the workspace level.
-         * If the config is coming from "Run and Debug" playButton, there is one case where the folder is undefined:
+         * If the config is coming from the "Run and Debug" playButton, there is one case where the folder is undefined:
          * 1. when debugging is done on a single file where there is no folder open.
          */
 
-        /** Do not resolve PreLaunchTask for these two cases, and let the VsCode resolve it:
-         * 1: The configs that comes from playButton and are already defined, these configs should already have their PreLaunchTask defined.
-         * 2: The configs that comes from debugPanel where the folder is undefined but task can not be found.
+        /** Do not resolve PreLaunchTask for these two cases, and let the Vs Code resolve it:
+         * 1: The existing configs that come from the playButton: the PreLaunchTask should already be defined for these configs.
+         * 2: The configs that come from the debugPanel where the folder is undefined and the PreLaunchTask cannot be found.
          */
         if (config.preLaunchTask) {
             let resolveByVsCode: boolean = false;
@@ -157,7 +157,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 }
             }
 
-            // Send Telemetry before writing into files.
+            // Send the telemetry before writing into files.
             await this.sendDebugTelemetry(folder, config, existingConfig, debugPanelConfig);
 
             if (!resolveByVsCode) {
@@ -636,7 +636,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         const configs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, config.type);
         const matchingConfig: CppDebugConfiguration | undefined = configs?.find((item: any) => item.name && item.name === config.name);
-        if (matchingConfig && matchingConfig.source) {
+        if (matchingConfig?.source) {
             return matchingConfig.source;
         }
         return undefined;
@@ -646,7 +646,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Get existing debug configurations from launch.json or user/workspace "launch" settings.
         const WorkspaceConfigs: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('launch', folder);
         const configs: any = WorkspaceConfigs.inspect<vscode.DebugConfiguration>('configurations');
-        // let configs: any = vscode.workspace.getConfiguration('launch', folder).get('configurations');
         if (!configs) {
             return undefined;
         }
