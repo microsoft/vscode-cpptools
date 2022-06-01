@@ -905,7 +905,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         binaryVersion = binaryVersionMatches && binaryVersionMatches.length > 1 ? binaryVersionMatches[1] : "";
     }
 
-    // Extract any message indicating missing dynamically loaded symbol.
+    // Extract any message indicating missing dynamically loaded symbols.
     let dynamicLoadError: string = "";
     const dynamicLoadErrorStart: string = "Dyld Error Message:";
     const startDynamicLoadError: number = data.indexOf(dynamicLoadErrorStart);
