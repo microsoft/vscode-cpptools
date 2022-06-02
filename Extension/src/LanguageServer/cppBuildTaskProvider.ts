@@ -226,8 +226,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
-    public async writeDefaultBuildTask(taskLabel: string): Promise<void> {
-        return this.writeBuildTask(taskLabel, true);
+    public async writeDefaultBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<void> {
+        return this.writeBuildTask(taskLabel, workspaceFolder, true);
     }
 
     public async isExistingTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<boolean> {
@@ -239,8 +239,8 @@ export class CppBuildTaskProvider implements TaskProvider {
         return rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
     }
 
-    public async writeBuildTask(taskLabel: string, setAsDefault: boolean = false): Promise<void> {
-        const rawTasksJson: any = await this.getRawTasksJson();
+    public async writeBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder, setAsDefault: boolean = false): Promise<void> {
+        const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
