@@ -33,6 +33,7 @@ export enum DebuggerEvent {
 
 export enum TaskStatus {
     recentlyUsed = "Recently Used Task", // A configured task that has been used recently.
+
     configured = "Configured Task", // The tasks that are configured in tasks.json file.
     detected = "Detected Task"      // The tasks that are available based on detected compilers.
 }

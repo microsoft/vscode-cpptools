@@ -762,10 +762,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (!isExistingConfig && selectedConfig.preLaunchTask && (selectedConfig.taskStatus && selectedConfig.taskStatus === TaskStatus.detected)) {
             await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
         }
+        // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
+        selectedConfig.detail = undefined;
+        selectedConfig.taskStatus = undefined;
+        selectedConfig.isDefault = undefined;
+        selectedConfig.source = undefined;
+        selectedConfig.debuggerEvent = undefined;
         // Write debug configuration in launch.json file.
         await this.writeDebugConfig(selectedConfig, isExistingConfig, folder);
         Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "true" });
-
     }
 
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
