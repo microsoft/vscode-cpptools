@@ -12,8 +12,9 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
-    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './client';
+import { Client, openFileVersions } from './client';
+import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
+    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';

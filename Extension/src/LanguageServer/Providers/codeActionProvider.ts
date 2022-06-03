@@ -5,8 +5,9 @@
 import * as vscode from 'vscode';
 import {  Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import * as util from '../../common';
+import { DefaultClient } from '../client';
 import { CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
-    codeAnalysisAllFixes, DefaultClient } from '../client';
+    codeAnalysisAllFixes } from '../codeAnalysis';
 import { makeVscodeRange } from '../utils';
 import { CppSettings } from '../settings';
 
