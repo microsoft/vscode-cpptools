@@ -420,7 +420,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             if (!config.detail && config.preLaunchTask) {
                 config.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask);
             }
-            config.taskStatus = TaskStatus.configured;
             config.existing = true;
             return config;
         });
@@ -830,6 +829,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskStatus.configured));
             sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskStatus.detected));
+            sortedItems = sortedItems.concat(items.filter(item => item.detail === undefined));
 
             selection = await vscode.window.showQuickPick(this.localizeConfigDetail(sortedItems), {
                 placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
