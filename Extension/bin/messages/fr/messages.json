@@ -3450,5 +3450,12 @@
   "la sélection de membre implique un trop grand nombre de types anonymes imbriqués",
   "il n’existe aucun type commun entre les opérandes",
   "pointeur vers membre attendu",
-  "un membre de tableau flexible ne peut pas être déclaré dans un type autrement vide."
+  "un membre de tableau flexible ne peut pas être déclaré dans un type autrement vide.",
+  "expected 'std::source_location::__impl' to be defined to a class with only the data members '_M_function_name', '_M_file_name', '_M_column', '_M_line'",
+  "lors de l’initialisation de 'std::source_location::__impl', le numéro de colonne dépasse le membre '_M_column' de type %t",
+  "lors de l’initialisation de 'std::source_location::__impl', le numéro de ligne dépasse le membre '_M_line' de type %t",
+  "une constante de caractères UTF-16 ne peut pas occuper plusieurs unités de code ; valeur tronquée",
+  "les deux arguments doivent avoir le même type",
+  "le type %t n’est pas valide en tant qu’argument pour ce builtin",
+  "appelé à partir de %nd :"
 ]

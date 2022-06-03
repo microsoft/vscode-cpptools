@@ -3450,5 +3450,12 @@
   "üye seçimi çok fazla iç içe anonim tür içeriyor",
   "işlenenler arasında ortak tür yok",
   "üye işaretçisi bekleniyordu",
-  "esnek bir dizi üyesi diğer türlü boş olan bir türde bildirilemez"
+  "esnek bir dizi üyesi diğer türlü boş olan bir türde bildirilemez",
+  "'std::source_location::__impl', yalnızca '_M_function_name', '_M_file_name', '_M_column', '_M_line' veri üyelerine sahip bir sınıfa tanımlanmalıdır",
+  "'std::source_location::__impl' başlatılırken, sütun numarası %t türündeki '_M_column' üyesini aşıyor",
+  "'std::source_location::__impl' başlatılırken, satır numarası %t türündeki '_M_line' üyesini aşıyor",
+  "UTF-16 karakter sabit değeri, bir kod biriminden fazla yer kaplayamaz; kesilmiş değer",
+  "her iki bağımsız değişken de aynı türe sahip olmalıdır",
+  "%t türü bu yerleşik için bağımsız değişken olarak geçersiz",
+  "%nd kaynağından çağrı:"
 ]
