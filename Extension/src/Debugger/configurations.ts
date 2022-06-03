@@ -27,16 +27,18 @@ export enum DebuggerType {
 
 export enum DebuggerEvent {
     debugPanel = "debugPanel",  // F5 or "Run and Debug" Panel
-    playButton = "playButton"   // "Run and Debug" play button
+    playButton = "playButton",   // "Run and Debug" play button
+    addConfigGear = "AddConfigGear"
 }
 
-export enum TaskConfigStatus {
-    recentlyUsed = "Recently Used Task",
+export enum TaskStatus {
+    recentlyUsed = "Recently Used Task", // A configured task that has been used recently.
+
     configured = "Configured Task", // The tasks that are configured in tasks.json file.
     detected = "Detected Task"      // The tasks that are available based on detected compilers.
 }
 
-export enum DebugConfigSource {
+export enum ConfigSource {
     singleFile = "singleFile",              // a debug config defined for a single mode file
     workspaceFolder = "workspaceFolder",    // a debug config defined in launch.json
     workspace = "workspace",                // a debug config defined in workspace level
@@ -44,12 +46,25 @@ export enum DebugConfigSource {
     unknown = "unknown"
 }
 
+export enum ConfigMode {
+    launchConfig = "launchConfig",
+    noLaunchConfig = "noLaunchConfig",
+    unknown = "unknown"
+}
+
+export enum DebugType {
+    debug = "debug",
+    run = "run"
+}
+
 export interface CppDebugConfiguration extends vscode.DebugConfiguration {
     detail?: string;
-    taskStatus?: TaskConfigStatus;
+    taskStatus?: TaskStatus;
     isDefault?: boolean; // The debug configuration is considered as default, if the prelaunch task is set as default.
-    source?: DebugConfigSource;
+    configSource?: ConfigSource;
     debuggerEvent?: DebuggerEvent;
+    debugType?: DebugType;
+    existing?: boolean;
 }
 
 export interface IConfigurationSnippet {
