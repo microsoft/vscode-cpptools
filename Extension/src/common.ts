@@ -342,6 +342,13 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
         return "";
     }
 
+    // jsonc parser may assign a non-string object to a string.
+    if (typeof(input) !== "string") {
+        const inputAny: any = input;
+        input = inputAny.toString();
+        return input ?? "";
+    }
+
     // Replace environment and configuration variables.
     let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
