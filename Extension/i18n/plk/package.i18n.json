@@ -79,7 +79,7 @@
 	"c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription": "Wcięcie nowego wiersza jest określane na podstawie elementu `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.",
 	"c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "W istniejącym kodzie zachowaj istniejące wyrównanie nowych wierszy w obrębie nawiasów.",
 	"c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription": "W przypadku etykiet tworzone jest wcięcie względem instrukcji switch o szerokości określonej w ustawieniu `#editor.tabSize#`.",
-	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "W przypadku kodu wewnątrz bloku „case” tworzone jest wcięcie w stosunku do jego etykiety o szerokości określonej w ustawieniu `#editor.tabSize#`.",
+	"c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": "W przypadku kodu wewnątrz bloku `case` tworzone jest wcięcie w stosunku do jego etykiety o szerokości określonej w ustawieniu `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription": "Zastosuj wcięcie nawiasów klamrowych po instrukcji case o wartości określonej w ustawieniu `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription": "Zastosuj wcięcie nawiasów klamrowych dla wyrażeń lambda używanych jako parametry funkcji względem początku instrukcji o wartości określonej w ustawieniu `#editor.tabSize#`.",
 	"c_cpp.configuration.vcFormat.indent.gotoLabels.description": "Pozycja etykiet instrukcji goto.",
