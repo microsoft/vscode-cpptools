@@ -2826,6 +2826,12 @@
         "title": "%c_cpp.command.AddDebugConfiguration.title%",
         "category": "C/C++",
         "icon": "$(debug-configure)"      
+      },
+      {
+        "command": "C_Cpp.GenerateDoxygenComment", 
+        "title":"%c_cpp.command.GenerateDoxygenComment.title%",
+        "category":"C/C++"
+                   
       }
     ],
     "keybindings": [

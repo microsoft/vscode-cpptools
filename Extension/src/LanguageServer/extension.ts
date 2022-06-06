@@ -429,6 +429,14 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', onGenerateDoxygenComment));
+}
+
+function onGenerateDoxygenComment() :void {
+    //generate string
+    //call a funtion to edit the text : vscode.window.activeTextEditor
+    // console.log("1");
+    
 }
 
 function onRestartIntelliSenseForFile(): void {
