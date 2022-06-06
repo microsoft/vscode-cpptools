@@ -343,7 +343,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // jsonc parser may assign a non-string object to a string.
-    if (typeof(input) !== "string") {
+    if (!isString(input)) {
         const inputAny: any = input;
         input = inputAny.toString();
         return input ?? "";
