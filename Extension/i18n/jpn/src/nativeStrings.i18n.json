@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "すべてのヘッダーの依存関係が解決されると、エラーの波線が有効になります。",
 	"replaced_placeholder_file_record": "プレースホルダー ファイル レコードを置換しました",
 	"tag_parsing_file": "ファイルのタグを解析中: {0}",
-	"tag_parsing_error": "tag parsing error (this can be ignored unless symbols can't be found):",
+	"tag_parsing_error": "タグ解析エラー (シンボルが見つからない場合を除き、無視できます):",
 	"reset_timestamp_for": "{0} のタイムスタンプのリセット",
 	"remove_file_failed": "ファイルを削除できませんでした: {0}",
 	"regex_parse_error": "RegEx 解析エラー - vscode パターン: {0}、RegEx: {1}、エラー メッセージ: {2}",
@@ -216,8 +216,10 @@
 	"inline_macro": "Inline マクロ",
 	"unable_to_access_browse_database": "参照データベースにアクセスできません。({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode は、検出されたコンパイラと一致しなかったため、変更されました。 代わりに \"compilerPath\" を設定することを検討してください。 システム インクルードと定義の検出を無効にするには、\"compilerPath\" を \"\" に設定します。",
-	"clear_code_analysis_squiggles": "コード分析波線をクリアする",
+	"remove_all_code_analysis_problems": "すべてのコード分析の問題を削除する",
 	"multiple_locations_note": "(複数の場所)",
 	"folder_tag": "フォルダー",
-	"file_tag": "ファイル"
+	"file_tag": "ファイル",
+	"compiler_default_language_standard_version_old": "コンパイラから既定の言語の標準バージョンが返されました: {0}。このバージョンは古いため、より新しいバージョン {1} をデフォルトとして使用しようとします。",
+	"unexpected_output_from_clang_tidy": "clang-tidy からの予期しない出力: {0}。期待値: {1}。"
 }
