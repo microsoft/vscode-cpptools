@@ -43,7 +43,7 @@ interface CodeActionWorkspaceEdit {
 
 interface CodeActionPerUriInfo {
     // These two arrays have the same length, i.e. index i of identifiers
-    // is usee to index into workspaceEdits to get the corresponding edit.
+    // is used to index into workspaceEdits to get the corresponding edit.
     identifiers: CodeAnalysisDiagnosticIdentifier[];
     workspaceEdits?: CodeActionWorkspaceEdit[];
 
