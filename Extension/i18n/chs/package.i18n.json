@@ -329,7 +329,7 @@
 	"c_cpp.semanticTokenTypes.templateType.description": "C++ 模板类型的样式。",
 	"c_cpp.semanticTokenTypes.operatorOverload.description": "C++ 重载运算符的样式。",
 	"c_cpp.semanticTokenTypes.memberOperatorOverload.description": "C++ 重载运算符成员函数的样式。",
-	"c_cpp.semanticTokenTypes.newOperator.description": "C++ `新` 或 `删除` 运算符的样式。",
+	"c_cpp.semanticTokenTypes.newOperator.description": "C++ `new` 或 `delete` 运算符的样式。",
 	"c_cpp.semanticTokenTypes.customLiteral.description": "C++ 用户定义文本的样式。",
 	"c_cpp.semanticTokenTypes.numberLiteral.description": "C++ 用户定义文本数字的样式。",
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "C++ 用户定义文本字符串的样式。",
