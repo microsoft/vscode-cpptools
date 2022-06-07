@@ -109,12 +109,12 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
-export function getJsonPath(jsonFilaName: string): string | undefined {
+export function getJsonPath(jsonFilaName: string, workspaceFolder?: vscode.WorkspaceFolder): string | undefined {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return undefined;
     }
-    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    const folder: vscode.WorkspaceFolder | undefined = workspaceFolder ? workspaceFolder : vscode.workspace.getWorkspaceFolder(editor.document.uri);
     if (!folder) {
         return undefined;
     }

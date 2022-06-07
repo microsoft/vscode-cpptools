@@ -3450,5 +3450,12 @@
   "Die Mitgliederauswahl umfasst zu viele geschachtelte anonyme Typen",
   "Es gibt keinen gemeinsamen Typ zwischen den Operanden",
   "Es wurde ein Pointer-to-Member erwartet",
-  "Ein flexibles Arrayelement kann nicht in einem ansonsten leeren Typ deklariert werden."
+  "Ein flexibles Arrayelement kann nicht in einem ansonsten leeren Typ deklariert werden.",
+  "Es wurde erwartet, dass \"std::source_location::__impl\" für eine Klasse definiert ist, die nur die Datenmember \"_M_function_name\", \"_M_file_name\", \"_M_column\", \"_M_line\" enthält.",
+  "während der Initialisierung von \"std::source_location::__impl\" überläuft die Spaltennummer den Member \"_M_column\" vom Typ \"%t\".",
+  "während der Initialisierung von \"std::source_location::__impl\" überläuft die Zeilennummer den Member \"_M_line\" vom Typ \"%t\".",
+  "Eine UTF-16-Zeichenkonstante darf nicht mehrere Codeeinheiten belegen. Wert abgeschnitten.",
+  "Beide Argumente müssen denselben Typ aufweisen.",
+  "Der Typ \"%t\" ist als Argument für dieses integrierte Element ungültig.",
+  "aufgerufen von %nd:"
 ]

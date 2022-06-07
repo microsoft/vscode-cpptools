@@ -226,32 +226,32 @@ export class CppBuildTaskProvider implements TaskProvider {
         return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
-    public async writeDefaultBuildTask(taskLabel: string): Promise<void> {
-        return this.checkBuildTaskExists(taskLabel, true, true);
+    public async writeDefaultBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<void> {
+        return this.writeBuildTask(taskLabel, workspaceFolder, true);
     }
 
-    public async writeBuildTask(taskLabel: string): Promise<void> {
-        return this.checkBuildTaskExists(taskLabel, true);
+    public async isExistingTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<boolean> {
+        const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
+        if (!rawTasksJson.tasks) {
+            return false;
+        }
+        // Check if the task exists in the user's task.json.
+        return rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
     }
 
-    public async checkBuildTaskExists(taskLabel: string, createTask: boolean = false, setAsDefault: boolean = false): Promise<void> {
-        const rawTasksJson: any = await this.getRawTasksJson();
+    public async writeBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder, setAsDefault: boolean = false): Promise<void> {
+        const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
-        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
-        let selectedTask: any;
-        if (!createTask) {
-            selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-            if (selectedTask) {
-                return;
-            }
+        // Check if the task exists in the user's task.json.
+        if (rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel)) {
+            return;
         }
 
         // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const normalizedLabel: string = (taskLabel.indexOf("ver(") !== -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
-        selectedTask = buildTasks.find(task => task.name === normalizedLabel);
+        const selectedTask: any = buildTasks.find(task => task.name === taskLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in checkBuildTaskExists()");
@@ -261,7 +261,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
         rawTasksJson.version = "2.0.0";
 
-        // Modify the current default task
+        // If the new task should be set as the default task, modify the current default task.
         if (setAsDefault) {
             rawTasksJson.tasks.forEach((task: any) => {
                 if (task.label === selectedTask?.definition.label) {
@@ -319,12 +319,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
     }
 
-    private getTasksJsonPath(): string | undefined {
-        return util.getJsonPath("tasks.json");
+    private getTasksJsonPath(workspaceFolder?: WorkspaceFolder): string | undefined {
+        return util.getJsonPath("tasks.json", workspaceFolder);
     }
 
-    public getRawTasksJson(): Promise<any> {
-        const path: string | undefined = this.getTasksJsonPath();
+    public getRawTasksJson(workspaceFolder?: WorkspaceFolder): Promise<any> {
+        const path: string | undefined = this.getTasksJsonPath(workspaceFolder);
         return util.getRawJson(path);
     }
 
