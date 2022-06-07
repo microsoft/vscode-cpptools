@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 为此标头安装库",
 	"copy.vcpkg.command": "将用于安装“{0}”的 vcpkg 命令复制到剪贴板",
-	"more.info.button": "详细信息",
-	"ignore.button": "忽略",
-	"vsix.platform.incompatible": "已安装的 C/C++ 扩展与系统不匹配。",
-	"vsix.platform.mismatching": "已安装的 C/C++ 扩展与系统兼容，但与系统不匹配。",
 	"client.not.found": "未找到客户端",
 	"configuration.select.first": "首先打开一个文件夹以选择配置",
 	"configuration.provider.select.first": "首先打开一个文件夹以选择配置提供程序",
 	"edit.configurations.open.first": "首先打开一个文件夹以编辑配置",
+	"code.action.aborted": "无法应用代码分析修复程序，因为文档已更改。",
 	"add.includepath.open.first": "首先打开一个要添加到 {0} 的文件夹"
 }

@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "vcpkg ile bu üst bilgi için bir kitaplık yüklemeyi öğrenin",
 	"copy.vcpkg.command": "'{0}' yükleme vcpkg komutunu panoya kopyalayın",
-	"more.info.button": "Daha Fazla Bilgi",
-	"ignore.button": "Yoksay",
-	"vsix.platform.incompatible": "Yüklü C/C++ uzantısı sisteminiz ile eşleşmiyor.",
-	"vsix.platform.mismatching": "Yüklenen C/C++ uzantısı, sisteminizle uyumlu ancak eşleşmiyor.",
 	"client.not.found": "istemci bulunamadı",
 	"configuration.select.first": "Yapılandırma seçmek için önce bir klasör açın",
 	"configuration.provider.select.first": "Yapılandırma sağlayıcısı seçmek için önce bir klasör açın",
 	"edit.configurations.open.first": "Yapılandırmaları düzenlemek için önce bir klasör açın",
+	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı.",
 	"add.includepath.open.first": "{0} öğesine eklemek için önce bir klasör açın"
 }
