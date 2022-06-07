@@ -193,6 +193,231 @@
         }
       }
     },
+    "Variables": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.variables.description%",
+      "default": {},
+      "properties": {},
+      "additionalProperties": {
+        "type": "string",
+        "description": "%c_cpp.debuggers.variables.properties.description%",
+        "default": ""
+      }
+    },
+    "VsCodeCommand": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.vsCodeCommand.description%",
+      "default": {},
+      "required": [
+        "type",
+        "command"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.vsCodeCommand.description%",
+          "default": "",
+          "enum": [
+            "command"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.vsCodeCommand.command.description%",
+          "default": ""
+        },
+        "args": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.vsCodeCommand.args.description%",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Host": {
+      "type": "object",
+      "description": "%c_cpp.debuggers.host.description%",
+      "default": {},
+      "required": [
+        "hostName"
+      ],
+      "properties": {
+        "user": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.host.user.description%",
+          "default": ""
+        },
+        "hostName": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.host.hostName.description%",
+          "default": ""
+        },
+        "port": {
+          "type": "number",
+          "description": "%c_cpp.debuggers.host.port.description%",
+          "default": 22
+        },
+        "jumpHosts": {
+          "type": "array",
+          "description": "%c_cpp.debuggers.host.jumpHost.description%",
+          "items": {
+            "type": "object",
+            "default": {},
+            "required": [
+              "hostName"
+            ],
+            "properties": {
+              "user": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.host.user.description%",
+                "default": ""
+              },
+              "hostName": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.host.hostName.description%",
+                "default": ""
+              },
+              "port": {
+                "type": "number",
+                "description": "%c_cpp.debuggers.host.port.description%",
+                "default": 22
+              }
+            }
+          }
+        }
+      }
+    },
+    "DeploySteps": {
+      "type": "array",
+      "description": "%c_cpp.debuggers.deploySteps.description%",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+            "default": {},
+            "required": [
+              "type",
+              "files",
+              "host",
+              "targetDir"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+                "default": "",
+                "enum": [
+                  "scp"
+                ]
+              },
+              "files": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "description": "%c_cpp.debuggers.deploySteps.scp.files.description%",
+                "default": ""
+              },
+              "host": {
+                "$ref": "#/definitions/Host"
+              },
+              "targetDir": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.scp.targetDir.description%",
+                "default": ""
+              },
+              "debug": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.deploySteps.debug%"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "%c_cpp.debuggers.deploySteps.ssh.description%",
+            "default": {},
+            "required": [
+              "type",
+              "host",
+              "command"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.ssh.description%",
+                "default": "",
+                "enum": [
+                  "ssh"
+                ]
+              },
+              "host": {
+                "$ref": "#/definitions/Host"
+              },
+              "command": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.ssh.command.description%",
+                "default": ""
+              },
+              "continueOn": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.continueOn.description%",
+                "default": ""
+              },
+              "debug": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.deploySteps.debug%"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "%c_cpp.debuggers.deploySteps.shell.description%",
+            "default": {},
+            "required": [
+              "type",
+              "command"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.shell.description%",
+                "default": "",
+                "enum": [
+                  "shell"
+                ]
+              },
+              "command": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.shell.command.description%",
+                "default": ""
+              },
+              "continueOn": {
+                "type": "string",
+                "description": "%c_cpp.debuggers.deploySteps.continueOn.description%",
+                "default": ""
+              },
+              "debug": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.deploySteps.debug%"
+              }
+            }
+          },
+          {
+            "$ref": "#/definitions/VsCodeCommand"
+          }
+        ]
+      },
+      "default": []
+    },
     "CppdbgLaunchOptions": {
       "type": "object",
       "required": [
@@ -253,8 +478,8 @@
         },
         "launchCompleteCommand": {
           "enum": [
-            "exec-run", 
-            "exec-continue", 
+            "exec-run",
+            "exec-continue",
             "None"
           ],
           "description": "%c_cpp.debuggers.launchCompleteCommand.description%",
@@ -399,6 +624,14 @@
           "$ref": "#/definitions/HardwareBreakpoints",
           "description": "%c_cpp.debuggers.hardwareBreakpoints.description%",
           "default": {}
+        },
+        "variables": {
+            "$ref": "#/definitions/Variables",
+            "description": "%c_cpp.debuggers.variables.description%"
+        },
+        "deploySteps": {
+            "$ref": "#/definitions/DeploySteps",
+            "description": "%c_cpp.debuggers.description%"
         }
       }
     },
@@ -513,6 +746,14 @@
         "symbolLoadInfo": {
           "$ref": "#/definitions/SymbolLoadInfo",
           "description": "%c_cpp.debuggers.symbolLoadInfo.description%"
+        },
+        "variables": {
+            "$ref": "#/definitions/Variables",
+            "description": "%c_cpp.debuggers.variables.description%"
+        },
+        "deploySteps": {
+            "$ref": "#/definitions/DeploySteps",
+            "description": "%c_cpp.debuggers.description%"
         }
       }
     },

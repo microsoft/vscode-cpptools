@@ -19,6 +19,10 @@ import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
+import { expandAllStrings, expandString, ExpansionOptions, ExpansionVars } from '../expand';
+import { scp, ssh } from '../SSH/commands';
+import * as glob from 'glob';
+import { promisify } from 'util';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -37,22 +41,32 @@ export enum TaskConfigStatus {
     detected = "Detected Task"      // The tasks that are available based on detected compilers.
 }
 
+enum StepType {
+    scp = 'scp',
+    ssh = 'ssh',
+    shell = 'shell',
+    remoteShell = 'remoteShell',
+    command = 'command'
+}
+
+const globAsync = promisify(glob);
+
 const addDetailToConfigs = (items: MenuItem[]): MenuItem[] => {
     items.map((item: MenuItem) => {
         switch (item.detail) {
-            case TaskConfigStatus.recentlyUsed : {
+            case TaskConfigStatus.recentlyUsed: {
                 item.detail = localize("recently.used.task", "Recently Used Task");
                 break;
             }
-            case TaskConfigStatus.configured : {
+            case TaskConfigStatus.configured: {
                 item.detail = localize("configured.task", "Configured Task");
                 break;
             }
-            case TaskConfigStatus.detected : {
+            case TaskConfigStatus.detected: {
                 item.detail = localize("detected.task", "Detected Task");
                 break;
             }
-            default : {
+            default: {
                 break;
             }
         }
@@ -125,7 +139,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const quickPickConfig: vscode.DebugConfiguration = {...config};
+            const quickPickConfig: vscode.DebugConfiguration = { ...config };
             const menuItem: MenuItem = { label: config.name, configuration: quickPickConfig, description: config.detail, detail: config.existing };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
@@ -134,7 +148,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return menuItem;
         });
 
-        const selection: MenuItem | undefined = await vscode.window.showQuickPick(addDetailToConfigs(items), {placeHolder: localize("select.configuration", "Select a configuration")});
+        const selection: MenuItem | undefined = await vscode.window.showQuickPick(addDetailToConfigs(items), { placeHolder: localize("select.configuration", "Select a configuration") });
         if (!selection) {
             Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
             return []; // User canceled it.
@@ -163,7 +177,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
             // Hence, providing debug configs, and start debugging should be done manually.
             // resolveDebugConfiguration will be automatically called after calling provideDebugConfigurations.
-            const configs: vscode.DebugConfiguration[]= await this.provideDebugConfigurations(folder);
+            const configs: vscode.DebugConfiguration[] = await this.provideDebugConfigurations(folder);
             if (!configs || configs.length === 0) {
                 Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
                 return undefined; // aborts debugging silently
@@ -195,11 +209,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * This hook is directly called after 'resolveDebugConfiguration' but with all variables substituted.
      * This is also ran after the tasks.json has completed.
      *
-	 * Try to add all missing attributes to the debug configuration being launched.
+     * Try to add all missing attributes to the debug configuration being launched.
      * If return "undefined", the debugging will be aborted silently.
      * If return "null", the debugging will be aborted and launch.json will be opened.
-	 */
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+     */
+    async resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration | null | undefined> {
         if (!config || !config.type) {
             return undefined; // Abort debugging silently.
         }
@@ -222,7 +236,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
             // Disable debug heap by default, enable if 'enableDebugHeap' is set.
             if (!config.enableDebugHeap) {
-                const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
+                const disableDebugHeapEnvSetting: Environment = { "name": "_NO_DEBUG_HEAP", "value": "1" };
 
                 if (config.environment && util.isArray(config.environment)) {
                     config.environment.push(disableDebugHeapEnvSetting);
@@ -234,6 +248,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Add environment variables from .env file
         this.resolveEnvFile(config, folder);
+
+        await this.expand(config, folder);
 
         this.resolveSourceFileMapVariables(config);
 
@@ -295,6 +311,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
             // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
             // logger.showOutputChannel();
+        }
+
+        // Run deploy steps
+        const deploySucceeded = await this.deploySteps(config, folder, token);
+        if (!deploySucceeded || token?.isCancellationRequested) {
+            return;
         }
 
         return config;
@@ -548,17 +570,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
-                        message +=  (message ? ' ' : '\t');
+                        message += (message ? ' ' : '\t');
                         message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
                         target = newSourceFileMapTarget;
                     }
                 } else if (util.isObject(sourceFileMapTarget)) {
-                    const newSourceFileMapTarget: {"editorPath": string; "useForBreakpoints": boolean } = sourceFileMapTarget;
+                    const newSourceFileMapTarget: { "editorPath": string; "useForBreakpoints": boolean } = sourceFileMapTarget;
                     newSourceFileMapTarget["editorPath"] = util.resolveVariables(sourceFileMapTarget["editorPath"], undefined);
 
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
-                        message +=  (message ? ' ' : '\t');
+                        message += (message ? ' ' : '\t');
                         message += localize("replacing.editorPath", "Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
                         target = newSourceFileMapTarget;
                     }
@@ -696,7 +718,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Keep track of the entry point where the debug has been selected, for telemetry purposes.
         selectedConfig.debuggerEvent = DebuggerEvent.launchPlayButton;
         // startDebugging will trigger a call to resolveDebugConfiguration.
-        await vscode.debug.startDebugging(folder, selectedConfig, {noDebug: !debugModeOn});
+        await vscode.debug.startDebugging(folder, selectedConfig, { noDebug: !debugModeOn });
     }
 
     private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = false): Promise<vscode.DebugConfiguration | undefined> {
@@ -775,6 +797,135 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": configMode });
     }
 
+    private async expand(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder | undefined): Promise<void> {
+        const folderPath = folder?.uri.fsPath || vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const vars: ExpansionVars = config.variables ? config.variables : {};
+        vars.workspaceFolder = folderPath || '{workspaceFolder}';
+        vars.workspaceFolderBasename = folderPath ? path.basename(folderPath) : '{workspaceFolderBasename}';
+        const expansionOptions: ExpansionOptions = { vars, recursive: true };
+
+        for (const var_path of Object.keys(vars)) {
+            if (var_path.endsWith('_path')) {
+                const var_name = var_path.substring(0, var_path.length - 5);
+                const var_dirname = `${var_name}_dirname`;
+                const var_basename = `${var_name}_basename`;
+
+                vars[var_path] = await expandString(vars[var_path], expansionOptions);
+
+                if (!vars[var_dirname]) {
+                    vars[var_dirname] = path.dirname(vars[var_path]);
+                }
+                if (!vars[var_basename]) {
+                    vars[var_basename] = path.basename(vars[var_path]);
+                }
+            }
+        }
+
+        return expandAllStrings(config, expansionOptions);
+    }
+
+    // Returns true when ALL steps succeed
+    private async deploySteps(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder | undefined, cancellationToken?: vscode.CancellationToken): Promise<boolean> {
+        if (!config.deploySteps || config.deploySteps.length === 0) {
+            return true;
+        }
+
+        let succeeded = true;
+        const deployStart = new Date().getTime();
+
+        STEPS: for (const step of config.deploySteps) {
+            if ((config.noDebug && step.debug === true) || (!config.noDebug && step.debug === false)) {
+                // Skip steps that doesn't match current launch mode. Explicit true/false check, since a step is always run when debug is undefined.
+                continue;
+            }
+            switch (step.type) {
+                case StepType.command: {
+                    // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
+                    if (step.args && !Array.isArray(step.args)) {
+                        logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
+                        break STEPS;
+                    }
+                    const returnCode = await vscode.commands.executeCommand(step.command, ...step.args);
+                    succeeded = !returnCode;
+                    if (!succeeded) {
+                        break STEPS;
+                    }
+                    break;
+                }
+                case StepType.scp: {
+                    if (!step.files || !step.targetDir || !step.host) {
+                        logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
+                        break STEPS;
+                    }
+                    const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                    const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
+                    let files: vscode.Uri[] = [];
+                    if (util.isString(step.files)) {
+                        files = files.concat((await globAsync(step.files)).map(file => vscode.Uri.file(file)));
+                    } else if (util.isArrayOfString(step.files)) {
+                        for (const fileGlob of (step.files as string[])) {
+                            files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
+                        }
+                    } else {
+                        logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
+                        succeeded = false;
+                        break STEPS;
+                    }
+                    const scpResult = await scp(folder, files, host, step.targetDir, jumpHosts, step.filesOnRemote);
+                    succeeded = scpResult.succeeded;
+                    if (!succeeded || cancellationToken?.isCancellationRequested) {
+                        break STEPS;
+                    }
+                    break;
+                }
+                case StepType.ssh: {
+                    if (!step.host || !step.command) {
+                        logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
+                        break STEPS;
+                    }
+                    const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                    const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
+                    const sshResult = await ssh(host, step.command, jumpHosts, step.continueOn);
+                    succeeded = sshResult.succeeded;
+                    if (!succeeded || cancellationToken?.isCancellationRequested) {
+                        break STEPS;
+                    }
+                    break;
+                }
+                case StepType.shell: {
+                    if (!step.command) {
+                        logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
+                        break STEPS;
+                    }
+                    const taskResult = await util.spawnChildProcess(step.command, undefined, step.continueOn);
+                    succeeded = taskResult.succeeded;
+                    if (!succeeded || cancellationToken?.isCancellationRequested) {
+                        logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
+                        break STEPS;
+                    }
+                    break;
+                }
+                default: {
+                    logger.getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
+                    succeeded = false;
+                    break STEPS;
+                }
+            }
+        }
+
+        const deployEnd = new Date().getTime();
+
+        const telemetryProperties: { [key: string]: string } = {
+            Succeeded: `${succeeded}`,
+            IsDebugging: `${!config.noDebug || false}`
+        };
+        const telemetryMetrics: { [key: string]: number } = {
+            Duration: deployEnd - deployStart
+        };
+        Telemetry.logDebuggerEvent('deploy', telemetryProperties, telemetryMetrics);
+
+        return succeeded;
+    }
 }
 
 export interface IConfigurationAssetProvider {
@@ -927,7 +1078,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.
-            this.snippets.forEach((item) => items.push({...item}));
+            this.snippets.forEach((item) => items.push({ ...item }));
 
             items.map((item) => {
                 item.insertText = item.insertText + ','; // Add comma

@@ -19,9 +19,9 @@ import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
-import { Readable } from 'stream';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
+import { CppSettings } from './LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -321,10 +321,13 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
+export function isWindows(): boolean {
+    return os.platform() === 'win32';
+}
+
 export function defaultExePath(): string {
-    const isWindows: boolean = os.platform() === 'win32';
     const exePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-    return isWindows ? exePath + '.exe' : exePath;
+    return isWindows() ? exePath + '.exe' : exePath;
 }
 
 export function findExePathInArgs(args: string[]): string | undefined {
@@ -562,9 +565,9 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
 }
 
 /** Test whether a relative path exists */
-export function checkPathExistsSync(path: string, relativePath: string, isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
+export function checkPathExistsSync(path: string, relativePath: string, _isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
     let pathExists: boolean = true;
-    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
+    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && _isWindows && !isWSL && fs.existsSync(path + ".exe");
     if (!fs.existsSync(path)) {
         if (existsWithExeAdded(path)) {
             path += ".exe";
@@ -703,32 +706,80 @@ export function execChildProcess(process: string, workingDirectory?: string, cha
     });
 }
 
-export function spawnChildProcess(process: string, args: string[], workingDirectory: string,
-    dataCallback: (stdout: string) => void, errorCallback: (stderr: string) => void): Promise<void> {
+export interface ProcessReturnType {
+    succeeded: boolean;
+    exitCode?: number | NodeJS.Signals;
+    output: string;
+}
 
-    return new Promise<void>(function (resolve, reject): void {
-        const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
+export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
+    const exitCode = programOutput.exitCode;
+    const settings: CppSettings = new CppSettings();
+    if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
+        getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}\n${programOutput.stderr || programOutput.stdout}\n`);
+    }
+    if (programOutput.exitCode) {
+        return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
+    } else {
+        let stdout: string;
+        if (programOutput.stdout.length) {
+            // Type system doesn't work very well here, so we need call toString
+            stdout = programOutput.stdout;
+        } else {
+            stdout = localize('process.succeeded', 'Process executed successfully.');
+        }
+        return { succeeded: true, exitCode, output: stdout };
+    }
+}
 
-        const stdout: Readable | null = child.stdout;
-        if (stdout) {
-            stdout.on('data', (data) => {
-                dataCallback(`${data}`);
-            });
+interface ProcessOutput {
+    exitCode?: number | NodeJS.Signals;
+    stdout: string;
+    stderr: string;
+}
+
+async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
+    return new Promise(async (resolve, reject) => {
+        const _args = args.filter(Boolean);
+        let proc: child_process.ChildProcess;
+        if (await isExecutable(program)) {
+            proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, _args, { shell: true, cwd: path.dirname(program) });
+        } else {
+            proc = child_process.spawn(program, _args, { shell: true });
         }
 
-        const stderr: Readable | null = child.stderr;
-        if (stderr) {
-            stderr.on('data', (data) => {
-                errorCallback(`${data}`);
-            });
-        }
+        const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
+            getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
+            proc.kill();
+        });
 
-        child.on('exit', (code: number) => {
-            if (code !== 0) {
-                reject(new Error(localize("process.exited.with.code", "{0} exited with error code {1}", process, code)));
-            } else {
-                resolve();
+        const clean = () => {
+            proc.removeAllListeners();
+            if (cancellationTokenListener) {
+                cancellationTokenListener.dispose();
             }
+        };
+
+        let stdout: string = '';
+        let stderr: string = '';
+        proc.stdout?.on('data', data => {
+            stdout += data.toString();
+            if (continueOn) {
+                const continueOnReg = escapeStringForRegex(continueOn);
+                if (stdout.search(continueOnReg)) {
+                    resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+                }
+            }
+        });
+        proc.stderr?.on('data', data => stderr += data.toString());
+        proc.on('close', (code, signal) => {
+            clean();
+            resolve({ exitCode: (code || signal)!, stdout: stdout.trim(), stderr: stderr.trim() });
+        });
+        proc.on('error', error => {
+            clean();
+            reject(error);
         });
     });
 }
@@ -919,7 +970,6 @@ function resolveWindowsEnvironmentVariables(str: string): string {
 }
 
 function legacyExtractArgs(argsString: string): string[] {
-    const isWindows: boolean = os.platform() === 'win32';
     const result: string[] = [];
     let currentArg: string = "";
     let isWithinDoubleQuote: boolean = false;
@@ -943,7 +993,7 @@ function legacyExtractArgs(argsString: string): string[] {
             }
         } else if (c === '\'') {
             // On Windows, a single quote string is not allowed to join multiple args into a single arg
-            if (!isWindows) {
+            if (!isWindows()) {
                 if (!isWithinDoubleQuote) {
                     isWithinSingleQuote = !isWithinSingleQuote;
                 }
@@ -1463,3 +1513,29 @@ export function isVsCodeInsiders(): boolean {
         extensionPath.includes(".vscode-server-exploration");
 }
 
+export function stripEscapeSequences(str: string): string {
+    return str
+        .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
+        .replace(/\u0008/g, '')
+        .replace(/\r/g, '');
+}
+
+export function splitLines(data: string): string[] {
+    return data.split(/\r?\n/g);
+}
+
+export function escapeStringForRegex(str: string): string {
+    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+}
+
+export function replaceAll(str: string, searchValue: string, replaceValue: string): string {
+    const pattern = escapeStringForRegex(searchValue);
+    const re = new RegExp(pattern, 'g');
+    return str.replace(re, replaceValue);
+}
+
+export interface ISshHostInfo {
+    hostName: string;
+    user?: string;
+    port?: number;
+}
