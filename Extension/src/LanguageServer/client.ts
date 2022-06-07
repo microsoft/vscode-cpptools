@@ -2246,7 +2246,7 @@ export class DefaultClient implements Client {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
 
-        // Get diagnotics for configuration provider info.
+        // Get diagnostics for configuration provider info.
         let configurationLoggingStr: string = "";
         const tuSearchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
         if (tuSearchStart >= 0) {
