@@ -88,7 +88,7 @@ interface CodeActionWorkspaceEdit {
 
 interface CodeActionPerUriInfo {
     // These two arrays have the same length, i.e. index i of identifiers
-    // is usee to index into workspaceEdits to get the corresponding edit.
+    // is used to index into workspaceEdits to get the corresponding edit.
     identifiers: CodeAnalysisDiagnosticIdentifier[];
     workspaceEdits?: CodeActionWorkspaceEdit[];
 
@@ -2246,7 +2246,7 @@ export class DefaultClient implements Client {
             configJson = `Current Configuration:\n${JSON.stringify(this.configuration.CurrentConfiguration, null, 4)}\n`;
         }
 
-        // Get diagnotics for configuration provider info.
+        // Get diagnostics for configuration provider info.
         let configurationLoggingStr: string = "";
         const tuSearchStart: number = response.diagnostics.indexOf("Translation Unit Mappings:");
         if (tuSearchStart >= 0) {
