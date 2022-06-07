@@ -2294,6 +2294,8 @@ export class DefaultClient implements Client {
             onFinished();
             return;
         }
+        telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId });
+
         return this.queueBlockingTask(async () => {
             const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             console.log("provideCustomConfiguration");

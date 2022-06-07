@@ -3450,5 +3450,12 @@
   "a seleção de membro envolve muitos tipos anônimos aninhados",
   "não há nenhum tipo comum entre os operandos",
   "esperava-se um ponteiro para membro",
-  "um membro da matriz flexível não pode ser declarado em um tipo de outro modo vazio"
+  "um membro da matriz flexível não pode ser declarado em um tipo de outro modo vazio",
+  "esperado que 'std::source_location::__impl' seja definido para uma classe com apenas os membros de dados '_M_function_name', '_M_file_name', '_M_column', '_M_line'",
+  "durante a inicialização de 'std::source_location::__impl', o número da coluna estoura o membro '_M_column' do tipo %t",
+  "durante a inicialização de 'std::source_location::__impl', o número da linha estoura o membro '_M_line' do tipo %t",
+  "uma constante de caractere UTF-16 não pode ocupar mais de uma unidade de código; valor truncado",
+  "ambos os argumentos devem ter o mesmo tipo",
+  "o tipo %téinválido como argumento para este builtin",
+  "chamado de %nd:"
 ]
