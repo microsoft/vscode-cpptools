@@ -714,7 +714,7 @@ export interface ProcessReturnType {
 
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
-    const exitCode = programOutput.exitCode;
+    const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     const settings: CppSettings = new CppSettings();
     if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
         getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}\n${programOutput.stderr || programOutput.stdout}\n`);
@@ -741,12 +741,11 @@ interface ProcessOutput {
 
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
     return new Promise(async (resolve, reject) => {
-        const _args = args.filter(Boolean);
         let proc: child_process.ChildProcess;
         if (await isExecutable(program)) {
-            proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, _args, { shell: true, cwd: path.dirname(program) });
+            proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
         } else {
-            proc = child_process.spawn(program, _args, { shell: true });
+            proc = child_process.spawn(program, args, { shell: true });
         }
 
         const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
@@ -763,19 +762,23 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
 
         let stdout: string = '';
         let stderr: string = '';
-        proc.stdout?.on('data', data => {
-            stdout += data.toString();
-            if (continueOn) {
-                const continueOnReg = escapeStringForRegex(continueOn);
-                if (stdout.search(continueOnReg)) {
-                    resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+        if (proc.stdout) {
+            proc.stdout.on('data', data => {
+                stdout += data.toString();
+                if (continueOn) {
+                    const continueOnReg: string = escapeStringForRegex(continueOn);
+                    if (stdout.search(continueOnReg)) {
+                        resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+                    }
                 }
-            }
-        });
-        proc.stderr?.on('data', data => stderr += data.toString());
+            });
+        }
+        if (proc.stderr) {
+            proc.stderr.on('data', data => stderr += data.toString());
+        }
         proc.on('close', (code, signal) => {
             clean();
-            resolve({ exitCode: (code || signal)!, stdout: stdout.trim(), stderr: stderr.trim() });
+            resolve({ exitCode: code || signal, stdout: stdout.trim(), stderr: stderr.trim() });
         });
         proc.on('error', error => {
             clean();
@@ -1529,8 +1532,8 @@ export function escapeStringForRegex(str: string): string {
 }
 
 export function replaceAll(str: string, searchValue: string, replaceValue: string): string {
-    const pattern = escapeStringForRegex(searchValue);
-    const re = new RegExp(pattern, 'g');
+    const pattern: string = escapeStringForRegex(searchValue);
+    const re: RegExp = new RegExp(pattern, 'g');
     return str.replace(re, replaceValue);
 }
 

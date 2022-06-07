@@ -19,7 +19,7 @@ import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
-import { expandAllStrings, expandString, ExpansionOptions, ExpansionVars } from '../expand';
+import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { scp, ssh } from '../SSH/commands';
 import * as glob from 'glob';
 import { promisify } from 'util';
@@ -49,7 +49,7 @@ enum StepType {
     command = 'command'
 }
 
-const globAsync = promisify(glob);
+const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
 
 const addDetailToConfigs = (items: MenuItem[]): MenuItem[] => {
     items.map((item: MenuItem) => {
@@ -314,7 +314,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         // Run deploy steps
-        const deploySucceeded = await this.deploySteps(config, folder, token);
+        const deploySucceeded: boolean = await this.deploySteps(config, folder, token);
         if (!deploySucceeded || token?.isCancellationRequested) {
             return;
         }
@@ -798,29 +798,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private async expand(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder | undefined): Promise<void> {
-        const folderPath = folder?.uri.fsPath || vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const folderPath: string | undefined = folder?.uri.fsPath || vscode.workspace.workspaceFolders?.[0].uri.fsPath;
         const vars: ExpansionVars = config.variables ? config.variables : {};
         vars.workspaceFolder = folderPath || '{workspaceFolder}';
         vars.workspaceFolderBasename = folderPath ? path.basename(folderPath) : '{workspaceFolderBasename}';
         const expansionOptions: ExpansionOptions = { vars, recursive: true };
-
-        for (const var_path of Object.keys(vars)) {
-            if (var_path.endsWith('_path')) {
-                const var_name = var_path.substring(0, var_path.length - 5);
-                const var_dirname = `${var_name}_dirname`;
-                const var_basename = `${var_name}_basename`;
-
-                vars[var_path] = await expandString(vars[var_path], expansionOptions);
-
-                if (!vars[var_dirname]) {
-                    vars[var_dirname] = path.dirname(vars[var_path]);
-                }
-                if (!vars[var_basename]) {
-                    vars[var_basename] = path.basename(vars[var_path]);
-                }
-            }
-        }
-
         return expandAllStrings(config, expansionOptions);
     }
 
@@ -830,8 +812,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return true;
         }
 
-        let succeeded = true;
-        const deployStart = new Date().getTime();
+        let succeeded: boolean = true;
+        const deployStart: number = new Date().getTime();
 
         STEPS: for (const step of config.deploySteps) {
             if ((config.noDebug && step.debug === true) || (!config.noDebug && step.debug === false)) {
@@ -845,7 +827,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
                         break STEPS;
                     }
-                    const returnCode = await vscode.commands.executeCommand(step.command, ...step.args);
+                    const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
                     succeeded = !returnCode;
                     if (!succeeded) {
                         break STEPS;
@@ -871,7 +853,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         succeeded = false;
                         break STEPS;
                     }
-                    const scpResult = await scp(folder, files, host, step.targetDir, jumpHosts, step.filesOnRemote);
+                    const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, jumpHosts, cancellationToken);
                     succeeded = scpResult.succeeded;
                     if (!succeeded || cancellationToken?.isCancellationRequested) {
                         break STEPS;
@@ -885,7 +867,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     }
                     const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                     const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
-                    const sshResult = await ssh(host, step.command, jumpHosts, step.continueOn);
+                    const sshResult: util.ProcessReturnType = await ssh(host, step.command, jumpHosts, step.continueOn, cancellationToken);
                     succeeded = sshResult.succeeded;
                     if (!succeeded || cancellationToken?.isCancellationRequested) {
                         break STEPS;
@@ -897,7 +879,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
                         break STEPS;
                     }
-                    const taskResult = await util.spawnChildProcess(step.command, undefined, step.continueOn);
+                    const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
                     succeeded = taskResult.succeeded;
                     if (!succeeded || cancellationToken?.isCancellationRequested) {
                         logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
@@ -913,7 +895,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
         }
 
-        const deployEnd = new Date().getTime();
+        const deployEnd: number = new Date().getTime();
 
         const telemetryProperties: { [key: string]: string } = {
             Succeeded: `${succeeded}`,

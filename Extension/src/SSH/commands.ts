@@ -8,13 +8,10 @@ import { ISshHostInfo, ProcessReturnType } from '../common';
 import { defaultSystemInteractor } from './commandInteractors';
 import { runSshTerminalCommandWithLogin } from './sshCommandRunner';
 
-export async function scp(folder: vscode.WorkspaceFolder | undefined, files: vscode.Uri[],
-    host: ISshHostInfo, targetDir: string,
-    jumpHosts?: ISshHostInfo[],
-    cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
-    const args = [];
+export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+    const args: string[] = [];
     if (jumpHosts && jumpHosts.length > 0) {
-        args.push('-J', jumpHosts.map(jumpHost => getFullHostAddress(jumpHost)).join(','));
+        args.push('-J', jumpHosts.map(getFullHostAddress).join(','));
     }
     if (host.port) {
         // upper case P
@@ -26,9 +23,9 @@ export async function scp(folder: vscode.WorkspaceFolder | undefined, files: vsc
 }
 
 export function ssh(host: ISshHostInfo, command: string, jumpHosts?: ISshHostInfo[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
-    const args = [];
+    const args: string[] = [];
     if (jumpHosts && jumpHosts.length > 0) {
-        args.push('-J', jumpHosts.map(jumpHost => getFullHostAddress(jumpHost)).join(','));
+        args.push('-J', jumpHosts.map(getFullHostAddress).join(','));
     }
     if (host.port) {
         // lower case p
@@ -51,6 +48,6 @@ function getFullHostAddressNoPort(host: ISshHostInfo): string {
 }
 
 function getFullHostAddress(host: ISshHostInfo): string {
-    const fullHostName = getFullHostAddressNoPort(host);
+    const fullHostName: string = getFullHostAddressNoPort(host);
     return host.port ? `${fullHostName}:${host.port}` : fullHostName;
 }
