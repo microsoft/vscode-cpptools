@@ -67,11 +67,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 if (cacheEntry) {
                     this.cache.set(uriString, cacheEntry);
                     return this.getHintsBasedOnSettings(cacheEntry);
-                } else {
-                    // Force another request because file versions do not match.
-                    // TODO: verify this works when data is available.
-                    this.onDidChangeInlayHintsEvent.fire();
                 }
+            } else {
+                // Force another request because file versions do not match.
+                // TODO: verify this works when data is available.
+                this.onDidChangeInlayHintsEvent.fire();
             }
         }
         return undefined;
