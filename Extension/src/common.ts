@@ -343,6 +343,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // jsonc parser may assign a non-string object to a string.
+    // TODO: https://github.com/microsoft/vscode-cpptools/issues/9414
     if (!isString(input)) {
         const inputAny: any = input;
         input = inputAny.toString();
