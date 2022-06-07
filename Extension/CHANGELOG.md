@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.10.4: June 3, 2022
+### Bug Fixes
+* Fix formatting issue with vcFormat when using multi-byte UTF-8 sequences. [#9297](https://github.com/microsoft/vscode-cpptools/issues/9297)
+* Add support for "user" level and "workspace" level debug configurations. [#9319](https://github.com/microsoft/vscode-cpptools/issues/9319)
+* Fix code analysis with g++ 12 system headers. [#9347](https://github.com/microsoft/vscode-cpptools/issues/9347)
+* Fix crash on macOS <= 10.14, due to missing symbol. [#9387](https://github.com/microsoft/vscode-cpptools/issues/9387)
+
 ## Version 1.10.3: May 23, 2022
 ### New Feature
 * Add code actions to apply clang-tidy fixes. [#8476](https://github.com/microsoft/vscode-cpptools/issues/8476)
