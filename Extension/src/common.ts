@@ -109,12 +109,12 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
-export function getJsonPath(jsonFilaName: string): string | undefined {
+export function getJsonPath(jsonFilaName: string, workspaceFolder?: vscode.WorkspaceFolder): string | undefined {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return undefined;
     }
-    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    const folder: vscode.WorkspaceFolder | undefined = workspaceFolder ? workspaceFolder : vscode.workspace.getWorkspaceFolder(editor.document.uri);
     if (!folder) {
         return undefined;
     }
@@ -343,6 +343,14 @@ export function findExePathInArgs(args: string[]): string | undefined {
 export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
     if (!input) {
         return "";
+    }
+
+    // jsonc parser may assign a non-string object to a string.
+    // TODO: https://github.com/microsoft/vscode-cpptools/issues/9414
+    if (!isString(input)) {
+        const inputAny: any = input;
+        input = inputAny.toString();
+        return input ?? "";
     }
 
     // Replace environment and configuration variables.
