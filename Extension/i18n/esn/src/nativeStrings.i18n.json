@@ -216,8 +216,10 @@
 	"inline_macro": "Insertar macro",
 	"unable_to_access_browse_database": "No se puede acceder a la base de datos de exploración. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Se ha cambiado IntelliSenseMode porque no coincidía con el compilador detectado.  Considere la posibilidad de establecer \"compilerPath\" en su lugar.  Establezca \"compilerPath\" en \"\" para deshabilitar la detección de las inclusión y definiciones del sistema.",
-	"clear_code_analysis_squiggles": "Borrar el subrayado ondulado del análisis de código",
+	"remove_all_code_analysis_problems": "Quitar todos los problemas de análisis de código",
 	"multiple_locations_note": "(Varias ubicaciones)",
 	"folder_tag": "Carpeta",
-	"file_tag": "Archivo"
+	"file_tag": "Archivo",
+	"compiler_default_language_standard_version_old": "El compilador devolvió la versión estándar del lenguaje predeterminado: {0}. Dado que esta versión es antigua, se intentará usar la versión {1}, más reciente, como predeterminada.",
+	"unexpected_output_from_clang_tidy": "Salida inesperada de Clang-Tidy: {0}. Se esperaba: {1}."
 }

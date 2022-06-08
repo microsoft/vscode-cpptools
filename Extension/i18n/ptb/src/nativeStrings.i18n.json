@@ -216,8 +216,10 @@
 	"inline_macro": "Macro embutida",
 	"unable_to_access_browse_database": "Não é possível acessar o banco de dados de navegação. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "O IntelliSenseMode foi alterado porque não correspondeu ao compilador detectado. Considere configurar \"compilerPath\" em vez disso. Defina \"compilerPath\" como \"\" para desabilitar a detecção de inserções e definições do sistema.",
-	"clear_code_analysis_squiggles": "Limpar rabiscos de análise de código",
+	"remove_all_code_analysis_problems": "Remover todos os problemas de análise de código",
 	"multiple_locations_note": "Vários locais",
 	"folder_tag": "Pasta",
-	"file_tag": "Arquivo"
+	"file_tag": "Arquivo",
+	"compiler_default_language_standard_version_old": "O compilador retornou a versão padrão do idioma padrão: {0}. Como essa versão é antiga, tentaremos usar a versão {1} mais recente como padrão.",
+	"unexpected_output_from_clang_tidy": "Saída inesperada de clang-tidy: {0}. Esperado: {1}."
 }

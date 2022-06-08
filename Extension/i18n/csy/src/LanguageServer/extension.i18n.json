@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Jak nainstalovat knihovnu pro tuto hlavičku pomocí vcpkg",
 	"copy.vcpkg.command": "Zkopírovat příkaz vcpkg pro instalaci {0} do schránky",
-	"more.info.button": "Další informace",
-	"ignore.button": "Ignorovat",
-	"vsix.platform.incompatible": "Nainstalované rozšíření C/C++ neodpovídá vašemu systému.",
-	"vsix.platform.mismatching": "Nainstalované rozšíření C/C++ je kompatibilní s vaším systémem, ale neodpovídá mu.",
 	"client.not.found": "klient se nenašel",
 	"configuration.select.first": "Pokud chcete vybrat konfiguraci, otevřete nejdříve složku.",
 	"configuration.provider.select.first": "Pokud chcete vybrat poskytovatele konfigurace, otevřete nejdříve složku.",
 	"edit.configurations.open.first": "Pokud chcete upravit konfigurace, otevřete nejdříve složku.",
+	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn.",
 	"add.includepath.open.first": "Nejdříve otevřete složku, která se má přidat do {0}."
 }

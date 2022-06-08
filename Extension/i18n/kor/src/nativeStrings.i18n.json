@@ -216,8 +216,10 @@
 	"inline_macro": "인라인 매크로",
 	"unable_to_access_browse_database": "찾아보기 데이터베이스에 액세스할 수 없습니다({0}).",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode가 검색된 컴파일러와 일치하지 않아 변경되었습니다.  \"compilerPath\"를 대신 설정하는 것이 좋습니다.  \"compilerPath\"를 \"\"(으)로 설정하여 시스템 포함 및 정의 검색을 사용하지 않도록 설정합니다.",
-	"clear_code_analysis_squiggles": "명확한 코드 분석 물결선",
+	"remove_all_code_analysis_problems": "모든 코드 분석 문제 제거",
 	"multiple_locations_note": "여러 위치",
 	"folder_tag": "폴더",
-	"file_tag": "파일"
+	"file_tag": "파일",
+	"compiler_default_language_standard_version_old": "컴파일러가 기본 언어 표준 버전 {0}을(를) 반환했습니다. 이 버전은 이전 버전이므로 새 버전 {1}을(를) 기본으로 사용하려고 합니다.",
+	"unexpected_output_from_clang_tidy": "clang-tidy에서 예기치 않은 출력: {0}. 예상: {1}."
 }

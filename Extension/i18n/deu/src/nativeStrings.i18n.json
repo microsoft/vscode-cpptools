@@ -216,8 +216,10 @@
 	"inline_macro": "Inlinemakro",
 	"unable_to_access_browse_database": "Auf die Suchdatenbank kann nicht zugegriffen werden. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode wurde geändert, weil es nicht mit dem erkannten Compiler übereinstimmte. Erwägen Sie stattdessen, \"compilerPath\" festzulegen. Legen Sie \"compilerPath\" auf \"\" fest, um die Erkennung von System-Includes und -Definitionen zu deaktivieren.",
-	"clear_code_analysis_squiggles": "Code Analysis-Wellenlinien löschen",
+	"remove_all_code_analysis_problems": "Alle Codeanalyseprobleme entfernen",
 	"multiple_locations_note": "(Mehrere Standorte)",
 	"folder_tag": "Ordner",
-	"file_tag": "Datei"
+	"file_tag": "Datei",
+	"compiler_default_language_standard_version_old": "Der Compiler hat die Standardversion der Standardsprache zurückgegeben: {0}. Da diese Version alt ist, wird versucht, eine neuere Version {1} als Standard zu verwenden.",
+	"unexpected_output_from_clang_tidy": "Unerwartete Ausgabe von „clang-tidy“: {0}. Erwartet: {1}."
 }
