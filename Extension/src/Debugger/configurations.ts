@@ -5,10 +5,19 @@
 
 import * as os from 'os';
 import * as nls from 'vscode-nls';
+import * as vscode from 'vscode';
 import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+export function isDebugLaunchStr(str: string): boolean {
+    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
+}
+
+export interface ConfigMenu extends vscode.QuickPickItem {
+    configuration: CppDebugConfiguration;
+}
 
 export enum DebuggerType {
     cppvsdbg = "cppvsdbg",
@@ -17,14 +26,45 @@ export enum DebuggerType {
 }
 
 export enum DebuggerEvent {
-    debugPanel = "debugPanel",
-    launchPlayButton = "launchPlayButton"
+    debugPanel = "debugPanel",  // F5 or "Run and Debug" Panel
+    playButton = "playButton",   // "Run and Debug" play button
+    addConfigGear = "AddConfigGear"
 }
 
-export enum TaskConfigStatus {
-    recentlyUsed = "Recently Used Task",
+export enum TaskStatus {
+    recentlyUsed = "Recently Used Task", // A configured task that has been used recently.
+
     configured = "Configured Task", // The tasks that are configured in tasks.json file.
     detected = "Detected Task"      // The tasks that are available based on detected compilers.
+}
+
+export enum ConfigSource {
+    singleFile = "singleFile",              // a debug config defined for a single mode file
+    workspaceFolder = "workspaceFolder",    // a debug config defined in launch.json
+    workspace = "workspace",                // a debug config defined in workspace level
+    global = "global",                      // a debug config defined in user level
+    unknown = "unknown"
+}
+
+export enum ConfigMode {
+    launchConfig = "launchConfig",
+    noLaunchConfig = "noLaunchConfig",
+    unknown = "unknown"
+}
+
+export enum DebugType {
+    debug = "debug",
+    run = "run"
+}
+
+export interface CppDebugConfiguration extends vscode.DebugConfiguration {
+    detail?: string;
+    taskStatus?: TaskStatus;
+    isDefault?: boolean; // The debug configuration is considered as default, if the prelaunch task is set as default.
+    configSource?: ConfigSource;
+    debuggerEvent?: DebuggerEvent;
+    debugType?: DebugType;
+    existing?: boolean;
 }
 
 export interface IConfigurationSnippet {

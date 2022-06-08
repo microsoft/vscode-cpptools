@@ -3445,5 +3445,17 @@
   "el gráfico de definición de parámetros IFC especificó %d1 parámetros, mientras que la declaración IFC especificó %d2 parámetros",
   "el gráfico de definición de parámetros IFC especificó %d1 parámetro, mientras que la declaración IFC especificó %d2 parámetros",
   "el gráfico de definición de parámetros IFC especificó %d1 parámetros, mientras que la declaración IFC especificó %d2 parámetro",
-  "Falta la representación IFC de la definición de la función %sq"
+  "Falta la representación IFC de la definición de la función %sq",
+  "el modificador de función no se aplica a la declaración de plantilla de miembro",
+  "la selección de miembros implica demasiados tipos anónimos anidados",
+  "no hay ningún tipo común entre los operandos",
+  "se esperaba un puntero a miembro",
+  "un miembro de matriz flexible no se puede declarar en un tipo que de otro modo estaría vacío",
+  "se esperaba que 'std::source_location::__impl' se definiera a una clase con solo los miembros de datos '_M_function_name', '_M_file_name', '_M_column', '_M_line'",
+  "durante la inicialización de 'std::source_location::__impl', el número de columna desborda el miembro '_M_column' de tipo %t",
+  "durante la inicialización de 'std::source_location::__impl', el número de línea desborda el miembro '_M_line' de tipo %t",
+  "una constante de caracteres UTF-16 no puede ocupar más de una unidad de código; valor truncado",
+  "ambos argumentos deben tener el mismo tipo",
+  "el tipo %t no es válido como argumento para este elemento integrado",
+  "llamado desde %nd:"
 ]

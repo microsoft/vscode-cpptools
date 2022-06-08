@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
 import * as util from '../../common';
 import { processDelayedDidOpen } from '../extension';
+import { makeVscodeRange } from '../utils';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private client: DefaultClient;
@@ -39,13 +40,13 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                     }
                     const offset_scope: number = symbol.name.lastIndexOf("::", offset_paren - 2);
                     if (offset_scope > 0) {
-                        detail = symbol.name.substr(0, offset_scope);
-                        symbol.name = symbol.name.substr(offset_scope + 2);
+                        detail = symbol.name.substring(0, offset_scope);
+                        symbol.name = symbol.name.substring(offset_scope + 2);
                     }
                 }
 
-                let r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
-                const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
+                let r: vscode.Range = makeVscodeRange(symbol.range);
+                const sr: vscode.Range = makeVscodeRange(symbol.selectionRange);
                 if (!r.contains(sr)) {
                     r = sr;
                 }

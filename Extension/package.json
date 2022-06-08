@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.9.8-main",
+  "version": "1.10.5-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -50,7 +50,6 @@
     "onLanguage:cuda-cpp",
     "onCommand:extension.pickNativeProcess",
     "onCommand:extension.pickRemoteNativeProcess",
-    "onCommand:C_Cpp.BuildAndDebugActiveFile",
     "onCommand:C_Cpp.RestartIntelliSenseForFile",
     "onCommand:C_Cpp.ConfigurationEditJSON",
     "onCommand:C_Cpp.ConfigurationEditUI",
@@ -74,7 +73,7 @@
     "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
     "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
     "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
-    "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
+    "onCommand:C_Cpp.RemoveAllCodeAnalysisProblems",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -417,6 +416,36 @@
           },
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.showClear": {
+            "type": "string",
+            "description": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.description%",
+            "enum": [
+                "None",
+                "AllOnly",
+                "AllAndAllType",
+                "AllAndAllTypeAndThis"
+              ],
+            "enumDescriptions": [
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.None.description%",
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllOnly.description%",
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description%",
+                "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description%"
+            ],
+            "default": "AllAndAllTypeAndThis",
+            "scope": "application"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.showDisable": {
+            "type": "boolean",
+            "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDisable.markdownDescription%",
+            "default": true,
+            "scope": "application"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.showDocumentation": {
+            "type": "boolean",
+            "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDocumentation.markdownDescription%",
+            "default": true,
+            "scope": "application"
+        },
         "C_Cpp.codeAnalysis.runAutomatically": {
           "type": "boolean",
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.runAutomatically.markdownDescription%",
@@ -461,6 +490,12 @@
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.useBuildPath": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.codeAnalysis.clangTidy.checks.enabled": {
           "type": "array",
           "items": {
@@ -468,6 +503,7 @@
             "enum": [
               "*",
               "abseil-*",
+              "abseil-cleanup-ctad",
               "abseil-duration-*",
               "abseil-duration-addition",
               "abseil-duration-comparison",
@@ -562,9 +598,11 @@
               "bugprone-string-constructor",
               "bugprone-string-integer-assignment",
               "bugprone-string-literal-with-embedded-nul",
+              "bugprone-stringview-nullptr",
               "bugprone-suspicious-*",
               "bugprone-suspicious-enum-usage",
               "bugprone-suspicious-include",
+              "bugprone-suspicious-memory-comparison",
               "bugprone-suspicious-memset-usage",
               "bugprone-suspicious-missing-comma",
               "bugprone-suspicious-semicolon",
@@ -599,13 +637,17 @@
               "cert-env33-c",
               "cert-err*",
               "cert-err09-cpp",
+              "cert-err33-c",
               "cert-err34-c",
               "cert-err52-cpp",
               "cert-err58-cpp",
               "cert-err60-cpp",
               "cert-err61-cpp",
+              "cert-exp42-c",
               "cert-fio38-c",
+              "cert-flp*",
               "cert-flp30-c",
+              "cert-flp37-c",
               "cert-mem57-cpp",
               "cert-msc*",
               "cert-msc30-c",
@@ -617,7 +659,9 @@
               "cert-oop54-cpp",
               "cert-oop57-cpp",
               "cert-oop58-cpp",
+              "cert-pos*",
               "cert-pos44-c",
+              "cert-pos47-c",
               "cert-sig30-c",
               "cert-str34-c",
               "clang-analyzer-*",
@@ -758,6 +802,7 @@
               "cppcoreguidelines-pro-type-vararg",
               "cppcoreguidelines-slicing",
               "cppcoreguidelines-special-member-functions",
+              "cppcoreguidelines-virtual-class-destructor",
               "darwin-*",
               "darwin-avoid-spinlock",
               "darwin-dispatch-once-nonstatic",
@@ -848,6 +893,9 @@
               "llvmlibc-restrict-system-libc-headers",
               "misc-*",
               "misc-definitions-in-headers",
+              "misc-misleading-*",
+              "misc-misleading-bidirectional",
+              "misc-misleading-identifier",
               "misc-misplaced-const",
               "misc-new-delete-overloads",
               "misc-no-recursion",
@@ -905,6 +953,7 @@
               "mpi-buffer-deref",
               "mpi-type-mismatch",
               "objc-*",
+              "objc-assert-equals",
               "objc-avoid-nserror-init",
               "objc-dealloc-in-category",
               "objc-forbidden-subclassing",
@@ -942,13 +991,19 @@
               "readability-avoid-const-params-in-decls",
               "readability-braces-around-statements",
               "readability-const-return-type",
+              "readability-container-*",
+              "readability-container-contains",
+              "readability-container-data-pointer",
               "readability-container-size-empty",
               "readability-convert-member-functions-to-static",
               "readability-delete-null-pointer",
+              "readability-duplicate-include",
               "readability-else-after-return",
               "readability-function-*",
               "readability-function-cognitive-complexity",
               "readability-function-size",
+              "readability-identifier-*",
+              "readability-identifier-length",
               "readability-identifier-naming",
               "readability-implicit-bool-conversion",
               "readability-inconsistent-declaration-parameter-name",
@@ -978,6 +1033,7 @@
               "readability-static-accessed-through-instance",
               "readability-static-definition-in-anonymous-namespace",
               "readability-string-compare",
+              "readability-suspicious-call-argument",
               "readability-uniqueptr-delete-release",
               "readability-uppercase-literal-suffix",
               "readability-use-anyofallof",
@@ -994,6 +1050,7 @@
             "enum": [
               "*",
               "abseil-*",
+              "abseil-cleanup-ctad",
               "abseil-duration-*",
               "abseil-duration-addition",
               "abseil-duration-comparison",
@@ -1088,9 +1145,11 @@
               "bugprone-string-constructor",
               "bugprone-string-integer-assignment",
               "bugprone-string-literal-with-embedded-nul",
+              "bugprone-stringview-nullptr",
               "bugprone-suspicious-*",
               "bugprone-suspicious-enum-usage",
               "bugprone-suspicious-include",
+              "bugprone-suspicious-memory-comparison",
               "bugprone-suspicious-memset-usage",
               "bugprone-suspicious-missing-comma",
               "bugprone-suspicious-semicolon",
@@ -1125,13 +1184,17 @@
               "cert-env33-c",
               "cert-err*",
               "cert-err09-cpp",
+              "cert-err33-c",
               "cert-err34-c",
               "cert-err52-cpp",
               "cert-err58-cpp",
               "cert-err60-cpp",
               "cert-err61-cpp",
+              "cert-exp42-c",
               "cert-fio38-c",
+              "cert-flp*",
               "cert-flp30-c",
+              "cert-flp37-c",
               "cert-mem57-cpp",
               "cert-msc*",
               "cert-msc30-c",
@@ -1143,7 +1206,9 @@
               "cert-oop54-cpp",
               "cert-oop57-cpp",
               "cert-oop58-cpp",
+              "cert-pos*",
               "cert-pos44-c",
+              "cert-pos47-c",
               "cert-sig30-c",
               "cert-str34-c",
               "clang-analyzer-*",
@@ -1284,6 +1349,7 @@
               "cppcoreguidelines-pro-type-vararg",
               "cppcoreguidelines-slicing",
               "cppcoreguidelines-special-member-functions",
+              "cppcoreguidelines-virtual-class-destructor",
               "darwin-*",
               "darwin-avoid-spinlock",
               "darwin-dispatch-once-nonstatic",
@@ -1374,6 +1440,9 @@
               "llvmlibc-restrict-system-libc-headers",
               "misc-*",
               "misc-definitions-in-headers",
+              "misc-misleading-*",
+              "misc-misleading-bidirectional",
+              "misc-misleading-identifier",
               "misc-misplaced-const",
               "misc-new-delete-overloads",
               "misc-no-recursion",
@@ -1431,6 +1500,7 @@
               "mpi-buffer-deref",
               "mpi-type-mismatch",
               "objc-*",
+              "objc-assert-equals",
               "objc-avoid-nserror-init",
               "objc-dealloc-in-category",
               "objc-forbidden-subclassing",
@@ -1468,13 +1538,19 @@
               "readability-avoid-const-params-in-decls",
               "readability-braces-around-statements",
               "readability-const-return-type",
+              "readability-container-*",
+              "readability-container-contains",
+              "readability-container-data-pointer",
               "readability-container-size-empty",
               "readability-convert-member-functions-to-static",
               "readability-delete-null-pointer",
+              "readability-duplicate-include",
               "readability-else-after-return",
               "readability-function-*",
               "readability-function-cognitive-complexity",
               "readability-function-size",
+              "readability-identifier-*",
+              "readability-identifier-length",
               "readability-identifier-naming",
               "readability-implicit-bool-conversion",
               "readability-inconsistent-declaration-parameter-name",
@@ -1504,6 +1580,7 @@
               "readability-static-accessed-through-instance",
               "readability-static-definition-in-anonymous-namespace",
               "readability-string-compare",
+              "readability-suspicious-call-argument",
               "readability-uniqueptr-delete-release",
               "readability-uppercase-literal-suffix",
               "readability-use-anyofallof",
@@ -2403,12 +2480,14 @@
             "c++14",
             "c++17",
             "c++20",
+            "c++23",
             "gnu++98",
             "gnu++03",
             "gnu++11",
             "gnu++14",
             "gnu++17",
-            "gnu++20"
+            "gnu++20",
+            "gnu++23"
           ],
           "markdownDescription": "%c_cpp.configuration.default.cppStandard.markdownDescription%",
           "scope": "resource"
@@ -2583,12 +2662,16 @@
         },
         "C_Cpp.debugShortcut": {
           "type": "boolean",
-          "default": false,
-          "tags": [
-            "experimental"
-          ],
+          "default": true,
           "description": "%c_cpp.configuration.debugShortcut.description%",
           "scope": "application"
+        },
+        "C_Cpp.legacyCompilerArgsBehavior": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
+          "scope": "resource",
+          "deprecationMessage": "%c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage%"
         }
       }
     },
@@ -2722,8 +2805,8 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.ClearCodeAnalysisSquiggles",
-        "title": "%c_cpp.command.ClearCodeAnalysisSquiggles.title%",
+        "command": "C_Cpp.RemoveAllCodeAnalysisProblems",
+        "title": "%c_cpp.command.RemoveAllCodeAnalysisProblems.title%",
         "category": "C/C++"
       },
       {
@@ -2737,6 +2820,12 @@
         "title": "%c_cpp.command.BuildAndRunFile.title%",
         "category": "C/C++",
         "icon": "$(run)"
+      },
+      {
+        "command": "C_Cpp.AddDebugConfiguration",
+        "title": "%c_cpp.command.AddDebugConfiguration.title%",
+        "category": "C/C++",
+        "icon": "$(debug-configure)"      
       }
     ],
     "keybindings": [
@@ -3427,6 +3516,7 @@
       {
         "type": "cppvsdbg",
         "label": "C++ (Windows)",
+        "when": "workspacePlatform == windows",
         "languages": [
           "c",
           "cpp",
@@ -3867,31 +3957,43 @@
           "group": "navigation@1"
         }
       ],
+      "editor/title": [
+        {
+          "command": "C_Cpp.AddDebugConfiguration",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen",
+          "group": "navigation"
+        }
+      ],
       "editor/context": [
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.SwitchHeaderSource",
-          "group": "other1_navigation@1"
+          "group": "custom1@1"
         },
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.gotoSymbol",
-          "group": "other1_navigation@3"
+          "group": "custom1@2"
         },
         {
           "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
-          "group": "other1_navigation@4"
+          "group": "custom1@3"
         },
         {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
-          "group": "other2@2"
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "group": "custom2@1"
         },
         {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.RestartIntelliSenseForFile",
-          "group": "other2@3"
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "group": "custom2@2"
+        },
+        {
+          "command": "C_Cpp.AddDebugConfiguration",
+          "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen",
+          "group": "custom2@3"
         }
       ],
       "commandPalette": [
@@ -3920,9 +4022,6 @@
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true
-      },
-      "[Log]": {
-        "editor.wordWrap": "off"
       }
     },
     "semanticTokenTypes": [
@@ -4427,9 +4526,9 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.5",
-    "plist": "^3.0.4",
+    "plist": "^3.0.5",
     "tmp": "^0.2.1",
-    "vscode-cpptools": "^5.0.0",
+    "vscode-cpptools": "^6.1.0",
     "vscode-extension-telemetry": "^0.4.4",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^5.0.0",
@@ -4449,6 +4548,6 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "**/mkdirp/minimist": "^0.2.1"
+    "minimist": "^1.2.6"
   }
 }

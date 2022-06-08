@@ -10,9 +10,11 @@ import { NativeAttachItemsProviderFactory } from './nativeAttach';
 import { DebugConfigurationProvider, ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
 import { DebuggerType } from './configurations';
+import * as nls from 'vscode-nls';
 
-// The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
+// The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export async function initialize(context: vscode.ExtensionContext): Promise<void> {
     // Activate Process Picker Commands
@@ -39,6 +41,13 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.AddDebugConfiguration", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        if (!folder) {
+            vscode.window.showWarningMessage(localize("add.debug.configuration.not.available.for.single.file", "Add debug configuration is not available for single file."));
+        }
+        await debugProvider.addDebugConfiguration(textEditor);
+    }));
 
     assetProvider.getConfigurationSnippets();
 

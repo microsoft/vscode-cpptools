@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope } from '../client';
+import { makeVscodeLocation } from '../utils';
 import * as util from '../../common';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
@@ -38,13 +39,11 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                     name = name + " (protected)";
                 }
             }
-            const range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
-            const uri: vscode.Uri = vscode.Uri.parse(symbol.location.uri.toString());
             const vscodeSymbol: vscode.SymbolInformation = new vscode.SymbolInformation(
                 name,
                 symbol.kind,
                 symbol.containerName,
-                new vscode.Location(uri, range)
+                makeVscodeLocation(symbol.location)
             );
             resultSymbols.push(vscodeSymbol);
         });

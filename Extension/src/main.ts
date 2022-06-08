@@ -39,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
             console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
-            const fileName: string = uri.path.substr(1);
+            const fileName: string = uri.path.substring(1);
             const locale: string = util.getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
             const fileExists: boolean = await util.checkFileExists(localizedFilePath);
@@ -68,25 +68,43 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     UpdateInsidersAccess();
 
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-    if (settings.intelliSenseEngine === "Disabled") {
-        languageServiceDisabled = true;
+    let isOldMacOs: boolean = false;
+    if (info.platform === 'darwin') {
+        const releaseParts: string[] = os.release().split(".");
+        if (releaseParts.length >= 1) {
+            isOldMacOs = parseInt(releaseParts[0]) < 16;
+        }
     }
-    let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
-    disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-        if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
-            if (currentIntelliSenseEngineValue === "Disabled") {
-                // If switching from disabled to enabled, we can continue activation.
-                currentIntelliSenseEngineValue = settings.intelliSenseEngine;
-                languageServiceDisabled = false;
-                LanguageServer.activate();
-            } else {
-                // We can't deactivate or change engines on the fly, so prompt for window reload.
-                reloadMessageShown = true;
-                util.promptForReloadWindowDueToSettingsChange();
+
+    // Read the setting and determine whether we should activate the language server prior to installing callbacks,
+    // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
+    // function, to allow any further setup to occur here, prior to activation.
+    const shouldActivateLanguageServer: boolean = (settings.intelliSenseEngine !== "Disabled" && !isOldMacOs);
+
+    if (isOldMacOs) {
+        languageServiceDisabled = true;
+        vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
+    } else {
+        if (settings.intelliSenseEngine === "Disabled") {
+            languageServiceDisabled = true;
+        }
+        let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
+        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+            const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+            if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
+                if (currentIntelliSenseEngineValue === "Disabled") {
+                    // If switching from disabled to enabled, we can continue activation.
+                    currentIntelliSenseEngineValue = settings.intelliSenseEngine;
+                    languageServiceDisabled = false;
+                    LanguageServer.activate();
+                } else {
+                    // We can't deactivate or change engines on the fly, so prompt for window reload.
+                    reloadMessageShown = true;
+                    util.promptForReloadWindowDueToSettingsChange();
+                }
             }
         }
-    }));
+    }
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
@@ -114,7 +132,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         }
     });
 
-    if (settings.intelliSenseEngine !== "Disabled") {
+    if (shouldActivateLanguageServer) {
         await LanguageServer.activate();
     }
 
@@ -137,6 +155,7 @@ async function makeBinariesExecutable(): Promise<void> {
         const commonBinaries: string[] = [
             "./bin/cpptools",
             "./bin/cpptools-srv",
+            "./bin/cpptools-wordexp",
             "./LLVM/bin/clang-format",
             "./LLVM/bin/clang-tidy",
             "./debugAdapters/bin/OpenDebugAD7"

@@ -235,8 +235,10 @@
     },
     "unable_to_access_browse_database": "Unable to access browse database. ({0})",
     "default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode was changed because it didn't match the detected compiler.  Consider setting \"compilerPath\" instead.  Set \"compilerPath\" to \"\" to disable detection of system includes and defines.",
-    "clear_code_analysis_squiggles": "Clear code analysis squiggles",
+    "remove_all_code_analysis_problems": "Remove all code analysis problems",
     "multiple_locations_note": "(Multiple locations)",
     "folder_tag": "Folder",
-    "file_tag": "File"
+    "file_tag": "File",
+    "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default.",
+    "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}. Expected: {1}."
 }

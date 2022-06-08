@@ -32,7 +32,7 @@ export class ParsedEnvironmentFile {
 
         // Remove UTF-8 BOM if present
         if (content.charAt(0) === '\uFEFF') {
-            content = content.substr(1);
+            content = content.substring(1);
         }
 
         const parseErrors: string[] = [];

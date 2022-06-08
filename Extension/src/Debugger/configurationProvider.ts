@@ -13,18 +13,19 @@ import * as fs from 'fs';
 import * as Telemetry from '../telemetry';
 import * as logger from '../logger';
 import * as nls from 'vscode-nls';
-import { IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations, WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations, TaskConfigStatus } from './configurations';
-import { parse } from 'comment-json';
+import {
+    IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations,
+    WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations, CppDebugConfiguration,
+    ConfigSource, TaskStatus, isDebugLaunchStr, ConfigMenu, ConfigMode, DebugType
+} from './configurations';
+import * as jsonc from 'comment-json';
 import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
+import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-
-function isDebugLaunchStr(str: string): boolean {
-    return str.startsWith("(gdb) ") || str.startsWith("(lldb) ") || str.startsWith("(Windows) ");
-}
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
@@ -46,28 +47,32 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     /**
      * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
+     * resolveDebugConfiguration will be automatically called after this function.
      */
-    async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        let configs: vscode.DebugConfiguration[] | null | undefined = await this.provideDebugConfigurationsForType(this.type, folder, token);
+    async provideDebugConfigurations(folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<CppDebugConfiguration[]> {
+        let configs: CppDebugConfiguration[] | null | undefined = await this.provideDebugConfigurationsForType(this.type, folder, token);
         if (!configs) {
             configs = [];
         }
-        const defaultConfig: vscode.DebugConfiguration | undefined = configs.find(config => isDebugLaunchStr(config.name) && config.request === "launch");
-        if (!defaultConfig) {
+        const defaultTemplateConfig: CppDebugConfiguration | undefined = configs.find(config => isDebugLaunchStr(config.name) && config.request === "launch");
+        if (!defaultTemplateConfig) {
             throw new Error("Default config not found in provideDebugConfigurations()");
         }
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor || !util.isCppOrCFile(editor.document.uri) || configs.length <= 1) {
-            return [defaultConfig];
+            return [defaultTemplateConfig];
         }
-        interface MenuItem extends vscode.QuickPickItem {
-            configuration: vscode.DebugConfiguration;
+
+        const defaultConfig: CppDebugConfiguration[] = this.findDefaultConfig(configs);
+        // If there was only one config defined for the default task, choose that config, otherwise ask the user to choose.
+        if (defaultConfig.length === 1) {
+            return defaultConfig;
         }
 
         // Find the recently used task and place it at the top of quickpick list.
-        let recentlyUsedConfig: vscode.DebugConfiguration | undefined;
+        let recentlyUsedConfig: CppDebugConfiguration | undefined;
         configs = configs.filter(config => {
-            if (config.existing !== TaskConfigStatus.recentlyUsed) {
+            if (config.taskStatus !== TaskStatus.recentlyUsed) {
                 return true;
             } else {
                 recentlyUsedConfig = config;
@@ -78,13 +83,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             configs.unshift(recentlyUsedConfig);
         }
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => {
-            const reducedConfig: vscode.DebugConfiguration = {...config};
-            // Remove the "detail" property from the DebugConfiguration that will be written in launch.json.
-            reducedConfig.detail = undefined;
-            reducedConfig.existing = undefined;
-            reducedConfig.isDefault = undefined;
-            const menuItem: MenuItem = { label: config.name, configuration: reducedConfig, description: config.detail, detail: config.existing };
+        const items: ConfigMenu[] = configs.map<ConfigMenu>(config => {
+            const quickPickConfig: CppDebugConfiguration = {...config};
+            const menuItem: ConfigMenu = { label: config.name, configuration: quickPickConfig, description: config.detail, detail: config.taskStatus };
             // Rename the menu item for the default configuration as its name is non-descriptive.
             if (isDebugLaunchStr(menuItem.label)) {
                 menuItem.label = localize("default.configuration.menuitem", "Default Configuration");
@@ -92,9 +93,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             return menuItem;
         });
 
-        const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {placeHolder: localize("select.configuration", "Select a configuration")});
+        const selection: ConfigMenu | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": ConfigSource.unknown, "configMode": ConfigMode.unknown, "cancelled": "true", "success": "true" });
             return []; // User canceled it.
         }
 
@@ -106,46 +107,86 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     /**
-	 * Error checks the provided 'config' without any variables substituted.
+     * Error checks the provided 'config' without any variables substituted.
      * If return "undefined", the debugging will be aborted silently.
      * If return "null", the debugging will be aborted and launch.json will be opened.
-	 */
-    resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+     * resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this function.
+     */
+    async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: CppDebugConfiguration, token?: vscode.CancellationToken): Promise<CppDebugConfiguration | null | undefined> {
+        const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
-            // Providing debug configs, and debugging should be called manually.
-            // Currently, we expect only one debug config to be selected.
-            this.provideDebugConfigurations(folder).then(async configs => {
-                if (!configs || configs.length === 0) {
-                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
-                    return undefined; // aborts debugging silently
-                } else {
-                    console.assert(configs.length === 1, "More than one debug config is selected.");
-                    await this.resolvePreLaunchTask(folder, configs[0], DebuggerEvent.debugPanel);
-                    await this.startDebugging(folder, configs[0], DebuggerEvent.debugPanel);
-                    return configs[0];
-                }
-            });
-        } else {
-            // resolveDebugConfigurationWithSubstitutedVariables will be called automatically after this.
-            if (config.type === 'cppvsdbg') {
-                // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
-                if (config.hasOwnProperty("externalConsole")) {
-                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
-                    if (config.externalConsole && !config.console) {
-                        config.console = "externalTerminal";
-                    }
-                    delete config.externalConsole;
-                }
+            // Hence, providing debug configs, and start debugging should be done manually.
+            // resolveDebugConfiguration will be automatically called after calling provideDebugConfigurations.
+            const configs: CppDebugConfiguration[]= await this.provideDebugConfigurations(folder);
+            if (!configs || configs.length === 0) {
+                Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "success": "true" });
+                return undefined; // aborts debugging silently
+            } else {
+                // Currently, we expect only one debug config to be selected.
+                console.assert(configs.length === 1, "More than one debug config is selected.");
+                config = configs[0];
+                // Keep track of the entry point where the debug config has been selected, for telemetry purposes.
+                config.debuggerEvent = DebuggerEvent.debugPanel;
+                config.configSource = folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile;
+            }
+        }
 
-                // Fail if cppvsdbg type is running on non-Windows
-                if (os.platform() !== 'win32') {
-                    logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
-                    return undefined; // Stop debugging
+        /** If the config is coming from the "Run and Debug" debugPanel, there are three cases where the folder is undefined:
+         * 1. when debugging is done on a single file where there is no folder open,
+         * 2. when the debug configuration is defined at the User level (global).
+         * 3. when the debug configuration is defined at the workspace level.
+         * If the config is coming from the "Run and Debug" playButton, there is one case where the folder is undefined:
+         * 1. when debugging is done on a single file where there is no folder open.
+         */
+
+        /** Do not resolve PreLaunchTask for these three cases, and let the Vs Code resolve it:
+         * 1: The existing configs that are found for a single file.
+         * 2: The existing configs that come from the playButton (the PreLaunchTask should already be defined for these configs).
+         * 3: The existing configs that come from the debugPanel where the folder is undefined and the PreLaunchTask cannot be found.
+         */
+
+        if (config.preLaunchTask) {
+            config.configSource = this.getDebugConfigSource(config, folder);
+            let resolveByVsCode: boolean = false;
+            const isDebugPanel: boolean = !config.debuggerEvent || (config.debuggerEvent && config.debuggerEvent === DebuggerEvent.debugPanel);
+            const singleFile: boolean = config.configSource === ConfigSource.singleFile;
+            const isExistingConfig: boolean = this.isExistingConfig(config, folder);
+            const isExistingTask: boolean = await this.isExistingTask(config, folder);
+            if (singleFile) {
+                if (isExistingConfig) {
+                    resolveByVsCode = true;
+                }
+            } else {
+                if (!isDebugPanel && (isExistingConfig || isExistingTask)) {
+                    resolveByVsCode = true;
+                } else if (isDebugPanel && !folder && isExistingConfig && !isExistingTask) {
+                    resolveByVsCode = true;
                 }
             }
-            return config;
+
+            // Send the telemetry before writing into files
+            config.debugType = config.debugType ? config.debugType : DebugType.debug;
+            const configMode: ConfigMode = isExistingConfig ? ConfigMode.launchConfig : ConfigMode.noLaunchConfig;
+            // if configuration.debuggerEvent === undefined, it means this configuration is already defined in launch.json and is shown in debugPanel.
+            Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "true" });
+
+            if (!resolveByVsCode) {
+                if ((singleFile || isIntelliSenseDisabled ||
+                    (isDebugPanel && !folder && isExistingTask))) {
+                    await this.resolvePreLaunchTask(config, configMode);
+                    config.preLaunchTask = undefined;
+                } else {
+                    await this.resolvePreLaunchTask(config, configMode, folder);
+                    DebugConfigurationProvider.recentBuildTaskLabelStr = config.preLaunchTask;
+                }
+            } else {
+                DebugConfigurationProvider.recentBuildTaskLabelStr = config.preLaunchTask;
+            }
         }
+
+        // resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this return.
+        return config;
     }
 
     /**
@@ -156,12 +197,27 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * If return "undefined", the debugging will be aborted silently.
      * If return "null", the debugging will be aborted and launch.json will be opened.
 	 */
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: CppDebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<CppDebugConfiguration> {
         if (!config || !config.type) {
-            return undefined;
+            return undefined; // Abort debugging silently.
         }
 
-        if (config.type === 'cppvsdbg') {
+        if (config.type === DebuggerType.cppvsdbg) {
+            // Fail if cppvsdbg type is running on non-Windows
+            if (os.platform() !== 'win32') {
+                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.not.available", "Debugger of type: '{0}' is only available on Windows. Use type: '{1}' on the current OS platform.", "cppvsdbg", "cppdbg"));
+                return undefined; // Abort debugging silently.
+            }
+
+            // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
+            if (config.hasOwnProperty("externalConsole")) {
+                logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
+                if (config.externalConsole && !config.console) {
+                    config.console = "externalTerminal";
+                }
+                delete config.externalConsole;
+            }
+
             // Disable debug heap by default, enable if 'enableDebugHeap' is set.
             if (!config.enableDebugHeap) {
                 const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
@@ -242,10 +298,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return config;
     }
 
-    async provideDebugConfigurationsForType(type: DebuggerType, folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<vscode.DebugConfiguration[]> {
-        const defaultConfig: vscode.DebugConfiguration = this.assetProvider.getInitialConfigurations(type).find((config: any) =>
+    async provideDebugConfigurationsForType(type: DebuggerType, folder?: vscode.WorkspaceFolder, token?: vscode.CancellationToken): Promise<CppDebugConfiguration[]> {
+        const defaultTemplateConfig: CppDebugConfiguration = this.assetProvider.getInitialConfigurations(type).find((config: any) =>
             isDebugLaunchStr(config.name) && config.request === "launch");
-        console.assert(defaultConfig, "Could not find default debug configuration.");
+        console.assert(defaultTemplateConfig, "Could not find default debug configuration.");
 
         const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
 
@@ -269,7 +325,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             if (!command) {
                 return false;
             }
-            if (defaultConfig.name.startsWith("(Windows) ")) {
+            if (defaultTemplateConfig.name.startsWith("(Windows) ")) {
                 if (command.startsWith("cl.exe")) {
                     return true;
                 }
@@ -283,33 +339,38 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
-        const configs: vscode.DebugConfiguration[] = await Promise.all(buildTasks.map<Promise<vscode.DebugConfiguration>>(async task => {
+        let configs: CppDebugConfiguration[] = await Promise.all(buildTasks.map<Promise<CppDebugConfiguration>>(async task => {
             const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
             const compilerPath: string = definition.command;
             const compilerName: string = path.basename(compilerPath);
-            const newConfig: vscode.DebugConfiguration = { ...defaultConfig }; // Copy enumerables and properties
+            const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
+            newConfig.existing = false;
 
             newConfig.name = configPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
             newConfig.preLaunchTask = task.name;
-            if (newConfig.type === "cppdbg") {
+            if (newConfig.type === DebuggerType.cppdbg) {
                 newConfig.externalConsole = false;
             } else {
                 newConfig.console = "externalTerminal";
             }
             const isWindows: boolean = platformInfo.platform === 'win32';
-            const exeName: string = path.join("${fileDirname}", "${fileBasenameNoExtension}");
-            newConfig.program = isWindows ? exeName + ".exe" : exeName;
+            // Extract the .exe path from the defined task.
+            const definedExePath: string | undefined = util.findExePathInArgs(task.definition.args);
+            newConfig.program = definedExePath ? definedExePath : util.defaultExePath();
             // Add the "detail" property to show the compiler path in QuickPickItem.
             // This property will be removed before writing the DebugConfiguration in launch.json.
             newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
-            newConfig.existing = (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskConfigStatus.recentlyUsed : (task.existing ? TaskConfigStatus.configured : TaskConfigStatus.detected);
+            newConfig.taskDetail = task.detail;
+            newConfig.taskStatus = task.existing ?
+                ((task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskStatus.recentlyUsed : TaskStatus.configured) :
+                TaskStatus.detected;
             if (task.isDefault) {
                 newConfig.isDefault = true;
             }
             const isCl: boolean = compilerName === "cl.exe";
             newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
-            return new Promise<vscode.DebugConfiguration>(resolve => {
+            return new Promise<CppDebugConfiguration>(resolve => {
                 if (platformInfo.platform === "darwin") {
                     return resolve(newConfig);
                 } else {
@@ -321,14 +382,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
                             const suffixIndex: number = compilerName.indexOf("-");
                             if (suffixIndex !== -1) {
-                                const suffix: string = compilerName.substr(suffixIndex);
+                                const suffix: string = compilerName.substring(suffixIndex);
                                 debuggerName += suffix;
                             }
                         }
-                        newConfig.type = "cppdbg";
+                        newConfig.type = DebuggerType.cppdbg;
                     } else if (compilerName === "cl.exe") {
                         newConfig.miDebuggerPath = undefined;
-                        newConfig.type = "cppvsdbg";
+                        newConfig.type = DebuggerType.cppvsdbg;
                         return resolve(newConfig);
                     } else {
                         debuggerName = "gdb";
@@ -354,7 +415,26 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 }
             });
         }));
-        configs.push(defaultConfig);
+        configs.push(defaultTemplateConfig);
+        const existingConfigs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, type)?.map(config => {
+            if (!config.detail && config.preLaunchTask) {
+                config.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask);
+            }
+            config.existing = true;
+            return config;
+        });
+        if (existingConfigs) {
+            // Remove the detected configs that are already configured once in launch.json.
+            const dedupExistingConfigs: CppDebugConfiguration[] = configs.filter(detectedConfig => !existingConfigs.some(config => {
+                if (config.preLaunchTask === detectedConfig.preLaunchTask && config.type === detectedConfig.type && config.request === detectedConfig.request) {
+                    // Carry the default task information.
+                    config.isDefault = detectedConfig.isDefault ? detectedConfig.isDefault : undefined;
+                    return true;
+                }
+                return false;
+            }));
+            configs = existingConfigs.concat(dedupExistingConfigs);
+        }
         return configs;
     }
 
@@ -417,7 +497,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return undefined;
     }
 
-    private resolveEnvFile(config: vscode.DebugConfiguration, folder?: vscode.WorkspaceFolder): void {
+    private resolveEnvFile(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder): void {
         if (config.envFile) {
             // replace ${env:???} variables
             let envFilePath: string = util.resolveVariables(config.envFile, undefined);
@@ -445,7 +525,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    private resolveSourceFileMapVariables(config: vscode.DebugConfiguration): void {
+    private resolveSourceFileMapVariables(config: CppDebugConfiguration): void {
         const messages: string[] = [];
         if (config.sourceFileMap) {
             for (const sourceFileMapSource of Object.keys(config.sourceFileMap)) {
@@ -510,13 +590,187 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
     }
 
-    public async getLaunchConfigs(folder: vscode.WorkspaceFolder | undefined): Promise<vscode.WorkspaceConfiguration[] | undefined> {
-        let configs: vscode.WorkspaceConfiguration[] | undefined = vscode.workspace.getConfiguration('launch', folder).get('configurations');
+    private localizeConfigDetail(items: ConfigMenu[]): ConfigMenu[] {
+        items.map((item: ConfigMenu) => {
+            switch (item.detail) {
+                case TaskStatus.recentlyUsed : {
+                    item.detail = localize("recently.used.task", "Recently Used Task");
+                    break;
+                }
+                case TaskStatus.configured : {
+                    item.detail = localize("configured.task", "Configured Task");
+                    break;
+                }
+                case TaskStatus.detected : {
+                    item.detail = localize("detected.task", "Detected Task");
+                    break;
+                }
+                default : {
+                    break;
+                }
+            }
+            if (item.configuration.taskDetail) {
+                // Add the compiler path of the preLaunchTask to the description of the debug configuration.
+                item.detail = (item.detail ?? "") + " (" + item.configuration.taskDetail + ")";
+            }
+        });
+        return items;
+    }
+
+    private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
+        return configs.filter((config: CppDebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
+    }
+
+    private async isExistingTask(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder): Promise<boolean> {
+        if (config.taskStatus && (config.taskStatus !== TaskStatus.detected)) {
+            return true;
+        } else if (config.taskStatus && (config.taskStatus === TaskStatus.detected)) {
+            return false;
+        }
+        return cppBuildTaskProvider.isExistingTask(config.preLaunchTask, folder);
+    }
+
+    private isExistingConfig(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder): boolean {
+        if (config.existing) {
+            return config.existing;
+        }
+        const configs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, config.type);
+        if (configs && configs.length > 0) {
+            const selectedConfig: any | undefined = configs.find((item: any) => item.name && item.name === config.name);
+            if (selectedConfig) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private getDebugConfigSource(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder): ConfigSource | undefined {
+        if (config.configSource) {
+            return config.configSource;
+        }
+        const isExistingConfig: boolean = this.isExistingConfig(config, folder);
+        if (!isExistingConfig && !folder) {
+            return ConfigSource.singleFile;
+        } else if (!isExistingConfig) {
+            return ConfigSource.workspaceFolder;
+        }
+
+        const configs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, config.type);
+        const matchingConfig: CppDebugConfiguration | undefined = configs?.find((item: any) => item.name && item.name === config.name);
+        if (matchingConfig?.configSource) {
+            return matchingConfig.configSource;
+        }
+        return ConfigSource.unknown;
+    }
+
+    public getLaunchConfigs(folder?: vscode.WorkspaceFolder, type?: DebuggerType | string): CppDebugConfiguration[] | undefined {
+        // Get existing debug configurations from launch.json or user/workspace "launch" settings.
+        const WorkspaceConfigs: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('launch', folder);
+        const configs: any = WorkspaceConfigs.inspect<vscode.DebugConfiguration>('configurations');
         if (!configs) {
             return undefined;
         }
-        configs = configs.filter(config => (config.name && config.request === "launch" && (config.type === DebuggerType.cppvsdbg || config.type === DebuggerType.cppdbg)));
-        return configs;
+        let detailedConfigs: CppDebugConfiguration[] = [];
+        if (configs.workspaceFolderValue !== undefined) {
+            detailedConfigs = detailedConfigs.concat(configs.workspaceFolderValue.map((item: CppDebugConfiguration) => {
+                item.configSource = ConfigSource.workspaceFolder;
+                return item;
+            }));
+        }
+        if (configs.workspaceValue !== undefined) {
+            detailedConfigs = detailedConfigs.concat(configs.workspaceValue.map((item: CppDebugConfiguration) => {
+                item.configSource = ConfigSource.workspace;
+                return item;
+            }));
+        }
+        if (configs.globalValue !== undefined) {
+            detailedConfigs = detailedConfigs.concat(configs.globalValue.map((item: CppDebugConfiguration) => {
+                item.configSource = ConfigSource.global;
+                return item;
+            }));
+        }
+        detailedConfigs = detailedConfigs.filter((config: any) => (config.name && config.request === "launch" && type ? (config.type === type) : true));
+        return detailedConfigs;
+    }
+
+    private getLaunchJsonPath(): string | undefined {
+        return util.getJsonPath("launch.json");
+    }
+
+    private getRawLaunchJson(): Promise<any> {
+        const path: string | undefined = this.getLaunchJsonPath();
+        return util.getRawJson(path);
+    }
+
+    public async writeDebugConfig(config: vscode.DebugConfiguration, isExistingConfig: boolean, folder?: vscode.WorkspaceFolder): Promise<void> {
+        const launchJsonPath: string | undefined = this.getLaunchJsonPath();
+
+        if (isExistingConfig) {
+            if (launchJsonPath) {
+                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(launchJsonPath);
+                if (doc) {
+                    vscode.window.showTextDocument(doc);
+                }
+            }
+            return;
+        }
+        const rawLaunchJson: any = await this.getRawLaunchJson();
+        if (!rawLaunchJson.configurations) {
+            rawLaunchJson.configurations = new Array();
+        }
+        if (!rawLaunchJson.version) {
+            rawLaunchJson.version = "2.0.0";
+        }
+
+        // Remove the extra properties that are not a part of the vsCode.DebugConfiguration.
+        config.detail = undefined;
+        config.taskStatus = undefined;
+        config.isDefault = undefined;
+        config.source = undefined;
+        config.debuggerEvent = undefined;
+        config.debugType = undefined;
+        config.existing = undefined;
+        config.taskDetail = undefined;
+        rawLaunchJson.configurations.push(config);
+
+        if (!launchJsonPath) {
+            throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
+        }
+
+        const settings: OtherSettings = new OtherSettings();
+        await util.writeFileText(launchJsonPath, jsonc.stringify(rawLaunchJson, null, settings.editorTabSize));
+        await vscode.workspace.openTextDocument(launchJsonPath);
+        const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(launchJsonPath);
+        if (doc) {
+            vscode.window.showTextDocument(doc);
+        }
+    }
+
+    public async addDebugConfiguration(textEditor: vscode.TextEditor): Promise<void> {
+        const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        if (!folder) {
+            return;
+        }
+        const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, false, true);
+        if (!selectedConfig) {
+            Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "true", "success": "true" });
+            return; // User canceled it.
+        }
+
+        const isExistingConfig: boolean = this.isExistingConfig(selectedConfig, folder);
+        // Write preLaunchTask into tasks.json file.
+        if (!isExistingConfig && selectedConfig.preLaunchTask && (selectedConfig.taskStatus && selectedConfig.taskStatus === TaskStatus.detected)) {
+            await cppBuildTaskProvider.writeBuildTask(selectedConfig.preLaunchTask);
+        }
+        // Remove the extra properties that are not a part of the DebugConfiguration, as these properties will be written in launch.json.
+        selectedConfig.detail = undefined;
+        selectedConfig.taskStatus = undefined;
+        selectedConfig.isDefault = undefined;
+        selectedConfig.source = undefined;
+        selectedConfig.debuggerEvent = undefined;
+        // Write debug configuration in launch.json file.
+        await this.writeDebugConfig(selectedConfig, isExistingConfig, folder);
+        Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "true" });
     }
 
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
@@ -525,7 +779,27 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     public async buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
+        let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
+        const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor);
+        if (!selectedConfig) {
+            Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? DebugType.debug : DebugType.run, "configSource": ConfigSource.unknown, "cancelled": "true", "success": "true" });
+            return; // User canceled it.
+        }
 
+        // Keep track of the entry point where the debug has been selected, for telemetry purposes.
+        selectedConfig.debuggerEvent = DebuggerEvent.playButton;
+        // If the configs are coming from workspace or global settings and the task is not found in tasks.json, let that to be resolved by VsCode.
+        if (selectedConfig.preLaunchTask && selectedConfig.configSource &&
+            (selectedConfig.configSource === ConfigSource.global || selectedConfig.configSource === ConfigSource.workspace) &&
+            !(await this.isExistingTask(selectedConfig))) {
+            folder = undefined;
+        }
+        selectedConfig.debugType = debugModeOn ? DebugType.debug : DebugType.run;
+        // startDebugging will trigger a call to resolveDebugConfiguration.
+        await vscode.debug.startDebugging(folder, selectedConfig, {noDebug: !debugModeOn});
+    }
+
+    private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = true, onlyWorkspaceFolder: boolean = false): Promise<CppDebugConfiguration | undefined> {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!util.isCppOrCFile(textEditor.document.uri)) {
             vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
@@ -533,126 +807,60 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         // Get debug configurations for all debugger types.
-        let configs: vscode.DebugConfiguration[] = await this.provideDebugConfigurationsForType(DebuggerType.cppdbg, folder);
+        let configs: CppDebugConfiguration[] = await this.provideDebugConfigurationsForType(DebuggerType.cppdbg, folder);
         if (os.platform() === 'win32') {
             configs = configs.concat(await this.provideDebugConfigurationsForType(DebuggerType.cppvsdbg, folder));
         }
-
-        if (folder) {
-            // Get existing debug configurations from launch.json.
-            const existingConfigs: vscode.DebugConfiguration[] | undefined = (await this.getLaunchConfigs(folder))?.map(config => ({
-                name: config.name,
-                type: config.type,
-                request: config.request,
-                detail: config.detail ? config.detail : localize("pre.Launch.Task", "preLaunchTask: {0}", config.preLaunchTask),
-                preLaunchTask: config.preLaunchTask,
-                existing: TaskConfigStatus.configured
-            }));
-            if (existingConfigs) {
-                const areEqual = (config1: vscode.DebugConfiguration, config2: vscode.DebugConfiguration): boolean =>
-                    (config1.name === config2.name && config1.preLaunchTask === config2.preLaunchTask
-                    && config1.type === config2.type && config1.request === config2.request);
-                // Remove the detected configs that are already configured once in launch.json.
-                const dedupExistingConfigs: vscode.DebugConfiguration[] = configs.filter(detectedConfig => !existingConfigs.some(config => areEqual(config, detectedConfig)));
-                configs = existingConfigs.concat(dedupExistingConfigs);
-            }
+        if (onlyWorkspaceFolder) {
+            configs = configs.filter(item => !item.configSource || item.configSource === ConfigSource.workspaceFolder);
         }
 
-        const defaultConfig: vscode.DebugConfiguration[] = configs.filter((config: vscode.DebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
-        interface MenuItem extends vscode.QuickPickItem {
-            configuration: vscode.DebugConfiguration;
-        }
+        const defaultConfig: CppDebugConfiguration[] | undefined = pickDefault ? this.findDefaultConfig(configs) : undefined;
 
-        const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail, detail: config.existing }));
+        const items: ConfigMenu[] = configs.map<ConfigMenu>(config => ({ label: config.name, configuration: config, description: config.detail, detail: config.taskStatus }));
 
-        let selection: MenuItem | undefined;
+        let selection: ConfigMenu | undefined;
 
-        if (defaultConfig.length !== 0) {
-            selection = { label: defaultConfig[0].name, configuration: defaultConfig[0], description: defaultConfig[0].detail, detail: defaultConfig[0].existing };
+        // if there was only one config for the default task, choose that config, otherwise ask the user to choose.
+        if (defaultConfig && defaultConfig.length === 1) {
+            selection = { label: defaultConfig[0].name, configuration: defaultConfig[0], description: defaultConfig[0].detail, detail: defaultConfig[0].taskStatus };
         } else {
-            let sortedItems: MenuItem[] = [];
+            let sortedItems: ConfigMenu[] = [];
             // Find the recently used task and place it at the top of quickpick list.
-            const recentTask: MenuItem[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr));
-            if (recentTask.length !== 0) {
-                recentTask[0].detail = TaskConfigStatus.recentlyUsed;
+            const recentTask: ConfigMenu[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr));
+            if (recentTask.length !== 0 && recentTask[0].detail !== TaskStatus.detected) {
+                recentTask[0].detail = TaskStatus.recentlyUsed;
                 sortedItems.push(recentTask[0]);
             }
-            sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskConfigStatus.configured));
-            sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskConfigStatus.detected));
-            selection = await vscode.window.showQuickPick(sortedItems, {
+            sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskStatus.configured));
+            sortedItems = sortedItems.concat(items.filter(item => item.detail === TaskStatus.detected));
+            sortedItems = sortedItems.concat(items.filter(item => item.detail === undefined));
+
+            selection = await vscode.window.showQuickPick(this.localizeConfigDetail(sortedItems), {
                 placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
             });
         }
-
-        const debuggerEvent: string = DebuggerEvent.launchPlayButton;
-        if (!selection) {
-            Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugModeOn ? "debug" : "run", "folderMode": folder ? "folder" : "singleFile", "cancelled": "true" });
-            return; // User canceled it.
-        }
-
-        if (this.isClConfiguration(selection.label) && this.showErrorIfClNotAvailable(selection.label)) {
+        if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {
             return;
         }
-
-        // Resolve config before start debugging.
-        let resolvedConfig: vscode.DebugConfiguration | undefined | null;
-        if (selection.configuration && selection.configuration.type) {
-            resolvedConfig = await this.resolveDebugConfiguration(folder, selection.configuration);
-            if (resolvedConfig) {
-                resolvedConfig = await this.resolveDebugConfigurationWithSubstitutedVariables(folder, resolvedConfig);
-            }
-        }
-        if (resolvedConfig) {
-            await this.resolvePreLaunchTask(folder, resolvedConfig, debuggerEvent, debugModeOn);
-            await this.startDebugging(folder, resolvedConfig, debuggerEvent, debugModeOn);
-        }
+        return selection?.configuration;
     }
 
-    private async resolvePreLaunchTask(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debuggerEvent: string, debugModeOn: boolean = true): Promise<void> {
-        const debugType: string = debugModeOn ? "debug" : "run";
-        const folderMode: string = folder ? "folder" : "singleFile";
-        if (configuration.preLaunchTask) {
+    private async resolvePreLaunchTask(config: CppDebugConfiguration, configMode: ConfigMode, folder?: vscode.WorkspaceFolder | undefined): Promise<void> {
+        if (config.preLaunchTask) {
             try {
-                if (folder) {
-                    await cppBuildTaskProvider.checkBuildTaskExists(configuration.preLaunchTask);
-                    DebugConfigurationProvider.recentBuildTaskLabelStr = configuration.preLaunchTask;
-                } else {
+                if (config.configSource === ConfigSource.singleFile) {
                     // In case of singleFile, remove the preLaunch task from the debug configuration and run it here instead.
-                    await cppBuildTaskProvider.runBuildTask(configuration.preLaunchTask);
-                    DebugConfigurationProvider.recentBuildTaskLabelStr = configuration.preLaunchTask;
+                    await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
+                } else {
+                    await cppBuildTaskProvider.writeDefaultBuildTask(config.preLaunchTask, folder);
                 }
             } catch (errJS) {
                 const e: Error = errJS as Error;
                 if (e && e.message === util.failedToParseJson) {
                     vscode.window.showErrorMessage(util.failedToParseJson);
                 }
-                Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "noBuildConfig", "success": "false" });
-            }
-        }
-    }
-
-    private async startDebugging(folder: vscode.WorkspaceFolder | undefined, configuration: vscode.DebugConfiguration, debuggerEvent: string, debugModeOn: boolean = true): Promise<void> {
-        const debugType: string = debugModeOn ? "debug" : "run";
-        const folderMode: string = folder ? "folder" : "singleFile";
-        if (!folder) {
-            // In case of singleFile, remove the preLaunch task.
-            configuration.preLaunchTask = undefined;
-        }
-        try {
-            // Check if the debug configuration exists in launch.json.
-            await cppBuildTaskProvider.checkDebugConfigExists(configuration.name);
-            try {
-                await vscode.debug.startDebugging(folder, configuration.name, {noDebug: !debugModeOn});
-                Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "launchConfig", "success": "true" });
-            } catch (e) {
-                Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "launchConfig", "success": "false" });
-            }
-        } catch (e) {
-            try {
-                await vscode.debug.startDebugging(folder, configuration, {noDebug: !debugModeOn});
-                Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "noLaunchConfig", "success": "true" });
-            } catch (e) {
-                Telemetry.logDebuggerEvent(debuggerEvent, { "debugType": debugType, "folderMode": folderMode, "config": "noLaunchConfig", "success": "false" });
+                Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "false" });
             }
         }
     }
@@ -802,7 +1010,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
         let items: vscode.CompletionItem[] = this.snippets;
 
-        const launch: any = parse(document.getText());
+        const launch: any = jsonc.parse(document.getText());
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
         if (launch.configurations.length !== 0) {
             items = [];

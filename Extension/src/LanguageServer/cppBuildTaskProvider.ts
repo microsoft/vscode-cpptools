@@ -150,7 +150,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
         // Task for valid user compiler path setting
         if (isCompilerValid && userCompilerPath) {
-            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.additionalArgs));
+            result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.allCompilerArgs));
         }
         return result;
     }
@@ -168,9 +168,8 @@ export class CppBuildTaskProvider implements TaskProvider {
             const isWindows: boolean = os.platform() === 'win32';
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
-            const filePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-            const programName: string = isWindows ? filePath + '.exe' : filePath;
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', '/Fe:', programName, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+            const programName: string = util.defaultExePath();
+            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', `/Fe${programName}`, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
@@ -206,7 +205,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const rawJson: any = await this.getRawTasksJson();
         const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
-            if (!task.label) {
+            if (!task.label || !task.type || task.type !== CppBuildTaskProvider.CppBuildScriptType) {
                 return null;
             }
             const definition: CppBuildTaskDefinition = {
@@ -227,24 +226,32 @@ export class CppBuildTaskProvider implements TaskProvider {
         return buildTasksJson.filter((task: CppBuildTask) => task !== null);
     }
 
-    public async checkBuildTaskExists(taskLabel: string, createTask: boolean = false): Promise<void> {
-        const rawTasksJson: any = await this.getRawTasksJson();
+    public async writeDefaultBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<void> {
+        return this.writeBuildTask(taskLabel, workspaceFolder, true);
+    }
+
+    public async isExistingTask(taskLabel: string, workspaceFolder?: WorkspaceFolder): Promise<boolean> {
+        const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
+        if (!rawTasksJson.tasks) {
+            return false;
+        }
+        // Check if the task exists in the user's task.json.
+        return rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
+    }
+
+    public async writeBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder, setAsDefault: boolean = false): Promise<void> {
+        const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
         if (!rawTasksJson.tasks) {
             rawTasksJson.tasks = new Array();
         }
-        // Ensure that the task exists in the user's task.json. Task will not be found otherwise.
-        let selectedTask: any;
-        if (!createTask) {
-            selectedTask = rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel);
-            if (selectedTask) {
-                return;
-            }
+        // Check if the task exists in the user's task.json.
+        if (rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel)) {
+            return;
         }
 
         // Create the task which should be created based on the selected "debug configuration".
         const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const normalizedLabel: string = (taskLabel.indexOf("ver(") !== -1) ? taskLabel.slice(0, taskLabel.indexOf("ver(")).trim() : taskLabel;
-        selectedTask = buildTasks.find(task => task.name === normalizedLabel);
+        const selectedTask: any = buildTasks.find(task => task.name === taskLabel);
         console.assert(selectedTask);
         if (!selectedTask) {
             throw new Error("Failed to get selectedTask in checkBuildTaskExists()");
@@ -254,20 +261,22 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
         rawTasksJson.version = "2.0.0";
 
-        // Modify the current default task
-        rawTasksJson.tasks.forEach((task: any) => {
-            if (task.label === selectedTask?.definition.label) {
-                task.group = { kind: "build", "isDefault": true };
-            } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
-                task.group = "build";
-            }
-        });
+        // If the new task should be set as the default task, modify the current default task.
+        if (setAsDefault) {
+            rawTasksJson.tasks.forEach((task: any) => {
+                if (task.label === selectedTask?.definition.label) {
+                    task.group = { kind: "build", "isDefault": true };
+                } else if (task.group.kind && task.group.kind === "build" && task.group.isDefault && task.group.isDefault === true) {
+                    task.group = "build";
+                }
+            });
+        }
 
         if (!rawTasksJson.tasks.find((task: any) => task.label === selectedTask?.definition.label)) {
             const newTask: any = {
                 ...selectedTask.definition,
                 problemMatcher: selectedTask.problemMatchers,
-                group: { kind: "build", "isDefault": true },
+                group: setAsDefault ? { kind: "build", "isDefault": true } : "build",
                 detail: localize("task_generated_by_debugger", "Task generated by Debugger.")
             };
             rawTasksJson.tasks.push(newTask);
@@ -278,13 +287,18 @@ export class CppBuildTaskProvider implements TaskProvider {
         if (!tasksJsonPath) {
             throw new Error("Failed to get tasksJsonPath in checkBuildTaskExists()");
         }
-
+        // Vs Code removes the comments in tasks.json, microsoft/vscode#29453
         await util.writeFileText(tasksJsonPath, JSON.stringify(rawTasksJson, null, settings.editorTabSize));
     }
 
     public async runBuildTask(taskLabel: string): Promise<void> {
-        const buildTasks: CppBuildTask[] = await this.getTasks(true);
-        const task: CppBuildTask | undefined = buildTasks.find(task => task.name === taskLabel);
+        let task: CppBuildTask | undefined;
+        const configuredBuildTasks: CppBuildTask[] = await this.getJsonTasks();
+        task = configuredBuildTasks.find(task => task.name === taskLabel);
+        if (!task) {
+            const detectedBuildTasks: CppBuildTask[] = await this.getTasks(true);
+            task = detectedBuildTasks.find(task => task.name === taskLabel);
+        }
         if (!task) {
             throw new Error("Failed to find task in runBuildTask()");
         } else {
@@ -305,39 +319,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
     }
 
-    public async checkDebugConfigExists(configName: string): Promise<void> {
-        const launchJsonPath: string | undefined = this.getLaunchJsonPath();
-        if (!launchJsonPath) {
-            throw new Error("Failed to get launchJsonPath in checkDebugConfigExists()");
-        }
-
-        const rawLaunchJson: any = await this.getRawLaunchJson();
-        // Ensure that the debug configurations exists in the user's launch.json. Config will not be found otherwise.
-        if (!rawLaunchJson || !rawLaunchJson.configurations) {
-            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
-        }
-        const selectedConfig: any | undefined = rawLaunchJson.configurations.find((config: any) => config.name && config.name === configName);
-        if (!selectedConfig) {
-            throw new Error(`Configuration '${configName}' is missing in 'launch.json'.`);
-        }
-        return;
+    private getTasksJsonPath(workspaceFolder?: WorkspaceFolder): string | undefined {
+        return util.getJsonPath("tasks.json", workspaceFolder);
     }
 
-    private getLaunchJsonPath(): string | undefined {
-        return util.getJsonPath("launch.json");
-    }
-
-    private getTasksJsonPath(): string | undefined {
-        return util.getJsonPath("tasks.json");
-    }
-
-    public getRawLaunchJson(): Promise<any> {
-        const path: string | undefined = this.getLaunchJsonPath();
-        return util.getRawJson(path);
-    }
-
-    public getRawTasksJson(): Promise<any> {
-        const path: string | undefined = this.getTasksJsonPath();
+    public getRawTasksJson(workspaceFolder?: WorkspaceFolder): Promise<any> {
+        const path: string | undefined = this.getTasksJsonPath(workspaceFolder);
         return util.getRawJson(path);
     }
 
@@ -375,6 +362,11 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         // Do build.
         let command: string = util.resolveVariables(this.command);
         let activeCommand: string = command;
+
+        // Create the exe folder path if it doesn't exist.
+        const exePath: string | undefined = util.resolveVariables(util.findExePathInArgs(this.args));
+        util.createDirIfNotExistsSync(exePath);
+
         this.args.forEach((value, index) => {
             value = util.normalizeArg(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
@@ -408,13 +400,14 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         this.writeEmitter.fire(activeCommand + this.endOfLine);
+
         let child: cp.ChildProcess | undefined;
         try {
             child = cp.spawn(command, this.args, this.options ? this.options : {});
             let error: string = "";
             let stdout: string = "";
             let stderr: string = "";
-            const result: number = await new Promise<number>(resolve => {
+            const spawnResult: number = await new Promise<number>(resolve => {
                 if (child) {
                     child.on('error', err => {
                         splitWriteEmitter(err.message);
@@ -436,29 +429,38 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                         if (result === null) {
                             this.writeEmitter.fire(localize("build.run.terminated", "Build run was terminated.") + this.endOfLine);
                             resolve(-1);
+                        } else {
+                            resolve(result);
                         }
-                        resolve(0);
                     });
                 }
             });
-            this.printBuildSummary(error, stdout, stderr);
+            const result: number = this.printBuildSummary(error, stdout, stderr, spawnResult);
             this.closeEmitter.fire(result);
         } catch {
             this.closeEmitter.fire(-1);
         }
     }
 
-    private printBuildSummary(error: string, stdout: string, stderr: string): void {
-        if (error || (!stdout && stderr && stderr.includes("error")) ||
-            (stdout && stdout.includes("error C"))) { // cl.exe compiler errors
+    private printBuildSummary(error: string, stdout: string, stderr: string, spawnResult: number): number {
+        if (spawnResult !== 0) {
             telemetry.logLanguageServerEvent("cppBuildTaskError");
             this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
+            return -1;
+        }
+        if (error || (!stdout && stderr && stderr.includes("error")) ||
+            (stdout && (stdout.includes("error C") || stdout.includes("LINK : fatal error")))) { // cl.exe compiler errors
+            telemetry.logLanguageServerEvent("cppBuildTaskError");
+            this.writeEmitter.fire(localize("build.finished.with.error", "Build finished with error(s).") + this.endOfLine);
+            return -1;
         } else if ((!stdout && stderr) || // gcc/clang
             (stdout && stdout.includes("warning C"))) { // cl.exe compiler warnings
             telemetry.logLanguageServerEvent("cppBuildTaskWarnings");
             this.writeEmitter.fire(localize("build.finished.with.warnings", "Build finished with warning(s).") + this.endOfLine);
+            return 0;
         } else {
             this.writeEmitter.fire(localize("build.finished.successfully", "Build finished successfully.") + this.endOfLine);
+            return 0;
         }
     }
 }
