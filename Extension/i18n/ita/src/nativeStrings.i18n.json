@@ -216,8 +216,10 @@
 	"inline_macro": "Macro inline",
 	"unable_to_access_browse_database": "Impossibile accedere al database di esplorazione. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode è stato modificato perché non corrisponde al compilatore rilevato.  Provare a impostare \"compilerPath\".  Impostare \"compilerPath\" su \"\" per disabilitare il rilevamento delle inclusioni e delle definizioni del sistema.",
-	"clear_code_analysis_squiggles": "Cancella segni di revisione di analisi del codice",
+	"remove_all_code_analysis_problems": "Rimuovere tutti i problemi Code Analysis",
 	"multiple_locations_note": "(Più località)",
 	"folder_tag": "Cartella",
-	"file_tag": "File"
+	"file_tag": "File",
+	"compiler_default_language_standard_version_old": "Il compilatore ha restituito la versione standard del linguaggio predefinito: {0}. Poiché questa versione è obsoleta, verrà eseguito un tentativo di utilizzare la versione più recente {1} come predefinita.",
+	"unexpected_output_from_clang_tidy": "Output imprevisto da clang-tidy: {0}. Previsto: {1}."
 }

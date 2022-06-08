@@ -216,8 +216,10 @@
 	"inline_macro": "内联宏",
 	"unable_to_access_browse_database": "无法访问浏览数据库。({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode 已更改，因为它与检测到的编译器不匹配。请考虑改为设置 \"compilerPath\"。将 \"compilerPath\" 设为 \"\" 以禁用系统包含和定义的检测。",
-	"clear_code_analysis_squiggles": "清除代码分析波形曲线",
+	"remove_all_code_analysis_problems": "删除所有代码分析问题",
 	"multiple_locations_note": "(多个位置)",
 	"folder_tag": "文件夹",
-	"file_tag": "文件"
+	"file_tag": "文件",
+	"compiler_default_language_standard_version_old": "编译器返回默认语言标准版本:{0}。由于此版本是旧版本，因此将尝试使用较新版本 {1} 作为默认版本。",
+	"unexpected_output_from_clang_tidy": "来自 clang-tidy 的意外输出:{0}。应为:{1}。"
 }

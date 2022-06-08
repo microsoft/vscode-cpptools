@@ -216,8 +216,10 @@
 	"inline_macro": "內嵌巨集",
 	"unable_to_access_browse_database": "無法存取瀏覽資料庫。({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode 已變更，因為它不符合偵測到的編譯器。請考慮改為設定 \"compilerPath\"。 將 \"compilerPath\" 設定為 \"\" 以停用系統包含和定義的偵測。",
-	"clear_code_analysis_squiggles": "清除程式碼分析曲線",
+	"remove_all_code_analysis_problems": "移除所有程式碼分析問題",
 	"multiple_locations_note": "(多個位置)",
 	"folder_tag": "資料夾",
-	"file_tag": "檔案"
+	"file_tag": "檔案",
+	"compiler_default_language_standard_version_old": "編譯器傳回預設語言標準版本: {0}。因為此版本為舊版本，將嘗試使用較新的版本 {1} 為預設版本。",
+	"unexpected_output_from_clang_tidy": "來自 clang-tidy 的未預期輸出: {0}。預期是: {1}。"
 }

@@ -64,5 +64,5 @@
 	"limit.symbols": "Gözat: sembolleri eklenen üst bilgilerle sınırla",
 	"limit.symbols.checkbox": "{0} (veya işaretli) olduğunda, Etiket Ayrıştırıcı yalnızca {1} içindeki bir kaynak dosya tarafından doğrudan veya dolaylı olarak dahil edilen kod dosyalarını ayrıştırır. {2} olduğunda (veya işaretlenmediğinde), Etiket Ayrıştırıcı {3} listesinde belirtilen yollarda bulunan tüm kod dosyalarını ayrıştırır.",
 	"database.filename": "Gözat: veritabanı dosya adı",
-	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1})"
+	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1})."
 }
