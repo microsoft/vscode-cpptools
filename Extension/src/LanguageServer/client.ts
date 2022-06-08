@@ -877,6 +877,15 @@ interface GoToDirectiveInGroupParams {
     next: boolean;
 };
 
+export interface GenerateDoxygenCommentParams {
+    uri: string;
+    position: Position;
+}
+
+export interface GenerateDoxygenCommentsResult {
+    contents : string;
+}
+
 interface SetTemporaryTextDocumentLanguageParams {
     path: string;
     isC: boolean;
@@ -912,6 +921,8 @@ export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, 
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
+const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, Position | undefined, void, void> = new RequestType<GenerateDoxygenCommentParams, Position | undefined, void, void>('cpptools/generateDoxygenCommentParams');
+
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
@@ -1117,6 +1128,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
+    handleGenerateDoxygenComment():Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -3441,6 +3453,50 @@ export class DefaultClient implements Client {
         }
     }
 
+    public async  handleGenerateDoxygenComment():Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            const params: GenerateDoxygenCommentParams = {
+                uri: editor.document.uri.toString(),
+                position: editor.selection.active,
+            };
+
+            await this.awaitUntilLanguageClientReady();
+            const result: GenerateDoxygenCommentsResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
+            if (result?.contents) {
+
+                const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                const edits: vscode.TextEdit[] = [];
+
+                if(vscode.window.activeTextEditor) {
+                    edits.push(new vscode.TextEdit(vscode.window.activeTextEditor.selection, result?.contents));
+                    workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                    vscode.workspace.applyEdit(workspaceEdit);
+                } 
+
+                // for (const file in result.contents) {
+                //     const uri: vscode.Uri = vscode.Uri.file(file);
+                //     const edits: vscode.TextEdit[] = [];
+                //     for (const edit of result.changes[file]) {
+                //         const range: vscode.Range = new vscode.Range(
+                //             new vscode.Position(edit.range.start.line, edit.range.start.character),
+                //             new vscode.Position(edit.range.end.line, edit.range.end.character));
+                //         edits.push(new vscode.TextEdit(range, edit.newText));
+                //     }
+                //     workspaceEdit.set(uri, edits);
+                // const p: vscode.Position = new vscode.Position(response.line, response.character);
+                // const r: vscode.Range = new vscode.Range(p, p);
+
+                // // Check if still the active document.
+                // const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+                // if (currentEditor && editor.document.uri === currentEditor.document.uri) {
+                //     currentEditor.selection = new vscode.Selection(r.start, r.end);
+                //     currentEditor.revealRange(r);
+                // }
+            }
+        }
+    }
+
     public async handleCheckForCompiler(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
         const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
@@ -3736,6 +3792,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
+    handleGenerateDoxygenComment():Promise<void> {return Promise.resolve();}
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
