@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-// TODO: merge with resolveVariables in common
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { isString, replaceAll } from './common';

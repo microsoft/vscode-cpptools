@@ -3259,8 +3259,8 @@
                 }
               },
               "variables": {
-                "description": "%c_cpp.debuggers.variables.description%",
                 "type": "object",
+                "description": "%c_cpp.debuggers.variables.description%",
                 "default": {},
                 "properties": {},
                 "additionalProperties": {
@@ -3270,8 +3270,8 @@
                 }
               },
               "deploySteps": {
-                "description": "%c_cpp.debuggers.description%",
                 "type": "array",
+                "description": "%c_cpp.debuggers.deploySteps.description%",
                 "items": {
                   "anyOf": [
                     {
@@ -3782,8 +3782,8 @@
                 }
               },
               "variables": {
-                "description": "%c_cpp.debuggers.variables.description%",
                 "type": "object",
+                "description": "%c_cpp.debuggers.variables.description%",
                 "default": {},
                 "properties": {},
                 "additionalProperties": {
@@ -3793,8 +3793,8 @@
                 }
               },
               "deploySteps": {
-                "description": "%c_cpp.debuggers.description%",
                 "type": "array",
+                "description": "%c_cpp.debuggers.deploySteps.description%",
                 "items": {
                   "anyOf": [
                     {
