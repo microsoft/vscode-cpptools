@@ -5,17 +5,7 @@
 'use strict';
 import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
-
-/** Differs from vscode.Location, which has a uri of type vscode.Uri. */
-export interface Location {
-    uri: string;
-    range: Range;
-}
-
-export interface TextEdit {
-    range: Range;
-    newText: string;
-}
+import { Location, TextEdit } from './commonTypes';
 
 export function makeCpptoolsRange(vscRange: vscode.Range): Range {
     return { start: { line: vscRange.start.line, character: vscRange.start.character },
