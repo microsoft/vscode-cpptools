@@ -103,7 +103,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                     util.promptForReloadWindowDueToSettingsChange();
                 }
             }
-        }
+        }));
     }
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
