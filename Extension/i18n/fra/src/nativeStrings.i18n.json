@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "Les tildes d'erreur sont activés si toutes les dépendances d'en-tête sont résolues.",
 	"replaced_placeholder_file_record": "Enregistrement du fichier d'espace réservé remplacé",
 	"tag_parsing_file": "fichier d'analyse de balises : {0}",
-	"tag_parsing_error": "erreur d’analyse des balises (elle peut être ignorée, sauf si les symboles sont introuvables) :",
+	"tag_parsing_error": "erreur d’analyse des balises (elle peut être ignorée, sauf si les symboles sont introuvables) :",
 	"reset_timestamp_for": "Réinitialiser l'horodatage pour {0}",
 	"remove_file_failed": "La suppression du fichier a échoué : {0}",
 	"regex_parse_error": "Erreur d'analyse de regex - Modèle vscode : {0}, regex : {1}, message d'erreur : {2}",
@@ -216,8 +216,10 @@
 	"inline_macro": "Inline macro",
 	"unable_to_access_browse_database": "Impossible d’accéder à la base de données Browse. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "IntelliSenseMode a été modifié car il ne correspondait pas au compilateur détecté.  Envisagez de définir \"compilerPath\" à la place.  Définissez \"compilerPath\" à \"\" pour désactiver la détection des includes et defines du système.",
-	"clear_code_analysis_squiggles": "Effacer les tildes d’analyse du code",
+	"remove_all_code_analysis_problems": "Supprimer tous les problèmes d’analyse du code",
 	"multiple_locations_note": "(Plusieurs emplacements)",
 	"folder_tag": "Dossier",
-	"file_tag": "Fichier"
+	"file_tag": "Fichier",
+	"compiler_default_language_standard_version_old": "Le compilateur a retourné la version standard du langage par défaut : {0}. Étant donné que cette version est ancienne, essaiera d’utiliser une version plus récente {1} par défaut.",
+	"unexpected_output_from_clang_tidy": "Sortie inattendue de clang-tidy : {0}. Attendu : {1}."
 }

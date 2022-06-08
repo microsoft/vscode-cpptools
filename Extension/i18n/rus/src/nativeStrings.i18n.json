@@ -81,7 +81,7 @@
 	"error_squiggles_enabled_if_all_headers_resolve": "Волнистые линии для ошибок включены, если разрешены все зависимости заголовка.",
 	"replaced_placeholder_file_record": "Запись файла-прототипа заменена",
 	"tag_parsing_file": "файл анализа тегов: {0}",
-	"tag_parsing_error": "tag parsing error (this can be ignored unless symbols can't be found):",
+	"tag_parsing_error": "ошибка анализа тегов (ее можно пропустить, если не возникает ошибка \\\"Символы не найдены\\\"):",
 	"reset_timestamp_for": "Сброс метки времени для {0}",
 	"remove_file_failed": "Не удалось удалить файл: {0}",
 	"regex_parse_error": "Ошибка анализа регулярного выражения — шаблон VS Code: {0}, регулярное выражение: {1}, сообщение об ошибке: {2}",
@@ -216,8 +216,10 @@
 	"inline_macro": "Встроенный макрос",
 	"unable_to_access_browse_database": "Не удалось получить доступ к базе данных просмотра. ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Режим IntelliSenseMode изменен, поскольку он не совпал с обнаруженным компилятором. Попробуйте указать \"compilerPath\" вместо этого.  Установите для \"compilerPath\" значение \"\", чтобы отключить обнаружение элементов, включаемых системой и определяемых системой.",
-	"clear_code_analysis_squiggles": "Очистить волнистые подчеркивания анализа кода",
+	"remove_all_code_analysis_problems": "Удалить все проблемы анализа кода",
 	"multiple_locations_note": "(Несколько расположений)",
 	"folder_tag": "Папка",
-	"file_tag": "Файл"
+	"file_tag": "Файл",
+	"compiler_default_language_standard_version_old": "Компилятор вернул стандартную версию языка по умолчанию: {0}. Так как эта версия устарела, будет предпринята попытка использовать более новую версию {1} по умолчанию.",
+	"unexpected_output_from_clang_tidy": "Непредусмотренные выходные данные Clang-Tidy: {0}. Ожидалось: {1}."
 }

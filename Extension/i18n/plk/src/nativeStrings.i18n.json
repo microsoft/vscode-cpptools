@@ -216,8 +216,10 @@
 	"inline_macro": "Osadź makro w tekście",
 	"unable_to_access_browse_database": "Nie można uzyskać dostępu, aby przeglądać bazę danych ({0})",
 	"default_compiler_path_modified_explicit_intellisense_mode": "Tryb IntelliSenseMode został zmieniony, ponieważ nie jest zgodny z wykrytym kompilatorem.  Zamiast tego rozważ ustawienie parametru „compilerPath”.  Ustaw parametr „compilerPath” na wartość \"\", aby wyłączyć wykrywanie elementów systemowych uwzględnianych i definiowanych.",
-	"clear_code_analysis_squiggles": "Wyczyść zygzaki rozszerzenia Code Analysis",
+	"remove_all_code_analysis_problems": "Usuń wszystkie problemy z analizą kodu",
 	"multiple_locations_note": "(Wiele lokalizacji)",
 	"folder_tag": "Folder",
-	"file_tag": "Plik"
+	"file_tag": "Plik",
+	"compiler_default_language_standard_version_old": "Kompilator zwrócił domyślną wersję standardową języka: {0}. Ponieważ ta wersja jest stara, spróbuje użyć nowszej wersji {1} jako domyślnej.",
+	"unexpected_output_from_clang_tidy": "Nieoczekiwane dane wyjściowe z narzędzia Clang-Tidy: {0}. Oczekiwano: {1}."
 }
