@@ -100,10 +100,16 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const showRefEnabled: boolean = true; // TODO: get from settings
         const hideParamNameEnabled: boolean = false; // TODO: get from settings
         hints.forEach((h: CppInlayHint) => {
-            const refString: string = (showRefEnabled && h.isValueRef) ? "& " : "";
+            // Build parameter label based on settings.
             // TODO: remove label if param includes parameter name or in comments.
-            const paramName: string = hideParamNameEnabled /* && h.hasParamName*/ ? "" : h.label;
-            const label: string = refString + paramName + ":";
+            const paramName: string = (hideParamNameEnabled /* && h.hasParamName*/) ? "" : h.label;
+            let refString: string = "";
+            if (showRefEnabled && h.isValueRef) {
+                refString = (paramName.length > 0) ? "& " : "&";
+            }
+            const colonString: string = (paramName.length > 0 || refString.length > 0) ? ":" : "";
+            const label: string = refString + paramName + colonString;
+
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(h.position.line, h.position.character),
                 label,
