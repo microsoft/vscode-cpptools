@@ -928,7 +928,7 @@ export class DefaultClient implements Client {
                             this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
                         }
                         // TODO: enable based on settings.
-                        const isInlayHintsEnabled: boolean = false;
+                        const isInlayHintsEnabled: boolean = true;
                         if (isInlayHintsEnabled) {
                             this.inlayHintsProvider = new InlayHintsProvider(this);
                             this.inlayHintsProviderDisposable = vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider);

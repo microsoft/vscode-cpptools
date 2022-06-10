@@ -10,7 +10,7 @@ interface GetInlayHintsParams {
     uri: string;
 }
 
-enum CppInlayHintKind {
+enum InlayHintKind {
     Type = 0,
     Parameter = 1,
 }
@@ -18,7 +18,9 @@ enum CppInlayHintKind {
 interface CppInlayHint {
     position: Position;
     label: string;
-    kind: CppInlayHintKind;
+    inlayHintKind: InlayHintKind;
+    isValueRef: boolean;
+    // hasParamName: boolean;
 }
 
 interface GetInlayHintsResult {
@@ -30,7 +32,7 @@ interface GetInlayHintsResult {
 type InlayHintsCacheEntry = {
     FileVersion: number;
     TypeHints: vscode.InlayHint[];
-    ParameterHints: vscode.InlayHint[];
+    ParameterHints: CppInlayHint[];
 };
 
 const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult, void, void> =
@@ -39,7 +41,7 @@ const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult
 export class InlayHintsProvider implements vscode.InlayHintsProvider {
     private client: DefaultClient;
     public onDidChangeInlayHintsEvent = new vscode.EventEmitter<void>();
-    onDidChangeInlayHints?: vscode.Event<void>;
+    public onDidChangeInlayHints?: vscode.Event<void>;
     private cache: Map<string, InlayHintsCacheEntry> = new Map<string, InlayHintsCacheEntry>();
 
     constructor(client: DefaultClient) {
@@ -55,7 +57,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         // Get results from cache if available.
         const cacheEntry: InlayHintsCacheEntry | undefined = this.cache.get(uriString);
         if (cacheEntry?.FileVersion === document.version) {
-            return this.getHintsBasedOnSettings(cacheEntry);
+            return this.getHints(cacheEntry);
         }
 
         // Get new results from the language server
@@ -63,14 +65,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const inlayHintsResult: GetInlayHintsResult = await this.client.languageClient.sendRequest(GetInlayHintsRequest, params, token);
         if (!inlayHintsResult.canceled) {
             if (inlayHintsResult.fileVersion === openFileVersions.get(uriString)) {
-                const cacheEntry: InlayHintsCacheEntry | undefined = this.createCacheEntry(inlayHintsResult);
-                if (cacheEntry) {
-                    this.cache.set(uriString, cacheEntry);
-                    return this.getHintsBasedOnSettings(cacheEntry);
-                }
+                const cacheEntry: InlayHintsCacheEntry = this.createCacheEntry(inlayHintsResult);
+                this.cache.set(uriString, cacheEntry);
+                return this.getHints(cacheEntry);
             } else {
                 // Force another request because file versions do not match.
-                // TODO: verify this works when data is available.
                 this.onDidChangeInlayHintsEvent.fire();
             }
         }
@@ -82,49 +81,58 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         this.onDidChangeInlayHintsEvent.fire();
     }
 
-    private CppToVsCodeInlayHintKind(hintKind: CppInlayHintKind): vscode.InlayHintKind | undefined {
-        switch (hintKind) {
-            case CppInlayHintKind.Type:
-                return vscode.InlayHintKind.Type;
-            case CppInlayHintKind.Parameter:
-                return vscode.InlayHintKind.Parameter;
-            default:
-                break;
+    private getHints(cacheEntry: InlayHintsCacheEntry): vscode.InlayHint[] {
+        let result: vscode.InlayHint[] = [];
+        const showTypeHintsEnabled: boolean = true; // TODO: get value from settings.
+        const showParamHintsEnabled: boolean = true; // TODO: get value from settings.
+        if (showTypeHintsEnabled) {
+            result = result.concat(cacheEntry?.TypeHints);
         }
-        return undefined;
+        if (showParamHintsEnabled) {
+            const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
+            result = result.concat(resolvedParameterHints);
+        }
+        return result;
     }
 
-    private createCacheEntry(results: GetInlayHintsResult): InlayHintsCacheEntry | undefined {
-        if (results.inlayHints.length === 0) {
-            return undefined;
-        }
-        const typeHints: vscode.InlayHint[] = [];
-        const paramHints: vscode.InlayHint[] = [];
-        results.inlayHints.forEach((h: CppInlayHint) => {
+    private resolveParameterHints(hints: CppInlayHint[]): vscode.InlayHint[] {
+        const resolvedHints: vscode.InlayHint[] = [];
+        const showRefEnabled: boolean = true; // TODO: get from settings
+        const hideParamNameEnabled: boolean = false; // TODO: get from settings
+        hints.forEach((h: CppInlayHint) => {
+            const refString: string = (showRefEnabled && h.isValueRef) ? "& " : "";
+            // TODO: remove label if param includes parameter name or in comments.
+            const paramName: string = hideParamNameEnabled /* && h.hasParamName*/ ? "" : h.label;
+            const label: string = refString + paramName + ":";
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                // Place hints on column of first character minus 1.
-                // TODO: this depends on what language server returns.
-                new vscode.Position(h.position.line, h.position.character - 1),
-                h.label,
-                this.CppToVsCodeInlayHintKind(h.kind)
-            );
+                new vscode.Position(h.position.line, h.position.character),
+                label,
+                vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
-            if (inlayHint.kind === vscode.InlayHintKind.Type) {
+            resolvedHints.push(inlayHint);
+        });
+        return resolvedHints;
+    }
+
+    private createCacheEntry(inlayHintsResults: GetInlayHintsResult): InlayHintsCacheEntry {
+        const typeHints: vscode.InlayHint[] = [];
+        inlayHintsResults.inlayHints.forEach((h: CppInlayHint) => {
+            if (h.inlayHintKind === InlayHintKind.Type) {
+                const inlayHint: vscode.InlayHint = new vscode.InlayHint(
+                    new vscode.Position(h.position.line, h.position.character),
+                    h.label,
+                    vscode.InlayHintKind.Type);
+                inlayHint.paddingRight = true;
                 typeHints.push(inlayHint);
-            } else if (inlayHint.kind === vscode.InlayHintKind.Parameter) {
-                paramHints.push(inlayHint);
             }
         });
+        const paramHints: CppInlayHint[] = inlayHintsResults.inlayHints.filter(
+            h => h.inlayHintKind === InlayHintKind.Parameter);
         const cacheEntry: InlayHintsCacheEntry = {
-            FileVersion: results.fileVersion,
+            FileVersion: inlayHintsResults.fileVersion,
             TypeHints: typeHints,
             ParameterHints: paramHints
         };
         return cacheEntry;
-    }
-
-    private getHintsBasedOnSettings(cacheEntry: InlayHintsCacheEntry): vscode.InlayHint[] {
-        // TODO: rename function and return hint kinds based on settings.
-        return cacheEntry?.TypeHints.concat(cacheEntry?.ParameterHints);
     }
 }
