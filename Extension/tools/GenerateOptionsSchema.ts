@@ -96,7 +96,7 @@ function replaceReferences(definitions: any, objects: any): any {
             objects[key].items = refReplace(definitions, objects[key].items);
         }
 
-        // Recursively replace references if the array has objects taht contains ref in items.
+        // Recursively replace references if the array has objects that contains ref in items.
         if (objects[key].hasOwnProperty('type') && objects[key].type === "array" && objects[key].items !== null) {
             objects[key].items = replaceReferences(definitions, objects[key].items);
         }

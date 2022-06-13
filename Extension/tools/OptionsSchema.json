@@ -196,7 +196,9 @@
     "Variables": {
       "type": "object",
       "description": "%c_cpp.debuggers.variables.description%",
-      "default": {},
+      "default": {
+        "<variable-name>": "<variable-value>"
+      },
       "properties": {},
       "additionalProperties": {
         "type": "string",

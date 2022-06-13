@@ -27,11 +27,7 @@ export interface IInteractorDataDetails {
 
 export interface IInteractor {
     id: string;
-    onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction>;
+    onData(data: string, cancelToken?: vscode.CancellationToken, extraDetails?: IInteractorDataDetails): Promise<IInteraction>;
 }
 
 export class MitmInteractor implements IInteractor {
@@ -55,20 +51,13 @@ export class MitmInteractor implements IInteractor {
 export class FingerprintInteractor implements IInteractor {
     static ID = 'fingerprint';
 
-    constructor(
-        private readonly hostName: string,
-        private readonly confirmationProvider: IFingerprintConfirmationProvider
-    ) { }
+    constructor(private readonly hostName: string, private readonly confirmationProvider: IFingerprintConfirmationProvider) { }
 
     get id(): string {
         return FingerprintInteractor.ID;
     }
 
-    async onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction> {
+    async onData(data: string, cancelToken?: vscode.CancellationToken, extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
         const fingerprintMatcher: RegExp = /fingerprint\sis\s(.+)\./;
 
         const result: IInteraction = { postAction: 'keep' };
@@ -114,18 +103,12 @@ export class FingerprintInteractor implements IInteractor {
 export class DifferingHostKeyInteractor implements IInteractor {
     static ID = 'differing host key';
 
-    constructor(
-        private readonly confirmationProvider: IDifferingHostConfirmationProvider
-    ) { }
+    constructor(private readonly confirmationProvider: IDifferingHostConfirmationProvider) { }
 
     get id(): string {
         return DifferingHostKeyInteractor.ID;
     }
-    async onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        _extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction> {
+    async onData(data: string, cancelToken?: vscode.CancellationToken, _extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
         data = data.trim();
 
@@ -196,6 +179,7 @@ export function getExitCode(output: string, marker: string): number | undefined 
 }
 
 /**
+ * Matches SSH password prompt of format:
  * 's password:
  * or
  * Password:
@@ -203,10 +187,7 @@ export function getExitCode(output: string, marker: string): number | undefined 
  * 's old password:
  * 's new password:
  */
-function getPasswordPrompt(
-    data: string,
-    details?: IInteractorDataDetails
-): { user?: string; message?: string } | undefined {
+function getPasswordPrompt(data: string, details?: IInteractorDataDetails): { user?: string; message?: string } | undefined {
     if (data.includes('Password:')) {
         // Password prompt for unspecified user
         return { user: '' };
@@ -233,11 +214,7 @@ export class PasswordInteractor implements IInteractor {
         return PasswordInteractor.ID;
     }
 
-    async onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction> {
+    async onData(data: string, cancelToken?: vscode.CancellationToken, extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
         const pwPrompt: { user?: string; message?: string } | undefined = getPasswordPrompt(data, extraDetails);
         if (pwPrompt && typeof pwPrompt.user === 'string') {
@@ -261,9 +238,7 @@ export type IVerificationCodeProvider =
 export class TwoFacInteractor implements IInteractor {
     static ID = '2fa';
 
-    constructor(
-        private readonly verificationCodeProvider: IVerificationCodeProvider
-    ) { }
+    constructor(private readonly verificationCodeProvider: IVerificationCodeProvider) { }
 
     get id(): string {
         return TwoFacInteractor.ID;
@@ -290,9 +265,7 @@ export class TwoFacInteractor implements IInteractor {
 export class DuoTwoFacInteractor implements IInteractor {
     static ID = 'duo-2fa';
 
-    constructor(
-        private readonly verificationCodeProvider: IVerificationCodeProvider
-    ) { }
+    constructor(private readonly verificationCodeProvider: IVerificationCodeProvider) { }
 
     get id(): string {
         return DuoTwoFacInteractor.ID;
@@ -318,9 +291,7 @@ export class DuoTwoFacInteractor implements IInteractor {
 export class ContinueOnInteractor implements IInteractor {
     static ID = 'continueOn';
 
-    constructor(
-        private readonly continueOn: string
-    ) { }
+    constructor(private readonly continueOn: string) { }
 
     get id(): string {
         return ContinueOnInteractor.ID;

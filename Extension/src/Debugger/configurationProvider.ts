@@ -312,9 +312,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
 
         // Run deploy steps
-        const deploySucceeded: boolean = await this.deploySteps(config, folder, token);
-        if (!deploySucceeded || token?.isCancellationRequested) {
-            return;
+        if (config.deploySteps && config.deploySteps.length !== 0) {
+            const deploySucceeded: boolean = await this.deploySteps(config, token);
+            if (!deploySucceeded || token?.isCancellationRequested) {
+                return undefined;
+            }
         }
 
         return config;
@@ -896,92 +898,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return expandAllStrings(config, expansionOptions);
     }
 
-    // Returns true when ALL steps succeed
-    private async deploySteps(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder | undefined, cancellationToken?: vscode.CancellationToken): Promise<boolean> {
-        if (!config.deploySteps || config.deploySteps.length === 0) {
-            return true;
-        }
-
+    // Returns true when ALL steps succeed; stop all subsequent steps if one fails
+    private async deploySteps(config: vscode.DebugConfiguration, cancellationToken?: vscode.CancellationToken): Promise<boolean> {
         let succeeded: boolean = true;
         const deployStart: number = new Date().getTime();
 
-        STEPS: for (const step of config.deploySteps) {
-            if ((config.noDebug && step.debug === true) || (!config.noDebug && step.debug === false)) {
-                // Skip steps that doesn't match current launch mode. Explicit true/false check, since a step is always run when debug is undefined.
-                continue;
-            }
-            switch (step.type) {
-                case StepType.command: {
-                    // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
-                    if (step.args && !Array.isArray(step.args)) {
-                        logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
-                        break STEPS;
-                    }
-                    const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
-                    succeeded = !returnCode;
-                    if (!succeeded) {
-                        break STEPS;
-                    }
-                    break;
-                }
-                case StepType.scp: {
-                    if (!step.files || !step.targetDir || !step.host) {
-                        logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
-                        break STEPS;
-                    }
-                    const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
-                    const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
-                    let files: vscode.Uri[] = [];
-                    if (util.isString(step.files)) {
-                        files = files.concat((await globAsync(step.files)).map(file => vscode.Uri.file(file)));
-                    } else if (util.isArrayOfString(step.files)) {
-                        for (const fileGlob of (step.files as string[])) {
-                            files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
-                        }
-                    } else {
-                        logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
-                        succeeded = false;
-                        break STEPS;
-                    }
-                    const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, jumpHosts, cancellationToken);
-                    succeeded = scpResult.succeeded;
-                    if (!succeeded || cancellationToken?.isCancellationRequested) {
-                        break STEPS;
-                    }
-                    break;
-                }
-                case StepType.ssh: {
-                    if (!step.host || !step.command) {
-                        logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
-                        break STEPS;
-                    }
-                    const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
-                    const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
-                    const sshResult: util.ProcessReturnType = await ssh(host, step.command, jumpHosts, step.continueOn, cancellationToken);
-                    succeeded = sshResult.succeeded;
-                    if (!succeeded || cancellationToken?.isCancellationRequested) {
-                        break STEPS;
-                    }
-                    break;
-                }
-                case StepType.shell: {
-                    if (!step.command) {
-                        logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
-                        break STEPS;
-                    }
-                    const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
-                    succeeded = taskResult.succeeded;
-                    if (!succeeded || cancellationToken?.isCancellationRequested) {
-                        logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
-                        break STEPS;
-                    }
-                    break;
-                }
-                default: {
-                    logger.getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
-                    succeeded = false;
-                    break STEPS;
-                }
+        for (const step of config.deploySteps) {
+            succeeded = await this.singleDeployStep(config, step, cancellationToken);
+            if (!succeeded) {
+                break;
             }
         }
 
@@ -992,11 +917,84 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             IsDebugging: `${!config.noDebug || false}`
         };
         const telemetryMetrics: { [key: string]: number } = {
+            NumSteps: config.deploySteps.length,
             Duration: deployEnd - deployStart
         };
         Telemetry.logDebuggerEvent('deploy', telemetryProperties, telemetryMetrics);
 
         return succeeded;
+    }
+
+    private async singleDeployStep(config: vscode.DebugConfiguration, step: any, cancellationToken?: vscode.CancellationToken): Promise<boolean> {
+        if ((config.noDebug && step.debug === true) || (!config.noDebug && step.debug === false)) {
+            // Skip steps that doesn't match current launch mode. Explicit true/false check, since a step is always run when debug is undefined.
+            return true;
+        }
+        switch (step.type) {
+            case StepType.command: {
+                // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
+                if (step.args && !Array.isArray(step.args)) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
+                    return false;
+                }
+                const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
+                return !returnCode;
+            }
+            case StepType.scp: {
+                if (!step.files || !step.targetDir || !step.host) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
+                    return false;
+                }
+                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
+                let files: vscode.Uri[] = [];
+                if (util.isString(step.files)) {
+                    files = files.concat((await globAsync(step.files)).map(file => vscode.Uri.file(file)));
+                } else if (util.isArrayOfString(step.files)) {
+                    for (const fileGlob of (step.files as string[])) {
+                        files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
+                    }
+                } else {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
+                    return false;
+                }
+                const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, jumpHosts, cancellationToken);
+                if (!scpResult.succeeded || cancellationToken?.isCancellationRequested) {
+                    return false;
+                }
+                break;
+            }
+            case StepType.ssh: {
+                if (!step.host || !step.command) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
+                    return false;
+                }
+                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
+                const sshResult: util.ProcessReturnType = await ssh(host, step.command, jumpHosts, step.continueOn, cancellationToken);
+                if (!sshResult.succeeded || cancellationToken?.isCancellationRequested) {
+                    return false;
+                }
+                break;
+            }
+            case StepType.shell: {
+                if (!step.command) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
+                    return false;
+                }
+                const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
+                if (!taskResult.succeeded || cancellationToken?.isCancellationRequested) {
+                    logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
+                    return false;
+                }
+                break;
+            }
+            default: {
+                logger.getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
+                return false;
+            }
+        }
+        return true;
     }
 }
 
