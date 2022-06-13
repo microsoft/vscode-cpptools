@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 安裝此標頭的程式庫",
 	"copy.vcpkg.command": "將用於安裝 '{0}' 的 vcpkg 命令複製到剪貼簿",
-	"more.info.button": "更多資訊",
-	"ignore.button": "略過",
-	"vsix.platform.incompatible": "安裝的 C/C++ 延伸模組與您的系統不相符。",
-	"vsix.platform.mismatching": "安裝的 C/C++ 延伸模組與您的系統相容，但不相符。",
 	"client.not.found": "找不到用戶端",
 	"configuration.select.first": "先開啟資料夾以選取組態",
 	"configuration.provider.select.first": "先開啟資料夾以選取組態提供者",
 	"edit.configurations.open.first": "先開啟資料夾以編輯組態",
+	"code.action.aborted": "無法套用程式碼分析修正，因為文件已變更。",
 	"add.includepath.open.first": "先開啟資料夾以新增至 {0}"
 }

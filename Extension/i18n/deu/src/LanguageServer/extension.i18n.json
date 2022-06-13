@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Erfahren Sie, wie Sie mit vcpkg eine Bibliothek für diesen Header installieren.",
 	"copy.vcpkg.command": "vcpkg-Befehl zum Installieren von \"{0}\" in die Zwischenablage kopieren",
-	"more.info.button": "Weitere Informationen",
-	"ignore.button": "Ignorieren",
-	"vsix.platform.incompatible": "Die installierte C/C++-Erweiterung stimmt nicht mit Ihrem System überein.",
-	"vsix.platform.mismatching": "Die installierte C/C++-Erweiterung ist mit Ihrem System kompatibel, stimmt jedoch nicht mit diesem überein.",
 	"client.not.found": "Client nicht gefunden.",
 	"configuration.select.first": "Zum Auswählen einer Konfiguration zuerst einen Ordner öffnen",
 	"configuration.provider.select.first": "Zum Auswählen eines Konfigurationsanbieters zuerst einen Ordner öffnen",
 	"edit.configurations.open.first": "Zum Bearbeiten von Konfigurationen zuerst einen Ordner öffnen",
+	"code.action.aborted": "Der Codeanalysepatch konnte nicht angewendet werden, da sich das Dokument geändert hat.",
 	"add.includepath.open.first": "Zuerst einen Ordner öffnen, der \"{0}\" hinzugefügt werden soll"
 }
