@@ -2670,8 +2670,7 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
-          "scope": "resource",
-          "deprecationMessage": "%c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage%"
+          "scope": "resource"
         }
       }
     },
