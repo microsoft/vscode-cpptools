@@ -1,9 +1,8 @@
-/*! -------------------------------------------------------------------------------------------
+/* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-// TODO: merge with resolveVariables in common
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { isString, replaceAll } from './common';
@@ -43,11 +42,11 @@ export async function expandAllStrings(obj: any, options: ExpansionOptions): Pro
 }
 
 export async function expandString(input: string, options: ExpansionOptions): Promise<string> {
-    const MAX_RECURSION = 10;
-    let result = input;
-    let didReplacement = false;
+    const MAX_RECURSION: number = 10;
+    let result: string = input;
+    let didReplacement: boolean = false;
 
-    let i = 0;
+    let i: number = 0;
     do {
         // TODO: consider a full circular reference check?
         [result, didReplacement] = await expandStringImpl(result, options);
@@ -69,16 +68,16 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
 
     // We accumulate a list of substitutions that we need to make, preventing
     // recursively expanding or looping forever on bad replacements
-    const subs = new Map<string, string>();
+    const subs: Map<string, string> = new Map<string, string>();
 
-    const var_re = /\$\{(\w+)\}/g;
+    const var_re: RegExp = /\$\{(\w+)\}/g;
     let match: RegExpMatchArray | null = null;
     while ((match = var_re.exec(input))) {
-        const full = match[0];
-        const key = match[1];
+        const full: string = match[0];
+        const key: string = match[1];
         if (key !== 'dollar') {
             // Replace dollar sign at the very end of the expanding process
-            const repl = options.vars[key];
+            const repl: string = options.vars[key];
             if (!repl) {
                 getOutputChannelLogger().showWarningMessage(localize('invalid.var.reference', 'Invalid variable reference {0} in string: {1}.', full, input));
             } else {
@@ -90,39 +89,39 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
     // Regular expression for variable value (between the variable suffix and the next ending curly bracket):
     // .+? matches any character (except line terminators) between one and unlimited times,
     // as few times as possible, expanding as needed (lazy)
-    const varValueRegexp = ".+?";
-    const env_re = RegExp(`\\$\\{env:(${varValueRegexp})\\}`, "g");
+    const varValueRegexp: string = ".+?";
+    const env_re: RegExp = RegExp(`\\$\\{env:(${varValueRegexp})\\}`, "g");
     while ((match = env_re.exec(input))) {
-        const full = match[0];
-        const varname = match[1];
+        const full: string = match[0];
+        const varname: string = match[1];
         if (process.env[varname] === undefined) {
             getOutputChannelLogger().showWarningMessage(localize('env.var.not.found', 'Environment variable {0} not found', varname));
         }
-        const repl = process.env[varname] || '';
+        const repl: string = process.env[varname] || '';
         subs.set(full, repl);
     }
 
-    const command_re = RegExp(`\\$\\{command:(${varValueRegexp})\\}`, "g");
+    const command_re: RegExp = RegExp(`\\$\\{command:(${varValueRegexp})\\}`, "g");
     while ((match = command_re.exec(input))) {
         if (options.doNotSupportCommands) {
             getOutputChannelLogger().showWarningMessage(localize('commands.not.supported', 'Commands are not supported for string: {0}.', input));
             break;
         }
-        const full = match[0];
-        const command = match[1];
+        const full: string = match[0];
+        const command: string = match[1];
         if (subs.has(full)) {
             continue;  // Don't execute commands more than once per string
         }
         try {
-            const command_ret = await vscode.commands.executeCommand(command, options.vars.workspaceFolder);
+            const command_ret: unknown = await vscode.commands.executeCommand(command, options.vars.workspaceFolder);
             subs.set(full, `${command_ret}`);
         } catch (e: any) {
             getOutputChannelLogger().showWarningMessage(localize('exception.executing.command', 'Exception while executing command {0} for string: {1} {2}.', command, input, e));
         }
     }
 
-    let result = input;
-    let didReplacement = false;
+    let result: string = input;
+    let didReplacement: boolean = false;
     subs.forEach((value, key) => {
         if (value !== key) {
             result = replaceAll(result, key, value);

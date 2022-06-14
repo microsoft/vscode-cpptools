@@ -6,13 +6,11 @@
 import * as vscode from 'vscode';
 import { stripEscapeSequences, isWindows, escapeStringForRegex } from '../common';
 
-export interface IDifferingHostConfirmationProvider {
-    (message: string, cancelToken?: vscode.CancellationToken): Promise<string | undefined>;
-}
+export type IDifferingHostConfirmationProvider =
+    (message: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
 
-export interface IFingerprintConfirmationProvider {
-    (host: string, fingerprint: string, cancelToken?: vscode.CancellationToken): Promise<string | undefined>;
-}
+export type IFingerprintConfirmationProvider =
+    (host: string, fingerprint: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
 
 export interface IInteraction {
     canceled?: boolean;
@@ -29,11 +27,7 @@ export interface IInteractorDataDetails {
 
 export interface IInteractor {
     id: string;
-    onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction>;
+    onData(data: string, cancelToken?: vscode.CancellationToken, extraDetails?: IInteractorDataDetails): Promise<IInteraction>;
 }
 
 export class MitmInteractor implements IInteractor {
@@ -57,21 +51,14 @@ export class MitmInteractor implements IInteractor {
 export class FingerprintInteractor implements IInteractor {
     static ID = 'fingerprint';
 
-    constructor(
-        private readonly hostName: string,
-        private readonly confirmationProvider: IFingerprintConfirmationProvider
-    ) { }
+    constructor(private readonly hostName: string, private readonly confirmationProvider: IFingerprintConfirmationProvider) { }
 
     get id(): string {
         return FingerprintInteractor.ID;
     }
 
-    async onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction> {
-        const fingerprintMatcher = /fingerprint\sis\s(.+)\./;
+    async onData(data: string, cancelToken?: vscode.CancellationToken, extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
+        const fingerprintMatcher: RegExp = /fingerprint\sis\s(.+)\./;
 
         const result: IInteraction = { postAction: 'keep' };
         data = data.trim();
@@ -82,7 +69,7 @@ export class FingerprintInteractor implements IInteractor {
             (fingerprintMatch = data.match(fingerprintMatcher))
         ) {
             result.postAction = 'consume';
-            const confirmation = await this.confirmationProvider(
+            const confirmation: string | undefined = await this.confirmationProvider(
                 this.hostName,
                 fingerprintMatch[1],
                 cancelToken
@@ -98,10 +85,10 @@ export class FingerprintInteractor implements IInteractor {
         ) {
             // hack for #1195
             // First line local server case (git ssh only gives the first line over ssh_askpass)
-            const key = extraDetails?.detectedServerKey || '(unknown)';
+            const key: string = extraDetails?.detectedServerKey || '(unknown)';
 
             result.postAction = 'consume';
-            const confirmation = await this.confirmationProvider(this.hostName, key, cancelToken);
+            const confirmation: string | undefined = await this.confirmationProvider(this.hostName, key, cancelToken);
             if (confirmation) {
                 result.response = confirmation;
             } else {
@@ -116,18 +103,12 @@ export class FingerprintInteractor implements IInteractor {
 export class DifferingHostKeyInteractor implements IInteractor {
     static ID = 'differing host key';
 
-    constructor(
-        private readonly confirmationProvider: IDifferingHostConfirmationProvider
-    ) { }
+    constructor(private readonly confirmationProvider: IDifferingHostConfirmationProvider) { }
 
     get id(): string {
         return DifferingHostKeyInteractor.ID;
     }
-    async onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        _extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction> {
+    async onData(data: string, cancelToken?: vscode.CancellationToken, _extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
         data = data.trim();
 
@@ -137,8 +118,8 @@ export class DifferingHostKeyInteractor implements IInteractor {
             data.includes('Matching host key in')
         ) {
             result.postAction = 'consume';
-            const message = data.substring(data.indexOf('Warning'), data.indexOf('Are')).trim();
-            const confirmation = await this.confirmationProvider(message, cancelToken);
+            const message: string = data.substring(data.indexOf('Warning'), data.indexOf('Are')).trim();
+            const confirmation: string | undefined = await this.confirmationProvider(message, cancelToken);
             if (confirmation) {
                 result.response = confirmation;
             } else {
@@ -150,9 +131,8 @@ export class DifferingHostKeyInteractor implements IInteractor {
     }
 }
 
-export interface IStringProvider {
-    (key?: string, detail?: string, cancelToken?: vscode.CancellationToken): Promise<string | undefined>;
-}
+export type IStringProvider =
+    (key?: string, detail?: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
 
 export class PassphraseInteractor implements IInteractor {
     static ID = 'passphrase';
@@ -165,10 +145,10 @@ export class PassphraseInteractor implements IInteractor {
 
     async onData(data: string, cancelToken?: vscode.CancellationToken): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
-        const lines = data.trim().split('\n');
+        const lines: string[] = data.trim().split('\n');
         if (lines.some(l => l.indexOf('Enter passphrase for') >= 0)) {
             result.postAction = 'consume';
-            const passphrase = await this.passphraseProvider(undefined, undefined, cancelToken); // TODO keep track of the key name
+            const passphrase: string | undefined = await this.passphraseProvider(undefined, undefined, cancelToken); // TODO keep track of the key name
             if (typeof passphrase === 'string') {
                 result.response = passphrase;
                 result.isPassword = true;
@@ -184,11 +164,11 @@ export class PassphraseInteractor implements IInteractor {
 }
 
 export function getExitCode(output: string, marker: string): number | undefined {
-    const regex = new RegExp(`${marker}##([0-9]*)##`);
-    const match = regex.exec(output);
+    const regex: RegExp = new RegExp(`${marker}##([0-9]*)##`);
+    const match: RegExpExecArray | null = regex.exec(output);
     if (match) {
         try {
-            const num = parseInt(match[1]);
+            const num: number = parseInt(match[1]);
             return Number.isNaN(num) ? undefined : num;
         } catch (err) {
             return undefined;
@@ -199,6 +179,7 @@ export function getExitCode(output: string, marker: string): number | undefined 
 }
 
 /**
+ * Matches SSH password prompt of format:
  * 's password:
  * or
  * Password:
@@ -206,21 +187,18 @@ export function getExitCode(output: string, marker: string): number | undefined 
  * 's old password:
  * 's new password:
  */
-function getPasswordPrompt(
-    data: string,
-    details?: IInteractorDataDetails
-): { user?: string; message?: string } | undefined {
+function getPasswordPrompt(data: string, details?: IInteractorDataDetails): { user?: string; message?: string } | undefined {
     if (data.includes('Password:')) {
         // Password prompt for unspecified user
         return { user: '' };
     }
 
     // Got \r\r\n as a line ending here
-    const match = stripEscapeSequences(data).match(/([a-zA-Z0-9\-_@\.]*)'s password:/);
+    const match: RegExpMatchArray | null = stripEscapeSequences(data).match(/([a-zA-Z0-9\-_@\.]*)'s password:/);
     if (match) {
         return {
             user: match[1],
-            message: details ? details.detail : undefined,
+            message: details ? details.detail : undefined
         };
     }
 
@@ -236,16 +214,12 @@ export class PasswordInteractor implements IInteractor {
         return PasswordInteractor.ID;
     }
 
-    async onData(
-        data: string,
-        cancelToken?: vscode.CancellationToken,
-        extraDetails?: IInteractorDataDetails
-    ): Promise<IInteraction> {
+    async onData(data: string, cancelToken?: vscode.CancellationToken, extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
-        const pwPrompt = getPasswordPrompt(data, extraDetails);
+        const pwPrompt: { user?: string; message?: string } | undefined = getPasswordPrompt(data, extraDetails);
         if (pwPrompt && typeof pwPrompt.user === 'string') {
             result.postAction = 'consume';
-            const password = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
+            const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
             if (typeof password === 'string') {
                 result.response = password;
                 result.isPassword = true;
@@ -258,16 +232,13 @@ export class PasswordInteractor implements IInteractor {
     }
 }
 
-export interface IVerificationCodeProvider {
-    (msg: string, cancelToken?: vscode.CancellationToken): Promise<string | undefined>;
-}
+export type IVerificationCodeProvider =
+    (msg: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
 
 export class TwoFacInteractor implements IInteractor {
     static ID = '2fa';
 
-    constructor(
-        private readonly verificationCodeProvider: IVerificationCodeProvider
-    ) { }
+    constructor(private readonly verificationCodeProvider: IVerificationCodeProvider) { }
 
     get id(): string {
         return TwoFacInteractor.ID;
@@ -277,7 +248,7 @@ export class TwoFacInteractor implements IInteractor {
         const result: IInteraction = { postAction: 'keep' };
         if (data.includes('Verification code:')) {
             result.postAction = 'consume';
-            const verificationCode = await this.verificationCodeProvider('Enter verification code', cancelToken);
+            const verificationCode: string | undefined = await this.verificationCodeProvider('Enter verification code', cancelToken);
             if (typeof verificationCode === 'string') {
                 result.response = verificationCode;
                 result.isPassword = true;
@@ -294,9 +265,7 @@ export class TwoFacInteractor implements IInteractor {
 export class DuoTwoFacInteractor implements IInteractor {
     static ID = 'duo-2fa';
 
-    constructor(
-        private readonly verificationCodeProvider: IVerificationCodeProvider
-    ) { }
+    constructor(private readonly verificationCodeProvider: IVerificationCodeProvider) { }
 
     get id(): string {
         return DuoTwoFacInteractor.ID;
@@ -306,7 +275,7 @@ export class DuoTwoFacInteractor implements IInteractor {
         const result: IInteraction = { postAction: 'keep' };
         if (data.includes('Passcode:')) {
             result.postAction = 'consume';
-            const verificationCode = await this.verificationCodeProvider('Enter passcode', cancelToken);
+            const verificationCode: string | undefined = await this.verificationCodeProvider('Enter passcode', cancelToken);
             if (typeof verificationCode === 'string') {
                 result.response = verificationCode;
                 result.isPassword = true;
@@ -322,9 +291,7 @@ export class DuoTwoFacInteractor implements IInteractor {
 export class ContinueOnInteractor implements IInteractor {
     static ID = 'continueOn';
 
-    constructor(
-        private readonly continueOn: string
-    ) { }
+    constructor(private readonly continueOn: string) { }
 
     get id(): string {
         return ContinueOnInteractor.ID;
@@ -332,8 +299,8 @@ export class ContinueOnInteractor implements IInteractor {
 
     async onData(data: string, _cancelToken?: vscode.CancellationToken): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
-        const pattern = escapeStringForRegex(this.continueOn);
-        const re = new RegExp(pattern, 'g');
+        const pattern: string = escapeStringForRegex(this.continueOn);
+        const re: RegExp = new RegExp(pattern, 'g');
         if (data.match(re)) {
             result.continue = true;
         }
@@ -350,7 +317,7 @@ export class ComposedInteractor implements IInteractor {
 
     async onData(data: string): Promise<IInteraction> {
         for (const interactor of this.interactors) {
-            const result = await interactor.onData(data);
+            const result: IInteraction = await interactor.onData(data);
             if (result.postAction === 'consume') {
                 return result;
             }
@@ -369,5 +336,5 @@ export interface ISystemInteractor {
 export const defaultSystemInteractor: ISystemInteractor = {
     createTerminal: vscode.window.createTerminal,
     onDidCloseTerminal: vscode.window.onDidCloseTerminal,
-    onDidWriteTerminalData: vscode.window.onDidWriteTerminalData,
+    onDidWriteTerminalData: vscode.window.onDidWriteTerminalData
 };

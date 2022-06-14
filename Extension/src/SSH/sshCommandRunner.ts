@@ -17,7 +17,8 @@ import {
     PasswordInteractor,
     TwoFacInteractor,
     ContinueOnInteractor,
-    ISystemInteractor
+    ISystemInteractor,
+    IInteraction
 } from './commandInteractors';
 import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
 import { getOutputChannelLogger } from '../logger';
@@ -41,8 +42,8 @@ export function showPassphraseInputBox(
     prompt?: string,
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
-    const keyStr = keyName ? `"${keyName}"` : '';
-    const msg = localize('ssh.passphrase.input.box', 'Enter passphrase for ssh key {0}', keyStr);
+    const keyStr: string = keyName ? `"${keyName}"` : '';
+    const msg: string = localize('ssh.passphrase.input.box', 'Enter passphrase for ssh key {0}', keyStr);
     return showInputBox(msg, prompt, cancelToken);
 }
 
@@ -51,7 +52,7 @@ export function showPasswordInputBox(
     prompt?: string,
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
-    const msg = user ? localize('ssh.enter.password.for.user', 'Enter password for user "{0}"', user) : localize('ssh_message_enterPassword', 'Enter password');
+    const msg: string = user ? localize('ssh.enter.password.for.user', 'Enter password for user "{0}"', user) : localize('ssh_message_enterPassword', 'Enter password');
     return showInputBox(msg, prompt, cancelToken);
 }
 
@@ -68,17 +69,17 @@ export async function showInputBox(
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
-        const quickPick = vscode.window.createInputBox();
+        const quickPick: vscode.InputBox = vscode.window.createInputBox();
         quickPick.title = msg;
         quickPick.prompt = prompt;
         quickPick.password = true;
         quickPick.ignoreFocusOut = true;
 
-        let isAccepted = false;
+        let isAccepted: boolean = false;
 
         quickPick.onDidAccept(() => {
             isAccepted = true;
-            const passphrase = quickPick.value;
+            const passphrase: string = quickPick.value;
             quickPick.dispose();
             resolve(passphrase);
         });
@@ -108,7 +109,7 @@ class ConfirmationItem implements vscode.QuickPickItem, vscode.MessageItem {
     }
 }
 
-const continueConfirmationPlaceholder = localize('ssh.continue.confirmation.placeholder', 'Are you sure you want to continue?');
+const continueConfirmationPlaceholder: string = localize('ssh.continue.confirmation.placeholder', 'Are you sure you want to continue?');
 
 export async function showHostKeyConfirmation(
     host: string,
@@ -135,17 +136,17 @@ async function showConfirmationPicker(
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
-        const quickPick = vscode.window.createQuickPick<ConfirmationItem>();
+        const quickPick: vscode.QuickPick<ConfirmationItem> = vscode.window.createQuickPick<ConfirmationItem>();
         quickPick.canSelectMany = false;
         quickPick.items = [new ConfirmationItem(localize('continue', 'Continue'), 'yes'), new ConfirmationItem(localize('cancel', 'Cancel'), 'no')];
         quickPick.title = title;
         quickPick.placeholder = placeholder;
 
-        let isAccepted = false;
+        let isAccepted: boolean = false;
 
         quickPick.onDidAccept(async () => {
             isAccepted = true;
-            const value = quickPick.selectedItems[0].value;
+            const value: string = quickPick.selectedItems[0].value;
             quickPick.dispose();
             resolve(value);
         });
@@ -209,7 +210,7 @@ export async function runSshTerminalCommandWithLogin(
     }
 
     // This terminal is always local
-    const result = await runInteractiveSshTerminalCommand({
+    const result: ProcessReturnType = await runInteractiveSshTerminalCommand({
         systemInteractor: terminalArgs.systemInteractor,
         command: terminalArgs.command,
         interactors,
@@ -219,7 +220,7 @@ export async function runSshTerminalCommandWithLogin(
         marker: terminalArgs.marker,
         revealTerminal: terminalArgs.revealTerminal,
         showLoginTerminal,
-        cwd: terminalArgs.cwd ? vscode.Uri.file(terminalArgs.cwd) : undefined,
+        cwd: terminalArgs.cwd ? vscode.Uri.file(terminalArgs.cwd) : undefined
     });
 
     return result;
@@ -251,14 +252,14 @@ export function getResumeLogMarker(uuid: string): string {
 export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Promise<ProcessReturnType> {
     const disposables: vscode.Disposable[] = [];
     const { systemInteractor, command, interactors, nickname, token } = args;
-    let logIsPaused = false;
+    let logIsPaused: boolean = false;
     return new Promise(async (resolve, reject) => {
-        let stdout = '',
-            windowListener: vscode.Disposable | undefined,
-            terminalListener: vscode.Disposable | undefined,
-            terminal: vscode.Terminal | undefined,
-            tokenListener: vscode.Disposable,
-            continueWithoutExiting = false;
+        let stdout: string = '';
+        let windowListener: vscode.Disposable | undefined;
+        let terminalListener: vscode.Disposable | undefined;
+        let terminal: vscode.Terminal | undefined;
+        let tokenListener: vscode.Disposable;
+        let continueWithoutExiting: boolean = false;
 
         const clean = () => {
             if (terminalListener) {
@@ -297,7 +298,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             }
 
             // When using showLoginTerminal, stdout include the passphrase prompt, etc. Try to get just the command output on the last line.
-            const actualOutput = cancel ? '' : lastNonemptyLine(stdout);
+            const actualOutput: string | undefined = cancel ? '' : lastNonemptyLine(stdout);
             resolve({ succeeded: !exitCode, exitCode, output: actualOutput || '' });
         };
 
@@ -308,16 +309,16 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
         };
 
         const handleOutputLogging = (data: string): void => {
-            let nextPauseState;
+            let nextPauseState: boolean | undefined;
             if (args.marker) {
-                const pauseMarker = getPauseLogMarker(args.marker);
-                const pauseIdx = data.lastIndexOf(pauseMarker);
+                const pauseMarker: string = getPauseLogMarker(args.marker);
+                const pauseIdx: number = data.lastIndexOf(pauseMarker);
                 if (pauseIdx >= 0) {
                     data = data.substring(0, pauseIdx + pauseMarker.length);
                     nextPauseState = true;
                 }
 
-                const resumeIdx = data.lastIndexOf(getResumeLogMarker(args.marker));
+                const resumeIdx: number = data.lastIndexOf(getResumeLogMarker(args.marker));
                 if (resumeIdx >= 0) {
                     data = data.substring(resumeIdx);
                     nextPauseState = false;
@@ -342,7 +343,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             if (interactors) {
                 for (const interactor of interactors) {
                     try {
-                        const interaction = await interactor.onData(stdout);
+                        const interaction: IInteraction = await interactor.onData(stdout);
 
                         if (interaction.postAction === 'consume') {
                             if (args.usedInteractors) {
@@ -375,11 +376,13 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                                 args.usedInteractors.add(interactor.id);
                             }
 
-                            terminal!.sendText(`${interaction.response}\n`);
-                            const logOutput = interaction.isPassword
-                                ? interaction.response!.replace(/./g, '*')
-                                : interaction.response;
-                            getOutputChannelLogger().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
+                            if (terminal) {
+                                terminal.sendText(`${interaction.response}\n`);
+                                const logOutput: string = interaction.isPassword
+                                    ? interaction.response.replace(/./g, '*')
+                                    : interaction.response;
+                                getOutputChannelLogger().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
+                            }
                         }
                     } catch (e) {
                         failed(e);
@@ -394,7 +397,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             });
         }
 
-        const terminalIsWindows = typeof args.terminalIsWindows === 'boolean' ? args.terminalIsWindows : isWindows();
+        const terminalIsWindows: boolean = typeof args.terminalIsWindows === 'boolean' ? args.terminalIsWindows : isWindows();
         try {
             // the terminal process should not fail, but exit cleanly
             let shellArgs: string | string[];
@@ -413,10 +416,10 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                 name: nickname,
                 shellPath: getShellPath(terminalIsWindows),
                 shellArgs,
-                hideFromUser: true,
+                hideFromUser: true
             };
 
-            let terminalDataHandlingQueue = Promise.resolve();
+            let terminalDataHandlingQueue: Promise<void> = Promise.resolve();
             terminalListener = systemInteractor.onDidWriteTerminalData(async e => {
                 if (e.terminal !== terminal) {
                     return;
@@ -437,14 +440,14 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             }
 
             if (args.sendText) {
-                const sendText = terminalIsWindows ? `${args.sendText}\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
+                const sendText: string = terminalIsWindows ? `${args.sendText}\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
 
                 terminal.sendText(sendText);
                 getOutputChannelLogger().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
             }
 
             if (args.showLoginTerminal) {
-                terminal!.show();
+                terminal.show();
             }
 
             windowListener = systemInteractor.onDidCloseTerminal(t => {
@@ -464,7 +467,7 @@ function getShellPath(_isWindows: boolean): string {
         // Some users don't have cmd.exe on the path...
         if (process.env.SystemRoot) {
             // This var should always exist but be paranoid
-            const cmdPath = path.join(process.env.SystemRoot, 'System32', 'cmd.exe');
+            const cmdPath: string = path.join(process.env.SystemRoot, 'System32', 'cmd.exe');
             return cmdPath;
         } else {
             return 'cmd.exe';
@@ -476,12 +479,12 @@ function getShellPath(_isWindows: boolean): string {
 }
 
 function logReceivedData(data: string, nickname: string): void {
-    const logData = data.replace(/\r?\n$/, ''); // Trim single trailing newline for nicer log
+    const logData: string = data.replace(/\r?\n$/, ''); // Trim single trailing newline for nicer log
     if (logData === ' ') {
         // From the sleep command that must periodically echo ' '
         return;
     }
-    const markedLines = logData
+    const markedLines: string = logData
         .split(/\n/)
         .map(line => `${nickname}> ${line}`)
         .join('\n');
@@ -490,12 +493,12 @@ function logReceivedData(data: string, nickname: string): void {
 }
 
 function lastNonemptyLine(str: string): string | undefined {
-    const lines = splitLines(str);
+    const lines: string[] = splitLines(str);
 
     if (isWindows()) {
-        let outputContainingPipeError = '';
-        for (let i = lines.length - 1; i >= 0; i--) {
-            const strippedLine = stripEscapeSequences(lines[i]);
+        let outputContainingPipeError: string = '';
+        for (let i: number = lines.length - 1; i >= 0; i--) {
+            const strippedLine: string = stripEscapeSequences(lines[i]);
             if (strippedLine.match(/The process tried to write to a nonexistent pipe/)) {
                 outputContainingPipeError = strippedLine;
                 continue;
@@ -510,6 +513,6 @@ function lastNonemptyLine(str: string): string | undefined {
         }
     }
 
-    const nonEmptyLines = lines.filter(l => !!l);
+    const nonEmptyLines: string[] = lines.filter(l => !!l);
     return nonEmptyLines[nonEmptyLines.length - 1];
 }

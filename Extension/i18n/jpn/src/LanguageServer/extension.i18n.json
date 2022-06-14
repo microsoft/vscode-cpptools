@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "このヘッダーのライブラリを vcpkg でインストールする方法の詳細",
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
-	"more.info.button": "詳細",
-	"ignore.button": "無視",
-	"vsix.platform.incompatible": "インストールされている C/C++ 拡張機能がシステムと一致しません。",
-	"vsix.platform.mismatching": "インストールされている C/C++ 拡張機能は、システムと互換性がありますが、一致しません。",
 	"client.not.found": "クライアントが見つかりませんでした",
 	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください",
 	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください",
 	"edit.configurations.open.first": "構成を編集するには、まずフォルダーを開いてください",
+	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。",
 	"add.includepath.open.first": "{0} に追加するには、まずフォルダーを開いてください"
 }

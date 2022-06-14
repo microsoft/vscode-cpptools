@@ -196,7 +196,9 @@
     "Variables": {
       "type": "object",
       "description": "%c_cpp.debuggers.variables.description%",
-      "default": {},
+      "default": {
+        "<variable-name>": "<variable-value>"
+      },
       "properties": {},
       "additionalProperties": {
         "type": "string",
@@ -626,12 +628,10 @@
           "default": {}
         },
         "variables": {
-            "$ref": "#/definitions/Variables",
-            "description": "%c_cpp.debuggers.variables.description%"
+            "$ref": "#/definitions/Variables"
         },
         "deploySteps": {
-            "$ref": "#/definitions/DeploySteps",
-            "description": "%c_cpp.debuggers.description%"
+            "$ref": "#/definitions/DeploySteps"
         }
       }
     },
@@ -748,12 +748,10 @@
           "description": "%c_cpp.debuggers.symbolLoadInfo.description%"
         },
         "variables": {
-            "$ref": "#/definitions/Variables",
-            "description": "%c_cpp.debuggers.variables.description%"
+            "$ref": "#/definitions/Variables"
         },
         "deploySteps": {
-            "$ref": "#/definitions/DeploySteps",
-            "description": "%c_cpp.debuggers.description%"
+            "$ref": "#/definitions/DeploySteps"
         }
       }
     },
