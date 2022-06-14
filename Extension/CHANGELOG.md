@@ -3,7 +3,6 @@
 ## Version 1.10.6: June 14, 2022
 ### Bug Fixes
 * Fix `@responseFile` in `compilerArgs` not being handled on Linux/Mac. [#9434](https://github.com/microsoft/vscode-cpptools/issues/9434)
-* Make the `C_Cpp.legacyCompilerArgsBehavior" setting non-deprecated.
 
 ## Version 1.10.5: June 8, 2022
 ### New Features
