@@ -1,10 +1,14 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.10.7: June 15, 2022
+### Bug Fixes
+* Fix bugs with process creation on Windows (which caused IntelliSense to fail). [#9431](https://github.com/microsoft/vscode-cpptools/issues/9431)
+
 ## Version 1.10.6: June 14, 2022
 ### Bug Fixes
 * Fix `@responseFile` in `compilerArgs` not being handled on Linux/Mac. [#9434](https://github.com/microsoft/vscode-cpptools/issues/9434)
-* Fix debug preLaunchTask not working when `C_Cpp.intelliSenseEngine` is "Disabled". [#9446](https://github.com/microsoft/vscode-cpptools/issues/9446)
-* Make the `C_Cpp.legacyCompilerArgsBehavior" setting non-deprecated.
+* Fix debug preLaunchTask not working when `C_Cpp.intelliSenseEngine` is `"Disabled"`. [#9446](https://github.com/microsoft/vscode-cpptools/issues/9446)
+* Make the `C_Cpp.legacyCompilerArgsBehavior` setting non-deprecated.
 
 ## Version 1.10.5: June 8, 2022
 ### New Features
