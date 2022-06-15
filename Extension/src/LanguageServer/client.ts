@@ -7,7 +7,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-// Importing providers here
+// Start provider imports
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
@@ -18,6 +18,7 @@ import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
+import { InlayHintsProvider } from './Providers/inlayHintProvider';
 // End provider imports
 
 import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
@@ -534,6 +535,7 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
+const InlayHintsChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/inlayHintsChanged');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisProcessed');
@@ -716,6 +718,8 @@ export class DefaultClient implements Client {
     private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
     private codeFoldingProvider: FoldingRangeProvider | undefined;
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
+    private inlayHintsProvider: InlayHintsProvider | undefined;
+    private inlayHintsProviderDisposable: vscode.Disposable | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
@@ -922,6 +926,12 @@ export class DefaultClient implements Client {
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
                             this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
+                        }
+                        // TODO: enable based on settings.
+                        const isInlayHintsEnabled: boolean = true;
+                        if (isInlayHintsEnabled) {
+                            this.inlayHintsProvider = new InlayHintsProvider(this);
+                            this.inlayHintsProviderDisposable = vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider);
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
@@ -1626,7 +1636,9 @@ export class DefaultClient implements Client {
         if (this.semanticTokensProvider) {
             this.semanticTokensProvider.invalidateFile(uri);
         }
-
+        if (this.inlayHintsProvider) {
+            this.inlayHintsProvider.invalidateFile(uri);
+        }
         openFileVersions.delete(uri);
     }
 
@@ -2160,6 +2172,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
+        this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
@@ -3126,6 +3139,10 @@ export class DefaultClient implements Client {
         if (this.semanticTokensProviderDisposable) {
             this.semanticTokensProviderDisposable.dispose();
             this.semanticTokensProviderDisposable = undefined;
+        }
+        if (this.inlayHintsProviderDisposable) {
+            this.inlayHintsProviderDisposable.dispose();
+            this.inlayHintsProviderDisposable = undefined;
         }
         this.model.dispose();
     }
