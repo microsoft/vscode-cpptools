@@ -3457,5 +3457,9 @@
   "una constante de caracteres UTF-16 no puede ocupar más de una unidad de código; valor truncado",
   "ambos argumentos deben tener el mismo tipo",
   "el tipo %t no es válido como argumento para este elemento integrado",
-  "llamado desde %nd:"
+  "llamado desde %nd:",
+  "un tipo calificado no es estándar para campos de bits anónimos",
+  "el tipo de elemento de la condición de vector (%t1) debe tener el mismo tamaño que el tipo de elemento del resultado (%t2)",
+  "el tipo de operando de vector de punto flotante (%t) no tiene ningún tipo de vector entero coincidente",
+  "aún no se ha implementado la limpieza de expresiones \"requires\""
 ]

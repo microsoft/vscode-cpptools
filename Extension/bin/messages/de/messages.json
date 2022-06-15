@@ -3457,5 +3457,9 @@
   "Eine UTF-16-Zeichenkonstante darf nicht mehrere Codeeinheiten belegen. Wert abgeschnitten.",
   "Beide Argumente müssen denselben Typ aufweisen.",
   "Der Typ \"%t\" ist als Argument für dieses integrierte Element ungültig.",
-  "aufgerufen von %nd:"
+  "aufgerufen von %nd:",
+  "ein qualifizierter Typ ist kein Standard für anonyme Bitfelder",
+  "der Elementtyp der Vektorbedingung (%t1) muss dieselbe Größe haben wie der Elementtyp des Ergebnisses (%t2)",
+  "der Gleitkomma-Vektoroperandentyp (%t) hat keinen übereinstimmenden ganzzahligen Vektortyp",
+  "das Mangling für 'requires'-Ausdrücke ist noch nicht implementiert"
 ]
