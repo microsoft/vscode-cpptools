@@ -20,7 +20,7 @@ interface CppInlayHint {
     label: string;
     inlayHintKind: InlayHintKind;
     isValueRef: boolean;
-    // hasParamName: boolean;
+    hasParamName: boolean;
 }
 
 interface GetInlayHintsResult {
@@ -83,12 +83,12 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     private buildVSCodeHints(cacheEntry: InlayHintsCacheEntry): vscode.InlayHint[] {
         let result: vscode.InlayHint[] = [];
-        const showTypeHintsEnabled: boolean = true; // TODO: get value from settings.
-        const showParamHintsEnabled: boolean = true; // TODO: get value from settings.
-        if (showTypeHintsEnabled) {
+        const autoTypeHintsEnabled: boolean = true; // TODO: get value from settings.
+        const paramHintsEnabled: boolean = true; // TODO: get value from settings.
+        if (autoTypeHintsEnabled) {
             result = result.concat(cacheEntry?.TypeHints);
         }
-        if (showParamHintsEnabled) {
+        if (paramHintsEnabled) {
             const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
             result = result.concat(resolvedParameterHints);
         }
@@ -97,18 +97,19 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     private resolveParameterHints(hints: CppInlayHint[]): vscode.InlayHint[] {
         const resolvedHints: vscode.InlayHint[] = [];
-        const showRefEnabled: boolean = true; // TODO: get from settings
-        const hideParamNameEnabled: boolean = false; // TODO: get from settings
+        const addRefOperator: boolean = true; // TODO: get from settings
+        const hideParamNameWhenArgMatches: boolean = false; // TODO: get from settings
         for (const h of hints) {
             // Build parameter label based on settings.
-            // TODO: remove label if param includes parameter name or in comments.
-            const paramName: string = (hideParamNameEnabled /* && h.hasParamName*/) ? "" : h.label;
-            let refString: string = "";
-            if (showRefEnabled && h.isValueRef) {
-                refString = (paramName.length > 0) ? "& " : "&";
+            const paramHintLabel: string = (hideParamNameWhenArgMatches && h.hasParamName) ? "" : h.label;
+            let refOperatorString: string = "";
+            if (addRefOperator && h.isValueRef) {
+                refOperatorString = (paramHintLabel.length > 0) ? "& " : "&";
             }
-            const colonString: string = (paramName.length > 0 || refString.length > 0) ? ":" : "";
-            const label: string = refString + paramName + colonString;
+            let label: string = "";
+            if (paramHintLabel.length > 0 || refOperatorString.length > 0) {
+                label = refOperatorString + paramHintLabel + ":";
+            }
 
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(h.position.line, h.position.character),
