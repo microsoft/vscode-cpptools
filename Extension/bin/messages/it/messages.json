@@ -3457,5 +3457,9 @@
   "una costante di caratteri UTF-16 non può occupare più di un'unità di codice; valore troncato",
   "entrambi gli argomenti devono avere lo stesso tipo",
   "il tipo %t non è valido come argomento per questa compilazione",
-  "chiamato da %nd:"
+  "chiamato da %nd:",
+  "un tipo qualificato non è conforme allo standard per i campi di bit anonimi",
+  "il tipo di elemento della condizione vettoriale (%t1) deve avere le stesse dimensioni del tipo di elemento del risultato (%t2)",
+  "il tipo di operando di vettore a virgola mobile (%t) non ha un tipo di vettore intero corrispondente",
+  "il mangling per le espressioni 'requires' non è ancora implementato"
 ]
