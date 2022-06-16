@@ -260,7 +260,7 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.parameterNames.enabled") === true;
     }
 
-    public get inlayHintsParameterNamesAddRefOperator(): boolean { 
+    public get inlayHintsParameterNamesAddRefOperator(): boolean {
         return super.Section.get<boolean>("inlayHints.parameterNames.addReferenceOperator") === true;
     }
 

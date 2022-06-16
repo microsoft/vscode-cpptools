@@ -1346,7 +1346,7 @@ export class DefaultClient implements Client {
                 },
                 editor: {
                     autoClosingBrackets: settings_editorAutoClosingBrackets,
-                    inlayHintsEnabled: workspaceOtherSettings.InlayHintsEnabled,
+                    inlayHintsEnabled: workspaceOtherSettings.InlayHintsEnabled
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 cpp_exclude_files: settings_cppFilesExclude,
