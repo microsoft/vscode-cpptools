@@ -10,7 +10,6 @@
 * Fix skipping the compiler argument after `-c`. [#9453](https://github.com/microsoft/vscode-cpptools/issues/9453)
 * Fix `-std:c++20` not being handled with cl.exe. [#9458](https://github.com/microsoft/vscode-cpptools/issues/9458)
 
-
 ## Version 1.10.7: June 15, 2022
 ### Bug Fixes
 * Fix bugs with process creation on Windows (which caused IntelliSense to fail). [#9431](https://github.com/microsoft/vscode-cpptools/issues/9431)
