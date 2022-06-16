@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import { DefaultClient, openFileVersions } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
+import { CppSettings } from '../settings';
 
 interface GetInlayHintsParams {
     uri: string;
@@ -83,12 +84,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     private buildVSCodeHints(cacheEntry: InlayHintsCacheEntry): vscode.InlayHint[] {
         let result: vscode.InlayHint[] = [];
-        const autoTypeHintsEnabled: boolean = true; // TODO: get value from settings.
-        const paramHintsEnabled: boolean = true; // TODO: get value from settings.
-        if (autoTypeHintsEnabled) {
+        const settings: CppSettings = new CppSettings();
+        if (settings.inlayHintsAutoDeclarationTypes) {
             result = result.concat(cacheEntry?.TypeHints);
         }
-        if (paramHintsEnabled) {
+        if (settings.inlayHintsParameterNames) {
             const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
             result = result.concat(resolvedParameterHints);
         }
@@ -97,13 +97,12 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     private resolveParameterHints(hints: CppInlayHint[]): vscode.InlayHint[] {
         const resolvedHints: vscode.InlayHint[] = [];
-        const addRefOperator: boolean = true; // TODO: get from settings
-        const hideParamNameWhenArgMatches: boolean = false; // TODO: get from settings
+        const settings: CppSettings = new CppSettings();
         for (const h of hints) {
             // Build parameter label based on settings.
-            const paramHintLabel: string = (hideParamNameWhenArgMatches && h.hasParamName) ? "" : h.label;
+            const paramHintLabel: string = (settings.inlayHintsParameterNamesSuppressName && h.hasParamName) ? "" : h.label;
             let refOperatorString: string = "";
-            if (addRefOperator && h.isValueRef) {
+            if (settings.inlayHintsParameterNamesAddRefOperator && h.isValueRef) {
                 refOperatorString = (paramHintLabel.length > 0) ? "& " : "&";
             }
             let label: string = "";

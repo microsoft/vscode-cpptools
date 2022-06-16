@@ -719,7 +719,6 @@ export class DefaultClient implements Client {
     private codeFoldingProvider: FoldingRangeProvider | undefined;
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
     private inlayHintsProvider: InlayHintsProvider | undefined;
-    private inlayHintsProviderDisposable: vscode.Disposable | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
@@ -908,6 +907,9 @@ export class DefaultClient implements Client {
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
 
+                        this.inlayHintsProvider = new InlayHintsProvider(this);
+
+                        this.disposables.push(vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider));
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
                         this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
@@ -926,12 +928,6 @@ export class DefaultClient implements Client {
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
                             this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
-                        }
-                        // TODO: enable based on settings.
-                        const isInlayHintsEnabled: boolean = true;
-                        if (isInlayHintsEnabled) {
-                            this.inlayHintsProvider = new InlayHintsProvider(this);
-                            this.inlayHintsProviderDisposable = vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider);
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
@@ -1349,7 +1345,8 @@ export class DefaultClient implements Client {
                     autoSaveAfterDelay: settings_filesAutoSaveAfterDelay
                 },
                 editor: {
-                    autoClosingBrackets: settings_editorAutoClosingBrackets
+                    autoClosingBrackets: settings_editorAutoClosingBrackets,
+                    inlayHintsEnabled: workspaceOtherSettings.InlayHintsEnabled,
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 cpp_exclude_files: settings_cppFilesExclude,
@@ -1481,7 +1478,8 @@ export class DefaultClient implements Client {
                 }
             },
             editor: {
-                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets
+                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets,
+                inlayHintsEnabled: otherSettingsWorkspace.InlayHintsEnabled
             },
             files: {
                 encoding: otherSettingsFolder.filesEncoding,
@@ -3139,10 +3137,6 @@ export class DefaultClient implements Client {
         if (this.semanticTokensProviderDisposable) {
             this.semanticTokensProviderDisposable.dispose();
             this.semanticTokensProviderDisposable = undefined;
-        }
-        if (this.inlayHintsProviderDisposable) {
-            this.inlayHintsProviderDisposable.dispose();
-            this.inlayHintsProviderDisposable = undefined;
         }
         this.model.dispose();
     }
