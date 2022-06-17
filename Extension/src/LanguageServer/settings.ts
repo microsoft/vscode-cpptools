@@ -252,6 +252,22 @@ export class CppSettings extends Settings {
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
     public get legacyCompilerArgsBehavior(): boolean | undefined  { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
+    public get inlayHintsAutoDeclarationTypes(): boolean {
+        return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;
+    }
+
+    public get inlayHintsParameterNames(): boolean {
+        return super.Section.get<boolean>("inlayHints.parameterNames.enabled") === true;
+    }
+
+    public get inlayHintsParameterNamesSuppressName(): boolean {
+        return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentContainsName") === true;
+    }
+
+    public get inlayHintsReferenceOperator(): boolean {
+        return super.Section.get<boolean>("inlayHints.referenceOperator.enabled") === true;
+    }
+
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization") === "Enabled"
             && super.Section.get<string>("intelliSenseEngine") === "Default"
@@ -788,6 +804,7 @@ export class OtherSettings {
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
+    public get InlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 

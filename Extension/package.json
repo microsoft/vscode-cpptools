@@ -2211,6 +2211,30 @@
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
+        "C_Cpp.inlayHints.autoDeclarationTypes.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
+          "scope": "application"
+        },
+        "C_Cpp.inlayHints.parameterNames.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription%",
+          "scope": "application"
+        },
+        "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentContainsName": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
+          "scope": "application"
+        },
+        "C_Cpp.inlayHints.referenceOperator.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
+          "scope": "application"
+        },
         "C_Cpp.loggingLevel": {
           "type": "string",
           "enum": [
