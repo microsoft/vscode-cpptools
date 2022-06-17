@@ -88,30 +88,31 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         if (settings.inlayHintsAutoDeclarationTypes) {
             result = result.concat(cacheEntry?.TypeHints);
         }
-        if (settings.inlayHintsParameterNames) {
-            const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
-            result = result.concat(resolvedParameterHints);
-        }
+        const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
+        result = result.concat(resolvedParameterHints);
         return result;
     }
 
     private resolveParameterHints(hints: CppInlayHint[]): vscode.InlayHint[] {
         const resolvedHints: vscode.InlayHint[] = [];
         const settings: CppSettings = new CppSettings();
-        for (const h of hints) {
+        for (const hint of hints) {
             // Build parameter label based on settings.
-            const paramHintLabel: string = (settings.inlayHintsParameterNamesSuppressName && h.hasParamName) ? "" : h.label;
+            let paramHintLabel: string = "";
+            if (settings.inlayHintsParameterNames) {
+                paramHintLabel = (settings.inlayHintsParameterNamesSuppressName && hint.hasParamName) ? "" : hint.label;
+            }
             let refOperatorString: string = "";
-            if (settings.inlayHintsParameterNamesAddRefOperator && h.isValueRef) {
+            if (settings.inlayHintsReferenceOperator && hint.isValueRef) {
                 refOperatorString = (paramHintLabel.length > 0) ? "& " : "&";
             }
             let label: string = "";
             if (paramHintLabel.length > 0 || refOperatorString.length > 0) {
-                label = refOperatorString + paramHintLabel + ":";
+                label = refOperatorString +  paramHintLabel + ":";
             }
 
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                new vscode.Position(h.position.line, h.position.character),
+                new vscode.Position(hint.position.line, hint.position.character),
                 label,
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;

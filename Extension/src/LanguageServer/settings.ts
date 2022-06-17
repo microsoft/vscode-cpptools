@@ -260,12 +260,12 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.parameterNames.enabled") === true;
     }
 
-    public get inlayHintsParameterNamesAddRefOperator(): boolean {
-        return super.Section.get<boolean>("inlayHints.parameterNames.addReferenceOperator") === true;
-    }
-
     public get inlayHintsParameterNamesSuppressName(): boolean {
         return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentMatchesName") === true;
+    }
+
+    public get inlayHintsReferenceOperator(): boolean {
+        return super.Section.get<boolean>("inlayHints.referenceOperator.enabled") === true;
     }
 
     public get enhancedColorization(): boolean {
