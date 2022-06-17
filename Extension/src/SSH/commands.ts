@@ -8,7 +8,7 @@ import { ISshHostInfo, ProcessReturnType } from '../common';
 import { defaultSystemInteractor } from './commandInteractors';
 import { runSshTerminalCommandWithLogin } from './sshCommandRunner';
 
-export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, scpPath?: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const args: string[] = [];
     if (jumpHosts && jumpHosts.length > 0) {
         args.push('-J', jumpHosts.map(getFullHostAddress).join(','));
@@ -19,10 +19,10 @@ export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: st
     }
     args.push(files.map(uri => `"${uri.fsPath}"`).join(' '), `${getFullHostAddressNoPort(host)}:${targetDir}`);
 
-    return runSshTerminalCommandWithLogin(host, { systemInteractor: defaultSystemInteractor, nickname: 'scp', command: `scp ${args.join(' ')}`, token: cancellationToken });
+    return runSshTerminalCommandWithLogin(host, { systemInteractor: defaultSystemInteractor, nickname: 'scp', command: `"${scpPath || 'scp'}" ${args.join(' ')}`, token: cancellationToken });
 }
 
-export function ssh(host: ISshHostInfo, command: string, jumpHosts?: ISshHostInfo[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+export function ssh(host: ISshHostInfo, command: string, sshPath?: string, jumpHosts?: ISshHostInfo[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const args: string[] = [];
     if (jumpHosts && jumpHosts.length > 0) {
         args.push('-J', jumpHosts.map(getFullHostAddress).join(','));
@@ -35,7 +35,7 @@ export function ssh(host: ISshHostInfo, command: string, jumpHosts?: ISshHostInf
 
     return runSshTerminalCommandWithLogin(host, {
         systemInteractor: defaultSystemInteractor,
-        command: `ssh ${args.join(' ')}`,
+        command: `"${sshPath || 'ssh'}" ${args.join(' ')}`,
         nickname: 'ssh',
         continueOn,
         token: cancellationToken

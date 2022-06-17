@@ -958,7 +958,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
                     return false;
                 }
-                const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, jumpHosts, cancellationToken);
+                const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, config.scpPath, jumpHosts, cancellationToken);
                 if (!scpResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }
@@ -971,7 +971,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 }
                 const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
-                const sshResult: util.ProcessReturnType = await ssh(host, step.command, jumpHosts, step.continueOn, cancellationToken);
+                const sshResult: util.ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, step.continueOn, cancellationToken);
                 if (!sshResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }

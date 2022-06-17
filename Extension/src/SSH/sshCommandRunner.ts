@@ -404,7 +404,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             if (args.sendText) {
                 shellArgs = '';
             } else {
-                shellArgs = terminalIsWindows ? `/c ${command}\nexit /b %ErrorLevel%` : ['-c', `${command}\nexit $?`];
+                shellArgs = terminalIsWindows ? `/c (${command})\nexit /b %ErrorLevel%` : ['-c', `${command}\nexit $?`];
             }
 
             const options: vscode.TerminalOptions = {
@@ -440,7 +440,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             }
 
             if (args.sendText) {
-                const sendText: string = terminalIsWindows ? `${args.sendText}\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
+                const sendText: string = terminalIsWindows ? `(${args.sendText})\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
 
                 terminal.sendText(sendText);
                 getOutputChannelLogger().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));

@@ -3368,6 +3368,11 @@
                           "description": "%c_cpp.debuggers.deploySteps.scp.targetDir.description%",
                           "default": ""
                         },
+                        "scpPath": {
+                          "type": "string",
+                          "description": "%c_cpp.debuggers.deploySteps.scp.scpPath.description%",
+                          "default": ""
+                        },
                         "debug": {
                           "type": "boolean",
                           "description": "%c_cpp.debuggers.deploySteps.debug%"
@@ -3448,6 +3453,11 @@
                         "command": {
                           "type": "string",
                           "description": "%c_cpp.debuggers.deploySteps.ssh.command.description%",
+                          "default": ""
+                        },
+                        "sshPath": {
+                          "type": "string",
+                          "description": "%c_cpp.debuggers.deploySteps.ssh.sshPath.description%",
                           "default": ""
                         },
                         "continueOn": {
@@ -3893,6 +3903,11 @@
                           "description": "%c_cpp.debuggers.deploySteps.scp.targetDir.description%",
                           "default": ""
                         },
+                        "scpPath": {
+                          "type": "string",
+                          "description": "%c_cpp.debuggers.deploySteps.scp.scpPath.description%",
+                          "default": ""
+                        },
                         "debug": {
                           "type": "boolean",
                           "description": "%c_cpp.debuggers.deploySteps.debug%"
@@ -3973,6 +3988,11 @@
                         "command": {
                           "type": "string",
                           "description": "%c_cpp.debuggers.deploySteps.ssh.command.description%",
+                          "default": ""
+                        },
+                        "sshPath": {
+                          "type": "string",
+                          "description": "%c_cpp.debuggers.deploySteps.ssh.sshPath.description%",
                           "default": ""
                         },
                         "continueOn": {
