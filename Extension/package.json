@@ -2223,10 +2223,10 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription%",
           "scope": "application"
         },
-        "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentMatchesName": {
+        "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentContainsName": {
           "type": "boolean",
           "default": true,
-          "description": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentMatchesName.description%",
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.description%",
           "scope": "application"
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {

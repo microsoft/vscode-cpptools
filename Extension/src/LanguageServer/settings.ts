@@ -261,7 +261,7 @@ export class CppSettings extends Settings {
     }
 
     public get inlayHintsParameterNamesSuppressName(): boolean {
-        return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentMatchesName") === true;
+        return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentContainsName") === true;
     }
 
     public get inlayHintsReferenceOperator(): boolean {
