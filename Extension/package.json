@@ -2848,7 +2848,7 @@
         "command": "C_Cpp.AddDebugConfiguration",
         "title": "%c_cpp.command.AddDebugConfiguration.title%",
         "category": "C/C++",
-        "icon": "$(debug-configure)"      
+        "icon": "$(debug-configure)"
       }
     ],
     "keybindings": [
@@ -3989,28 +3989,28 @@
       ],
       "editor/context": [
         {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "C_Cpp.SwitchHeaderSource",
+          "when": "config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
           "group": "custom1@1"
         },
         {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.gotoSymbol",
+          "when": "config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
           "group": "custom1@2"
         },
         {
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "command": "workbench.action.showAllSymbols",
+          "when": "config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
           "group": "custom1@3"
         },
         {
           "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@1"
         },
         {
           "command": "C_Cpp.RestartIntelliSenseForFile",
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@2"
         },
         {
