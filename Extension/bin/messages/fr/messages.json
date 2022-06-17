@@ -3461,5 +3461,5 @@
   "un type qualifié n’est pas standard pour les champs de bits anonymes.",
   "le type d’élément de la condition vectorielle (%t1) doit avoir la même taille que le type d’élément du résultat (%t2).",
   "le type d’opérande vectoriel à virgule flottante (%t) n’a pas de type de vecteur entier correspondant.",
-  "La gestion des expressions \"nécessite\" n'est pas encore implémentée."
+  "La gestion des expressions \"requires\" n'est pas encore implémentée."
 ]
