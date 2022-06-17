@@ -3457,5 +3457,9 @@
   "uma constante de caractere UTF-16 não pode ocupar mais de uma unidade de código; valor truncado",
   "ambos os argumentos devem ter o mesmo tipo",
   "o tipo %téinválido como argumento para este builtin",
-  "chamado de %nd:"
+  "chamado de %nd:",
+  "um tipo qualificado não é padrão para campos de bits anônimos",
+  "o tipo de elemento da condição de vetor (%t1) deve ter o mesmo tamanho que o tipo de elemento do resultado (%t2)",
+  "o tipo de operando vetorial de ponto flutuante (%t) não tem nenhum tipo de vetor inteiro correspondente",
+  "a estruturação para expressões 'requires' ainda não foi implementada"
 ]

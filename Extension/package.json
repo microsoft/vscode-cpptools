@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.10.5-main",
+  "version": "1.11.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2214,6 +2214,30 @@
           "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
           "scope": "resource"
         },
+        "C_Cpp.inlayHints.autoDeclarationTypes.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
+          "scope": "application"
+        },
+        "C_Cpp.inlayHints.parameterNames.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription%",
+          "scope": "application"
+        },
+        "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentContainsName": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
+          "scope": "application"
+        },
+        "C_Cpp.inlayHints.referenceOperator.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
+          "scope": "application"
+        },
         "C_Cpp.loggingLevel": {
           "type": "string",
           "enum": [
@@ -2673,8 +2697,7 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
-          "scope": "resource",
-          "deprecationMessage": "%c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage%"
+          "scope": "resource"
         }
       }
     },

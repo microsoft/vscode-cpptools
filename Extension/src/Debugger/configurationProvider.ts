@@ -127,7 +127,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this function.
      */
     async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: CppDebugConfiguration, token?: vscode.CancellationToken): Promise<CppDebugConfiguration | null | undefined> {
-        const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
             // Hence, providing debug configs, and start debugging should be done manually.
@@ -162,6 +161,18 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (config.preLaunchTask) {
             config.configSource = this.getDebugConfigSource(config, folder);
+            const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
+            // Run the build task if IntelliSense is disabled.
+            if (isIntelliSenseDisabled) {
+                try {
+                    await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
+                    config.preLaunchTask = undefined;
+                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "true" });
+                } catch (err) {
+                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "false" });
+                }
+                return config;
+            }
             let resolveByVsCode: boolean = false;
             const isDebugPanel: boolean = !config.debuggerEvent || (config.debuggerEvent && config.debuggerEvent === DebuggerEvent.debugPanel);
             const singleFile: boolean = config.configSource === ConfigSource.singleFile;
@@ -186,8 +197,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "true" });
 
             if (!resolveByVsCode) {
-                if ((singleFile || isIntelliSenseDisabled ||
-                    (isDebugPanel && !folder && isExistingTask))) {
+                if ((singleFile || (isDebugPanel && !folder && isExistingTask))) {
                     await this.resolvePreLaunchTask(config, configMode);
                     config.preLaunchTask = undefined;
                 } else {

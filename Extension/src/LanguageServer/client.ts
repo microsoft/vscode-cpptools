@@ -7,7 +7,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-// Importing providers here
+// Start provider imports
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
@@ -18,6 +18,7 @@ import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
+import { InlayHintsProvider } from './Providers/inlayHintProvider';
 // End provider imports
 
 import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
@@ -534,6 +535,7 @@ const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, v
 const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
 const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
+const InlayHintsChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/inlayHintsChanged');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisProcessed');
@@ -716,6 +718,7 @@ export class DefaultClient implements Client {
     private onTypeFormattingProviderDisposable: vscode.Disposable | undefined;
     private codeFoldingProvider: FoldingRangeProvider | undefined;
     private codeFoldingProviderDisposable: vscode.Disposable | undefined;
+    private inlayHintsProvider: InlayHintsProvider | undefined;
     private semanticTokensProvider: SemanticTokensProvider | undefined;
     private semanticTokensProviderDisposable: vscode.Disposable | undefined;
     private innerConfiguration?: configs.CppProperties;
@@ -904,6 +907,9 @@ export class DefaultClient implements Client {
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
 
+                        this.inlayHintsProvider = new InlayHintsProvider(this);
+
+                        this.disposables.push(vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider));
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
                         this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
@@ -1339,7 +1345,8 @@ export class DefaultClient implements Client {
                     autoSaveAfterDelay: settings_filesAutoSaveAfterDelay
                 },
                 editor: {
-                    autoClosingBrackets: settings_editorAutoClosingBrackets
+                    autoClosingBrackets: settings_editorAutoClosingBrackets,
+                    inlayHintsEnabled: workspaceOtherSettings.InlayHintsEnabled
                 },
                 workspace_fallback_encoding: workspaceOtherSettings.filesEncoding,
                 cpp_exclude_files: settings_cppFilesExclude,
@@ -1471,7 +1478,8 @@ export class DefaultClient implements Client {
                 }
             },
             editor: {
-                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets
+                autoClosingBrackets: otherSettingsFolder.editorAutoClosingBrackets,
+                inlayHintsEnabled: otherSettingsWorkspace.InlayHintsEnabled
             },
             files: {
                 encoding: otherSettingsFolder.filesEncoding,
@@ -1626,7 +1634,9 @@ export class DefaultClient implements Client {
         if (this.semanticTokensProvider) {
             this.semanticTokensProvider.invalidateFile(uri);
         }
-
+        if (this.inlayHintsProvider) {
+            this.inlayHintsProvider.invalidateFile(uri);
+        }
         openFileVersions.delete(uri);
     }
 
@@ -2160,6 +2170,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
+        this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
