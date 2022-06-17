@@ -3461,5 +3461,5 @@
   "kwalifikowany typ jest niestandardowy dla anonimowych pól bitowych",
   "typ elementu warunku wektora (%t1) musi mieć taki sam rozmiar jak typ elementu wyniku (%t2)",
   "typ operandu wektora zmiennoprzecinkowego (%t) nie ma zgodnego typu wektora liczb całkowitych",
-  "nie jest jeszcze zaimplementowane dekorowanie wyrażeń typu „wymaga”."
+  "nie jest jeszcze zaimplementowane dekorowanie wyrażeń typu „requires”."
 ]
