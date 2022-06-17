@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Informazioni su come installare una libreria per questa intestazione con vcpkg",
 	"copy.vcpkg.command": "Copiare il comando vcpkg per installare '{0}' negli Appunti",
-	"more.info.button": "Altre informazioni",
-	"ignore.button": "Ignora",
-	"vsix.platform.incompatible": "L'estensione C/C++ installata non corrisponde al sistema.",
-	"vsix.platform.mismatching": "L'estensione C/C++ installata è compatibile con il sistema, ma non corrisponde allo stesso.",
 	"client.not.found": "client non trovato",
 	"configuration.select.first": "Aprire prima una cartella per selezionare una configurazione",
 	"configuration.provider.select.first": "Aprire prima una cartella per selezionare un provider di configurazione",
 	"edit.configurations.open.first": "Aprire prima una cartella per modificare le configurazioni",
+	"code.action.aborted": "Impossibile applicare la correzione di Code Analysis perché il documento è stato modificato.",
 	"add.includepath.open.first": "Aprire prima una cartella da aggiungere a {0}"
 }

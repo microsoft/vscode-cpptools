@@ -12,8 +12,9 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions, CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
-    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './client';
+import { Client, openFileVersions } from './client';
+import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
+    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
 import { CppSettings, OtherSettings } from './settings';
@@ -362,7 +363,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
     return false;
 }
 
-function onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void {
+function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(editor => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {

@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Más información sobre el modo de instalar una biblioteca para este encabezado con vcpkg",
 	"copy.vcpkg.command": "Copie el comando vcpkg para instalar \"{0}\" en el Portapapeles",
-	"more.info.button": "Más información",
-	"ignore.button": "Omitir",
-	"vsix.platform.incompatible": "La extensión C/C++ instalada no coincide con el sistema.",
-	"vsix.platform.mismatching": "La extensión C/C++ instalada es compatible con el sistema, pero no coincide con el sistema.",
 	"client.not.found": "No se encuentra el cliente",
 	"configuration.select.first": "Abra una carpeta primero para seleccionar una configuración",
 	"configuration.provider.select.first": "Abra una carpeta primero para seleccionar un proveedor de configuración",
 	"edit.configurations.open.first": "Abra una carpeta primero para editar las configuraciones",
+	"code.action.aborted": "No se pudo aplicar la corrección de análisis de código porque el documento ha cambiado.",
 	"add.includepath.open.first": "Abra primero una carpeta para agregarla a {0}"
 }

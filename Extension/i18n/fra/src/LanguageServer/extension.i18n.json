@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Découvrir comment installer une bibliothèque pour cet en-tête avec vcpkg",
 	"copy.vcpkg.command": "Copier la commande vcpkg pour installer '{0}' dans le Presse-papiers",
-	"more.info.button": "En savoir plus",
-	"ignore.button": "Ignorer",
-	"vsix.platform.incompatible": "L’extension C/C++ installée ne correspond pas à votre système.",
-	"vsix.platform.mismatching": "L’extension C/C++ installée est compatible avec mais ne correspond pas à votre système.",
 	"client.not.found": "client introuvable",
 	"configuration.select.first": "Commencer par ouvrir un dossier pour sélectionner une configuration",
 	"configuration.provider.select.first": "Commencer par ouvrir un dossier pour sélectionner un fournisseur de configuration",
 	"edit.configurations.open.first": "Commencer par ouvrir un dossier pour modifier des configurations",
+	"code.action.aborted": "Impossible d’appliquer le correctif d’analyse du code, car le document a changé.",
 	"add.includepath.open.first": "Commencer par ouvrir un dossier à ajouter à {0}"
 }

@@ -6,13 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Dowiedz się, jak zainstalować bibliotekę dla tego nagłówka przy użyciu menedżera vcpkg",
 	"copy.vcpkg.command": "Skopiuj polecenie vcpkg, aby zainstalować element „{0}” w schowku",
-	"more.info.button": "Więcej informacji",
-	"ignore.button": "Ignoruj",
-	"vsix.platform.incompatible": "Zainstalowane rozszerzenie C/C++ jest nie pasuje do Twojego systemu.",
-	"vsix.platform.mismatching": "Zainstalowane rozszerzenie C/C++ jest kompatybilne, ale nie pasuje do Twojego systemu.",
 	"client.not.found": "nie znaleziono klienta",
 	"configuration.select.first": "Otwórz najpierw folder, aby wybrać konfigurację",
 	"configuration.provider.select.first": "Otwórz najpierw folder, aby wybrać dostawcę konfiguracji",
 	"edit.configurations.open.first": "Otwórz najpierw folder, aby edytować konfiguracje",
+	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony.",
 	"add.includepath.open.first": "Otwórz najpierw folder, aby dodać go do {0}"
 }
