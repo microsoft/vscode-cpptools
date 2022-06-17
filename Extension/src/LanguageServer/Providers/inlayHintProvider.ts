@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import { DefaultClient, openFileVersions } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
+import { CppSettings } from '../settings';
 
 interface GetInlayHintsParams {
     uri: string;
@@ -20,7 +21,7 @@ interface CppInlayHint {
     label: string;
     inlayHintKind: InlayHintKind;
     isValueRef: boolean;
-    // hasParamName: boolean;
+    hasParamName: boolean;
 }
 
 interface GetInlayHintsResult {
@@ -83,35 +84,35 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     private buildVSCodeHints(cacheEntry: InlayHintsCacheEntry): vscode.InlayHint[] {
         let result: vscode.InlayHint[] = [];
-        const showTypeHintsEnabled: boolean = true; // TODO: get value from settings.
-        const showParamHintsEnabled: boolean = true; // TODO: get value from settings.
-        if (showTypeHintsEnabled) {
+        const settings: CppSettings = new CppSettings();
+        if (settings.inlayHintsAutoDeclarationTypes) {
             result = result.concat(cacheEntry?.TypeHints);
         }
-        if (showParamHintsEnabled) {
-            const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
-            result = result.concat(resolvedParameterHints);
-        }
+        const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
+        result = result.concat(resolvedParameterHints);
         return result;
     }
 
     private resolveParameterHints(hints: CppInlayHint[]): vscode.InlayHint[] {
         const resolvedHints: vscode.InlayHint[] = [];
-        const showRefEnabled: boolean = true; // TODO: get from settings
-        const hideParamNameEnabled: boolean = false; // TODO: get from settings
-        for (const h of hints) {
+        const settings: CppSettings = new CppSettings();
+        for (const hint of hints) {
             // Build parameter label based on settings.
-            // TODO: remove label if param includes parameter name or in comments.
-            const paramName: string = (hideParamNameEnabled /* && h.hasParamName*/) ? "" : h.label;
-            let refString: string = "";
-            if (showRefEnabled && h.isValueRef) {
-                refString = (paramName.length > 0) ? "& " : "&";
+            let paramHintLabel: string = "";
+            if (settings.inlayHintsParameterNames) {
+                paramHintLabel = (settings.inlayHintsParameterNamesSuppressName && hint.hasParamName) ? "" : hint.label;
             }
-            const colonString: string = (paramName.length > 0 || refString.length > 0) ? ":" : "";
-            const label: string = refString + paramName + colonString;
+            let refOperatorString: string = "";
+            if (settings.inlayHintsReferenceOperator && hint.isValueRef) {
+                refOperatorString = (paramHintLabel.length > 0) ? "& " : "&";
+            }
+            let label: string = "";
+            if (paramHintLabel.length > 0 || refOperatorString.length > 0) {
+                label = refOperatorString +  paramHintLabel + ":";
+            }
 
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                new vscode.Position(h.position.line, h.position.character),
+                new vscode.Position(hint.position.line, hint.position.character),
                 label,
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
