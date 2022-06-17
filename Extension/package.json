@@ -2226,7 +2226,7 @@
         "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentContainsName": {
           "type": "boolean",
           "default": true,
-          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.description%",
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
           "scope": "application"
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
