@@ -4034,17 +4034,20 @@
       "[cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true
+        "editor.semanticHighlighting.enabled": true,
+        "editor.inlayHints.fontSize": 11
       },
       "[cuda-cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true
+        "editor.semanticHighlighting.enabled": true,
+        "editor.inlayHints.fontSize": 11
       },
       "[c]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true
+        "editor.semanticHighlighting.enabled": true,
+        "editor.inlayHints.fontSize": 11
       }
     },
     "semanticTokenTypes": [
