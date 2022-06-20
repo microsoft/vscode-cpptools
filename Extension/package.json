@@ -2213,13 +2213,13 @@
         },
         "C_Cpp.inlayHints.autoDeclarationTypes.enabled": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
           "scope": "application"
         },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription%",
           "scope": "application"
         },
@@ -2231,7 +2231,7 @@
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
           "scope": "application"
         },
