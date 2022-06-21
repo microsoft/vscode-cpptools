@@ -882,7 +882,7 @@ export interface GenerateDoxygenCommentParams {
     position: Position;
 }
 
-export interface GenerateDoxygenCommentsResult {
+export interface GenerateDoxygenCommentResult {
     contents : string;
 }
 
@@ -921,7 +921,7 @@ export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, 
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
-const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, Position | undefined, void, void> = new RequestType<GenerateDoxygenCommentParams, Position | undefined, void, void>('cpptools/generateDoxygenCommentParams');
+const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void, void>('cpptools/generateDoxygenComment');
 
 
 // Notifications to the server
@@ -1455,6 +1455,7 @@ export class DefaultClient implements Client {
         const settings_suggestSnippets: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
+        const settings_generateDoxygenComment: (string | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1622,6 +1623,7 @@ export class DefaultClient implements Client {
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
+                settings_generateDoxygenComment.push(setting.generateDoxygenComment);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1805,6 +1807,7 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
+                generateDoxygenComment: settings_generateDoxygenComment,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -3462,7 +3465,7 @@ export class DefaultClient implements Client {
             };
 
             await this.awaitUntilLanguageClientReady();
-            const result: GenerateDoxygenCommentsResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
+            const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
             if (result?.contents) {
 
                 const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -3473,26 +3476,6 @@ export class DefaultClient implements Client {
                     workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
                     vscode.workspace.applyEdit(workspaceEdit);
                 } 
-
-                // for (const file in result.contents) {
-                //     const uri: vscode.Uri = vscode.Uri.file(file);
-                //     const edits: vscode.TextEdit[] = [];
-                //     for (const edit of result.changes[file]) {
-                //         const range: vscode.Range = new vscode.Range(
-                //             new vscode.Position(edit.range.start.line, edit.range.start.character),
-                //             new vscode.Position(edit.range.end.line, edit.range.end.character));
-                //         edits.push(new vscode.TextEdit(range, edit.newText));
-                //     }
-                //     workspaceEdit.set(uri, edits);
-                // const p: vscode.Position = new vscode.Position(response.line, response.character);
-                // const r: vscode.Range = new vscode.Range(p, p);
-
-                // // Check if still the active document.
-                // const currentEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-                // if (currentEditor && editor.document.uri === currentEditor.document.uri) {
-                //     currentEditor.selection = new vscode.Selection(r.start, r.end);
-                //     currentEditor.revealRange(r);
-                // }
             }
         }
     }

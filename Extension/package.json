@@ -2282,6 +2282,18 @@
           "markdownDescription": "%c_cpp.configuration.simplifyStructuredComments.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.generateDoxygenComment":{
+          "type":"string",
+          "enum":[
+            "///",
+            "/**",
+            "/*!",
+            "//!"
+          ],
+          "default":"/**",
+          "markdownDescription": "%c_cpp.configuration.generateDoxygenComment.markdownDescription%",
+          "scope": "application"
+        },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
