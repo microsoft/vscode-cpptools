@@ -3953,6 +3953,9 @@
       },
       {
         "language": "cuda"
+      },
+      {
+        "language": "rust"
       }
     ],
     "jsonValidation": [
