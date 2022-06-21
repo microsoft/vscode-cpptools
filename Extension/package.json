@@ -4035,19 +4035,19 @@
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true,
-        "editor.inlayHints.fontSize": 11
+        "editor.inlayHints.fontSize": 12
       },
       "[cuda-cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true,
-        "editor.inlayHints.fontSize": 11
+        "editor.inlayHints.fontSize": 12
       },
       "[c]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true,
-        "editor.inlayHints.fontSize": 11
+        "editor.inlayHints.fontSize": 12
       }
     },
     "semanticTokenTypes": [
