@@ -1548,5 +1548,5 @@ export function replaceAll(str: string, searchValue: string, replaceValue: strin
 export interface ISshHostInfo {
     hostName: string;
     user?: string;
-    port?: number;
+    port?: number | string;
 }

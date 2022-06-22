@@ -3352,7 +3352,15 @@
                               "default": ""
                             },
                             "port": {
-                              "type": "number",
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+$"
+                                }
+                              ],
                               "description": "%c_cpp.debuggers.host.port.description%",
                               "default": 22
                             },
@@ -3377,7 +3385,15 @@
                                     "default": ""
                                   },
                                   "port": {
-                                    "type": "number",
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$"
+                                      }
+                                    ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
                                   }
@@ -3439,7 +3455,15 @@
                               "default": ""
                             },
                             "port": {
-                              "type": "number",
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+$"
+                                }
+                              ],
                               "description": "%c_cpp.debuggers.host.port.description%",
                               "default": 22
                             },
@@ -3464,7 +3488,15 @@
                                     "default": ""
                                   },
                                   "port": {
-                                    "type": "number",
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$"
+                                      }
+                                    ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
                                   }
@@ -3887,7 +3919,15 @@
                               "default": ""
                             },
                             "port": {
-                              "type": "number",
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+$"
+                                }
+                              ],
                               "description": "%c_cpp.debuggers.host.port.description%",
                               "default": 22
                             },
@@ -3912,7 +3952,15 @@
                                     "default": ""
                                   },
                                   "port": {
-                                    "type": "number",
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$"
+                                      }
+                                    ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
                                   }
@@ -3974,7 +4022,15 @@
                               "default": ""
                             },
                             "port": {
-                              "type": "number",
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+$"
+                                }
+                              ],
                               "description": "%c_cpp.debuggers.host.port.description%",
                               "default": 22
                             },
@@ -3999,7 +4055,15 @@
                                     "default": ""
                                   },
                                   "port": {
-                                    "type": "number",
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$"
+                                      }
+                                    ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
                                   }
