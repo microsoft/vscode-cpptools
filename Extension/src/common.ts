@@ -1550,3 +1550,12 @@ export interface ISshHostInfo {
     user?: string;
     port?: number | string;
 }
+
+export interface ISshLocalForwardInfo {
+    bindAddress?: string;
+    port?: number | string;
+    host?: string;
+    hostPort?: number | string;
+    localSocket?: string;
+    remoteSocket?: string;
+}

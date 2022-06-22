@@ -981,7 +981,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 }
                 const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
-                const sshResult: util.ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, step.continueOn, cancellationToken);
+                const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
+                const continueOn: string = step.continueOn;
+                const sshResult: util.ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, localForwards, continueOn, cancellationToken);
                 if (!sshResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }

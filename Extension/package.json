@@ -3358,7 +3358,7 @@
                                 },
                                 {
                                   "type": "string",
-                                  "pattern": "^\\d+$"
+                                  "pattern": "^\\d+$|^\\${.+}$"
                                 }
                               ],
                               "description": "%c_cpp.debuggers.host.port.description%",
@@ -3391,11 +3391,65 @@
                                       },
                                       {
                                         "type": "string",
-                                        "pattern": "^\\d+$"
+                                        "pattern": "^\\d+$|^\\${.+}$"
                                       }
                                     ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
+                                  }
+                                }
+                              }
+                            },
+                            "localForwards": {
+                              "type": "array",
+                              "description": "%c_cpp.debuggers.host.localForward.description%",
+                              "items": {
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                  "bindAddress": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                    "default": ""
+                                  },
+                                  "port": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                  },
+                                  "host": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                    "default": ""
+                                  },
+                                  "hostPort": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                  },
+                                  "localSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                    "default": ""
+                                  },
+                                  "remoteSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                    "default": ""
                                   }
                                 }
                               }
@@ -3461,7 +3515,7 @@
                                 },
                                 {
                                   "type": "string",
-                                  "pattern": "^\\d+$"
+                                  "pattern": "^\\d+$|^\\${.+}$"
                                 }
                               ],
                               "description": "%c_cpp.debuggers.host.port.description%",
@@ -3494,11 +3548,65 @@
                                       },
                                       {
                                         "type": "string",
-                                        "pattern": "^\\d+$"
+                                        "pattern": "^\\d+$|^\\${.+}$"
                                       }
                                     ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
+                                  }
+                                }
+                              }
+                            },
+                            "localForwards": {
+                              "type": "array",
+                              "description": "%c_cpp.debuggers.host.localForward.description%",
+                              "items": {
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                  "bindAddress": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                    "default": ""
+                                  },
+                                  "port": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                  },
+                                  "host": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                    "default": ""
+                                  },
+                                  "hostPort": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                  },
+                                  "localSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                    "default": ""
+                                  },
+                                  "remoteSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                    "default": ""
                                   }
                                 }
                               }
@@ -3925,7 +4033,7 @@
                                 },
                                 {
                                   "type": "string",
-                                  "pattern": "^\\d+$"
+                                  "pattern": "^\\d+$|^\\${.+}$"
                                 }
                               ],
                               "description": "%c_cpp.debuggers.host.port.description%",
@@ -3958,11 +4066,65 @@
                                       },
                                       {
                                         "type": "string",
-                                        "pattern": "^\\d+$"
+                                        "pattern": "^\\d+$|^\\${.+}$"
                                       }
                                     ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
+                                  }
+                                }
+                              }
+                            },
+                            "localForwards": {
+                              "type": "array",
+                              "description": "%c_cpp.debuggers.host.localForward.description%",
+                              "items": {
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                  "bindAddress": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                    "default": ""
+                                  },
+                                  "port": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                  },
+                                  "host": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                    "default": ""
+                                  },
+                                  "hostPort": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                  },
+                                  "localSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                    "default": ""
+                                  },
+                                  "remoteSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                    "default": ""
                                   }
                                 }
                               }
@@ -4028,7 +4190,7 @@
                                 },
                                 {
                                   "type": "string",
-                                  "pattern": "^\\d+$"
+                                  "pattern": "^\\d+$|^\\${.+}$"
                                 }
                               ],
                               "description": "%c_cpp.debuggers.host.port.description%",
@@ -4061,11 +4223,65 @@
                                       },
                                       {
                                         "type": "string",
-                                        "pattern": "^\\d+$"
+                                        "pattern": "^\\d+$|^\\${.+}$"
                                       }
                                     ],
                                     "description": "%c_cpp.debuggers.host.port.description%",
                                     "default": 22
+                                  }
+                                }
+                              }
+                            },
+                            "localForwards": {
+                              "type": "array",
+                              "description": "%c_cpp.debuggers.host.localForward.description%",
+                              "items": {
+                                "type": "object",
+                                "default": {},
+                                "properties": {
+                                  "bindAddress": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                    "default": ""
+                                  },
+                                  "port": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                  },
+                                  "host": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                    "default": ""
+                                  },
+                                  "hostPort": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "pattern": "^\\d+$|^\\${.+}$"
+                                      }
+                                    ],
+                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                  },
+                                  "localSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                    "default": ""
+                                  },
+                                  "remoteSocket": {
+                                    "type": "string",
+                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                    "default": ""
                                   }
                                 }
                               }
