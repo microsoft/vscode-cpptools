@@ -278,9 +278,9 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
         const relatedCodeActions: CodeActionDiagnosticInfo[] = [];
         const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [];
         const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
+        rootAndRelatedIdentifiersAndUris.push(identifiersAndUri);
         if (workspaceEdit.workspaceEdit !== undefined) {
             rootAndRelatedWorkspaceEdits.push(workspaceEdit);
-            rootAndRelatedIdentifiersAndUris.push(identifiersAndUri);
         }
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
