@@ -131,9 +131,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                     h.label,
                     vscode.InlayHintKind.Type);
                 inlayHint.paddingRight = true;
-                if (h.leftPadding) {
-                    inlayHint.paddingLeft = true;
-                }
+                inlayHint.paddingLeft = h.leftPadding;
                 typeHints.push(inlayHint);
             }
         }
