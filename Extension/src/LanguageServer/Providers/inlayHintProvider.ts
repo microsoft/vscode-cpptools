@@ -101,6 +101,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             let paramHintLabel: string = "";
             if (settings.inlayHintsParameterNames) {
                 paramHintLabel = (settings.inlayHintsParameterNamesSuppressName && hint.hasParamName) ? "" : hint.label;
+                if (paramHintLabel !== "" && settings.inlayHintsParameterNamesHideLeadingUnderscores) {
+                    while (paramHintLabel.startsWith('_')) {
+                        paramHintLabel = paramHintLabel.substring(1);
+                    }
+                }
             }
             let refOperatorString: string = "";
             if (settings.inlayHintsReferenceOperator && hint.isValueRef) {

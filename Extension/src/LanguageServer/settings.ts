@@ -264,6 +264,10 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentContainsName") === true;
     }
 
+    public get inlayHintsParameterNamesHideLeadingUnderscores(): boolean {
+        return super.Section.get<boolean>("inlayHints.parameterNames.hideLeadingUnderscores") === true;
+    }
+
     public get inlayHintsReferenceOperator(): boolean {
         return super.Section.get<boolean>("inlayHints.referenceOperator.enabled") === true;
     }
