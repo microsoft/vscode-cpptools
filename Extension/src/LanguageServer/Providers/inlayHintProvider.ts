@@ -22,6 +22,7 @@ interface CppInlayHint {
     inlayHintKind: InlayHintKind;
     isValueRef: boolean;
     hasParamName: boolean;
+    leftPadding: boolean;
 }
 
 interface GetInlayHintsResult {
@@ -130,6 +131,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                     h.label,
                     vscode.InlayHintKind.Type);
                 inlayHint.paddingRight = true;
+                inlayHint.paddingLeft = h.leftPadding;
                 typeHints.push(inlayHint);
             }
         }
