@@ -3468,14 +3468,20 @@ export class DefaultClient implements Client {
             const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
             if (result?.contents) {
 
-                const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                const edits: vscode.TextEdit[] = [];
+                if(result.contents.length > 1) {
+                    const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                    const edits: vscode.TextEdit[] = [];
+    
+                    if(vscode.window.activeTextEditor) {
 
-                if(vscode.window.activeTextEditor) {
-                    edits.push(new vscode.TextEdit(vscode.window.activeTextEditor.selection, result?.contents));
-                    workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                    vscode.workspace.applyEdit(workspaceEdit);
-                } 
+                        const range = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, vscode.window.activeTextEditor.selection.end.character);
+                        vscode.window.activeTextEditor.selection 
+                        edits.push(new vscode.TextEdit(range, result?.contents));
+                        workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                        vscode.workspace.applyEdit(workspaceEdit);
+                    } 
+                }
+
             }
         }
     }

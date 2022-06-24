@@ -2292,7 +2292,7 @@
           ],
           "default":"/**",
           "markdownDescription": "%c_cpp.configuration.generateDoxygenComment.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
