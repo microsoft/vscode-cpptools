@@ -2235,6 +2235,12 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.inlayHints.referenceOperator.showSpace": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
+            "scope": "application"
+        },
         "C_Cpp.loggingLevel": {
           "type": "string",
           "enum": [
