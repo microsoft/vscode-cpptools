@@ -2235,10 +2235,10 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
           "scope": "application"
         },
-        "C_Cpp.inlayHints.referenceOperator.useSpace": {
+        "C_Cpp.inlayHints.referenceOperator.showSpace": {
             "type": "boolean",
             "default": false,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.useSpace.markdownDescription%",
+            "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
             "scope": "application"
         },
         "C_Cpp.loggingLevel": {

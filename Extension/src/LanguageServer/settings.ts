@@ -268,8 +268,8 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.referenceOperator.enabled") === true;
     }
 
-    public get inlayHintsReferenceOperatorUseSpace(): boolean {
-        return super.Section.get<boolean>("inlayHints.referenceOperator.useSpace") === true;
+    public get inlayHintsReferenceOperatorShowSpace(): boolean {
+        return super.Section.get<boolean>("inlayHints.referenceOperator.showSpace") === true;
     }
 
     public get enhancedColorization(): boolean {
