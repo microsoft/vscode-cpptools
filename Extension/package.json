@@ -2217,6 +2217,12 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
+            "scope": "application"
+        },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
           "default": false,
