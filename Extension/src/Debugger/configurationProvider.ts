@@ -95,7 +95,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         const selection: ConfigMenu | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": ConfigSource.unknown, "configMode": ConfigMode.unknown, "cancelled": "true", "success": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": ConfigSource.unknown, "configMode": ConfigMode.unknown, "cancelled": "true", "complete": "true" });
             return []; // User canceled it.
         }
 
@@ -119,7 +119,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // resolveDebugConfiguration will be automatically called after calling provideDebugConfigurations.
             const configs: CppDebugConfiguration[]= await this.provideDebugConfigurations(folder);
             if (!configs || configs.length === 0) {
-                Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "success": "true" });
+                Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "complete": "true" });
                 return undefined; // aborts debugging silently
             } else {
                 // Currently, we expect only one debug config to be selected.
@@ -153,9 +153,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 try {
                     await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
                     config.preLaunchTask = undefined;
-                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "true" });
+                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "complete": "true" });
                 } catch (err) {
-                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "false" });
+                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "complete": "false" });
                 }
                 return config;
             }
@@ -180,7 +180,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             config.debugType = config.debugType ? config.debugType : DebugType.debug;
             const configMode: ConfigMode = isExistingConfig ? ConfigMode.launchConfig : ConfigMode.noLaunchConfig;
             // if configuration.debuggerEvent === undefined, it means this configuration is already defined in launch.json and is shown in debugPanel.
-            Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "true" });
+            Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "complete": "true" });
 
             if (!resolveByVsCode) {
                 if ((singleFile || (isDebugPanel && !folder && isExistingTask))) {
@@ -763,7 +763,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, false, true);
         if (!selectedConfig) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "true", "success": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "true", "complete": "true" });
             return; // User canceled it.
         }
 
@@ -780,7 +780,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         selectedConfig.debuggerEvent = undefined;
         // Write debug configuration in launch.json file.
         await this.writeDebugConfig(selectedConfig, isExistingConfig, folder);
-        Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "true" });
+        Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "complete": "true" });
     }
 
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
@@ -792,7 +792,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor);
         if (!selectedConfig) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? DebugType.debug : DebugType.run, "configSource": ConfigSource.unknown, "cancelled": "true", "success": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? DebugType.debug : DebugType.run, "configSource": ConfigSource.unknown, "cancelled": "true", "complete": "true" });
             return; // User canceled it.
         }
 
@@ -870,7 +870,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 if (e && e.message === util.failedToParseJson) {
                     vscode.window.showErrorMessage(util.failedToParseJson);
                 }
-                Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "false" });
+                Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "complete": "false" });
             }
         }
     }
