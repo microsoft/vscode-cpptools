@@ -2841,7 +2841,8 @@
         "languages": [
           "c",
           "cpp",
-          "cuda-cpp"
+          "cuda-cpp",
+          "rust"
         ],
         "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -3519,7 +3520,8 @@
         "languages": [
           "c",
           "cpp",
-          "cuda-cpp"
+          "cuda-cpp",
+          "rust"
         ],
         "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -3923,6 +3925,9 @@
       },
       {
         "language": "cuda"
+      },
+      {
+        "language": "rust"
       }
     ],
     "jsonValidation": [
