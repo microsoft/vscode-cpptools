@@ -2235,6 +2235,12 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
+            "scope": "application"
+        },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
           "default": false,
