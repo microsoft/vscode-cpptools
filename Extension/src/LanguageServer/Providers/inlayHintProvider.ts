@@ -117,7 +117,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             }
             let refOperatorString: string = "";
             if (settings.inlayHintsReferenceOperator && hint.isValueRef) {
-                refOperatorString = (paramHintLabel.length > 0) ? "& " : "&";
+                refOperatorString = (paramHintLabel.length > 0 && settings.inlayHintsReferenceOperatorShowSpace) ? "& " : "&";
             }
             let label: string = "";
             if (paramHintLabel.length > 0 || refOperatorString.length > 0) {
