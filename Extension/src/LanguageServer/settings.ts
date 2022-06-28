@@ -256,6 +256,10 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;
     }
 
+    public get inlayHintsAutoDeclarationTypesShowOnLeft(): boolean {
+        return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.showOnLeft") === true;
+    }
+
     public get inlayHintsParameterNames(): boolean {
         return super.Section.get<boolean>("inlayHints.parameterNames.enabled") === true;
     }
