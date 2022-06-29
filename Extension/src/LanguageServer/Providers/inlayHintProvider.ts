@@ -23,6 +23,8 @@ interface CppInlayHint {
     isValueRef: boolean;
     hasParamName: boolean;
     leftPadding: boolean;
+    rightPadding: boolean;
+    identifierLength: number;
 }
 
 interface GetInlayHintsResult {
@@ -102,6 +104,18 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             let paramHintLabel: string = "";
             if (settings.inlayHintsParameterNames) {
                 paramHintLabel = (settings.inlayHintsParameterNamesSuppressName && hint.hasParamName) ? "" : hint.label;
+                if (paramHintLabel !== "" && settings.inlayHintsParameterNamesHideLeadingUnderscores) {
+                    let nonUnderscoreIndex: number = 0;
+                    for (let i: number = 0; i < paramHintLabel.length; ++i) {
+                        if (paramHintLabel[i] !== '_') {
+                            nonUnderscoreIndex = i;
+                            break;
+                        }
+                    }
+                    if (nonUnderscoreIndex > 0) {
+                        paramHintLabel = paramHintLabel.substring(nonUnderscoreIndex);
+                    }
+                }
             }
             let refOperatorString: string = "";
             if (settings.inlayHintsReferenceOperator && hint.isValueRef) {
@@ -124,14 +138,17 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     private createCacheEntry(inlayHintsResults: GetInlayHintsResult): InlayHintsCacheEntry {
         const typeHints: vscode.InlayHint[] = [];
+        const settings: CppSettings = new CppSettings();
         for (const h of inlayHintsResults.inlayHints) {
             if (h.inlayHintKind === InlayHintKind.Type) {
+                const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && h.identifierLength > 0;
                 const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                    new vscode.Position(h.position.line, h.position.character),
-                    h.label,
+                    new vscode.Position(h.position.line, h.position.character +
+                        (showOnLeft ? 0 : h.identifierLength)),
+                    (showOnLeft ? h.label : ": " + h.label),
                     vscode.InlayHintKind.Type);
-                inlayHint.paddingRight = true;
-                inlayHint.paddingLeft = h.leftPadding;
+                inlayHint.paddingRight = showOnLeft || h.rightPadding;
+                inlayHint.paddingLeft = showOnLeft && h.leftPadding;
                 typeHints.push(inlayHint);
             }
         }

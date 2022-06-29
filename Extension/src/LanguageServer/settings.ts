@@ -256,12 +256,20 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;
     }
 
+    public get inlayHintsAutoDeclarationTypesShowOnLeft(): boolean {
+        return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.showOnLeft") === true;
+    }
+
     public get inlayHintsParameterNames(): boolean {
         return super.Section.get<boolean>("inlayHints.parameterNames.enabled") === true;
     }
 
     public get inlayHintsParameterNamesSuppressName(): boolean {
         return super.Section.get<boolean>("inlayHints.parameterNames.suppressWhenArgumentContainsName") === true;
+    }
+
+    public get inlayHintsParameterNamesHideLeadingUnderscores(): boolean {
+        return super.Section.get<boolean>("inlayHints.parameterNames.hideLeadingUnderscores") === true;
     }
 
     public get inlayHintsReferenceOperator(): boolean {
