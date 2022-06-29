@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.11.1: June 29, 2022
+## Version 1.11.1 (pre-release): June 29, 2022
 ### Enhancements
 * Move "auto" inlay hints to the right by default and add `C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft`. [#9478](https://github.com/microsoft/vscode-cpptools/issues/9478)
 * Reduce the default `editor.inlayHint.fontSize` to 12 (90% of the default `editor.fontSize`) for C/C++ languages. [PR #4980](https://github.com/microsoft/vscode-cpptools/pull/9480)
@@ -19,7 +19,7 @@
 * Fix duplicate inlay hints appearing sometimes. [#9487](https://github.com/microsoft/vscode-cpptools/issues/9487)
 * Fix process launching concurrency issues on Windows.
 
-## Version 1.11.0: June 20, 2022
+## Version 1.11.0 (pre-release): June 20, 2022
 ### New Features
 * Add inlay hints for parameters and auto types. [#5845](https://github.com/microsoft/vscode-cpptools/issues/5845)
 
