@@ -39,8 +39,8 @@ type InlayHintsCacheEntry = {
     ParameterHints: CppInlayHint[];
 };
 
-const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult, void, void> =
-    new RequestType<GetInlayHintsParams, GetInlayHintsResult, void, void>('cpptools/getInlayHints');
+const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult, void> =
+    new RequestType<GetInlayHintsParams, GetInlayHintsResult, void>('cpptools/getInlayHints');
 
 export class InlayHintsProvider implements vscode.InlayHintsProvider {
     private client: DefaultClient;

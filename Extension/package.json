@@ -4579,7 +4579,7 @@
     "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
     "@vscode/extension-telemetry": "^0.6.2",
-    "vscode-languageclient": "^5.2.1",
+    "vscode-languageclient": "^8.0.1",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
     "which": "^2.0.2",

@@ -26,8 +26,8 @@ interface CodeActionCommand {
     uri?: string;
 }
 
-export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void> =
-    new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void, void>('cpptools/getCodeActions');
+export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void> =
+    new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void>('cpptools/getCodeActions');
 
 export class CodeActionProvider implements vscode.CodeActionProvider {
     private client: DefaultClient;
