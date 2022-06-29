@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.65.0"
+    "vscode": "^1.67.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
