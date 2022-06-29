@@ -3,7 +3,6 @@
 ## Version 1.11.1 (pre-release): June 29, 2022
 ### Enhancements
 * Move "auto" inlay hints to the right by default and add `C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft`. [#9478](https://github.com/microsoft/vscode-cpptools/issues/9478)
-* Reduce the default `editor.inlayHint.fontSize` to 12 (90% of the default `editor.fontSize`) for C/C++ languages. [PR #4980](https://github.com/microsoft/vscode-cpptools/pull/9480)
 * Allow breakpoints for Rust debugging. [PR #9484](https://github.com/microsoft/vscode-cpptools/pull/9484)
 * Remove `_` from the start of parameter inlay hints and add `C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores`. [#9485](https://github.com/microsoft/vscode-cpptools/issues/9485)
 * Add `C_Cpp.inlayHints.referenceOperator.showSpace` setting. [#9486](https://github.com/microsoft/vscode-cpptools/issues/9486)
