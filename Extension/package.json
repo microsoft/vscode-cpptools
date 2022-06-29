@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.11.0-main",
+  "version": "1.11.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2706,7 +2706,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.debugShortcut.description%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.legacyCompilerArgsBehavior": {
           "type": "boolean",
@@ -4057,20 +4057,17 @@
       "[cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true,
-        "editor.inlayHints.fontSize": 12
+        "editor.semanticHighlighting.enabled": true
       },
       "[cuda-cpp]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true,
-        "editor.inlayHints.fontSize": 12
+        "editor.semanticHighlighting.enabled": true
       },
       "[c]": {
         "editor.wordBasedSuggestions": false,
         "editor.suggest.insertMode": "replace",
-        "editor.semanticHighlighting.enabled": true,
-        "editor.inlayHints.fontSize": 12
+        "editor.semanticHighlighting.enabled": true
       }
     },
     "semanticTokenTypes": [
