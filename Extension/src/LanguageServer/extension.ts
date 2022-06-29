@@ -433,21 +433,7 @@ export function registerCommands(): void {
 }
 
 function onGenerateDoxygenComment() :void {
-
-    //const client: Client = getActiveClient();
     getActiveClient().handleGenerateDoxygenComment();
-   
-    // const allTypeWorkspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-    // const edits: vscode.TextEdit[] = [];
-
-    // if(vscode.window.activeTextEditor) {
-    //     edits.push(new vscode.TextEdit(vscode.window.activeTextEditor.selection, "hello!"));
-    //     allTypeWorkspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-    //     vscode.workspace.applyEdit(allTypeWorkspaceEdit);
-    //     console.log(vscode.window.activeTextEditor.selection);
-    // } 
-    
-    
 }
 
 function onRestartIntelliSenseForFile(): void {

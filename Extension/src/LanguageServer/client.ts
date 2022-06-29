@@ -3465,24 +3465,42 @@ export class DefaultClient implements Client {
             };
 
             await this.awaitUntilLanguageClientReady();
+
+            const oldVersion = openFileVersions.get(params.uri);
             const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
-            if (result?.contents) {
 
-                if(result.contents.length > 1) {
-                    const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                    const edits: vscode.TextEdit[] = [];
-    
-                    if(vscode.window.activeTextEditor) {
-
-                        const range = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, vscode.window.activeTextEditor.selection.end.character);
-                        vscode.window.activeTextEditor.selection 
-                        edits.push(new vscode.TextEdit(range, result?.contents));
-                        workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                        vscode.workspace.applyEdit(workspaceEdit);
-                    } 
-                }
+            //check the activedocument, (version number doc.version) is the same 
+            //if no , just don't insert 
+            //check if the openfilerversion will be updated 
+            const newVersion = openFileVersions.get(params.uri);
+            //const oldVersion: number | undefined = openFileVersions.get(vscode.TextDocumentChangeEvent.document.uri.toString());
+            //const newVersion: number = vscode.TextDocumentChangeEvent.document.version;
+            if(oldVersion === undefined) {
 
             }
+            if(newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion) {
+                
+            }
+                // openFileVersions.set(vscode.TextDocumentChangeEvent.document.uri.toString(), newVersion);
+            else {
+                if (result?.contents) {
+
+                    if(result.contents.length > 1) {
+                        const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                        const edits: vscode.TextEdit[] = [];
+        
+                        if(vscode.window.activeTextEditor) {
+    
+                            const newRange = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
+                            edits.push(new vscode.TextEdit(newRange, result?.contents));
+                            workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                            vscode.workspace.applyEdit(workspaceEdit);
+                        } 
+                    }
+    
+                }
+            }  
+
         }
     }
 
