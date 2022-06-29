@@ -2706,7 +2706,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.debugShortcut.description%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.legacyCompilerArgsBehavior": {
           "type": "boolean",
