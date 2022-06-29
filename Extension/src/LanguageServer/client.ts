@@ -60,6 +60,7 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
@@ -747,8 +748,6 @@ export class DefaultClient implements Client {
     public static renameRequestsPending: number = 0;
     public static renamePending: boolean = false;
 
-    private firstClientStarted: Promise<void> = Promise.resolve();
-
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
 
@@ -857,7 +856,7 @@ export class DefaultClient implements Client {
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
-                this.firstClientStarted = languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
+                firstClientStarted = languageClient.start();
                 util.setProgress(util.getProgressExecutableStarted());
                 firstClient = true;
             }
@@ -866,7 +865,7 @@ export class DefaultClient implements Client {
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(async () => {
-                await this.firstClientStarted;
+                await firstClientStarted;
                 try {
                     const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
                     this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
