@@ -2694,7 +2694,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.debugShortcut.description%",
-          "scope": "language-overridable"
+          "scope": "resource"
         },
         "C_Cpp.legacyCompilerArgsBehavior": {
           "type": "boolean",
