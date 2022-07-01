@@ -3215,6 +3215,7 @@ export class DefaultClient implements Client {
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
                     if (providerVersion < Version.v6) {
                         itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
+                        itemConfig.compilerArgs = undefined;
                     } else {
                         itemConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
                     }
@@ -3306,6 +3307,7 @@ export class DefaultClient implements Client {
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;
                 if (providerVersion < Version.v6) {
                     sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
+                    sanitized.compilerArgs = undefined;
                 } else {
                     sanitized.compilerArgs = compilerPathAndArgs.allCompilerArgs;
                 }
