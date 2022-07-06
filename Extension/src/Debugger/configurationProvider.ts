@@ -482,13 +482,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (fileIsCpp) {
             if (!DebugConfigurationProvider.detectedCppBuildTasks || DebugConfigurationProvider.detectedCppBuildTasks.length === 0) {
                 DebugConfigurationProvider.detectedCppBuildTasks = await cppBuildTaskProvider.getTasks(true);
-                DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCppBuildTasks;
             }
+            DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCppBuildTasks;
         } else {
             if (!DebugConfigurationProvider.detectedCBuildTasks || DebugConfigurationProvider.detectedCBuildTasks.length === 0) {
                 DebugConfigurationProvider.detectedCBuildTasks = await cppBuildTaskProvider.getTasks(true);
-                DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCBuildTasks;
             }
+            DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCBuildTasks;
         }
     }
 
