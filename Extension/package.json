@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.11.0-main",
+  "version": "1.11.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2220,6 +2220,12 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
+            "scope": "application"
+        },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
           "default": false,
@@ -2232,11 +2238,23 @@
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
+            "scope": "application"
+        },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
           "scope": "application"
+        },
+        "C_Cpp.inlayHints.referenceOperator.showSpace": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
+            "scope": "application"
         },
         "C_Cpp.loggingLevel": {
           "type": "string",
@@ -2691,7 +2709,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.debugShortcut.description%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.legacyCompilerArgsBehavior": {
           "type": "boolean",
@@ -2868,7 +2886,8 @@
         "languages": [
           "c",
           "cpp",
-          "cuda-cpp"
+          "cuda-cpp",
+          "rust"
         ],
         "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -4388,7 +4407,8 @@
         "languages": [
           "c",
           "cpp",
-          "cuda-cpp"
+          "cuda-cpp",
+          "rust"
         ],
         "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -4792,6 +4812,9 @@
       },
       {
         "language": "cuda"
+      },
+      {
+        "language": "rust"
       }
     ],
     "jsonValidation": [
@@ -5363,7 +5386,7 @@
     "await-notify": "^1.0.1",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.24.2",
-    "eslint-plugin-jsdoc": "^36.1.0",
+    "eslint-plugin-jsdoc": "^39.3.3",
     "event-stream": "^4.0.1",
     "fs-extra": "^8.1.0",
     "gulp": "^4.0.2",
@@ -5401,7 +5424,7 @@
     "plist": "^3.0.5",
     "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
-    "vscode-extension-telemetry": "^0.4.4",
+    "@vscode/extension-telemetry": "^0.6.2",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
