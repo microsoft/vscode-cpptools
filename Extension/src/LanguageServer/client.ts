@@ -884,6 +884,7 @@ export interface GenerateDoxygenCommentParams {
 
 export interface GenerateDoxygenCommentResult {
     contents : string;
+    position: Position; 
 }
 
 interface SetTemporaryTextDocumentLanguageParams {
@@ -3443,7 +3444,7 @@ export class DefaultClient implements Client {
             await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
-                const p: vscode.Position = new vscode.Position(response.line, response.character);
+                const p: vscode.Position = new vscode.Position(response.line, response.character); 
                 const r: vscode.Range = new vscode.Range(p, p);
 
                 // Check if still the active document.
@@ -3468,20 +3469,14 @@ export class DefaultClient implements Client {
 
             const oldVersion = openFileVersions.get(params.uri);
             const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
-
-            //check the activedocument, (version number doc.version) is the same 
-            //if no , just don't insert 
-            //check if the openfilerversion will be updated 
             const newVersion = openFileVersions.get(params.uri);
-            //const oldVersion: number | undefined = openFileVersions.get(vscode.TextDocumentChangeEvent.document.uri.toString());
-            //const newVersion: number = vscode.TextDocumentChangeEvent.document.version;
             if(oldVersion === undefined) {
 
             }
-            if(newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion) {
+            else if(newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion) {
                 
             }
-                // openFileVersions.set(vscode.TextDocumentChangeEvent.document.uri.toString(), newVersion);
+                
             else {
                 if (result?.contents) {
 
@@ -3494,11 +3489,20 @@ export class DefaultClient implements Client {
                             const newRange = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
                             edits.push(new vscode.TextEdit(newRange, result?.contents));
                             workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                            vscode.workspace.applyEdit(workspaceEdit);
+                            await vscode.workspace.applyEdit(workspaceEdit);
+
+                            //set the cursor position after @brief
+                            if(result?.position) {
+                                const newPosition: vscode.Position = new vscode.Position(result.position.line, result.position.character);
+                                const newSelection = new vscode.Selection(newPosition, newPosition);
+                                editor.selection = newSelection;
+                            }
                         } 
                     }
     
                 }
+
+
             }  
 
         }
