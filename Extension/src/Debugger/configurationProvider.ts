@@ -323,6 +323,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Run deploy steps
         if (config.deploySteps && config.deploySteps.length !== 0) {
+            const codeVersion: number[] = vscode.version.split('.').map(num => parseInt(num, undefined));
+            if ((util.isNumber(codeVersion[0]) && codeVersion[0] < 1) || (util.isNumber(codeVersion[0]) && codeVersion[0] === 1 && util.isNumber(codeVersion[1]) && codeVersion[1] < 69)) {
+                logger.getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
+                return undefined;
+            }
             const deploySucceeded: boolean = await this.deploySteps(config, token);
             if (!deploySucceeded || token?.isCancellationRequested) {
                 return undefined;
