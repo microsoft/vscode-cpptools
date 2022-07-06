@@ -37,7 +37,6 @@ import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
-import * as logger from '../logger';
 import { updateLanguageConfigurations, CppSourceStr } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
@@ -49,7 +48,7 @@ import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams } from './codeAnalysis';
-import { DebugProtocolParams, showWarning, ShowWarningParams } from '../logger';
+import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -88,8 +87,8 @@ function logTelemetry(notificationBody: TelemetryPayload): void {
 function setupOutputHandlers(): void {
     console.assert(languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-    languageClient.onNotification(DebugProtocolNotification, logger.logDebugProtocol);
-    languageClient.onNotification(DebugLogNotification, logger.logLocalized);
+    languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
+    languageClient.onNotification(DebugLogNotification, logLocalized);
 }
 
 /** Note: We should not await on the following functions,
@@ -1468,7 +1467,7 @@ export class DefaultClient implements Client {
                         this.loggingLevel = newLoggingLevel;
                         const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
                         if (oldLoggingLevelLogged || newLoggingLevelLogged) {
-                            const out: logger.Logger = logger.getOutputChannelLogger();
+                            const out: Logger = getOutputChannelLogger();
                             out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
                         }
                     }
@@ -1760,7 +1759,7 @@ export class DefaultClient implements Client {
 
     public async logDiagnostics(): Promise<void> {
         const response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
-        const diagnosticsChannel: vscode.OutputChannel = logger.getDiagnosticsChannel();
+        const diagnosticsChannel: vscode.OutputChannel = getDiagnosticsChannel();
         diagnosticsChannel.clear();
 
         const header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
@@ -2298,7 +2297,7 @@ export class DefaultClient implements Client {
         } else if (message.endsWith("IntelliSense done")) {
             const settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
-                const out: logger.Logger = logger.getOutputChannelLogger();
+                const out: Logger = getOutputChannelLogger();
                 const duration: number = Date.now() - timeStamp;
                 out.appendLine(localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", duration / 1000));
             }
@@ -2714,7 +2713,7 @@ export class DefaultClient implements Client {
         }
 
         const settings: CppSettings = new CppSettings();
-        const out: logger.Logger = logger.getOutputChannelLogger();
+        const out: Logger = getOutputChannelLogger();
         if (settings.loggingLevel === "Debug") {
             out.appendLine(localize("configurations.received", "Custom configurations received:"));
         }
@@ -2818,7 +2817,7 @@ export class DefaultClient implements Client {
 
             const settings: CppSettings = new CppSettings();
             if (settings.loggingLevel === "Debug") {
-                const out: logger.Logger = logger.getOutputChannelLogger();
+                const out: Logger = getOutputChannelLogger();
                 out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
             }
 
