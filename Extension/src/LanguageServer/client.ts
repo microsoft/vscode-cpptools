@@ -24,7 +24,7 @@ import { InlayHintsProvider } from './Providers/inlayHintProvider';
 import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
-import { getLocalizedString, LocalizeStringParams } from './localization';
+import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
 import { Location, TextEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation } from './utils';
 import * as util from '../common';
@@ -49,6 +49,7 @@ import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams } from './codeAnalysis';
+import { DebugProtocolParams, showWarning, ShowWarningParams } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -64,10 +65,6 @@ const languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
-let diagnosticsChannel: vscode.OutputChannel;
-let outputChannel: vscode.OutputChannel;
-let debugChannel: vscode.OutputChannel;
-let warningChannel: vscode.OutputChannel;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 
 let workspaceDisposables: vscode.Disposable[] = [];
@@ -91,30 +88,8 @@ function logTelemetry(notificationBody: TelemetryPayload): void {
 function setupOutputHandlers(): void {
     console.assert(languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-    languageClient.onNotification(DebugProtocolNotification, (output) => {
-        if (!debugChannel) {
-            debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
-            workspaceDisposables.push(debugChannel);
-        }
-        debugChannel.appendLine("");
-        debugChannel.appendLine("************************************************************************************************************************");
-        debugChannel.append(`${output}`);
-    });
-
-    languageClient.onNotification(DebugLogNotification, logLocalized);
-}
-
-function log(output: string): void {
-    if (!outputChannel) {
-        outputChannel = logger.getOutputChannel();
-        workspaceDisposables.push(outputChannel);
-    }
-    outputChannel.appendLine(`${output}`);
-}
-
-function logLocalized(params: LocalizeStringParams): void {
-    const output: string = getLocalizedString(params);
-    log(output);
+    languageClient.onNotification(DebugProtocolNotification, logger.logDebugProtocol);
+    languageClient.onNotification(DebugLogNotification, logger.logLocalized);
 }
 
 /** Note: We should not await on the following functions,
@@ -136,21 +111,6 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
         default:
             console.assert("Unrecognized type for showMessageWindow");
             break;
-    }
-}
-
-function showWarning(params: ShowWarningParams): void {
-    const message: string = getLocalizedString(params.localizeStringParams);
-    let showChannel: boolean = false;
-    if (!warningChannel) {
-        warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Configuration Warnings")}`);
-        workspaceDisposables.push(warningChannel);
-        showChannel = true;
-    }
-    // Append before showing the channel, to avoid a delay.
-    warningChannel.appendLine(`[${new Date().toLocaleString()}] ${message}`);
-    if (showChannel) {
-        warningChannel.show(true);
     }
 }
 
@@ -190,12 +150,6 @@ interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
     metrics?: { [key: string]: number };
-}
-
-interface DebugProtocolParams {
-    jsonrpc: string;
-    method: string;
-    params?: any;
 }
 
 interface ReportStatusNotificationBody extends WorkspaceFolderParams {
@@ -298,10 +252,6 @@ interface PublishIntelliSenseDiagnosticsParams {
 
 interface ShowMessageWindowParams {
     type: number;
-    localizeStringParams: LocalizeStringParams;
-}
-
-interface ShowWarningParams {
     localizeStringParams: LocalizeStringParams;
 }
 
@@ -1378,7 +1328,7 @@ export class DefaultClient implements Client {
                 },
                 vcpkg_root: util.getVcpkgRoot(),
                 experimentalFeatures: workspaceSettings.experimentalFeatures,
-                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", util.getLocaleId()),
+                edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
                 localizedStrings: localizedStrings,
                 packageVersion: util.packageJson.version,
                 legacyCompilerArgsBehavior: settings_legacyCompilerArgsBehavior
@@ -1810,12 +1760,8 @@ export class DefaultClient implements Client {
 
     public async logDiagnostics(): Promise<void> {
         const response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
-        if (!diagnosticsChannel) {
-            diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
-            workspaceDisposables.push(diagnosticsChannel);
-        } else {
-            diagnosticsChannel.clear();
-        }
+        const diagnosticsChannel: vscode.OutputChannel = logger.getDiagnosticsChannel();
+        diagnosticsChannel.clear();
 
         const header: string = `-------- Diagnostics - ${new Date().toLocaleString()}\n`;
         const version: string = `Version: ${util.packageJson.version}\n`;
@@ -2425,7 +2371,7 @@ export class DefaultClient implements Client {
     }
 
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
-        this.model.parsingWorkspaceStatus.Value = util.getLocalizedString(notificationBody);
+        this.model.parsingWorkspaceStatus.Value = getLocalizedString(notificationBody);
         if (notificationBody.text.startsWith("Workspace parsing paused")) {
             this.model.isParsingWorkspacePausable.Value = true;
             this.model.isParsingWorkspacePaused.Value = true;

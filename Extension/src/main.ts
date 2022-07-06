@@ -21,6 +21,8 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as semver from 'semver';
 import * as nls from 'vscode-nls';
 import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
+import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
+import { disposeOutputChannels, log } from './logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -40,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
             console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
             const fileName: string = uri.path.substring(1);
-            const locale: string = util.getLocaleId();
+            const locale: string = getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
             const fileExists: boolean = await util.checkFileExists(localizedFilePath);
             if (!fileExists) {
@@ -79,7 +81,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Read the setting and determine whether we should activate the language server prior to installing callbacks,
     // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
     // function, to allow any further setup to occur here, prior to activation.
-    const shouldActivateLanguageServer: boolean = (settings.intelliSenseEngine !== "Disabled" && !isOldMacOs);
+    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "Disabled";
+    const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
@@ -135,18 +138,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     if (shouldActivateLanguageServer) {
         await LanguageServer.activate();
     }
+    if (isIntelliSenseEngineDisabled) {
+        log(localize("intellisense.disabled", "intelliSenseEngine is Disabled"));
+    }
 
     return cppTools;
 }
 
-export function deactivate(): Thenable<void> {
+export async function deactivate(): Promise<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
     disposables.forEach(d => d.dispose());
     if (languageServiceDisabled) {
         return Promise.resolve();
     }
-    return LanguageServer.deactivate();
+    await LanguageServer.deactivate();
+    disposeOutputChannels();
 }
 
 async function makeBinariesExecutable(): Promise<void> {
@@ -322,7 +329,7 @@ async function checkVsixCompatibility(): Promise<void> {
             if (promise) {
                 promise.then(async (value) => {
                     if (value === moreInfoButton) {
-                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(util.getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(getLocalizedHtmlPath("Reinstalling the Extension.md")));
                     } else if (value === ignoreButton) {
                         ignoreMismatchedCompatibleVsix.Value = true;
                     }
