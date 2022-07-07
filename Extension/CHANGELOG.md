@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.10.8: June 29, 2022
+## Version 1.10.8: July 7, 2022
 ### Enhancements
 * Allow breakpoints for Rust debugging. [PR #9484](https://github.com/microsoft/vscode-cpptools/pull/9484)
 * Make `C_Cpp.debugShortcut` settable per-workspace folder. [PR #9514](https://github.com/microsoft/vscode-cpptools/pull/9514)
@@ -10,6 +10,7 @@
 * Fix skipping the compiler argument after `-c`. [#9453](https://github.com/microsoft/vscode-cpptools/issues/9453)
 * Fix `-std:c++20` not being handled with cl.exe. [#9458](https://github.com/microsoft/vscode-cpptools/issues/9458)
 * Fix bug with the environment being incorrect when compiler querying. [#9472](https://github.com/microsoft/vscode-cpptools/issues/9472)
+* Fix duplicate compiler args in compiler query with custom configuration providers using cpptools-api prior to v6. [#9531](https://github.com/microsoft/vscode-cpptools/issues/9531)
 * Fix process launching concurrency issues on Windows.
 
 ## Version 1.10.7: June 15, 2022
