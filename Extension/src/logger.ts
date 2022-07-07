@@ -8,6 +8,11 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { CppSettings } from './LanguageServer/settings';
 import { CppSourceStr } from './LanguageServer/extension';
+import * as nls from 'vscode-nls';
+import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 // This is used for testing purposes
 let Subscriber: (message: string) => void;
@@ -67,7 +72,10 @@ export class Logger {
     }
 }
 
-let outputChannel: vscode.OutputChannel | undefined;
+export let outputChannel: vscode.OutputChannel | undefined;
+export let diagnosticsChannel: vscode.OutputChannel | undefined;
+export let debugChannel: vscode.OutputChannel | undefined;
+export let warningChannel: vscode.OutputChannel | undefined;
 
 export function getOutputChannel(): vscode.OutputChannel {
     if (!outputChannel) {
@@ -81,6 +89,13 @@ export function getOutputChannel(): vscode.OutputChannel {
     return outputChannel;
 }
 
+export function getDiagnosticsChannel(): vscode.OutputChannel {
+    if (!diagnosticsChannel) {
+        diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
+    }
+    return diagnosticsChannel;
+}
+
 export function showOutputChannel(): void {
     getOutputChannel().show();
 }
@@ -92,4 +107,64 @@ export function getOutputChannelLogger(): Logger {
         outputChannelLogger = new Logger(message => getOutputChannel().append(message));
     }
     return outputChannelLogger;
+}
+
+export function log(output: string): void {
+    if (!outputChannel) {
+        outputChannel = getOutputChannel();
+    }
+    outputChannel.appendLine(`${output}`);
+}
+
+export interface DebugProtocolParams {
+    jsonrpc: string;
+    method: string;
+    params?: any;
+}
+
+export function logDebugProtocol(output: DebugProtocolParams): void {
+    if (!debugChannel) {
+        debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
+    }
+    debugChannel.appendLine("");
+    debugChannel.appendLine("************************************************************************************************************************");
+    debugChannel.append(`${output}`);
+}
+
+export interface ShowWarningParams {
+    localizeStringParams: LocalizeStringParams;
+}
+
+export function showWarning(params: ShowWarningParams): void {
+    const message: string = getLocalizedString(params.localizeStringParams);
+    let showChannel: boolean = false;
+    if (!warningChannel) {
+        warningChannel = vscode.window.createOutputChannel(`${localize("c.cpp.warnings", "C/C++ Configuration Warnings")}`);
+        showChannel = true;
+    }
+    // Append before showing the channel, to avoid a delay.
+    warningChannel.appendLine(`[${new Date().toLocaleString()}] ${message}`);
+    if (showChannel) {
+        warningChannel.show(true);
+    }
+}
+
+export function logLocalized(params: LocalizeStringParams): void {
+    const output: string = getLocalizedString(params);
+    log(output);
+}
+
+export function disposeOutputChannels(): void {
+    if (outputChannel) {
+        outputChannel.dispose();
+    }
+    if (diagnosticsChannel) {
+        diagnosticsChannel.dispose();
+    }
+    if (debugChannel) {
+        debugChannel.dispose();
+    }
+    if (warningChannel) {
+        warningChannel.dispose();
+    }
 }

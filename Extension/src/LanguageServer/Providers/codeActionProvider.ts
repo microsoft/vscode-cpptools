@@ -4,14 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import {  Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
-import * as util from '../../common';
 import { DefaultClient } from '../client';
 import { CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
     codeAnalysisAllFixes } from '../codeAnalysis';
 import { makeVscodeRange } from '../utils';
 import { CppSettings } from '../settings';
-
-type LocalizeStringParams = util.LocalizeStringParams;
+import { getLocalizedString, LocalizeStringParams } from '../localization';
 
 interface GetCodeActionsRequestParams {
     uri: string;
@@ -63,7 +61,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
             // Convert to vscode.CodeAction array
             commands.forEach((command) => {
-                const title: string = util.getLocalizedString(command.localizeStringParams);
+                const title: string = getLocalizedString(command.localizeStringParams);
                 let wsEdit: vscode.WorkspaceEdit | undefined;
                 let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
                 if (command.edit) {
