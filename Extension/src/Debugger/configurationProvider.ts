@@ -38,6 +38,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     private assetProvider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
     private static detectedBuildTasks: CppBuildTask[] = [];
+    private static detectedCppBuildTasks: CppBuildTask[] = [];
+    private static detectedCBuildTasks: CppBuildTask[] = [];
     protected static recentBuildTaskLabel: string;
 
     public constructor(assetProvider: IConfigurationAssetProvider, type: DebuggerType) {
@@ -449,8 +451,44 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private async loadDetectedTasks(): Promise<void> {
-        if (!DebugConfigurationProvider.detectedBuildTasks || DebugConfigurationProvider.detectedBuildTasks.length === 0) {
-            DebugConfigurationProvider.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        const emptyTasks: CppBuildTask[] = [];
+        if (!editor) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        const fileExt: string = path.extname(editor.document.fileName);
+        if (!fileExt) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        // Don't offer tasks for header files.
+        const isHeader: boolean = util.isHeaderFile (editor.document.uri);
+        if (isHeader) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
+        const fileIsCpp: boolean = util.isCppFile(editor.document.uri);
+        const fileIsC: boolean = util.isCFile(editor.document.uri);
+        if (!(fileIsCpp || fileIsC)) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        if (fileIsCpp) {
+            if (!DebugConfigurationProvider.detectedCppBuildTasks || DebugConfigurationProvider.detectedCppBuildTasks.length === 0) {
+                DebugConfigurationProvider.detectedCppBuildTasks = await cppBuildTaskProvider.getTasks(true);
+            }
+            DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCppBuildTasks;
+        } else {
+            if (!DebugConfigurationProvider.detectedCBuildTasks || DebugConfigurationProvider.detectedCBuildTasks.length === 0) {
+                DebugConfigurationProvider.detectedCBuildTasks = await cppBuildTaskProvider.getTasks(true);
+            }
+            DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCBuildTasks;
         }
     }
 
