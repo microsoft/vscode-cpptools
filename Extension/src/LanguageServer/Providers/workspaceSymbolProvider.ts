@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope } from '../client';
 import { makeVscodeLocation } from '../utils';
-import * as util from '../../common';
+import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
     private client: DefaultClient;
@@ -23,13 +23,13 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 
         // Convert to vscode.Command array
         symbols.forEach((symbol) => {
-            let suffix: string = util.getLocalizedString(symbol.suffix);
+            let suffix: string = getLocalizedString(symbol.suffix);
             let name: string = symbol.name;
             if (suffix.length) {
                 if (symbol.scope === SymbolScope.Private) {
-                    suffix = util.getLocalizedSymbolScope("private", suffix);
+                    suffix = getLocalizedSymbolScope("private", suffix);
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    suffix = util.getLocalizedSymbolScope("protected", suffix);
+                    suffix = getLocalizedSymbolScope("protected", suffix);
                 }
                 name = name + ' (' + suffix + ')';
             } else {

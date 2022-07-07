@@ -1,6 +1,29 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.11.0: June 20, 2022
+## Version 1.11.1 (pre-release): July 7, 2022
+### Enhancements
+* Add deploySteps and variables to cppdbg. [PR #9418](https://github.com/microsoft/vscode-cpptools/pull/9418)
+* Move "auto" inlay hints to the right by default and add `C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft`. [#9478](https://github.com/microsoft/vscode-cpptools/issues/9478)
+* Allow breakpoints for Rust debugging. [PR #9484](https://github.com/microsoft/vscode-cpptools/pull/9484)
+* Remove `_` from the start of parameter inlay hints and add `C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores`. [#9485](https://github.com/microsoft/vscode-cpptools/issues/9485)
+* Add `C_Cpp.inlayHints.referenceOperator.showSpace` setting. [#9486](https://github.com/microsoft/vscode-cpptools/issues/9486)
+* Make `C_Cpp.debugShortcut` settable per-workspace folder. [PR #9514](https://github.com/microsoft/vscode-cpptools/pull/9514)
+
+### Bug Fixes
+* Fix "unknown register name" IntelliSense error. [#4382](https://github.com/microsoft/vscode-cpptools/issues/4382)
+* Fix performance issue with tag parsing a file with a lot of defines. [#6454](https://github.com/microsoft/vscode-cpptools/issues/6454)
+* Fix missing logging when `C_Cpp.intelliSenseEngine` is set to `"Disabled"`. [#9277](https://github.com/microsoft/vscode-cpptools/issues/9277)
+* Fix the code analysis "disable" option not automatically clearing the disabled diagnostics. [#9364](https://github.com/microsoft/vscode-cpptools/issues/9364)
+* Fix `-isystem` not being used for system headers with code analysis. [#9366](https://github.com/microsoft/vscode-cpptools/issues/9366)
+* Fix compiler querying for EDG-based compilers. [#9410](https://github.com/microsoft/vscode-cpptools/issues/9410)
+* Fix bug with the environment being incorrect when compiler querying. [#9472](https://github.com/microsoft/vscode-cpptools/issues/9472)
+* Fix inlay hints not having padding on the left if there is no existing space. [#9479](https://github.com/microsoft/vscode-cpptools/issues/9479)
+* Fix duplicate inlay hints appearing sometimes. [#9487](https://github.com/microsoft/vscode-cpptools/issues/9487)
+* Fix duplicate compiler args in compiler query with custom configuration providers using cpptools-api prior to v6. [#9531](https://github.com/microsoft/vscode-cpptools/issues/9531)
+* Fix cl.exe build tasks not showing for .c files and .c build tasks being cached for .cpp files (and vice versa). [PR #9544](https://github.com/microsoft/vscode-cpptools/pull/9544)
+* Fix process launching concurrency issues on Windows.
+
+## Version 1.11.0 (pre-release): June 20, 2022
 ### New Features
 * Add inlay hints for parameters and auto types. [#5845](https://github.com/microsoft/vscode-cpptools/issues/5845)
 
