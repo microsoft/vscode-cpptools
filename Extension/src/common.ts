@@ -17,7 +17,6 @@ import * as assert from 'assert';
 import * as https from 'https';
 import * as tmp from 'tmp';
 import { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
@@ -1248,67 +1247,6 @@ export class BlockingTask<T> {
     public getPromise(): Thenable<T> {
         return this.promise;
     }
-}
-
-interface VSCodeNlsConfig {
-    locale: string;
-    availableLanguages: {
-        [pack: string]: string;
-    };
-}
-
-export function getLocaleId(): string {
-    // This replicates the language detection used by initializeSettings() in vscode-nls
-    if (isString(process.env.VSCODE_NLS_CONFIG)) {
-        const vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
-        if (vscodeOptions.availableLanguages) {
-            const value: any = vscodeOptions.availableLanguages['*'];
-            if (isString(value)) {
-                return value;
-            }
-        }
-        if (isString(vscodeOptions.locale)) {
-            return vscodeOptions.locale.toLowerCase();
-        }
-    }
-    return "en";
-}
-
-export function getLocalizedHtmlPath(originalPath: string): string {
-    const locale: string = getLocaleId();
-    if (!locale.startsWith("en")) {
-        const localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
-        if (fs.existsSync(localizedFilePath)) {
-            return localizedFilePath;
-        }
-    }
-    return getExtensionFilePath(originalPath);
-}
-
-export interface LocalizeStringParams {
-    text: string;
-    stringId: number;
-    stringArgs: string[];
-    indentSpaces: number;
-}
-
-export function getLocalizedString(params: LocalizeStringParams): string {
-    let indent: string = "";
-    if (params.indentSpaces) {
-        indent = " ".repeat(params.indentSpaces);
-    }
-    let text: string = params.text;
-    if (params.stringId !== 0) {
-        text = lookupString(params.stringId, params.stringArgs);
-    }
-    return indent + text;
-}
-
-export function getLocalizedSymbolScope(scope: string, detail: string): string {
-    return localize({
-        key: "c.cpp.symbolscope.separator", comment:
-            ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized version of \"declaration\""]
-    }, "{0}, {1}", scope, detail);
 }
 
 function decodeUCS16(input: string): number[] {

@@ -122,10 +122,19 @@ export class CppBuildTaskProvider implements TaskProvider {
         const knownCompilerPathsSet: Set<string> = new Set();
         let knownCompilers: configs.KnownCompiler[] | undefined = await activeClient.getKnownCompilers();
         if (knownCompilers) {
-            const compiler_condition: (info: configs.KnownCompiler) => boolean = info => ((fileIsCpp && !info.isC) || (fileIsC && info.isC)) &&
-                (!isCompilerValid || (!!userCompilerPathAndArgs &&
-                (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))) &&
-                (!isWindows || !info.path.startsWith("/")); // TODO: Add WSL compiler support.
+            const compiler_condition: (info: configs.KnownCompiler) => boolean = info =>
+                (
+                    // Filter out c compilers for cpp files and vice versa, except for cl.exe, which handles both.
+                    path.basename(info.path) === "cl.exe" ||
+                    (fileIsCpp && !info.isC) || (fileIsC && info.isC)
+                ) &&
+                (
+                    !isCompilerValid || (!!userCompilerPathAndArgs &&
+                    (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
+                ) &&
+                (
+                    !isWindows || !info.path.startsWith("/")
+                ); // TODO: Add WSL compiler support.
             const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
                 ((path.basename(info.path) === "cl.exe") && compiler_condition(info)));
             knownCompilers = knownCompilers.filter(info =>
