@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.10.7-main",
+  "version": "1.10.8-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2664,7 +2664,7 @@
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.debugShortcut.description%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.legacyCompilerArgsBehavior": {
           "type": "boolean",
@@ -2841,7 +2841,8 @@
         "languages": [
           "c",
           "cpp",
-          "cuda-cpp"
+          "cuda-cpp",
+          "rust"
         ],
         "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -3519,7 +3520,8 @@
         "languages": [
           "c",
           "cpp",
-          "cuda-cpp"
+          "cuda-cpp",
+          "rust"
         ],
         "_aiKeyComment": "Ignore 'Property aiKey is not allowed'. See https://github.com/microsoft/vscode/issues/76493",
         "aiKey": "AIF-d9b70cd4-b9f9-4d70-929b-a071c400b217",
@@ -3923,6 +3925,9 @@
       },
       {
         "language": "cuda"
+      },
+      {
+        "language": "rust"
       }
     ],
     "jsonValidation": [
@@ -4528,7 +4533,7 @@
     "plist": "^3.0.5",
     "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
-    "vscode-extension-telemetry": "^0.4.4",
+    "@vscode/extension-telemetry": "^0.6.2",
     "vscode-languageclient": "^5.2.1",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
