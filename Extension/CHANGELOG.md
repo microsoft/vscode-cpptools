@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.11.1 (pre-release): July 8, 2022
+### Enhancements
+* Add deploySteps and variables to cppdbg. [PR #9418](https://github.com/microsoft/vscode-cpptools/pull/9418)
+
 ## Version 1.11.1 (pre-release): July 7, 2022
 ### Enhancements
 * Move "auto" inlay hints to the right by default and add `C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft`. [#9478](https://github.com/microsoft/vscode-cpptools/issues/9478)
