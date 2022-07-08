@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.11.1 (pre-release): July 8, 2022
+## Version 1.11.2 (pre-release): July 8, 2022
 ### Enhancements
 * Add deploySteps and variables to cppdbg. [PR #9418](https://github.com/microsoft/vscode-cpptools/pull/9418)
 
