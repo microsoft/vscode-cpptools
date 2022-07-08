@@ -33,4 +33,3 @@ localized_string_ids.h
 # ignore generate files.  It will be generated when building
 src/nativeStrings.ts
 
-vscode*.d.ts
