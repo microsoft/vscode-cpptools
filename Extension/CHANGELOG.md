@@ -2,7 +2,6 @@
 
 ## Version 1.11.1 (pre-release): July 7, 2022
 ### Enhancements
-* Add deploySteps and variables to cppdbg. [PR #9418](https://github.com/microsoft/vscode-cpptools/pull/9418)
 * Move "auto" inlay hints to the right by default and add `C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft`. [#9478](https://github.com/microsoft/vscode-cpptools/issues/9478)
 * Allow breakpoints for Rust debugging. [PR #9484](https://github.com/microsoft/vscode-cpptools/pull/9484)
 * Remove `_` from the start of parameter inlay hints and add `C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores`. [#9485](https://github.com/microsoft/vscode-cpptools/issues/9485)
