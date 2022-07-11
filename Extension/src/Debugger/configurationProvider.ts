@@ -27,6 +27,8 @@ import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { scp, ssh } from '../SSH/commands';
 import * as glob from 'glob';
 import { promisify } from 'util';
+import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
+import { NativeAttachItemsProviderFactory } from './nativeAttach';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -332,6 +334,26 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
             const deploySucceeded: boolean = await this.deploySteps(config, token);
             if (!deploySucceeded || token?.isCancellationRequested) {
+                return undefined;
+            }
+        }
+
+        // Pick process if process id is empty
+        if (config.request === "attach" && !config.processId) {
+            let processId: string | undefined = undefined;
+            if (config.pipeTransport || config.useExtendedRemote) {
+                const remoteAttachPicker = new RemoteAttachPicker();
+                processId = await remoteAttachPicker.ShowAttachEntries(config);
+            } else {
+                const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
+                const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
+                processId = await attacher.ShowAttachEntries();
+            }
+
+            if (processId) {
+                config.processId = processId;
+            } else {
+                logger.getOutputChannelLogger().showErrorMessage("No process was selected.");
                 return undefined;
             }
         }

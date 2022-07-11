@@ -106,7 +106,6 @@ function createAttachString(name: string, type: string, executable: string): str
 "name": "${name}",
 "type": "${type}",
 "request": "attach",{0}
-"processId": "$\{command:pickProcess\}"
 `, [type === "cppdbg" ? `${os.EOL}"program": "${localize("enter.program.name", "enter program name, for example {0}", "$\{workspaceFolder\}" + "/" + executable).replace(/\"/g, "\\\"")}",` : ""]);
 }
 
