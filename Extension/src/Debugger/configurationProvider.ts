@@ -23,9 +23,23 @@ import { PlatformInformation } from '../platform';
 import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
+import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
+import { scp, ssh } from '../SSH/commands';
+import * as glob from 'glob';
+import { promisify } from 'util';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+enum StepType {
+    scp = 'scp',
+    ssh = 'ssh',
+    shell = 'shell',
+    remoteShell = 'remoteShell',
+    command = 'command'
+}
+
+const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
@@ -38,6 +52,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     private assetProvider: IConfigurationAssetProvider;
     // Keep a list of tasks detected by cppBuildTaskProvider.
     private static detectedBuildTasks: CppBuildTask[] = [];
+    private static detectedCppBuildTasks: CppBuildTask[] = [];
+    private static detectedCBuildTasks: CppBuildTask[] = [];
     protected static recentBuildTaskLabel: string;
 
     public constructor(assetProvider: IConfigurationAssetProvider, type: DebuggerType) {
@@ -95,7 +111,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         const selection: ConfigMenu | undefined = await vscode.window.showQuickPick(this.localizeConfigDetail(items), {placeHolder: localize("select.configuration", "Select a configuration")});
         if (!selection) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": ConfigSource.unknown, "configMode": ConfigMode.unknown, "cancelled": "true", "success": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": "debug", "configSource": ConfigSource.unknown, "configMode": ConfigMode.unknown, "cancelled": "true", "succeeded": "true" });
             return []; // User canceled it.
         }
 
@@ -113,14 +129,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * resolveDebugConfigurationWithSubstitutedVariables will be automatically called after this function.
      */
     async resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: CppDebugConfiguration, token?: vscode.CancellationToken): Promise<CppDebugConfiguration | null | undefined> {
-        const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
         if (!config || !config.type) {
             // When DebugConfigurationProviderTriggerKind is Dynamic, this function will be called with an empty config.
             // Hence, providing debug configs, and start debugging should be done manually.
             // resolveDebugConfiguration will be automatically called after calling provideDebugConfigurations.
             const configs: CppDebugConfiguration[]= await this.provideDebugConfigurations(folder);
             if (!configs || configs.length === 0) {
-                Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "success": "true" });
+                Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": folder ? ConfigSource.workspaceFolder : ConfigSource.singleFile, "configMode": ConfigMode.noLaunchConfig, "cancelled": "true", "succeeded": "true" });
                 return undefined; // aborts debugging silently
             } else {
                 // Currently, we expect only one debug config to be selected.
@@ -148,6 +163,18 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (config.preLaunchTask) {
             config.configSource = this.getDebugConfigSource(config, folder);
+            const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
+            // Run the build task if IntelliSense is disabled.
+            if (isIntelliSenseDisabled) {
+                try {
+                    await cppBuildTaskProvider.runBuildTask(config.preLaunchTask);
+                    config.preLaunchTask = undefined;
+                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
+                } catch (err) {
+                    Telemetry.logDebuggerEvent(DebuggerEvent.debugPanel, { "debugType": DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "false" });
+                }
+                return config;
+            }
             let resolveByVsCode: boolean = false;
             const isDebugPanel: boolean = !config.debuggerEvent || (config.debuggerEvent && config.debuggerEvent === DebuggerEvent.debugPanel);
             const singleFile: boolean = config.configSource === ConfigSource.singleFile;
@@ -169,11 +196,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             config.debugType = config.debugType ? config.debugType : DebugType.debug;
             const configMode: ConfigMode = isExistingConfig ? ConfigMode.launchConfig : ConfigMode.noLaunchConfig;
             // if configuration.debuggerEvent === undefined, it means this configuration is already defined in launch.json and is shown in debugPanel.
-            Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "true" });
+            Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "succeeded": "true" });
 
             if (!resolveByVsCode) {
-                if ((singleFile || isIntelliSenseDisabled ||
-                    (isDebugPanel && !folder && isExistingTask))) {
+                if ((singleFile || (isDebugPanel && !folder && isExistingTask))) {
                     await this.resolvePreLaunchTask(config, configMode);
                     config.preLaunchTask = undefined;
                 } else {
@@ -193,11 +219,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
      * This hook is directly called after 'resolveDebugConfiguration' but with all variables substituted.
      * This is also ran after the tasks.json has completed.
      *
-	 * Try to add all missing attributes to the debug configuration being launched.
+     * Try to add all missing attributes to the debug configuration being launched.
      * If return "undefined", the debugging will be aborted silently.
      * If return "null", the debugging will be aborted and launch.json will be opened.
-	 */
-    resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: CppDebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<CppDebugConfiguration> {
+     */
+    async resolveDebugConfigurationWithSubstitutedVariables(folder: vscode.WorkspaceFolder | undefined, config: CppDebugConfiguration, token?: vscode.CancellationToken): Promise<CppDebugConfiguration | null | undefined> {
         if (!config || !config.type) {
             return undefined; // Abort debugging silently.
         }
@@ -220,7 +246,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
             // Disable debug heap by default, enable if 'enableDebugHeap' is set.
             if (!config.enableDebugHeap) {
-                const disableDebugHeapEnvSetting: Environment = {"name" : "_NO_DEBUG_HEAP", "value" : "1"};
+                const disableDebugHeapEnvSetting: Environment = { "name": "_NO_DEBUG_HEAP", "value": "1" };
 
                 if (config.environment && util.isArray(config.environment)) {
                     config.environment.push(disableDebugHeapEnvSetting);
@@ -232,6 +258,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Add environment variables from .env file
         this.resolveEnvFile(config, folder);
+
+        await this.expand(config, folder);
 
         this.resolveSourceFileMapVariables(config);
 
@@ -293,6 +321,19 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             outputChannel.appendLine(JSON.stringify(config, undefined, 2));
             // TODO: Enable when https://github.com/microsoft/vscode/issues/108619 is resolved.
             // logger.showOutputChannel();
+        }
+
+        // Run deploy steps
+        if (config.deploySteps && config.deploySteps.length !== 0) {
+            const codeVersion: number[] = vscode.version.split('.').map(num => parseInt(num, undefined));
+            if ((util.isNumber(codeVersion[0]) && codeVersion[0] < 1) || (util.isNumber(codeVersion[0]) && codeVersion[0] === 1 && util.isNumber(codeVersion[1]) && codeVersion[1] < 69)) {
+                logger.getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
+                return undefined;
+            }
+            const deploySucceeded: boolean = await this.deploySteps(config, token);
+            if (!deploySucceeded || token?.isCancellationRequested) {
+                return undefined;
+            }
         }
 
         return config;
@@ -439,8 +480,44 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private async loadDetectedTasks(): Promise<void> {
-        if (!DebugConfigurationProvider.detectedBuildTasks || DebugConfigurationProvider.detectedBuildTasks.length === 0) {
-            DebugConfigurationProvider.detectedBuildTasks = await cppBuildTaskProvider.getTasks(true);
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        const emptyTasks: CppBuildTask[] = [];
+        if (!editor) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        const fileExt: string = path.extname(editor.document.fileName);
+        if (!fileExt) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        // Don't offer tasks for header files.
+        const isHeader: boolean = util.isHeaderFile (editor.document.uri);
+        if (isHeader) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        // Don't offer tasks if the active file's extension is not a recognized C/C++ extension.
+        const fileIsCpp: boolean = util.isCppFile(editor.document.uri);
+        const fileIsC: boolean = util.isCFile(editor.document.uri);
+        if (!(fileIsCpp || fileIsC)) {
+            DebugConfigurationProvider.detectedBuildTasks = emptyTasks;
+            return;
+        }
+
+        if (fileIsCpp) {
+            if (!DebugConfigurationProvider.detectedCppBuildTasks || DebugConfigurationProvider.detectedCppBuildTasks.length === 0) {
+                DebugConfigurationProvider.detectedCppBuildTasks = await cppBuildTaskProvider.getTasks(true);
+            }
+            DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCppBuildTasks;
+        } else {
+            if (!DebugConfigurationProvider.detectedCBuildTasks || DebugConfigurationProvider.detectedCBuildTasks.length === 0) {
+                DebugConfigurationProvider.detectedCBuildTasks = await cppBuildTaskProvider.getTasks(true);
+            }
+            DebugConfigurationProvider.detectedBuildTasks = DebugConfigurationProvider.detectedCBuildTasks;
         }
     }
 
@@ -547,17 +624,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
-                        message +=  (message ? ' ' : '\t');
+                        message += (message ? ' ' : '\t');
                         message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
                         target = newSourceFileMapTarget;
                     }
                 } else if (util.isObject(sourceFileMapTarget)) {
-                    const newSourceFileMapTarget: {"editorPath": string; "useForBreakpoints": boolean } = sourceFileMapTarget;
+                    const newSourceFileMapTarget: { "editorPath": string; "useForBreakpoints": boolean } = sourceFileMapTarget;
                     newSourceFileMapTarget["editorPath"] = util.resolveVariables(sourceFileMapTarget["editorPath"], undefined);
 
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
-                        message +=  (message ? ' ' : '\t');
+                        message += (message ? ' ' : '\t');
                         message += localize("replacing.editorPath", "Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
                         target = newSourceFileMapTarget;
                     }
@@ -753,7 +830,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         const selectedConfig: vscode.DebugConfiguration | undefined = await this.selectConfiguration(textEditor, false, true);
         if (!selectedConfig) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "true", "success": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "true", "succeeded": "true" });
             return; // User canceled it.
         }
 
@@ -770,7 +847,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         selectedConfig.debuggerEvent = undefined;
         // Write debug configuration in launch.json file.
         await this.writeDebugConfig(selectedConfig, isExistingConfig, folder);
-        Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "success": "true" });
+        Telemetry.logDebuggerEvent(DebuggerEvent.addConfigGear, { "configSource": ConfigSource.workspaceFolder, "configMode": ConfigMode.launchConfig, "cancelled": "false", "succeeded": "true" });
     }
 
     public async buildAndRun(textEditor: vscode.TextEditor): Promise<void> {
@@ -782,7 +859,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor);
         if (!selectedConfig) {
-            Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? DebugType.debug : DebugType.run, "configSource": ConfigSource.unknown, "cancelled": "true", "success": "true" });
+            Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? DebugType.debug : DebugType.run, "configSource": ConfigSource.unknown, "cancelled": "true", "succeeded": "true" });
             return; // User canceled it.
         }
 
@@ -796,7 +873,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         selectedConfig.debugType = debugModeOn ? DebugType.debug : DebugType.run;
         // startDebugging will trigger a call to resolveDebugConfiguration.
-        await vscode.debug.startDebugging(folder, selectedConfig, {noDebug: !debugModeOn});
+        await vscode.debug.startDebugging(folder, selectedConfig, { noDebug: !debugModeOn });
     }
 
     private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = true, onlyWorkspaceFolder: boolean = false): Promise<CppDebugConfiguration | undefined> {
@@ -860,9 +937,119 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 if (e && e.message === util.failedToParseJson) {
                     vscode.window.showErrorMessage(util.failedToParseJson);
                 }
-                Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "success": "false" });
+                Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "succeeded": "false" });
             }
         }
+    }
+
+    private async expand(config: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder | undefined): Promise<void> {
+        const folderPath: string | undefined = folder?.uri.fsPath || vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+        const vars: ExpansionVars = config.variables ? config.variables : {};
+        vars.workspaceFolder = folderPath || '{workspaceFolder}';
+        vars.workspaceFolderBasename = folderPath ? path.basename(folderPath) : '{workspaceFolderBasename}';
+        const expansionOptions: ExpansionOptions = { vars, recursive: true };
+        return expandAllStrings(config, expansionOptions);
+    }
+
+    // Returns true when ALL steps succeed; stop all subsequent steps if one fails
+    private async deploySteps(config: vscode.DebugConfiguration, cancellationToken?: vscode.CancellationToken): Promise<boolean> {
+        let succeeded: boolean = true;
+        const deployStart: number = new Date().getTime();
+
+        for (const step of config.deploySteps) {
+            succeeded = await this.singleDeployStep(config, step, cancellationToken);
+            if (!succeeded) {
+                break;
+            }
+        }
+
+        const deployEnd: number = new Date().getTime();
+
+        const telemetryProperties: { [key: string]: string } = {
+            Succeeded: `${succeeded}`,
+            IsDebugging: `${!config.noDebug || false}`
+        };
+        const telemetryMetrics: { [key: string]: number } = {
+            NumSteps: config.deploySteps.length,
+            Duration: deployEnd - deployStart
+        };
+        Telemetry.logDebuggerEvent('deploy', telemetryProperties, telemetryMetrics);
+
+        return succeeded;
+    }
+
+    private async singleDeployStep(config: vscode.DebugConfiguration, step: any, cancellationToken?: vscode.CancellationToken): Promise<boolean> {
+        if ((config.noDebug && step.debug === true) || (!config.noDebug && step.debug === false)) {
+            // Skip steps that doesn't match current launch mode. Explicit true/false check, since a step is always run when debug is undefined.
+            return true;
+        }
+        switch (step.type) {
+            case StepType.command: {
+                // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
+                if (step.args && !Array.isArray(step.args)) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('command.args.must.be.array', '"args" in command deploy step must be an array.'));
+                    return false;
+                }
+                const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
+                return !returnCode;
+            }
+            case StepType.scp: {
+                if (!step.files || !step.targetDir || !step.host) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
+                    return false;
+                }
+                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
+                let files: vscode.Uri[] = [];
+                if (util.isString(step.files)) {
+                    files = files.concat((await globAsync(step.files)).map(file => vscode.Uri.file(file)));
+                } else if (util.isArrayOfString(step.files)) {
+                    for (const fileGlob of (step.files as string[])) {
+                        files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
+                    }
+                } else {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
+                    return false;
+                }
+                const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, config.scpPath, jumpHosts, cancellationToken);
+                if (!scpResult.succeeded || cancellationToken?.isCancellationRequested) {
+                    return false;
+                }
+                break;
+            }
+            case StepType.ssh: {
+                if (!step.host || !step.command) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
+                    return false;
+                }
+                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
+                const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
+                const continueOn: string = step.continueOn;
+                const sshResult: util.ProcessReturnType = await ssh(host, step.command, config.sshPath, jumpHosts, localForwards, continueOn, cancellationToken);
+                if (!sshResult.succeeded || cancellationToken?.isCancellationRequested) {
+                    return false;
+                }
+                break;
+            }
+            case StepType.shell: {
+                if (!step.command) {
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.shell', '"command" is required for shell steps.'));
+                    return false;
+                }
+                const taskResult: util.ProcessReturnType = await util.spawnChildProcess(step.command, undefined, step.continueOn);
+                if (!taskResult.succeeded || cancellationToken?.isCancellationRequested) {
+                    logger.getOutputChannelLogger().showErrorMessage(taskResult.output);
+                    return false;
+                }
+                break;
+            }
+            default: {
+                logger.getOutputChannelLogger().appendLine(localize('deploy.step.type.not.supported', 'Deploy step type {0} is not supported.', step.type));
+                return false;
+            }
+        }
+        return true;
     }
 }
 
@@ -1016,7 +1203,7 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.
-            this.snippets.forEach((item) => items.push({...item}));
+            this.snippets.forEach((item) => items.push({ ...item }));
 
             items.map((item) => {
                 item.insertText = item.insertText + ','; // Add comma

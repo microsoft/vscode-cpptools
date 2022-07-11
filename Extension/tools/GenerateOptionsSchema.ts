@@ -53,7 +53,7 @@ function updateDefaults(object: any, defaults: any): any {
 }
 
 function refReplace(definitions: any, ref: any): any {
-// $ref is formatted as "#/definitions/ObjectName"
+    // $ref is formatted as "#/definitions/ObjectName"
     const referenceStringArray: string[] = ref['$ref'].split('/');
 
     // Getting "ObjectName"
@@ -82,11 +82,7 @@ function replaceReferences(definitions: any, objects: any): any {
 
         // Handle 'anyOf' with references
         if (objects[key].hasOwnProperty('anyOf')) {
-            for (const index in objects[key].anyOf) {
-                if (objects[key].anyOf[index].hasOwnProperty('$ref')) {
-                    objects[key].anyOf[index] = refReplace(definitions, objects[key].anyOf[index]);
-                }
-            }
+            objects[key].anyOf = replaceReferences(definitions, objects[key].anyOf);
         }
 
         // Recursively replace references if this object has properties.
@@ -95,9 +91,14 @@ function replaceReferences(definitions: any, objects: any): any {
             objects[key].properties = updateDefaults(objects[key].properties, objects[key].default);
         }
 
-        // Recursively replace references if the array has objects in items.
+        // Items in array contains ref
         if (objects[key].hasOwnProperty('type') && objects[key].type === "array" && objects[key].items !== null && objects[key].items.hasOwnProperty('$ref')) {
             objects[key].items = refReplace(definitions, objects[key].items);
+        }
+
+        // Recursively replace references if the array has objects that contains ref in items.
+        if (objects[key].hasOwnProperty('type') && objects[key].type === "array" && objects[key].items !== null) {
+            objects[key].items = replaceReferences(definitions, objects[key].items);
         }
     }
 

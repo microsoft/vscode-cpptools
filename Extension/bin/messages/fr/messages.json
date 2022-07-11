@@ -3457,5 +3457,9 @@
   "une constante de caractères UTF-16 ne peut pas occuper plusieurs unités de code ; valeur tronquée",
   "les deux arguments doivent avoir le même type",
   "le type %t n’est pas valide en tant qu’argument pour ce builtin",
-  "appelé à partir de %nd :"
+  "appelé à partir de %nd :",
+  "un type qualifié n’est pas standard pour les champs de bits anonymes.",
+  "le type d’élément de la condition vectorielle (%t1) doit avoir la même taille que le type d’élément du résultat (%t2).",
+  "le type d’opérande vectoriel à virgule flottante (%t) n’a pas de type de vecteur entier correspondant.",
+  "La gestion des expressions \"requires\" n'est pas encore implémentée."
 ]

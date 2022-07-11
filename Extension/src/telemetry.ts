@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import TelemetryReporter from 'vscode-extension-telemetry';
+import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
 
@@ -89,11 +89,11 @@ export async function deactivate(): Promise<void> {
     }
 }
 
-export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }): void {
+export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
     const sendTelemetry = () => {
         if (experimentationTelemetry) {
             const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
-            experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties);
+            experimentationTelemetry.sendTelemetryEvent(eventNamePrefix + eventName, properties, metrics);
         }
     };
 
