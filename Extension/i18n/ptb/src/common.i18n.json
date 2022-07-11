@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "Falha ao analisar o arquivo JSON, possivelmente devido a comentários ou vírgulas à direita.",
 	"extension.not.ready": "A extensão C/C++ ainda está sendo instalada. Confira a janela de saída para obter mais informações.",
 	"refer.read.me": "Consulte {0} para obter informações de solução de problemas. Os problemas podem ser criados no {1}",
-	"process.exited.with.code": "{0} foi encerrado com o código de erro {1}",
+	"process.exited": "Processo encerrado com o código {0}",
+	"process.succeeded": "Processo executado com êxito.",
+	"killing.process": "Encerrando o processo {0}",
 	"warning.file.missing": "Aviso: o arquivo esperado {0} está ausente.",
 	"warning.debugging.not.tested": "Aviso: a depuração não foi testada para esta plataforma.",
 	"reload.workspace.for.changes": "Recarregue o workspace para que a alteração das configurações entre em vigor.",
 	"reload.string": "Recarregar",
-	"invalid.download.location.received": "Recebido um local de download inválido",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"invalid.download.location.received": "Recebido um local de download inválido"
 }

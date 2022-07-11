@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "Büyük olasılıkla açıklamalar veya sondaki virgüllerden dolayı json dosyası ayrıştırılamadı.",
 	"extension.not.ready": "C/C++ uzantısı hala yükleniyor. Daha fazla bilgi için çıkış penceresine bakın.",
 	"refer.read.me": "Sorun giderme bilgileri için lütfen şuraya bakın: {0}. Sorunlar {1} konumunda oluşturulabilir",
-	"process.exited.with.code": "{0}, {1} hata koduyla çıktı",
+	"process.exited": "İşlemden {0} koduyla çıkış yapıldı",
+	"process.succeeded": "İşlem başarıyla yürütüldü.",
+	"killing.process": "{0} işlemi durduruluyor",
 	"warning.file.missing": "Uyarı: Beklenen {0} dosyası eksik.",
 	"warning.debugging.not.tested": "Uyarı: Bu platform için hata ayıklama test edilmedi.",
 	"reload.workspace.for.changes": "Ayar değişikliklerinin etkili olması için çalışma alanını yeniden yükleyin.",
 	"reload.string": "Yeniden yükle",
-	"invalid.download.location.received": "Geçersiz indirme konumu alındı",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"invalid.download.location.received": "Geçersiz indirme konumu alındı"
 }

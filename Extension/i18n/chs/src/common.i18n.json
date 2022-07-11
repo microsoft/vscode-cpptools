@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "未能分析 json 文件，可能是因注释或尾部逗号所致。",
 	"extension.not.ready": "C/C++ 扩展仍在安装。请查看输出窗口获取详细信息。",
 	"refer.read.me": "请参阅 {0} 了解疑难解答信息。可在 {1} 处创建问题",
-	"process.exited.with.code": "{0} 已退出，收到错误代码 {1}",
+	"process.exited": "已退出进程，代码为 {0}",
+	"process.succeeded": "已成功执行进程。",
+	"killing.process": "正在终止进程 {0}",
 	"warning.file.missing": "警告: 缺少预期的文件 {0}。",
 	"warning.debugging.not.tested": "警告: 尚未为此平台测试调试。",
 	"reload.workspace.for.changes": "重新加载工作区以使设置更改生效。",
 	"reload.string": "重新加载",
-	"invalid.download.location.received": "接收的下载位置无效",
-	"c.cpp.symbolscope.separator": "{0}，{1}"
+	"invalid.download.location.received": "接收的下载位置无效"
 }
