@@ -216,7 +216,7 @@ export class RemoteAttachPicker {
         const processes: AttachItem[] = [];
         for (const line of lines) {
             const trimmedLine: string = line.trim();
-            if (!trimmedLine.endsWith('?') && !trimmedLine.includes('/usr/bin/gdbserver')) {
+            if (!trimmedLine.endsWith('?')) {
                 const matches: RegExpMatchArray | null = trimmedLine.match(/^(\d+)\s+(.+?)\s+\d+$/);
                 if (matches?.length === 3) {
                     const id: string = matches[1];
