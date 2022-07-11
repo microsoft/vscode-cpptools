@@ -340,9 +340,9 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         // Pick process if process id is empty
         if (config.request === "attach" && !config.processId) {
-            let processId: string | undefined = undefined;
+            let processId: string | undefined;
             if (config.pipeTransport || config.useExtendedRemote) {
-                const remoteAttachPicker = new RemoteAttachPicker();
+                const remoteAttachPicker: RemoteAttachPicker = new RemoteAttachPicker();
                 processId = await remoteAttachPicker.ShowAttachEntries(config);
             } else {
                 const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();

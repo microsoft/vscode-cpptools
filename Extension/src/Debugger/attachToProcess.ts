@@ -39,7 +39,7 @@ export class RemoteAttachPicker {
 
     public async ShowAttachEntries(config: any): Promise<string | undefined> {
         this._channel.clear();
-        let processes: AttachItem[]
+        let processes: AttachItem[];
 
         const pipeTransport: any = config ? config.pipeTransport : undefined;
         const useExtendedRemote: any = config ? config.useExtendedRemote : undefined;
@@ -178,17 +178,17 @@ export class RemoteAttachPicker {
     }
 
     private async getRemoteProcessesExtendedRemote(miDebuggerPath: string, miDebuggerServerAddress: string): Promise<AttachItem[]> {
-        const args = [`-ex "target extended-remote ${miDebuggerServerAddress}"`, '-ex "info os processes"', '-batch'];
+        const args: string[] = [`-ex "target extended-remote ${miDebuggerServerAddress}"`, '-ex "info os processes"', '-batch'];
         let processListOutput: util.ProcessReturnType = await util.spawnChildProcess(miDebuggerPath, args);
         // The device may not be responsive for a while during the restart after image deploy. Retry 5 times.
-        for (let i = 0; i < 5 && !processListOutput.succeeded; i++) {
+        for (let i: number = 0; i < 5 && !processListOutput.succeeded; i++) {
             processListOutput = await util.spawnChildProcess(miDebuggerPath, args);
         }
 
         if (!processListOutput.succeeded) {
             throw new Error(localize('failed.to.make.gdb.connection', 'Failed to make GDB connection: "{0}".', processListOutput.output));
         }
-        const processes = this.parseProcessesFromInfoOsProcesses(processListOutput.output);
+        const processes: AttachItem[] = this.parseProcessesFromInfoOsProcesses(processListOutput.output);
         if (!processes || processes.length === 0) {
             throw new Error(localize('failed.to.parse.processes', 'Failed to parse processes: "{0}".', processListOutput.output));
         }
@@ -208,19 +208,19 @@ export class RemoteAttachPicker {
     to get a better label.
     */
     private parseProcessesFromInfoOsProcesses(processList: string): AttachItem[] {
-        const lines = processList.split('\n');
+        const lines: string[] = processList?.split('\n');
         if (!lines?.length) {
             return [];
         }
 
         const processes: AttachItem[] = [];
         for (const line of lines) {
-            const trimmedLine = line.trim();
+            const trimmedLine: string = line.trim();
             if (!trimmedLine.endsWith('?') && !trimmedLine.includes('/usr/bin/gdbserver')) {
-                const matches = trimmedLine.match(/^(\d+)\s+(.+?)\s+\d+$/);
+                const matches: RegExpMatchArray | null = trimmedLine.match(/^(\d+)\s+(.+?)\s+\d+$/);
                 if (matches?.length === 3) {
-                    const id = matches[1];
-                    const userCommand = matches[2];
+                    const id: string = matches[1];
+                    const userCommand: string = matches[2];
                     processes.push({ label: userCommand, id });
                 }
             }
