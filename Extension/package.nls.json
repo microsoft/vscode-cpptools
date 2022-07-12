@@ -360,7 +360,7 @@
     "c_cpp.semanticTokenTypes.templateType.description": "Style for C++ template types.",
     "c_cpp.semanticTokenTypes.operatorOverload.description": "Style for C++ overloaded operators.",
     "c_cpp.semanticTokenTypes.memberOperatorOverload.description": "Style for C++ overloaded operator member functions.",
-    "c_cpp.semanticTokenTypes.newOperator.description": "Style for C++ `new` or `delete` operators.",
+    "c_cpp.semanticTokenTypes.newOperator.description": { "message": "Style for C++ `new` or `delete` operators.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
     "c_cpp.semanticTokenTypes.customLiteral.description": "Style for C++ user-defined literals.",
     "c_cpp.semanticTokenTypes.numberLiteral.description": "Style for C++ user-defined literal numbers.",
     "c_cpp.semanticTokenTypes.stringLiteral.description": "Style for C++ user-defined literal strings.",
