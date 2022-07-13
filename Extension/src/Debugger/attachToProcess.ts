@@ -84,7 +84,7 @@ export class RemoteAttachPicker {
             processes = await this.getRemoteOSAndProcesses(pipeCmd);
         } else if (!pipeTransport && useExtendedRemote) {
             if (!miDebuggerPath || !miDebuggerServerAddress) {
-                throw new Error(localize("debugger.path.and.server.address.requried", "{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
+                throw new Error(localize("debugger.path.and.server.address.required", "{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
             }
             processes = await this.getRemoteProcessesExtendedRemote(miDebuggerPath, miDebuggerServerAddress);
         } else {
@@ -203,8 +203,8 @@ export class RemoteAttachPicker {
     3                 /usr/bin/sample 0
     4        root     /usr/bin/gdbserver --multi :6000 0
 
-    Returns aa array AttachItems, each one contains a label of "<user   >command", and a pid.
-    Unfortunately becuase the format of each line is not fixed, and everything except pid is optional, it's hard
+    Returns an AttachItem array, each item contains a label of "<user   >command", and a pid.
+    Unfortunately because the format of each line is not fixed, and everything except pid is optional, it's hard
     to get a better label.
     */
     private parseProcessesFromInfoOsProcesses(processList: string): AttachItem[] {
