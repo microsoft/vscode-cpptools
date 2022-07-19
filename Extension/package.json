@@ -2327,7 +2327,13 @@
           "markdownDescription": "%c_cpp.configuration.simplifyStructuredComments.markdownDescription%",
           "scope": "application"
         },
-        "C_Cpp.generateDoxygenComment":{
+        "C_Cpp.autocompleteDoxygenComment":{
+          "type":"boolean",
+          "default":true,
+          "markdownDescription": "%c_cpp.configuration.autocompleteDoxygenComment.markdownDescription%",
+          "scope": "resource"
+        },
+        "C_Cpp.generatedDoxygenCommentStyle":{
           "type":"string",
           "enum":[
             "///",
@@ -2336,7 +2342,7 @@
             "//!"
           ],
           "default":"/**",
-          "markdownDescription": "%c_cpp.configuration.generateDoxygenComment.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.generatedDoxygenCommentStyle.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.commentContinuationPatterns": {

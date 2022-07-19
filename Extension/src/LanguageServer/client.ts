@@ -405,7 +405,9 @@ export interface GenerateDoxygenCommentParams {
 
 export interface GenerateDoxygenCommentResult {
     contents : string;
-    position: Position; 
+    initPosition: Position;
+    finalPosition: Position;
+    fileVersion: number;
 }
 
 interface SetTemporaryTextDocumentLanguageParams {
@@ -501,6 +503,7 @@ const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> =
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisProcessed');
 const ReportCodeAnalysisTotalNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisTotal');
+const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult, void> = new NotificationType<GenerateDoxygenCommentResult, void>('cpptools/insertDoxygenComment');
 let failureMessageShown: boolean = false;
 
 export interface ReferencesCancellationState {
@@ -979,7 +982,8 @@ export class DefaultClient implements Client {
         const settings_suggestSnippets: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
-        const settings_generateDoxygenComment: (string | undefined)[] = [];
+        const settings_generatedDoxygenCommentStyle: (string | undefined)[] = [];
+        const settings_autocompleteDoxygenComment: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1147,7 +1151,8 @@ export class DefaultClient implements Client {
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
-                settings_generateDoxygenComment.push(setting.generateDoxygenComment);
+                settings_generatedDoxygenCommentStyle.push(setting.generatedDoxygenCommentStyle);
+                settings_autocompleteDoxygenComment.push(setting.autocompleteDoxygenComment);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1332,7 +1337,8 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-                generateDoxygenComment: settings_generateDoxygenComment,
+                generatedDoxygenCommentStyle: settings_generatedDoxygenCommentStyle,
+                autocompleteDoxygenComment: settings_autocompleteDoxygenComment,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -2136,6 +2142,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
+        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
         setupOutputHandlers();
     }
 
@@ -2620,6 +2627,43 @@ export class DefaultClient implements Client {
         this.model.codeAnalysisTotal.Value = total;
     }
 
+    private async insertDoxygenComment(result:GenerateDoxygenCommentResult): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            const oldVersion = result.fileVersion;
+            const newVersion = openFileVersions.get(editor.document.uri.toString());
+           
+            if(newVersion !== undefined && oldVersion !== undefined && oldVersion === newVersion && 
+                result?.initPosition.line === editor.selection.active.line && result?.initPosition.character === editor.selection.active.character){
+                if(result?.contents) {
+
+                    if (result.contents.length > 1) {
+                        const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                        const edits: vscode.TextEdit[] = [];
+
+                        if(vscode.window.activeTextEditor) {
+    
+                            const newRange = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
+                            edits.push(new vscode.TextEdit(newRange, result?.contents));
+                            workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                            await vscode.workspace.applyEdit(workspaceEdit);
+
+                            //set the cursor position after @brief
+                            if(result?.finalPosition) {
+                                const newPosition: vscode.Position = new vscode.Position(result.finalPosition.line, result.finalPosition.character);
+                                const newSelection = new vscode.Selection(newPosition, newPosition);
+                                editor.selection = newSelection;
+                            }
+                        } 
+                    }
+                }
+
+            }
+        }
+        
+
+    }
+
     private doneInitialCustomBrowseConfigurationCheck: boolean = false;
 
     private onConfigurationsChanged(cppProperties: configs.CppProperties): void {
@@ -2998,10 +3042,10 @@ export class DefaultClient implements Client {
             if(oldVersion === undefined) {
 
             }
-            else if(newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion) {
+            else if(newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion
+                && result?.initPosition !== editor.selection.active) {
                 
-            }
-                
+            }   
             else {
                 if (result?.contents) {
 
@@ -3017,8 +3061,8 @@ export class DefaultClient implements Client {
                             await vscode.workspace.applyEdit(workspaceEdit);
 
                             //set the cursor position after @brief
-                            if(result?.position) {
-                                const newPosition: vscode.Position = new vscode.Position(result.position.line, result.position.character);
+                            if(result?.finalPosition) {
+                                const newPosition: vscode.Position = new vscode.Position(result.finalPosition.line, result.finalPosition.character);
                                 const newSelection = new vscode.Selection(newPosition, newPosition);
                                 editor.selection = newSelection;
                             }
