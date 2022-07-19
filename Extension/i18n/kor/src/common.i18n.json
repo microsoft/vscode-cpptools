@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "주석 또는 후행 쉼표로 인해 json 파일을 구문 분석하지 못했습니다.",
 	"extension.not.ready": "C/C++ 확장을 아직 설치하고 있습니다. 자세한 내용은 출력 창을 참조하세요.",
 	"refer.read.me": "문제 해결 정보를 보려면 {0}을(를) 참조하세요. 이슈는 {1}에서 만들 수 있습니다.",
-	"process.exited.with.code": "오류 코드 {1}과(와) 함께 {0}이(가) 종료되었습니다.",
+	"process.exited": "프로세스가 {0} 코드로 종료됨",
+	"process.succeeded": "프로세스가 성공적으로 실행되었습니다.",
+	"killing.process": "프로세스 {0}종료 중",
 	"warning.file.missing": "경고: 필요한 파일 {0}이(가) 없습니다.",
 	"warning.debugging.not.tested": "경고: 디버깅이 이 플랫폼에서 테스트되지 않았습니다.",
 	"reload.workspace.for.changes": "설정 변경 내용을 적용하려면 작업 영역을 다시 로드합니다.",
 	"reload.string": "다시 로드",
-	"invalid.download.location.received": "잘못된 다운로드 위치가 수신되었습니다.",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"invalid.download.location.received": "잘못된 다운로드 위치가 수신되었습니다."
 }
