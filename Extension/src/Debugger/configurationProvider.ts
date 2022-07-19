@@ -857,7 +857,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     public async buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
         let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
-        const err: boolean = false;
+        let err: boolean = false;
 
         const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor);
         if (!selectedConfig) {
@@ -876,6 +876,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         selectedConfig.debugType = debugModeOn ? DebugType.debug : DebugType.run;
         // startDebugging will trigger a call to resolveDebugConfiguration.
         if (err) {
+            err = true;
             throw new Error(localize("debugger.not.installed", "The debugger you're using is not installed. Please install the debugger first."));
         } else {
             await vscode.debug.startDebugging(folder, selectedConfig, { noDebug: !debugModeOn });
