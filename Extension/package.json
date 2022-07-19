@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.11.2-main",
+  "version": "1.11.3-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2221,10 +2221,10 @@
           "scope": "application"
         },
         "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
-            "scope": "application"
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
+          "scope": "application"
         },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
@@ -2239,10 +2239,10 @@
           "scope": "application"
         },
         "C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
-            "scope": "application"
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
+          "scope": "application"
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
@@ -2251,10 +2251,10 @@
           "scope": "application"
         },
         "C_Cpp.inlayHints.referenceOperator.showSpace": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
-            "scope": "application"
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
+          "scope": "application"
         },
         "C_Cpp.loggingLevel": {
           "type": "string",
@@ -3079,6 +3079,11 @@
                 "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
                 "default": "serveraddress:port"
               },
+              "useExtendedRemote": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.useExtendedRemote.description%",
+                "default": false
+              },
               "stopAtEntry": {
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.stopAtEntry.description%",
@@ -3727,8 +3732,7 @@
             "type": "object",
             "default": {},
             "required": [
-              "program",
-              "processId"
+              "program"
             ],
             "properties": {
               "program": {
@@ -3775,6 +3779,11 @@
                 "type": "string",
                 "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
                 "default": "serveraddress:port"
+              },
+              "useExtendedRemote": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.useExtendedRemote.description%",
+                "default": false
               },
               "processId": {
                 "anyOf": [

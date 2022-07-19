@@ -1,4 +1,19 @@
 # C/C++ for Visual Studio Code Change Log
+## Version 1.11.3 (pre-release): July 19, 2022
+### New Feature
+* Added extended remote support for debugging. [#8497](https://github.com/microsoft/vscode-cpptools/issues/8497), [#9195](https://github.com/microsoft/vscode-cpptools/issues/9195), [#9491](https://github.com/microsoft/vscode-cpptools/discussions/9491), [#9505](https://github.com/microsoft/vscode-cpptools/issues/9505)
+
+### Bug Fixes
+* Fix doc comments for macros and typedefs. [#8320](https://github.com/microsoft/vscode-cpptools/issues/8320)
+* Fix issue with CUDA configuration when using a custom config provider and no config is available for the file. [#8483](https://github.com/microsoft/vscode-cpptools/issues/8483)
+* Fix code analysis not detecting warnings with relative paths. [#9555](https://github.com/microsoft/vscode-cpptools/issues/9555)
+* Fix `--header-filter` being used with clang-tidy when it shouldn't when a .clang-tidy file exists. [#9566](https://github.com/microsoft/vscode-cpptools/issues/9566)
+* Fix code analysis giving an error with `__has_include` with gcc 9. [#9575](https://github.com/microsoft/vscode-cpptools/issues/9575)
+* Fix `-target` not being processed in `compilerArgs`. [#9586](https://github.com/microsoft/vscode-cpptools/issues/9586)
+
+## Version 1.11.2 (pre-release): July 8, 2022
+### Enhancements
+* Add deploySteps and variables to cppdbg. [PR #9418](https://github.com/microsoft/vscode-cpptools/pull/9418)
 
 ## Version 1.11.2 (pre-release): July 8, 2022
 ### Enhancements
@@ -15,6 +30,7 @@
 ### Bug Fixes
 * Fix "unknown register name" IntelliSense error. [#4382](https://github.com/microsoft/vscode-cpptools/issues/4382)
 * Fix performance issue with tag parsing a file with a lot of defines. [#6454](https://github.com/microsoft/vscode-cpptools/issues/6454)
+* Fix IntelliSense with gcc vector extension types. [#6890](https://github.com/microsoft/vscode-cpptools/issues/6890)
 * Fix missing logging when `C_Cpp.intelliSenseEngine` is set to `"Disabled"`. [#9277](https://github.com/microsoft/vscode-cpptools/issues/9277)
 * Fix the code analysis "disable" option not automatically clearing the disabled diagnostics. [#9364](https://github.com/microsoft/vscode-cpptools/issues/9364)
 * Fix `-isystem` not being used for system headers with code analysis. [#9366](https://github.com/microsoft/vscode-cpptools/issues/9366)
