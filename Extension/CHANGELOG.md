@@ -1,5 +1,8 @@
 # C/C++ for Visual Studio Code Change Log
 ## Version 1.11.3 (pre-release): July 19, 2022
+### New Feature
+* Added extended remote support for debugging. [#8497](https://github.com/microsoft/vscode-cpptools/issues/8497), [#9195](https://github.com/microsoft/vscode-cpptools/issues/9195), [#9491](https://github.com/microsoft/vscode-cpptools/discussions/9491), [#9505](https://github.com/microsoft/vscode-cpptools/issues/9505)
+
 ### Bug Fixes
 * Fix doc comments for macros and typedefs. [#8320](https://github.com/microsoft/vscode-cpptools/issues/8320)
 * Fix issue with CUDA configuration when using a custom config provider and no config is available for the file. [#8483](https://github.com/microsoft/vscode-cpptools/issues/8483)
