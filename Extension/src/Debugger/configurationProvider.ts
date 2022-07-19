@@ -779,14 +779,6 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         return util.getRawJson(path);
     }
 
-    private showUnifiedErrorMessage(error: any): string {
-        let message: string = error.message;
-        if (error.stack) {
-            message = localize('launch.error.stack', "The stack trace was: {0}", error.stack);
-        }
-        return message;
-    }
-
     public async writeDebugConfig(config: vscode.DebugConfiguration, isExistingConfig: boolean, folder?: vscode.WorkspaceFolder): Promise<void> {
         const launchJsonPath: string | undefined = this.getLaunchJsonPath();
 
@@ -865,8 +857,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     public async buildAndDebug(textEditor: vscode.TextEditor, debugModeOn: boolean = true): Promise<void> {
         let folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
-        const errorMessage: string | undefined = undefined;
-        const error: boolean = false;
+        let err: boolean = false;
+
         const selectedConfig: CppDebugConfiguration | undefined = await this.selectConfiguration(textEditor);
         if (!selectedConfig) {
             Telemetry.logDebuggerEvent(DebuggerEvent.playButton, { "debugType": debugModeOn ? DebugType.debug : DebugType.run, "configSource": ConfigSource.unknown, "cancelled": "true", "succeeded": "true" });
@@ -883,11 +875,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         selectedConfig.debugType = debugModeOn ? DebugType.debug : DebugType.run;
         // startDebugging will trigger a call to resolveDebugConfiguration.
-        await vscode.debug.startDebugging(folder, selectedConfig, { noDebug: !debugModeOn });
-
-        if (error) {
-            this.showUnifiedErrorMessage(errorMessage);
-        }
+        err = await vscode.debug.startDebugging(folder, selectedConfig, { noDebug: !debugModeOn });
     }
 
     private async selectConfiguration(textEditor: vscode.TextEditor, pickDefault: boolean = true, onlyWorkspaceFolder: boolean = false): Promise<CppDebugConfiguration | undefined> {
