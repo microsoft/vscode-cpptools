@@ -5452,6 +5452,7 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "minimist": "^1.2.6"
+    "minimist": "^1.2.6",
+    "terser": "^5.14.2"
   }
 }
