@@ -3457,5 +3457,9 @@
   "UTF-16 karakter sabit değeri, bir kod biriminden fazla yer kaplayamaz; kesilmiş değer",
   "her iki bağımsız değişken de aynı türe sahip olmalıdır",
   "%t türü bu yerleşik için bağımsız değişken olarak geçersiz",
-  "%nd kaynağından çağrı:"
+  "%nd kaynağından çağrı:",
+  "nitelenmiş bir tür adı anonim bit alanları için standart dışı",
+  "vektör koşulunun öğe türü (%t1), sonucun öğe türü (%t2) ile aynı boyuta sahip olmalıdır",
+  "kayan nokta vektörü işlenen türü (%t) eşleşen bir tamsayı vektörü türü içermiyor",
+  "'requires' ifadeleri için değiştirme henüz uygulanmadı"
 ]

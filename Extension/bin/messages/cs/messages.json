@@ -3457,5 +3457,9 @@
   "znaková konstanta UTF-16 nemůže zabírat více než jednu jednotku kódu; hodnota byla zkrácena",
   "oba argumenty musí mít stejný typ",
   "typ %t není platný jako argument pro tento předdefinovan.",
-  "voláno z %nd:"
+  "voláno z %nd:",
+  "kvalifikovaný typ je pro anonymní bitová pole nestandardní.",
+  "typ elementu vektorové podmínky (%t1) musí mít stejnou velikost jako typ elementu výsledku (%t2).",
+  "typ operandu vektoru s plovoucí desetinnou čárkou (%t) nemá žádný odpovídající celočíselný vektorový typ.",
+  "mangling pro výrazy requires ještě není implementovaný."
 ]

@@ -3457,5 +3457,9 @@
   "stała znaków UTF-16 nie może zajmować więcej niż jednej jednostki kodu; obcięta wartość",
   "oba argumenty muszą mieć ten sam typ",
   "typ %t jest nieprawidłowy jako argument dla tej wbudowanej",
-  "wywołano z %nd:"
+  "wywołano z %nd:",
+  "kwalifikowany typ jest niestandardowy dla anonimowych pól bitowych",
+  "typ elementu warunku wektora (%t1) musi mieć taki sam rozmiar jak typ elementu wyniku (%t2)",
+  "typ operandu wektora zmiennoprzecinkowego (%t) nie ma zgodnego typu wektora liczb całkowitych",
+  "nie jest jeszcze zaimplementowane dekorowanie wyrażeń typu „requires”."
 ]

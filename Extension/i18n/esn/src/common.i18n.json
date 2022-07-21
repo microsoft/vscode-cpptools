@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "No se pudo analizar el archivo json, posiblemente debido a comentarios o a comas finales.",
 	"extension.not.ready": "La extensión de C/C++ aún se está instalando. Vea la ventana de salida para obtener más información.",
 	"refer.read.me": "Consulte {0} para obtener información de solución de problemas. Puede crear incidencias en {1}",
-	"process.exited.with.code": "{0} se cerró con el código de error {1}",
+	"process.exited": "Proceso cerrado con el código {0}",
+	"process.succeeded": "El proceso se ejecutó correctamente.",
+	"killing.process": "{0}de proceso de terminación",
 	"warning.file.missing": "Advertencia: Falta el archivo {0} que se esperaba.",
 	"warning.debugging.not.tested": "Advertencia: La depuración no se ha probado para esta plataforma.",
 	"reload.workspace.for.changes": "Recargue el área de trabajo para que el cambio de configuración surta efecto.",
 	"reload.string": "Volver a cargar",
-	"invalid.download.location.received": "Se ha recibido una ubicación de descarga no válida.",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"invalid.download.location.received": "Se ha recibido una ubicación de descarga no válida."
 }

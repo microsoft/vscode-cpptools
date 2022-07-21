@@ -4,9 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
-import * as util from '../../common';
 import { processDelayedDidOpen } from '../extension';
 import { makeVscodeRange } from '../utils';
+import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private client: DefaultClient;
@@ -17,18 +17,18 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         const documentSymbols: vscode.DocumentSymbol[] = [];
         if (symbols) {
             symbols.forEach((symbol) => {
-                let detail: string = util.getLocalizedString(symbol.detail);
+                let detail: string = getLocalizedString(symbol.detail);
                 if (symbol.scope === SymbolScope.Private) {
                     if (detail.length === 0) {
                         detail = "private";
                     } else {
-                        detail = util.getLocalizedSymbolScope("private", detail);
+                        detail = getLocalizedSymbolScope("private", detail);
                     }
                 } else if (symbol.scope === SymbolScope.Protected) {
                     if (detail.length === 0) {
                         detail = "protected";
                     } else {
-                        detail = util.getLocalizedSymbolScope("protected", detail);
+                        detail = getLocalizedSymbolScope("protected", detail);
                     }
                 }
 
