@@ -121,14 +121,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             if (settings.inlayHintsReferenceOperator && hint.isValueRef) {
                 refOperatorString = (paramHintLabel.length > 0 && settings.inlayHintsReferenceOperatorShowSpace) ? "& " : "&";
             }
-            let label: string = "";
-            if (paramHintLabel.length > 0 || refOperatorString.length > 0) {
-                label = refOperatorString +  paramHintLabel + ":";
+
+            if (paramHintLabel.length <= 0 && refOperatorString.length <= 0) {
+                continue;
             }
 
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.position.line, hint.position.character),
-                label,
+                refOperatorString +  paramHintLabel + ":",
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
             resolvedHints.push(inlayHint);
