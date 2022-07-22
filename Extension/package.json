@@ -2682,7 +2682,8 @@
           "type": "object",
           "markdownDescription": "%c_cpp.configuration.filesExclude.markdownDescription%",
           "default": {
-            "**/.vscode": true
+            "**/.vscode": true,
+            "**/.vs": true
           },
           "additionalProperties": {
             "anyOf": [
