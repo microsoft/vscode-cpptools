@@ -28,6 +28,7 @@ import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
 
+
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
@@ -430,11 +431,11 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
     disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', onGenerateDoxygenComment));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (line, colum) => onGenerateDoxygenComment(line, colum)));
 }
 
-function onGenerateDoxygenComment() :void {
-    getActiveClient().handleGenerateDoxygenComment();
+function onGenerateDoxygenComment(line: number | undefined, colum: number | undefined ) :void {
+    getActiveClient().handleGenerateDoxygenComment(line, colum);
 }
 
 function onRestartIntelliSenseForFile(): void {

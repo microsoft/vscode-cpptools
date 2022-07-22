@@ -49,6 +49,7 @@ import { lookupString, localizedStringCount } from '../nativeStrings';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams } from './codeAnalysis';
 import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
+// import { Position } from 'vscode-languageclient';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -401,12 +402,14 @@ interface GoToDirectiveInGroupParams {
 export interface GenerateDoxygenCommentParams {
     uri: string;
     position: Position;
+    isCodeAction: boolean;
 }
 
 export interface GenerateDoxygenCommentResult {
     contents : string;
     initPosition: Position;
-    finalPosition: Position;
+    finalInsertionPosition: Position;
+    finalCursorPosition: Position;
     fileVersion: number;
 }
 
@@ -651,7 +654,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
-    handleGenerateDoxygenComment():Promise<void>;
+    handleGenerateDoxygenComment(line: number | undefined, colum: number | undefined):Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -2649,8 +2652,8 @@ export class DefaultClient implements Client {
                             await vscode.workspace.applyEdit(workspaceEdit);
 
                             //set the cursor position after @brief
-                            if(result?.finalPosition) {
-                                const newPosition: vscode.Position = new vscode.Position(result.finalPosition.line, result.finalPosition.character);
+                            if(result?.finalCursorPosition) {
+                                const newPosition: vscode.Position = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
                                 const newSelection = new vscode.Selection(newPosition, newPosition);
                                 editor.selection = newSelection;
                             }
@@ -3026,14 +3029,24 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async  handleGenerateDoxygenComment():Promise<void> {
+    public async  handleGenerateDoxygenComment(originalLine: number | undefined, originalCol: number | undefined):Promise<void> {
+        
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
-            const params: GenerateDoxygenCommentParams = {
-                uri: editor.document.uri.toString(),
-                position: editor.selection.active,
-            };
-
+            
+            const params : GenerateDoxygenCommentParams= {
+                uri : editor.document.uri.toString(),
+                position : (originalLine!=undefined && originalCol != undefined)? new vscode.Position(originalLine, originalCol) : editor.selection.active,
+                isCodeAction : (originalLine!=undefined && originalCol != undefined)? true:false
+            }
+            
+            if(originalLine!=undefined && originalCol != undefined){
+                params.position = new vscode.Position(originalLine, originalCol);
+                params.isCodeAction = true;
+            } else {
+                params.isCodeAction = false;
+            }
+            
             await this.awaitUntilLanguageClientReady();
 
             const oldVersion = openFileVersions.get(params.uri);
@@ -3052,17 +3065,27 @@ export class DefaultClient implements Client {
                     if(result.contents.length > 1) {
                         const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         const edits: vscode.TextEdit[] = [];
+
+                        const isCommand : boolean = result.finalInsertionPosition.line != editor.selection.active.line;
         
                         if(vscode.window.activeTextEditor) {
-    
-                            const newRange = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
-                            edits.push(new vscode.TextEdit(newRange, result?.contents));
-                            workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                            await vscode.workspace.applyEdit(workspaceEdit);
+                            
+                            if (params.isCodeAction || isCommand){
+                                const newRange = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
+                                edits.push(new vscode.TextEdit(newRange, result?.contents));
+                                workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                                await vscode.workspace.applyEdit(workspaceEdit); 
+                            } else {
+                                const newRange = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
+                                edits.push(new vscode.TextEdit(newRange, result?.contents));
+                                workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                                await vscode.workspace.applyEdit(workspaceEdit);
+                            }
+
 
                             //set the cursor position after @brief
-                            if(result?.finalPosition) {
-                                const newPosition: vscode.Position = new vscode.Position(result.finalPosition.line, result.finalPosition.character);
+                            if(result?.finalCursorPosition) {
+                                const newPosition: vscode.Position = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
                                 const newSelection = new vscode.Selection(newPosition, newPosition);
                                 editor.selection = newSelection;
                             }
