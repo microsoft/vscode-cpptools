@@ -1414,6 +1414,9 @@ export class DefaultClient implements Client {
                 references: {
                     ...vscode.workspace.getConfiguration("C_Cpp.references", this.RootUri)
                 },
+                tagParseAsC: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.tagParseAsC", this.RootUri)
+                },
                 vcFormat: {
                     ...vscode.workspace.getConfiguration("C_Cpp.vcFormat", this.RootUri),
                     indent: vscode.workspace.getConfiguration("C_Cpp.vcFormat.indent", this.RootUri),

@@ -1622,6 +1622,12 @@
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
+        "C_Cpp.tagParseAsC": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.tagParseAsC.markdownDescription%",
+          "scope": "resource"
+        },
         "C_Cpp.vcFormat.indent.braces": {
           "type": "boolean",
           "default": false,
