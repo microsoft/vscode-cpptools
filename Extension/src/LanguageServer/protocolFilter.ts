@@ -14,16 +14,16 @@ import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension'
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
     // Disabling lint for invoke handlers
-    const defaultHandler: (data: any, callback: (data: any) => void) => void = (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenLanguageClientReady(() => callback(data)); };
-    // let invoke1 = (a, callback: (a) => any) => { if (clients.ActiveClient === me) { return me.requestWhenReady(() => callback(a)); } return null; };
-    const invoke2 = (a: any, b: any, callback: (a: any, b: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b));
-    const invoke3 = (a: any, b: any, c: any, callback: (a: any, b: any, c: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c));
-    const invoke4 = (a: any, b: any, c: any, d: any, callback: (a: any, b: any, c: any, d: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d));
-    const invoke5 = (a: any, b: any, c: any, d: any, e: any, callback: (a: any, b: any, c: any, d: any, e: any) => any) => clients.ActiveClient.requestWhenReady<any>(() => callback(a, b, c, d, e));
+    const defaultHandler: (data: any, callback: (data: any) => Promise<void>) => Promise<void> = async (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenLanguageClientReady(() => callback(data)); };
+    // const invoke1 = async (a: any, next: (a: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a); };
+    const invoke2 = async (a: any, b: any, next: (a: any, b: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b); };
+    const invoke3 = async (a: any, b: any, c: any, next: (a: any, b: any, c: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c); };
+    const invoke4 = async (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c, d); };
+    // const invoke5 = async (a: any, b: any, c: any, d: any, e: any, next: (a: any, b: any, c: any, d: any, e: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c, d, e); };
     /* tslint:enable */
 
     return {
-        didOpen: (document, sendMessage) => {
+        didOpen: async (document, sendMessage) => {
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
@@ -74,7 +74,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                 // didOpen), and first becomes visible.
             }
         },
-        didChange: (textDocumentChangeEvent, sendMessage) => {
+        didChange: async (textDocumentChangeEvent, sendMessage) => {
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
             if (!me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
                 processDelayedDidOpen(textDocumentChangeEvent.document);
@@ -83,7 +83,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
             me.notifyWhenLanguageClientReady(() => sendMessage(textDocumentChangeEvent));
         },
         willSave: defaultHandler,
-        willSaveWaitUntil: (event, sendMessage) => {
+        willSaveWaitUntil: async (event, sendMessage) => {
             const me: Client = clients.getClientFor(event.document.uri);
             if (me.TrackedDocuments.has(event.document)) {
                 // Don't use me.requestWhenReady or notifyWhenLanguageClientReady;
@@ -93,7 +93,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
             return Promise.resolve([]);
         },
         didSave: defaultHandler,
-        didClose: (document, sendMessage) => {
+        didClose: async (document, sendMessage) => {
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
@@ -111,23 +111,11 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
             }
             return null;
         },
-        provideSignatureHelp: invoke3,
+        provideSignatureHelp: invoke4,
         provideDefinition: invoke3,
         provideReferences: invoke4,
         provideDocumentHighlights: invoke3,
-        provideDocumentSymbols: invoke2,
-        provideWorkspaceSymbols: invoke2,
-        provideCodeActions: invoke4,
-        provideCodeLenses: invoke2,
-        resolveCodeLens: invoke2,
-        provideDocumentFormattingEdits: invoke3,
-        provideDocumentRangeFormattingEdits: invoke4,
-        provideOnTypeFormattingEdits: invoke5,
-        provideRenameEdits: invoke4,
-        provideDocumentLinks: invoke2,
-        resolveDocumentLink: invoke2,
         provideDeclaration: invoke3
-
         // I believe the default handler will do the same thing.
         // workspace: {
         //     didChangeConfiguration: (sections, sendMessage) => sendMessage(sections)
