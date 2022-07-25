@@ -3065,23 +3065,15 @@ export class DefaultClient implements Client {
                     if(result.contents.length > 1) {
                         const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         const edits: vscode.TextEdit[] = [];
-
-                        const isCommand : boolean = result.finalInsertionPosition.line != editor.selection.active.line;
         
                         if(vscode.window.activeTextEditor) {
                             
-                            if (params.isCodeAction || isCommand){
-                                const newRange = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
-                                edits.push(new vscode.TextEdit(newRange, result?.contents));
-                                workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                                await vscode.workspace.applyEdit(workspaceEdit); 
-                            } else {
-                                const newRange = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
-                                edits.push(new vscode.TextEdit(newRange, result?.contents));
-                                workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                                await vscode.workspace.applyEdit(workspaceEdit);
-                            }
 
+                            const newRange = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
+                            edits.push(new vscode.TextEdit(newRange, result?.contents));
+                            workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
+                            await vscode.workspace.applyEdit(workspaceEdit); 
+                          
 
                             //set the cursor position after @brief
                             if(result?.finalCursorPosition) {
