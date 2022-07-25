@@ -94,7 +94,7 @@ function setupOutputHandlers(): void {
 }
 
 /** Note: We should not await on the following functions,
- * or any funstion that returns a promise acquired from them,
+ * or any function that returns a promise acquired from them,
  * vscode.window.showInformationMessage, vscode.window.showWarningMessage, vscode.window.showErrorMessage
 */
 function showMessageWindow(params: ShowMessageWindowParams): void {
@@ -913,7 +913,7 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(FindAllReferencesNotification, params);
     }
 
-    public sendRenameNofication(params: RenameParams): void {
+    public sendRenameNotification(params: RenameParams): void {
         this.languageClient.sendNotification(RenameNotification, params);
     }
 
