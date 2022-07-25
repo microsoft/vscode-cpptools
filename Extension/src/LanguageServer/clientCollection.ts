@@ -295,7 +295,6 @@ export class ClientCollection {
         // this.defaultClient is already in this.languageClients, so do not call dispose() on it.
         this.languageClients.forEach(client => client.dispose());
         this.languageClients.clear();
-        cpptools.disposeWorkspaceData();
         return cpptools.DefaultClient.stopLanguageClient();
     }
 }

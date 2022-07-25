@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "無法剖析 json 檔案，這可能是因為註解或結尾逗號所致。",
 	"extension.not.ready": "C/C ++ 延伸模組仍在安裝。如需詳細資訊，請查看輸出視窗。",
 	"refer.read.me": "如需疑難排解資訊，請參閱 {0}。問題可在 {1} 建立",
-	"process.exited.with.code": "{0} 已結束，錯誤碼為 {1}",
+	"process.exited": "處理序已結束，代碼為 {0}",
+	"process.succeeded": "程序已成功執行。",
+	"killing.process": "終止程序 {0}",
 	"warning.file.missing": "警告: 缺少預期的檔案 {0}。",
 	"warning.debugging.not.tested": "警告: 尚未針對此平台測試偵錯。",
 	"reload.workspace.for.changes": "請重新載入工作區以讓設定變更生效。",
 	"reload.string": "重新載入",
-	"invalid.download.location.received": "收到的下載位置無效",
-	"c.cpp.symbolscope.separator": "{0}，{1}"
+	"invalid.download.location.received": "收到的下載位置無效"
 }
