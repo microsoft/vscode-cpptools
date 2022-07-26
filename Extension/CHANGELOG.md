@@ -1,5 +1,21 @@
 # C/C++ for Visual Studio Code Change Log
 
+## Version 1.12.0 (pre-release): July 26, 2022
+## Enhancements
+* Show an informative message when an IntelliSense-related command is executed while IntelliSense is disabled. [#9614](https://github.com/microsoft/vscode-cpptools/issues/9614)
+* Add the `.vs` folder to the default exclusions. [PR #9629](https://github.com/microsoft/vscode-cpptools/pull/9629)
+
+## Bug Fixes
+* Fix some IntelliSense parsing bugs. [#3683](https://github.com/microsoft/vscode-cpptools/issues/3683), [#6659](https://github.com/microsoft/vscode-cpptools/issues/6659)
+* Fix `.` to `->` completion in functions defined in the class/struct definition. [#9599](https://github.com/microsoft/vscode-cpptools/issues/9599)
+* Fix inlay hint filtering not working with some cases of whitespace. [#9606](https://github.com/microsoft/vscode-cpptools/issues/9606)
+* Fix Chinese translation mistakes.
+  * kouhe3 (@kouhe3) [PR #9624](https://github.com/microsoft/vscode-cpptools/pull/9624)
+* Fix IntelliSense error with ARM register declarations. [#9627](https://github.com/microsoft/vscode-cpptools/issues/9627)
+* Fix files with a `.c` extension not using a C++ `std` version passed in the `compilerArgs` or `compilerFragments`. [#9628](https://github.com/microsoft/vscode-cpptools/issues/9628)
+* Fix unnecessary IntelliSense process restarting on file creation handling. [#9630](https://github.com/microsoft/vscode-cpptools/issues/9630)
+* Fix potential crashes on shutdown.
+
 ## Version 1.11.4: July 21, 2022
 ## New Features
 * Add inlay hints for parameters and auto types. [#5845](https://github.com/microsoft/vscode-cpptools/issues/5845)
