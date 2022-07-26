@@ -442,7 +442,7 @@ function onDisabledCommand(): void {
                 "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
             ] },
         "IntelliSense related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `Disabled`");
-    vscode.window.showInformationMessage(message);
+    vscode.window.showWarningMessage(message);
 }
 
 function onRestartIntelliSenseForFile(): void {
