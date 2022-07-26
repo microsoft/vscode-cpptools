@@ -38,6 +38,7 @@ let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 const disposables: vscode.Disposable[] = [];
+const commandDisposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
 let intervalTimer: NodeJS.Timer;
 let codeActionProvider: vscode.Disposable;
@@ -198,7 +199,7 @@ export async function activate(): Promise<void> {
         intervalTimer = global.setInterval(onInterval, 2500);
     });
 
-    registerCommands();
+    registerCommands(true);
 
     vscode.tasks.onDidStartTask(event => {
         getActiveClient().PauseCodeAnalysis();
@@ -383,53 +384,65 @@ function onInterval(): void {
 /**
  * registered commands
  */
-export function registerCommands(): void {
-    disposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', onSwitchHeaderSource));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', onResetDatabase));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', onSelectConfiguration));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', onSelectConfigurationProvider));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', onEditConfigurationJSON));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', onEditConfigurationUI));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', onEditConfiguration));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', onAddToIncludePath));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', onEnableSquiggles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', onDisableSquiggles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', onToggleIncludeFallback));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', onToggleDimInactiveRegions));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', onPauseParsing));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', onResumeParsing));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', onPauseCodeAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', onResumeCodeAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', onCancelCodeAnalysis));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', onShowParsingCommands));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', onShowCodeAnalysisCommands));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', onShowReferencesProgress));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', onTakeSurvey));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', onLogDiagnostics));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', onRescanWorkspace));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', onShowRefCommand));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', onToggleRefGroupView));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', onToggleRefGroupView));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', onVcpkgClipboardInstallSuggested));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', onVcpkgOnlineHelpSuggested));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveCodeAnalysisProblems', onRemoveCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RemoveAllCodeAnalysisProblems', onRemoveAllCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.FixThisCodeAnalysisProblem', onFixThisCodeAnalysisProblem));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllTypeCodeAnalysisProblems', onFixAllTypeCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', onFixAllCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.DisableAllTypeCodeAnalysisProblems', onDisableAllTypeCodeAnalysisProblems));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisDocumentation', (uri) => vscode.env.openExternal(uri)));
-    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', onGetActiveConfigName));
-    disposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', onGetActiveConfigCustomVariable));
-    disposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', onSetActiveConfigName));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', onRestartIntelliSenseForFile));
+export function registerCommands(enabled: boolean): void {
+    commandDisposables.forEach(d => d.dispose());
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', !enabled ? onDisabledCommand : onSwitchHeaderSource));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', !enabled ? onDisabledCommand : onResetDatabase));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', !enabled ? onDisabledCommand : onSelectConfiguration));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', !enabled ? onDisabledCommand : onSelectConfigurationProvider));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', !enabled ? onDisabledCommand : onEditConfigurationJSON));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditUI', !enabled ? onDisabledCommand : onEditConfigurationUI));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEdit', !enabled ? onDisabledCommand : onEditConfiguration));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddToIncludePath', !enabled ? onDisabledCommand : onAddToIncludePath));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.EnableErrorSquiggles', !enabled ? onDisabledCommand : onEnableSquiggles));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableErrorSquiggles', !enabled ? onDisabledCommand : onDisableSquiggles));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleIncludeFallback', !enabled ? onDisabledCommand : onToggleIncludeFallback));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ToggleDimInactiveRegions', !enabled ? onDisabledCommand : onToggleDimInactiveRegions));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsing', !enabled ? onDisabledCommand : onPauseParsing));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsing', !enabled ? onDisabledCommand : onResumeParsing));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', !enabled ? onDisabledCommand : onPauseCodeAnalysis));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', !enabled ? onDisabledCommand : onResumeCodeAnalysis));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', !enabled ? onDisabledCommand : onCancelCodeAnalysis));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', !enabled ? onDisabledCommand : onShowParsingCommands));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', !enabled ? onDisabledCommand : onShowCodeAnalysisCommands));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', !enabled ? onDisabledCommand : onShowReferencesProgress));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', !enabled ? onDisabledCommand : onTakeSurvey));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', !enabled ? onDisabledCommand : onLogDiagnostics));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspace', !enabled ? onDisabledCommand : onRescanWorkspace));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferenceItem', !enabled ? onDisabledCommand : onShowRefCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewGroupByType', !enabled ? onDisabledCommand : onToggleRefGroupView));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.referencesViewUngroupByType', !enabled ? onDisabledCommand : onToggleRefGroupView));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgClipboardInstallSuggested', !enabled ? onDisabledCommand : onVcpkgClipboardInstallSuggested));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.VcpkgOnlineHelpSuggested', !enabled ? onDisabledCommand : onVcpkgOnlineHelpSuggested));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', !enabled ? onDisabledCommand : onGenerateEditorConfig));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', !enabled ? onDisabledCommand : onGoToNextDirectiveInGroup));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', !enabled ? onDisabledCommand : onGoToPrevDirectiveInGroup));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', !enabled ? onDisabledCommand : onCheckForCompiler));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', !enabled ? onDisabledCommand : onRunCodeAnalysisOnActiveFile));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', !enabled ? onDisabledCommand : onRunCodeAnalysisOnOpenFiles));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', !enabled ? onDisabledCommand : onRunCodeAnalysisOnAllFiles));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RemoveCodeAnalysisProblems', !enabled ? onDisabledCommand : onRemoveCodeAnalysisProblems));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RemoveAllCodeAnalysisProblems', !enabled ? onDisabledCommand : onRemoveAllCodeAnalysisProblems));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FixThisCodeAnalysisProblem', !enabled ? onDisabledCommand : onFixThisCodeAnalysisProblem));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FixAllTypeCodeAnalysisProblems', !enabled ? onDisabledCommand : onFixAllTypeCodeAnalysisProblems));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.FixAllCodeAnalysisProblems', !enabled ? onDisabledCommand : onFixAllCodeAnalysisProblems));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.DisableAllTypeCodeAnalysisProblems', !enabled ? onDisabledCommand : onDisableAllTypeCodeAnalysisProblems));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisDocumentation', !enabled ? onDisabledCommand : (uri) => vscode.env.openExternal(uri)));
+    commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigName', !enabled ? onDisabledCommand : onGetActiveConfigName));
+    commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', !enabled ? onDisabledCommand : onGetActiveConfigCustomVariable));
+    commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', !enabled ? onDisabledCommand : onSetActiveConfigName));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', !enabled ? onDisabledCommand : onRestartIntelliSenseForFile));
+}
+
+function onDisabledCommand(): void {
+    const message: string = localize(
+        {
+            key: "on.disabled.command",
+            comment: [
+                "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            ] },
+        "IntelliSense related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `Disabled`");
+    vscode.window.showInformationMessage(message);
 }
 
 function onRestartIntelliSenseForFile(): void {
@@ -986,6 +999,7 @@ export function deactivate(): Thenable<void> {
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
+    commandDisposables.forEach(d => d.dispose());
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
     ui.dispose();
