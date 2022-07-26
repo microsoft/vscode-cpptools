@@ -137,13 +137,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     if (shouldActivateLanguageServer) {
         await LanguageServer.activate();
-    } else {
+    } else if (isIntelliSenseEngineDisabled) {
         LanguageServer.registerCommands(false);
-        if (isIntelliSenseEngineDisabled) {
-            // The check here for isIntelliSenseEngineDisabled avoids logging
-            // the message on old Macs that we've already displayed a warning for.
-            log(localize("intellisense.disabled", "intelliSenseEngine is Disabled"));
-        }
+        // The check here for isIntelliSenseEngineDisabled avoids logging
+        // the message on old Macs that we've already displayed a warning for.
+        log(localize("intellisense.disabled", "intelliSenseEngine is Disabled"));
     }
 
     return cppTools;
