@@ -4,7 +4,23 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import { stripEscapeSequences, isWindows, escapeStringForRegex } from '../common';
+import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress } from '../common';
+
+/**
+ * user -> password
+ * This should NOT be persisted.
+ * host.user@host.hostName used as user when there are no user info in the prompt.
+ * We don't store passphrases, because there's no way to decide if it's a wrong passphrase or auth for jump
+ * proxy based on the prompt.
+ */
+const passwordCache: Map<string, string> = new Map<string, string>();
+
+/**
+ * Users' passewords already used for auth.
+ * If a user's pass is already used and yet we still get the same prompt, we probably got a wrong password.
+ * Needs to be reset for each command.
+ */
+export const userUsedPasswords: Set<string> = new Set<string>();
 
 export type IDifferingHostConfirmationProvider =
     (message: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
@@ -208,7 +224,7 @@ function getPasswordPrompt(data: string, details?: IInteractorDataDetails): { us
 export class PasswordInteractor implements IInteractor {
     static ID = 'password';
 
-    constructor(private readonly passwordProvider: IStringProvider) { }
+    constructor(private readonly host: ISshHostInfo, private readonly passwordProvider: IStringProvider) { }
 
     get id(): string {
         return PasswordInteractor.ID;
@@ -219,12 +235,22 @@ export class PasswordInteractor implements IInteractor {
         const pwPrompt: { user?: string; message?: string } | undefined = getPasswordPrompt(data, extraDetails);
         if (pwPrompt && typeof pwPrompt.user === 'string') {
             result.postAction = 'consume';
-            const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
-            if (typeof password === 'string') {
-                result.response = password;
+            const actualUser: string = pwPrompt.user === '' ? getFullHostAddress(this.host) : pwPrompt.user;
+            const cachedPassword: string | undefined = passwordCache.get(actualUser);
+            if (cachedPassword !== undefined && !userUsedPasswords.has(actualUser)) {
+                userUsedPasswords.add(actualUser);
+                result.response = cachedPassword;
                 result.isPassword = true;
             } else {
-                result.canceled = true;
+                const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
+                if (typeof password === 'string') {
+                    passwordCache.set(actualUser, password);
+                    userUsedPasswords.add(actualUser);
+                    result.response = password;
+                    result.isPassword = true;
+                } else {
+                    result.canceled = true;
+                }
             }
         }
 

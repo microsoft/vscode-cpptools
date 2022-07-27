@@ -199,7 +199,7 @@ export async function runSshTerminalCommandWithLogin(
             new FingerprintInteractor(host.hostName, showHostKeyConfirmation),
             new PassphraseInteractor(showPassphraseInputBox),
             new DifferingHostKeyInteractor(showDifferingHostConfirmation),
-            new PasswordInteractor(showPasswordInputBox),
+            new PasswordInteractor(host, showPasswordInputBox),
             new TwoFacInteractor(showVerificationCodeInputBox),
             new DuoTwoFacInteractor(showVerificationCodeInputBox)
         );
