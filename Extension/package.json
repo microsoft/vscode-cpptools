@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.11.1-main",
+  "version": "1.12.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.65.0"
+    "vscode": "^1.67.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -2221,10 +2221,10 @@
           "scope": "application"
         },
         "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
-            "scope": "application"
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
+          "scope": "application"
         },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
@@ -2239,10 +2239,10 @@
           "scope": "application"
         },
         "C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
-            "scope": "application"
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
+          "scope": "application"
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
@@ -2251,10 +2251,10 @@
           "scope": "application"
         },
         "C_Cpp.inlayHints.referenceOperator.showSpace": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
-            "scope": "application"
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
+          "scope": "application"
         },
         "C_Cpp.loggingLevel": {
           "type": "string",
@@ -2700,7 +2700,8 @@
           "type": "object",
           "markdownDescription": "%c_cpp.configuration.filesExclude.markdownDescription%",
           "default": {
-            "**/.vscode": true
+            "**/.vscode": true,
+            "**/.vs": true
           },
           "additionalProperties": {
             "anyOf": [
@@ -3102,6 +3103,11 @@
                 "type": "string",
                 "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
                 "default": "serveraddress:port"
+              },
+              "useExtendedRemote": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.useExtendedRemote.description%",
+                "default": false
               },
               "stopAtEntry": {
                 "type": "boolean",
@@ -3751,8 +3757,7 @@
             "type": "object",
             "default": {},
             "required": [
-              "program",
-              "processId"
+              "program"
             ],
             "properties": {
               "program": {
@@ -3799,6 +3804,11 @@
                 "type": "string",
                 "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
                 "default": "serveraddress:port"
+              },
+              "useExtendedRemote": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.useExtendedRemote.description%",
+                "default": false
               },
               "processId": {
                 "anyOf": [
@@ -5454,7 +5464,7 @@
     "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
     "@vscode/extension-telemetry": "^0.6.2",
-    "vscode-languageclient": "^5.2.1",
+    "vscode-languageclient": "^8.0.1",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
     "which": "^2.0.2",
@@ -5472,6 +5482,7 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "minimist": "^1.2.6"
+    "minimist": "^1.2.6",
+    "terser": "^5.14.2"
   }
 }

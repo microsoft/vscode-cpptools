@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "Fehler beim Analysieren der JSON-Datei, möglicherweise aufgrund von Kommentaren oder nachgestellten Kommas.",
 	"extension.not.ready": "Die C/C++-Erweiterung wird noch installiert. Weitere Informationen finden Sie im Ausgabefenster.",
 	"refer.read.me": "Informationen zur Problembehandlung finden Sie hier: {0}. Issues können hier erstellt werden: {1}.",
-	"process.exited.with.code": "\"{0}\" wurde mit Fehlercode \"{1}\" beendet.",
+	"process.exited": "Der Prozess wurde mit Code {0} beendet.",
+	"process.succeeded": "Der Prozess wurde erfolgreich ausgeführt.",
+	"killing.process": "Der Prozess „{0}“ wird beendet.",
 	"warning.file.missing": "Warnung: Die erwartete Datei \"{0}\" fehlt.",
 	"warning.debugging.not.tested": "Warnung: Das Debugging wurde für diese Plattform nicht getestet.",
 	"reload.workspace.for.changes": "Laden Sie den Arbeitsbereich neu, damit die Einstellungsänderung wirksam wird.",
 	"reload.string": "Aktualisieren",
-	"invalid.download.location.received": "Ungültiger Downloadspeicherort empfangen.",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"invalid.download.location.received": "Ungültiger Downloadspeicherort empfangen."
 }

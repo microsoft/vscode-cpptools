@@ -39,48 +39,58 @@ export class RemoteAttachPicker {
 
     public async ShowAttachEntries(config: any): Promise<string | undefined> {
         this._channel.clear();
+        let processes: AttachItem[];
 
         const pipeTransport: any = config ? config.pipeTransport : undefined;
+        const useExtendedRemote: any = config ? config.useExtendedRemote : undefined;
+        const miDebuggerPath: any = config ? config.miDebuggerPath : undefined;
+        const miDebuggerServerAddress: any = config ? config.miDebuggerServerAddress : undefined;
 
-        if (!pipeTransport) {
-            throw new Error(localize("no.pipetransport", "Chosen debug configuration does not contain {0}", "pipeTransport"));
-        }
+        if (pipeTransport) {
+            let pipeProgram: string | undefined;
 
-        let pipeProgram: string | undefined;
+            if (os.platform() === 'win32' &&
+                pipeTransport.pipeProgram &&
+                !await util.checkFileExists(pipeTransport.pipeProgram)) {
+                const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
+                const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
 
-        if (os.platform() === 'win32' &&
-            pipeTransport.pipeProgram &&
-            !await util.checkFileExists(pipeTransport.pipeProgram)) {
-            const pipeProgramStr: string = pipeTransport.pipeProgram.toLowerCase().trim();
-            const expectedArch: debugUtils.ArchType = debugUtils.ArchType[process.arch as keyof typeof debugUtils.ArchType];
+                // Check for pipeProgram
+                if (!await util.checkFileExists(config.pipeTransport.pipeProgram)) {
+                    pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
+                }
 
-            // Check for pipeProgram
-            if (!await util.checkFileExists(config.pipeTransport.pipeProgram)) {
-                pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(pipeProgramStr, expectedArch);
-            }
+                // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
+                if (!pipeProgram && config.pipeTransport.pipeCwd) {
+                    const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
+                    const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
 
-            // If pipeProgram does not get replaced and there is a pipeCwd, concatenate with pipeProgramStr and attempt to replace.
-            if (!pipeProgram && config.pipeTransport.pipeCwd) {
-                const pipeCwdStr: string = config.pipeTransport.pipeCwd.toLowerCase().trim();
-                const newPipeProgramStr: string = path.join(pipeCwdStr, pipeProgramStr);
-
-                if (!await util.checkFileExists(newPipeProgramStr)) {
-                    pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
+                    if (!await util.checkFileExists(newPipeProgramStr)) {
+                        pipeProgram = debugUtils.ArchitectureReplacer.checkAndReplaceWSLPipeProgram(newPipeProgramStr, expectedArch);
+                    }
                 }
             }
+
+            if (!pipeProgram) {
+                pipeProgram = pipeTransport.pipeProgram;
+            }
+
+            const pipeArgs: string[] = pipeTransport.pipeArgs;
+
+            const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
+
+            const pipeCmd: string = `"${pipeProgram}" ${argList}`;
+
+            processes = await this.getRemoteOSAndProcesses(pipeCmd);
+        } else if (!pipeTransport && useExtendedRemote) {
+            if (!miDebuggerPath || !miDebuggerServerAddress) {
+                throw new Error(localize("debugger.path.and.server.address.required", "{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
+            }
+            processes = await this.getRemoteProcessesExtendedRemote(miDebuggerPath, miDebuggerServerAddress);
+        } else {
+            throw new Error(localize("no.pipetransport.useextendedremote", "Chosen debug configuration does not contain {0} or {1}", "pipeTransport", "useExtendedRemote"));
         }
 
-        if (!pipeProgram) {
-            pipeProgram = pipeTransport.pipeProgram;
-        }
-
-        const pipeArgs: string[] = pipeTransport.pipeArgs;
-
-        const argList: string = RemoteAttachPicker.createArgumentList(pipeArgs);
-
-        const pipeCmd: string = `"${pipeProgram}" ${argList}`;
-
-        const processes: AttachItem[]= await this.getRemoteOSAndProcesses(pipeCmd);
         const attachPickOptions: vscode.QuickPickOptions = {
             matchOnDetail: true,
             matchOnDescription: true,
@@ -118,8 +128,8 @@ export class RemoteAttachPicker {
         }
 
         return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
-        `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
-        `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
+            `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
+            `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
     private async getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
@@ -165,6 +175,58 @@ export class RemoteAttachPicker {
                     .map(p => p.toAttachItem());
             }
         }
+    }
+
+    private async getRemoteProcessesExtendedRemote(miDebuggerPath: string, miDebuggerServerAddress: string): Promise<AttachItem[]> {
+        const args: string[] = [`-ex "target extended-remote ${miDebuggerServerAddress}"`, '-ex "info os processes"', '-batch'];
+        let processListOutput: util.ProcessReturnType = await util.spawnChildProcess(miDebuggerPath, args);
+        // The device may not be responsive for a while during the restart after image deploy. Retry 5 times.
+        for (let i: number = 0; i < 5 && !processListOutput.succeeded; i++) {
+            processListOutput = await util.spawnChildProcess(miDebuggerPath, args);
+        }
+
+        if (!processListOutput.succeeded) {
+            throw new Error(localize('failed.to.make.gdb.connection', 'Failed to make GDB connection: "{0}".', processListOutput.output));
+        }
+        const processes: AttachItem[] = this.parseProcessesFromInfoOsProcesses(processListOutput.output);
+        if (!processes || processes.length === 0) {
+            throw new Error(localize('failed.to.parse.processes', 'Failed to parse processes: "{0}".', processListOutput.output));
+        }
+        return processes;
+    }
+
+    /**
+    Format:
+    pid      usr      command     cores
+    1        ?
+    2        ?
+    3                 /usr/bin/sample 0
+    4        root     /usr/bin/gdbserver --multi :6000 0
+
+    Returns an AttachItem array, each item contains a label of "<user   >command", and a pid.
+    Unfortunately because the format of each line is not fixed, and everything except pid is optional, it's hard
+    to get a better label.
+    */
+    private parseProcessesFromInfoOsProcesses(processList: string): AttachItem[] {
+        const lines: string[] = processList?.split('\n');
+        if (!lines?.length) {
+            return [];
+        }
+
+        const processes: AttachItem[] = [];
+        for (const line of lines) {
+            const trimmedLine: string = line.trim();
+            if (!trimmedLine.endsWith('?')) {
+                const matches: RegExpMatchArray | null = trimmedLine.match(/^(\d+)\s+(.+?)\s+\d+$/);
+                if (matches?.length === 3) {
+                    const id: string = matches[1];
+                    const userCommand: string = matches[2];
+                    processes.push({ label: userCommand, id });
+                }
+            }
+        }
+
+        return processes;
     }
 
     private static createArgumentList(args: string[]): string {

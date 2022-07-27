@@ -7,11 +7,12 @@
 	"failed.to.parse.json": "Non è stato possibile analizzare il file JSON probabilmente a causa di commenti o virgole finali.",
 	"extension.not.ready": "L'estensione C/C++ è ancora in fase di installazione. Per altre informazioni, vedere la finestra di output.",
 	"refer.read.me": "Vedere {0} per informazioni sulla risoluzione dei problemi. È possibile creare problemi in {1}",
-	"process.exited.with.code": "{0} è stato terminato. Codice errore: {1}",
+	"process.exited": "Processo terminato con codice {0}",
+	"process.succeeded": "Il processo è stato eseguito correttamente.",
+	"killing.process": "Arresto del processo.{0}",
 	"warning.file.missing": "Avviso: manca il file previsto {0}.",
 	"warning.debugging.not.tested": "Avviso: il debug non è stato testato per questa piattaforma.",
 	"reload.workspace.for.changes": "Ricaricare l'area di lavoro per rendere effettive le modifiche apportate alle impostazioni.",
 	"reload.string": "Ricarica",
-	"invalid.download.location.received": "È stato ricevuto un percorso di download non valido",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"invalid.download.location.received": "È stato ricevuto un percorso di download non valido"
 }

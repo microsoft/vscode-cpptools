@@ -620,6 +620,11 @@
           "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
           "default": "serveraddress:port"
         },
+        "useExtendedRemote": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.useExtendedRemote.description%",
+          "default": false
+        },
         "stopAtEntry": {
           "type": "boolean",
           "description": "%c_cpp.debuggers.stopAtEntry.description%",
@@ -719,8 +724,7 @@
       "type": "object",
       "default": {},
       "required": [
-        "program",
-        "processId"
+        "program"
       ],
       "properties": {
         "program": {
@@ -767,6 +771,11 @@
           "type": "string",
           "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
           "default": "serveraddress:port"
+        },
+        "useExtendedRemote": {
+          "type": "boolean",
+          "description": "%c_cpp.debuggers.useExtendedRemote.description%",
+          "default": false
         },
         "processId": {
           "anyOf": [

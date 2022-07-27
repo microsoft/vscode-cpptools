@@ -1,0 +1,86 @@
+name: Bug Report - Language Service
+description: Create a bug report for IntelliSense, autocomplete, code editing, code navigation, etc.
+body:
+- type: markdown
+  attributes:
+    value: |
+      ### Is there an existing issue for this?
+      Please search our [existing issues](https://github.com/microsoft/vscode-cpptools/issues) to see if an issue already exists for the bug you encountered.
+
+      Please also review our [documentation](https://code.visualstudio.com/docs/languages/cpp) and [FAQs](https://code.visualstudio.com/docs/cpp/faq-cpp).
+- type: textarea
+  attributes:
+    label: Environment
+    description: |
+      Please provide the information for the following:
+        - OS and Version
+        - VS Code Version
+        - C/C++ Extension Version
+        - Other extensions you installed (and if the issue persists after disabling them)
+        - If using SSH remote, specify OS of remote machine
+        - A clear and concise description of what the bug is, including information about the workspace (i.e. is the workspace a single project or multiple projects, size of the project, etc).
+    value: |
+        - OS and Version:
+        - VS Code Version:
+        - C/C++ Extension Version:
+        - Other extensions you installed (and if the issue persists after disabling them):  
+        - If using SSH remote, specify OS of remote machine:  
+        - A clear and concise description of what the bug is, including information about the workspace (i.e. is the workspace a single project or multiple projects, size of the project, etc).
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Bug Summary and Steps to Reproduce
+    description: |
+      Please describe the language service issue or language service feature that is not working as expected.
+
+      Include clear steps on how to reproduce the issue.
+    value: |
+      Bug Summary:
+
+
+      Steps to reproduce:
+      1. Go to '...'
+      2. Click on '....'
+      3. Scroll down to '....'
+      4. See error
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Expected behavior
+    description: A clear and concise description of what you expected to happen.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Code sample and Logs
+    description: |
+      Please provide code sample, your c_cpp_properties.json and logs:
+        - Code sample
+        - Configurations in `c_cpp_properties.json`
+        - Logs from running `C/C++: Log Diagnostics` from the VS Code command palette
+        - Logs from [the language server logging](https://code.visualstudio.com/docs/cpp/enable-logging-cpp#_enable-logging-for-the-language-server)
+    render: shell
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Screenshots
+    description: If applicable, add screenshots to help explain your problem.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional context
+    description: |
+      Providing call stacks:
+      For bugs like crashes, deadlocks, infinite loops, etc. that we are not able to repro and for which the call stack may be useful, please attach a debugger and/or create a dmp and provide the call stacks. Windows binaries have symbols available in VS Code by setting your "symbolSearchPath" to "https://msdl.microsoft.com/download/symbols".
+
+      Instructions for attaching debugger to language service process:
+      https://github.com/microsoft/vscode-cpptools/wiki/Attaching-debugger-to-cpptools-or-cpptools%E2%80%90srv.
+
+      Performance analysis:
+      For a performance issue see instructions at https://github.com/microsoft/vscode-cpptools/wiki/Troubleshooting-Performance-Issues.
+  validations:
+    required: false
