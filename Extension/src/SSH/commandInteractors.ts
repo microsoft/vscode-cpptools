@@ -16,7 +16,7 @@ import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, ge
 const passwordCache: Map<string, string> = new Map<string, string>();
 
 /**
- * Users' passewords already used for auth.
+ * Users' passwords already used for auth.
  * If a user's pass is already used and yet we still get the same prompt, we probably got a wrong password.
  * Needs to be reset for each command.
  */
