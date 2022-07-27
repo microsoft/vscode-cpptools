@@ -413,6 +413,14 @@ enum CodeAnalysisScope {
     ClearSquiggles
 };
 
+interface CodeAnalysisParams {
+    scope: CodeAnalysisScope;
+}
+
+interface FinishedRequestCustomConfigParams {
+    uri: string;
+}
+
 interface IntervalTimerParams {
     freeMemory: number;
 };
@@ -456,14 +464,14 @@ const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfig
 const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomConfigurations');
 const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomBrowseConfiguration');
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
-export const RequestReferencesNotification: NotificationType<boolean> = new NotificationType<boolean>('cpptools/requestReferences');
+export const RequestReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/requestReferences');
 export const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
-const FinishedRequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/finishedRequestCustomConfig');
+const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams> = new NotificationType<DidChangeConfigurationParams>('cpptools/didChangeSettings');
 
-const CodeAnalysisNotification: NotificationType<CodeAnalysisScope> = new NotificationType<CodeAnalysisScope>('cpptools/runCodeAnalysis');
+const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
 const ResumeCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeCodeAnalysis');
 const CancelCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelCodeAnalysis');
@@ -1806,7 +1814,7 @@ export class DefaultClient implements Client {
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
         const onFinished: () => void = () => {
             if (requestFile) {
-                this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+                this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
             }
         };
         const providerId: string | undefined = this.configurationProvider;
@@ -2998,23 +3006,23 @@ export class DefaultClient implements Client {
 
     public async handleRunCodeAnalysisOnActiveFile(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ActiveFile);
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.ActiveFile });
     }
 
     public async handleRunCodeAnalysisOnOpenFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.OpenFiles);
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.OpenFiles });
     }
 
     public async handleRunCodeAnalysisOnAllFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.AllFiles);
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope:  CodeAnalysisScope.AllFiles });
     }
 
     public async handleRemoveAllCodeAnalysisProblems(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
         if (removeAllCodeAnalysisProblems()) {
-            this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
+            this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.ClearSquiggles });
         }
     }
 
@@ -3111,7 +3119,7 @@ export class DefaultClient implements Client {
                         } else {
                             workspaceReferences.referencesRequestHasOccurred = true;
                             workspaceReferences.referencesRequestPending = true;
-                            this.languageClient.sendNotification(RequestReferencesNotification, false);
+                            this.languageClient.sendNotification(RequestReferencesNotification);
                         }
                     }
                 }

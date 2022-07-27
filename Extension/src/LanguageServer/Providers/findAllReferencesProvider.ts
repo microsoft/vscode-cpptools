@@ -73,7 +73,7 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                         // This is a preview (2nd or later preview)
                         workspaceReferences.referencesRequestPending = true;
                         workspaceReferences.setResultsCallback(resultCallback);
-                        this.client.languageClient.sendNotification(RequestReferencesNotification, false);
+                        this.client.languageClient.sendNotification(RequestReferencesNotification);
                     }
                 }
                 token.onCancellationRequested(e => {
