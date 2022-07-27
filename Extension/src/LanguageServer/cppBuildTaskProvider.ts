@@ -178,7 +178,12 @@ export class CppBuildTaskProvider implements TaskProvider {
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const programName: string = util.defaultExePath();
-            let args: string[] = isCl ? ['/Zi', '/EHsc', '/nologo', `/Fe${programName}`, '${file}'] : ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+            const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
+            let args: string[] = isCl ?
+                ['/Zi', '/EHsc', '/nologo', `/Fe${programName}`, '${file}'] :
+                isClang ?
+                    ['-fcolor-diagnostics', '-fansi-escape-codes', '-g', '${file}', '-o', programName] :
+                    ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
