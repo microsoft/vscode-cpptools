@@ -112,18 +112,18 @@ suite("[Inlay hints test]", function(): void {
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Type;
-        assertHintValues(result2[0], 16, 16, ": int *const", expectedKind);
-        assertHintValues(result2[1], 17, 17, ": const int *const", expectedKind);
-        assertHintValues(result2[2], 18, 18, ": const int *const &", expectedKind);
-        assertHintValues(result2[3], 19, 19, ": const int *const", expectedKind);
-        assertHintValues(result2[4], 20, 17, ": const int", expectedKind);
-        assertHintValues(result2[5], 21, 12, ": const int &", expectedKind);
-        assertHintValues(result2[6], 22, 21, ": const int &", expectedKind);
-        assertHintValues(result2[7], 23, 21, ": const int *", expectedKind);
-        assertHintValues(result2[8], 24, 21, ": int *", expectedKind);
-        assertHintValues(result2[9], 25, 21, ": const int *", expectedKind);
-        assertHintValues(result2[10], 28, 14, ": int", expectedKind);
-        assertHintValues(result2[11], 29, 15, ": int", expectedKind);
+        assertHintValues(result2, 0, 16, 16, ": int *const", expectedKind);
+        assertHintValues(result2, 1, 17, 17, ": const int *const", expectedKind);
+        assertHintValues(result2, 2, 18, 18, ": const int *const &", expectedKind);
+        assertHintValues(result2, 3, 19, 19, ": const int *const", expectedKind);
+        assertHintValues(result2, 4, 20, 17, ": const int", expectedKind);
+        assertHintValues(result2, 5, 21, 12, ": const int &", expectedKind);
+        assertHintValues(result2, 6, 22, 21, ": const int &", expectedKind);
+        assertHintValues(result2, 7, 23, 21, ": const int *", expectedKind);
+        assertHintValues(result2, 8, 24, 21, ": int *", expectedKind);
+        assertHintValues(result2, 9, 25, 21, ": const int *", expectedKind);
+        assertHintValues(result2, 10, 28, 14, ": int", expectedKind);
+        assertHintValues(result2, 11, 29, 15, ": int", expectedKind);
     });
 
     test("[Inlay Hints - auto type, show on left]", async () => {
@@ -141,18 +141,18 @@ suite("[Inlay hints test]", function(): void {
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Type;
-        assertHintValues(result2[0], 16, 15, "int *const", expectedKind);
-        assertHintValues(result2[1], 17, 15, "const int *const", expectedKind);
-        assertHintValues(result2[2], 18, 16, "const int *const &", expectedKind);
-        assertHintValues(result2[3], 19, 17, "const int *const", expectedKind);
-        assertHintValues(result2[4], 20, 15, "const int", expectedKind);
-        assertHintValues(result2[5], 21, 10, "const int &", expectedKind);
-        assertHintValues(result2[6], 22, 19, "const int &", expectedKind);
-        assertHintValues(result2[7], 23, 19, "const int *", expectedKind);
-        assertHintValues(result2[8], 24, 19, "int *", expectedKind);
-        assertHintValues(result2[9], 25, 19, "const int *", expectedKind);
-        assertHintValues(result2[10], 28, 9, "int", expectedKind);
-        assertHintValues(result2[11], 29, 14, "int", expectedKind);
+        assertHintValues(result2, 0, 16, 15, "int *const", expectedKind);
+        assertHintValues(result2, 1, 17, 15, "const int *const", expectedKind);
+        assertHintValues(result2, 2, 18, 16, "const int *const &", expectedKind);
+        assertHintValues(result2, 3, 19, 17, "const int *const", expectedKind);
+        assertHintValues(result2, 4, 20, 15, "const int", expectedKind);
+        assertHintValues(result2, 5, 21, 10, "const int &", expectedKind);
+        assertHintValues(result2, 6, 22, 19, "const int &", expectedKind);
+        assertHintValues(result2, 7, 23, 19, "const int *", expectedKind);
+        assertHintValues(result2, 8, 24, 19, "int *", expectedKind);
+        assertHintValues(result2, 9, 25, 19, "const int *", expectedKind);
+        assertHintValues(result2, 10, 28, 9, "int", expectedKind);
+        assertHintValues(result2, 11, 29, 14, "int", expectedKind);
     });
 
     test("[Inlay Hints - parameter names]", async () => {
@@ -170,22 +170,22 @@ suite("[Inlay hints test]", function(): void {
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 16, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
-        assertHintValues(result2[0], 16, 15, "width:", expectedKind);
-        assertHintValues(result2[1], 17, 15, "height:", expectedKind);
-        assertHintValues(result2[2], 18, 16, "width:", expectedKind);
-        assertHintValues(result2[3], 19, 17, "height:", expectedKind);
-        assertHintValues(result2[4], 20, 15, "width:", expectedKind);
-        assertHintValues(result2[5], 21, 10, "height:", expectedKind);
-        assertHintValues(result2[6], 22, 19, "height:", expectedKind);
-        assertHintValues(result2[7], 23, 19, "height:", expectedKind);
-        assertHintValues(result2[8], 24, 19, "height:", expectedKind);
-        assertHintValues(result2[9], 25, 19, "height:", expectedKind);
-        assertHintValues(result2[10], 28, 9, "height:", expectedKind);
-        assertHintValues(result2[11], 29, 14, "width:", expectedKind);
-        assertHintValues(result2[12], 29, 14, "width:", expectedKind);
-        assertHintValues(result2[13], 28, 9, "width:", expectedKind);
-        assertHintValues(result2[14], 29, 14, "width:", expectedKind);
-        assertHintValues(result2[15], 29, 14, "width:", expectedKind);
+        assertHintValues(result2, 0, 41, 17, "width:", expectedKind);
+        assertHintValues(result2, 1, 41, 20, "height:", expectedKind);
+        assertHintValues(result2, 2, 42, 17, "width:", expectedKind);
+        assertHintValues(result2, 3, 43, 17, "height:", expectedKind);
+        assertHintValues(result2, 4, 45, 17, "width:", expectedKind);
+        assertHintValues(result2, 5, 46, 17, "height:", expectedKind);
+        assertHintValues(result2, 6, 50, 20, "height:", expectedKind);
+        assertHintValues(result2, 7, 51, 26, "height:", expectedKind);
+        assertHintValues(result2, 8, 52, 29, "height:", expectedKind);
+        assertHintValues(result2, 9, 54, 13, "height:", expectedKind);
+        assertHintValues(result2, 10, 57, 13, "height:", expectedKind);
+        assertHintValues(result2, 11, 61, 13, "width:", expectedKind);
+        assertHintValues(result2, 12, 62, 13, "width:", expectedKind);
+        assertHintValues(result2, 13, 63, 16, "width:", expectedKind);
+        assertHintValues(result2, 14, 64, 13, "width:", expectedKind);
+        assertHintValues(result2, 15, 67, 13, "width:", expectedKind);
     });
 
     test("[Inlay Hints - parameter hideLeadingUnderscores]", async () => {
@@ -197,19 +197,19 @@ suite("[Inlay hints test]", function(): void {
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 4, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
-        assertHintValues(result1[0], 35, 16, "___x:", expectedKind);
-        assertHintValues(result1[1], 35, 19, "__y:", expectedKind);
-        assertHintValues(result1[2], 35, 22, "_z:", expectedKind);
-        assertHintValues(result1[3], 35, 25, "a:", expectedKind);
+        assertHintValues(result1, 0, 35, 16, "___x:", expectedKind);
+        assertHintValues(result1, 1, 35, 19, "__y:", expectedKind);
+        assertHintValues(result1, 2, 35, 22, "_z:", expectedKind);
+        assertHintValues(result1, 3, 35, 25, "a:", expectedKind);
 
         await changeInlayHintSetting(parameterNamesHideUnderScore, enabled);
         await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 4, "Incorrect number of results.");
-        assertHintValues(result2[0], 35, 16, "x:", expectedKind);
-        assertHintValues(result2[1], 35, 19, "y:", expectedKind);
-        assertHintValues(result2[2], 35, 22, "z:", expectedKind);
-        assertHintValues(result2[3], 35, 25, "a:", expectedKind);
+        assertHintValues(result2, 0, 35, 16, "x:", expectedKind);
+        assertHintValues(result2, 1, 35, 19, "y:", expectedKind);
+        assertHintValues(result2, 2, 35, 22, "z:", expectedKind);
+        assertHintValues(result2, 3, 35, 25, "a:", expectedKind);
     });
 
     test("[Inlay Hints - reference operator]", async () => {
@@ -228,22 +228,22 @@ suite("[Inlay hints test]", function(): void {
         assert.strictEqual(result2.length, 16, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
         const refOp: string = "&:";
-        assertHintValues(result2[0], 87, 9, refOp, expectedKind);
-        assertHintValues(result2[1], 87, 12, refOp, expectedKind);
-        assertHintValues(result2[2], 88, 9, refOp, expectedKind);
-        assertHintValues(result2[3], 88, 22, refOp, expectedKind);
-        assertHintValues(result2[4], 89, 9, refOp, expectedKind);
-        assertHintValues(result2[5], 90, 9, refOp, expectedKind);
-        assertHintValues(result2[6], 93, 9, refOp, expectedKind);
-        assertHintValues(result2[7], 94, 9, refOp, expectedKind);
-        assertHintValues(result2[8], 97, 9, refOp, expectedKind);
-        assertHintValues(result2[9], 97, 12, refOp, expectedKind);
-        assertHintValues(result2[10], 98, 9, refOp, expectedKind);
-        assertHintValues(result2[11], 98, 12, refOp, expectedKind);
-        assertHintValues(result2[12], 99, 9, refOp, expectedKind);
-        assertHintValues(result2[13], 100, 9, refOp, expectedKind);
-        assertHintValues(result2[14], 103, 9, refOp, expectedKind);
-        assertHintValues(result2[15], 104, 9, refOp, expectedKind);
+        assertHintValues(result2, 0, 87, 9, refOp, expectedKind);
+        assertHintValues(result2, 1, 87, 12, refOp, expectedKind);
+        assertHintValues(result2, 2, 88, 9, refOp, expectedKind);
+        assertHintValues(result2, 3, 88, 22, refOp, expectedKind);
+        assertHintValues(result2, 4, 89, 9, refOp, expectedKind);
+        assertHintValues(result2, 5, 90, 9, refOp, expectedKind);
+        assertHintValues(result2, 6, 93, 9, refOp, expectedKind);
+        assertHintValues(result2, 7, 94, 9, refOp, expectedKind);
+        assertHintValues(result2, 8, 97, 9, refOp, expectedKind);
+        assertHintValues(result2, 9, 97, 12, refOp, expectedKind);
+        assertHintValues(result2, 10, 98, 9, refOp, expectedKind);
+        assertHintValues(result2, 11, 98, 12, refOp, expectedKind);
+        assertHintValues(result2, 12, 99, 9, refOp, expectedKind);
+        assertHintValues(result2, 13, 100, 9, refOp, expectedKind);
+        assertHintValues(result2, 14, 103, 9, refOp, expectedKind);
+        assertHintValues(result2, 15, 104, 9, refOp, expectedKind);
     });
 
     test("[Inlay Hints - reference operator and param name, show space]", async () => {
@@ -258,35 +258,35 @@ suite("[Inlay hints test]", function(): void {
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
-        assertHintValues(result1[0], 87, 9, "&first:", expectedKind);
-        assertHintValues(result1[1], 87, 12, "&last:", expectedKind);
-        assertHintValues(result1[2], 87, 15, "flag:", expectedKind);
-        assertHintValues(result1[3], 88, 9, "&first:", expectedKind);
-        assertHintValues(result1[4], 88, 22, "&last:", expectedKind);
-        assertHintValues(result1[5], 88, 25, "flag:", expectedKind);
-        assertHintValues(result1[6], 89, 9, "&first:", expectedKind);
-        assertHintValues(result1[7], 90, 9, "&last:", expectedKind);
-        assertHintValues(result1[8], 91, 9, "flag:", expectedKind);
-        assertHintValues(result1[9], 93, 9, "&first:", expectedKind);
-        assertHintValues(result1[10], 94, 9, "&last:", expectedKind);
-        assertHintValues(result1[11], 95, 9, "flag:", expectedKind);
+        assertHintValues(result1, 0, 87, 9, "&first:", expectedKind);
+        assertHintValues(result1, 1, 87, 12, "&last:", expectedKind);
+        assertHintValues(result1, 2, 87, 15, "flag:", expectedKind);
+        assertHintValues(result1, 3, 88, 9, "&first:", expectedKind);
+        assertHintValues(result1, 4, 88, 22, "&last:", expectedKind);
+        assertHintValues(result1, 5, 88, 25, "flag:", expectedKind);
+        assertHintValues(result1, 6, 89, 9, "&first:", expectedKind);
+        assertHintValues(result1, 7, 90, 9, "&last:", expectedKind);
+        assertHintValues(result1, 8, 91, 9, "flag:", expectedKind);
+        assertHintValues(result1, 9, 93, 9, "&first:", expectedKind);
+        assertHintValues(result1, 10, 94, 9, "&last:", expectedKind);
+        assertHintValues(result1, 11, 95, 9, "flag:", expectedKind);
 
         await changeInlayHintSetting(referenceOperatorShowSpace, enabled);
         await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
-        assertHintValues(result2[0], 87, 9, "& first:", expectedKind);
-        assertHintValues(result2[1], 87, 12, "& last:", expectedKind);
-        assertHintValues(result2[2], 87, 15, "flag:", expectedKind);
-        assertHintValues(result2[3], 88, 9, "& first:", expectedKind);
-        assertHintValues(result2[4], 88, 22, "& last:", expectedKind);
-        assertHintValues(result2[5], 88, 25, "flag:", expectedKind);
-        assertHintValues(result2[6], 89, 9, "& first:", expectedKind);
-        assertHintValues(result2[7], 90, 9, "& last:", expectedKind);
-        assertHintValues(result2[8], 91, 9, "flag:", expectedKind);
-        assertHintValues(result2[9], 93, 9, "& first:", expectedKind);
-        assertHintValues(result2[10], 94, 9, "& last:", expectedKind);
-        assertHintValues(result2[11], 95, 9, "flag:", expectedKind);
+        assertHintValues(result2, 0, 87, 9, "& first:", expectedKind);
+        assertHintValues(result2, 1, 87, 12, "& last:", expectedKind);
+        assertHintValues(result2, 2, 87, 15, "flag:", expectedKind);
+        assertHintValues(result2, 3, 88, 9, "& first:", expectedKind);
+        assertHintValues(result2, 4, 88, 22, "& last:", expectedKind);
+        assertHintValues(result2, 5, 88, 25, "flag:", expectedKind);
+        assertHintValues(result2, 6, 89, 9, "& first:", expectedKind);
+        assertHintValues(result2, 7, 90, 9, "& last:", expectedKind);
+        assertHintValues(result2, 8, 91, 9, "flag:", expectedKind);
+        assertHintValues(result2, 9, 93, 9, "& first:", expectedKind);
+        assertHintValues(result2, 10, 94, 9, "& last:", expectedKind);
+        assertHintValues(result2, 11, 95, 9, "flag:", expectedKind);
     });
 
     async function changeInlayHintSetting(inlayHintSetting: string, valueNew: any): Promise<void> {
@@ -299,14 +299,15 @@ suite("[Inlay hints test]", function(): void {
     }
 
     function assertHintValues(
-        actualHint: any,
+        actualHintResults: any,
+        resultNumber: number,
         expectedLine: number,
         expectedCharacter: number,
         expectedLabel: string,
         expectedKind: any): void {
-        assert.strictEqual(actualHint.position.line, expectedLine, "Incorrect line.");
-        assert.strictEqual(actualHint.position.character, expectedCharacter, "Incorrect character.");
-        assert.strictEqual(actualHint.label, expectedLabel, "Incorrect label.");
-        assert.strictEqual(actualHint.kind, expectedKind, "Incorrect kind.");
+        assert.strictEqual(actualHintResults[resultNumber].position.line, expectedLine, `Incorrect line for result ${resultNumber}.`);
+        assert.strictEqual(actualHintResults[resultNumber].position.character, expectedCharacter, `Incorrect character for result ${resultNumber}.`);
+        assert.strictEqual(actualHintResults[resultNumber].label, expectedLabel, `Incorrect label for result ${resultNumber}.`);
+        assert.strictEqual(actualHintResults[resultNumber].kind, expectedKind, `Incorrect kind for result ${resultNumber}.`);
     }
 });
