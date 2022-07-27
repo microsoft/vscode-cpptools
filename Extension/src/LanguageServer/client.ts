@@ -2636,15 +2636,15 @@ export class DefaultClient implements Client {
             const oldVersion = result.fileVersion;
             const newVersion = openFileVersions.get(editor.document.uri.toString());
            
-            if(newVersion !== undefined && oldVersion !== undefined && oldVersion === newVersion && 
+            if (newVersion !== undefined && oldVersion !== undefined && oldVersion === newVersion && 
                 result?.initPosition.line === editor.selection.active.line && result?.initPosition.character === editor.selection.active.character){
-                if(result?.contents) {
+                if (result?.contents) {
 
                     if (result.contents.length > 1) {
                         const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         const edits: vscode.TextEdit[] = [];
 
-                        if(vscode.window.activeTextEditor) {
+                        if (vscode.window.activeTextEditor) {
     
                             const newRange = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
                             edits.push(new vscode.TextEdit(newRange, result?.contents));
