@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.11.3-main",
+  "version": "1.12.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -11,7 +11,7 @@
   },
   "license": "SEE LICENSE IN LICENSE.txt",
   "engines": {
-    "vscode": "^1.65.0"
+    "vscode": "^1.67.0"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/vscode-cpptools/issues",
@@ -2682,7 +2682,8 @@
           "type": "object",
           "markdownDescription": "%c_cpp.configuration.filesExclude.markdownDescription%",
           "default": {
-            "**/.vscode": true
+            "**/.vscode": true,
+            "**/.vs": true
           },
           "additionalProperties": {
             "anyOf": [
@@ -5434,7 +5435,7 @@
     "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
     "@vscode/extension-telemetry": "^0.6.2",
-    "vscode-languageclient": "^5.2.1",
+    "vscode-languageclient": "^8.0.1",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
     "which": "^2.0.2",
@@ -5452,6 +5453,7 @@
     "set-value": "^4.0.1",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5",
-    "minimist": "^1.2.6"
+    "minimist": "^1.2.6",
+    "terser": "^5.14.2"
   }
 }

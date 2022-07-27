@@ -195,7 +195,7 @@ export class ReferencesManager {
     private prevVisibleRangesLength: number = 0;
     private visibleRangesDecreased: boolean = false;
     private visibleRangesDecreasedTicks: number = 0;
-    private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweeking?
+    private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweaking?
 
     private resultsCallback?: ReferencesResultCallback;
     private currentUpdateProgressTimer?: NodeJS.Timeout;
@@ -397,7 +397,7 @@ export class ReferencesManager {
                 this.resultsCallback(null, true);
             }
         } else {
-            this.client.sendRenameNofication(params);
+            this.client.sendRenameNotification(params);
         }
     }
 

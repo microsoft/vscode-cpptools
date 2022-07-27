@@ -40,7 +40,7 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
     getTreeItem(element: TreeNode): vscode.TreeItem {
         if (this.referencesModel === undefined) {
-            throw new Error("Undefined RefrencesModel in getTreeItem()");
+            throw new Error("Undefined ReferencesModel in getTreeItem()");
         }
 
         switch (element.node) {
