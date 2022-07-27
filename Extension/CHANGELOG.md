@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Change Log
 
-## Version 1.12.0 (pre-release): July 26, 2022
+## Version 1.12.0 (pre-release): July 27, 2022
 ## Enhancements
 * Show an informative message when an IntelliSense-related command is executed while IntelliSense is disabled. [#9614](https://github.com/microsoft/vscode-cpptools/issues/9614)
 * Add the `.vs` folder to the default exclusions. [PR #9629](https://github.com/microsoft/vscode-cpptools/pull/9629)
