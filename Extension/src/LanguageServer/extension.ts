@@ -433,7 +433,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (line, colum) =>  getActiveClient().handleGenerateDoxygenComment(line, colum)));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (line, column) =>  getActiveClient().handleGenerateDoxygenComment(line, column)));
 }
 
 function onDisabledCommand(): void {

@@ -995,7 +995,7 @@ export class DefaultClient implements Client {
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
         const settings_generatedDoxygenCommentStyle: (string | undefined)[] = [];
-        const settings_autocompleteDoxygenComment: (boolean | undefined)[] = [];
+        const settings_autoCompleteDoxygenComment: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1164,7 +1164,7 @@ export class DefaultClient implements Client {
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_generatedDoxygenCommentStyle.push(setting.generatedDoxygenCommentStyle);
-                settings_autocompleteDoxygenComment.push(setting.autocompleteDoxygenComment);
+                settings_autoCompleteDoxygenComment.push(setting.autoCompleteDoxygenComment);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1350,7 +1350,7 @@ export class DefaultClient implements Client {
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
                 generatedDoxygenCommentStyle: settings_generatedDoxygenCommentStyle,
-                autocompleteDoxygenComment: settings_autocompleteDoxygenComment,
+                autoCompleteDoxygenComment: settings_autoCompleteDoxygenComment,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -2643,7 +2643,7 @@ export class DefaultClient implements Client {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
             const oldVersion: number = result.fileVersion;
-            const newVersion: number|undefined = openFileVersions.get(editor.document.uri.toString());
+            const newVersion: number | undefined = openFileVersions.get(editor.document.uri.toString());
 
             if (newVersion !== undefined && oldVersion !== undefined && oldVersion === newVersion &&
                 result?.initPosition.line === editor.selection.active.line && result?.initPosition.character === editor.selection.active.character) {
@@ -2654,7 +2654,7 @@ export class DefaultClient implements Client {
                         const edits: vscode.TextEdit[] = [];
 
                         if (vscode.window.activeTextEditor) {
-                            const newRange: vscode.Range = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
+                            const newRange: vscode.Range = new vscode.Range(vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
                             edits.push(new vscode.TextEdit(newRange, result?.contents));
                             workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
                             await vscode.workspace.applyEdit(workspaceEdit);
@@ -3035,41 +3035,42 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async  handleGenerateDoxygenComment(originalLine: number | undefined, originalCol: number | undefined): Promise<void> {
+    public async handleGenerateDoxygenComment(line: number | undefined, column: number | undefined): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if(!editor)
+        if (!editor) {
             return;
-        
-        const params: GenerateDoxygenCommentParams= {
+        }
+        const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
-            position: (originalLine !== undefined && originalCol !== undefined) ? new vscode.Position(originalLine, originalCol) : editor.selection.active,
-            isCodeAction: (originalLine !== undefined && originalCol !==  undefined) ? true : false
+            position: (line !== undefined && column !== undefined) ? new vscode.Position(line, column) : editor.selection.active,
+            isCodeAction: (line !== undefined && column !== undefined) ? true : false
         };
 
-        if (originalLine !== undefined && originalCol !==  undefined) {
-            params.position = new vscode.Position(originalLine, originalCol);
+        if (line !== undefined && column !== undefined) {
+            params.position = new vscode.Position(line, column);
             params.isCodeAction = true;
         } else {
             params.isCodeAction = false;
         };
 
         await this.awaitUntilLanguageClientReady();
-        const oldVersion: number|undefined = openFileVersions.get(params.uri);
+        const oldVersion: number | undefined = openFileVersions.get(params.uri);
         const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
-        const newVersion: number|undefined = openFileVersions.get(params.uri);
+        const newVersion: number | undefined = openFileVersions.get(params.uri);
 
-        if(oldVersion === undefined)
+        if (oldVersion === undefined) {
             return;
+        }
         if (newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion
-            && result?.initPosition !== editor.selection.active)
+            && result?.initPosition !== editor.selection.active) {
             return;
-        
-        if(result?.contents && result.contents.length > 1) {
+        }
+        if (result?.contents && result.contents.length > 1) {
             const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             const edits: vscode.TextEdit[] = [];
 
             if (vscode.window.activeTextEditor) {
-                const newRange: vscode.Range = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
+                const newRange: vscode.Range = new vscode.Range(result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
                 edits.push(new vscode.TextEdit(newRange, result?.contents));
                 workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
                 await vscode.workspace.applyEdit(workspaceEdit);
@@ -3123,7 +3124,7 @@ export class DefaultClient implements Client {
 
     public async handleRunCodeAnalysisOnAllFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, { scope:  CodeAnalysisScope.AllFiles });
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.AllFiles });
     }
 
     public async handleRemoveAllCodeAnalysisProblems(): Promise<void> {
@@ -3343,7 +3344,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
-    handleGenerateDoxygenComment(): Promise<void> {return Promise.resolve(); }
+    handleGenerateDoxygenComment(): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
