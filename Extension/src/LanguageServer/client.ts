@@ -408,7 +408,7 @@ export interface GenerateDoxygenCommentParams {
 }
 
 export interface GenerateDoxygenCommentResult {
-    contents : string;
+    contents: string;
     initPosition: Position;
     finalInsertionPosition: Position;
     finalCursorPosition: Position;
@@ -664,7 +664,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
-    handleGenerateDoxygenComment(line: number | undefined, colum: number | undefined):Promise<void>;
+    handleGenerateDoxygenComment(line: number | undefined, colum: number | undefined): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -2640,14 +2640,14 @@ export class DefaultClient implements Client {
         this.model.codeAnalysisTotal.Value = total;
     }
 
-    private async insertDoxygenComment(result:GenerateDoxygenCommentResult): Promise<void> {
+    private async insertDoxygenComment(result: GenerateDoxygenCommentResult): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
-            const oldVersion = result.fileVersion;
-            const newVersion = openFileVersions.get(editor.document.uri.toString());
-           
-            if (newVersion !== undefined && oldVersion !== undefined && oldVersion === newVersion && 
-                result?.initPosition.line === editor.selection.active.line && result?.initPosition.character === editor.selection.active.character){
+            const oldVersion: number = result.fileVersion;
+            const newVersion: number|undefined = openFileVersions.get(editor.document.uri.toString());
+
+            if (newVersion !== undefined && oldVersion !== undefined && oldVersion === newVersion &&
+                result?.initPosition.line === editor.selection.active.line && result?.initPosition.character === editor.selection.active.character) {
                 if (result?.contents) {
 
                     if (result.contents.length > 1) {
@@ -2655,26 +2655,23 @@ export class DefaultClient implements Client {
                         const edits: vscode.TextEdit[] = [];
 
                         if (vscode.window.activeTextEditor) {
-    
-                            const newRange = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
+                            const newRange: vscode.Range = new vscode.Range (vscode.window.activeTextEditor.selection.start.line, 0, vscode.window.activeTextEditor.selection.end.line, 99999999);
                             edits.push(new vscode.TextEdit(newRange, result?.contents));
                             workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
                             await vscode.workspace.applyEdit(workspaceEdit);
 
-                            //set the cursor position after @brief
-                            if(result?.finalCursorPosition) {
+                            // Set the cursor position after @brief
+                            if (result?.finalCursorPosition) {
                                 const newPosition: vscode.Position = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
-                                const newSelection = new vscode.Selection(newPosition, newPosition);
+                                const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
                                 editor.selection = newSelection;
                             }
-                        } 
+                        }
                     }
                 }
 
             }
         }
-        
-
     }
 
     private doneInitialCustomBrowseConfigurationCheck: boolean = false;
@@ -3026,7 +3023,7 @@ export class DefaultClient implements Client {
             await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
-                const p: vscode.Position = new vscode.Position(response.line, response.character); 
+                const p: vscode.Position = new vscode.Position(response.line, response.character);
                 const r: vscode.Range = new vscode.Range(p, p);
 
                 // Check if still the active document.
@@ -3039,66 +3036,48 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async  handleGenerateDoxygenComment(originalLine: number | undefined, originalCol: number | undefined):Promise<void> {
-        
+    public async  handleGenerateDoxygenComment(originalLine: number | undefined, originalCol: number | undefined): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
-            
-            const params : GenerateDoxygenCommentParams= {
-                uri : editor.document.uri.toString(),
-                position : (originalLine!=undefined && originalCol != undefined)? new vscode.Position(originalLine, originalCol) : editor.selection.active,
-                isCodeAction : (originalLine!=undefined && originalCol != undefined)? true:false
-            }
-            
-            if(originalLine!=undefined && originalCol != undefined){
+            const params: GenerateDoxygenCommentParams= {
+                uri: editor.document.uri.toString(),
+                position: (originalLine !== undefined && originalCol !== undefined) ? new vscode.Position(originalLine, originalCol) : editor.selection.active,
+                isCodeAction: (originalLine !== undefined && originalCol !==  undefined) ? true : false
+            };
+            if (originalLine !== undefined && originalCol !==  undefined) {
                 params.position = new vscode.Position(originalLine, originalCol);
                 params.isCodeAction = true;
             } else {
                 params.isCodeAction = false;
-            }
-            
+            };
             await this.awaitUntilLanguageClientReady();
-
-            const oldVersion = openFileVersions.get(params.uri);
+            const oldVersion: number|undefined = openFileVersions.get(params.uri);
             const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
-            const newVersion = openFileVersions.get(params.uri);
-            if(oldVersion === undefined) {
+            const newVersion: number|undefined = openFileVersions.get(params.uri);
+            if (oldVersion === undefined) {
 
-            }
-            else if(newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion
+            } else if (newVersion !== undefined && oldVersion !== undefined && newVersion > oldVersion
                 && result?.initPosition !== editor.selection.active) {
-                
-            }   
-            else {
+            } else {
                 if (result?.contents) {
-
-                    if(result.contents.length > 1) {
+                    if (result.contents.length > 1) {
                         const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                         const edits: vscode.TextEdit[] = [];
-        
-                        if(vscode.window.activeTextEditor) {
-                            
-
-                            const newRange = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
+                        if (vscode.window.activeTextEditor) {
+                            const newRange: vscode.Range = new vscode.Range (result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
                             edits.push(new vscode.TextEdit(newRange, result?.contents));
                             workspaceEdit.set(vscode.window.activeTextEditor.document.uri, edits);
-                            await vscode.workspace.applyEdit(workspaceEdit); 
-                          
-
-                            //set the cursor position after @brief
-                            if(result?.finalCursorPosition) {
+                            await vscode.workspace.applyEdit(workspaceEdit);
+                            // Set the cursor position after @brief
+                            if (result?.finalCursorPosition) {
                                 const newPosition: vscode.Position = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
-                                const newSelection = new vscode.Selection(newPosition, newPosition);
+                                const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
                                 editor.selection = newSelection;
                             }
-                        } 
+                        }
                     }
-    
                 }
-
-
-            }  
-
+            }
         }
     }
 
@@ -3362,7 +3341,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
-    handleGenerateDoxygenComment():Promise<void> {return Promise.resolve();}
+    handleGenerateDoxygenComment(): Promise<void> {return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }

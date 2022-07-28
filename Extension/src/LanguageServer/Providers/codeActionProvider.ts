@@ -160,7 +160,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     resultCodeActions.push(...disableCodeActions);
                     resultCodeActions.push(...docCodeActions);
                     return;
-                } 
+                }
                 const vscodeCodeAction: vscode.CodeAction = {
                     title: title,
                     command: command.command === "edit" ? undefined : {

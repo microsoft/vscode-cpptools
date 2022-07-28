@@ -28,7 +28,6 @@ import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
 import { UpdateInsidersAccess } from '../main';
 
-
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
@@ -434,7 +433,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (line, colum) => onGenerateDoxygenComment(line, colum)));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (line, colum) =>  getActiveClient().handleGenerateDoxygenComment(line, colum)));
 }
 
 function onDisabledCommand(): void {
@@ -447,10 +446,6 @@ function onDisabledCommand(): void {
         },
         "IntelliSense-related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `Disabled`.");
     vscode.window.showWarningMessage(message);
-}
-
-function onGenerateDoxygenComment(line: number | undefined, colum: number | undefined ) :void {
-    getActiveClient().handleGenerateDoxygenComment(line, colum);
 }
 
 function onRestartIntelliSenseForFile(): void {
