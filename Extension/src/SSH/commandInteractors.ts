@@ -4,16 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress } from '../common';
-
-/**
- * user -> password
- * This should NOT be persisted.
- * host.user@host.hostName used as user when there are no user info in the prompt.
- * We don't store passphrases, because there's no way to decide if it's a wrong passphrase or auth for jump
- * proxy based on the prompt.
- */
-const passwordCache: Map<string, string> = new Map<string, string>();
+import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
 
 /**
  * Users' passwords already used for auth.
@@ -236,7 +227,8 @@ export class PasswordInteractor implements IInteractor {
         if (pwPrompt && typeof pwPrompt.user === 'string') {
             result.postAction = 'consume';
             const actualUser: string = pwPrompt.user === '' ? getFullHostAddress(this.host) : pwPrompt.user;
-            const cachedPassword: string | undefined = passwordCache.get(actualUser);
+            const passwordCacheKey: string = `SSH:${actualUser}`;
+            const cachedPassword: string | undefined = await extensionContext?.secrets?.get(passwordCacheKey);
             if (cachedPassword !== undefined && !userUsedPasswords.has(actualUser)) {
                 userUsedPasswords.add(actualUser);
                 result.response = cachedPassword;
@@ -244,7 +236,7 @@ export class PasswordInteractor implements IInteractor {
             } else {
                 const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
                 if (typeof password === 'string') {
-                    passwordCache.set(actualUser, password);
+                    await extensionContext?.secrets?.store(passwordCacheKey, password);
                     userUsedPasswords.add(actualUser);
                     result.response = password;
                     result.isPassword = true;
