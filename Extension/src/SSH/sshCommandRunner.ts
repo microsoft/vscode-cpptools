@@ -19,7 +19,7 @@ import {
     ContinueOnInteractor,
     ISystemInteractor,
     IInteraction,
-    userUsedPasswords
+    autoFilledPasswordForUsers
 } from './commandInteractors';
 import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
 import { getOutputChannelLogger } from '../logger';
@@ -195,7 +195,7 @@ export async function runSshTerminalCommandWithLogin(
     }
 
     if (!showLoginTerminal) {
-        userUsedPasswords.clear();
+        autoFilledPasswordForUsers.clear();
         interactors.push(
             new MitmInteractor(),
             new FingerprintInteractor(host.hostName, showHostKeyConfirmation),

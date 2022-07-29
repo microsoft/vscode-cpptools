@@ -7,11 +7,11 @@ import * as vscode from 'vscode';
 import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
 
 /**
- * Users' passwords already used for auth.
- * If a user's pass is already used and yet we still get the same prompt, we probably got a wrong password.
+ * The users that we autofilled their passwords.
+ * If a user's password is already used and yet we still get the same prompt, we probably got a wrong password.
  * Needs to be reset for each command.
  */
-export const userUsedPasswords: Set<string> = new Set<string>();
+export const autoFilledPasswordForUsers: Set<string> = new Set<string>();
 
 export type IDifferingHostConfirmationProvider =
     (message: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
@@ -229,15 +229,15 @@ export class PasswordInteractor implements IInteractor {
             const actualUser: string = pwPrompt.user === '' ? getFullHostAddress(this.host) : pwPrompt.user;
             const passwordCacheKey: string = `SSH:${actualUser}`;
             const cachedPassword: string | undefined = await extensionContext?.secrets?.get(passwordCacheKey);
-            if (cachedPassword !== undefined && !userUsedPasswords.has(actualUser)) {
-                userUsedPasswords.add(actualUser);
+            if (cachedPassword !== undefined && !autoFilledPasswordForUsers.has(actualUser)) {
+                autoFilledPasswordForUsers.add(actualUser);
                 result.response = cachedPassword;
                 result.isPassword = true;
             } else {
                 const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
                 if (typeof password === 'string') {
                     await extensionContext?.secrets?.store(passwordCacheKey, password);
-                    userUsedPasswords.add(actualUser);
+                    autoFilledPasswordForUsers.add(actualUser);
                     result.response = password;
                     result.isPassword = true;
                 } else {
