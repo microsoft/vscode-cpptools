@@ -16,6 +16,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
     public async provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
+        const onChanges: string | number | boolean = options.onChanges;
         const settings: CppSettings = new CppSettings(this.client.RootUri);
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
@@ -35,7 +36,8 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                         character: 0,
                         line: 0
                     }
-                }
+                },
+                onChanges: onChanges === true
             };
             // We do not currently pass the CancellationToken to sendRequest
             // because there is not currently cancellation logic for formatting

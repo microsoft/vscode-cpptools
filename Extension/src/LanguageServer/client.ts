@@ -312,6 +312,7 @@ export interface FormatParams {
     tabSize: number;
     editorConfigSettings: any;
     useVcFormat: boolean;
+    onChanges: boolean;
 }
 
 export interface GetFoldingRangesParams {
@@ -3028,6 +3029,19 @@ export class DefaultClient implements Client {
 
     public async handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
         if (await vscode.workspace.applyEdit(workspaceEdit)) {
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.clangTidyCodeActionFormatFixes) {
+                const editedFiles: Set<vscode.Uri> = new Set<vscode.Uri>();
+                for (const entry of workspaceEdit.entries()) {
+                    editedFiles.add(entry[0]);
+                }
+                for (const uri of editedFiles) {
+                    const formatTextEdits: vscode.TextEdit[] = await vscode.commands.executeCommand<vscode.TextEdit[]>("vscode.executeFormatDocumentProvider", uri, { onChanges: true });
+                    const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                    formatEdits.set(uri, formatTextEdits);
+                    await vscode.workspace.applyEdit(formatEdits);
+                }
+            }
             return this.handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
         }
     }

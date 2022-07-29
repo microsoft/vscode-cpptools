@@ -189,6 +189,7 @@ export class CppSettings extends Settings {
     public get clangTidyCodeActionShowDisable(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDisable"); }
     public get clangTidyCodeActionShowClear(): string { return super.Section.get<string>("codeAnalysis.clangTidy.codeAction.showClear") ?? "AllAndAllType"; }
     public get clangTidyCodeActionShowDocumentation(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
+    public get clangTidyCodeActionFormatFixes(): boolean { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true; }
     public addClangTidyChecksDisabled(value: string): void {
         const checks: string[] | undefined = this.clangTidyChecksDisabled;
         if (checks === undefined) {

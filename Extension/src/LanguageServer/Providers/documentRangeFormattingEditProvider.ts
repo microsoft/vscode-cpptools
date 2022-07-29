@@ -35,7 +35,8 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
                         character: range.end.character,
                         line: range.end.line
                     }
-                }
+                },
+                onChanges: false
             };
             // We do not currently pass the CancellationToken to sendRequest
             // because there is not currently cancellation logic for formatting
