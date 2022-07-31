@@ -663,7 +663,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
-    handleGenerateDoxygenComment(line: number | undefined, colum: number | undefined): Promise<void>;
+    handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, line: number | undefined, column: number | undefined): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -2645,14 +2645,13 @@ export class DefaultClient implements Client {
             return;
         }
         const currentFileVersion: number | undefined = openFileVersions.get(editor.document.uri.toString());
-
+        // Insert the comment only if the cursor has not moved
         if (result.fileVersion === currentFileVersion &&
-            result?.initPosition.line === editor.selection.active.line &&
-            result?.initPosition.character === editor.selection.active.character && // Check the cursor doesn't move
+            result.initPosition.line === editor.selection.active.line &&
+            result.initPosition.character === editor.selection.active.character &&
             result.contents.length > 1) {
             const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             const edits: vscode.TextEdit[] = [];
-
             const maxColumn: number = 99999999;
             const newRange: vscode.Range = new vscode.Range(editor.selection.start.line, 0, editor.selection.end.line, maxColumn);
             edits.push(new vscode.TextEdit(newRange, result?.contents));
@@ -3027,12 +3026,13 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleGenerateDoxygenComment(line: number | undefined, column: number | undefined): Promise<void> {
+    public async handleGenerateDoxygenComment (initCursorLine: number | undefined, initCursorColumn: number | undefined, line: number | undefined, column: number | undefined): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
             return;
         }
         const isCodeAction: boolean =  (line !== undefined && column !== undefined);
+        const initCursorPosition: vscode.Position = isCodeAction ? new vscode.Position(initCursorLine ?? 0, initCursorColumn ?? 0) : editor.selection.active;
         const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
             position: isCodeAction ? new vscode.Position(line ?? 0, column ?? 0) : editor.selection.active,
@@ -3044,11 +3044,13 @@ export class DefaultClient implements Client {
             return;
         }
         const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
-        if (result?.fileVersion !== undefined &&
-            result?.fileVersion === currentFileVersion &&
-            result?.initPosition.line === editor.selection.active.line &&
-            result?.initPosition.character === editor.selection.active.character && // Check the cursor doesn't move
-            result?.contents && result.contents.length > 1) {
+        // Insert the comment only if the comment has contents and the cursor has not moved
+        if (result !== undefined &&
+            initCursorPosition.line === editor.selection.active.line &&
+            initCursorPosition.character === editor.selection.active.character &&
+            result.fileVersion !== undefined &&
+            result.fileVersion === currentFileVersion &&
+            result.contents && result.contents.length > 1) {
             const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             const edits: vscode.TextEdit[] = [];
             const newRange: vscode.Range = new vscode.Range(result.finalInsertionPosition.line, 0, result.finalInsertionPosition.line, 0);
