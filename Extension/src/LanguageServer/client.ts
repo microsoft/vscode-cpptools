@@ -3035,10 +3035,14 @@ export class DefaultClient implements Client {
                 for (const entry of workspaceEdit.entries()) {
                     editedFiles.add(entry[0]);
                 }
+                const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 for (const uri of editedFiles) {
-                    const formatTextEdits: vscode.TextEdit[] = await vscode.commands.executeCommand<vscode.TextEdit[]>("vscode.executeFormatDocumentProvider", uri, { onChanges: true });
-                    const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                    formatEdits.set(uri, formatTextEdits);
+                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatDocumentProvider", uri, { onChanges: true });
+                    if (formatTextEdits && formatTextEdits.length > 0) {
+                        formatEdits.set(uri, formatTextEdits);
+                    }
+                }
+                if (formatEdits.size > 0) {
                     await vscode.workspace.applyEdit(formatEdits);
                 }
             }
