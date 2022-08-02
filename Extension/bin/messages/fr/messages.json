@@ -3423,7 +3423,7 @@
   "module %sq1 position de fichier %d1 (position relative %d2) demandée pour la partition %sq2, qui précède le début de la partition",
   "module %sq1 position de fichier %d1 (position relative %d2) demandée pour la partition %sq2, qui dépasse la fin de sa partition",
   "module %sq1 position de fichier %d1 (position relative %d2) demandée pour la partition %sq2, qui est mal alignée avec ses éléments de partitions",
-  "à partir du sous-champ %sq",
+  "à partir du sous-champ %sq (position relative par rapport au nœud %d)",
   "à partir de la partition %sq, élément %d1 (position de fichier %d2, position relative %d3)",
   "les attributs lambda ne sont pas standard ici",
   "l’identificateur %sq peut être confondu avec un identificateur visuellement similaire qui apparaît %p",
@@ -3461,5 +3461,11 @@
   "un type qualifié n’est pas standard pour les champs de bits anonymes.",
   "le type d’élément de la condition vectorielle (%t1) doit avoir la même taille que le type d’élément du résultat (%t2).",
   "le type d’opérande vectoriel à virgule flottante (%t) n’a pas de type de vecteur entier correspondant.",
-  "La gestion des expressions \"requires\" n'est pas encore implémentée."
+  "La gestion des expressions \"requires\" n'est pas encore implémentée.",
+  "en raison d’un attribut 'unavailable'",
+  "a tenté de construire un élément à partir d’une partition IFC %sq à l’aide d’un index dans la partition IFC %sq.",
+  "le %sq de partition a spécifié sa taille d’entrée %d1 alors que %d2 était attendu.",
+  "une exigence IFC inattendue s’est produite lors du traitement du module %sq1.",
+  "échec de la condition à la ligne %d dans %s1 : %sq2",
+  "la contrainte atomique dépend d’elle-même."
 ]
