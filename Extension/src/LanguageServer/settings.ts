@@ -809,6 +809,7 @@ export class OtherSettings {
     }
 
     public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
+    public get editorInsertSpaces(): boolean | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<boolean>("insertSpaces"); }
     public get editorAutoClosingBrackets(): string | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<string>("autoClosingBrackets"); }
     public get filesEncoding(): string | undefined { return vscode.workspace.getConfiguration("files", { uri: this.resource, languageId: "cpp" }).get<string>("encoding"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }
