@@ -3461,5 +3461,6 @@
   "ein qualifizierter Typ ist kein Standard für anonyme Bitfelder",
   "der Elementtyp der Vektorbedingung (%t1) muss dieselbe Größe haben wie der Elementtyp des Ergebnisses (%t2)",
   "der Gleitkomma-Vektoroperandentyp (%t) hat keinen übereinstimmenden ganzzahligen Vektortyp",
-  "das Mangling für 'requires'-Ausdrücke ist noch nicht implementiert"
+  "das Mangling für 'requires'-Ausdrücke ist noch nicht implementiert",
+  "aufgrund eines „nicht verfügbaren“ Attributs"
 ]

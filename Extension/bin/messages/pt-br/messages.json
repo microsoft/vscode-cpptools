@@ -3423,7 +3423,7 @@
   "módulo %sq1 posição de arquivo %d1 (posição relativa %d2) solicitada para a partição %sq2 - que impede o início da partição",
   "módulo %sq1 posição de arquivo %d1 (posição relativa %d2) solicitada para a partição %sq2 - que estoura o final de sua partição",
   "módulo %sq1 posição de arquivo %d1 (posição relativa %d2) solicitada para a partição %sq2 - que está desalinhada com seus elementos de partições",
-  "do subcampo %sq",
+  "do subcampo %sq (posição relativa ao nó %d)",
   "da partição %sq elemento %d1 (posição do arquivo %d2, posição relativa %d3)",
   "os atributos lambda não são padrão aqui",
   "O identificador %sq pode ser confundido com um visualmente semelhante ao que aparece %p",
@@ -3461,5 +3461,11 @@
   "um tipo qualificado não é padrão para campos de bits anônimos",
   "o tipo de elemento da condição de vetor (%t1) deve ter o mesmo tamanho que o tipo de elemento do resultado (%t2)",
   "o tipo de operando vetorial de ponto flutuante (%t) não tem nenhum tipo de vetor inteiro correspondente",
-  "a estruturação para expressões 'requires' ainda não foi implementada"
+  "a estruturação para expressões 'requires' ainda não foi implementada",
+  "devido a um atributo 'indisponível'",
+  "tentou construir um elemento da partição IFC %sq usando um índice na partição IFC %sq",
+  "a partição %sq especificou seu tamanho de entrada como %d1 quando %d2 era esperado",
+  "um requisito IFC inesperado foi encontrado durante o processamento do módulo %sq1",
+  "condição falhou na linha %d em %s1: %sq2",
+  "restrição atômica depende de si mesma"
 ]

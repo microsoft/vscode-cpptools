@@ -3423,7 +3423,7 @@
   "%sq1 modülünün %d1 dosya konumu (%d2 göreli konumu) bölümün başlangıcından önce gelen %sq2 bölümü için istekte bulundu",
   "%sq1 modülünün %d1 dosya konumu (%d2 göreli konumu) bölümünün sonundan taşan %sq2 bölümü için istekte bulundu",
   "%sq1 modülünün %d1 dosya konumu (%d2 göreli konumu) bölüm öğeleriyle yanlış hizalanan %sq2 bölümü için istekte bulundu",
-  "%sq alt alanından",
+  "%sq alt alanından (%d düğümüne göreli olan konum)",
   "%sq bölümündeki %d1 öğesinden (%d2 dosya konumu, %d3 göreli konumu)",
   "lambda öznitelikleri burada standart dışı",
   "%sq tanımlayıcısı görsel olarak %p gibi görünen tanımlayıcıyla karıştırılabilir",
@@ -3461,5 +3461,11 @@
   "nitelenmiş bir tür adı anonim bit alanları için standart dışı",
   "vektör koşulunun öğe türü (%t1), sonucun öğe türü (%t2) ile aynı boyuta sahip olmalıdır",
   "kayan nokta vektörü işlenen türü (%t) eşleşen bir tamsayı vektörü türü içermiyor",
-  "'requires' ifadeleri için değiştirme henüz uygulanmadı"
+  "'requires' ifadeleri için değiştirme henüz uygulanmadı",
+  "'kullanılamayan' bir öznitelik nedeniyle",
+  "%sq IFC bölümü içinde bir dizin kullanılarak %sq IFC bölümündeki bir öğe oluşturulmaya çalışıldı",
+  "%sq bölümü, %d2 beklenirken girdi boyutunu %d1 olarak belirtti",
+  "%sq1 modülü işlenirken beklenmeyen bir IFC gereksinimiyle karşılaşıldı",
+  null,
+  "atomik kısıtlama kendisine bağımlı"
 ]
