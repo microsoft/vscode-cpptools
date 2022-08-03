@@ -20,19 +20,15 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
         if (onChanges) {
             let insertSpacesSet: boolean = false;
             let tabSizeSet: boolean = false;
-            for (const editor of vscode.window.visibleTextEditors) {
-                if (document === editor.document) {
-                    if (editor.options.insertSpaces && typeof editor.options.insertSpaces === "boolean") {
-                        options.insertSpaces = editor.options.insertSpaces;
-                        insertSpacesSet = true;
-                    }
-                    if (editor.options.tabSize && typeof editor.options.tabSize === "number") {
-                        options.tabSize = editor.options.tabSize;
-                        tabSizeSet = true;
-                    }
-                    break;
-                }
-            };
+            const editor: vscode.TextEditor = await vscode.window.showTextDocument(document, undefined, true);
+            if (editor.options.insertSpaces && typeof editor.options.insertSpaces === "boolean") {
+                options.insertSpaces = editor.options.insertSpaces;
+                insertSpacesSet = true;
+            }
+            if (editor.options.tabSize && typeof editor.options.tabSize === "number") {
+                options.tabSize = editor.options.tabSize;
+                tabSizeSet = true;
+            }
 
             if (!insertSpacesSet || !tabSizeSet) {
                 const settings: OtherSettings = new OtherSettings(this.client.RootUri);
