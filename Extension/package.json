@@ -419,6 +419,12 @@
           },
           "scope": "resource"
         },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.formatFixes": {
+          "type": "boolean",
+          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription%",
+          "default": true,
+          "scope": "resource"
+        },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.showClear": {
           "type": "string",
           "description": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.description%",
