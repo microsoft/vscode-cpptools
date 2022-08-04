@@ -413,7 +413,7 @@ export interface GenerateDoxygenCommentResult {
     finalInsertionLine: number;
     finalCursorPosition: Position;
     fileVersion: number;
-    insertNewLineAtEnd: boolean;
+    isCursorAboveSignatureLine: boolean;
 }
 
 interface SetTemporaryTextDocumentLanguageParams {
@@ -3067,7 +3067,7 @@ export class DefaultClient implements Client {
             const edits: vscode.TextEdit[] = [];
             const maxColumn: number = 99999999;
             let newRange: vscode.Range;
-            const cursorOnEmptyLineAboveSignature: boolean = !result.insertNewLineAtEnd;
+            const cursorOnEmptyLineAboveSignature: boolean = result.isCursorAboveSignatureLine;
             if (cursorOnEmptyLineAboveSignature) {
                 if (isCodeAction) {
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
