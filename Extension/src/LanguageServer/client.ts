@@ -3067,8 +3067,8 @@ export class DefaultClient implements Client {
             const edits: vscode.TextEdit[] = [];
             const maxColumn: number = 99999999;
             let newRange: vscode.Range;
-            const cursonOnEmptyLineAboveSignature: boolean = !result.insertNewLineAtEnd;
-            if (cursonOnEmptyLineAboveSignature) {
+            const cursorOnEmptyLineAboveSignature: boolean = !result.insertNewLineAtEnd;
+            if (cursorOnEmptyLineAboveSignature) {
                 if (isCodeAction) {
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
                 } else {
@@ -3082,7 +3082,7 @@ export class DefaultClient implements Client {
             await vscode.workspace.applyEdit(workspaceEdit);
             // Set the cursor position after @brief
             let newPosition: vscode.Position;
-            if (cursonOnEmptyLineAboveSignature && isCodeAction) {
+            if (cursorOnEmptyLineAboveSignature && isCodeAction) {
                 newPosition = new vscode.Position(result.finalCursorPosition.line - 1, result.finalCursorPosition.character);
             } else {
                 newPosition = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);

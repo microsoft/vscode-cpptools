@@ -2342,7 +2342,7 @@
             "//!"
           ],
           "default":"/**",
-          "markdownDescription": "%c_cpp.configuration.generatedDoxygenCommentStyle.markdownDescription%",
+          "description": "%c_cpp.configuration.generatedDoxygenCommentStyle.description%",
           "scope": "resource"
         },
         "C_Cpp.commentContinuationPatterns": {
