@@ -3423,7 +3423,7 @@
   "Pro oddíl %sq2 se požádalo o pozici v souboru %d1 (relativní pozice %d2) v modulu %sq1, pozice ale předchází začátek oddílu.",
   "Pro oddíl %sq2 se požádalo o pozici v souboru %d1 (relativní pozice %d2) v modulu %sq1, pozice ale přetéká konec svého oddílu.",
   "Pro oddíl %sq2 se požádalo o pozici v souboru %d1 (relativní pozice %d2) v modulu %sq1, pozice ale není zarovnaná s elementy oddílu.",
-  "Z podpole %sq",
+  "z dílčího pole %sq (relativní pozice k uzlu %d)",
   "Z oddílu %sq, elementu %d1 (pozice v souboru %d2, relativní pozice %d3)",
   "Atributy výrazu lambda tady nejsou standardní.",
   "Identifikátor %sq by bylo možné zaměnit za vizuálně podobné %p.",
@@ -3461,5 +3461,11 @@
   "kvalifikovaný typ je pro anonymní bitová pole nestandardní.",
   "typ elementu vektorové podmínky (%t1) musí mít stejnou velikost jako typ elementu výsledku (%t2).",
   "typ operandu vektoru s plovoucí desetinnou čárkou (%t) nemá žádný odpovídající celočíselný vektorový typ.",
-  "mangling pro výrazy requires ještě není implementovaný."
+  "mangling pro výrazy requires ještě není implementovaný.",
+  "kvůli atributu „není k dispozici“",
+  "došlo k pokusu o vytvoření elementu z oddílu IFC %sq pomocí indexu do oddílu IFC %sq.",
+  "oddíl %sq určil svou velikost položky jako %d1, když bylo očekáváno %d2.",
+  "při zpracování modulu %sq1 byl zjištěn neočekávaný požadavek IFC.",
+  "podmínka selhala na řádku %d v %s1: %sq2",
+  "atomické omezení závisí na sobě"
 ]
