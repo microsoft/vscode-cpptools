@@ -18,7 +18,8 @@ import {
     TwoFacInteractor,
     ContinueOnInteractor,
     ISystemInteractor,
-    IInteraction
+    IInteraction,
+    autoFilledPasswordForUsers
 } from './commandInteractors';
 import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
 import { getOutputChannelLogger } from '../logger';
@@ -194,12 +195,13 @@ export async function runSshTerminalCommandWithLogin(
     }
 
     if (!showLoginTerminal) {
+        autoFilledPasswordForUsers.clear();
         interactors.push(
             new MitmInteractor(),
             new FingerprintInteractor(host.hostName, showHostKeyConfirmation),
             new PassphraseInteractor(showPassphraseInputBox),
             new DifferingHostKeyInteractor(showDifferingHostConfirmation),
-            new PasswordInteractor(showPasswordInputBox),
+            new PasswordInteractor(host, showPasswordInputBox),
             new TwoFacInteractor(showVerificationCodeInputBox),
             new DuoTwoFacInteractor(showVerificationCodeInputBox)
         );

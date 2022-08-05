@@ -1489,6 +1489,16 @@ export interface ISshHostInfo {
     port?: number | string;
 }
 
+/** user@host */
+export function getFullHostAddressNoPort(host: ISshHostInfo): string {
+    return host.user ? `${host.user}@${host.hostName}` : `${host.hostName}`;
+}
+
+export function getFullHostAddress(host: ISshHostInfo): string {
+    const fullHostName: string = getFullHostAddressNoPort(host);
+    return host.port ? `${fullHostName}:${host.port}` : fullHostName;
+}
+
 export interface ISshLocalForwardInfo {
     bindAddress?: string;
     port?: number | string;

@@ -332,7 +332,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 logger.getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
                 return undefined;
             }
-            const deploySucceeded: boolean = await this.deploySteps(config, token);
+
+            const deploySucceeded: boolean = await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: localize("running.deploy.steps", "Running deploy steps...")
+            }, async () => this.deploySteps(config, token));
+
             if (!deploySucceeded || token?.isCancellationRequested) {
                 return undefined;
             }
