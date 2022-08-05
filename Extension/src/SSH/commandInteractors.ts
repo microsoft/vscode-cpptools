@@ -4,7 +4,14 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import { stripEscapeSequences, isWindows, escapeStringForRegex } from '../common';
+import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
+
+/**
+ * The users that we autofilled their passwords.
+ * If a user's password is already used and yet we still get the same prompt, we probably got a wrong password.
+ * Needs to be reset for each command.
+ */
+export const autoFilledPasswordForUsers: Set<string> = new Set<string>();
 
 export type IDifferingHostConfirmationProvider =
     (message: string, cancelToken?: vscode.CancellationToken) => Promise<string | undefined>;
@@ -208,7 +215,7 @@ function getPasswordPrompt(data: string, details?: IInteractorDataDetails): { us
 export class PasswordInteractor implements IInteractor {
     static ID = 'password';
 
-    constructor(private readonly passwordProvider: IStringProvider) { }
+    constructor(private readonly host: ISshHostInfo, private readonly passwordProvider: IStringProvider) { }
 
     get id(): string {
         return PasswordInteractor.ID;
@@ -219,12 +226,23 @@ export class PasswordInteractor implements IInteractor {
         const pwPrompt: { user?: string; message?: string } | undefined = getPasswordPrompt(data, extraDetails);
         if (pwPrompt && typeof pwPrompt.user === 'string') {
             result.postAction = 'consume';
-            const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
-            if (typeof password === 'string') {
-                result.response = password;
+            const actualUser: string = pwPrompt.user === '' ? getFullHostAddress(this.host) : pwPrompt.user;
+            const passwordCacheKey: string = `SSH:${actualUser}`;
+            const cachedPassword: string | undefined = await extensionContext?.secrets?.get(passwordCacheKey);
+            if (cachedPassword !== undefined && !autoFilledPasswordForUsers.has(actualUser)) {
+                autoFilledPasswordForUsers.add(actualUser);
+                result.response = cachedPassword;
                 result.isPassword = true;
             } else {
-                result.canceled = true;
+                const password: string | undefined = await this.passwordProvider(pwPrompt.user, pwPrompt.message, cancelToken);
+                if (typeof password === 'string') {
+                    await extensionContext?.secrets?.store(passwordCacheKey, password);
+                    autoFilledPasswordForUsers.add(actualUser);
+                    result.response = password;
+                    result.isPassword = true;
+                } else {
+                    result.canceled = true;
+                }
             }
         }
 
