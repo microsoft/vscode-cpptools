@@ -404,7 +404,7 @@ export interface GenerateDoxygenCommentParams {
     uri: string;
     position: Position;
     isCodeAction: boolean;
-    insertNewLineAtEnd: boolean;
+    isCursorAboveSignatureLine: boolean;
 }
 
 export interface GenerateDoxygenCommentResult {
@@ -3028,7 +3028,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, line: number | undefined, column: number | undefined, insertNewLineAtEnd: boolean): Promise<void> {
+    public async handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, adjustedLine: number | undefined, adjustedColmn: number | undefined, isCursorAboveSignatureLine: boolean): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
             return;
@@ -3042,13 +3042,13 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const isCodeAction: boolean = (line !== undefined && column !== undefined);
+        const isCodeAction: boolean = (adjustedLine !== undefined && adjustedLine !== undefined);
         const initCursorPosition: vscode.Position = isCodeAction ? new vscode.Position(initCursorLine ?? 0, initCursorColumn ?? 0) : editor.selection.active;
         const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
-            position: isCodeAction ? new vscode.Position(line ?? 0, column ?? 0) : editor.selection.active,
+            position: isCodeAction ? new vscode.Position(adjustedLine ?? 0, adjustedColmn ?? 0) : editor.selection.active,
             isCodeAction: isCodeAction,
-            insertNewLineAtEnd: insertNewLineAtEnd
+            isCursorAboveSignatureLine: isCursorAboveSignatureLine
         };
         await this.awaitUntilLanguageClientReady();
         const currentFileVersion: number | undefined = openFileVersions.get(params.uri);
@@ -3068,8 +3068,12 @@ export class DefaultClient implements Client {
             const maxColumn: number = 99999999;
             let newRange: vscode.Range;
             const cursorOnEmptyLineAboveSignature: boolean = result.isCursorAboveSignatureLine;
+            // The reason why we need to set different range is because if cursor is immediatly above the signature line, we want the comments to be inserted at the line of cursor and to replace everyhing on the line.
+            // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
             if (cursorOnEmptyLineAboveSignature) {
                 if (isCodeAction) {
+                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not corret. 
+                    // In mose cases, it's the line number of the signature line. 
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
                 } else {
                     newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, maxColumn);
