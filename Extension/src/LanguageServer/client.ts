@@ -3072,8 +3072,8 @@ export class DefaultClient implements Client {
             // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
             if (cursorOnEmptyLineAboveSignature) {
                 if (isCodeAction) {
-                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not corret. 
-                    // In mose cases, it's the line number of the signature line. 
+                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not corret.
+                    // In mose cases, it's the line number of the signature line.
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
                 } else {
                     newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, maxColumn);
