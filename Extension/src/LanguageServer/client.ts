@@ -3068,12 +3068,12 @@ export class DefaultClient implements Client {
             const maxColumn: number = 99999999;
             let newRange: vscode.Range;
             const cursorOnEmptyLineAboveSignature: boolean = result.isCursorAboveSignatureLine;
-            // The reason why we need to set different range is because if cursor is immediatly above the signature line, we want the comments to be inserted at the line of cursor and to replace everyhing on the line.
+            // The reason why we need to set different range is because if cursor is immediately above the signature line, we want the comments to be inserted at the line of cursor and to replace everything on the line.
             // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
             if (cursorOnEmptyLineAboveSignature) {
                 if (isCodeAction) {
-                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not corret.
-                    // In mose cases, it's the line number of the signature line.
+                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not correct.
+                    // In most cases, the finalInsertionLine is the line of the signature line.
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
                 } else {
                     newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, maxColumn);
