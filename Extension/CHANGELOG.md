@@ -36,9 +36,9 @@
 
 ## Version 1.11.5: August 9, 2022
 ## Bug Fixes
+* Fix crash when tag parsing files containing certain string literals. [#9538](https://github.com/microsoft/vscode-cpptools/issues/9538)
 * Fix `llvm-project` parser crash on file: `clang\test\parser\parser_overflow.c`. [#9653](https://github.com/microsoft/vscode-cpptools/issues/9653)
 * Fix `llvm-project` parser crash on file: `libcxx\test\support\test.support\make_string_header.pass.cpp` [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
-* Fix crash when tag parsing files containing certain string literals. [#9538](https://github.com/microsoft/vscode-cpptools/issues/9538)
 
 ## Version 1.11.4: July 21, 2022
 ## New Features
