@@ -35,7 +35,8 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
                         character: 0,
                         line: 0
                     }
-                }
+                },
+                onChanges: false
             };
             // We do not currently pass the CancellationToken to sendRequest
             // because there is not currently cancellation logic for formatting

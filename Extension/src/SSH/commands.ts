@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { ISshHostInfo, ISshLocalForwardInfo, ProcessReturnType } from '../common';
+import { getFullHostAddress, getFullHostAddressNoPort, ISshHostInfo, ISshLocalForwardInfo, ProcessReturnType } from '../common';
 import { defaultSystemInteractor } from './commandInteractors';
 import { runSshTerminalCommandWithLogin } from './sshCommandRunner';
 
@@ -85,14 +85,4 @@ function localForwardToArgs(localForward: ISshLocalForwardInfo): string[] {
     }
 
     return ['-L', arg];
-}
-
-/** user@host */
-function getFullHostAddressNoPort(host: ISshHostInfo): string {
-    return host.user ? `${host.user}@${host.hostName}` : `${host.hostName}`;
-}
-
-function getFullHostAddress(host: ISshHostInfo): string {
-    const fullHostName: string = getFullHostAddressNoPort(host);
-    return host.port ? `${fullHostName}:${host.port}` : fullHostName;
 }
