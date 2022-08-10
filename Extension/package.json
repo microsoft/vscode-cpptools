@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.12.0-main",
+  "version": "1.12.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -417,6 +417,12 @@
               }
             ]
           },
+          "scope": "resource"
+        },
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.formatFixes": {
+          "type": "boolean",
+          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription%",
+          "default": true,
           "scope": "resource"
         },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.showClear": {
@@ -2327,6 +2333,24 @@
           "markdownDescription": "%c_cpp.configuration.simplifyStructuredComments.markdownDescription%",
           "scope": "application"
         },
+        "C_Cpp.autocompleteDoxygenComment":{
+          "type":"boolean",
+          "default":true,
+          "description": "%c_cpp.configuration.autocompleteDoxygenComment.description%",
+          "scope": "resource"
+        },
+        "C_Cpp.generatedDoxygenCommentStyle": {
+          "type":"string",
+          "enum":[
+            "///",
+            "/**",
+            "/*!",
+            "//!"
+          ],
+          "default":"/**",
+          "description": "%c_cpp.configuration.generatedDoxygenCommentStyle.description%",
+          "scope": "resource"
+        },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
@@ -2870,7 +2894,13 @@
         "command": "C_Cpp.AddDebugConfiguration",
         "title": "%c_cpp.command.AddDebugConfiguration.title%",
         "category": "C/C++",
-        "icon": "$(debug-configure)"
+        "icon": "$(debug-configure)"      
+      },
+      {
+        "command": "C_Cpp.GenerateDoxygenComment", 
+        "title":"%c_cpp.command.GenerateDoxygenComment.title%",
+        "category":"C/C++"
+                   
       }
     ],
     "keybindings": [
@@ -4894,6 +4924,11 @@
         {
           "command": "C_Cpp.AddDebugConfiguration",
           "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && BuildAndDebug.isSourceFile && BuildAndDebug.isFolderOpen",
+          "group": "custom2@3"
+        },
+        {
+          "command": "C_Cpp.GenerateDoxygenComment",
+          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
           "group": "custom2@3"
         }
       ],

@@ -3461,5 +3461,6 @@
   "un tipo qualificato non è conforme allo standard per i campi di bit anonimi",
   "il tipo di elemento della condizione vettoriale (%t1) deve avere le stesse dimensioni del tipo di elemento del risultato (%t2)",
   "il tipo di operando di vettore a virgola mobile (%t) non ha un tipo di vettore intero corrispondente",
-  "il mangling per le espressioni 'requires' non è ancora implementato"
+  "il mangling per le espressioni 'requires' non è ancora implementato",
+  "a causa di un attributo 'non disponibile'"
 ]

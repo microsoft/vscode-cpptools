@@ -3423,7 +3423,7 @@
   "zażądano modułu %sq1 pozycji pliku %d1 (względna pozycja %d2) dla partycji %sq2, która poprzedza rozpoczęcie partycji",
   "zażądano modułu %sq1 pozycji pliku %d1 (pozycja względna %d2) dla partycji %sq2, która powoduje przepełnienie końca partycji",
   "zażądano modułu %sq1 pozycji pliku %d1 (pozycja względna %d2) dla partycji %sq2, która jest nieprawidłowo wyrównana do jej elementów partycji",
-  "z podpola %sq",
+  "z podpola %sq (względne położenie w stosunku do węzła %d)",
   "z partycji %sq element %d1 (pozycja pliku %d2, względna pozycja %d3)",
   "atrybuty lambda są niestandardowe w tym miejscu",
   "identyfikator %sq można pomylić z widocznym wizualnie identyfikatorem %p",
@@ -3461,5 +3461,11 @@
   "kwalifikowany typ jest niestandardowy dla anonimowych pól bitowych",
   "typ elementu warunku wektora (%t1) musi mieć taki sam rozmiar jak typ elementu wyniku (%t2)",
   "typ operandu wektora zmiennoprzecinkowego (%t) nie ma zgodnego typu wektora liczb całkowitych",
-  "nie jest jeszcze zaimplementowane dekorowanie wyrażeń typu „requires”."
+  "nie jest jeszcze zaimplementowane dekorowanie wyrażeń typu „requires”.",
+  "z powodu atrybutu „unavailable”",
+  "próbowano skonstruować element z partycji IFC %sq przy użyciu indeksu do partycji IFC %sq",
+  "partycja %sq określiła swój rozmiar wpisu jako %d1, gdy oczekiwano wartości %d2",
+  "napotkano nieoczekiwane wymaganie IFC podczas przetwarzania modułu %sq1",
+  "warunek nie powiódł się w wierszu %d w %s1: %sq2",
+  "niepodzielne ograniczenie zależy od samego siebie"
 ]
