@@ -34,6 +34,10 @@
 * Fix unnecessary IntelliSense process restarting on file creation handling. [#9630](https://github.com/microsoft/vscode-cpptools/issues/9630)
 * Fix potential crashes on shutdown.
 
+## Version 1.11.5: August 9, 2022
+## Bug Fixes
+* Work around multiple issues causing crashes when parsing files in llvm-project. [#9653](https://github.com/microsoft/vscode-cpptools/issues/9653), [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
+
 ## Version 1.11.4: July 21, 2022
 ## New Features
 * Add inlay hints for parameters and auto types. [#5845](https://github.com/microsoft/vscode-cpptools/issues/5845)
