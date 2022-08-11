@@ -13,9 +13,9 @@ C++ is a compiled language meaning your program's source code must be translated
 
 <br/>
 
-Here is a list of compilers and architectures per platform officially supported by the extension. These are reflect by the available [IntelliSense modes](https://code.visualstudio.com/docs/cpp/configure-intellisense-crosscompilation#_intellisense-mode). Note that support for other compilers may be limited.
+Here is a list of compilers and architectures per platform officially supported by the extension. These are reflected by the available [IntelliSense modes](https://code.visualstudio.com/docs/cpp/configure-intellisense-crosscompilation#_intellisense-mode). Note that support for other compilers may be limited.
 
-Platform | Compilers | architectures
+Platform | Compilers | Architectures
 :--- | :--- | :--- 
 Windows | MSVC, Clang, GCC | x64, x86, arm64, arm
 Linux | Clang, GCC | x64, x86, arm64, arm
