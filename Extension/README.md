@@ -11,7 +11,19 @@ C++ is a compiled language meaning your program's source code must be translated
  * C++ compiler pre-installed
  * C++ debugger pre-installed
 
+<br/>
+
+Here is a list of compilers and architectures per platform officially supported by the extension. These are reflect by the available [IntelliSense modes](https://code.visualstudio.com/docs/cpp/configure-intellisense-crosscompilation#_intellisense-mode). Note that support for other compilers may be limited.
+
+Platform | Compilers | architectures
+:--- | :--- | :--- 
+Windows | MSVC, Clang, GCC | x64, x86, arm64, arm
+Linux | Clang, GCC | x64, x86, arm64, arm
+macOS | Clang, GCC | x64, x86, arm64
+
 For more information about installing the required tools or setting up the extension, please follow the tutorials below.
+<br/>
+<br/>
 
 ## Overview and tutorials
 * [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
