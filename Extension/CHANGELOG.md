@@ -3,7 +3,7 @@
 ## Version 1.12.1 (pre-release): August 15, 2022
 
 ## New Features
-* Add Doxygen comment generation via command, context menu, code action or typing.[#5683](https://github.com/microsoft/vscode-cpptools/issues/5683)
+* Add Doxygen comment generation via command, context menu, code action, or typing. [#5683](https://github.com/microsoft/vscode-cpptools/issues/5683)
 
 ## Enhancements
 * Enable auto-formatting of lines that are changed by code analysis fixes. [#9322](https://github.com/microsoft/vscode-cpptools/issues/9322)
