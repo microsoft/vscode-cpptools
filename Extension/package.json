@@ -2333,21 +2333,21 @@
           "markdownDescription": "%c_cpp.configuration.simplifyStructuredComments.markdownDescription%",
           "scope": "application"
         },
-        "C_Cpp.autocompleteDoxygenComment":{
-          "type":"boolean",
-          "default":true,
-          "description": "%c_cpp.configuration.autocompleteDoxygenComment.description%",
+        "C_Cpp.generateDoxygenCommentsOnTyping":{
+          "type": "boolean",
+          "default": true,
+          "description": "%c_cpp.configuration.generateDoxygenCommentsOnTyping.description%",
           "scope": "resource"
         },
         "C_Cpp.generatedDoxygenCommentStyle": {
-          "type":"string",
+          "type": "string",
           "enum":[
             "///",
             "/**",
             "/*!",
             "//!"
           ],
-          "default":"/**",
+          "default": "/**",
           "description": "%c_cpp.configuration.generatedDoxygenCommentStyle.description%",
           "scope": "resource"
         },
@@ -2898,9 +2898,8 @@
       },
       {
         "command": "C_Cpp.GenerateDoxygenComment", 
-        "title":"%c_cpp.command.GenerateDoxygenComment.title%",
-        "category":"C/C++"
-                   
+        "title": "%c_cpp.command.GenerateDoxygenComment.title%",
+        "category": "C/C++"
       }
     ],
     "keybindings": [

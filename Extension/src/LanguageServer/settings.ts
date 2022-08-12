@@ -222,7 +222,7 @@ export class CppSettings extends Settings {
     public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
     public get simplifyStructuredComments(): boolean | undefined { return super.Section.get<boolean>("simplifyStructuredComments"); }
     public get generatedDoxygenCommentStyle(): string | undefined { return super.Section.get<string>("generatedDoxygenCommentStyle"); }
-    public get autocompleteDoxygenComment(): boolean | undefined { return super.Section.get<boolean>("autocompleteDoxygenComment"); }
+    public get generateDoxygenCommentsOnTyping(): boolean | undefined { return super.Section.get<boolean>("generateDoxygenCommentsOnTyping"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
