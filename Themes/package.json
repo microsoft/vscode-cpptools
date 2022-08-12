@@ -43,10 +43,22 @@
         "path": "./themes/cpptools_dark_vs.json"
       },
       {
+        "id": "Visual Studio 2019 Dark - C++",
+        "label": "Dark (Visual Studio 2019 - C/C++)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/cpptools_dark_vs_new.json"
+      },
+      {
         "id": "Visual Studio Light - C++",
         "label": "Light (Visual Studio - C/C++)",
         "uiTheme": "vs",
         "path": "./themes/cpptools_light_vs.json"
+      },
+      {
+        "id": "Visual Studio 2019 Light - C++",
+        "label": "Light (Visual Studio 2019 - C/C++)",
+        "uiTheme": "vs",
+        "path": "./themes/cpptools_light_vs_new.json"
       }
     ]
   }
