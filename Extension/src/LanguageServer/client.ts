@@ -997,8 +997,8 @@ export class DefaultClient implements Client {
         const settings_suggestSnippets: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
-        const settings_generatedDoxygenCommentStyle: (string | undefined)[] = [];
-        const settings_generateDoxygenCommentsOnTyping: (boolean | undefined)[] = [];
+        const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
+        const settings_doxygenGenerateCommentsOnTyping: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1166,8 +1166,8 @@ export class DefaultClient implements Client {
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
-                settings_generatedDoxygenCommentStyle.push(setting.generatedDoxygenCommentStyle);
-                settings_generateDoxygenCommentsOnTyping.push(setting.generateDoxygenCommentsOnTyping);
+                settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
+                settings_doxygenGenerateCommentsOnTyping.push(setting.doxygenGenerateCommentsOnTyping);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1352,8 +1352,8 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-                generatedDoxygenCommentStyle: settings_generatedDoxygenCommentStyle,
-                generateDoxygenCommentsOnTyping: settings_generateDoxygenCommentsOnTyping,
+                doxygenGeneratedCommentStyle: settings_doxygenGeneratedCommentStyle,
+                doxygenGenerateCommentsOnTyping: settings_doxygenGenerateCommentsOnTyping,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
