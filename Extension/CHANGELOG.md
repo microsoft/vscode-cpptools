@@ -20,6 +20,7 @@
 * Add PID to the extended remote process picker. [PR #9673](https://github.com/microsoft/vscode-cpptools/pull/9673)
 * Fix `llvm-project` parser crash on file: `libcxx/test/support/test.support/make_string_header.pass.cpp`. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
 * Fix unintended generation of `nul.d` file when querying clang or gcc, when compiler arguments include dependency generation arguments. [9707](https://github.com/microsoft/vscode-cpptools/issues/9707)
+* Fix issue with stuck database icon when an excluded file is open on launch or when the database is reset.
 
 ## Version 1.12.0 (pre-release): July 27, 2022
 ## Enhancements
