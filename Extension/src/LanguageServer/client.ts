@@ -998,7 +998,7 @@ export class DefaultClient implements Client {
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
         const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
-        const settings_doxygenGenerateCommentsOnTyping: (boolean | undefined)[] = [];
+        const settings_doxygenGenerateOnType: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1167,7 +1167,7 @@ export class DefaultClient implements Client {
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
-                settings_doxygenGenerateCommentsOnTyping.push(setting.doxygenGenerateCommentsOnTyping);
+                settings_doxygenGenerateOnType.push(setting.doxygenGenerateOnType);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1353,8 +1353,8 @@ export class DefaultClient implements Client {
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
                 doxygen: {
-                    generatedCommentStyle: settings_doxygenGeneratedCommentStyle,
-                    generateCommentsOnTyping: settings_doxygenGenerateCommentsOnTyping
+                    generatedStyle: settings_doxygenGeneratedCommentStyle,
+                    generateOnType: settings_doxygenGenerateOnType
                 },
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
