@@ -1352,8 +1352,10 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-                doxygenGeneratedCommentStyle: settings_doxygenGeneratedCommentStyle,
-                doxygenGenerateCommentsOnTyping: settings_doxygenGenerateCommentsOnTyping,
+                doxygen: {
+                    generatedCommentStyle: settings_doxygenGeneratedCommentStyle,
+                    generateCommentsOnTyping: settings_doxygenGenerateCommentsOnTyping
+                },
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -1461,6 +1463,9 @@ export class DefaultClient implements Client {
                     },
                     space: vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap: vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
+                },
+                doxygen: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.doxygen", this.RootUri)
                 }
             },
             editor: {
