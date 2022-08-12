@@ -997,8 +997,8 @@ export class DefaultClient implements Client {
         const settings_suggestSnippets: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
-        const settings_generatedDoxygenCommentStyle: (string | undefined)[] = [];
-        const settings_autocompleteDoxygenComment: (boolean | undefined)[] = [];
+        const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
+        const settings_doxygenGenerateOnType: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1166,8 +1166,8 @@ export class DefaultClient implements Client {
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
-                settings_generatedDoxygenCommentStyle.push(setting.generatedDoxygenCommentStyle);
-                settings_autocompleteDoxygenComment.push(setting.autocompleteDoxygenComment);
+                settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
+                settings_doxygenGenerateOnType.push(setting.doxygenGenerateOnType);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1352,8 +1352,10 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-                generatedDoxygenCommentStyle: settings_generatedDoxygenCommentStyle,
-                autocompleteDoxygenComment: settings_autocompleteDoxygenComment,
+                doxygen: {
+                    generatedStyle: settings_doxygenGeneratedCommentStyle,
+                    generateOnType: settings_doxygenGenerateOnType
+                },
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -1461,6 +1463,9 @@ export class DefaultClient implements Client {
                     },
                     space: vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap: vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
+                },
+                doxygen: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.doxygen", this.RootUri)
                 }
             },
             editor: {
