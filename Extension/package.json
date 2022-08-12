@@ -2347,7 +2347,7 @@
             "/*!",
             "//!"
           ],
-          "default":"/**",
+          "default":"///",
           "description": "%c_cpp.configuration.generatedDoxygenCommentStyle.description%",
           "scope": "resource"
         },
