@@ -998,7 +998,7 @@ export class DefaultClient implements Client {
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
         const settings_generatedDoxygenCommentStyle: (string | undefined)[] = [];
-        const settings_autocompleteDoxygenComment: (boolean | undefined)[] = [];
+        const settings_generateDoxygenCommentsOnTyping: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1167,7 +1167,7 @@ export class DefaultClient implements Client {
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_generatedDoxygenCommentStyle.push(setting.generatedDoxygenCommentStyle);
-                settings_autocompleteDoxygenComment.push(setting.autocompleteDoxygenComment);
+                settings_generateDoxygenCommentsOnTyping.push(setting.generateDoxygenCommentsOnTyping);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1353,7 +1353,7 @@ export class DefaultClient implements Client {
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
                 generatedDoxygenCommentStyle: settings_generatedDoxygenCommentStyle,
-                autocompleteDoxygenComment: settings_autocompleteDoxygenComment,
+                generateDoxygenCommentsOnTyping: settings_generateDoxygenCommentsOnTyping,
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
