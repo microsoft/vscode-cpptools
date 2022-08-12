@@ -1,4 +1,4 @@
-# C/C++ for Visual Studio Code Change Log
+# C/C++ for Visual Studio Code Changelog
 
 ## Version 1.12.1 (pre-release): August 15, 2022
 
