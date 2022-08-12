@@ -21,7 +21,6 @@
 * Fix `llvm-project` parser crash on file: `libcxx/test/support/test.support/make_string_header.pass.cpp`. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
 * Fix unintended generation of `nul.d` file when querying clang or gcc, when compiler arguments include dependency generation arguments. [9707](https://github.com/microsoft/vscode-cpptools/issues/9707)
 
-
 ## Version 1.12.0 (pre-release): July 27, 2022
 ## Enhancements
 * Show an informative message when an IntelliSense-related command is executed while IntelliSense is disabled. [#9614](https://github.com/microsoft/vscode-cpptools/issues/9614)
@@ -38,13 +37,11 @@
 * Fix unnecessary IntelliSense process restarting on file creation handling. [#9630](https://github.com/microsoft/vscode-cpptools/issues/9630)
 * Fix potential crashes on shutdown.
 
-
 ## Version 1.11.5: August 9, 2022
 ## Bug Fixes
 * Fix crash when tag parsing files containing certain string literals. [#9538](https://github.com/microsoft/vscode-cpptools/issues/9538)
 * Fix `llvm-project` parser crash on file: `clang/test/parser/parser_overflow.c`. [#9653](https://github.com/microsoft/vscode-cpptools/issues/9653)
 * Fix `llvm-project` parser crash on file: `libcxx/test/support/test.support/make_string_header.pass.cpp`. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
-
 
 ## Version 1.11.4: July 21, 2022
 ## New Features
