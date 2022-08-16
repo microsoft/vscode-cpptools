@@ -162,16 +162,17 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
+    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
     public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
     public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
     public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
     public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
-    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxConcurrentThreads"); }
-    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }
-    public get codeAnalysisUpdateDelay(): number | undefined | null { return super.Section.get<number>("codeAnalysis.updateDelay"); }
+    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("codeAnalysis.maxConcurrentThreads"); }
+    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number | null>("codeAnalysis.maxMemory"); }
+    public get codeAnalysisUpdateDelay(): number | undefined { return super.Section.get<number>("codeAnalysis.updateDelay"); }
     public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
     public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
@@ -200,7 +201,7 @@ export class CppSettings extends Settings {
     }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
-    public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
+    public get clangFormatSortIncludes(): string | undefined | null { return super.Section.get<string | null>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
@@ -329,7 +330,7 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true;
     }
 
-    public get vcFormatIndentGotoLables(): string {
+    public get vcFormatIndentGotoLabels(): string {
         // These strings have default values in package.json, so should never be undefined.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return super.Section.get<string>("vcFormat.indent.gotoLabels")!;
@@ -584,7 +585,7 @@ export class CppSettings extends Settings {
         settingMap.set("cpp_indent_case_contents", this.vcFormatIndentCaseContents.toString());
         settingMap.set("cpp_indent_case_contents_when_block", this.vcFormatIndentCaseContentsWhenBlock.toString());
         settingMap.set("cpp_indent_lambda_braces_when_parameter", this.vcFormatIndentLambdaBracesWhenParameter.toString());
-        settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(this.vcFormatIndentGotoLables));
+        settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(this.vcFormatIndentGotoLabels));
         settingMap.set("cpp_indent_preprocessor", mapIndentToEditorConfig(this.vcFormatIndentPreprocessor));
         settingMap.set("cpp_indent_access_specifiers", this.vcFormatIndentAccessSpecifiers.toString());
         settingMap.set("cpp_indent_namespace_contents", this.vcFormatIndentNamespaceContents.toString());
