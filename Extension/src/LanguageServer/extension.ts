@@ -17,7 +17,7 @@ import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, code
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings } from './settings';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -275,14 +275,14 @@ export function updateLanguageConfigurations(): void {
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     const activeClient: Client = clients.ActiveClient;
-    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
-    clients.forEach(client => {
-        if (client !== activeClient) {
-            client.onDidChangeSettings(event, false);
-        }
-    });
+    const changedSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event);
+    // clients.forEach(client => {
+    //     if (client !== activeClient) {
+    //         client.onDidChangeSettings(event, false);
+    //     }
+    // });
 
-    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
+    const newUpdateChannel: string = changedSettings['updateChannel'];
     if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
         UpdateInsidersAccess();
     }
@@ -347,7 +347,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
                         const fileName: string = path.basename(document.uri.fsPath);
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, "cpp");
-                        client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                        client.sendDidChangeSettings();
                         vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
                             finishDidOpen(newDoc);
                         });

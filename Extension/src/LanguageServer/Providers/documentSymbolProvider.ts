@@ -7,11 +7,12 @@ import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, 
 import { processDelayedDidOpen } from '../extension';
 import { makeVscodeRange } from '../utils';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
+import { ClientCollection } from '../clientCollection';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
+    private clientCollection: ClientCollection;
+    constructor(clientCollection: ClientCollection) {
+        this.clientCollection = clientCollection;
     }
     private getChildrenSymbols(symbols: LocalizeDocumentSymbol[]): vscode.DocumentSymbol[] {
         const documentSymbols: vscode.DocumentSymbol[] = [];
@@ -58,14 +59,15 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         return documentSymbols;
     }
     public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
-        if (!this.client.TrackedDocuments.has(document)) {
+        const client: DefaultClient = <DefaultClient>this.clientCollection.getClientFor(document.uri);
+        if (!client.TrackedDocuments.has(document)) {
             processDelayedDidOpen(document);
         }
-        return this.client.requestWhenReady(async () => {
+        return client.requestWhenReady(async () => {
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
-            const symbols: LocalizeDocumentSymbol[] = await this.client.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+            const symbols: LocalizeDocumentSymbol[] = await client.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
             const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
             return resultSymbols;
         });

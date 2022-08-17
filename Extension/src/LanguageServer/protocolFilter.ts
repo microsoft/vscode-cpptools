@@ -9,7 +9,7 @@ import { Middleware } from 'vscode-languageclient';
 import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import * as vscode from 'vscode';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings } from './settings';
 import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
 export function createProtocolFilter(clients: ClientCollection): Middleware {
@@ -52,7 +52,7 @@ export function createProtocolFilter(clients: ClientCollection): Middleware {
                                 const fileName: string = path.basename(document.uri.fsPath);
                                 const mappingString: string = fileName + "@" + document.uri.fsPath;
                                 me.addFileAssociations(mappingString, "cpp");
-                                me.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                                me.sendDidChangeSettings();
                                 vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
                                     finishDidOpen(newDoc);
                                 });

@@ -31,7 +31,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
             }
 
             if (!insertSpacesSet || !tabSizeSet) {
-                const settings: OtherSettings = new OtherSettings(this.client.RootUri);
+                const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
                 if (!insertSpacesSet) {
                     options.insertSpaces = settings.editorInsertSpaces ?? true;
                 }
@@ -40,7 +40,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                 }
             }
         }
-        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
