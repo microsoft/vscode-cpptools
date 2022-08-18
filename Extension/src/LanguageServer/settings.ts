@@ -201,7 +201,7 @@ export class CppSettings extends Settings {
     }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
-    public get clangFormatSortIncludes(): string | undefined | null { return super.Section.get<string | null>("clang_format_sortIncludes"); }
+    public get clangFormatSortIncludes(): boolean | undefined | null { return super.Section.get<boolean | null>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }

@@ -472,7 +472,7 @@ interface WorkspaceFolderSettingsParams {
     clangFormatPath: string | undefined;
     clangFormatStyle: string | undefined;
     clangFormatFallbackStyle: string | undefined;
-    clangFormatSortIncludes: string | undefined | null;
+    clangFormatSortIncludes: boolean | undefined | null;
     codeAnalysisRunAutomatically: boolean | undefined;
     codeAnalysisExclude: Excludes | undefined;
     clangTidyEnabled: boolean | undefined;
@@ -487,58 +487,58 @@ interface WorkspaceFolderSettingsParams {
     clangTidyFixNotes: boolean | undefined;
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
-    vcFormatIndentBraces: boolean;
+    vcFormatIndentBraces: boolean | undefined;
     vcFormatIndentMultiLineRelativeTo: string | undefined;
     vcFormatIndentWithinParentheses: string | undefined;
     vcFormatIndentPreserveWithinParentheses: boolean;
-    vcFormatIndentCaseLabels: boolean;
-    vcFormatIndentCaseContents: boolean;
-    vcFormatIndentCaseContentsWhenBlock: boolean;
-    vcFormatIndentLambdaBracesWhenParameter: boolean;
+    vcFormatIndentCaseLabels: boolean | undefined;
+    vcFormatIndentCaseContents: boolean | undefined;
+    vcFormatIndentCaseContentsWhenBlock: boolean | undefined;
+    vcFormatIndentLambdaBracesWhenParameter: boolean | undefined;
     vcFormatIndentGotoLabels: string | undefined;
     vcFormatIndentPreprocessor: string | undefined;
-    vcFormatIndentAccesSpecifiers: boolean;
-    vcFormatIndentNamespaceContents: boolean;
-    vcFormatIndentPreserveComments: boolean;
-    vcFormatNewLineScopeBracesOnSeparateLines: boolean;
+    vcFormatIndentAccesSpecifiers: boolean | undefined;
+    vcFormatIndentNamespaceContents: boolean | undefined;
+    vcFormatIndentPreserveComments: boolean | undefined;
+    vcFormatNewLineScopeBracesOnSeparateLines: boolean | undefined;
     vcFormatNewLineBeforeOpenBraceNamespace: string | undefined;
     vcFormatNewLineBeforeOpenBraceType: string | undefined;
     vcFormatNewLineBeforeOpenBraceFunction: string | undefined;
     vcFormatNewLineBeforeOpenBraceBlock: string | undefined;
     vcFormatNewLineBeforeOpenBraceLambda: string | undefined;
-    vcFormatNewLineBeforeCatch: boolean;
-    vcFormatNewLineBeforeElse: boolean;
-    vcFormatNewLineBeforeWhileInDoWhile: boolean;
-    vcFormatNewLineCloseBraceSameLineEmptyType: boolean;
-    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean;
-    vcFormatSpaceWithinParameterListParentheses: boolean;
-    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean;
-    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean;
-    vcFormatSpaceWithinControlFlowStatementParentheses: boolean;
-    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean;
-    vcFormatSpaceWithinCastParentheses: boolean;
-    vcFormatSpaceAfterCastCloseParenthesis: boolean;
-    vcFormatSpaceWithinExpressionParentheses: boolean;
-    vcFormatSpaceBeforeBlockOpenBrace: boolean;
-    vcFormatSpaceBetweenEmptyBraces: boolean;
-    vcFormatSpaceBeforeInitializerListOpenBrace: boolean;
-    vcFormatSpaceWithinInitializerListBraces: boolean;
-    vcFormatSpacePreserveInInitializerList: boolean;
-    vcFormatSpaceBeforeOpenSquareBracket: boolean;
-    vcFormatSpaceWithinSquareBrackets: boolean;
-    vcFormatSpaceBeforeEmptySquareBrackets: boolean;
-    vcFormatSpaceBetweenEmptySquareBrackets: boolean;
-    vcFormatSpaceGroupSquareBrackets: boolean;
-    vcFormatSpaceWithinLambdaBrackets: boolean;
-    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean;
-    vcFormatSpaceBeforeComma: boolean;
-    vcFormatSpaceAfterComma: boolean;
-    vcFormatSpaceRemoveAroundMemberOperators: boolean;
-    vcFormatSpaceBeforeInheritanceColon: boolean;
-    vcFormatSpaceBeforeConstructorColon: boolean;
-    vcFormatSpaceRemoveBeforeSemicolon: boolean;
-    vcFormatSpaceInsertAfterSemicolon: boolean;
-    vcFormatSpaceRemoveAroundUnaryOperator: boolean;
+    vcFormatNewLineBeforeCatch: boolean | undefined;
+    vcFormatNewLineBeforeElse: boolean | undefined;
+    vcFormatNewLineBeforeWhileInDoWhile: boolean | undefined;
+    vcFormatNewLineCloseBraceSameLineEmptyType: boolean | undefined;
+    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean | undefined;
+    vcFormatSpaceWithinParameterListParentheses: boolean | undefined;
+    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean | undefined;
+    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean | undefined;
+    vcFormatSpaceWithinControlFlowStatementParentheses: boolean | undefined;
+    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean | undefined;
+    vcFormatSpaceWithinCastParentheses: boolean | undefined;
+    vcFormatSpaceAfterCastCloseParenthesis: boolean | undefined;
+    vcFormatSpaceWithinExpressionParentheses: boolean | undefined;
+    vcFormatSpaceBeforeBlockOpenBrace: boolean | undefined;
+    vcFormatSpaceBetweenEmptyBraces: boolean | undefined;
+    vcFormatSpaceBeforeInitializerListOpenBrace: boolean | undefined;
+    vcFormatSpaceWithinInitializerListBraces: boolean | undefined;
+    vcFormatSpacePreserveInInitializerList: boolean | undefined;
+    vcFormatSpaceBeforeOpenSquareBracket: boolean | undefined;
+    vcFormatSpaceWithinSquareBrackets: boolean | undefined;
+    vcFormatSpaceBeforeEmptySquareBrackets: boolean | undefined;
+    vcFormatSpaceBetweenEmptySquareBrackets: boolean | undefined;
+    vcFormatSpaceGroupSquareBrackets: boolean | undefined;
+    vcFormatSpaceWithinLambdaBrackets: boolean | undefined;
+    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean | undefined;
+    vcFormatSpaceBeforeComma: boolean | undefined;
+    vcFormatSpaceAfterComma: boolean | undefined;
+    vcFormatSpaceRemoveAroundMemberOperators: boolean | undefined;
+    vcFormatSpaceBeforeInheritanceColon: boolean | undefined;
+    vcFormatSpaceBeforeConstructorColon: boolean | undefined;
+    vcFormatSpaceRemoveBeforeSemicolon: boolean | undefined;
+    vcFormatSpaceInsertAfterSemicolon: boolean | undefined;
+    vcFormatSpaceRemoveAroundUnaryOperator: boolean | undefined;
     vcFormatSpaceBeforeFunctionOpenParenthesis: string | undefined;
     vcFormatSpaceAroundBinaryOperator: string | undefined;
     vcFormatSpaceAroundAssignmentOperator: string | undefined;
@@ -548,15 +548,16 @@ interface WorkspaceFolderSettingsParams {
     doxygenGenerateOnType: boolean | undefined;
     doxygenGeneratedStyle: string | undefined;
     filesExclude: Excludes | undefined;
-    filesSaveAfterDelay: boolean;
+    filesAutoSaveAfterDelay: boolean | undefined;
     filesEncoding: string | undefined;
     searchExclude: Excludes | undefined;
     editorAutoClosingBrackets: string | undefined;
+    editorInlayHintsEnabled: boolean | undefined;
 };
 
 interface SettingsParams {
     filesAssociations: { [key: string]: string };
-
+    workspaceFallbackEncoding: string | undefined;
     maxConcurrentThreads: number | null | undefined;
     maxCachedProcesses: number | null | undefined;
     maxMemory: number | null | undefined;
@@ -567,18 +568,14 @@ interface SettingsParams {
     intelliSenseUpdateDelay: number | undefined;
     experimentalFeatures: string | undefined;
     enhancedColorization: boolean | undefined;
-
     intellisenseMaxCachedProcesses: number | null | undefined;
     intellisenseMaxMemory: number | null | undefined;
-
     referencesMaxConcurrentThreads: number | null | undefined;
     referencesMaxCachedProcesses: number | null | undefined;
     referencesMaxMemory: number | null | undefined;
-
     codeAnalysisMaxConcurrentThreads: number | null | undefined;
     codeAnalysisMaxMemory: number | null | undefined;
     codeAnalysisUpdateDelay: number | undefined;
-
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
 };
 
@@ -1190,10 +1187,11 @@ export class DefaultClient implements Client {
             doxygenGenerateOnType: settings.doxygenGenerateOnType,
             doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
             filesExclude: otherSettings.filesExclude,
-            filesSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
+            filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
             filesEncoding: otherSettings.filesEncoding,
             searchExclude: otherSettings.searchExclude,
-            editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets
+            editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
+            editorInlayHintsEnabled: otherSettings.InlayHintsEnabled
         };
     };
 
@@ -1217,6 +1215,7 @@ export class DefaultClient implements Client {
         const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
         return {
             filesAssociations: workspaceOtherSettings.filesAssociations,
+            workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
             maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
             maxCachedProcesses: workspaceSettings.maxCachedProcesses,
             maxMemory: workspaceSettings.maxMemory,
