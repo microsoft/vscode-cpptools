@@ -12,7 +12,7 @@ import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFact
 import { DebuggerType } from './configurations';
 import * as nls from 'vscode-nls';
 import { getActiveSshTarget, initializeSshTargets, selectSshTarget, SshTargetsProvider } from '../SSH/TargetsView/sshTargetsProvider';
-import { BaseNode, refreshCppSshTargetsView } from '../SSH/TargetsView/common';
+import { addSshTarget, BaseNode, refreshCppSshTargetsView } from '../SSH/TargetsView/common';
 import { setActiveSshTarget, TargetLeafNode } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, writeSshConfiguration } from '../SSH/sshHosts';
@@ -79,8 +79,8 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     await initializeSshTargets();
     const sshTargetsProvider: SshTargetsProvider = new SshTargetsProvider();
     disposables.push(vscode.window.registerTreeDataProvider('CppSshTargetsView', sshTargetsProvider));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.addSshTarget', addSshTarget));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.removeSshTarget', removeSshTarget));
+    disposables.push(vscode.commands.registerCommand(addSshTarget, addSshTargetImpl));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.removeSshTarget', removeSshTargetImpl));
     disposables.push(vscode.commands.registerCommand(refreshCppSshTargetsView, (node?: BaseNode) => sshTargetsProvider.refresh(node)));
     disposables.push(vscode.commands.registerCommand('C_Cpp.setActiveSshTarget', async (node: TargetLeafNode) => {
         await setActiveSshTarget(node.name);
@@ -111,7 +111,7 @@ export function dispose(): void {
     disposables.forEach(d => d.dispose());
 }
 
-async function addSshTarget(): Promise<boolean> {
+async function addSshTargetImpl(): Promise<string> {
     const name: string | undefined = await vscode.window.showInputBox({
         title: localize('enter.ssh.target.name', 'Enter SSH Target Name'),
         placeHolder: localize('ssh.target.name.place.holder', 'Example: `mySSHTarget`'),
@@ -119,7 +119,7 @@ async function addSshTarget(): Promise<boolean> {
     });
     if (name === undefined) {
         // Cancelled
-        return false;
+        return '';
     }
 
     const command: string | undefined = await vscode.window.showInputBox({
@@ -128,24 +128,24 @@ async function addSshTarget(): Promise<boolean> {
         ignoreFocusOut: true
     });
     if (!command) {
-        return false;
+        return '';
     }
 
     const newEntry: { [key: string]: string } = sshCommandToConfig(command, name);
 
     const targetFile: string | undefined = await vscode.window.showQuickPick(getSshConfigurationFiles().filter(file => pathAccessible(file, fs.constants.W_OK)), { title: localize('select.ssh.config.file', 'Select a SSH configuration file') });
     if (!targetFile) {
-        return false;
+        return '';
     }
 
     const parsed: Configuration = await getSshConfiguration(targetFile, false);
     parsed.prepend(newEntry, true);
     await writeSshConfiguration(targetFile, parsed);
 
-    return true;
+    return name;
 }
 
-async function removeSshTarget(node: TargetLeafNode): Promise<boolean> {
+async function removeSshTargetImpl(node: TargetLeafNode): Promise<boolean> {
     const labelYes: string = localize('yes', 'Yes');
     const labelNo: string = localize('no', 'No');
     const confirm: string | undefined = await vscode.window.showInformationMessage(localize('ssh.target.delete.confirmation', 'Are you sure you want to permanamtly delete "{0}"?', node.name), labelYes, labelNo);

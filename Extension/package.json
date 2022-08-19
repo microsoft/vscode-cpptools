@@ -2892,28 +2892,19 @@
         "command": "C_Cpp.addSshTarget",
         "category": "C/C++",
         "title": "%c_cpp.command.addSshTarget.title%",
-        "icon": {
-          "light": "assets/plus-light.svg",
-          "dark": "assets/plus-dark.svg"
-        }
+        "icon": "$(plus)"
       },
       {
         "command": "C_Cpp.removeSshTarget",
         "category": "C/C++",
         "title": "%c_cpp.command.removeSshTarget.title%",
-        "icon": {
-          "light": "assets/cancel-light.svg",
-          "dark": "assets/cancel-dark.svg"
-        }
+        "icon": "$(remove)"
       },
       {
         "command": "C_Cpp.setActiveSshTarget",
         "category": "C/C++",
         "title": "%c_cpp.command.setActiveSshTarget.title%",
-        "icon": {
-          "light": "assets/check-light.svg",
-          "dark": "assets/check-dark.svg"
-        }
+        "icon": "$(check)"
       },
       {
         "command": "C_Cpp.selectActiveSshTarget",
@@ -2934,10 +2925,7 @@
         "command": "C_Cpp.refreshCppSshTargetsView",
         "category": "C/C++",
         "title": "%c_cpp.command.refreshCppSshTargetsView.title%",
-        "icon": {
-          "light": "assets/Refresh.svg",
-          "dark": "assets/Refresh_inverse.svg"
-        }
+        "icon": "$(refresh)"
       }
     ],
     "keybindings": [

@@ -5,7 +5,7 @@
 
 import { getSshConfigHostInfos } from '../sshHosts';
 import * as vscode from 'vscode';
-import { BaseNode, LabelLeafNode, refreshCppSshTargetsView } from './common';
+import { addSshTarget, BaseNode, LabelLeafNode, refreshCppSshTargetsView } from './common';
 import { TargetLeafNode, filesWritable, setActiveSshTarget, _activeTarget, workspaceState_activeSshTarget } from './targetNodes';
 import { extensionContext, ISshConfigHostInfo } from '../../common';
 import * as nls from 'vscode-nls';
@@ -81,6 +81,18 @@ export async function getActiveSshTarget(selectWhenNotSet: boolean = true): Prom
     return _activeTarget;
 }
 
-export function selectSshTarget(): Thenable<string | undefined> {
-    return vscode.window.showQuickPick(Array.from(_targets.keys()), { title: localize('select.ssh.target', 'Select an SSH target') });
+const addNewSshTarget: string = localize('add.new.ssh.target', '{0} Add New SSH Target...', '$(plus)');
+
+export async function selectSshTarget(): Promise<string | undefined> {
+    const items: string[] = Array.from(_targets.keys());
+    // Special item for adding SSH target
+    items.push(addNewSshTarget);
+    const selection: string | undefined = await vscode.window.showQuickPick(items, { title: localize('select.ssh.target', 'Select an SSH target') });
+    if (!selection) {
+        return undefined;
+    }
+    if (selection === addNewSshTarget) {
+        return vscode.commands.executeCommand(addSshTarget);
+    }
+    return selection;
 }
