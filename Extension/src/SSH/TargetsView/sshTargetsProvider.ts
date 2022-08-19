@@ -15,7 +15,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let _targets: Map<string, ISshConfigHostInfo> = new Map<string, ISshConfigHostInfo>();
 
-export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode> {
+export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode>, vscode.Disposable {
     private readonly _onDidChangeTreeData: vscode.EventEmitter<BaseNode | undefined> = new vscode.EventEmitter<BaseNode | undefined>();
 
     public get onDidChangeTreeData(): vscode.Event<BaseNode | undefined> {
@@ -41,6 +41,10 @@ export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode> {
 
     refresh(node?: BaseNode): void {
         this._onDidChangeTreeData.fire(node);
+    }
+
+    dispose(): void {
+        this._onDidChangeTreeData.dispose();
     }
 
     private async getTargets(): Promise<BaseNode[]> {

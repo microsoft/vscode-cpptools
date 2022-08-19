@@ -19,10 +19,13 @@ import { getSshConfiguration, getSshConfigurationFiles, writeSshConfiguration } 
 import { pathAccessible } from '../common';
 import * as fs from 'fs';
 import { Configuration } from 'ssh-config';
+import * as chokidar from 'chokidar';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+const fileWatchers: chokidar.FSWatcher[] = [];
 
 export async function initialize(context: vscode.ExtensionContext): Promise<void> {
     // Activate Process Picker Commands
@@ -92,12 +95,19 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
         }
     }));
     disposables.push(vscode.commands.registerCommand('C_Cpp.activeSshTarget', getActiveSshTarget));
+    disposables.push(sshTargetsProvider);
+    for (const sshConfig of getSshConfigurationFiles()) {
+        fileWatchers.push(chokidar.watch(sshConfig, {ignoreInitial: true})
+            .on('add', () => vscode.commands.executeCommand(refreshCppSshTargetsView))
+            .on('change', () => vscode.commands.executeCommand(refreshCppSshTargetsView))
+            .on('unlink', () => vscode.commands.executeCommand(refreshCppSshTargetsView)));
+    }
     vscode.commands.executeCommand('setContext', 'showCppSshTargetsView', true);
-
-    vscode.Disposable.from(...disposables);
 }
 
 export function dispose(): void {
+    // Don't wait
+    fileWatchers.forEach(watcher => watcher.close().then(() => {}, () => {}));
     disposables.forEach(d => d.dispose());
 }
 
@@ -131,7 +141,6 @@ async function addSshTarget(): Promise<boolean> {
     const parsed: Configuration = await getSshConfiguration(targetFile, false);
     parsed.prepend(newEntry, true);
     await writeSshConfiguration(targetFile, parsed);
-    await vscode.commands.executeCommand(refreshCppSshTargetsView);
 
     return true;
 }
@@ -151,7 +160,6 @@ async function removeSshTarget(node: TargetLeafNode): Promise<boolean> {
     const parsed: Configuration = await getSshConfiguration(node.sshConfigHostInfo.file, false);
     parsed.remove({ Host: node.name });
     await writeSshConfiguration(node.sshConfigHostInfo.file, parsed);
-    await vscode.commands.executeCommand(refreshCppSshTargetsView);
 
     return true;
 }
