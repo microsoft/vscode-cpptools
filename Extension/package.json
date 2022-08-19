@@ -3426,127 +3426,136 @@
                           "default": ""
                         },
                         "host": {
-                          "type": "object",
-                          "description": "%c_cpp.debuggers.host.description%",
-                          "default": {},
-                          "required": [
-                            "hostName"
-                          ],
-                          "properties": {
-                            "user": {
+                          "anyOf": [
+                            {
                               "type": "string",
-                              "description": "%c_cpp.debuggers.host.user.description%",
-                              "default": ""
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": "hello@microsoft.com"
                             },
-                            "hostName": {
-                              "type": "string",
-                              "description": "%c_cpp.debuggers.host.hostName.description%",
-                              "default": ""
-                            },
-                            "port": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d+$|^\\${.+}$"
-                                }
+                            {
+                              "type": "object",
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": {},
+                              "required": [
+                                "hostName"
                               ],
-                              "description": "%c_cpp.debuggers.host.port.description%",
-                              "default": 22
-                            },
-                            "jumpHosts": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.jumpHost.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "required": [
-                                  "hostName"
-                                ],
-                                "properties": {
-                                  "user": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.user.description%",
-                                    "default": ""
-                                  },
-                                  "hostName": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.hostName.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
-                                        "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
+                              "properties": {
+                                "user": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.user.description%",
+                                  "default": ""
+                                },
+                                "hostName": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.hostName.description%",
+                                  "default": ""
+                                },
+                                "port": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "pattern": "^\\d+$|^\\${.+}$"
+                                    }
+                                  ],
+                                  "description": "%c_cpp.debuggers.host.port.description%",
+                                  "default": 22
+                                },
+                                "jumpHosts": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "required": [
+                                      "hostName"
                                     ],
-                                    "description": "%c_cpp.debuggers.host.port.description%",
-                                    "default": 22
+                                    "properties": {
+                                      "user": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.user.description%",
+                                        "default": ""
+                                      },
+                                      "hostName": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.hostName.description%",
+                                        "default": ""
+                                      },
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.port.description%",
+                                        "default": 22
+                                      }
+                                    }
                                   }
-                                }
-                              }
-                            },
-                            "localForwards": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.localForward.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "properties": {
-                                  "bindAddress": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
+                                },
+                                "localForwards": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.localForward.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "properties": {
+                                      "bindAddress": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
-                                  },
-                                  "host": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
-                                    "default": ""
-                                  },
-                                  "hostPort": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
+                                        "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                        "default": ""
                                       },
-                                      {
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                      },
+                                      "host": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
+                                        "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                        "default": ""
+                                      },
+                                      "hostPort": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                      },
+                                      "localSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                        "default": ""
+                                      },
+                                      "remoteSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                        "default": ""
                                       }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
-                                  },
-                                  "localSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
-                                    "default": ""
-                                  },
-                                  "remoteSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
-                                    "default": ""
+                                    }
                                   }
                                 }
                               }
                             }
-                          }
+                          ]
                         },
                         "targetDir": {
                           "type": "string",
@@ -3583,127 +3592,136 @@
                           ]
                         },
                         "host": {
-                          "type": "object",
-                          "description": "%c_cpp.debuggers.host.description%",
-                          "default": {},
-                          "required": [
-                            "hostName"
-                          ],
-                          "properties": {
-                            "user": {
+                          "anyOf": [
+                            {
                               "type": "string",
-                              "description": "%c_cpp.debuggers.host.user.description%",
-                              "default": ""
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": "hello@microsoft.com"
                             },
-                            "hostName": {
-                              "type": "string",
-                              "description": "%c_cpp.debuggers.host.hostName.description%",
-                              "default": ""
-                            },
-                            "port": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d+$|^\\${.+}$"
-                                }
+                            {
+                              "type": "object",
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": {},
+                              "required": [
+                                "hostName"
                               ],
-                              "description": "%c_cpp.debuggers.host.port.description%",
-                              "default": 22
-                            },
-                            "jumpHosts": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.jumpHost.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "required": [
-                                  "hostName"
-                                ],
-                                "properties": {
-                                  "user": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.user.description%",
-                                    "default": ""
-                                  },
-                                  "hostName": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.hostName.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
-                                        "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
+                              "properties": {
+                                "user": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.user.description%",
+                                  "default": ""
+                                },
+                                "hostName": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.hostName.description%",
+                                  "default": ""
+                                },
+                                "port": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "pattern": "^\\d+$|^\\${.+}$"
+                                    }
+                                  ],
+                                  "description": "%c_cpp.debuggers.host.port.description%",
+                                  "default": 22
+                                },
+                                "jumpHosts": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "required": [
+                                      "hostName"
                                     ],
-                                    "description": "%c_cpp.debuggers.host.port.description%",
-                                    "default": 22
+                                    "properties": {
+                                      "user": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.user.description%",
+                                        "default": ""
+                                      },
+                                      "hostName": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.hostName.description%",
+                                        "default": ""
+                                      },
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.port.description%",
+                                        "default": 22
+                                      }
+                                    }
                                   }
-                                }
-                              }
-                            },
-                            "localForwards": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.localForward.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "properties": {
-                                  "bindAddress": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
+                                },
+                                "localForwards": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.localForward.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "properties": {
+                                      "bindAddress": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
-                                  },
-                                  "host": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
-                                    "default": ""
-                                  },
-                                  "hostPort": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
+                                        "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                        "default": ""
                                       },
-                                      {
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                      },
+                                      "host": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
+                                        "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                        "default": ""
+                                      },
+                                      "hostPort": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                      },
+                                      "localSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                        "default": ""
+                                      },
+                                      "remoteSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                        "default": ""
                                       }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
-                                  },
-                                  "localSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
-                                    "default": ""
-                                  },
-                                  "remoteSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
-                                    "default": ""
+                                    }
                                   }
                                 }
                               }
                             }
-                          }
+                          ]
                         },
                         "command": {
                           "type": "string",
@@ -4105,127 +4123,136 @@
                           "default": ""
                         },
                         "host": {
-                          "type": "object",
-                          "description": "%c_cpp.debuggers.host.description%",
-                          "default": {},
-                          "required": [
-                            "hostName"
-                          ],
-                          "properties": {
-                            "user": {
+                          "anyOf": [
+                            {
                               "type": "string",
-                              "description": "%c_cpp.debuggers.host.user.description%",
-                              "default": ""
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": "hello@microsoft.com"
                             },
-                            "hostName": {
-                              "type": "string",
-                              "description": "%c_cpp.debuggers.host.hostName.description%",
-                              "default": ""
-                            },
-                            "port": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d+$|^\\${.+}$"
-                                }
+                            {
+                              "type": "object",
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": {},
+                              "required": [
+                                "hostName"
                               ],
-                              "description": "%c_cpp.debuggers.host.port.description%",
-                              "default": 22
-                            },
-                            "jumpHosts": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.jumpHost.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "required": [
-                                  "hostName"
-                                ],
-                                "properties": {
-                                  "user": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.user.description%",
-                                    "default": ""
-                                  },
-                                  "hostName": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.hostName.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
-                                        "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
+                              "properties": {
+                                "user": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.user.description%",
+                                  "default": ""
+                                },
+                                "hostName": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.hostName.description%",
+                                  "default": ""
+                                },
+                                "port": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "pattern": "^\\d+$|^\\${.+}$"
+                                    }
+                                  ],
+                                  "description": "%c_cpp.debuggers.host.port.description%",
+                                  "default": 22
+                                },
+                                "jumpHosts": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "required": [
+                                      "hostName"
                                     ],
-                                    "description": "%c_cpp.debuggers.host.port.description%",
-                                    "default": 22
+                                    "properties": {
+                                      "user": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.user.description%",
+                                        "default": ""
+                                      },
+                                      "hostName": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.hostName.description%",
+                                        "default": ""
+                                      },
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.port.description%",
+                                        "default": 22
+                                      }
+                                    }
                                   }
-                                }
-                              }
-                            },
-                            "localForwards": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.localForward.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "properties": {
-                                  "bindAddress": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
+                                },
+                                "localForwards": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.localForward.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "properties": {
+                                      "bindAddress": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
-                                  },
-                                  "host": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
-                                    "default": ""
-                                  },
-                                  "hostPort": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
+                                        "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                        "default": ""
                                       },
-                                      {
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                      },
+                                      "host": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
+                                        "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                        "default": ""
+                                      },
+                                      "hostPort": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                      },
+                                      "localSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                        "default": ""
+                                      },
+                                      "remoteSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                        "default": ""
                                       }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
-                                  },
-                                  "localSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
-                                    "default": ""
-                                  },
-                                  "remoteSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
-                                    "default": ""
+                                    }
                                   }
                                 }
                               }
                             }
-                          }
+                          ]
                         },
                         "targetDir": {
                           "type": "string",
@@ -4262,127 +4289,136 @@
                           ]
                         },
                         "host": {
-                          "type": "object",
-                          "description": "%c_cpp.debuggers.host.description%",
-                          "default": {},
-                          "required": [
-                            "hostName"
-                          ],
-                          "properties": {
-                            "user": {
+                          "anyOf": [
+                            {
                               "type": "string",
-                              "description": "%c_cpp.debuggers.host.user.description%",
-                              "default": ""
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": "hello@microsoft.com"
                             },
-                            "hostName": {
-                              "type": "string",
-                              "description": "%c_cpp.debuggers.host.hostName.description%",
-                              "default": ""
-                            },
-                            "port": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string",
-                                  "pattern": "^\\d+$|^\\${.+}$"
-                                }
+                            {
+                              "type": "object",
+                              "description": "%c_cpp.debuggers.host.description%",
+                              "default": {},
+                              "required": [
+                                "hostName"
                               ],
-                              "description": "%c_cpp.debuggers.host.port.description%",
-                              "default": 22
-                            },
-                            "jumpHosts": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.jumpHost.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "required": [
-                                  "hostName"
-                                ],
-                                "properties": {
-                                  "user": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.user.description%",
-                                    "default": ""
-                                  },
-                                  "hostName": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.hostName.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
-                                        "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
+                              "properties": {
+                                "user": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.user.description%",
+                                  "default": ""
+                                },
+                                "hostName": {
+                                  "type": "string",
+                                  "description": "%c_cpp.debuggers.host.hostName.description%",
+                                  "default": ""
+                                },
+                                "port": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "pattern": "^\\d+$|^\\${.+}$"
+                                    }
+                                  ],
+                                  "description": "%c_cpp.debuggers.host.port.description%",
+                                  "default": 22
+                                },
+                                "jumpHosts": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.jumpHost.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "required": [
+                                      "hostName"
                                     ],
-                                    "description": "%c_cpp.debuggers.host.port.description%",
-                                    "default": 22
+                                    "properties": {
+                                      "user": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.user.description%",
+                                        "default": ""
+                                      },
+                                      "hostName": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.hostName.description%",
+                                        "default": ""
+                                      },
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.port.description%",
+                                        "default": 22
+                                      }
+                                    }
                                   }
-                                }
-                              }
-                            },
-                            "localForwards": {
-                              "type": "array",
-                              "description": "%c_cpp.debuggers.host.localForward.description%",
-                              "items": {
-                                "type": "object",
-                                "default": {},
-                                "properties": {
-                                  "bindAddress": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
-                                    "default": ""
-                                  },
-                                  "port": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
-                                      },
-                                      {
+                                },
+                                "localForwards": {
+                                  "type": "array",
+                                  "description": "%c_cpp.debuggers.host.localForward.description%",
+                                  "items": {
+                                    "type": "object",
+                                    "default": {},
+                                    "properties": {
+                                      "bindAddress": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
-                                      }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
-                                  },
-                                  "host": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
-                                    "default": ""
-                                  },
-                                  "hostPort": {
-                                    "anyOf": [
-                                      {
-                                        "type": "number"
+                                        "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                                        "default": ""
                                       },
-                                      {
+                                      "port": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                                      },
+                                      "host": {
                                         "type": "string",
-                                        "pattern": "^\\d+$|^\\${.+}$"
+                                        "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                                        "default": ""
+                                      },
+                                      "hostPort": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "pattern": "^\\d+$|^\\${.+}$"
+                                          }
+                                        ],
+                                        "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                                      },
+                                      "localSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                                        "default": ""
+                                      },
+                                      "remoteSocket": {
+                                        "type": "string",
+                                        "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                                        "default": ""
                                       }
-                                    ],
-                                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
-                                  },
-                                  "localSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
-                                    "default": ""
-                                  },
-                                  "remoteSocket": {
-                                    "type": "string",
-                                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
-                                    "default": ""
+                                    }
                                   }
                                 }
                               }
                             }
-                          }
+                          ]
                         },
                         "command": {
                           "type": "string",

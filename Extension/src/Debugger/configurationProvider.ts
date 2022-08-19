@@ -1025,7 +1025,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
                     return false;
                 }
-                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 let files: vscode.Uri[] = [];
                 if (util.isString(step.files)) {
@@ -1049,7 +1049,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
                     return false;
                 }
-                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
                 const continueOn: string = step.continueOn;
