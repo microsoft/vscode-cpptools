@@ -55,7 +55,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     // Initialize the DebuggerExtension and register the related commands and providers.
-    DebuggerExtension.initialize(context);
+    await DebuggerExtension.initialize(context);
 
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     sendTelemetry(info);

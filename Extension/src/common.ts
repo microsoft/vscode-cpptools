@@ -353,7 +353,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // Replace environment and configuration variables.
-    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
+    const regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     const cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
@@ -411,11 +411,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
         });
     }
 
-    // Resolve '~' at the start of the path.
-    regexp = () => /^\~/g;
-    ret = ret.replace(regexp(), (match: string, name: string) => os.homedir());
+    return resolveHome(ret);
+}
 
-    return ret;
+// Resolve '~' at the start of the path.
+export function resolveHome(filePath: string): string {
+    return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
 }
 
 export function asFolder(uri: vscode.Uri): string {
@@ -469,17 +470,25 @@ export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
     return new HttpsProxyAgent(proxyOptions);
 }
 
+export async function fsStat(filePath: fs.PathLike): Promise<fs.Stats | undefined> {
+    let stats: fs.Stats | undefined;
+    try {
+        stats = await fs.promises.stat(filePath);
+    } catch (e) {
+        // File doesn't exist
+        return undefined;
+    }
+    return stats;
+}
+
+export async function checkPathExists(filePath: string): Promise<boolean> {
+    return !!(await fsStat(filePath));
+}
+
 /** Test whether a file exists */
-export function checkFileExists(filePath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(filePath, (err, stats) => {
-            if (stats && stats.isFile()) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    });
+export async function checkFileExists(filePath: string): Promise<boolean> {
+    const stats: fs.Stats | undefined = await fsStat(filePath);
+    return !!stats && stats.isFile();
 }
 
 /** Test whether a file exists */
@@ -508,16 +517,9 @@ export async function checkExecutableWithoutExtensionExists(filePath: string): P
 }
 
 /** Test whether a directory exists */
-export function checkDirectoryExists(dirPath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(dirPath, (err, stats) => {
-            if (stats && stats.isDirectory()) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    });
+export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
+    const stats: fs.Stats | undefined = await fsStat(dirPath);
+    return !!stats && stats.isDirectory();
 }
 
 export function createDirIfNotExistsSync(filePath: string | undefined): void {
@@ -794,16 +796,16 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
     });
 }
 
+/**
+ * @param permission fs file access constants: https://nodejs.org/api/fs.html#file-access-constants
+ */
+export function pathAccessible(filePath: string, permission: number = fs.constants.F_OK): Promise<boolean> {
+    if (!filePath) { return Promise.resolve(false); }
+    return new Promise(resolve => fs.access(filePath, permission, err => resolve(!err)));
+}
+
 export function isExecutable(file: string): Promise<boolean> {
-    return new Promise((resolve) => {
-        fs.access(file, fs.constants.X_OK, (err) => {
-            if (err) {
-                resolve(false);
-            } else {
-                resolve(true);
-            }
-        });
-    });
+    return pathAccessible(file, fs.constants.X_OK);
 }
 
 export async function allowExecution(file: string): Promise<void> {
@@ -1487,6 +1489,10 @@ export interface ISshHostInfo {
     hostName: string;
     user?: string;
     port?: number | string;
+}
+
+export interface ISshConfigHostInfo extends ISshHostInfo {
+    file: string;
 }
 
 /** user@host */
