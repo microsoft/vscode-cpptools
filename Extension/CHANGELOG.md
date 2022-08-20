@@ -1,4 +1,26 @@
-# C/C++ for Visual Studio Code Change Log
+# C/C++ for Visual Studio Code Changelog
+
+## Version 1.12.1 (pre-release): August 15, 2022
+## New Features
+* Add Doxygen comment generation via command, context menu, code action, or typing. [#5683](https://github.com/microsoft/vscode-cpptools/issues/5683)
+* Add auto-complete of Doxygen keywords in comments.
+
+## Enhancements
+* Enable auto-formatting of lines that are changed by code analysis fixes. [#9322](https://github.com/microsoft/vscode-cpptools/issues/9322)
+* Enable colorized output in cppBuild tasks for clang. [#9643](https://github.com/microsoft/vscode-cpptools/issues/9643)
+* Cache and reuse SSH passwords in the current remote debugging session. [PR #9654](https://github.com/microsoft/vscode-cpptools/pull/9654)
+* Do std fallback when compiler querying, even when explicitly specified via a compiler arg.
+
+## Bug Fixes
+* Fix C++20 IntelliSense parsing bugs. [#7446](https://github.com/microsoft/vscode-cpptools/issues/7446), [#9215](https://github.com/microsoft/vscode-cpptools/issues/9215)
+* Fix crash when tag parsing files containing certain string literals. [#9538](https://github.com/microsoft/vscode-cpptools/issues/9538)
+* Fix incorrect semantic tokens with templated operator overloads. [#9556](https://github.com/microsoft/vscode-cpptools/issues/9556)
+* Fix `llvm-project` parser crash on file: `clang/test/parser/parser_overflow.c`. [#9653](https://github.com/microsoft/vscode-cpptools/issues/9653)
+* Fix tag parsing of classes and enums with attributes. [#9672](https://github.com/microsoft/vscode-cpptools/issues/9672)
+* Add PID to the extended remote process picker. [PR #9673](https://github.com/microsoft/vscode-cpptools/pull/9673)
+* Fix `llvm-project` parser crash on file: `libcxx/test/support/test.support/make_string_header.pass.cpp`. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
+* Fix unintended generation of `nul.d` file when querying clang or gcc, when compiler arguments include dependency generation arguments. [9707](https://github.com/microsoft/vscode-cpptools/issues/9707)
+* Fix issue with stuck database icon when an excluded file is open on launch or when the database is reset.
 
 ## Version 1.12.0 (pre-release): July 27, 2022
 ## Enhancements
@@ -15,6 +37,12 @@
 * Fix files with a `.c` extension not using a C++ `std` version passed in the `compilerArgs` or `compilerFragments`. [#9628](https://github.com/microsoft/vscode-cpptools/issues/9628)
 * Fix unnecessary IntelliSense process restarting on file creation handling. [#9630](https://github.com/microsoft/vscode-cpptools/issues/9630)
 * Fix potential crashes on shutdown.
+
+## Version 1.11.5: August 9, 2022
+## Bug Fixes
+* Fix crash when tag parsing files containing certain string literals. [#9538](https://github.com/microsoft/vscode-cpptools/issues/9538)
+* Fix `llvm-project` parser crash on file: `clang/test/parser/parser_overflow.c`. [#9653](https://github.com/microsoft/vscode-cpptools/issues/9653)
+* Fix `llvm-project` parser crash on file: `libcxx/test/support/test.support/make_string_header.pass.cpp`. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679)
 
 ## Version 1.11.4: July 21, 2022
 ## New Features

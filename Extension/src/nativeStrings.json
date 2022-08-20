@@ -240,5 +240,6 @@
     "folder_tag": "Folder",
     "file_tag": "File",
     "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default.",
-    "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}. Expected: {1}."
+    "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}. Expected: {1}.",
+    "generate_doxygen_comment": "Generate Doxygen Comment"
 }

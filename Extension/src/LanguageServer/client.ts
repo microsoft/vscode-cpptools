@@ -401,6 +401,22 @@ interface GoToDirectiveInGroupParams {
     next: boolean;
 };
 
+export interface GenerateDoxygenCommentParams {
+    uri: string;
+    position: Position;
+    isCodeAction: boolean;
+    isCursorAboveSignatureLine: boolean;
+}
+
+export interface GenerateDoxygenCommentResult {
+    contents: string;
+    initPosition: Position;
+    finalInsertionLine: number;
+    finalCursorPosition: Position;
+    fileVersion: number;
+    isCursorAboveSignatureLine: boolean;
+}
+
 interface SetTemporaryTextDocumentLanguageParams {
     path: string;
     isC: boolean;
@@ -444,6 +460,7 @@ export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> 
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
+const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -500,6 +517,8 @@ const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup> = new N
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams> = new NotificationType<SetTemporaryTextDocumentLanguageParams>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisProcessed');
 const ReportCodeAnalysisTotalNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisTotal');
+const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult> = new NotificationType<GenerateDoxygenCommentResult>('cpptools/insertDoxygenComment');
+
 let failureMessageShown: boolean = false;
 
 export interface ReferencesCancellationState {
@@ -647,6 +666,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
+    handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, line: number | undefined, column: number | undefined, insertNewLineAtBeginning: boolean | undefined): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -977,6 +997,8 @@ export class DefaultClient implements Client {
         const settings_suggestSnippets: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
+        const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
+        const settings_doxygenGenerateOnType: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1144,6 +1166,8 @@ export class DefaultClient implements Client {
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
+                settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
+                settings_doxygenGenerateOnType.push(setting.doxygenGenerateOnType);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1328,6 +1352,10 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
+                doxygen: {
+                    generatedStyle: settings_doxygenGeneratedCommentStyle,
+                    generateOnType: settings_doxygenGenerateOnType
+                },
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -1435,6 +1463,9 @@ export class DefaultClient implements Client {
                     },
                     space: vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap: vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
+                },
+                doxygen: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.doxygen", this.RootUri)
                 }
             },
             editor: {
@@ -2131,6 +2162,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
+        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
         setupOutputHandlers();
     }
 
@@ -2615,6 +2647,32 @@ export class DefaultClient implements Client {
         this.model.codeAnalysisTotal.Value = total;
     }
 
+    private async insertDoxygenComment(result: GenerateDoxygenCommentResult): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+        const currentFileVersion: number | undefined = openFileVersions.get(editor.document.uri.toString());
+        // Insert the comment only if the cursor has not moved
+        if (result.fileVersion === currentFileVersion &&
+            result.initPosition.line === editor.selection.active.line &&
+            result.initPosition.character === editor.selection.active.character &&
+            result.contents.length > 1) {
+            const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            const edits: vscode.TextEdit[] = [];
+            const maxColumn: number = 99999999;
+            const newRange: vscode.Range = new vscode.Range(editor.selection.start.line, 0, editor.selection.end.line, maxColumn);
+            edits.push(new vscode.TextEdit(newRange, result?.contents));
+            workspaceEdit.set(editor.document.uri, edits);
+            await vscode.workspace.applyEdit(workspaceEdit);
+
+            // Set the cursor position after @brief
+            const newPosition: vscode.Position = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
+            const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
+            editor.selection = newSelection;
+        }
+    }
+
     private doneInitialCustomBrowseConfigurationCheck: boolean = false;
 
     private onConfigurationsChanged(cppProperties: configs.CppProperties): void {
@@ -2960,7 +3018,6 @@ export class DefaultClient implements Client {
                 position: editor.selection.active,
                 next: next
             };
-
             await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
@@ -2975,6 +3032,75 @@ export class DefaultClient implements Client {
                 }
             }
         }
+    }
+
+    public async handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, adjustedLine: number | undefined, adjustedColmn: number | undefined, isCursorAboveSignatureLine: boolean): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+
+        if (editor.document.uri.scheme !== "file") {
+            return;
+        }
+
+        if (!(editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+            return;
+        }
+
+        const isCodeAction: boolean = (adjustedLine !== undefined && adjustedLine !== undefined);
+        const initCursorPosition: vscode.Position = isCodeAction ? new vscode.Position(initCursorLine ?? 0, initCursorColumn ?? 0) : editor.selection.active;
+        const params: GenerateDoxygenCommentParams = {
+            uri: editor.document.uri.toString(),
+            position: isCodeAction ? new vscode.Position(adjustedLine ?? 0, adjustedColmn ?? 0) : editor.selection.active,
+            isCodeAction: isCodeAction,
+            isCursorAboveSignatureLine: isCursorAboveSignatureLine
+        };
+        await this.awaitUntilLanguageClientReady();
+        const currentFileVersion: number | undefined = openFileVersions.get(params.uri);
+        if (currentFileVersion === undefined) {
+            return;
+        }
+        const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
+        // Insert the comment only if the comment has contents and the cursor has not moved
+        if (result !== undefined &&
+            initCursorPosition.line === editor.selection.active.line &&
+            initCursorPosition.character === editor.selection.active.character &&
+            result.fileVersion !== undefined &&
+            result.fileVersion === currentFileVersion &&
+            result.contents && result.contents.length > 1) {
+            const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            const edits: vscode.TextEdit[] = [];
+            const maxColumn: number = 99999999;
+            let newRange: vscode.Range;
+            const cursorOnEmptyLineAboveSignature: boolean = result.isCursorAboveSignatureLine;
+            // The reason why we need to set different range is because if cursor is immediately above the signature line, we want the comments to be inserted at the line of cursor and to replace everything on the line.
+            // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
+            if (cursorOnEmptyLineAboveSignature) {
+                if (isCodeAction) {
+                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not correct.
+                    // In most cases, the finalInsertionLine is the line of the signature line.
+                    newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
+                } else {
+                    newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, maxColumn);
+                }
+            } else {
+                newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, 0);
+            }
+            edits.push(new vscode.TextEdit(newRange, result?.contents));
+            workspaceEdit.set(editor.document.uri, edits);
+            await vscode.workspace.applyEdit(workspaceEdit);
+            // Set the cursor position after @brief
+            let newPosition: vscode.Position;
+            if (cursorOnEmptyLineAboveSignature && isCodeAction) {
+                newPosition = new vscode.Position(result.finalCursorPosition.line - 1, result.finalCursorPosition.character);
+            } else {
+                newPosition = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
+            }
+            const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
+            editor.selection = newSelection;
+        }
+
     }
 
     public async handleCheckForCompiler(): Promise<void> {
@@ -3017,7 +3143,7 @@ export class DefaultClient implements Client {
 
     public async handleRunCodeAnalysisOnAllFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, { scope:  CodeAnalysisScope.AllFiles });
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.AllFiles });
     }
 
     public async handleRemoveAllCodeAnalysisProblems(): Promise<void> {
@@ -3254,6 +3380,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
+    handleGenerateDoxygenComment(): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }

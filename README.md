@@ -4,10 +4,30 @@
 
 [![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
-The C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
+The C/C++ extension adds language support for C/C++ to Visual Studio Code, including [editing (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) and [debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) features.
+
+## Pre-requisites
+C++ is a compiled language meaning your program's source code must be translated (compiled) before it can be run on your computer. VS Code is first and foremost an editor, and relies on command-line tools to do much of the development workflow. The C/C++ extension **does not include a C++ compiler or debugger**. You will need to install these tools or use those already installed on your computer.
+ * C++ compiler pre-installed
+ * C++ debugger pre-installed
+
+<br/>
+
+Here is a list of compilers and architectures per platform officially supported by the extension. These are reflected by the available [IntelliSense modes](https://code.visualstudio.com/docs/cpp/configure-intellisense-crosscompilation#_intellisense-mode) from the extension's IntelliSense configuration. Note that support for other compilers may be limited.
+
+Platform | Compilers | Architectures
+:--- | :--- | :--- 
+Windows | MSVC, Clang, GCC | x64, x86, arm64, arm
+Linux | Clang, GCC | x64, x86, arm64, arm
+macOS | Clang, GCC | x64, x86, arm64
+
+For more information about installing the required tools or setting up the extension, please follow the tutorials below.
+<br/>
+<br/>
 
 ## Overview and tutorials
 * [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
+* [Introductory Videos](https://code.visualstudio.com/docs/cpp/introvideos-cpp)
 
 C/C++ extension tutorials per compiler and platform
 * [Microsoft C++ compiler (MSVC) on Windows](https://code.visualstudio.com/docs/cpp/config-msvc)
