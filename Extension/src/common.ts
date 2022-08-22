@@ -20,7 +20,6 @@ import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
-import { CppSettings } from './LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -724,8 +723,10 @@ export interface ProcessReturnType {
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
-    const settings: CppSettings = new CppSettings();
-    if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
+    // Do not use CppSettings to avoid circular require()
+    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    if (loggingLevel === "Information" || loggingLevel === "Debug") {
         getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}\n${programOutput.stderr || programOutput.stdout}\n`);
     }
     if (programOutput.exitCode) {
