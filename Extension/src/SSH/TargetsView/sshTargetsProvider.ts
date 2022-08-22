@@ -67,8 +67,8 @@ export async function initializeSshTargets(): Promise<void> {
 }
 
 export async function getActiveSshTarget(selectWhenNotSet: boolean = true): Promise<string | undefined> {
-    if (_targets.size === 0) {
-        throw Error(localize('no.ssh.targets', 'No SSH targets.'));
+    if (_targets.size === 0 && !selectWhenNotSet) {
+        return undefined;
     }
     if (!_activeTarget && selectWhenNotSet) {
         const name: string | undefined = await selectSshTarget();
