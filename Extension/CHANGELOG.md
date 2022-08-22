@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.12.2 (pre-release): August 22, 2022
+## Version 1.12.2 (pre-release): August 23, 2022
 ## Enhancements
 * Fix "natvis collections only show the first 50 elements". [MIEngine#821](https://github.com/microsoft/MIEngine/issues/821)
   * Related [#9377](https://github.com/microsoft/vscode-cpptools/issues/9377)
@@ -13,6 +13,7 @@
 * Fix tag parser crash. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679), [#9695](https://github.com/microsoft/vscode-cpptools/issues/9695)
 * Fix code analysis fixes not being available when more than one check is associated with a fix. [#9755](https://github.com/microsoft/vscode-cpptools/issues/9755)
 * Fix the asterisk alignment of the ending `*/` for generated Doxygen comments. [#9758](https://github.com/microsoft/vscode-cpptools/issues/9758)
+* Fix infinite memory usage if a code analysis fix causes line deletion when formatting uses `vcFormat`. [#9761](https://github.com/microsoft/vscode-cpptools/issues/9761)
 * Fix "The result of GDB -exec evaluate request in all contexts is printed in debug console." [MIEngine #1236](https://github.com/microsoft/MIEngine/issues/1236)
 * Fix "Evaluating a variable after a failed Step Out causes a fatal error, leaving debug session unusable". [MIEngine#1336](https://github.com/microsoft/MIEngine/issues/1336)
   * Gareth Rees (@gareth-rees) [PR MIEngine#1337](https://github.com/microsoft/MIEngine/pull/1337)
