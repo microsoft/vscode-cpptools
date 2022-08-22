@@ -5598,6 +5598,7 @@
     "https-proxy-agent": "^2.2.4",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.5",
+    "node-loader": "^2.0.0",
     "plist": "^3.0.5",
     "tmp": "^0.2.1",
     "posix-getopt": "^1.2.1",
