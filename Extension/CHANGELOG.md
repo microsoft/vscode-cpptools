@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.12.2 (pre-release): August 23, 2022
+## Version 1.12.2 (pre-release): August 24, 2022
 ## Enhancements
 * Fix "natvis collections only show the first 50 elements". [MIEngine#821](https://github.com/microsoft/MIEngine/issues/821)
   * Related [#9377](https://github.com/microsoft/vscode-cpptools/issues/9377)
