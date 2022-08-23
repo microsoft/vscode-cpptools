@@ -14,6 +14,7 @@
 * Fix code analysis fixes not being available when more than one check is associated with a fix. [#9755](https://github.com/microsoft/vscode-cpptools/issues/9755)
 * Fix the asterisk alignment of the ending `*/` for generated Doxygen comments. [#9758](https://github.com/microsoft/vscode-cpptools/issues/9758)
 * Fix infinite memory usage if a code analysis fix causes line deletion when formatting uses `vcFormat`. [#9761](https://github.com/microsoft/vscode-cpptools/issues/9761)
+* Fix error when debugging is started without a launch.json and IntelliSense is disabled. [#9762](https://github.com/microsoft/vscode-cpptools/issues/9762)
 * Fix "The result of GDB -exec evaluate request in all contexts is printed in debug console." [MIEngine #1236](https://github.com/microsoft/MIEngine/issues/1236)
 * Fix "Evaluating a variable after a failed Step Out causes a fatal error, leaving debug session unusable". [MIEngine#1336](https://github.com/microsoft/MIEngine/issues/1336)
   * Gareth Rees (@gareth-rees) [PR MIEngine#1337](https://github.com/microsoft/MIEngine/pull/1337)
