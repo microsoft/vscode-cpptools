@@ -64,7 +64,7 @@ let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
-let firstClient: Client;
+export let firstClient: Client;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
@@ -576,7 +576,7 @@ interface SettingsParams {
     codeAnalysisMaxConcurrentThreads: number | null | undefined;
     codeAnalysisMaxMemory: number | null | undefined;
     codeAnalysisUpdateDelay: number | undefined;
-    workspaceFolderSettings: WorkspaceFolderSettingsParams[];
+    workspaceFolderSettings: WorkspaceFolderSettingsParams[] | undefined;
 };
 
 interface InitializationOptions {
@@ -1325,9 +1325,6 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
-        if (this !== firstClient) {
-            return firstClient.onDidChangeSettings(event);
-        }
         this.sendDidChangeSettings();
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenLanguageClientReady(() => {
