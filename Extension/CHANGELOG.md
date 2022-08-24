@@ -1,5 +1,26 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.12.2 (pre-release): August 24, 2022
+## Enhancements
+* Fix "natvis collections only show the first 50 elements". [MIEngine#821](https://github.com/microsoft/MIEngine/issues/821)
+  * Related [#9377](https://github.com/microsoft/vscode-cpptools/issues/9377)
+* Fix "cppdbg doesn't support array view of char* buf". [MIEngine#1258](https://github.com/microsoft/MIEngine/issues/1258)
+* Support explicit `this` references in natvis files.
+  * @Trass3r [PR MIEngine#1163](https://github.com/microsoft/MIEngine/pull/1163)
+
+## Bug Fixes
+* Fix code analysis fixes generating invalid code when the fix has escaped characters. [#9683](https://github.com/microsoft/vscode-cpptools/issues/9683)
+* Fix tag parser crash. [#9679](https://github.com/microsoft/vscode-cpptools/issues/9679), [#9695](https://github.com/microsoft/vscode-cpptools/issues/9695)
+* Fix code analysis fixes not being available when more than one check is associated with a fix. [#9755](https://github.com/microsoft/vscode-cpptools/issues/9755)
+* Fix the asterisk alignment of the ending `*/` for generated Doxygen comments. [#9758](https://github.com/microsoft/vscode-cpptools/issues/9758)
+* Fix infinite memory usage if a code analysis fix causes line deletion when formatting uses `vcFormat`. [#9761](https://github.com/microsoft/vscode-cpptools/issues/9761)
+* Fix error when debugging is started without a launch.json and IntelliSense is disabled. [#9762](https://github.com/microsoft/vscode-cpptools/issues/9762)
+* Fix "The result of GDB -exec evaluate request in all contexts is printed in debug console." [MIEngine #1236](https://github.com/microsoft/MIEngine/issues/1236)
+* Fix "Evaluating a variable after a failed Step Out causes a fatal error, leaving debug session unusable". [MIEngine#1336](https://github.com/microsoft/MIEngine/issues/1336)
+  * Gareth Rees (@gareth-rees) [PR MIEngine#1337](https://github.com/microsoft/MIEngine/pull/1337)
+* Fix deadlock in HandleStackTraceRequestAsync where lock was hold too long.
+  * GeorgeMay (@JoergMeier106) [PR MIEngine#1309](https://github.com/microsoft/MIEngine/pull/1309)
+
 ## Version 1.12.1 (pre-release): August 15, 2022
 ## New Features
 * Add Doxygen comment generation via command, context menu, code action, or typing. [#5683](https://github.com/microsoft/vscode-cpptools/issues/5683)
@@ -157,9 +178,9 @@
 * Add a "More Info" option when an incompatible VSIX is encountered. [PR #8920](https://github.com/microsoft/vscode-cpptools/pull/8920)
 * Add `;` to `break` and `continue` completion keywords. [#8932](https://github.com/microsoft/vscode-cpptools/issues/8932)
 * Prevent stripping of format specifiers from -exec commands.
-  * Gareth Rees (@gareth-rees) [MIEngine#1277](https://github.com/microsoft/MIEngine/pull/1278)
+  * Gareth Rees (@gareth-rees) [PR MIEngine#1277](https://github.com/microsoft/MIEngine/pull/1278)
 * Improve messages for unknown breakpoints and watchpoints.
-  * Gareth Rees (@gareth-rees) [MIEngine#1282](https://github.com/microsoft/MIEngine/pull/1283)
+  * Gareth Rees (@gareth-rees) [PR MIEngine#1282](https://github.com/microsoft/MIEngine/pull/1283)
 
 ### Bug Fixes
 * Fix some IntelliSense parsing bugs. [#5117](https://github.com/microsoft/vscode-cpptools/issues/5117)
@@ -266,7 +287,7 @@
 ### New Features
 * Add a command to restart IntelliSense for a specific file. [#3727](https://github.com/microsoft/vscode-cpptools/issues/3727)
 * Add support for macOS app bundles [#6726](https://github.com/microsoft/vscode-cpptools/issues/6726)
-	* [MIEngine#1091](https://github.com/microsoft/MIEngine/pull/1091)
+	* [PR MIEngine#1091](https://github.com/microsoft/MIEngine/pull/1091)
 * Add support for Go To / Peek Type Definition. [#7999](https://github.com/microsoft/vscode-cpptools/issues/7999)
 
 ### Enhancements
@@ -291,9 +312,9 @@
 * Add a check when cppbuild task is used when the active file is not a source file. [#7892](https://github.com/microsoft/vscode-cpptools/issues/7892)
 * Fix a cpptools crash [#8055](https://github.com/microsoft/vscode-cpptools/issues/8055)
 * Fix issue "LogPoint stopped working v1.6.0".  [#8065](https://github.com/microsoft/vscode-cpptools/issues/8065)
-	* [MIEngine#1208](https://github.com/microsoft/MIEngine/pull/1208)
+	* [PR MIEngine#1208](https://github.com/microsoft/MIEngine/pull/1208)
 * Fix issue "Debugger won't read/write from/to stdio". [#8075](https://github.com/microsoft/vscode-cpptools/issues/8075)
-	* [MIEngine#1209](https://github.com/microsoft/MIEngine/pull/1209)
+	* [PR MIEngine#1209](https://github.com/microsoft/MIEngine/pull/1209)
 * Fix an issue with VC 14.0 headers not being found. [#8078](https://github.com/microsoft/vscode-cpptools/issues/8078)
 * Fix an issue with CUDA support with `compile_commands.json`. [#8091](https://github.com/microsoft/vscode-cpptools/issues/8091)
 * Fix an issue with `/kernel` arg to `cl.exe` for C files. [#8158](https://github.com/microsoft/vscode-cpptools/issues/8158)
@@ -302,9 +323,9 @@
 ## Version 1.6.0: August 24, 2021
 ### New Features
 * Added support for standard `.editorconfig` entries when using vcFormat. [#7920](https://github.com/microsoft/vscode-cpptools/issues/7920)
-* Debug Step Granularity for cppdbg [MIEngine#1169](https://github.com/microsoft/MIEngine/pull/1169)
+* Debug Step Granularity for cppdbg [PR MIEngine#1169](https://github.com/microsoft/MIEngine/pull/1169)
   * Thank you for the contribution @Trass3r
-* InstructionBreakpoints for cppdbg [MIEgnine#1192](https://github.com/microsoft/MIEngine/pull/1192)
+* InstructionBreakpoints for cppdbg [PR MIEgnine#1192](https://github.com/microsoft/MIEngine/pull/1192)
 
 ### Enhancements
 * Debugger now runs on .NET 5 [#7858](https://github.com/microsoft/vscode-cpptools/pull/7858)
@@ -393,7 +414,7 @@
 * Update to clang-format 12. [#6434](https://github.com/microsoft/vscode-cpptools/issues/6434)
 * Add `private` or `protected` scope labels to class symbols. [#7120](https://github.com/microsoft/vscode-cpptools/issues/7120)
 * Fix file:line path for $FILEPOS [#7193](https://github.com/microsoft/vscode-cpptools/issues/7193)
-	* [#1124](https://github.com/microsoft/MIEngine/pull/1124)
+	* [PR MIEngine#1124](https://github.com/microsoft/MIEngine/pull/1124)
 * Add `stopAtConnect` and `hardwareBreakpoints` launch options [PR #7449](https://github.com/microsoft/vscode-cpptools/pull/7449) 
   * `stopAtConnect` stops the debugger on connection to a remote target [PR MIEngine#1109](https://github.com/microsoft/MIEngine/pull/1109)
   * `hardwareBreakpoints` controls usage and number of remote hardware breakpoints [PR MIEngine#1128](https://github.com/microsoft/MIEngine/pull/1128)
@@ -738,7 +759,7 @@
   * The way comments are formatted is controlled by the `C_Cpp.simplifyStructuredComments` setting.
 * Auto-convert `.` to `->` when the type is a pointer. [#862](https://github.com/microsoft/vscode-cpptools/issues/862)
 * Switch to using the VS Code Semantic Tokens API for semantic colorization (works with remoting). [PR #5401](https://github.com/microsoft/vscode-cpptools/pull/5401), [#3932](https://github.com/microsoft/vscode-cpptools/issues/3932), [#3933](https://github.com/microsoft/vscode-cpptools/issues/3933), [#3942](https://github.com/microsoft/vscode-cpptools/issues/3942)
-* Add support for LogMessage Breakpoints for debug type `cppdbg`. [MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
+* Add support for LogMessage Breakpoints for debug type `cppdbg`. [PR MIEngine#1013](https://github.com/microsoft/MIEngine/pull/1013)
 
 ### Enhancements
 * Automatically add `"${default}"` to the default `includePath` in `c_cpp_properties.json` if `C_Cpp.default.includePath` is set. [#3733](https://github.com/microsoft/vscode-cpptools/issues/3733)
