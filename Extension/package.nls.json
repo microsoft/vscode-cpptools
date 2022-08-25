@@ -239,7 +239,7 @@
     "c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription": "Enable pre-v1.10.0 behavior for how shell escaping is handled in compiler arg settings. Shell escaping is no longer expected or supported by default in arg arrays starting in v1.10.0.",
     "c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage": "This setting is temporary to support transitioning to corrected behavior in v1.10.0.",
     "c_cpp.contributes.views.cppReferencesView.title": "C/C++: Other references results",
-    "c_cpp.contributes.views.SshTargetsView.title": "C/C++: SSH targets",
+    "c_cpp.contributes.views.SshTargetsView.title": { "message": "CppTools: SSH targets", "comment": [ "Do not localize `CppTools`." ]  },
     "c_cpp.contributes.viewsWelcome.contents": { "message": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).", "comment": [ "Markdown text between () should not be altered: https://en.wikipedia.org/wiki/Markdown" ] },
     "c_cpp.configuration.debugShortcut.description": "Show the \"Run and Debug\" play button and \"Add Debug Configuration\" gear in the editor title bar for C++ files.",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",

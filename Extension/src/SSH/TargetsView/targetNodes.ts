@@ -7,6 +7,10 @@ import { extensionContext, ISshConfigHostInfo, pathAccessible } from "../../comm
 import { TreeItem } from "vscode";
 import { LabelLeafNode } from "./common";
 import { constants } from 'fs';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export const workspaceState_activeSshTarget: string = 'workspaceState_activeSshTarget';
 
@@ -32,7 +36,7 @@ export class TargetLeafNode extends LabelLeafNode {
         const item: TreeItem = await super.getTreeItem();
         const removable: boolean = await isWritable(this.sshConfigHostInfo.file);
         if (_activeTarget === this.name) {
-            item.label = `* ${item.label}`;
+            item.label = localize('ssh.target.active.label', '{0} [Active]', this.getLabel());
             if (removable) {
                 item.contextValue = 'CppSshTargetsView.targetLeafRemovable';
             }
