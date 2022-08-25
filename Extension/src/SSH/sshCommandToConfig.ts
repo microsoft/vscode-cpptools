@@ -126,7 +126,7 @@ export class CommandParseError extends Error { }
 export function sshCommandToConfig(command: string, name?: string): { [key: string]: string } {
     const parts: string[] = parse(command) as string[];
 
-    // ignore 'ssh'	if the user entered that as their first word
+    // ignore 'ssh' if the user entered that as their first word
     if (parts[0] === 'ssh') {
         parts.shift();
     }

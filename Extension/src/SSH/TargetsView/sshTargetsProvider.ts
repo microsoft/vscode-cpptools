@@ -51,11 +51,22 @@ export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode>, vs
         filesWritable.clear();
         _targets = await getSshConfigHostInfos();
         const targetNodes: BaseNode[] = [];
+        // Currently, the best place to check if a connection is removed is during refresh, since the active target could be removed
+        // by editing the SSH config file directly. If we see any performance issue in the future, we can move this to removeSshTargetImpl,
+        // and the file watchers.
+        let activeTargetRemoved: boolean = true;
+        const cachedActiveTarget: string | undefined = await getActiveSshTarget(false);
         for (const host of Array.from(_targets.keys())) {
             const sshConfigHostInfo: ISshConfigHostInfo | undefined = _targets.get(host);
             if (sshConfigHostInfo) {
                 targetNodes.push(new TargetLeafNode(host, sshConfigHostInfo));
+                if (host === cachedActiveTarget) {
+                    activeTargetRemoved = false;
+                }
             }
+        }
+        if (activeTargetRemoved) {
+            setActiveSshTarget(undefined);
         }
         return targetNodes;
     }
@@ -63,6 +74,16 @@ export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode>, vs
 
 export async function initializeSshTargets(): Promise<void> {
     _targets = await getSshConfigHostInfos();
+    let activeTargetRemoved: boolean = true;
+    const cachedActiveTarget: string | undefined = await getActiveSshTarget(false);
+    for (const host of Array.from(_targets.keys())) {
+        if (host === cachedActiveTarget) {
+            activeTargetRemoved = false;
+        }
+    }
+    if (activeTargetRemoved) {
+        setActiveSshTarget(undefined);
+    }
     await setActiveSshTarget(extensionContext?.workspaceState.get(workspaceState_activeSshTarget));
 }
 
@@ -73,7 +94,7 @@ export async function getActiveSshTarget(selectWhenNotSet: boolean = true): Prom
     if (!_activeTarget && selectWhenNotSet) {
         const name: string | undefined = await selectSshTarget();
         if (!name) {
-            throw Error(localize('no.active.ssh.target', 'No active SSH target.'));
+            throw Error(localize('active.ssh.target.selection.cancelled', 'Active SSH target selection cancelled.'));
         }
         await setActiveSshTarget(name);
         await vscode.commands.executeCommand(refreshCppSshTargetsView);

@@ -251,7 +251,7 @@
       "debug": [
         {
           "id": "CppSshTargetsView",
-          "name": "%c_cpp.contributes.views.SshTargetsView.title%",
+          "name": "%c_cpp.contributes.views.sshTargetsView.title%",
           "when": "showCppSshTargetsView"
         }
       ]

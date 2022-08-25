@@ -133,14 +133,14 @@ async function addSshTargetImpl(): Promise<string> {
 
     const newEntry: { [key: string]: string } = sshCommandToConfig(command, name);
 
-    const targetFile: string | undefined = await vscode.window.showQuickPick(getSshConfigurationFiles().filter(file => pathAccessible(file, fs.constants.W_OK)), { title: localize('select.ssh.config.file', 'Select a SSH configuration file') });
+    const targetFile: string | undefined = await vscode.window.showQuickPick(getSshConfigurationFiles().filter(file => pathAccessible(file, fs.constants.W_OK)), { title: localize('select.ssh.config.file', 'Select an SSH configuration file') });
     if (!targetFile) {
         return '';
     }
 
-    const parsed: Configuration = await getSshConfiguration(targetFile, false);
-    parsed.prepend(newEntry, true);
-    await writeSshConfiguration(targetFile, parsed);
+    const parsedSshConfig: Configuration = await getSshConfiguration(targetFile, false);
+    parsedSshConfig.prepend(newEntry, true);
+    await writeSshConfiguration(targetFile, parsedSshConfig);
 
     return name;
 }
@@ -153,13 +153,9 @@ async function removeSshTargetImpl(node: TargetLeafNode): Promise<boolean> {
         return false;
     }
 
-    if (await getActiveSshTarget(false) === node.name) {
-        await setActiveSshTarget(undefined);
-    }
-
-    const parsed: Configuration = await getSshConfiguration(node.sshConfigHostInfo.file, false);
-    parsed.remove({ Host: node.name });
-    await writeSshConfiguration(node.sshConfigHostInfo.file, parsed);
+    const parsedSshConfig: Configuration = await getSshConfiguration(node.sshConfigHostInfo.file, false);
+    parsedSshConfig.remove({ Host: node.name });
+    await writeSshConfiguration(node.sshConfigHostInfo.file, parsedSshConfig);
 
     return true;
 }

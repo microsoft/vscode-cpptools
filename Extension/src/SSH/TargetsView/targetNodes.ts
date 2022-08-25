@@ -36,7 +36,7 @@ export class TargetLeafNode extends LabelLeafNode {
         const item: TreeItem = await super.getTreeItem();
         const removable: boolean = await isWritable(this.sshConfigHostInfo.file);
         if (_activeTarget === this.name) {
-            item.label = localize('ssh.target.active.label', '{0} [Active]', this.getLabel());
+            item.description = localize('ssh.target.active.description', '[Active]');
             if (removable) {
                 item.contextValue = 'CppSshTargetsView.targetLeafRemovable';
             }
