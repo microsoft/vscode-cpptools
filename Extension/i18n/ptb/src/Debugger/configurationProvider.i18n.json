@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "Não é possível localizar 'LLDB.framework' para lldb-mi. Instale o XCode ou as Ferramentas de Linha de Comando do XCode.",
 	"debugger.launchConfig": "Iniciar configuração:",
 	"vs.code.1.69+.required": "'deploySteps' requer VS Code 1.69 ou superior.",
+	"running.deploy.steps": "Executando etapas de implantação...",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"build.and.debug.active.file": "Compilar e depurar o arquivo ativo",
 	"cl.exe.not.available": "A criação e a depuração de {0} só podem ser usadas quando o VS Code é executado por meio do Prompt de Comando do Desenvolvedor para VS.",

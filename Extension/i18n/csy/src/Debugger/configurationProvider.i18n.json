@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "Nepovedlo se najít LLDB.framework pro lldb-mi. Nainstalujte prosím XCode nebo jeho nástroje příkazového řádku.",
 	"debugger.launchConfig": "Spustit konfiguraci:",
 	"vs.code.1.69+.required": "DeploySteps vyžaduje VS Code 1.69+.",
+	"running.deploy.steps": "Spouští se kroky nasazení...",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"build.and.debug.active.file": "sestavit a ladit aktivní soubor",
 	"cl.exe.not.available": "Sestavení a ladění {0} je k dispozici jen v případě, že se nástroj VS Code spustil z nástroje Developer Command Prompt pro VS.",

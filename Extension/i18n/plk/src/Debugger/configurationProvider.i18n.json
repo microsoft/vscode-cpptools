@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "Nie można zlokalizować elementu „LLDB.framework” dla narzędzia lldb-mi. Zainstaluj środowisko XCode lub narzędzia wiersza polecenia środowiska XCode.",
 	"debugger.launchConfig": "Konfiguracja uruchamiania:",
 	"vs.code.1.69+.required": "Instrukcja „deploySteps” wymaga edytora VS Code 1.69 lub nowszego.",
+	"running.deploy.steps": "Trwa uruchamianie kroków wdrażania...",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"build.and.debug.active.file": "Kompiluj i debuguj aktywny plik",
 	"cl.exe.not.available": "{0} — funkcji kompilacji i debugowania można używać tylko wtedy, gdy program VS Code został uruchomiony z wiersza polecenia dla deweloperów w programie VS.",

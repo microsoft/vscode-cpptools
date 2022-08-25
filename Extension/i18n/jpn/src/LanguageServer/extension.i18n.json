@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "このヘッダーのライブラリを vcpkg でインストールする方法の詳細",
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
+	"on.disabled.command": "`C_Cpp.intelliSenseEngine` が `Disabled` に設定されている場合、IntelliSense 関連のコマンドは実行できません。",
 	"client.not.found": "クライアントが見つかりませんでした",
 	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください",
 	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください",

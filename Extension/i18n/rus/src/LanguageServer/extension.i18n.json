@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "Сведения об установке библиотеки для этого заголовка с помощью vcpkg",
 	"copy.vcpkg.command": "Копировать команду vcpkg для установки \"{0}\" в буфер обмена",
+	"on.disabled.command": "Команды, связанные с IntelliSense, не могут быть выполнены, если для \"C_Cpp.intelliSenseEngine\" установлено значение \"Disabled\".",
 	"client.not.found": "Клиент не найден.",
 	"configuration.select.first": "Сначала откройте папку, чтобы выбрать конфигурацию",
 	"configuration.provider.select.first": "Сначала откройте папку, чтобы выбрать поставщик конфигурации",

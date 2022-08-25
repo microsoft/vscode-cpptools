@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Wersja zestawu Windows SDK",
 	"windows.sdk.version.description": "Wersja ścieżki dyrektywy include zestawu Windows SDK, która ma być używana w systemie Windows, np. {0}.",
 	"mac.framework.path": "Ścieżka do platformy Mac",
-	"mac.framework.path.description": "Lista ścieżek do użycia przez aparat IntelliSense podczas wyszukiwania dołączonych nagłówków z platform Mac. Obsługiwane tylko w przypadku konfiguracji dla systemu macOS.",
+	"mac.framework.path.description": "Lista ścieżek do użycia przez aparat IntelliSense podczas wyszukiwania dołączonych nagłówków z platform Mac. Obsługiwane tylko w przypadku konfiguracji dla systemu MacOS.",
 	"one.path.per.line": "Jedna ścieżka na wiersz.",
 	"forced.include": "Wymuszone dołączanie",
 	"forced.include.description": "Lista plików, które powinny zostać uwzględnione przed przetworzeniem każdego innego znaku w pliku źródłowym. Pliki są uwzględniane w podanej kolejności.",

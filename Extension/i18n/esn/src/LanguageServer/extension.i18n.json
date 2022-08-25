@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "Más información sobre el modo de instalar una biblioteca para este encabezado con vcpkg",
 	"copy.vcpkg.command": "Copie el comando vcpkg para instalar \"{0}\" en el Portapapeles",
+	"on.disabled.command": "Los comandos relacionados con IntelliSense no se pueden ejecutar cuando 'C_Cpp.intelliSenseEngine' está establecido en 'Disabled'.",
 	"client.not.found": "No se encuentra el cliente",
 	"configuration.select.first": "Abra una carpeta primero para seleccionar una configuración",
 	"configuration.provider.select.first": "Abra una carpeta primero para seleccionar un proveedor de configuración",

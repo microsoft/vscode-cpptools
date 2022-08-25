@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 为此标头安装库",
 	"copy.vcpkg.command": "将用于安装“{0}”的 vcpkg 命令复制到剪贴板",
+	"on.disabled.command": "当 \"C_Cpp.intelliSenseEngine\" 设置为 \"Disabled\" 时，无法执行与 IntelliSense 相关的命令。",
 	"client.not.found": "未找到客户端",
 	"configuration.select.first": "首先打开一个文件夹以选择配置",
 	"configuration.provider.select.first": "首先打开一个文件夹以选择配置提供程序",

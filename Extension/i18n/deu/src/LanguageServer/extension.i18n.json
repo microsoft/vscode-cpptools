@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "Erfahren Sie, wie Sie mit vcpkg eine Bibliothek für diesen Header installieren.",
 	"copy.vcpkg.command": "vcpkg-Befehl zum Installieren von \"{0}\" in die Zwischenablage kopieren",
+	"on.disabled.command": "IntelliSense-bezogene Befehle können nicht ausgeführt werden, wenn „C_Cpp.intelliSenseEngine“ auf „Deaktiviert“ festgelegt ist.",
 	"client.not.found": "Client nicht gefunden.",
 	"configuration.select.first": "Zum Auswählen einer Konfiguration zuerst einen Ordner öffnen",
 	"configuration.provider.select.first": "Zum Auswählen eines Konfigurationsanbieters zuerst einen Ordner öffnen",

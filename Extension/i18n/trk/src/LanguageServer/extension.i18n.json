@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "vcpkg ile bu üst bilgi için bir kitaplık yüklemeyi öğrenin",
 	"copy.vcpkg.command": "'{0}' yükleme vcpkg komutunu panoya kopyalayın",
+	"on.disabled.command": "'C_Cpp.intelliSenseEngine' 'Disabled' olarak ayarlandığında IntelliSense ile ilgili komutlar yürütülemez.",
 	"client.not.found": "istemci bulunamadı",
 	"configuration.select.first": "Yapılandırma seçmek için önce bir klasör açın",
 	"configuration.provider.select.first": "Yapılandırma sağlayıcısı seçmek için önce bir klasör açın",
