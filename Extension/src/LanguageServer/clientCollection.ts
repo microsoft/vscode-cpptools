@@ -149,8 +149,8 @@ export class ClientCollection {
         }
 
         if (e !== undefined) {
-            let oldDefaultClient: cpptools.Client | undefined;
-            let needNewDefaultClient: boolean = false;
+            // let oldDefaultClient: cpptools.Client | undefined;
+            // let needNewDefaultClient: boolean = false;
 
             e.removed.forEach(folder => {
                 const path: string = util.asFolder(folder.uri);
@@ -166,72 +166,82 @@ export class ClientCollection {
                         this.activeClient.deactivate();
                     }
 
-                    // Defer selecting a new default client until all adds and removes have been processed.
-                    if (this.defaultClient === client) {
-                        oldDefaultClient = client;
-                    } else {
-                        client.dispose();
-                    }
+                    // // Defer selecting a new default client until all adds and removes have been processed.
+                    // if (this.defaultClient === client) {
+                    //     oldDefaultClient = client;
+                    // } else {
+                    client.dispose();
+                    // }
                 }
             });
 
-            e.added.forEach(folder => {
-                const path: string = util.asFolder(folder.uri);
-                const client: cpptools.Client | undefined = this.languageClients.get(path);
-                if (!client) {
-                    this.createClient(folder, true);
-                }
-            });
-
-            // Note: VS Code currently reloads the extension whenever the primary (first) workspace folder is added or removed.
-            // So the following handling of changes to defaultClient are likely unnecessary, unless the behavior of
-            // VS Code changes. The handling of changes to activeClient are still needed.
-
-            if (oldDefaultClient) {
-                const uri: vscode.Uri | undefined = oldDefaultClient.RootUri;
-                // uri will be set.
-                if (uri) {
-                    // Check if there is now another more appropriate client to use.
-                    this.defaultClient = this.getClientFor(uri);
-                    needNewDefaultClient = this.defaultClient === oldDefaultClient;
-                }
-                oldDefaultClient.dispose();
-            } else {
-                const defaultDefaultClient: cpptools.Client | undefined = this.languageClients.get(defaultClientKey);
-                if (defaultDefaultClient) {
-                    // If there is an entry in languageClients for defaultClientKey, we were not previously tracking any workspace folders.
-                    this.languageClients.delete(defaultClientKey);
-                    needNewDefaultClient = true;
-                    if (this.activeClient === this.defaultClient) {
-                        // Redundant deactivation should be OK.
-                        this.activeClient.deactivate();
-                    }
-                }
-            }
-
-            if (needNewDefaultClient) {
-                // Use the first workspaceFolder, if any.
-                if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-                    const key: string = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
-                    const client: cpptools.Client | undefined = this.languageClients.get(key);
+            if (e.added.length > 0) {
+                // Send a new set of settings. This will ensure the settings are
+                // read for new workspace folders. Send them up before creating new
+                // clients, so the native process is already aware of all workspace
+                // folders before receiving new CppProperties for new folders.
+                this.defaultClient.sendDidChangeSettings();
+                e.added.forEach(folder => {
+                    const path: string = util.asFolder(folder.uri);
+                    const client: cpptools.Client | undefined = this.languageClients.get(path);
                     if (!client) {
-                        // This should not occur.  If there is a workspace folder, we should have a client for it by now.
-                        throw new Error("Failed to construct default client");
+                        this.createClient(folder, true);
                     }
-                    this.defaultClient = client;
-                } else {
-                    // The user removed the last workspace folder. Create a new default defaultClient/activeClient
-                    // using the same approach as used in the constructor.
-                    this.defaultClient = cpptools.createClient(this);
-                    this.languageClients.set(defaultClientKey, this.defaultClient);
-                    this.defaultClient.deactivate();
-                    if (this.activeDocument) {
-                        // Only change activeClient if it would not be changed by the later check.
-                        this.activeClient.deactivate();
-                        this.activeClient = this.defaultClient;
-                    }
-                }
+                });
             }
+
+            // From https://code.visualstudio.com/api/references/vscode-api
+            //
+            //      Note: this event will not fire if the first workspace folder is added, removed or changed,
+            //      because in that case the currently executing extensions (including the one that listens to
+            //      this event) will be terminated and restarted so that the (deprecated) rootPath property is
+            //      updated to point to the first workspace folder.
+
+            // if (oldDefaultClient) {
+            //     const uri: vscode.Uri | undefined = oldDefaultClient.RootUri;
+            //     // uri will be set.
+            //     if (uri) {
+            //         // Check if there is now another more appropriate client to use.
+            //         this.defaultClient = this.getClientFor(uri);
+            //         needNewDefaultClient = this.defaultClient === oldDefaultClient;
+            //     }
+            //     oldDefaultClient.dispose();
+            // } else {
+            //     const defaultDefaultClient: cpptools.Client | undefined = this.languageClients.get(defaultClientKey);
+            //     if (defaultDefaultClient) {
+            //         // If there is an entry in languageClients for defaultClientKey, we were not previously tracking any workspace folders.
+            //         this.languageClients.delete(defaultClientKey);
+            //         needNewDefaultClient = true;
+            //         if (this.activeClient === this.defaultClient) {
+            //             // Redundant deactivation should be OK.
+            //             this.activeClient.deactivate();
+            //         }
+            //     }
+            // }
+            //
+            // if (needNewDefaultClient) {
+            //     // Use the first workspaceFolder, if any.
+            //     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            //         const key: string = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
+            //         const client: cpptools.Client | undefined = this.languageClients.get(key);
+            //         if (!client) {
+            //             // This should not occur.  If there is a workspace folder, we should have a client for it by now.
+            //             throw new Error("Failed to construct default client");
+            //         }
+            //         this.defaultClient = client;
+            //     } else {
+            //         // The user removed the last workspace folder. Create a new default defaultClient/activeClient
+            //         // using the same approach as used in the constructor.
+            //         this.defaultClient = cpptools.createClient(this);
+            //         this.languageClients.set(defaultClientKey, this.defaultClient);
+            //         this.defaultClient.deactivate();
+            //         if (this.activeDocument) {
+            //             // Only change activeClient if it would not be changed by the later check.
+            //             this.activeClient.deactivate();
+            //             this.activeClient = this.defaultClient;
+            //         }
+            //     }
+            // }
 
             // Ensure the best client for the currently active document is activated.
             if (this.activeDocument) {
@@ -260,6 +270,10 @@ export class ClientCollection {
         return this.getClientForFolder(folder);
     }
 
+    public getDefaultClient(): cpptools.Client {
+        return this.defaultClient;
+    }
+
     public getClientForFolder(folder?: vscode.WorkspaceFolder): cpptools.Client {
         if (!folder) {
             return this.defaultClient;
@@ -281,7 +295,6 @@ export class ClientCollection {
         const key: string = folder ? util.asFolder(folder.uri) : defaultClientKey;
         this.languageClients.set(key, newClient);
         getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
-        newClient.sendDidChangeSettings();
         return newClient;
     }
 

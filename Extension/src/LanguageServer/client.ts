@@ -64,7 +64,6 @@ let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
-export let firstClient: Client;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
@@ -977,7 +976,6 @@ export class DefaultClient implements Client {
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
-                firstClient = this;
                 firstClientStarted = languageClient.start();
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
@@ -1325,9 +1323,17 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
+        const defaultClient: Client = clientCollection.getDefaultClient();
+        if (this !== defaultClient) {
+            // Because settings changes may result in providers becoming registered/deregistered, and those
+            // providers are owned by the default client, we always need to defer processing of onDidChangeSettings
+            // to the default client.
+            return defaultClient.onDidChangeSettings(event);
+        }
         this.sendDidChangeSettings();
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenLanguageClientReady(() => {
+            this.languageClient.sendNotification(DidChangeSettingsNotification, { settings: this.getAllSettings(), workspaceFolderUri: this.RootPath });
             if (Object.keys(changedSettings).length > 0) {
                 if (changedSettings["commentContinuationPatterns"]) {
                     updateLanguageConfigurations();

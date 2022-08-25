@@ -12,7 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, firstClient, openFileVersions } from './client';
+import { Client, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
@@ -184,7 +184,6 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(onDidChangeWorkspaceFolders));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
@@ -275,19 +274,10 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
-    if (firstClient) {
-        const changedSettings: { [key: string]: string } = firstClient.onDidChangeSettings(event);
-        const newUpdateChannel: string = changedSettings['updateChannel'];
-        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-            UpdateInsidersAccess();
-        }
-    }
-}
-
-function onDidChangeWorkspaceFolders(event: vscode.WorkspaceFoldersChangeEvent): void {
-    // We'll find out about changes to the set of workspace folders when we process an updated set of settings.
-    if (firstClient) {
-        firstClient.sendDidChangeSettings();
+    const changedSettings: { [key: string]: string } = clients.getDefaultClient().onDidChangeSettings(event);
+    const newUpdateChannel: string = changedSettings['updateChannel'];
+    if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
+        UpdateInsidersAccess();
     }
 }
 
