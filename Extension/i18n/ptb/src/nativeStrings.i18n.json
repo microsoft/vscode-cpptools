@@ -221,5 +221,6 @@
 	"folder_tag": "Pasta",
 	"file_tag": "Arquivo",
 	"compiler_default_language_standard_version_old": "O compilador retornou a versão padrão do idioma padrão: {0}. Como essa versão é antiga, tentaremos usar a versão {1} mais recente como padrão.",
-	"unexpected_output_from_clang_tidy": "Saída inesperada de clang-tidy: {0}. Esperado: {1}."
+	"unexpected_output_from_clang_tidy": "Saída inesperada de clang-tidy: {0}. Esperado: {1}.",
+	"generate_doxygen_comment": "Gerar Comentário do Doxygen"
 }

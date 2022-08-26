@@ -221,5 +221,6 @@
 	"folder_tag": "資料夾",
 	"file_tag": "檔案",
 	"compiler_default_language_standard_version_old": "編譯器傳回預設語言標準版本: {0}。因為此版本為舊版本，將嘗試使用較新的版本 {1} 為預設版本。",
-	"unexpected_output_from_clang_tidy": "來自 clang-tidy 的未預期輸出: {0}。預期是: {1}。"
+	"unexpected_output_from_clang_tidy": "來自 clang-tidy 的未預期輸出: {0}。預期是: {1}。",
+	"generate_doxygen_comment": "產生 Doxygen 註解"
 }

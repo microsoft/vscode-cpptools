@@ -6,6 +6,7 @@
 {
 	"learn.how.to.install.a.library": "Dowiedz się, jak zainstalować bibliotekę dla tego nagłówka przy użyciu menedżera vcpkg",
 	"copy.vcpkg.command": "Skopiuj polecenie vcpkg, aby zainstalować element „{0}” w schowku",
+	"on.disabled.command": "Nie można wykonywać poleceń związanych z funkcją IntelliSense, gdy właściwość `C_Cpp.intelliSenseEngine` ma wartość `Disabled`.",
 	"client.not.found": "nie znaleziono klienta",
 	"configuration.select.first": "Otwórz najpierw folder, aby wybrać konfigurację",
 	"configuration.provider.select.first": "Otwórz najpierw folder, aby wybrać dostawcę konfiguracji",
