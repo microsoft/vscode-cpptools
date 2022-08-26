@@ -221,5 +221,6 @@
 	"folder_tag": "Ordner",
 	"file_tag": "Datei",
 	"compiler_default_language_standard_version_old": "Der Compiler hat die Standardversion der Standardsprache zurückgegeben: {0}. Da diese Version alt ist, wird versucht, eine neuere Version {1} als Standard zu verwenden.",
-	"unexpected_output_from_clang_tidy": "Unerwartete Ausgabe von „clang-tidy“: {0}. Erwartet: {1}."
+	"unexpected_output_from_clang_tidy": "Unerwartete Ausgabe von „clang-tidy“: {0}. Erwartet: {1}.",
+	"generate_doxygen_comment": "Doxygenkommentar generieren"
 }

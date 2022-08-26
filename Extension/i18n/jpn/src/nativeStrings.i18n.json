@@ -221,5 +221,6 @@
 	"folder_tag": "フォルダー",
 	"file_tag": "ファイル",
 	"compiler_default_language_standard_version_old": "コンパイラから既定の言語の標準バージョンが返されました: {0}。このバージョンは古いため、より新しいバージョン {1} をデフォルトとして使用しようとします。",
-	"unexpected_output_from_clang_tidy": "clang-tidy からの予期しない出力: {0}。期待値: {1}。"
+	"unexpected_output_from_clang_tidy": "clang-tidy からの予期しない出力: {0}。期待値: {1}。",
+	"generate_doxygen_comment": "Doxygen コメントの生成"
 }

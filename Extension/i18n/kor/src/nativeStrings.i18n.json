@@ -221,5 +221,6 @@
 	"folder_tag": "폴더",
 	"file_tag": "파일",
 	"compiler_default_language_standard_version_old": "컴파일러가 기본 언어 표준 버전 {0}을(를) 반환했습니다. 이 버전은 이전 버전이므로 새 버전 {1}을(를) 기본으로 사용하려고 합니다.",
-	"unexpected_output_from_clang_tidy": "clang-tidy에서 예기치 않은 출력: {0}. 예상: {1}."
+	"unexpected_output_from_clang_tidy": "clang-tidy에서 예기치 않은 출력: {0}. 예상: {1}.",
+	"generate_doxygen_comment": "Doxygen 주석 생성"
 }
