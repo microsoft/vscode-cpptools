@@ -56,7 +56,7 @@
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllOnly.description": "'모두 지우기' 코드 작업만 표시합니다(또는 유형이 하나뿐인 경우 '모두 지우기 <type>' 또는 문제가 하나만 있는 경우 '이것 지우기').",
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description": "'모두 지우기' 코드 작업(여러 문제 유형이 있는 경우) 및 '모두 지우기 <type>' 코드 작업 표시(또는 <type>에 대한 문제가 하나만 있는 경우 '이 항목 지우기')",
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description": "'모두 지우기'(여러 문제 유형이 있는 경우), '모두 지우기 <type>'(<type>에 대해 여러 문제가 있는 경우) 및 '이 항목 지우기' 코드 작업 표시",
-	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription": "'true'이면 '수정' 코드 동작에 의해 변경된 줄에서 서식이 실행됩니다.",
+	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription": "`true`이면 '수정' 코드 동작에 의해 변경된 줄에서 서식이 실행됩니다.",
 	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "`true`인 경우 `#C_Cpp.codeAnalysis.runAutomatically#`가 `true`(기본값)인 경우 `clang-tidy`를 사용한 코드 분석이 사용하도록 설정되고 자동으로 실행됩니다.",
 	"c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": "`clang-tidy` 실행 파일의 전체 경로입니다. 지정하지 않은 경우 `clang-tidy`를 환경 경로에서 사용할 수 있으면 해당 실행 파일이 사용됩니다. 환경 경로에 없는 경우에는 확장과 함께 제공된 `clang-tidy`가 사용됩니다.",
 	"c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription": "YAML/JSON 형식의 `clang-tidy` 구성을 지정합니다. `{Checks: '-*,clang-analyzer-*', CheckOptions: [{키: x, 값: y}]}`. 값이 비어 있으면 `clang-tidy`는 상위 디렉터리의 각 소스 파일에 대해 `.clang-tidy`라는 파일을 찾으려고 시도합니다.",
