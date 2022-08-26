@@ -1608,7 +1608,7 @@
           "type": "string",
           "default": "file",
           "markdownDescription": "%c_cpp.configuration.clang_format_style.markdownDescription%",
-          "scope": "machine-overridable"
+          "scope": "resource"
         },
         "C_Cpp.formatting": {
           "type": "string",
