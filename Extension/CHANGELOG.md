@@ -6,8 +6,8 @@
 * Add auto-complete of Doxygen keywords in comments.
 
 ### Enhancements
-* Enable auto-formatting of lines that are changed by code analysis fixes. [#9322](https://github.com/microsoft/vscode-cpptools/issues/9322)
-* Enable colorized output in cppBuild tasks for clang. [#9643](https://github.com/microsoft/vscode-cpptools/issues/9643)
+* Add auto-formatting of lines that are changed by code analysis fixes. [#9322](https://github.com/microsoft/vscode-cpptools/issues/9322)
+* Add compile arguments to enable colorized output in cppBuild tasks for clang. [#9643](https://github.com/microsoft/vscode-cpptools/issues/9643)
 * Cache and reuse SSH passwords in the current remote debugging session. [PR #9654](https://github.com/microsoft/vscode-cpptools/pull/9654)
 * Fix "natvis collections only show the first 50 elements". [MIEngine#821](https://github.com/microsoft/MIEngine/issues/821)
   * Related [#9377](https://github.com/microsoft/vscode-cpptools/issues/9377)
