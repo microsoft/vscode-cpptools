@@ -221,7 +221,7 @@ export class RemoteAttachPicker {
                 if (matches?.length === 3) {
                     const id: string = matches[1];
                     const userCommand: string = matches[2];
-                    processes.push({ label: userCommand, id });
+                    processes.push({ label: userCommand, id, description: id });
                 }
             }
         }

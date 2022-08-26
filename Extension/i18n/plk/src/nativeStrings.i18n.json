@@ -221,5 +221,6 @@
 	"folder_tag": "Folder",
 	"file_tag": "Plik",
 	"compiler_default_language_standard_version_old": "Kompilator zwrócił domyślną wersję standardową języka: {0}. Ponieważ ta wersja jest stara, spróbuje użyć nowszej wersji {1} jako domyślnej.",
-	"unexpected_output_from_clang_tidy": "Nieoczekiwane dane wyjściowe z narzędzia Clang-Tidy: {0}. Oczekiwano: {1}."
+	"unexpected_output_from_clang_tidy": "Nieoczekiwane dane wyjściowe z narzędzia Clang-Tidy: {0}. Oczekiwano: {1}.",
+	"generate_doxygen_comment": "Generuj komentarz Doxygen"
 }

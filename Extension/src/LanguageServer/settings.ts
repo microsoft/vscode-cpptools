@@ -189,6 +189,7 @@ export class CppSettings extends Settings {
     public get clangTidyCodeActionShowDisable(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDisable"); }
     public get clangTidyCodeActionShowClear(): string { return super.Section.get<string>("codeAnalysis.clangTidy.codeAction.showClear") ?? "AllAndAllType"; }
     public get clangTidyCodeActionShowDocumentation(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.showDocumentation"); }
+    public get clangTidyCodeActionFormatFixes(): boolean { return super.Section.get<boolean>("codeAnalysis.clangTidy.codeAction.formatFixes") ?? true; }
     public addClangTidyChecksDisabled(value: string): void {
         const checks: string[] | undefined = this.clangTidyChecksDisabled;
         if (checks === undefined) {
@@ -220,6 +221,8 @@ export class CppSettings extends Settings {
     public get workspaceSymbols(): string | undefined { return super.Section.get<string>("workspaceSymbols"); }
     public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
     public get simplifyStructuredComments(): boolean | undefined { return super.Section.get<boolean>("simplifyStructuredComments"); }
+    public get doxygenGeneratedCommentStyle(): string | undefined { return super.Section.get<string>("doxygen.generatedStyle"); }
+    public get doxygenGenerateOnType(): boolean | undefined { return super.Section.get<boolean>("doxygen.generateOnType"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
     public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
@@ -808,6 +811,7 @@ export class OtherSettings {
     }
 
     public get editorTabSize(): number | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<number>("tabSize"); }
+    public get editorInsertSpaces(): boolean | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<boolean>("insertSpaces"); }
     public get editorAutoClosingBrackets(): string | undefined { return vscode.workspace.getConfiguration("editor", this.resource).get<string>("autoClosingBrackets"); }
     public get filesEncoding(): string | undefined { return vscode.workspace.getConfiguration("files", { uri: this.resource, languageId: "cpp" }).get<string>("encoding"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }

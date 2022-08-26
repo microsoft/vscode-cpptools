@@ -35,12 +35,12 @@ interface GetInlayHintsResult {
 
 type InlayHintsCacheEntry = {
     FileVersion: number;
-    TypeHints: vscode.InlayHint[];
+    TypeHints: CppInlayHint[];
     ParameterHints: CppInlayHint[];
 };
 
-const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult, void, void> =
-    new RequestType<GetInlayHintsParams, GetInlayHintsResult, void, void>('cpptools/getInlayHints');
+const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult, void> =
+    new RequestType<GetInlayHintsParams, GetInlayHintsResult, void>('cpptools/getInlayHints');
 
 export class InlayHintsProvider implements vscode.InlayHintsProvider {
     private client: DefaultClient;
@@ -89,11 +89,31 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         let result: vscode.InlayHint[] = [];
         const settings: CppSettings = new CppSettings();
         if (settings.inlayHintsAutoDeclarationTypes) {
-            result = result.concat(cacheEntry?.TypeHints);
+            const resolvedTypeHints: vscode.InlayHint[] = this.resolveTypeHints(cacheEntry.TypeHints);
+            result = result.concat(resolvedTypeHints);
         }
-        const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
-        result = result.concat(resolvedParameterHints);
+        if (settings.inlayHintsParameterNames || settings.inlayHintsReferenceOperator) {
+            const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(cacheEntry.ParameterHints);
+            result = result.concat(resolvedParameterHints);
+        }
         return result;
+    }
+
+    private resolveTypeHints(hints: CppInlayHint[]): vscode.InlayHint[] {
+        const resolvedHints: vscode.InlayHint[] = [];
+        const settings: CppSettings = new CppSettings();
+        for (const hint of hints) {
+            const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
+            const inlayHint: vscode.InlayHint = new vscode.InlayHint(
+                new vscode.Position(hint.position.line, hint.position.character +
+                        (showOnLeft ? 0 : hint.identifierLength)),
+                (showOnLeft ? hint.label : ": " + hint.label),
+                vscode.InlayHintKind.Type);
+            inlayHint.paddingRight = showOnLeft || hint.rightPadding;
+            inlayHint.paddingLeft = showOnLeft && hint.leftPadding;
+            resolvedHints.push(inlayHint);
+        }
+        return resolvedHints;
     }
 
     private resolveParameterHints(hints: CppInlayHint[]): vscode.InlayHint[] {
@@ -137,21 +157,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     }
 
     private createCacheEntry(inlayHintsResults: GetInlayHintsResult): InlayHintsCacheEntry {
-        const typeHints: vscode.InlayHint[] = [];
-        const settings: CppSettings = new CppSettings();
-        for (const h of inlayHintsResults.inlayHints) {
-            if (h.inlayHintKind === InlayHintKind.Type) {
-                const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && h.identifierLength > 0;
-                const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                    new vscode.Position(h.position.line, h.position.character +
-                        (showOnLeft ? 0 : h.identifierLength)),
-                    (showOnLeft ? h.label : ": " + h.label),
-                    vscode.InlayHintKind.Type);
-                inlayHint.paddingRight = showOnLeft || h.rightPadding;
-                inlayHint.paddingLeft = showOnLeft && h.leftPadding;
-                typeHints.push(inlayHint);
-            }
-        }
+        const typeHints: CppInlayHint[] = inlayHintsResults.inlayHints.filter(h => h.inlayHintKind === InlayHintKind.Type);
         const paramHints: CppInlayHint[] = inlayHintsResults.inlayHints.filter(h => h.inlayHintKind === InlayHintKind.Parameter);
         const cacheEntry: InlayHintsCacheEntry = {
             FileVersion: inlayHintsResults.fileVersion,

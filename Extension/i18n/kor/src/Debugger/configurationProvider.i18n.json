@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "lldb-mi에 대한 'LLDB.framework'를 찾을 수 없습니다. XCode 또는 XCode 명령줄 도구를 설치하세요.",
 	"debugger.launchConfig": "시작 구성:",
 	"vs.code.1.69+.required": "'deploySteps'에는 VS Code 1.69 이상이 필요합니다.",
+	"running.deploy.steps": "배포 단계 실행 중...",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"build.and.debug.active.file": "활성 파일 빌드 및 디버그",
 	"cl.exe.not.available": "{0} 빌드 및 디버그는 VS의 개발자 명령 프롬프트에서 VS Code를 실행하는 경우에만 사용할 수 있습니다.",

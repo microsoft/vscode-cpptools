@@ -332,7 +332,12 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 logger.getOutputChannelLogger().showErrorMessage(localize("vs.code.1.69+.required", "'deploySteps' require VS Code 1.69+."));
                 return undefined;
             }
-            const deploySucceeded: boolean = await this.deploySteps(config, token);
+
+            const deploySucceeded: boolean = await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: localize("running.deploy.steps", "Running deploy steps...")
+            }, async () => this.deploySteps(config, token));
+
             if (!deploySucceeded || token?.isCancellationRequested) {
                 return undefined;
             }
@@ -378,106 +383,107 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             (!configuredBuildTasks.some(taskJson => (taskJson.definition.label === taskDetected.definition.label))));
         buildTasks = buildTasks.concat(configuredBuildTasks, dedupDetectedBuildTasks);
 
-        if (buildTasks.length === 0) {
-            return [];
-        }
-
         // Filter out build tasks that don't match the currently selected debug configuration type.
-        buildTasks = buildTasks.filter((task: CppBuildTask) => {
-            const command: string = task.definition.command as string;
-            if (!command) {
+        if (buildTasks.length !== 0) {
+            buildTasks = buildTasks.filter((task: CppBuildTask) => {
+                const command: string = task.definition.command as string;
+                if (!command) {
+                    return false;
+                }
+                if (defaultTemplateConfig.name.startsWith("(Windows) ")) {
+                    if (command.startsWith("cl.exe")) {
+                        return true;
+                    }
+                } else {
+                    if (!command.startsWith("cl.exe")) {
+                        return true;
+                    }
+                }
                 return false;
-            }
-            if (defaultTemplateConfig.name.startsWith("(Windows) ")) {
-                if (command.startsWith("cl.exe")) {
-                    return true;
-                }
-            } else {
-                if (!command.startsWith("cl.exe")) {
-                    return true;
-                }
-            }
-            return false;
-        });
+            });
+        }
 
         // Generate new configurations for each build task.
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
-        let configs: CppDebugConfiguration[] = await Promise.all(buildTasks.map<Promise<CppDebugConfiguration>>(async task => {
-            const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
-            const compilerPath: string = definition.command;
-            const compilerName: string = path.basename(compilerPath);
-            const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
-            newConfig.existing = false;
+        let configs: CppDebugConfiguration[] = [];
+        if (buildTasks.length !== 0) {
+            configs = await Promise.all(buildTasks.map<Promise<CppDebugConfiguration>>(async task => {
+                const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
+                const compilerPath: string = definition.command;
+                const compilerName: string = path.basename(compilerPath);
+                const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
+                newConfig.existing = false;
 
-            newConfig.name = configPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
-            newConfig.preLaunchTask = task.name;
-            if (newConfig.type === DebuggerType.cppdbg) {
-                newConfig.externalConsole = false;
-            } else {
-                newConfig.console = "externalTerminal";
-            }
-            const isWindows: boolean = platformInfo.platform === 'win32';
-            // Extract the .exe path from the defined task.
-            const definedExePath: string | undefined = util.findExePathInArgs(task.definition.args);
-            newConfig.program = definedExePath ? definedExePath : util.defaultExePath();
-            // Add the "detail" property to show the compiler path in QuickPickItem.
-            // This property will be removed before writing the DebugConfiguration in launch.json.
-            newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
-            newConfig.taskDetail = task.detail;
-            newConfig.taskStatus = task.existing ?
-                ((task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskStatus.recentlyUsed : TaskStatus.configured) :
-                TaskStatus.detected;
-            if (task.isDefault) {
-                newConfig.isDefault = true;
-            }
-            const isCl: boolean = compilerName === "cl.exe";
-            newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
-
-            return new Promise<CppDebugConfiguration>(resolve => {
-                if (platformInfo.platform === "darwin") {
-                    return resolve(newConfig);
+                newConfig.name = configPrefix + compilerName + " " + this.buildAndDebugActiveFileStr();
+                newConfig.preLaunchTask = task.name;
+                if (newConfig.type === DebuggerType.cppdbg) {
+                    newConfig.externalConsole = false;
                 } else {
-                    let debuggerName: string;
-                    if (compilerName.startsWith("clang")) {
-                        newConfig.MIMode = "lldb";
-                        debuggerName = "lldb-mi";
-                        // Search for clang-8, clang-10, etc.
-                        if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
-                            const suffixIndex: number = compilerName.indexOf("-");
-                            if (suffixIndex !== -1) {
-                                const suffix: string = compilerName.substring(suffixIndex);
-                                debuggerName += suffix;
-                            }
-                        }
-                        newConfig.type = DebuggerType.cppdbg;
-                    } else if (compilerName === "cl.exe") {
-                        newConfig.miDebuggerPath = undefined;
-                        newConfig.type = DebuggerType.cppvsdbg;
-                        return resolve(newConfig);
-                    } else {
-                        debuggerName = "gdb";
-                    }
-                    if (isWindows) {
-                        debuggerName = debuggerName.endsWith(".exe") ? debuggerName : (debuggerName + ".exe");
-                    }
-                    const compilerDirname: string = path.dirname(compilerPath);
-                    const debuggerPath: string = path.join(compilerDirname, debuggerName);
-                    if (isWindows) {
-                        newConfig.miDebuggerPath = debuggerPath;
-                        return resolve(newConfig);
-                    } else {
-                        fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                            if (!err && stats && stats.isFile()) {
-                                newConfig.miDebuggerPath = debuggerPath;
-                            } else {
-                                newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
-                            }
-                            return resolve(newConfig);
-                        });
-                    }
+                    newConfig.console = "externalTerminal";
                 }
-            });
-        }));
+                const isWindows: boolean = platformInfo.platform === 'win32';
+                // Extract the .exe path from the defined task.
+                const definedExePath: string | undefined = util.findExePathInArgs(task.definition.args);
+                newConfig.program = definedExePath ? definedExePath : util.defaultExePath();
+                // Add the "detail" property to show the compiler path in QuickPickItem.
+                // This property will be removed before writing the DebugConfiguration in launch.json.
+                newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
+                newConfig.taskDetail = task.detail;
+                newConfig.taskStatus = task.existing ?
+                    ((task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskStatus.recentlyUsed : TaskStatus.configured) :
+                    TaskStatus.detected;
+                if (task.isDefault) {
+                    newConfig.isDefault = true;
+                }
+                const isCl: boolean = compilerName === "cl.exe";
+                newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
+
+                return new Promise<CppDebugConfiguration>(resolve => {
+                    if (platformInfo.platform === "darwin") {
+                        return resolve(newConfig);
+                    } else {
+                        let debuggerName: string;
+                        if (compilerName.startsWith("clang")) {
+                            newConfig.MIMode = "lldb";
+                            debuggerName = "lldb-mi";
+                            // Search for clang-8, clang-10, etc.
+                            if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
+                                const suffixIndex: number = compilerName.indexOf("-");
+                                if (suffixIndex !== -1) {
+                                    const suffix: string = compilerName.substring(suffixIndex);
+                                    debuggerName += suffix;
+                                }
+                            }
+                            newConfig.type = DebuggerType.cppdbg;
+                        } else if (compilerName === "cl.exe") {
+                            newConfig.miDebuggerPath = undefined;
+                            newConfig.type = DebuggerType.cppvsdbg;
+                            return resolve(newConfig);
+                        } else {
+                            debuggerName = "gdb";
+                        }
+                        if (isWindows) {
+                            debuggerName = debuggerName.endsWith(".exe") ? debuggerName : (debuggerName + ".exe");
+                        }
+                        const compilerDirname: string = path.dirname(compilerPath);
+                        const debuggerPath: string = path.join(compilerDirname, debuggerName);
+                        if (isWindows) {
+                            newConfig.miDebuggerPath = debuggerPath;
+                            return resolve(newConfig);
+                        } else {
+                            fs.stat(debuggerPath, (err, stats: fs.Stats) => {
+                                if (!err && stats && stats.isFile()) {
+                                    newConfig.miDebuggerPath = debuggerPath;
+                                } else {
+                                    newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
+                                }
+                                return resolve(newConfig);
+                            });
+                        }
+                    }
+                });
+            }));
+        }
         configs.push(defaultTemplateConfig);
         const existingConfigs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, type)?.map(config => {
             if (!config.detail && config.preLaunchTask) {

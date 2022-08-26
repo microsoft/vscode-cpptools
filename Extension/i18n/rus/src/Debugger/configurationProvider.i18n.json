@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "Не удается найти \"LLDB.framework\" для lldb-mi. Установите XCode или средства командной строки XCode.",
 	"debugger.launchConfig": "Конфигурация запуска:",
 	"vs.code.1.69+.required": "\"deploySteps\" требует VS Code 1.69+.",
+	"running.deploy.steps": "Выполнение действий развертывания...",
 	"pre.Launch.Task": "ЗадачаПредварительногоЗапуска: {0}",
 	"build.and.debug.active.file": "сборка и отладка активного файла",
 	"cl.exe.not.available": "Сборку и отладку {0} можно использовать только при запуске VS Code из Командной строки разработчика для VS.",

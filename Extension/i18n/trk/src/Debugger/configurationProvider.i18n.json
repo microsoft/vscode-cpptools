@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "lldb-mi için 'LLDB.framework' bulunamıyor. Lütfen XCode'u veya XCode Komut Satırı Araçları'nı yükleyin.",
 	"debugger.launchConfig": "Yapılandırmayı başlat:",
 	"vs.code.1.69+.required": "'deploySteps' 1.69+ VS Code gerektirir.",
+	"running.deploy.steps": "Dağıtım adımları çalıştırılıyor...",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"build.and.debug.active.file": "etkin dosyayı derle ve dosyada hata ayıkla",
 	"cl.exe.not.available": "{0} derlemesi ve hata ayıklama yalnızca VS Code, VS için Geliştirici Komut İstemi'nden çalıştırıldığında kullanılabilir.",

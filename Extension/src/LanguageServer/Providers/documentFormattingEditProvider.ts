@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, FormatParams, FormatDocumentRequest } from '../client';
-import { CppSettings, getEditorConfigSettings } from '../settings';
+import { CppSettings, getEditorConfigSettings, OtherSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
@@ -16,6 +16,30 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
     public async provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
+        const onChanges: string | number | boolean = options.onChanges;
+        if (onChanges) {
+            let insertSpacesSet: boolean = false;
+            let tabSizeSet: boolean = false;
+            const editor: vscode.TextEditor = await vscode.window.showTextDocument(document, undefined, true);
+            if (editor.options.insertSpaces && typeof editor.options.insertSpaces === "boolean") {
+                options.insertSpaces = editor.options.insertSpaces;
+                insertSpacesSet = true;
+            }
+            if (editor.options.tabSize && typeof editor.options.tabSize === "number") {
+                options.tabSize = editor.options.tabSize;
+                tabSizeSet = true;
+            }
+
+            if (!insertSpacesSet || !tabSizeSet) {
+                const settings: OtherSettings = new OtherSettings(this.client.RootUri);
+                if (!insertSpacesSet) {
+                    options.insertSpaces = settings.editorInsertSpaces ?? true;
+                }
+                if (!tabSizeSet) {
+                    options.tabSize = settings.editorTabSize ?? 4;
+                }
+            }
+        }
         const settings: CppSettings = new CppSettings(this.client.RootUri);
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
@@ -35,7 +59,8 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                         character: 0,
                         line: 0
                     }
-                }
+                },
+                onChanges: onChanges === true
             };
             // We do not currently pass the CancellationToken to sendRequest
             // because there is not currently cancellation logic for formatting

@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { LanguageClient, NotificationType, Range } from 'vscode-languageclient';
+import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/node';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation, makeVscodeTextEdits, rangeEquals } from './utils';
 import {LocalizeStringParams, getLocalizedString } from './localization';
@@ -110,8 +110,8 @@ interface PublishCodeAnalysisDiagnosticsParams {
     diagnostics: CodeAnalysisDiagnostic[];
 }
 
-const PublishCodeAnalysisDiagnosticsNotification: NotificationType<PublishCodeAnalysisDiagnosticsParams, void> = new NotificationType<PublishCodeAnalysisDiagnosticsParams, void>('cpptools/publishCodeAnalysisDiagnostics');
-const PublishRemoveCodeAnalysisCodeActionFixesNotification: NotificationType<RemoveCodeAnalysisCodeActionFixesParams, void> = new NotificationType<RemoveCodeAnalysisCodeActionFixesParams, void>('cpptools/publishRemoveCodeAnalysisCodeActionFixes');
+const PublishCodeAnalysisDiagnosticsNotification: NotificationType<PublishCodeAnalysisDiagnosticsParams> = new NotificationType<PublishCodeAnalysisDiagnosticsParams>('cpptools/publishCodeAnalysisDiagnostics');
+const PublishRemoveCodeAnalysisCodeActionFixesNotification: NotificationType<RemoveCodeAnalysisCodeActionFixesParams> = new NotificationType<RemoveCodeAnalysisCodeActionFixesParams>('cpptools/publishRemoveCodeAnalysisCodeActionFixes');
 
 export const codeAnalysisFileToCodeActions: Map<string, CodeActionDiagnosticInfo[]> = new Map<string, CodeActionDiagnosticInfo[]>();
 export const codeAnalysisCodeToFixes: Map<string, CodeActionCodeInfo> = new Map<string, CodeActionCodeInfo>();

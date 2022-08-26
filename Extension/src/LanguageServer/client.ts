@@ -21,7 +21,8 @@ import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
 // End provider imports
 
-import { LanguageClient, LanguageClientOptions, ServerOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
+import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
+import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
@@ -59,6 +60,7 @@ const configProviderTimeout: number = 2000;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
+let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let clientCollection: ClientCollection;
@@ -92,7 +94,7 @@ function setupOutputHandlers(): void {
 }
 
 /** Note: We should not await on the following functions,
- * or any funstion that returns a promise acquired from them,
+ * or any function that returns a promise acquired from them,
  * vscode.window.showInformationMessage, vscode.window.showWarningMessage, vscode.window.showErrorMessage
 */
 function showMessageWindow(params: ShowMessageWindowParams): void {
@@ -310,6 +312,7 @@ export interface FormatParams {
     tabSize: number;
     editorConfigSettings: any;
     useVcFormat: boolean;
+    onChanges: boolean;
 }
 
 export interface GetFoldingRangesParams {
@@ -398,6 +401,22 @@ interface GoToDirectiveInGroupParams {
     next: boolean;
 };
 
+export interface GenerateDoxygenCommentParams {
+    uri: string;
+    position: Position;
+    isCodeAction: boolean;
+    isCursorAboveSignatureLine: boolean;
+}
+
+export interface GenerateDoxygenCommentResult {
+    contents: string;
+    initPosition: Position;
+    finalInsertionLine: number;
+    finalCursorPosition: Position;
+    fileVersion: number;
+    isCursorAboveSignatureLine: boolean;
+}
+
 interface SetTemporaryTextDocumentLanguageParams {
     path: string;
     isC: boolean;
@@ -411,6 +430,14 @@ enum CodeAnalysisScope {
     ClearSquiggles
 };
 
+interface CodeAnalysisParams {
+    scope: CodeAnalysisScope;
+}
+
+interface FinishedRequestCustomConfigParams {
+    uri: string;
+}
+
 interface IntervalTimerParams {
     freeMemory: number;
 };
@@ -421,74 +448,77 @@ export interface TextDocumentWillSaveParams {
 }
 
 // Requests
-const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void, void>('cpptools/queryCompilerDefaults');
-const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void, void>('cpptools/queryTranslationUnitSource');
-const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void, void> = new RequestType<SwitchHeaderSourceParams, string, void, void>('cpptools/didSwitchHeaderSource');
-const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void, void> = new RequestType<void, GetDiagnosticsResult, void, void>('cpptools/getDiagnostics');
-export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void, void>('cpptools/getDocumentSymbols');
-export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void, void>('cpptools/getWorkspaceSymbols');
-export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void, void>('cpptools/getFoldingRanges');
-export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void, void>('cpptools/getSemanticTokens');
-export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatDocument');
-export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatRange');
-export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void, void> = new RequestType<FormatParams, TextEdit[], void, void>('cpptools/formatOnType');
-const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void, void>('cpptools/goToDirectiveInGroup');
+const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
+const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
+const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
+const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
+export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void>('cpptools/getDocumentSymbols');
+export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
+export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
+export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void>('cpptools/getSemanticTokens');
+export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatDocument');
+export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
+export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
+const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
+const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
 // Notifications to the server
-const DidOpenNotification: NotificationType<DidOpenTextDocumentParams, void> = new NotificationType<DidOpenTextDocumentParams, void>('textDocument/didOpen');
-const FileCreatedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileCreated');
-const FileChangedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileChanged');
-const FileDeletedNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/fileDeleted');
-const ResetDatabaseNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resetDatabase');
-const PauseParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseParsing');
-const ResumeParsingNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeParsing');
-const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/activeDocumentChange');
-const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier, void> = new NotificationType<TextDocumentIdentifier, void>('cpptools/restartIntelliSenseForFile');
-const TextEditorSelectionChangeNotification: NotificationType<Range, void> = new NotificationType<Range, void>('cpptools/textEditorSelectionChange');
-const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams, void> = new NotificationType<CppPropertiesParams, void>('cpptools/didChangeCppProperties');
-const ChangeCompileCommandsNotification: NotificationType<FileChangedParams, void> = new NotificationType<FileChangedParams, void>('cpptools/didChangeCompileCommands');
-const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams, void> = new NotificationType<FolderSelectedSettingParams, void>('cpptools/didChangeSelectedSetting');
-const IntervalTimerNotification: NotificationType<IntervalTimerParams, void> = new NotificationType<IntervalTimerParams, void>('cpptools/onIntervalTimer');
-const CustomConfigurationNotification: NotificationType<CustomConfigurationParams, void> = new NotificationType<CustomConfigurationParams, void>('cpptools/didChangeCustomConfiguration');
-const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams, void> = new NotificationType<CustomBrowseConfigurationParams, void>('cpptools/didChangeCustomBrowseConfiguration');
-const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams, void> = new NotificationType<WorkspaceFolderParams, void>('cpptools/clearCustomConfigurations');
-const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFolderParams, void> = new NotificationType<WorkspaceFolderParams, void>('cpptools/clearCustomBrowseConfiguration');
-const RescanFolderNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/rescanFolder');
-export const RequestReferencesNotification: NotificationType<boolean, void> = new NotificationType<boolean, void>('cpptools/requestReferences');
-export const CancelReferencesNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelReferences');
-const FinishedRequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/finishedRequestCustomConfig');
-const FindAllReferencesNotification: NotificationType<FindAllReferencesParams, void> = new NotificationType<FindAllReferencesParams, void>('cpptools/findAllReferences');
-const RenameNotification: NotificationType<RenameParams, void> = new NotificationType<RenameParams, void>('cpptools/rename');
-const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams, void> = new NotificationType<DidChangeConfigurationParams, void>('cpptools/didChangeSettings');
+const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
+const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
+const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
+const FileDeletedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileDeleted');
+const ResetDatabaseNotification: NotificationType<void> = new NotificationType<void>('cpptools/resetDatabase');
+const PauseParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseParsing');
+const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
+const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/activeDocumentChange');
+const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
+const TextEditorSelectionChangeNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/textEditorSelectionChange');
+const ChangeCppPropertiesNotification: NotificationType<CppPropertiesParams> = new NotificationType<CppPropertiesParams>('cpptools/didChangeCppProperties');
+const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
+const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
+const IntervalTimerNotification: NotificationType<IntervalTimerParams> = new NotificationType<IntervalTimerParams>('cpptools/onIntervalTimer');
+const CustomConfigurationNotification: NotificationType<CustomConfigurationParams> = new NotificationType<CustomConfigurationParams>('cpptools/didChangeCustomConfiguration');
+const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams> = new NotificationType<CustomBrowseConfigurationParams>('cpptools/didChangeCustomBrowseConfiguration');
+const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomConfigurations');
+const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomBrowseConfiguration');
+const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
+export const RequestReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/requestReferences');
+export const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
+const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
+const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
+const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
+const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams> = new NotificationType<DidChangeConfigurationParams>('cpptools/didChangeSettings');
 
-const CodeAnalysisNotification: NotificationType<CodeAnalysisScope, void> = new NotificationType<CodeAnalysisScope, void>('cpptools/runCodeAnalysis');
-const PauseCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/pauseCodeAnalysis');
-const ResumeCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/resumeCodeAnalysis');
-const CancelCodeAnalysisNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/cancelCodeAnalysis');
-const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysisProblemsParams, void> = new NotificationType<RemoveCodeAnalysisProblemsParams, void>('cpptools/removeCodeAnalysisProblems');
+const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
+const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
+const ResumeCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeCodeAnalysis');
+const CancelCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelCodeAnalysis');
+const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysisProblemsParams> = new NotificationType<RemoveCodeAnalysisProblemsParams>('cpptools/removeCodeAnalysisProblems');
 
 // Notifications from the server
-const ReloadWindowNotification: NotificationType<void, void> = new NotificationType<void, void>('cpptools/reloadWindow');
-const LogTelemetryNotification: NotificationType<TelemetryPayload, void> = new NotificationType<TelemetryPayload, void>('cpptools/logTelemetry');
-const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/reportTagParseStatus');
-const ReportStatusNotification: NotificationType<ReportStatusNotificationBody, void> = new NotificationType<ReportStatusNotificationBody, void>('cpptools/reportStatus');
-const DebugProtocolNotification: NotificationType<DebugProtocolParams, void> = new NotificationType<DebugProtocolParams, void>('cpptools/debugProtocol');
-const DebugLogNotification: NotificationType<LocalizeStringParams, void> = new NotificationType<LocalizeStringParams, void>('cpptools/debugLog');
-const InactiveRegionNotification: NotificationType<InactiveRegionParams, void> = new NotificationType<InactiveRegionParams, void>('cpptools/inactiveRegions');
-const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths, void> = new NotificationType<CompileCommandsPaths, void>('cpptools/compileCommandsPaths');
-const ReferencesNotification: NotificationType<refs.ReferencesResultMessage, void> = new NotificationType<refs.ReferencesResultMessage, void>('cpptools/references');
-const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification, void> = new NotificationType<refs.ReportReferencesProgressNotification, void>('cpptools/reportReferencesProgress');
-const RequestCustomConfig: NotificationType<string, void> = new NotificationType<string, void>('cpptools/requestCustomConfig');
-const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams, void> = new NotificationType<PublishIntelliSenseDiagnosticsParams, void>('cpptools/publishIntelliSenseDiagnostics');
-const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams, void> = new NotificationType<ShowMessageWindowParams, void>('cpptools/showMessageWindow');
-const ShowWarningNotification: NotificationType<ShowWarningParams, void> = new NotificationType<ShowWarningParams, void>('cpptools/showWarning');
-const ReportTextDocumentLanguage: NotificationType<string, void> = new NotificationType<string, void>('cpptools/reportTextDocumentLanguage');
-const SemanticTokensChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/semanticTokensChanged');
-const InlayHintsChanged: NotificationType<string, void> = new NotificationType<string, void>('cpptools/inlayHintsChanged');
-const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup, void> = new NotificationType<IntelliSenseSetup, void>('cpptools/IntelliSenseSetup');
-const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams, void> = new NotificationType<SetTemporaryTextDocumentLanguageParams, void>('cpptools/setTemporaryTextDocumentLanguage');
-const ReportCodeAnalysisProcessedNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisProcessed');
-const ReportCodeAnalysisTotalNotification: NotificationType<number, void> = new NotificationType<number, void>('cpptools/reportCodeAnalysisTotal');
+const ReloadWindowNotification: NotificationType<void> = new NotificationType<void>('cpptools/reloadWindow');
+const LogTelemetryNotification: NotificationType<TelemetryPayload> = new NotificationType<TelemetryPayload>('cpptools/logTelemetry');
+const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/reportTagParseStatus');
+const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
+const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
+const DebugLogNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/debugLog');
+const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
+const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
+const ReferencesNotification: NotificationType<refs.ReferencesResultMessage> = new NotificationType<refs.ReferencesResultMessage>('cpptools/references');
+const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
+const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
+const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
+const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
+const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
+const ReportTextDocumentLanguage: NotificationType<string> = new NotificationType<string>('cpptools/reportTextDocumentLanguage');
+const SemanticTokensChanged: NotificationType<string> = new NotificationType<string>('cpptools/semanticTokensChanged');
+const InlayHintsChanged: NotificationType<string> = new NotificationType<string>('cpptools/inlayHintsChanged');
+const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup> = new NotificationType<IntelliSenseSetup>('cpptools/IntelliSenseSetup');
+const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams> = new NotificationType<SetTemporaryTextDocumentLanguageParams>('cpptools/setTemporaryTextDocumentLanguage');
+const ReportCodeAnalysisProcessedNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisProcessed');
+const ReportCodeAnalysisTotalNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisTotal');
+const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult> = new NotificationType<GenerateDoxygenCommentResult>('cpptools/insertDoxygenComment');
+
 let failureMessageShown: boolean = false;
 
 export interface ReferencesCancellationState {
@@ -613,7 +643,7 @@ export interface Client {
     queueTask<T>(task: () => Thenable<T>): Promise<T>;
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     notifyWhenLanguageClientReady(notify: () => void): void;
-    awaitUntilLanguageClientReady(): void;
+    awaitUntilLanguageClientReady(): Thenable<void>;
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -636,6 +666,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
+    handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, line: number | undefined, column: number | undefined, insertNewLineAtBeginning: boolean | undefined): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -803,7 +834,7 @@ export class DefaultClient implements Client {
                 languageClient = this.createLanguageClient(allClients);
                 clientCollection = allClients;
                 languageClient.registerProposedFeatures();
-                languageClient.start();  // This returns Disposable, but doesn't need to be tracked because we call .stop() explicitly in our dispose()
+                firstClientStarted = languageClient.start();
                 util.setProgress(util.getProgressExecutableStarted());
                 firstClient = true;
             }
@@ -812,7 +843,7 @@ export class DefaultClient implements Client {
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(async () => {
-                await languageClient.onReady();
+                await firstClientStarted;
                 try {
                     const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
                     this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
@@ -911,7 +942,7 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(FindAllReferencesNotification, params);
     }
 
-    public sendRenameNofication(params: RenameParams): void {
+    public sendRenameNotification(params: RenameParams): void {
         this.languageClient.sendNotification(RenameNotification, params);
     }
 
@@ -966,6 +997,8 @@ export class DefaultClient implements Client {
         const settings_suggestSnippets: (boolean | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
+        const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
+        const settings_doxygenGenerateOnType: (boolean | undefined)[] = [];
         const settings_defaultSystemIncludePath: (string[] | undefined)[] = [];
         const settings_intelliSenseCachePath: (string | undefined)[] = [];
         const settings_intelliSenseCacheSize: (number | undefined)[] = [];
@@ -1133,6 +1166,8 @@ export class DefaultClient implements Client {
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
+                settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
+                settings_doxygenGenerateOnType.push(setting.doxygenGenerateOnType);
                 settings_defaultSystemIncludePath.push(setting.defaultSystemIncludePath);
                 settings_intelliSenseCachePath.push(util.resolveCachePath(setting.intelliSenseCachePath, this.AdditionalEnvironment));
                 settings_intelliSenseCacheSize.push(setting.intelliSenseCacheSize);
@@ -1317,6 +1352,10 @@ export class DefaultClient implements Client {
                 enhancedColorization: settings_enhancedColorization,
                 suggestSnippets: settings_suggestSnippets,
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
+                doxygen: {
+                    generatedStyle: settings_doxygenGeneratedCommentStyle,
+                    generateOnType: settings_doxygenGenerateOnType
+                },
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
                 workspaceSymbols: workspaceSettings.workspaceSymbols,
@@ -1334,7 +1373,7 @@ export class DefaultClient implements Client {
             },
             middleware: createProtocolFilter(allClients),
             errorHandler: {
-                error: () => ErrorAction.Continue,
+                error: (error, message, count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
                     languageClientCrashTimes.push(Date.now());
                     languageClientCrashedNeedsRestart = true;
@@ -1351,7 +1390,7 @@ export class DefaultClient implements Client {
                             allClients.recreateClients();
                         }
                     }
-                    return CloseAction.DoNotRestart;
+                    return { action: CloseAction.DoNotRestart };
                 }
             }
 
@@ -1424,6 +1463,9 @@ export class DefaultClient implements Client {
                     },
                     space: vscode.workspace.getConfiguration("C_Cpp.vcFormat.space", this.RootUri),
                     wrap: vscode.workspace.getConfiguration("C_Cpp.vcFormat.wrap", this.RootUri)
+                },
+                doxygen: {
+                    ...vscode.workspace.getConfiguration("C_Cpp.doxygen", this.RootUri)
                 }
             },
             editor: {
@@ -1804,7 +1846,7 @@ export class DefaultClient implements Client {
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
         const onFinished: () => void = () => {
             if (requestFile) {
-                this.languageClient.sendNotification(FinishedRequestCustomConfig, requestFile);
+                this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
             }
         };
         const providerId: string | undefined = this.configurationProvider;
@@ -2120,6 +2162,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
+        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
         setupOutputHandlers();
     }
 
@@ -2604,6 +2647,32 @@ export class DefaultClient implements Client {
         this.model.codeAnalysisTotal.Value = total;
     }
 
+    private async insertDoxygenComment(result: GenerateDoxygenCommentResult): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+        const currentFileVersion: number | undefined = openFileVersions.get(editor.document.uri.toString());
+        // Insert the comment only if the cursor has not moved
+        if (result.fileVersion === currentFileVersion &&
+            result.initPosition.line === editor.selection.active.line &&
+            result.initPosition.character === editor.selection.active.character &&
+            result.contents.length > 1) {
+            const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            const edits: vscode.TextEdit[] = [];
+            const maxColumn: number = 99999999;
+            const newRange: vscode.Range = new vscode.Range(editor.selection.start.line, 0, editor.selection.end.line, maxColumn);
+            edits.push(new vscode.TextEdit(newRange, result?.contents));
+            workspaceEdit.set(editor.document.uri, edits);
+            await vscode.workspace.applyEdit(workspaceEdit);
+
+            // Set the cursor position after @brief
+            const newPosition: vscode.Position = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
+            const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
+            editor.selection = newSelection;
+        }
+    }
+
     private doneInitialCustomBrowseConfigurationCheck: boolean = false;
 
     private onConfigurationsChanged(cppProperties: configs.CppProperties): void {
@@ -2949,7 +3018,6 @@ export class DefaultClient implements Client {
                 position: editor.selection.active,
                 next: next
             };
-
             await this.awaitUntilLanguageClientReady();
             const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
@@ -2964,6 +3032,75 @@ export class DefaultClient implements Client {
                 }
             }
         }
+    }
+
+    public async handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, adjustedLine: number | undefined, adjustedColmn: number | undefined, isCursorAboveSignatureLine: boolean): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+
+        if (editor.document.uri.scheme !== "file") {
+            return;
+        }
+
+        if (!(editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+            return;
+        }
+
+        const isCodeAction: boolean = (adjustedLine !== undefined && adjustedLine !== undefined);
+        const initCursorPosition: vscode.Position = isCodeAction ? new vscode.Position(initCursorLine ?? 0, initCursorColumn ?? 0) : editor.selection.active;
+        const params: GenerateDoxygenCommentParams = {
+            uri: editor.document.uri.toString(),
+            position: isCodeAction ? new vscode.Position(adjustedLine ?? 0, adjustedColmn ?? 0) : editor.selection.active,
+            isCodeAction: isCodeAction,
+            isCursorAboveSignatureLine: isCursorAboveSignatureLine
+        };
+        await this.awaitUntilLanguageClientReady();
+        const currentFileVersion: number | undefined = openFileVersions.get(params.uri);
+        if (currentFileVersion === undefined) {
+            return;
+        }
+        const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
+        // Insert the comment only if the comment has contents and the cursor has not moved
+        if (result !== undefined &&
+            initCursorPosition.line === editor.selection.active.line &&
+            initCursorPosition.character === editor.selection.active.character &&
+            result.fileVersion !== undefined &&
+            result.fileVersion === currentFileVersion &&
+            result.contents && result.contents.length > 1) {
+            const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            const edits: vscode.TextEdit[] = [];
+            const maxColumn: number = 99999999;
+            let newRange: vscode.Range;
+            const cursorOnEmptyLineAboveSignature: boolean = result.isCursorAboveSignatureLine;
+            // The reason why we need to set different range is because if cursor is immediately above the signature line, we want the comments to be inserted at the line of cursor and to replace everything on the line.
+            // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
+            if (cursorOnEmptyLineAboveSignature) {
+                if (isCodeAction) {
+                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not correct.
+                    // In most cases, the finalInsertionLine is the line of the signature line.
+                    newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
+                } else {
+                    newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, maxColumn);
+                }
+            } else {
+                newRange = new vscode.Range(result.finalInsertionLine, 0, result.finalInsertionLine, 0);
+            }
+            edits.push(new vscode.TextEdit(newRange, result?.contents));
+            workspaceEdit.set(editor.document.uri, edits);
+            await vscode.workspace.applyEdit(workspaceEdit);
+            // Set the cursor position after @brief
+            let newPosition: vscode.Position;
+            if (cursorOnEmptyLineAboveSignature && isCodeAction) {
+                newPosition = new vscode.Position(result.finalCursorPosition.line - 1, result.finalCursorPosition.character);
+            } else {
+                newPosition = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
+            }
+            const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
+            editor.selection = newSelection;
+        }
+
     }
 
     public async handleCheckForCompiler(): Promise<void> {
@@ -2996,28 +3133,45 @@ export class DefaultClient implements Client {
 
     public async handleRunCodeAnalysisOnActiveFile(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ActiveFile);
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.ActiveFile });
     }
 
     public async handleRunCodeAnalysisOnOpenFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.OpenFiles);
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.OpenFiles });
     }
 
     public async handleRunCodeAnalysisOnAllFiles(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.AllFiles);
+        this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.AllFiles });
     }
 
     public async handleRemoveAllCodeAnalysisProblems(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
         if (removeAllCodeAnalysisProblems()) {
-            this.languageClient.sendNotification(CodeAnalysisNotification, CodeAnalysisScope.ClearSquiggles);
+            this.languageClient.sendNotification(CodeAnalysisNotification, { scope: CodeAnalysisScope.ClearSquiggles });
         }
     }
 
     public async handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
         if (await vscode.workspace.applyEdit(workspaceEdit)) {
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.clangTidyCodeActionFormatFixes) {
+                const editedFiles: Set<vscode.Uri> = new Set<vscode.Uri>();
+                for (const entry of workspaceEdit.entries()) {
+                    editedFiles.add(entry[0]);
+                }
+                const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                for (const uri of editedFiles) {
+                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatDocumentProvider", uri, { onChanges: true });
+                    if (formatTextEdits && formatTextEdits.length > 0) {
+                        formatEdits.set(uri, formatTextEdits);
+                    }
+                }
+                if (formatEdits.size > 0) {
+                    await vscode.workspace.applyEdit(formatEdits);
+                }
+            }
             return this.handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
         }
     }
@@ -3109,7 +3263,7 @@ export class DefaultClient implements Client {
                         } else {
                             workspaceReferences.referencesRequestHasOccurred = true;
                             workspaceReferences.referencesRequestPending = true;
-                            this.languageClient.sendNotification(RequestReferencesNotification, false);
+                            this.languageClient.sendNotification(RequestReferencesNotification);
                         }
                     }
                 }
@@ -3203,7 +3357,7 @@ class NullClient implements Client {
     queueTask<T>(task: () => Thenable<T>): Promise<T> { return Promise.resolve(task()); }
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
     notifyWhenLanguageClientReady(notify: () => void): void { }
-    awaitUntilLanguageClientReady(): void { }
+    awaitUntilLanguageClientReady(): Thenable<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
@@ -3226,6 +3380,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
+    handleGenerateDoxygenComment(): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
