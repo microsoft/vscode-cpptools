@@ -657,9 +657,18 @@
 			}
 		},
 		{
-			"scope": "keyword.other.using",
+			"scope": [
+				"keyword.other.using",
+				"keyword.operator.new"
+			],
 			"settings": {
 				"foreground": "#0000FF"
+			}
+		},
+		{
+			"scope": "punctuation.support.type.property-name",
+			"settings": {
+				"foreground": "#0451A5"
 			}
 		}
 	],

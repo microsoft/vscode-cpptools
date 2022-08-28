@@ -634,15 +634,24 @@
 			}
 		},
 		{
-			"scope": "keyword.other.using",
+			"scope": [
+				"keyword.other.using",
+				"keyword.operator.new"
+			],
 			"settings": {
 				"foreground": "#569CD6"
+			}
+		},
+		{
+			"scope": "punctuation.support.type.property-name",
+			"settings": {
+				"foreground": "#9CDCFE"
 			}
 		}
 	],
 	"semanticHighlighting": true,
 	"semanticTokenColors": {
-		"newOperator": "#C586C0",
+		"newOperator": "#569CD6",
 		"stringLiteral":"#ce9178",
 		"customLiteral": "#DCDCAA",
 		"numberLiteral": "#b5cea8"
