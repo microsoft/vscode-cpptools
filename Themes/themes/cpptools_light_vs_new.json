@@ -670,6 +670,12 @@
 			"settings": {
 				"foreground": "#0451A5"
 			}
+		},
+		{
+			"scope": "entity.name.scope-resolution",
+			"settings": {
+				"foreground": "#000000"
+			}
 		}
 	],
 	"semanticHighlighting": true,

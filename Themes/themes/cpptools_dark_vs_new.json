@@ -647,6 +647,12 @@
 			"settings": {
 				"foreground": "#9CDCFE"
 			}
+		},
+		{
+			"scope": "entity.name.scope-resolution",
+			"settings": {
+				"foreground": "#D4D4D4"
+			}
 		}
 	],
 	"semanticHighlighting": true,
