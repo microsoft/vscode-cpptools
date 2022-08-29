@@ -888,6 +888,17 @@ export function promptReloadWindow(message: string): void {
     });
 }
 
+export function promptForIgnoreSettingsChange(): void {
+    promptIgnoreChange(localize("ignore.workspace.for.changes", "Setting change is ignored at folder level"));
+}
+
+export function promptIgnoreChange(message: string): void {
+    const reload: string = localize("ignore.string", "Dismiss");
+    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
+    });
+}
+
+
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
     return new Promise<tmp.FileResult>((resolve, reject) => {
         tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {

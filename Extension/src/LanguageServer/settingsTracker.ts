@@ -6,7 +6,8 @@
 
 import * as vscode from 'vscode';
 import * as util from '../common';
-
+import { PersistentWorkspaceState } from './persistentState';
+import { CppSettings } from './settings';
 /**
  * track settings changes for telemetry
  */
@@ -38,12 +39,14 @@ export class SettingsTracker {
     private collectSettings(filter: FilterFunction): { [key: string]: string } {
         const settingsResourceScope: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.resource);
         const settingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
-        const selectCorrectlyScopedSettings = (rawSetting: any): vscode.WorkspaceConfiguration =>
+        let caseSensitiveFileSupportLastState: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
+
+        const selectCorrectlyScopedSettings = (rawSetting: any, key: string): vscode.WorkspaceConfiguration =>
             (!rawSetting || rawSetting.scope === "resource" || rawSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
         const result: { [key: string]: string } = {};
         for (const key in settingsResourceScope) {
             const rawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-            const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting);
+            const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting,key);
             const val: any = this.getSetting(correctlyScopedSettings, key);
             if (val === undefined) {
                 continue;
@@ -58,7 +61,7 @@ export class SettingsTracker {
                 for (const subKey in val) {
                     const newKey: string = key + "." + subKey;
                     const newRawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
-                    const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting);
+                    const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting,key);
                     const subVal: any = this.getSetting(correctlyScopedSubSettings, newKey);
                     if (subVal === undefined) {
                         continue;
@@ -82,8 +85,38 @@ export class SettingsTracker {
             if (entry && entry.key && entry.value) {
                 result[entry.key] = entry.value;
             }
+
+                // if (correctlyScopedSettings.inspect("caseSensitiveFileSupport")?.workspaceFolderValue != correctlyScopedSettings.inspect("caseSensitiveFileSupport")?.workspaceValue ){
+                //     util.promptForReloadWindowDueToSettingsChange;
+                // }
         }
 
+        // check workspace for multi in getworkspacevalue()
+        if (vscode.workspace.workspaceFile != undefined){
+            console.log("check");
+        
+        if (result.caseSensitiveFileSupport != undefined){
+            const settings = new CppSettings(this.resource);
+            const workspaceVal: string | undefined = settings.getWorkspaceValue("caseSensitiveFileSupport");
+            
+            if (workspaceVal == caseSensitiveFileSupportLastState.Value){
+                delete result["caseSensitiveFileSupport"];                
+                util.promptForIgnoreSettingsChange();
+            }
+            console.log(workspaceVal);
+        } else {
+
+            const settings = new CppSettings(this.resource);
+            const workspaceVal: string | undefined = settings.getWorkspaceValue("caseSensitiveFileSupport");
+            
+            if (workspaceVal != caseSensitiveFileSupportLastState.Value){
+                if (workspaceVal){
+                    result["caseSensitiveFileSupport"] = workspaceVal;
+                }
+            }
+            console.log(workspaceVal);
+        }
+    }
         return result;
     }
 

@@ -51,7 +51,7 @@ export class PersistentState<T> extends PersistentStateBase<T> {
         super(key, defaultValue, util.extensionContext ? util.extensionContext.globalState : undefined);
     }
 }
-
+// make setting a persistent workspace state and pass memento as a setting
 export class PersistentWorkspaceState<T> extends PersistentStateBase<T> {
     constructor(key: string, defaultValue: T) {
         super(key, defaultValue, util.extensionContext ? util.extensionContext.workspaceState : undefined);

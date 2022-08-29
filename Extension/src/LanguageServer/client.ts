@@ -32,7 +32,7 @@ import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
-import { PersistentState, PersistentFolderState } from './persistentState';
+import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { UI, getUI } from './ui';
 import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
@@ -47,8 +47,10 @@ import * as os from 'os';
 import * as refs from './references';
 import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
-import { CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
-    removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams } from './codeAnalysis';
+import {
+    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
+    removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams
+} from './codeAnalysis';
 import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -947,6 +949,9 @@ export class DefaultClient implements Client {
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
+        // do we need operating system?
+        let isFilePathHandlingCaseSensitivePersistent: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
+        let detectFilePathChange: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
         if (!exeExists) {
@@ -995,6 +1000,7 @@ export class DefaultClient implements Client {
         const settings_dimInactiveRegions: boolean[] = [];
         const settings_enhancedColorization: string[] = [];
         const settings_suggestSnippets: (boolean | undefined)[] = [];
+        const settings_caseSensitiveFileSupport: (string | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
         const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
@@ -1164,6 +1170,7 @@ export class DefaultClient implements Client {
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
                 settings_enhancedColorization.push(workspaceSettings.enhancedColorization ? "Enabled" : "Disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
+                settings_caseSensitiveFileSupport.push(setting.caseSensitiveFileSupport);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
@@ -1201,6 +1208,12 @@ export class DefaultClient implements Client {
             localizedStrings.push(lookupString(i));
         }
 
+        if (workspaceSettings.caseSensitiveFileSupport != isFilePathHandlingCaseSensitivePersistent.Value) {
+            detectFilePathChange = true; 
+            isFilePathHandlingCaseSensitivePersistent.Value = workspaceSettings.caseSensitiveFileSupport!; // value will not be null
+            util.promptForReloadWindowDueToSettingsChange();
+        }
+    
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'c' },
@@ -1209,8 +1222,10 @@ export class DefaultClient implements Client {
             ],
             initializationOptions: {
                 freeMemory: os.freemem() / 1048576,
+                resetFilePathHandling: detectFilePathChange,
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
                 maxCachedProcesses: workspaceSettings.maxCachedProcesses,
+                caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
                 maxMemory: workspaceSettings.maxMemory,
                 intelliSense: {
                     maxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
@@ -1566,6 +1581,11 @@ export class DefaultClient implements Client {
                     if (changedSettings["legacyCompilerArgsBehavior"]) {
                         this.configuration.handleConfigurationChange();
                     }
+                    
+                    if(changedSettings["caseSensitiveFileSupport"]){
+                        util.promptForReloadWindowDueToSettingsChange();
+                    }
+
                     // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
                     // or node-addon-api was installed so prompt for reload.
                     if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
@@ -2528,7 +2548,7 @@ export class DefaultClient implements Client {
                 return false;
             });
         },
-        () => ask.Value = false);
+            () => ask.Value = false);
     }
 
     /**
@@ -3189,7 +3209,8 @@ export class DefaultClient implements Client {
         if (removeCodeAnalysisProblems(identifiersAndUris)) {
             // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
             this.languageClient.sendNotification(RemoveCodeAnalysisProblemsNotification, {
-                identifiersAndUris: identifiersAndUrisCopy, refreshSquigglesOnSave: refreshSquigglesOnSave });
+                identifiersAndUris: identifiersAndUrisCopy, refreshSquigglesOnSave: refreshSquigglesOnSave
+            });
         }
     }
 

@@ -73,6 +73,29 @@ class Settings {
         }
         return undefined;
     }
+
+    public getWorkspaceFolderValue<T>(section: string): T | undefined {
+        const info: any = this.settings.inspect<T>(section);
+        if (info.workspaceFolderValue !== undefined) {
+            return info.workspaceFolderValue;
+        }
+        else if (info.workspaceValue !== undefined) {
+            return info.workspaceValue;
+        } else if (info.globalValue !== undefined) {
+            return info.globalValue;
+        }     
+        return info.defaultValue;
+    }
+
+    public getWorkspaceValue<T>(section: string): T | undefined {
+        const info: any = this.settings.inspect<T>(section);
+        if (info.workspaceValue !== undefined) {
+            return info.workspaceValue;
+        } else if (info.globalValue !== undefined) {
+            return info.globalValue;
+        }     
+        return info.defaultValue;
+    }
 }
 
 export class CppSettings extends Settings {
@@ -203,6 +226,7 @@ export class CppSettings extends Settings {
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
+    public get caseSensitiveFileSupport(): string | undefined { return super.Section.get<string>("caseSensitiveFileSupport"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string | undefined { return super.Section.get<string>("intelliSenseEngineFallback"); }
     public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
