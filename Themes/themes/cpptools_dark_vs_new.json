@@ -583,7 +583,8 @@
 		{
 			"scope": [
 				"keyword.control.directive",
-				"variable.parameter"
+				"variable.parameter",
+				"entity.other.attribute-name.pragma.preprocessor.cpp"
 			],
 			"settings": {
 				"foreground": "#9B9B9B"

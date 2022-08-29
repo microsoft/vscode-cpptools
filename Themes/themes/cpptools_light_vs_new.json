@@ -615,7 +615,8 @@
 			"scope": [
 				"keyword.control.directive",
 				"variable.parameter",
-                "punctuation.definition.directive"
+                "punctuation.definition.directive",
+				"entity.other.attribute-name.pragma.preprocessor.cpp"
 			],
 			"settings": {
 				"foreground": "#808080"
