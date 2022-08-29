@@ -633,7 +633,9 @@
 				"entity.name.scope-resolution",
                 "storage.modifier.pointer",
 				"storage.modifier.reference",
-				"entity.name.function.operator"
+				"entity.name.function.operator",
+				"keyword.other.operator.overload.cpp",
+				"entity.name.operator.cpp"
 			],
 			"settings": {
 				"foreground": "#000000"

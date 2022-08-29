@@ -609,7 +609,9 @@
 				"storage.modifier.pointer",
 				"storage.modifier.reference",
 				"keyword.operator",
-				"entity.name.function.operator"
+				"entity.name.function.operator",
+				"keyword.other.operator.overload.cpp",
+				"entity.name.operator.cpp"
 			],
 			"settings": {
 				"foreground": "#B4B4B4"
