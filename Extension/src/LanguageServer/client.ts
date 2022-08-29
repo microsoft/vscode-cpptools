@@ -1213,7 +1213,6 @@ export class DefaultClient implements Client {
             if (workspaceSettings.caseSensitiveFileSupport) {
                 isFilePathHandlingCaseSensitivePersistent.Value = workspaceSettings.caseSensitiveFileSupport;
             }
-            util.promptForReloadWindowDueToSettingsChange();
         }
 
         const clientOptions: LanguageClientOptions = {

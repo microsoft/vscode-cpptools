@@ -2660,7 +2660,7 @@
           ],
           "default": "default",
           "markdownDescription": "%c_cpp.configuration.caseSensitiveFileSupport.markdownDescription%",
-          "scope": "machine-overridable"
+          "scope": "window"
         },
         "C_Cpp.enhancedColorization": {
           "type": "string",
