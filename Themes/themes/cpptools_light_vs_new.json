@@ -611,6 +611,20 @@
 			}
 		},
         // VISUAL STUDIO 2019 LIGHT
+		{
+			"name": "Control flow / Special keywords",
+			"scope": [
+				"keyword.control",
+				"source.cpp keyword.operator.new",
+				"source.cpp keyword.operator.delete",
+				"keyword.other.using",
+				"keyword.other.operator",
+				"entity.name.operator"
+			],
+			"settings": {
+				"foreground": "#8F08C4"
+			}
+		},
         {
 			"scope": [
 				"keyword.control.directive",
