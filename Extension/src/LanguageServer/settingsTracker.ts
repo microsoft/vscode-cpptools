@@ -39,14 +39,14 @@ export class SettingsTracker {
     private collectSettings(filter: FilterFunction): { [key: string]: string } {
         const settingsResourceScope: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", this.resource);
         const settingsNonScoped: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp");
-        let caseSensitiveFileSupportLastState: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
+        const caseSensitiveFileSupportLastState: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
 
         const selectCorrectlyScopedSettings = (rawSetting: any, key: string): vscode.WorkspaceConfiguration =>
             (!rawSetting || rawSetting.scope === "resource" || rawSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
         const result: { [key: string]: string } = {};
         for (const key in settingsResourceScope) {
             const rawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
-            const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting,key);
+            const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting, key);
             const val: any = this.getSetting(correctlyScopedSettings, key);
             if (val === undefined) {
                 continue;
@@ -61,7 +61,7 @@ export class SettingsTracker {
                 for (const subKey in val) {
                     const newKey: string = key + "." + subKey;
                     const newRawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
-                    const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting,key);
+                    const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting, key);
                     const subVal: any = this.getSetting(correctlyScopedSubSettings, newKey);
                     if (subVal === undefined) {
                         continue;
@@ -86,37 +86,37 @@ export class SettingsTracker {
                 result[entry.key] = entry.value;
             }
 
-                // if (correctlyScopedSettings.inspect("caseSensitiveFileSupport")?.workspaceFolderValue != correctlyScopedSettings.inspect("caseSensitiveFileSupport")?.workspaceValue ){
-                //     util.promptForReloadWindowDueToSettingsChange;
-                // }
+            // if (correctlyScopedSettings.inspect("caseSensitiveFileSupport")?.workspaceFolderValue != correctlyScopedSettings.inspect("caseSensitiveFileSupport")?.workspaceValue ){
+            //     util.promptForReloadWindowDueToSettingsChange;
+            // }
         }
 
         // check workspace for multi in getworkspacevalue()
-        if (vscode.workspace.workspaceFile != undefined){
+        if (vscode.workspace.workspaceFile !== undefined) {
             console.log("check");
-        
-        if (result.caseSensitiveFileSupport != undefined){
-            const settings = new CppSettings(this.resource);
-            const workspaceVal: string | undefined = settings.getWorkspaceValue("caseSensitiveFileSupport");
-            
-            if (workspaceVal == caseSensitiveFileSupportLastState.Value){
-                delete result["caseSensitiveFileSupport"];                
-                util.promptForIgnoreSettingsChange();
-            }
-            console.log(workspaceVal);
-        } else {
 
-            const settings = new CppSettings(this.resource);
-            const workspaceVal: string | undefined = settings.getWorkspaceValue("caseSensitiveFileSupport");
-            
-            if (workspaceVal != caseSensitiveFileSupportLastState.Value){
-                if (workspaceVal){
-                    result["caseSensitiveFileSupport"] = workspaceVal;
+            if (result.caseSensitiveFileSupport !== undefined) {
+                const settings: any = new CppSettings(this.resource);
+                const workspaceVal: string | undefined = settings.getWorkspaceValue("caseSensitiveFileSupport");
+
+                if (workspaceVal === caseSensitiveFileSupportLastState.Value) {
+                    delete result["caseSensitiveFileSupport"];
+                    util.promptForIgnoreSettingsChange();
                 }
+                console.log(workspaceVal);
+            } else {
+
+                const settings: any = new CppSettings(this.resource);
+                const workspaceVal: string | undefined = settings.getWorkspaceValue("caseSensitiveFileSupport");
+
+                if (workspaceVal !== caseSensitiveFileSupportLastState.Value) {
+                    if (workspaceVal) {
+                        result["caseSensitiveFileSupport"] = workspaceVal;
+                    }
+                }
+                console.log(workspaceVal);
             }
-            console.log(workspaceVal);
         }
-    }
         return result;
     }
 
@@ -228,7 +228,7 @@ export class SettingsTracker {
             if (value && value.length > maxSettingLengthForTelemetry) {
                 value = value.substring(0, maxSettingLengthForTelemetry) + "...";
             }
-            return {key: key, value: value};
+            return { key: key, value: value };
         }
         return undefined;
     }

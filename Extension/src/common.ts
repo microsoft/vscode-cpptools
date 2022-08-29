@@ -898,7 +898,6 @@ export function promptIgnoreChange(message: string): void {
     });
 }
 
-
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
     return new Promise<tmp.FileResult>((resolve, reject) => {
         tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {

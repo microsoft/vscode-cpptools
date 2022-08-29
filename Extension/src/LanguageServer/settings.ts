@@ -78,12 +78,11 @@ class Settings {
         const info: any = this.settings.inspect<T>(section);
         if (info.workspaceFolderValue !== undefined) {
             return info.workspaceFolderValue;
-        }
-        else if (info.workspaceValue !== undefined) {
+        } else if (info.workspaceValue !== undefined) {
             return info.workspaceValue;
         } else if (info.globalValue !== undefined) {
             return info.globalValue;
-        }     
+        }
         return info.defaultValue;
     }
 
@@ -93,7 +92,7 @@ class Settings {
             return info.workspaceValue;
         } else if (info.globalValue !== undefined) {
             return info.globalValue;
-        }     
+        }
         return info.defaultValue;
     }
 }
@@ -185,7 +184,7 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); } public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
     public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
@@ -277,7 +276,7 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
-    public get legacyCompilerArgsBehavior(): boolean | undefined  { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
+    public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
         return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;

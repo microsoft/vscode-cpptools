@@ -950,7 +950,7 @@ export class DefaultClient implements Client {
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
         // do we need operating system?
-        let isFilePathHandlingCaseSensitivePersistent: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
+        const isFilePathHandlingCaseSensitivePersistent: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
         let detectFilePathChange: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
@@ -1208,12 +1208,14 @@ export class DefaultClient implements Client {
             localizedStrings.push(lookupString(i));
         }
 
-        if (workspaceSettings.caseSensitiveFileSupport != isFilePathHandlingCaseSensitivePersistent.Value) {
-            detectFilePathChange = true; 
-            isFilePathHandlingCaseSensitivePersistent.Value = workspaceSettings.caseSensitiveFileSupport!; // value will not be null
+        if (workspaceSettings.caseSensitiveFileSupport !== isFilePathHandlingCaseSensitivePersistent.Value) {
+            detectFilePathChange = true;
+            if (workspaceSettings.caseSensitiveFileSupport) {
+                isFilePathHandlingCaseSensitivePersistent.Value = workspaceSettings.caseSensitiveFileSupport;
+            }
             util.promptForReloadWindowDueToSettingsChange();
         }
-    
+
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'c' },
@@ -1581,8 +1583,8 @@ export class DefaultClient implements Client {
                     if (changedSettings["legacyCompilerArgsBehavior"]) {
                         this.configuration.handleConfigurationChange();
                     }
-                    
-                    if(changedSettings["caseSensitiveFileSupport"]){
+
+                    if (changedSettings["caseSensitiveFileSupport"]) {
                         util.promptForReloadWindowDueToSettingsChange();
                     }
 
@@ -2548,7 +2550,7 @@ export class DefaultClient implements Client {
                 return false;
             });
         },
-            () => ask.Value = false);
+        () => ask.Value = false);
     }
 
     /**
