@@ -12,6 +12,7 @@
 	"lldb.framework.not.found": "找不到用于 lldb-mi 的 \"LLDB.framework\"。请安装 XCode 或 XCode 命令行工具。",
 	"debugger.launchConfig": "启动配置:",
 	"vs.code.1.69+.required": "\"deploySteps\" 需要 VS Code 1.69+。",
+	"running.deploy.steps": "正在运行部署步骤...",
 	"pre.Launch.Task": "preLaunchTask: {0}",
 	"build.and.debug.active.file": "生成和调试活动文件",
 	"cl.exe.not.available": "仅当从 VS 开发人员命令提示符处运行 VS Code 时，{0} 生成和调试才可用。",

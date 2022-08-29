@@ -221,5 +221,6 @@
 	"folder_tag": "Dossier",
 	"file_tag": "Fichier",
 	"compiler_default_language_standard_version_old": "Le compilateur a retourné la version standard du langage par défaut : {0}. Étant donné que cette version est ancienne, essaiera d’utiliser une version plus récente {1} par défaut.",
-	"unexpected_output_from_clang_tidy": "Sortie inattendue de clang-tidy : {0}. Attendu : {1}."
+	"unexpected_output_from_clang_tidy": "Sortie inattendue de clang-tidy : {0}. Attendu : {1}.",
+	"generate_doxygen_comment": "Générer un commentaire Doxygen"
 }
