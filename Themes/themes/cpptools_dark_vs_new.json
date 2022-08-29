@@ -594,7 +594,9 @@
 				"meta.preprocessor",
 				"entity.name.namespace",
 				"variable.other.global",
-				"variable.other.property"
+				"variable.other.property",
+				"variable.other.constant",
+				"entity.name.scope-resolution"
 			],
 			"settings": {
 				"foreground": "#D4D4D4"
@@ -649,9 +651,9 @@
 			}
 		},
 		{
-			"scope": "entity.name.scope-resolution",
+			"scope": "variable.other.enummember",
 			"settings": {
-				"foreground": "#D4D4D4"
+				"foreground": "#B5CEA8"
 			}
 		}
 	],

@@ -627,6 +627,9 @@
 				"entity.name.namespace",
 				"variable.other.global",
 				"variable.other.property",
+				"variable.other.constant",
+				"variable.other.enummember",
+				"entity.name.scope-resolution",
                 "storage.modifier.pointer",
 				"storage.modifier.reference",
 				"entity.name.function.operator"
@@ -672,9 +675,9 @@
 			}
 		},
 		{
-			"scope": "entity.name.scope-resolution",
+			"scope": "variable.other.enummember",
 			"settings": {
-				"foreground": "#000000"
+				"foreground": "#098658"
 			}
 		}
 	],
