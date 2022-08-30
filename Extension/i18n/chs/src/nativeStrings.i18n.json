@@ -221,5 +221,6 @@
 	"folder_tag": "文件夹",
 	"file_tag": "文件",
 	"compiler_default_language_standard_version_old": "编译器返回默认语言标准版本:{0}。由于此版本是旧版本，因此将尝试使用较新版本 {1} 作为默认版本。",
-	"unexpected_output_from_clang_tidy": "来自 clang-tidy 的意外输出:{0}。应为:{1}。"
+	"unexpected_output_from_clang_tidy": "来自 clang-tidy 的意外输出:{0}。应为:{1}。",
+	"generate_doxygen_comment": "生成 Doxygen 注释"
 }
