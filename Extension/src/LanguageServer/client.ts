@@ -409,7 +409,6 @@ export interface GenerateDoxygenCommentParams {
     isCodeAction: boolean;
     isCursorAboveSignatureLine: boolean;
 }
-
 export interface GenerateDoxygenCommentResult {
     contents: string;
     initPosition: Position;
@@ -950,8 +949,8 @@ export class DefaultClient implements Client {
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
         // do we need operating system?
-        const isFilePathHandlingCaseSensitivePersistent: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
-        let detectFilePathChange: boolean = false;
+        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
+        let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
         if (!exeExists) {
@@ -1208,10 +1207,10 @@ export class DefaultClient implements Client {
             localizedStrings.push(lookupString(i));
         }
 
-        if (workspaceSettings.caseSensitiveFileSupport !== isFilePathHandlingCaseSensitivePersistent.Value) {
-            detectFilePathChange = true;
+        if (workspaceSettings.caseSensitiveFileSupport !== currentCaseSensitiveFileSupport.Value) {
+            resetDatabase = true;
             if (workspaceSettings.caseSensitiveFileSupport) {
-                isFilePathHandlingCaseSensitivePersistent.Value = workspaceSettings.caseSensitiveFileSupport;
+                currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
             }
         }
 
@@ -1223,7 +1222,7 @@ export class DefaultClient implements Client {
             ],
             initializationOptions: {
                 freeMemory: os.freemem() / 1048576,
-                resetFilePathHandling: detectFilePathChange,
+                resetFilePathHandling: resetDatabase,
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
                 maxCachedProcesses: workspaceSettings.maxCachedProcesses,
                 caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,

@@ -73,28 +73,6 @@ class Settings {
         }
         return undefined;
     }
-
-    public getWorkspaceFolderValue<T>(section: string): T | undefined {
-        const info: any = this.settings.inspect<T>(section);
-        if (info.workspaceFolderValue !== undefined) {
-            return info.workspaceFolderValue;
-        } else if (info.workspaceValue !== undefined) {
-            return info.workspaceValue;
-        } else if (info.globalValue !== undefined) {
-            return info.globalValue;
-        }
-        return info.defaultValue;
-    }
-
-    public getWorkspaceValue<T>(section: string): T | undefined {
-        const info: any = this.settings.inspect<T>(section);
-        if (info.workspaceValue !== undefined) {
-            return info.workspaceValue;
-        } else if (info.globalValue !== undefined) {
-            return info.globalValue;
-        }
-        return info.defaultValue;
-    }
 }
 
 export class CppSettings extends Settings {
