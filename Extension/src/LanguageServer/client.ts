@@ -949,7 +949,7 @@ export class DefaultClient implements Client {
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
         // do we need operating system?
-        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.isFilePathHandlingCaseSensitivePersistent", "default");
+        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.currentCaseSensitiveFileSupport", "default");
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
