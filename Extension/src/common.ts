@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
+import * as which from 'which';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as child_process from 'child_process';
@@ -1506,4 +1507,16 @@ export interface ISshLocalForwardInfo {
     hostPort?: number | string;
     localSocket?: string;
     remoteSocket?: string;
+}
+
+export function whichAsync(name: string): Promise<string | undefined> {
+    return new Promise<string | undefined>(resolve => {
+        which(name, (err, resolved) => {
+            if (err) {
+                resolve(undefined);
+            } else {
+                resolve(resolved);
+            }
+        });
+    });
 }

@@ -410,6 +410,15 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             configs = await Promise.all(buildTasks.map<Promise<CppDebugConfiguration>>(async task => {
                 const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
                 const compilerPath: string = definition.command;
+                // Filter out the tasks that has an invalid compiler path.
+                const compilerPathExists: boolean = path.isAbsolute(compilerPath) ?
+                    // Absolute path, just check if it exists
+                    await util.checkFileExists(compilerPath) :
+                    // Non-absolute. Check on $PATH
+                    ((await util.whichAsync(compilerPath)) !== undefined);
+                if (!compilerPathExists) {
+                    console.log("Unable to find {0}. {1} task is ignored.", compilerPath, definition.label);
+                }
                 const compilerName: string = path.basename(compilerPath);
                 const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
                 newConfig.existing = false;
