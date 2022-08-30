@@ -274,8 +274,14 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
-    const changedSettings: { [key: string]: string } = clients.getDefaultClient().onDidChangeSettings(event);
-    const newUpdateChannel: string = changedSettings['updateChannel'];
+    const defaultClient: Client = clients.getDefaultClient();
+    const changedDefaultClientSettings: { [key: string]: string } = defaultClient.onDidChangeSettings(event);
+    clients.forEach(client => {
+        if (client !== defaultClient) {
+            client.onDidChangeSettings(event);
+        }
+    });
+    const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
     if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
         UpdateInsidersAccess();
     }

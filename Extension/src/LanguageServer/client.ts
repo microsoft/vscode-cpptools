@@ -602,7 +602,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
-const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
+const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined | null, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
 // Notifications to the server
@@ -1037,16 +1037,18 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(allClients), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
+                        // Because formatting and codeFolding can very per resource, we need to register these provides
+                        // and leave them registered. The decisions of whether to provide results needs to be made on a per folder basis.
+                        // if (settings.formattingEngine !== "Disabled") {
+                        this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
+                        this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                        this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                        // }
+                        // if (settings.codeFolding) {
+                        this.codeFoldingProvider = new FoldingRangeProvider(this);
+                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
+                        // }
                         const settings: CppSettings = new CppSettings();
-                        if (settings.formattingEngine !== "Disabled") {
-                            this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
-                            this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                            this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
-                        }
-                        if (settings.codeFolding) {
-                            this.codeFoldingProvider = new FoldingRangeProvider(this);
-                            this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
-                        }
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
                             this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
@@ -1324,87 +1326,86 @@ export class DefaultClient implements Client {
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
         const defaultClient: Client = clientCollection.getDefaultClient();
-        if (this !== defaultClient) {
-            // Because settings changes may result in providers becoming registered/deregistered, and those
-            // providers are owned by the default client, we always need to defer processing of onDidChangeSettings
-            // to the default client.
-            return defaultClient.onDidChangeSettings(event);
+        if (this === defaultClient) {
+            // Only send the updated settings information once, as it includes values for all folders.
+            this.sendDidChangeSettings();
         }
-        this.sendDidChangeSettings();
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(DidChangeSettingsNotification, { settings: this.getAllSettings(), workspaceFolderUri: this.RootPath });
             if (Object.keys(changedSettings).length > 0) {
-                if (changedSettings["commentContinuationPatterns"]) {
-                    updateLanguageConfigurations();
-                }
-                if (changedSettings["loggingLevel"]) {
-                    const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== "None" && this.loggingLevel !== "Error";
-                    const newLoggingLevel: string | undefined = changedSettings["loggingLevel"];
-                    this.loggingLevel = newLoggingLevel;
-                    const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
-                    if (oldLoggingLevelLogged || newLoggingLevelLogged) {
-                        const out: Logger = getOutputChannelLogger();
-                        out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
+                if (this === defaultClient) {
+                    if (changedSettings["commentContinuationPatterns"]) {
+                        updateLanguageConfigurations();
                     }
-                }
-                const settings: CppSettings = new CppSettings();
-                if (changedSettings["formatting"]) {
-                    const folderSettings: CppSettings = new CppSettings(this.RootUri);
-                    if (folderSettings.formattingEngine !== "Disabled") {
-                        // Because the setting is not a bool, changes do not always imply we need to
-                        // register/unregister the providers.
-                        if (!this.documentFormattingProviderDisposable) {
-                            this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
-                        }
-                        if (!this.formattingRangeProviderDisposable) {
-                            this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                        }
-                        if (!this.onTypeFormattingProviderDisposable) {
-                            this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
-                        }
-                    } else {
-                        if (this.documentFormattingProviderDisposable) {
-                            this.documentFormattingProviderDisposable.dispose();
-                            this.documentFormattingProviderDisposable = undefined;
-                        }
-                        if (this.formattingRangeProviderDisposable) {
-                            this.formattingRangeProviderDisposable.dispose();
-                            this.formattingRangeProviderDisposable = undefined;
-                        }
-                        if (this.onTypeFormattingProviderDisposable) {
-                            this.onTypeFormattingProviderDisposable.dispose();
-                            this.onTypeFormattingProviderDisposable = undefined;
+                    if (changedSettings["loggingLevel"]) {
+                        const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== "None" && this.loggingLevel !== "Error";
+                        const newLoggingLevel: string | undefined = changedSettings["loggingLevel"];
+                        this.loggingLevel = newLoggingLevel;
+                        const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
+                        if (oldLoggingLevelLogged || newLoggingLevelLogged) {
+                            const out: Logger = getOutputChannelLogger();
+                            out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings["loggingLevel"]));
                         }
                     }
-                }
-                if (changedSettings["codeFolding"]) {
-                    if (settings.codeFolding) {
-                        this.codeFoldingProvider = new FoldingRangeProvider(this);
-                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
-                    } else if (this.codeFoldingProviderDisposable) {
-                        this.codeFoldingProviderDisposable.dispose();
-                        this.codeFoldingProviderDisposable = undefined;
-                        this.codeFoldingProvider = undefined;
+                    const settings: CppSettings = new CppSettings();
+                    // if (changedSettings["formatting"]) {
+                    //     const folderSettings: CppSettings = new CppSettings(this.RootUri);
+                    //     if (folderSettings.formattingEngine !== "Disabled") {
+                    //         // Because the setting is not a bool, changes do not always imply we need to
+                    //         // register/unregister the providers.
+                    //         if (!this.documentFormattingProviderDisposable) {
+                    //             this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
+                    //         }
+                    //         if (!this.formattingRangeProviderDisposable) {
+                    //             this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                    //         }
+                    //         if (!this.onTypeFormattingProviderDisposable) {
+                    //             this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                    //         }
+                    //     } else {
+                    //         if (this.documentFormattingProviderDisposable) {
+                    //             this.documentFormattingProviderDisposable.dispose();
+                    //             this.documentFormattingProviderDisposable = undefined;
+                    //         }
+                    //         if (this.formattingRangeProviderDisposable) {
+                    //             this.formattingRangeProviderDisposable.dispose();
+                    //             this.formattingRangeProviderDisposable = undefined;
+                    //         }
+                    //         if (this.onTypeFormattingProviderDisposable) {
+                    //             this.onTypeFormattingProviderDisposable.dispose();
+                    //             this.onTypeFormattingProviderDisposable = undefined;
+                    //         }
+                    //     }
+                    // }
+                    // if (changedSettings["codeFolding"]) {
+                    //     if (settings.codeFolding) {
+                    //         this.codeFoldingProvider = new FoldingRangeProvider(this);
+                    //         this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
+                    //     } else if (this.codeFoldingProviderDisposable) {
+                    //         this.codeFoldingProviderDisposable.dispose();
+                    //         this.codeFoldingProviderDisposable = undefined;
+                    //         this.codeFoldingProvider = undefined;
+                    //     }
+                    // }
+                    if (changedSettings["enhancedColorization"]) {
+                        if (settings.enhancedColorization && this.semanticTokensLegend) {
+                            this.semanticTokensProvider = new SemanticTokensProvider(this);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
+                        } else if (this.semanticTokensProviderDisposable) {
+                            this.semanticTokensProviderDisposable.dispose();
+                            this.semanticTokensProviderDisposable = undefined;
+                            this.semanticTokensProvider = undefined;
+                        }
                     }
-                }
-                if (changedSettings["enhancedColorization"]) {
-                    if (settings.enhancedColorization && this.semanticTokensLegend) {
-                        this.semanticTokensProvider = new SemanticTokensProvider(this);
-                        this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
-                    } else if (this.semanticTokensProviderDisposable) {
-                        this.semanticTokensProviderDisposable.dispose();
-                        this.semanticTokensProviderDisposable = undefined;
-                        this.semanticTokensProvider = undefined;
+                    // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
+                    // or node-addon-api was installed so prompt for reload.
+                    if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
+                        util.promptForReloadWindowDueToSettingsChange();
                     }
                 }
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
-                }
-                // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
-                // or node-addon-api was installed so prompt for reload.
-                if (changedSettings["addNodeAddonIncludePaths"] && settings.addNodeAddonIncludePaths && this.configuration.nodeAddonIncludesFound() === 0) {
-                    util.promptForReloadWindowDueToSettingsChange();
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2853,7 +2854,7 @@ export class DefaultClient implements Client {
                 next: next
             };
             await this.awaitUntilLanguageClientReady();
-            const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
+            const response: Position | undefined | null = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
                 const p: vscode.Position = new vscode.Position(response.line, response.character);
                 const r: vscode.Range = new vscode.Range(p, p);
