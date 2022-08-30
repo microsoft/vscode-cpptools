@@ -584,8 +584,6 @@
 			"name": "Control flow / Special keywords",
 			"scope": [
 				"keyword.control",
-				"source.cpp keyword.operator.new",
-				"keyword.operator.delete",
 				"keyword.other.using",
 				"keyword.other.operator",
 				"entity.name.operator"
@@ -655,7 +653,9 @@
 		{
 			"scope": [
 				"keyword.other.using",
-				"keyword.operator.new"
+				"keyword.operator.new",
+				"keyword.operator.new.cpp",
+				"keyword.operator.delete.cpp"
 			],
 			"settings": {
 				"foreground": "#569CD6"
