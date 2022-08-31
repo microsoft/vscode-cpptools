@@ -649,7 +649,8 @@
 				"entity.name.function.operator",
 				"keyword.other.operator.overload.cpp",
 				"entity.name.operator.cpp",
-				"entity.name.operator.type.reference.cpp"
+				"entity.name.operator.type.reference.cpp",
+				"entity.name.operator.type.pointer.cpp"
 			],
 			"settings": {
 				"foreground": "#000000"
