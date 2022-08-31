@@ -22,7 +22,8 @@
 		"tab.lastPinnedBorder": "#ccc3",
 		"list.activeSelectionIconForeground": "#FFF",
 		"editorLineNumber.foreground": "#2b91af",
-		"editorLineNumber.activeForeground": "#2b91af"
+		"editorLineNumber.activeForeground": "#2b91af",
+		"terminal.inactiveSelectionBackground": "#3A3D41"
 	},
 	"tokenColors": [
 		// VISUAL STUDIO DARK

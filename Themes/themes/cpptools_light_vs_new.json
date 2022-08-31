@@ -28,7 +28,8 @@
 		"list.activeSelectionIconForeground": "#FFF",
 		"list.focusAndSelectionOutline": "#90C2F9",
         "editorLineNumber.foreground": "#2b91af",
-		"editorLineNumber.activeForeground": "#2b91af"
+		"editorLineNumber.activeForeground": "#2b91af",
+		"terminal.inactiveSelectionBackground": "#E5EBF1"
 	},
 	"tokenColors": [
         // VISUAL STUDIO LIGHT
