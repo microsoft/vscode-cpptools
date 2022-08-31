@@ -602,7 +602,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
-const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined | null, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
+const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
 // Notifications to the server
@@ -2854,7 +2854,7 @@ export class DefaultClient implements Client {
                 next: next
             };
             await this.awaitUntilLanguageClientReady();
-            const response: Position | undefined | null = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
+            const response: Position | undefined = await this.languageClient.sendRequest(GoToDirectiveInGroupRequest, params);
             if (response) {
                 const p: vscode.Position = new vscode.Position(response.line, response.character);
                 const r: vscode.Range = new vscode.Range(p, p);
