@@ -221,5 +221,6 @@
 	"folder_tag": "Carpeta",
 	"file_tag": "Archivo",
 	"compiler_default_language_standard_version_old": "El compilador devolvió la versión estándar del lenguaje predeterminado: {0}. Dado que esta versión es antigua, se intentará usar la versión {1}, más reciente, como predeterminada.",
-	"unexpected_output_from_clang_tidy": "Salida inesperada de Clang-Tidy: {0}. Se esperaba: {1}."
+	"unexpected_output_from_clang_tidy": "Salida inesperada de Clang-Tidy: {0}. Se esperaba: {1}.",
+	"generate_doxygen_comment": "Generar comentario de Doxygen"
 }
