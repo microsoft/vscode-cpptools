@@ -221,5 +221,6 @@
 	"folder_tag": "Папка",
 	"file_tag": "Файл",
 	"compiler_default_language_standard_version_old": "Компилятор вернул стандартную версию языка по умолчанию: {0}. Так как эта версия устарела, будет предпринята попытка использовать более новую версию {1} по умолчанию.",
-	"unexpected_output_from_clang_tidy": "Непредусмотренные выходные данные Clang-Tidy: {0}. Ожидалось: {1}."
+	"unexpected_output_from_clang_tidy": "Непредусмотренные выходные данные Clang-Tidy: {0}. Ожидалось: {1}.",
+	"generate_doxygen_comment": "Создать комментарий Doxygen"
 }
