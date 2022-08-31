@@ -1581,7 +1581,7 @@ export class DefaultClient implements Client {
                         this.configuration.handleConfigurationChange();
                     }
 
-                    if (changedSettings["caseSensitiveFileSupport"]) {
+                    if (changedSettings["caseSensitiveFileSupport"] && util.isWindows()) {
                         util.promptForReloadWindowDueToSettingsChange();
                     }
 
