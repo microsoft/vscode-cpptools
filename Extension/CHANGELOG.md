@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.12.4: August 31, 2022
+### Other
+* Revert changes to telemetry key format. [PR #9822](https://github.com/microsoft/vscode-cpptools/pull/9822)
+
 ## Version 1.12.3: August 30, 2022
 ### New Features
 * Add Doxygen comment generation via command, context menu, code action, or typing. [#5683](https://github.com/microsoft/vscode-cpptools/issues/5683)
