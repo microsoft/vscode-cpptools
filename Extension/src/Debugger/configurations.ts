@@ -179,7 +179,7 @@ export class MIConfigurations extends Configuration {
         const name: string = `(${this.MIMode}) ${localize("attach.string", "Attach").replace(/\"/g, "\\\"")}`;
 
         const body: string = formatString(`{
-\t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))},
+\t${indentJsonString(createAttachString(name, this.miDebugger, this.executable))}
 \t"MIMode": "${this.MIMode}"{0}{1}
 }`, [this.miDebugger === "cppdbg" && os.platform() === "win32" ? `,${os.EOL}\t"miDebuggerPath": "/path/to/gdb"` : "",
             this.additionalProperties ? `,${os.EOL}\t${indentJsonString(this.additionalProperties)}` : ""]);
