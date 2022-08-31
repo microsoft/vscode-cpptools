@@ -648,7 +648,8 @@
 				"storage.modifier.reference",
 				"entity.name.function.operator",
 				"keyword.other.operator.overload.cpp",
-				"entity.name.operator.cpp"
+				"entity.name.operator.cpp",
+				"entity.name.operator.type.reference.cpp"
 			],
 			"settings": {
 				"foreground": "#000000"
