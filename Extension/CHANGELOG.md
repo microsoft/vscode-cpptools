@@ -1,8 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.12.5: September 1, 2022
+### Other
+* Restore changes to telemetry key. [PR #9833](https://github.com/microsoft/vscode-cpptools/pull/9822)
+
 ## Version 1.12.4: August 31, 2022
 ### Other
-* Revert changes to telemetry key format. [PR #9822](https://github.com/microsoft/vscode-cpptools/pull/9822)
+* Revert changes to telemetry key. [PR #9822](https://github.com/microsoft/vscode-cpptools/pull/9822)
 
 ## Version 1.12.3: August 30, 2022
 ### New Features
