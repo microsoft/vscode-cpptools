@@ -948,7 +948,7 @@ export class DefaultClient implements Client {
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
-        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<string> = new PersistentWorkspaceState<string>("CPP.currentCaseSensitiveFileSupport", "default");
+        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
@@ -998,7 +998,6 @@ export class DefaultClient implements Client {
         const settings_dimInactiveRegions: boolean[] = [];
         const settings_enhancedColorization: string[] = [];
         const settings_suggestSnippets: (boolean | undefined)[] = [];
-        const settings_caseSensitiveFileSupport: (string | undefined)[] = [];
         const settings_exclusionPolicy: (string | undefined)[] = [];
         const settings_preferredPathSeparator: (string | undefined)[] = [];
         const settings_doxygenGeneratedCommentStyle: (string | undefined)[] = [];
@@ -1168,7 +1167,6 @@ export class DefaultClient implements Client {
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
                 settings_enhancedColorization.push(workspaceSettings.enhancedColorization ? "Enabled" : "Disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
-                settings_caseSensitiveFileSupport.push(setting.caseSensitiveFileSupport);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
                 settings_doxygenGeneratedCommentStyle.push(setting.doxygenGeneratedCommentStyle);
@@ -1208,9 +1206,7 @@ export class DefaultClient implements Client {
 
         if (workspaceSettings.caseSensitiveFileSupport !== currentCaseSensitiveFileSupport.Value) {
             resetDatabase = true;
-            if (workspaceSettings.caseSensitiveFileSupport) {
-                currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
-            }
+            currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
         }
 
         const clientOptions: LanguageClientOptions = {

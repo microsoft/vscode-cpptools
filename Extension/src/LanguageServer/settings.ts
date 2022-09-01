@@ -162,7 +162,7 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); } 
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
     public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
     public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
@@ -204,7 +204,6 @@ export class CppSettings extends Settings {
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
-    public get caseSensitiveFileSupport(): string | undefined { return super.Section.get<string>("caseSensitiveFileSupport"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
     public get intelliSenseEngineFallback(): string | undefined { return super.Section.get<string>("intelliSenseEngineFallback"); }
     public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
@@ -255,6 +254,8 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
+    public get caseSensitiveFileSupport(): boolean { return super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
+
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
