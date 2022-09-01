@@ -2333,7 +2333,7 @@
           "markdownDescription": "%c_cpp.configuration.simplifyStructuredComments.markdownDescription%",
           "scope": "application"
         },
-        "C_Cpp.doxygen.generateOnType":{
+        "C_Cpp.doxygen.generateOnType": {
           "type": "boolean",
           "default": true,
           "description": "%c_cpp.configuration.doxygen.generateOnType.description%",
@@ -2341,13 +2341,13 @@
         },
         "C_Cpp.doxygen.generatedStyle": {
           "type": "string",
-          "enum":[
+          "enum": [
             "///",
             "/**",
             "/*!",
             "//!"
           ],
-          "default":"///",
+          "default": "///",
           "description": "%c_cpp.configuration.doxygen.generatedStyle.description%",
           "scope": "resource"
         },
@@ -2897,7 +2897,7 @@
         "icon": "$(debug-configure)"      
       },
       {
-        "command": "C_Cpp.GenerateDoxygenComment", 
+        "command": "C_Cpp.GenerateDoxygenComment",
         "title": "%c_cpp.command.GenerateDoxygenComment.title%",
         "category": "C/C++"
       }
@@ -3355,7 +3355,7 @@
                   "anyOf": [
                     {
                       "type": "object",
-                      "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+                      "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
                       "default": {},
                       "required": [
                         "type",
@@ -3366,10 +3366,11 @@
                       "properties": {
                         "type": {
                           "type": "string",
-                          "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
                           "default": "",
                           "enum": [
-                            "scp"
+                            "scp",
+                            "rsync"
                           ]
                         },
                         "files": {
@@ -3384,7 +3385,7 @@
                               }
                             }
                           ],
-                          "description": "%c_cpp.debuggers.deploySteps.scp.files.description%",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.files.description%",
                           "default": ""
                         },
                         "host": {
@@ -3512,19 +3513,57 @@
                         },
                         "targetDir": {
                           "type": "string",
-                          "description": "%c_cpp.debuggers.deploySteps.scp.targetDir.description%",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.targetDir.description%",
                           "default": ""
                         },
-                        "scpPath": {
-                          "type": "string",
-                          "description": "%c_cpp.debuggers.deploySteps.scp.scpPath.description%",
-                          "default": ""
+                        "recursive": {
+                          "type": "boolean",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
+                          "default": "true"
                         },
                         "debug": {
                           "type": "boolean",
                           "description": "%c_cpp.debuggers.deploySteps.debug%"
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "type": {
+                                "const": "scp"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "scpPath": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.deploySteps.copyFile.scpPath.description%",
+                                "default": ""
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "type": {
+                                "const": "rsync"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "rsyncPath": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description%",
+                                "default": ""
+                              }
+                            }
+                          }
+                        }
+                      ]
                     },
                     {
                       "type": "object",
@@ -4034,7 +4073,7 @@
                   "anyOf": [
                     {
                       "type": "object",
-                      "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+                      "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
                       "default": {},
                       "required": [
                         "type",
@@ -4045,10 +4084,11 @@
                       "properties": {
                         "type": {
                           "type": "string",
-                          "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
                           "default": "",
                           "enum": [
-                            "scp"
+                            "scp",
+                            "rsync"
                           ]
                         },
                         "files": {
@@ -4063,7 +4103,7 @@
                               }
                             }
                           ],
-                          "description": "%c_cpp.debuggers.deploySteps.scp.files.description%",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.files.description%",
                           "default": ""
                         },
                         "host": {
@@ -4191,19 +4231,57 @@
                         },
                         "targetDir": {
                           "type": "string",
-                          "description": "%c_cpp.debuggers.deploySteps.scp.targetDir.description%",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.targetDir.description%",
                           "default": ""
                         },
-                        "scpPath": {
-                          "type": "string",
-                          "description": "%c_cpp.debuggers.deploySteps.scp.scpPath.description%",
-                          "default": ""
+                        "recursive": {
+                          "type": "boolean",
+                          "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
+                          "default": "true"
                         },
                         "debug": {
                           "type": "boolean",
                           "description": "%c_cpp.debuggers.deploySteps.debug%"
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "type": {
+                                "const": "scp"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "scpPath": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.deploySteps.copyFile.scpPath.description%",
+                                "default": ""
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "type": {
+                                "const": "rsync"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "rsyncPath": {
+                                "type": "string",
+                                "description": "%c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description%",
+                                "default": ""
+                              }
+                            }
+                          }
+                        }
+                      ]
                     },
                     {
                       "type": "object",
