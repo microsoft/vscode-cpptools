@@ -9,7 +9,7 @@ import * as os from 'os';
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import * as Telemetry from './telemetry';
-import HttpsProxyAgent = require('https-proxy-agent');
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
