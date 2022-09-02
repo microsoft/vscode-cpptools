@@ -26,7 +26,6 @@ import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
-import { UpdateInsidersAccess } from '../main';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1021,4 +1020,43 @@ export function getClients(): ClientCollection {
 
 export function getActiveClient(): Client {
     return clients.ActiveClient;
+}
+
+export function UpdateInsidersAccess(): void {
+    let installPrerelease: boolean = false;
+
+    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
+    const settings: CppSettings = new CppSettings();
+    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
+    if (settings.updateChannel === "Insiders") {
+        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
+        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+            installPrerelease = true;
+            migratedInsiders.Value = true;
+        }
+    } else {
+        // Reset persistent value, so we register again if they switch to "Insiders" again.
+        if (migratedInsiders.Value) {
+            migratedInsiders.Value = false;
+        }
+    }
+
+    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
+    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
+    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
+    if (util.isVsCodeInsiders()) {
+        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
+        if (!insidersMitigationDone.Value) {
+            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+                if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
+                    installPrerelease = true;
+                }
+            }
+            insidersMitigationDone.Value = true;
+        }
+    }
+
+    if (installPrerelease) {
+        vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+    }
 }
