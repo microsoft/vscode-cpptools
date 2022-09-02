@@ -17,7 +17,7 @@ import { cachedEditorConfigLookups, cachedEditorConfigSettings } from './client'
 import * as editorConfig from 'editorconfig';
 import { PersistentState } from './persistentState';
 import * as nls from 'vscode-nls';
-
+import * as util from '../common';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -254,7 +254,7 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
-    public get caseSensitiveFileSupport(): boolean { return super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
+    public get caseSensitiveFileSupport(): boolean { return util.isWindows() || super.Section.get<string>("caseSensitiveFileSupport") == "enabled" ; }
 
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 

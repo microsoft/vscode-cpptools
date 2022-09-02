@@ -1217,7 +1217,7 @@ export class DefaultClient implements Client {
             ],
             initializationOptions: {
                 freeMemory: os.freemem() / 1048576,
-                resetFilePathHandling: resetDatabase,
+                resetDatabase: resetDatabase,
                 maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
                 maxCachedProcesses: workspaceSettings.maxCachedProcesses,
                 caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
