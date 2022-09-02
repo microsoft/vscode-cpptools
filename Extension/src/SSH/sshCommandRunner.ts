@@ -19,7 +19,8 @@ import {
     ContinueOnInteractor,
     ISystemInteractor,
     IInteraction,
-    autoFilledPasswordForUsers
+    autoFilledPasswordForUsers,
+    ConnectionFailureInteractor
 } from './commandInteractors';
 import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
 import { getOutputChannelLogger } from '../logger';
@@ -203,7 +204,8 @@ export async function runSshTerminalCommandWithLogin(
             new DifferingHostKeyInteractor(showDifferingHostConfirmation),
             new PasswordInteractor(host, showPasswordInputBox),
             new TwoFacInteractor(showVerificationCodeInputBox),
-            new DuoTwoFacInteractor(showVerificationCodeInputBox)
+            new DuoTwoFacInteractor(showVerificationCodeInputBox),
+            new ConnectionFailureInteractor(host.hostName)
         );
     }
 

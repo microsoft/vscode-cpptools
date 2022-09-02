@@ -24,7 +24,7 @@ import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
-import { scp, ssh } from '../SSH/commands';
+import { rsync, scp, ssh } from '../SSH/commands';
 import * as glob from 'glob';
 import { promisify } from 'util';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
@@ -35,6 +35,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 enum StepType {
     scp = 'scp',
+    rsync = 'rsync',
     ssh = 'ssh',
     shell = 'shell',
     remoteShell = 'remoteShell',
@@ -1011,7 +1012,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Skip steps that doesn't match current launch mode. Explicit true/false check, since a step is always run when debug is undefined.
             return true;
         }
-        switch (step.type) {
+        const stepType: StepType = step.type;
+        switch (stepType) {
             case StepType.command: {
                 // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
                 if (step.args && !Array.isArray(step.args)) {
@@ -1021,12 +1023,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
                 return !returnCode;
             }
-            case StepType.scp: {
+            case StepType.scp:
+            case StepType.rsync: {
+                const isScp: boolean = stepType === StepType.scp;
                 if (!step.files || !step.targetDir || !step.host) {
-                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.copyFile', '"host", "files", and "targetDir" are required in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
-                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 let files: vscode.Uri[] = [];
                 if (util.isString(step.files)) {
@@ -1036,10 +1040,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
                     }
                 } else {
-                    logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
+                    logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.copyFile', '"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
-                const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, config.scpPath, jumpHosts, cancellationToken);
+
+                let scpResult: util.ProcessReturnType;
+                if (isScp) {
+                    scpResult = await scp(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
+                } else {
+                    scpResult = await rsync(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
+                }
+
                 if (!scpResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }
@@ -1050,7 +1061,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
                     return false;
                 }
-                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
                 const continueOn: string = step.continueOn;

@@ -45,6 +45,9 @@ const config = {
                     }
                 }
             }]
+        },{
+            test: /.node$/,
+            loader: 'node-loader',
         }]
     },
     optimization: {
