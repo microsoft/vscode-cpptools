@@ -405,7 +405,7 @@ export interface GenerateDoxygenCommentParams {
     uri: string;
     position: Position;
     isCodeAction: boolean;
-    isCursorAboveSignatureLine: boolean;
+    isCursorAboveSignatureLine: boolean | undefined;
 }
 
 export interface GenerateDoxygenCommentResult {
@@ -416,6 +416,12 @@ export interface GenerateDoxygenCommentResult {
     fileVersion: number;
     isCursorAboveSignatureLine: boolean;
 }
+
+export interface DoxygenCodeActionCommandArguments {
+    initialCursor: Position;
+    adjustedCursor: Position;
+    isCursorAboveSignatureLine: boolean;
+};
 
 interface SetTemporaryTextDocumentLanguageParams {
     path: string;
@@ -809,7 +815,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
-    handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, line: number | undefined, column: number | undefined, insertNewLineAtBeginning: boolean | undefined): Promise<void>;
+    handleGenerateDoxygenComment(codeActionArguments: DoxygenCodeActionCommandArguments | undefined): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -1980,7 +1986,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e.referencesResult));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(requestFile));
@@ -2869,7 +2875,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleGenerateDoxygenComment(initCursorLine: number | undefined, initCursorColumn: number | undefined, adjustedLine: number | undefined, adjustedColmn: number | undefined, isCursorAboveSignatureLine: boolean): Promise<void> {
+    public async handleGenerateDoxygenComment(codeActionArguments: DoxygenCodeActionCommandArguments | undefined): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
             return;
@@ -2883,13 +2889,13 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const isCodeAction: boolean = (adjustedLine !== undefined && adjustedLine !== undefined);
-        const initCursorPosition: vscode.Position = isCodeAction ? new vscode.Position(initCursorLine ?? 0, initCursorColumn ?? 0) : editor.selection.active;
+        const isCodeAction: boolean = codeActionArguments !== undefined;
+        const initCursorPosition: vscode.Position = codeActionArguments !== undefined ? new vscode.Position(codeActionArguments.initialCursor.line, codeActionArguments.initialCursor.character) : editor.selection.active;
         const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
-            position: isCodeAction ? new vscode.Position(adjustedLine ?? 0, adjustedColmn ?? 0) : editor.selection.active,
+            position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments?.adjustedCursor.character) : editor.selection.active,
             isCodeAction: isCodeAction,
-            isCursorAboveSignatureLine: isCursorAboveSignatureLine
+            isCursorAboveSignatureLine: (codeActionArguments !== undefined) ? codeActionArguments.isCursorAboveSignatureLine : undefined
         };
         await this.awaitUntilLanguageClientReady();
         const currentFileVersion: number | undefined = openFileVersions.get(params.uri);
