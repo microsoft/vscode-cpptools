@@ -431,7 +431,7 @@
         },
         "C_Cpp.codeAnalysis.clangTidy.codeAction.formatFixes": {
           "type": "boolean",
-          "description": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription%",
+          "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription%",
           "default": true,
           "scope": "resource"
         },
