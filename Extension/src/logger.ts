@@ -6,7 +6,6 @@
 
 import * as vscode from 'vscode';
 import * as os from 'os';
-import { CppSettings } from './LanguageServer/settings';
 import { CppSourceStr } from './LanguageServer/extension';
 import * as nls from 'vscode-nls';
 import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
@@ -80,8 +79,9 @@ export let warningChannel: vscode.OutputChannel | undefined;
 export function getOutputChannel(): vscode.OutputChannel {
     if (!outputChannel) {
         outputChannel = vscode.window.createOutputChannel(CppSourceStr);
-        const settings: CppSettings = new CppSettings();
-        const loggingLevel: string | undefined = settings.loggingLevel;
+        // Do not use CppSettings to avoid circular require()
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
         if (!!loggingLevel && loggingLevel !== "None" && loggingLevel !== "Error") {
             outputChannel.appendLine(`loggingLevel: ${loggingLevel}`);
         }
