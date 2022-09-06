@@ -454,13 +454,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         let debuggerName: string;
                         if (compilerName.startsWith("clang")) {
                             newConfig.MIMode = "lldb";
-                            debuggerName = "lldb-mi";
-                            // Search for clang-8, clang-10, etc.
-                            if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
-                                const suffixIndex: number = compilerName.indexOf("-");
-                                if (suffixIndex !== -1) {
-                                    const suffix: string = compilerName.substring(suffixIndex);
-                                    debuggerName += suffix;
+                            if (isWindows) {
+                                debuggerName = "lldb";
+                            } else {
+                                debuggerName = "lldb-mi";
+                                // Search for clang-8, clang-10, etc.
+                                if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
+                                    const suffixIndex: number = compilerName.indexOf("-");
+                                    if (suffixIndex !== -1) {
+                                        const suffix: string = compilerName.substring(suffixIndex);
+                                        debuggerName += suffix;
+                                    }
                                 }
                             }
                             newConfig.type = DebuggerType.cppdbg;
@@ -476,20 +480,26 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         }
                         const compilerDirname: string = path.dirname(compilerPath);
                         const debuggerPath: string = path.join(compilerDirname, debuggerName);
-                        if (!await util.checkFileExists(debuggerPath)) {
+
+                        // Check if debuggerPath exists.
+                        if (await util.checkFileExists(debuggerPath)) {
+                            newConfig.miDebuggerPath = debuggerPath;
+                            return resolve(newConfig);
+                        } else if ((await util.whichAsync(debuggerName)) !== undefined) {
+                            // Check if debuggerName exists on $PATH
+                            newConfig.miDebuggerPath = debuggerName;
+                            return resolve(newConfig);
+                        } else {
                             if (!isWindows) {
                                 const newDebuggerPath: string = path.join("/usr", "bin", debuggerName);
-                                if (await util.checkFileExists(debuggerPath)) {
+                                if (await util.checkFileExists(newDebuggerPath)) {
                                     newConfig.miDebuggerPath = newDebuggerPath;
                                     return resolve(newConfig);
                                 }
                             }
-                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger in this path: {1}. The debug configuration for {2} is ignored.", `\"${debuggerName}\"`, `\"${debuggerPath}\"`, compilerName));
+                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {2} is ignored.", `\"${debuggerName}\"`, compilerName));
                             return resolve(undefined);
-                        } else {
-                            newConfig.miDebuggerPath = debuggerPath;
                         }
-                        return resolve(newConfig);
                     }
                 });
             }))).filter((item): item is CppDebugConfiguration => !!item);
