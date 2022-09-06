@@ -408,7 +408,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: CppDebugConfiguration[] = [];
         if (buildTasks.length !== 0) {
-            configs = (await Promise.all(buildTasks.map<Promise<CppDebugConfiguration|undefined>>(async task => {
+            configs = (await Promise.all(buildTasks.map<Promise<CppDebugConfiguration | undefined>>(async task => {
                 const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
                 const compilerPath: string = definition.command;
                 // Filter out the tasks that has an invalid compiler path.
