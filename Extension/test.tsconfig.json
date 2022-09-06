@@ -15,6 +15,7 @@
 		"test/**/*.ts",
 		"tools/**/*.ts",
 		"ui/**/*.ts",
-		"./vscode*.d.ts"
+		"./vscode*.d.ts",
+		"src/types/*.d.ts"
 	]
 }

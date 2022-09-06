@@ -10,18 +10,13 @@ import * as os from 'os';
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import * as Telemetry from './telemetry';
-import HttpsProxyAgent = require('https-proxy-agent');
-import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
-import * as https from 'https';
 import * as tmp from 'tmp';
-import { ClientRequest, OutgoingHttpHeaders } from 'http';
 import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
-import { CppSettings } from './LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -354,7 +349,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     }
 
     // Replace environment and configuration variables.
-    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
+    const regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     const cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
@@ -412,11 +407,12 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
         });
     }
 
-    // Resolve '~' at the start of the path.
-    regexp = () => /^\~/g;
-    ret = ret.replace(regexp(), (match: string, name: string) => os.homedir());
+    return resolveHome(ret);
+}
 
-    return ret;
+// Resolve '~' at the start of the path.
+export function resolveHome(filePath: string): string {
+    return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
 }
 
 export function asFolder(uri: vscode.Uri): string {
@@ -444,43 +440,25 @@ export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
-export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
-    let proxy: string | undefined = vscode.workspace.getConfiguration().get<string>('http.proxy');
-    if (!proxy) {
-        proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
-        if (!proxy) {
-            return undefined; // No proxy
-        }
-    }
-
-    // Basic sanity checking on proxy url
-    const proxyUrl: any = url.parse(proxy);
-    if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
+export async function fsStat(filePath: fs.PathLike): Promise<fs.Stats | undefined> {
+    let stats: fs.Stats | undefined;
+    try {
+        stats = await fs.promises.stat(filePath);
+    } catch (e) {
+        // File doesn't exist
         return undefined;
     }
+    return stats;
+}
 
-    const strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
-    const proxyOptions: any = {
-        host: proxyUrl.hostname,
-        port: parseInt(proxyUrl.port, 10),
-        auth: proxyUrl.auth,
-        rejectUnauthorized: strictProxy
-    };
-
-    return new HttpsProxyAgent(proxyOptions);
+export async function checkPathExists(filePath: string): Promise<boolean> {
+    return !!(await fsStat(filePath));
 }
 
 /** Test whether a file exists */
-export function checkFileExists(filePath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(filePath, (err, stats) => {
-            if (stats && stats.isFile()) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    });
+export async function checkFileExists(filePath: string): Promise<boolean> {
+    const stats: fs.Stats | undefined = await fsStat(filePath);
+    return !!stats && stats.isFile();
 }
 
 /** Test whether a file exists */
@@ -509,16 +487,9 @@ export async function checkExecutableWithoutExtensionExists(filePath: string): P
 }
 
 /** Test whether a directory exists */
-export function checkDirectoryExists(dirPath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(dirPath, (err, stats) => {
-            if (stats && stats.isDirectory()) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    });
+export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
+    const stats: fs.Stats | undefined = await fsStat(dirPath);
+    return !!stats && stats.isDirectory();
 }
 
 export function createDirIfNotExistsSync(filePath: string | undefined): void {
@@ -723,8 +694,10 @@ export interface ProcessReturnType {
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
-    const settings: CppSettings = new CppSettings();
-    if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
+    // Do not use CppSettings to avoid circular require()
+    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    if (loggingLevel === "Information" || loggingLevel === "Debug") {
         getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}\n${programOutput.stderr || programOutput.stdout}\n`);
     }
     if (programOutput.exitCode) {
@@ -795,16 +768,16 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
     });
 }
 
+/**
+ * @param permission fs file access constants: https://nodejs.org/api/fs.html#file-access-constants
+ */
+export function pathAccessible(filePath: string, permission: number = fs.constants.F_OK): Promise<boolean> {
+    if (!filePath) { return Promise.resolve(false); }
+    return new Promise(resolve => fs.access(filePath, permission, err => resolve(!err)));
+}
+
 export function isExecutable(file: string): Promise<boolean> {
-    return new Promise((resolve) => {
-        fs.access(file, fs.constants.X_OK, (err) => {
-            if (err) {
-                resolve(false);
-            } else {
-                resolve(true);
-            }
-        });
-    });
+    return pathAccessible(file, fs.constants.X_OK);
 }
 
 export async function allowExecution(file: string): Promise<void> {
@@ -897,79 +870,6 @@ export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResu
             }
             return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
         });
-    });
-}
-
-export function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        const parsedUrl: url.Url = url.parse(urlStr);
-        const request: ClientRequest = https.request({
-            host: parsedUrl.host,
-            path: parsedUrl.path,
-            agent: getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
-            headers: headers
-        }, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
-                // Download from new location
-                let redirectUrl: string;
-                if (typeof response.headers.location === 'string') {
-                    redirectUrl = response.headers.location;
-                } else {
-                    if (!response.headers.location) {
-                        return reject(new Error(localize("invalid.download.location.received", 'Invalid download location received')));
-                    }
-                    redirectUrl = response.headers.location[0];
-                }
-                return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
-            }
-            if (response.statusCode !== 200) { // If request is not successful
-                return reject();
-            }
-            // Write file using downloaded data
-            const createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
-            createdFile.on('finish', () => { resolve(); });
-            response.on('error', (error) => { reject(error); });
-            response.pipe(createdFile);
-        });
-        request.on('error', (error) => { reject(error); });
-        request.end();
-    });
-}
-
-export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders): Promise<any> {
-    return new Promise<string>((resolve, reject) => {
-        const parsedUrl: url.Url = url.parse(urlStr);
-        const request: ClientRequest = https.request({
-            host: parsedUrl.host,
-            path: parsedUrl.path,
-            agent: getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
-            headers: headers
-        }, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
-                // Download from new location
-                let redirectUrl: string;
-                if (typeof response.headers.location === 'string') {
-                    redirectUrl = response.headers.location;
-                } else {
-                    if (!response.headers.location) {
-                        return reject(new Error(localize("invalid.download.location.received", 'Invalid download location received')));
-                    }
-                    redirectUrl = response.headers.location[0];
-                }
-                return resolve(downloadFileToStr(redirectUrl, headers));
-            }
-            if (response.statusCode !== 200) { // If request is not successful
-                return reject();
-            }
-            let downloadedData: string = '';
-            response.on('data', (data) => { downloadedData += data; });
-            response.on('error', (error) => { reject(error); });
-            response.on('end', () => { resolve(downloadedData); });
-        });
-        request.on('error', (error) => { reject(error); });
-        request.end();
     });
 }
 
@@ -1488,6 +1388,10 @@ export interface ISshHostInfo {
     hostName: string;
     user?: string;
     port?: number | string;
+}
+
+export interface ISshConfigHostInfo extends ISshHostInfo {
+    file: string;
 }
 
 /** user@host */
