@@ -488,15 +488,13 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         } else if ((await util.whichAsync(debuggerName)) !== undefined) {
                             // Check if debuggerName exists on $PATH
                             newConfig.miDebuggerPath = debuggerName;
-                        } else if (isWindows) {
-                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {2} is ignored.", `\"${debuggerName}\"`, compilerName));
-                            return resolve(undefined);
                         } else {
-                            // Try the usr path.
+                            // Try the usr path for non-windows platforms.
                             const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
-                            if (await util.checkFileExists(usrDebuggerPath)) {
+                            if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
                                 newConfig.miDebuggerPath = usrDebuggerPath;
                             } else {
+                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {2} is ignored.", `\"${debuggerName}\"`, compilerName));
                                 return resolve(undefined);
                             }
                         }
