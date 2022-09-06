@@ -494,7 +494,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                             if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
                                 newConfig.miDebuggerPath = usrDebuggerPath;
                             } else {
-                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {2} is ignored.", `\"${debuggerName}\"`, compilerName));
+                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
                                 return resolve(undefined);
                             }
                         }
