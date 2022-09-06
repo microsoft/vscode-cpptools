@@ -484,22 +484,22 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         // Check if debuggerPath exists.
                         if (await util.checkFileExists(debuggerPath)) {
                             newConfig.miDebuggerPath = debuggerPath;
-                            return resolve(newConfig);
                         } else if ((await util.whichAsync(debuggerName)) !== undefined) {
                             // Check if debuggerName exists on $PATH
                             newConfig.miDebuggerPath = debuggerName;
-                            return resolve(newConfig);
-                        } else {
-                            if (!isWindows) {
-                                const newDebuggerPath: string = path.join("/usr", "bin", debuggerName);
-                                if (await util.checkFileExists(newDebuggerPath)) {
-                                    newConfig.miDebuggerPath = newDebuggerPath;
-                                    return resolve(newConfig);
-                                }
-                            }
+                        } else if (isWindows) {
                             logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {2} is ignored.", `\"${debuggerName}\"`, compilerName));
                             return resolve(undefined);
+                        } else {
+                            // Try the usr path.
+                            const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
+                            if (await util.checkFileExists(usrDebuggerPath)) {
+                                newConfig.miDebuggerPath = usrDebuggerPath;
+                            } else {
+                                return resolve(undefined);
+                            }
                         }
+                        return resolve(newConfig);
                     }
                 });
             }))).filter((item): item is CppDebugConfiguration => !!item);
