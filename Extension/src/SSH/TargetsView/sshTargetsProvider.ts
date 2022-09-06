@@ -5,7 +5,7 @@
 
 import { getSshConfigHostInfos } from '../sshHosts';
 import * as vscode from 'vscode';
-import { addSshTarget, BaseNode, LabelLeafNode, refreshCppSshTargetsView } from './common';
+import { cmd_addSshTarget, BaseNode, LabelLeafNode, cmd_refreshCppSshTargetsView } from './common';
 import { TargetLeafNode, filesWritable, setActiveSshTarget, _activeTarget, workspaceState_activeSshTarget } from './targetNodes';
 import { extensionContext, ISshConfigHostInfo } from '../../common';
 import * as nls from 'vscode-nls';
@@ -97,7 +97,7 @@ export async function getActiveSshTarget(selectWhenNotSet: boolean = true): Prom
             throw Error(localize('active.ssh.target.selection.cancelled', 'Active SSH target selection cancelled.'));
         }
         await setActiveSshTarget(name);
-        await vscode.commands.executeCommand(refreshCppSshTargetsView);
+        await vscode.commands.executeCommand(cmd_refreshCppSshTargetsView);
     }
     return _activeTarget;
 }
@@ -113,7 +113,7 @@ export async function selectSshTarget(): Promise<string | undefined> {
         return undefined;
     }
     if (selection === addNewSshTarget) {
-        return vscode.commands.executeCommand(addSshTarget);
+        return vscode.commands.executeCommand(cmd_addSshTarget);
     }
     return selection;
 }

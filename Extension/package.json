@@ -80,6 +80,7 @@
     "onCommand:C_Cpp.selectActiveSshTarget",
     "onCommand:C_Cpp.selectSshTarget",
     "onCommand:C_Cpp.activeSshTarget",
+    "onCommand:C_Cpp.enableSshTargetsView",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -252,7 +253,7 @@
         {
           "id": "CppSshTargetsView",
           "name": "%c_cpp.contributes.views.sshTargetsView.title%",
-          "when": "showCppSshTargetsView"
+          "when": "enableCppSshTargetsView"
         }
       ]
     },
@@ -2949,6 +2950,11 @@
         "category": "C/C++",
         "title": "%c_cpp.command.refreshCppSshTargetsView.title%",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "C_Cpp.enableSshTargetsView",
+        "category": "C/C++",
+        "title": "%c_cpp.command.enableSshTargetsView.title%"
       }
     ],
     "keybindings": [
@@ -5148,6 +5154,10 @@
         {
           "command": "C_Cpp.refreshCppSshTargetsView",
           "when": "never"
+        },
+        {
+          "command": "C_Cpp.enableSshTargetsView",
+          "when": "!enableCppSshTargetsView"
         }
       ]
     },
