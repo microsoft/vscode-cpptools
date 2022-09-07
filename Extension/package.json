@@ -2662,6 +2662,16 @@
           "markdownDescription": "%c_cpp.configuration.suggestSnippets.markdownDescription%",
           "scope": "resource"
         },
+        "C_Cpp.caseSensitiveFileSupport": {
+          "type": "string",
+          "enum": [
+            "default",
+            "enabled"
+          ],
+          "default": "default",
+          "markdownDescription": "%c_cpp.configuration.caseSensitiveFileSupport.markdownDescription%",
+          "scope": "window"
+        },
         "C_Cpp.enhancedColorization": {
           "type": "string",
           "enum": [
