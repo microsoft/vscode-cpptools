@@ -30,6 +30,7 @@ let sshTargetsViewEnabled: boolean = false;
 let sshConfigWatcher: chokidar.FSWatcher | undefined;
 let tasksWatcher: chokidar.FSWatcher | undefined;
 let launchesWatcher: chokidar.FSWatcher | undefined;
+let workspaceFileWatcher: chokidar.FSWatcher | undefined;
 
 const cmd_removeSshTarget: string = 'C_Cpp.removeSshTarget';
 const cmd_setActiveSshTarget: string = 'C_Cpp.setActiveSshTarget';
@@ -118,7 +119,15 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.commands.registerCommand(cmd_activeSshTarget, () => enableSshTargetsViewAndRun(getActiveSshTarget)));
     disposables.push(vscode.commands.registerCommand('C_Cpp.enableSshTargetsView', () => enableSshTargetsViewAndRun(enableSshTargetsView)));
     disposables.push(sshTargetsProvider);
-    if (vscode.workspace.workspaceFolders?.length) {
+
+    // Decide if we should show the SSH Targets View.
+    if (!sshTargetsViewEnabled && vscode.workspace.workspaceFile) {
+        const workspaceFilePath: string = vscode.workspace.workspaceFile.fsPath;
+        // The path to the workspace file is dynamic, so we can't listen to add event.
+        workspaceFileWatcher = chokidar.watch(workspaceFilePath, { ignoreInitial: true }).on('change', tasksAndLaunchesChanged);
+        tasksAndLaunchesChanged(workspaceFilePath);
+    }
+    if (!sshTargetsViewEnabled && vscode.workspace.workspaceFolders?.length) {
         const tasksJsonPaths: string[] = vscode.workspace.workspaceFolders.map(folder => path.join(folder.uri.fsPath, '.vscode', 'tasks.json'));
         const launchJsonPaths: string[] = vscode.workspace.workspaceFolders.map(folder => path.join(folder.uri.fsPath, '.vscode', 'launch.json'));
         tasksWatcher = chokidar.watch(tasksJsonPaths, { ignoreInitial: true })
@@ -158,6 +167,10 @@ export function dispose(): void {
 }
 
 function disposeTasksAndLaunchesWatchers(): void {
+    if (workspaceFileWatcher) {
+        workspaceFileWatcher.close();
+        workspaceFileWatcher = undefined;
+    }
     if (tasksWatcher) {
         tasksWatcher.close();
         tasksWatcher = undefined;
