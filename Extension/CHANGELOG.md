@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.0: September 7, 2022
+### New Features
+* SSH Target Selector. [PR #9760](https://github.com/microsoft/vscode-cpptools/pull/9760)
+* rsync support in deploySteps. [PR #9808](https://github.com/microsoft/vscode-cpptools/pull/9808)
+
+### Enhancement
+* Add `C_Cpp.caseSensitiveFileSupport` for enabling case sensitive file handling on Windows. [#1994](https://github.com/microsoft/vscode-cpptools/issues/1994)
+* Add better build and debug task handling for when a compiler or debugger doesn't exist. [#8836](https://github.com/microsoft/vscode-cpptools/issues/8836)
+
+### Bug Fixes
+* Fix `${workspaceFolder}` not being resolved in `C_Cpp.clang_format_style`. [#9786](https://github.com/microsoft/vscode-cpptools/issues/9786)
+* Fix extra comma in the generated the `(gdb) attach` configuration in `launch.json`. [#9818](https://github.com/microsoft/vscode-cpptools/issues/9818)
+* Fix include completion sorting extensionless headers (e.g. string) after headers with an extension (e.g. string.h).
+
 ## Version 1.12.4: August 31, 2022
 ### Other
 * Revert changes to telemetry key format. [PR #9822](https://github.com/microsoft/vscode-cpptools/pull/9822)
