@@ -32,7 +32,7 @@ import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings } from './settings';
 import * as telemetry from '../telemetry';
-import { PersistentState, PersistentFolderState } from './persistentState';
+import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { UI, getUI } from './ui';
 import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
@@ -47,8 +47,10 @@ import * as os from 'os';
 import * as refs from './references';
 import * as nls from 'vscode-nls';
 import { lookupString, localizedStringCount } from '../nativeStrings';
-import { CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
-    removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams } from './codeAnalysis';
+import {
+    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
+    removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams
+} from './codeAnalysis';
 import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -407,7 +409,6 @@ export interface GenerateDoxygenCommentParams {
     isCodeAction: boolean;
     isCursorAboveSignatureLine: boolean | undefined;
 }
-
 export interface GenerateDoxygenCommentResult {
     contents: string;
     initPosition: Position;
@@ -591,6 +592,8 @@ interface InitializationOptions {
     freeMemory: number;
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
+    caseSensitiveFileSupport: boolean;
+    resetDatabase: boolean;
     edgeMessagesDirectory: string;
     localizedStrings: string[];
     settings: SettingsParams;
@@ -1245,6 +1248,8 @@ export class DefaultClient implements Client {
     }
 
     private createLanguageClient(allClients: ClientCollection): LanguageClient {
+        const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
+        let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
         const exeExists: boolean = fs.existsSync(serverModule);
         if (!exeExists) {
@@ -1273,6 +1278,12 @@ export class DefaultClient implements Client {
             localizedStrings.push(lookupString(i));
         }
 
+        const workspaceSettings: CppSettings = new CppSettings();
+        if (workspaceSettings.caseSensitiveFileSupport !== currentCaseSensitiveFileSupport.Value) {
+            resetDatabase = true;
+            currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
+        }
+
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
@@ -1280,6 +1291,8 @@ export class DefaultClient implements Client {
             freeMemory: os.freemem() / 1048576,
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
+            caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
+            resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
             settings: this.getAllSettings()
@@ -1403,6 +1416,9 @@ export class DefaultClient implements Client {
                             this.semanticTokensProviderDisposable = undefined;
                             this.semanticTokensProvider = undefined;
                         }
+                    }
+                    if (changedSettings["caseSensitiveFileSupport"] && util.isWindows()) {
+                        util.promptForReloadWindowDueToSettingsChange();
                     }
                     // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan
                     // or node-addon-api was installed so prompt for reload.
@@ -3030,7 +3046,8 @@ export class DefaultClient implements Client {
         if (removeCodeAnalysisProblems(identifiersAndUris)) {
             // Need to notify the language client of the removed diagnostics so it doesn't re-send them.
             this.languageClient.sendNotification(RemoveCodeAnalysisProblemsNotification, {
-                identifiersAndUris: identifiersAndUrisCopy, refreshSquigglesOnSave: refreshSquigglesOnSave });
+                identifiersAndUris: identifiersAndUrisCopy, refreshSquigglesOnSave: refreshSquigglesOnSave
+            });
         }
     }
 
