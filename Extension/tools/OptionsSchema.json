@@ -1,6 +1,6 @@
 {
   "_comment": "See README.md for information about this file",
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "VS Code launch/attach options",
   "description": "A json schema for the VS Code attach and launch options",
   "type": "object",
@@ -238,127 +238,136 @@
       }
     },
     "Host": {
-      "type": "object",
-      "description": "%c_cpp.debuggers.host.description%",
-      "default": {},
-      "required": [
-        "hostName"
-      ],
-      "properties": {
-        "user": {
+      "anyOf": [
+        {
           "type": "string",
-          "description": "%c_cpp.debuggers.host.user.description%",
-          "default": ""
+          "description": "%c_cpp.debuggers.host.description%",
+          "default": "hello@microsoft.com"
         },
-        "hostName": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.host.hostName.description%",
-          "default": ""
-        },
-        "port": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "string",
-              "pattern": "^\\d+$|^\\${.+}$"
-            }
+        {
+          "type": "object",
+          "description": "%c_cpp.debuggers.host.description%",
+          "default": {},
+          "required": [
+            "hostName"
           ],
-          "description": "%c_cpp.debuggers.host.port.description%",
-          "default": 22
-        },
-        "jumpHosts": {
-          "type": "array",
-          "description": "%c_cpp.debuggers.host.jumpHost.description%",
-          "items": {
-            "type": "object",
-            "default": {},
-            "required": [
-              "hostName"
-            ],
-            "properties": {
-              "user": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.host.user.description%",
-                "default": ""
-              },
-              "hostName": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.host.hostName.description%",
-                "default": ""
-              },
-              "port": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "string",
-                    "pattern": "^\\d+$|^\\${.+}$"
-                  }
+          "properties": {
+            "user": {
+              "type": "string",
+              "description": "%c_cpp.debuggers.host.user.description%",
+              "default": ""
+            },
+            "hostName": {
+              "type": "string",
+              "description": "%c_cpp.debuggers.host.hostName.description%",
+              "default": ""
+            },
+            "port": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+$|^\\${.+}$"
+                }
+              ],
+              "description": "%c_cpp.debuggers.host.port.description%",
+              "default": 22
+            },
+            "jumpHosts": {
+              "type": "array",
+              "description": "%c_cpp.debuggers.host.jumpHost.description%",
+              "items": {
+                "type": "object",
+                "default": {},
+                "required": [
+                  "hostName"
                 ],
-                "description": "%c_cpp.debuggers.host.port.description%",
-                "default": 22
+                "properties": {
+                  "user": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.host.user.description%",
+                    "default": ""
+                  },
+                  "hostName": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.host.hostName.description%",
+                    "default": ""
+                  },
+                  "port": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^\\d+$|^\\${.+}$"
+                      }
+                    ],
+                    "description": "%c_cpp.debuggers.host.port.description%",
+                    "default": 22
+                  }
+                }
               }
-            }
-          }
-        },
-        "localForwards": {
-          "type": "array",
-          "description": "%c_cpp.debuggers.host.localForward.description%",
-          "items": {
-            "type": "object",
-            "default": {},
-            "properties": {
-              "bindAddress": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
-                "default": ""
-              },
-              "port": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
+            },
+            "localForwards": {
+              "type": "array",
+              "description": "%c_cpp.debuggers.host.localForward.description%",
+              "items": {
+                "type": "object",
+                "default": {},
+                "properties": {
+                  "bindAddress": {
                     "type": "string",
-                    "pattern": "^\\d+$|^\\${.+}$"
-                  }
-                ],
-                "description": "%c_cpp.debuggers.host.localForward.port.description%"
-              },
-              "host": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.host.localForward.host.description%",
-                "default": ""
-              },
-              "hostPort": {
-                "anyOf": [
-                  {
-                    "type": "number"
+                    "description": "%c_cpp.debuggers.host.localForward.bindAddress.description%",
+                    "default": ""
                   },
-                  {
+                  "port": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^\\d+$|^\\${.+}$"
+                      }
+                    ],
+                    "description": "%c_cpp.debuggers.host.localForward.port.description%"
+                  },
+                  "host": {
                     "type": "string",
-                    "pattern": "^\\d+$|^\\${.+}$"
+                    "description": "%c_cpp.debuggers.host.localForward.host.description%",
+                    "default": ""
+                  },
+                  "hostPort": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^\\d+$|^\\${.+}$"
+                      }
+                    ],
+                    "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
+                  },
+                  "localSocket": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
+                    "default": ""
+                  },
+                  "remoteSocket": {
+                    "type": "string",
+                    "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
+                    "default": ""
                   }
-                ],
-                "description": "%c_cpp.debuggers.host.localForward.hostPort.description%"
-              },
-              "localSocket": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.host.localForward.localSocket.description%",
-                "default": ""
-              },
-              "remoteSocket": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.host.localForward.remoteSocket.description%",
-                "default": ""
+                }
               }
             }
           }
         }
-      }
+      ]
     },
     "DeploySteps": {
       "type": "array",
@@ -367,7 +376,7 @@
         "anyOf": [
           {
             "type": "object",
-            "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+            "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
             "default": {},
             "required": [
               "type",
@@ -378,10 +387,11 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.deploySteps.scp.description%",
+                "description": "%c_cpp.debuggers.deploySteps.copyFile.description%",
                 "default": "",
                 "enum": [
-                  "scp"
+                  "scp",
+                  "rsync"
                 ]
               },
               "files": {
@@ -396,7 +406,7 @@
                     }
                   }
                 ],
-                "description": "%c_cpp.debuggers.deploySteps.scp.files.description%",
+                "description": "%c_cpp.debuggers.deploySteps.copyFile.files.description%",
                 "default": ""
               },
               "host": {
@@ -404,19 +414,49 @@
               },
               "targetDir": {
                 "type": "string",
-                "description": "%c_cpp.debuggers.deploySteps.scp.targetDir.description%",
+                "description": "%c_cpp.debuggers.deploySteps.copyFile.targetDir.description%",
                 "default": ""
               },
-              "scpPath": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.deploySteps.scp.scpPath.description%",
-                "default": ""
+              "recursive": {
+                "type": "boolean",
+                "description": "%c_cpp.debuggers.deploySteps.copyFile.recursive.description%",
+                "default": "true"
               },
               "debug": {
                 "type": "boolean",
                 "description": "%c_cpp.debuggers.deploySteps.debug%"
               }
-            }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "type": { "const": "scp" } }
+                },
+                "then": {
+                  "properties": {
+                    "scpPath": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.deploySteps.copyFile.scpPath.description%",
+                      "default": ""
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": { "type": { "const": "rsync" } }
+                },
+                "then": {
+                  "properties": {
+                    "rsyncPath": {
+                      "type": "string",
+                      "description": "%c_cpp.debuggers.deploySteps.copyFile.rsyncPath.description%",
+                      "default": ""
+                    }
+                  }
+                }
+              }
+            ]
           },
           {
             "type": "object",

@@ -221,5 +221,6 @@
 	"folder_tag": "Složka",
 	"file_tag": "Soubor",
 	"compiler_default_language_standard_version_old": "Kompilátor vrátil standardní verzi výchozího jazyka: {0}. Protože je tato verze stará, pokusí se použít novější verzi {1} jako výchozí.",
-	"unexpected_output_from_clang_tidy": "Neočekávaný výstup z clang-tidy: {0}. Očekáváno: {1}."
+	"unexpected_output_from_clang_tidy": "Neočekávaný výstup z clang-tidy: {0}. Očekáváno: {1}.",
+	"generate_doxygen_comment": "Vygenerovat komentář Doxygenu"
 }

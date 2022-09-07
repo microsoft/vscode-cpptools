@@ -10,7 +10,7 @@
 	"bug.report.link.title": "Zgłoś problem",
 	"reinstalling.extension.heading": "Ponowne instalowanie rozszerzenia C/C++",
 	"reinstall.extension.text1": "Podczas ponownego instalowania równoważnej wersji rozszerzenia, program VS Code może ponownie użyć istniejącego katalogu rozszerzeń. Aby temu zapobiec, podczas ponownej instalacji rozszerzenia C/C++, może być konieczne wstępne usunięcie istniejącego katalogu rozszerzeń.",
-	"reinstall.extension.text2": "Zainstalowane katalogi rozszerzeń można znaleźć w jednej z następujących ścieżek w katalogu użytkownika („%USERPROFILE%“ w systemie Windows lub „$HOME“ w systemach Linux i MacOS)",
+	"reinstall.extension.text2": "Zainstalowane katalogi rozszerzeń można znaleźć w jednej z następujących ścieżek w katalogu użytkownika („%USERPROFILE%“ w systemie Windows lub „$HOME“ w systemach Linux i macOS)",
 	"reinstall.extension.text3": "W połączeniu zdalnym:",
 	"reinstall.extension.text4": "Przykładowe ścieżki do zainstalowanych katalogów rozszerzeń C/C++:",
 	"reinstall.extension.text5": "W systemie Windows:",
