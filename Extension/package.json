@@ -80,7 +80,6 @@
     "onCommand:C_Cpp.selectActiveSshTarget",
     "onCommand:C_Cpp.selectSshTarget",
     "onCommand:C_Cpp.activeSshTarget",
-    "onCommand:C_Cpp.enableSshTargetsView",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -2752,6 +2751,17 @@
           "default": false,
           "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
           "scope": "resource"
+        },
+        "C_Cpp.sshTargetsView": {
+          "type": "string",
+          "enum": [
+            "Enabled",
+            "Disabled",
+            "Auto"
+          ],
+          "default": "Auto",
+          "description": "%c_cpp.configuration.sshTargetsView.description%",
+          "scope": "resource"
         }
       }
     },
@@ -2950,11 +2960,6 @@
         "category": "C/C++",
         "title": "%c_cpp.command.refreshCppSshTargetsView.title%",
         "icon": "$(refresh)"
-      },
-      {
-        "command": "C_Cpp.enableSshTargetsView",
-        "category": "C/C++",
-        "title": "%c_cpp.command.enableSshTargetsView.title%"
       }
     ],
     "keybindings": [
@@ -5154,10 +5159,6 @@
         {
           "command": "C_Cpp.refreshCppSshTargetsView",
           "when": "never"
-        },
-        {
-          "command": "C_Cpp.enableSshTargetsView",
-          "when": "!enableCppSshTargetsView"
         }
       ]
     },
@@ -5677,7 +5678,6 @@
     "xml2js": "^0.4.19"
   },
   "dependencies": {
-    "chokidar": "^3.5.3",
     "comment-json": "^4.1.1",
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",

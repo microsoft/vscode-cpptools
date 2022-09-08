@@ -19,33 +19,15 @@ import { getSshConfiguration, getSshConfigurationFiles, writeSshConfiguration } 
 import { pathAccessible } from '../common';
 import * as fs from 'fs';
 import { Configuration } from 'ssh-config';
-import * as chokidar from 'chokidar';
-import * as path from 'path';
+import { CppSettings } from '../LanguageServer/settings';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 let sshTargetsViewEnabled: boolean = false;
-let sshConfigWatcher: chokidar.FSWatcher | undefined;
-let tasksWatcher: chokidar.FSWatcher | undefined;
-let launchesWatcher: chokidar.FSWatcher | undefined;
-let workspaceFileWatcher: chokidar.FSWatcher | undefined;
-
-const cmd_removeSshTarget: string = 'C_Cpp.removeSshTarget';
-const cmd_setActiveSshTarget: string = 'C_Cpp.setActiveSshTarget';
-const cmd_selectSshTarget: string = 'C_Cpp.selectSshTarget';
-const cmd_selectActiveSshTarget: string = 'C_Cpp.selectActiveSshTarget';
-const cmd_activeSshTarget: string = 'C_Cpp.activeSshTarget';
-const sshTargetsCommands: string[] = [
-    cmd_addSshTarget,
-    cmd_removeSshTarget,
-    cmd_refreshCppSshTargetsView,
-    cmd_setActiveSshTarget,
-    cmd_selectSshTarget,
-    cmd_selectActiveSshTarget,
-    cmd_activeSshTarget
-];
+let sshTargetsViewSetting: string | undefined;
+let sshConfigWatchers: vscode.FileSystemWatcher[] = [];
 
 export async function initialize(context: vscode.ExtensionContext): Promise<void> {
     // Activate Process Picker Commands
@@ -100,15 +82,15 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     const sshTargetsProvider: SshTargetsProvider = new SshTargetsProvider();
     disposables.push(vscode.window.registerTreeDataProvider('CppSshTargetsView', sshTargetsProvider));
     disposables.push(vscode.commands.registerCommand(cmd_addSshTarget, () => enableSshTargetsViewAndRun(addSshTargetImpl)));
-    disposables.push(vscode.commands.registerCommand(cmd_removeSshTarget, (node?: BaseNode) => enableSshTargetsViewAndRun(removeSshTargetImpl, node)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.removeSshTarget', (node?: BaseNode) => enableSshTargetsViewAndRun(removeSshTargetImpl, node)));
     disposables.push(vscode.commands.registerCommand(cmd_refreshCppSshTargetsView, (node?: BaseNode) => enableSshTargetsViewAndRun(sshTargetsProvider.refresh, node)));
-    disposables.push(vscode.commands.registerCommand(cmd_setActiveSshTarget, async (node: TargetLeafNode) => {
+    disposables.push(vscode.commands.registerCommand('C_Cpp.setActiveSshTarget', async (node: TargetLeafNode) => {
         await enableSshTargetsView();
         await setActiveSshTarget(node.name);
         await vscode.commands.executeCommand(cmd_refreshCppSshTargetsView);
     }));
-    disposables.push(vscode.commands.registerCommand(cmd_selectSshTarget, () => enableSshTargetsViewAndRun(selectSshTarget)));
-    disposables.push(vscode.commands.registerCommand(cmd_selectActiveSshTarget, async () => {
+    disposables.push(vscode.commands.registerCommand('C_Cpp.selectSshTarget', () => enableSshTargetsViewAndRun(selectSshTarget)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.selectActiveSshTarget', async () => {
         await enableSshTargetsView();
         const name: string | undefined = await selectSshTarget();
         if (name) {
@@ -116,88 +98,33 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
             await vscode.commands.executeCommand(cmd_refreshCppSshTargetsView);
         }
     }));
-    disposables.push(vscode.commands.registerCommand(cmd_activeSshTarget, () => enableSshTargetsViewAndRun(getActiveSshTarget)));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.enableSshTargetsView', () => enableSshTargetsViewAndRun(enableSshTargetsView)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.activeSshTarget', () => enableSshTargetsViewAndRun(getActiveSshTarget)));
     disposables.push(sshTargetsProvider);
 
     // Decide if we should show the SSH Targets View.
-    if (!sshTargetsViewEnabled && vscode.workspace.workspaceFile) {
-        const workspaceFilePath: string = vscode.workspace.workspaceFile.fsPath;
-        // The path to the workspace file is dynamic, so we can't listen to add event.
-        workspaceFileWatcher = chokidar.watch(workspaceFilePath, { ignoreInitial: true }).on('change', tasksAndLaunchesChanged);
-        tasksAndLaunchesChanged(workspaceFilePath);
+    sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
+    if (sshTargetsViewSetting === 'Enabled') {
+        // Don't wait
+        enableSshTargetsView().then(() => {}, () => {});
     }
-    if (!sshTargetsViewEnabled && vscode.workspace.workspaceFolders?.length) {
-        const tasksJsonPaths: string[] = vscode.workspace.workspaceFolders.map(folder => path.join(folder.uri.fsPath, '.vscode', 'tasks.json'));
-        const launchJsonPaths: string[] = vscode.workspace.workspaceFolders.map(folder => path.join(folder.uri.fsPath, '.vscode', 'launch.json'));
-        tasksWatcher = chokidar.watch(tasksJsonPaths, { ignoreInitial: true })
-            .on('add', tasksAndLaunchesChanged)
-            .on('change', tasksAndLaunchesChanged);
-        launchesWatcher = chokidar.watch(launchJsonPaths, { ignoreInitial: true })
-            .on('add', tasksAndLaunchesChanged)
-            .on('change', tasksAndLaunchesChanged);
 
-        if (!sshTargetsViewEnabled) {
-            for (const launchJsonPath of launchJsonPaths) {
-                const viewEnabled: boolean = await tasksAndLaunchesChanged(launchJsonPath);
-                if (viewEnabled) {
-                    break;
-                }
+    disposables.push(vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration('C_Cpp.sshTargetsView')) {
+            sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
+            if (sshTargetsViewSetting === 'Enabled') {
+                await enableSshTargetsView();
+            } else {
+                await vscode.commands.executeCommand('setContext', 'enableCppSshTargetsView', false);
+                sshTargetsViewEnabled = false;
             }
         }
-        if (!sshTargetsViewEnabled) {
-            for (const tasksJsonPath of tasksJsonPaths) {
-                const viewEnabled: boolean = await tasksAndLaunchesChanged(tasksJsonPath);
-                if (viewEnabled) {
-                    break;
-                }
-            }
-        }
-    }
+    }));
 }
 
 export function dispose(): void {
-    // Don't wait
-    if (sshConfigWatcher) {
-        sshConfigWatcher.close();
-        sshConfigWatcher = undefined;
-    }
-    disposeTasksAndLaunchesWatchers();
+    sshConfigWatchers.forEach(watcher => watcher.dispose());
+    sshConfigWatchers = [];
     disposables.forEach(d => d.dispose());
-}
-
-function disposeTasksAndLaunchesWatchers(): void {
-    if (workspaceFileWatcher) {
-        workspaceFileWatcher.close();
-        workspaceFileWatcher = undefined;
-    }
-    if (tasksWatcher) {
-        tasksWatcher.close();
-        tasksWatcher = undefined;
-    }
-    if (launchesWatcher) {
-        launchesWatcher.close();
-        launchesWatcher = undefined;
-    }
-}
-
-async function tasksAndLaunchesChanged(path: string): Promise<boolean> {
-    const shouldEnableView: boolean = await containsSshTargetsCommands(path);
-    if (shouldEnableView) {
-        await enableSshTargetsView();
-        disposeTasksAndLaunchesWatchers();
-    }
-    return shouldEnableView;
-}
-
-async function containsSshTargetsCommands(path: string): Promise<boolean> {
-    const fileContents: string = (await vscode.workspace.fs.readFile(vscode.Uri.file(path))).toString();
-    for (const command of sshTargetsCommands) {
-        if (fileContents.includes(command)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 async function enableSshTargetsViewAndRun<T>(func: (...paras: any[]) => T | Promise<T>, ...args: any[]): Promise<T> {
@@ -206,14 +133,17 @@ async function enableSshTargetsViewAndRun<T>(func: (...paras: any[]) => T | Prom
 }
 
 async function enableSshTargetsView(): Promise<void> {
-    if (sshTargetsViewEnabled) {
+    if (sshTargetsViewEnabled || sshTargetsViewSetting === 'Disabled') {
         return;
     }
     await vscode.commands.executeCommand('setContext', 'enableCppSshTargetsView', true);
-    sshConfigWatcher = chokidar.watch(getSshConfigurationFiles(), {ignoreInitial: true})
-        .on('add', () => vscode.commands.executeCommand(cmd_refreshCppSshTargetsView))
-        .on('change', () => vscode.commands.executeCommand(cmd_refreshCppSshTargetsView))
-        .on('unlink', () => vscode.commands.executeCommand(cmd_refreshCppSshTargetsView));
+    for (const sshConfig of getSshConfigurationFiles()) {
+        const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(sshConfig);
+        watcher.onDidChange(() => vscode.commands.executeCommand(cmd_refreshCppSshTargetsView));
+        watcher.onDidCreate(() => vscode.commands.executeCommand(cmd_refreshCppSshTargetsView));
+        watcher.onDidDelete(() => vscode.commands.executeCommand(cmd_refreshCppSshTargetsView));
+        sshConfigWatchers.push(watcher);
+    }
     sshTargetsViewEnabled = true;
 }
 
