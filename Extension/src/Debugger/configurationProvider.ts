@@ -408,9 +408,18 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: CppDebugConfiguration[] = [];
         if (buildTasks.length !== 0) {
-            configs = await Promise.all(buildTasks.map<Promise<CppDebugConfiguration>>(async task => {
+            configs = (await Promise.all(buildTasks.map<Promise<CppDebugConfiguration | undefined>>(async task => {
                 const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
                 const compilerPath: string = definition.command;
+                // Filter out the tasks that has an invalid compiler path.
+                const compilerPathExists: boolean = path.isAbsolute(compilerPath) ?
+                    // Absolute path, just check if it exists
+                    await util.checkFileExists(compilerPath) :
+                    // Non-absolute. Check on $PATH
+                    ((await util.whichAsync(compilerPath)) !== undefined);
+                if (!compilerPathExists) {
+                    logger.getOutputChannelLogger().appendLine(localize('compiler.path.not.exists', "Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
+                }
                 const compilerName: string = path.basename(compilerPath);
                 const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
                 newConfig.existing = false;
@@ -439,20 +448,24 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const isCl: boolean = compilerName === "cl.exe";
                 newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
-                return new Promise<CppDebugConfiguration>(resolve => {
+                return new Promise<CppDebugConfiguration | undefined>(async resolve => {
                     if (platformInfo.platform === "darwin") {
                         return resolve(newConfig);
                     } else {
                         let debuggerName: string;
                         if (compilerName.startsWith("clang")) {
                             newConfig.MIMode = "lldb";
-                            debuggerName = "lldb-mi";
-                            // Search for clang-8, clang-10, etc.
-                            if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
-                                const suffixIndex: number = compilerName.indexOf("-");
-                                if (suffixIndex !== -1) {
-                                    const suffix: string = compilerName.substring(suffixIndex);
-                                    debuggerName += suffix;
+                            if (isWindows) {
+                                debuggerName = "lldb";
+                            } else {
+                                debuggerName = "lldb-mi";
+                                // Search for clang-8, clang-10, etc.
+                                if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
+                                    const suffixIndex: number = compilerName.indexOf("-");
+                                    if (suffixIndex !== -1) {
+                                        const suffix: string = compilerName.substring(suffixIndex);
+                                        debuggerName += suffix;
+                                    }
                                 }
                             }
                             newConfig.type = DebuggerType.cppdbg;
@@ -468,22 +481,27 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         }
                         const compilerDirname: string = path.dirname(compilerPath);
                         const debuggerPath: string = path.join(compilerDirname, debuggerName);
-                        if (isWindows) {
+
+                        // Check if debuggerPath exists.
+                        if (await util.checkFileExists(debuggerPath)) {
                             newConfig.miDebuggerPath = debuggerPath;
-                            return resolve(newConfig);
+                        } else if ((await util.whichAsync(debuggerName)) !== undefined) {
+                            // Check if debuggerName exists on $PATH
+                            newConfig.miDebuggerPath = debuggerName;
                         } else {
-                            fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                                if (!err && stats && stats.isFile()) {
-                                    newConfig.miDebuggerPath = debuggerPath;
-                                } else {
-                                    newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
-                                }
-                                return resolve(newConfig);
-                            });
+                            // Try the usr path for non-windows platforms.
+                            const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
+                            if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
+                                newConfig.miDebuggerPath = usrDebuggerPath;
+                            } else {
+                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
+                                return resolve(undefined);
+                            }
                         }
+                        return resolve(newConfig);
                     }
                 });
-            }));
+            }))).filter((item): item is CppDebugConfiguration => !!item);
         }
         configs.push(defaultTemplateConfig);
         const existingConfigs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, type)?.map(config => {
