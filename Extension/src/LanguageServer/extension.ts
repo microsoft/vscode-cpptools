@@ -681,19 +681,19 @@ function onAddToIncludePath(path: string): void {
 function onEnableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "Enabled");
+    settings.update<string>("errorSquiggles", "enabled");
 }
 
 function onDisableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "Disabled");
+    settings.update<string>("errorSquiggles", "disabled");
 }
 
 function onToggleIncludeFallback(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
+    settings.toggleSetting("intelliSenseEngineFallback", "enabled", "disabled");
 }
 
 function onToggleDimInactiveRegions(): void {

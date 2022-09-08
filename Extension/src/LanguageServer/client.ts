@@ -897,7 +897,7 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
                         const settings: CppSettings = new CppSettings();
-                        if (settings.formattingEngine !== "Disabled") {
+                        if (settings.formattingEngine !== "disabled") {
                             this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
                             this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
                             this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
@@ -1165,7 +1165,7 @@ export class DefaultClient implements Client {
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback);
                 settings_errorSquiggles.push(setting.errorSquiggles);
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);
-                settings_enhancedColorization.push(workspaceSettings.enhancedColorization ? "Enabled" : "Disabled");
+                settings_enhancedColorization.push(workspaceSettings.enhancedColorization ? "enabled" : "disabled");
                 settings_suggestSnippets.push(setting.suggestSnippets);
                 settings_exclusionPolicy.push(setting.exclusionPolicy);
                 settings_preferredPathSeparator.push(setting.preferredPathSeparator);
@@ -1526,7 +1526,7 @@ export class DefaultClient implements Client {
                     const settings: CppSettings = new CppSettings();
                     if (changedSettings["formatting"]) {
                         const folderSettings: CppSettings = new CppSettings(this.RootUri);
-                        if (folderSettings.formattingEngine !== "Disabled") {
+                        if (folderSettings.formattingEngine !== "disabled") {
                             // Because the setting is not a bool, changes do not always imply we need to
                             // register/unregister the providers.
                             if (!this.documentFormattingProviderDisposable) {
@@ -1962,7 +1962,7 @@ export class DefaultClient implements Client {
                     return;
                 }
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarnings === "enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = localize("dismiss.button", "Dismiss");
                     const disable: string = localize("diable.warnings.button", "Disable Warnings");
                     const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -1979,7 +1979,7 @@ export class DefaultClient implements Client {
                     vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
                         switch (response) {
                             case disable: {
-                                settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                                settings.toggleSetting("configurationWarnings", "enabled", "eisabled");
                                 break;
                             }
                         }
