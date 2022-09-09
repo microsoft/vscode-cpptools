@@ -565,7 +565,7 @@ export class CppSettings extends Settings {
     }
 
     public get sshTargetsView(): string {
-        return super.Section.get<string>("sshTargetsView") || 'Auto';
+        return super.Section.get<string>("sshTargetsView") || 'auto';
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {

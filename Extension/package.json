@@ -2765,11 +2765,11 @@
         "C_Cpp.sshTargetsView": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled",
-            "Auto"
+            "enabled",
+            "disabled",
+            "auto"
           ],
-          "default": "Auto",
+          "default": "auto",
           "description": "%c_cpp.configuration.sshTargetsView.description%",
           "scope": "resource"
         }
@@ -5688,6 +5688,7 @@
     "xml2js": "^0.4.19"
   },
   "dependencies": {
+    "chokidar": "^3.5.3",
     "comment-json": "^4.1.1",
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
