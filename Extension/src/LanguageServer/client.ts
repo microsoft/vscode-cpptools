@@ -1288,7 +1288,7 @@ export class DefaultClient implements Client {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
             storagePath: this.storagePath,
-            freeMemory: os.freemem() / 1048576,
+            freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
             caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
