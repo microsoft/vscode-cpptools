@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.12.4-main",
+  "version": "1.13.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2661,6 +2661,16 @@
           "default": true,
           "markdownDescription": "%c_cpp.configuration.suggestSnippets.markdownDescription%",
           "scope": "resource"
+        },
+        "C_Cpp.caseSensitiveFileSupport": {
+          "type": "string",
+          "enum": [
+            "default",
+            "enabled"
+          ],
+          "default": "default",
+          "markdownDescription": "%c_cpp.configuration.caseSensitiveFileSupport.markdownDescription%",
+          "scope": "window"
         },
         "C_Cpp.enhancedColorization": {
           "type": "string",
