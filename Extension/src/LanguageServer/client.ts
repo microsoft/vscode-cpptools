@@ -578,7 +578,6 @@ interface SettingsParams {
     codeAnalysisMaxConcurrentThreads: number | null | undefined;
     codeAnalysisMaxMemory: number | null | undefined;
     codeAnalysisUpdateDelay: number | undefined;
-    vcpkgRoot: string;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
 };
 
@@ -587,6 +586,7 @@ interface InitializationOptions {
     extensionPath: string;
     storagePath: string;
     freeMemory: number;
+    vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
     caseSensitiveFileSupport: boolean;
     resetDatabase: boolean;
@@ -1238,8 +1238,7 @@ export class DefaultClient implements Client {
             codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
             codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
             codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
-            workspaceFolderSettings: workspaceFolderSettingsParams,
-            vcpkgRoot: util.getVcpkgRoot()
+            workspaceFolderSettings: workspaceFolderSettingsParams
         };
     }
 
@@ -1285,6 +1284,7 @@ export class DefaultClient implements Client {
             extensionPath: util.extensionPath,
             storagePath: this.storagePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
+            vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
             caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
             resetDatabase: resetDatabase,
