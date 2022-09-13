@@ -897,7 +897,7 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(this), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
                         const settings: CppSettings = new CppSettings();
-                        if (settings.formattingEngine?.toLowerCase.toString() !== "disabled") {
+                        if (settings.formattingEngine?.toLowerCase() !== "disabled") {
                             this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
                             this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
                             this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
@@ -1526,7 +1526,7 @@ export class DefaultClient implements Client {
                     const settings: CppSettings = new CppSettings();
                     if (changedSettings["formatting"]) {
                         const folderSettings: CppSettings = new CppSettings(this.RootUri);
-                        if (folderSettings.formattingEngine?.toLowerCase.toString() !== "disabled") {
+                        if (folderSettings.formattingEngine?.toLowerCase() !== "disabled") {
                             // Because the setting is not a bool, changes do not always imply we need to
                             // register/unregister the providers.
                             if (!this.documentFormattingProviderDisposable) {
@@ -1962,7 +1962,7 @@ export class DefaultClient implements Client {
                     return;
                 }
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings?.toLowerCase.toString() === "enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarnings?.toLowerCase() === "enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = localize("dismiss.button", "Dismiss");
                     const disable: string = localize("diable.warnings.button", "Disable Warnings");
                     const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -1979,7 +1979,7 @@ export class DefaultClient implements Client {
                     vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
                         switch (response) {
                             case disable: {
-                                settings.toggleSetting("configurationWarnings", "enabled", "eisabled");
+                                settings.toggleSetting("configurationWarnings", "enabled", "disabled");
                                 break;
                             }
                         }

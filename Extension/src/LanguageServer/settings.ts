@@ -253,7 +253,7 @@ export class CppSettings extends Settings {
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
-    public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase.toString() === "enabled"; }
+    public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
     public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
 
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
@@ -287,8 +287,8 @@ export class CppSettings extends Settings {
     }
 
     public get enhancedColorization(): boolean {
-        return super.Section.get<string>("enhancedColorization")?.toLowerCase.toString() === "enabled"
-            && super.Section.get<string>("intelliSenseEngine")?.toLowerCase.toString() === "default"
+        return super.Section.get<string>("enhancedColorization")?.toLowerCase() === "enabled"
+            && super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
@@ -560,13 +560,13 @@ export class CppSettings extends Settings {
 
     public get dimInactiveRegions(): boolean {
         return super.Section.get<boolean>("dimInactiveRegions") === true
-            && super.Section.get<string>("intelliSenseEngine")?.toLowerCase.toString() === "default"
+            && super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         const value: string | undefined = super.Section.get<string>(name);
-        super.Section.update(name, value === value1 ? value2 : value1, getTarget());
+        super.Section.update(name, value === value1.toLowerCase() ? value2.toLowerCase() : value1.toLowerCase(), getTarget());
     }
 
     public update<T>(name: string, value: T): void {
@@ -726,11 +726,11 @@ export class CppSettings extends Settings {
         this.populateEditorConfig(document);
     }
 
-    // If formattingEngine is set to "Default", searches for .editorconfig with vcFormat
+    // If formattingEngine is set to "default", searches for .editorconfig with vcFormat
     // entries, or a .clang-format file, to determine which settings to use.
     // This is intentionally not async to avoid races due to multiple entrancy.
     public useVcFormat(document: vscode.TextDocument): boolean {
-        if (this.formattingEngine?.toLowerCase.toString() !== "default") {
+        if (this.formattingEngine?.toLowerCase() !== "default") {
             return this.formattingEngine === "vcFormat";
         }
         if (this.clangFormatStyle !== "file") {
