@@ -3466,6 +3466,7 @@
   "%sq IFC bölümü içinde bir dizin kullanılarak %sq IFC bölümündeki bir öğe oluşturulmaya çalışıldı",
   "%sq bölümü, %d2 beklenirken girdi boyutunu %d1 olarak belirtti",
   "%sq1 modülü işlenirken beklenmeyen bir IFC gereksinimiyle karşılaşıldı",
-  null,
-  "atomik kısıtlama kendisine bağımlı"
+  "koşul, %d numaralı satırda (%s1 içinde) başarısız oldu: %sq2",
+  "atomik kısıtlama kendisine bağımlı",
+  "'noreturn' işlevi geçersiz olmayan bir dönüş türüne sahiptir"
 ]
