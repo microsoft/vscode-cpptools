@@ -787,7 +787,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         const portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndLineNumbers => {
-            docAndLineNumbers[1].forEach(async line => {
+            docAndLineNumbers[1].forEach(line => {
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
