@@ -302,10 +302,6 @@ export interface FindAllReferencesParams {
     textDocument: TextDocumentIdentifier;
 }
 
-interface DidChangeConfigurationParams extends WorkspaceFolderParams {
-    settings: SettingsParams;
-}
-
 export interface FormatParams {
     uri: string;
     range: Range;
@@ -459,7 +455,7 @@ interface Excludes {
 };
 
 interface WorkspaceFolderSettingsParams {
-    workspaceFolderUri: string | undefined;
+    uri: string | undefined;
     intelliSenseEngine: string | undefined;
     intelliSenseEngineFallback: string | undefined;
     autocomplete: string | undefined;
@@ -562,7 +558,7 @@ interface WorkspaceFolderSettingsParams {
 };
 
 interface SettingsParams {
-    filesAssociations: { [key: string]: string };
+    filesAssociations: { [key: string]: string } | undefined;
     workspaceFallbackEncoding: string | undefined;
     maxConcurrentThreads: number | null | undefined;
     maxCachedProcesses: number | null | undefined;
@@ -582,7 +578,7 @@ interface SettingsParams {
     codeAnalysisMaxConcurrentThreads: number | null | undefined;
     codeAnalysisMaxMemory: number | null | undefined;
     codeAnalysisUpdateDelay: number | undefined;
-    workspaceFolderSettings: WorkspaceFolderSettingsParams[] | undefined;
+    workspaceFolderSettings: WorkspaceFolderSettingsParams[];
 };
 
 interface InitializationOptions {
@@ -639,7 +635,7 @@ export const CancelReferencesNotification: NotificationType<void> = new Notifica
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
-const DidChangeSettingsNotification: NotificationType<DidChangeConfigurationParams> = new NotificationType<DidChangeConfigurationParams>('cpptools/didChangeSettings');
+const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1046,17 +1042,16 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(allClients), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
-                        // Because formatting and codeFolding can very per resource, we need to register these provides
-                        // and leave them registered. The decisions of whether to provide results needs to be made on a per folder basis.
-                        // if (settings.formattingEngine !== "Disabled") {
+                        // Because formatting and codeFolding can very per folder, we need to register these providers once
+                        // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
+                        // within the providers themselves.
                         this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
                         this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
                         this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
-                        // }
-                        // if (settings.codeFolding) {
+
                         this.codeFoldingProvider = new FoldingRangeProvider(this);
                         this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
-                        // }
+
                         const settings: CppSettings = new CppSettings();
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
@@ -1101,7 +1096,7 @@ export class DefaultClient implements Client {
 
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
         return {
-            workspaceFolderUri: workspaceFolderUri?.toString(),
+            uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
             intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
             autocomplete: settings.autocomplete,
@@ -1339,7 +1334,7 @@ export class DefaultClient implements Client {
     public sendDidChangeSettings(): void {
         // Send settings json to native side
         this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(DidChangeSettingsNotification, { settings: this.getAllSettings(), workspaceFolderUri: this.RootPath });
+            this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
         });
     }
 
@@ -1351,7 +1346,6 @@ export class DefaultClient implements Client {
         }
         const changedSettings: { [key: string]: string } = this.settingsTracker.getChangedSettings();
         this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(DidChangeSettingsNotification, { settings: this.getAllSettings(), workspaceFolderUri: this.RootPath });
             if (Object.keys(changedSettings).length > 0) {
                 if (this === defaultClient) {
                     if (changedSettings["commentContinuationPatterns"]) {
@@ -1368,45 +1362,6 @@ export class DefaultClient implements Client {
                         }
                     }
                     const settings: CppSettings = new CppSettings();
-                    // if (changedSettings["formatting"]) {
-                    //     const folderSettings: CppSettings = new CppSettings(this.RootUri);
-                    //     if (folderSettings.formattingEngine !== "Disabled") {
-                    //         // Because the setting is not a bool, changes do not always imply we need to
-                    //         // register/unregister the providers.
-                    //         if (!this.documentFormattingProviderDisposable) {
-                    //             this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
-                    //         }
-                    //         if (!this.formattingRangeProviderDisposable) {
-                    //             this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                    //         }
-                    //         if (!this.onTypeFormattingProviderDisposable) {
-                    //             this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
-                    //         }
-                    //     } else {
-                    //         if (this.documentFormattingProviderDisposable) {
-                    //             this.documentFormattingProviderDisposable.dispose();
-                    //             this.documentFormattingProviderDisposable = undefined;
-                    //         }
-                    //         if (this.formattingRangeProviderDisposable) {
-                    //             this.formattingRangeProviderDisposable.dispose();
-                    //             this.formattingRangeProviderDisposable = undefined;
-                    //         }
-                    //         if (this.onTypeFormattingProviderDisposable) {
-                    //             this.onTypeFormattingProviderDisposable.dispose();
-                    //             this.onTypeFormattingProviderDisposable = undefined;
-                    //         }
-                    //     }
-                    // }
-                    // if (changedSettings["codeFolding"]) {
-                    //     if (settings.codeFolding) {
-                    //         this.codeFoldingProvider = new FoldingRangeProvider(this);
-                    //         this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
-                    //     } else if (this.codeFoldingProviderDisposable) {
-                    //         this.codeFoldingProviderDisposable.dispose();
-                    //         this.codeFoldingProviderDisposable = undefined;
-                    //         this.codeFoldingProvider = undefined;
-                    //     }
-                    // }
                     if (changedSettings["enhancedColorization"]) {
                         if (settings.enhancedColorization && this.semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
