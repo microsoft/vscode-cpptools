@@ -3467,5 +3467,6 @@
   "a partição %sq especificou seu tamanho de entrada como %d1 quando %d2 era esperado",
   "um requisito IFC inesperado foi encontrado durante o processamento do módulo %sq1",
   "condição falhou na linha %d em %s1: %sq2",
-  "restrição atômica depende de si mesma"
+  "restrição atômica depende de si mesma",
+  "A função 'noreturn' tem um tipo de retorno não nulo"
 ]
