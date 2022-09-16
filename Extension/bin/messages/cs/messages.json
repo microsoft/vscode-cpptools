@@ -3467,5 +3467,6 @@
   "oddíl %sq určil svou velikost položky jako %d1, když bylo očekáváno %d2.",
   "při zpracování modulu %sq1 byl zjištěn neočekávaný požadavek IFC.",
   "podmínka selhala na řádku %d v %s1: %sq2",
-  "atomické omezení závisí na sobě"
+  "atomické omezení závisí na sobě",
+  "Funkce noreturn má návratový typ, který není void."
 ]

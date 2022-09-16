@@ -564,6 +564,10 @@ export class CppSettings extends Settings {
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
+    public get sshTargetsView(): string {
+        return super.Section.get<string>("sshTargetsView") ?? 'default';
+    }
+
     public toggleSetting(name: string, value1: string, value2: string): void {
         const value: string | undefined = super.Section.get<string>(name);
         super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());

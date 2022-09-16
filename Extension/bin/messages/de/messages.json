@@ -3423,7 +3423,7 @@
   "Modul %sq1 Dateiposition %d1 (relative Position %d2) wurde für Partition %sq2 angefordert – was dem Start der Partition vorausgeht",
   "Modul %sq1 Dateiposition %d1 (relative Position %d2) wurde für die Partition %sq2 angefordert – was das Ende ihrer Partition überschreitet",
   "Modul %sq1 Dateiposition %d1 (relative Position %d2) wurde für die Partition %sq2 angefordert – welche mit ihren Partitionselementen falsch ausgerichtet ist",
-  "aus dem Subfeld %sq",
+  "von Unterfeld %sq (relative Position zum Knoten %d)",
   "von Partition %sq Element %d1 (Dateiposition %d2, relative Position %d3)",
   "Lambda-Attribute entsprechen hier nicht dem Standard",
   "der Bezeichner %sq könnte mit einem visuell ähnlichen Bezeichner verwechselt werden, der %p angezeigt wird",
@@ -3462,5 +3462,11 @@
   "der Elementtyp der Vektorbedingung (%t1) muss dieselbe Größe haben wie der Elementtyp des Ergebnisses (%t2)",
   "der Gleitkomma-Vektoroperandentyp (%t) hat keinen übereinstimmenden ganzzahligen Vektortyp",
   "das Mangling für 'requires'-Ausdrücke ist noch nicht implementiert",
-  "aufgrund eines „nicht verfügbaren“ Attributs"
+  "aufgrund eines „nicht verfügbaren“ Attributs",
+  "Es wurde versucht, ein Element aus der IFC-Partition %sq mithilfe eines Indexes in der IFC-Partition %sq zu erstellen",
+  "Die Partition %sq hat ihre Eintragsgröße mit %d1 angegeben, obwohl %d2 erwartet wurde",
+  "Unerwartete IFC-Anforderung beim Verarbeiten des Moduls %sq1",
+  "Bedingungsfehler in Zeile %d in %s1: %sq2",
+  "Die atomische Einschränkung hängt von sich selbst ab",
+  "Die Funktion \"noreturn\" weist den Rückgabetyp \"nicht void\" auf."
 ]

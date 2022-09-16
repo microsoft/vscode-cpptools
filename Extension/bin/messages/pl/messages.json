@@ -3467,5 +3467,6 @@
   "partycja %sq określiła swój rozmiar wpisu jako %d1, gdy oczekiwano wartości %d2",
   "napotkano nieoczekiwane wymaganie IFC podczas przetwarzania modułu %sq1",
   "warunek nie powiódł się w wierszu %d w %s1: %sq2",
-  "niepodzielne ograniczenie zależy od samego siebie"
+  "niepodzielne ograniczenie zależy od samego siebie",
+  "Funkcja \"noreturn\" ma zwracany typ inny niż void"
 ]
