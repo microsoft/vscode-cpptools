@@ -81,21 +81,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Read the setting and determine whether we should activate the language server prior to installing callbacks,
     // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
     // function, to allow any further setup to occur here, prior to activation.
-    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine?.toLowerCase() === "disabled";
+    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === false;
     const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
         vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
     } else {
-        if (settings.intelliSenseEngine?.toLowerCase() === "disabled") {
+        if (settings.intelliSenseEngine === false) {
             languageServiceDisabled = true;
         }
-        let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
+        let currentIntelliSenseEngineValue: boolean | undefined = settings.intelliSenseEngine;
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
             const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
             if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
-                if (currentIntelliSenseEngineValue?.toLowerCase() === "disabled") {
+                if (currentIntelliSenseEngineValue === false) {
                     // If switching from disabled to enabled, we can continue activation.
                     currentIntelliSenseEngineValue = settings.intelliSenseEngine;
                     languageServiceDisabled = false;

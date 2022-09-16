@@ -202,15 +202,15 @@ export class CppSettings extends Settings {
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
-    public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
+    public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
-    public get intelliSenseEngineFallback(): string | undefined { return super.Section.get<string>("intelliSenseEngineFallback"); }
+    public get intelliSenseEngine(): boolean | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "enabled" }
+    public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number | undefined { return super.Section.get<number>("intelliSenseMemoryLimit"); }
     public get intelliSenseUpdateDelay(): number | undefined { return super.Section.get<number>("intelliSenseUpdateDelay"); }
-    public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles"); }
+    public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles")?.toLowerCase(); }
     public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
@@ -225,7 +225,7 @@ export class CppSettings extends Settings {
     public get doxygenGeneratedCommentStyle(): string | undefined { return super.Section.get<string>("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean | undefined { return super.Section.get<boolean>("doxygen.generateOnType"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
-    public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
+    public get configurationWarnings(): boolean | undefined { return super.Section.get<string>("configurationWarnings")?.toLowerCase() === "enabled"; }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
     public get updateChannel(): string | undefined { return super.Section.get<string>("updateChannel"); }
     public get vcpkgEnabled(): boolean | undefined { return super.Section.get<boolean>("vcpkg.enabled"); }
@@ -293,7 +293,7 @@ export class CppSettings extends Settings {
     }
 
     public get formattingEngine(): string | undefined {
-        return super.Section.get<string>("formatting");
+        return super.Section.get<string>("formatting")?.toLowerCase();
     }
 
     public get vcFormatIndentBraces(): boolean {
@@ -730,7 +730,7 @@ export class CppSettings extends Settings {
     // entries, or a .clang-format file, to determine which settings to use.
     // This is intentionally not async to avoid races due to multiple entrancy.
     public useVcFormat(document: vscode.TextDocument): boolean {
-        if (this.formattingEngine?.toLowerCase() !== "default") {
+        if (this.formattingEngine !== "default") {
             return this.formattingEngine === "vcFormat";
         }
         if (this.clangFormatStyle !== "file") {

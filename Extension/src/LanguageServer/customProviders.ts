@@ -158,7 +158,7 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
-        if (new CppSettings(ext.getActiveClient().RootUri).intelliSenseEngine === "disabled") {
+        if (new CppSettings(ext.getActiveClient().RootUri).intelliSenseEngine === false) {
             console.warn("Language service is disabled. Provider will not be registered.");
             return false;
         }
