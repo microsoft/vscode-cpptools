@@ -566,7 +566,7 @@ export class CppSettings extends Settings {
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         const value: string | undefined = super.Section.get<string>(name);
-        super.Section.update(name, value === value1.toLowerCase() ? value2.toLowerCase() : value1.toLowerCase(), getTarget());
+        super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
     public update<T>(name: string, value: T): void {
