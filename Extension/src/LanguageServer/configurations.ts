@@ -918,6 +918,9 @@ export class CppProperties {
             }
 
             configuration.browse.limitSymbolsToIncludedHeaders = this.updateConfigurationStringOrBoolean(configuration.browse.limitSymbolsToIncludedHeaders, settings.defaultLimitSymbolsToIncludedHeaders, env);
+            if (configuration.browse.limitSymbolsToIncludedHeaders !== false) {
+                configuration.browse.limitSymbolsToIncludedHeaders = true;
+            }
             configuration.browse.databaseFilename = this.updateConfigurationString(configuration.browse.databaseFilename, settings.defaultDatabaseFilename, env);
 
             if (i === this.CurrentConfigurationIndex) {
