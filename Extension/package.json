@@ -2771,7 +2771,7 @@
           ],
           "default": "default",
           "description": "%c_cpp.configuration.sshTargetsView.description%",
-          "scope": "resource"
+          "scope": "window"
         }
       }
     },
