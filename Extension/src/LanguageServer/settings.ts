@@ -204,7 +204,7 @@ export class CppSettings extends Settings {
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): boolean | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "enabled" }
+    public get intelliSenseEngine(): boolean | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "enabled"; }
     public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
