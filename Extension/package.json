@@ -2767,9 +2767,9 @@
           "enum": [
             "enabled",
             "disabled",
-            "auto"
+            "default"
           ],
-          "default": "auto",
+          "default": "default",
           "description": "%c_cpp.configuration.sshTargetsView.description%",
           "scope": "resource"
         }

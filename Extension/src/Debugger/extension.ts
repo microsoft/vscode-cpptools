@@ -105,7 +105,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // Decide if we should show the SSH Targets View.
     sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
     // Active SSH Target initialized in initializeSshTargets()
-    if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'auto' && await getActiveSshTarget(false))) {
+    if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
         // Don't wait
         enableSshTargetsView();
     }
@@ -113,7 +113,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
         if (e.affectsConfiguration('C_Cpp.sshTargetsView')) {
             sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
-            if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'auto' && await getActiveSshTarget(false))) {
+            if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
                 await enableSshTargetsView();
             } else if (sshTargetsViewSetting === 'disabled') {
                 await disableSshTargetsView();
