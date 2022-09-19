@@ -81,21 +81,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Read the setting and determine whether we should activate the language server prior to installing callbacks,
     // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
     // function, to allow any further setup to occur here, prior to activation.
-    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === false;
+    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "Disabled";
     const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
         vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
     } else {
-        if (settings.intelliSenseEngine === false) {
+        if (settings.intelliSenseEngine === "Disabled") {
             languageServiceDisabled = true;
         }
-        let currentIntelliSenseEngineValue: boolean | undefined = settings.intelliSenseEngine;
+        let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
             const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
             if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
-                if (currentIntelliSenseEngineValue === false) {
+                if (currentIntelliSenseEngineValue === "Disabled") {
                     // If switching from disabled to enabled, we can continue activation.
                     currentIntelliSenseEngineValue = settings.intelliSenseEngine;
                     languageServiceDisabled = false;
@@ -141,7 +141,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         LanguageServer.registerCommands(false);
         // The check here for isIntelliSenseEngineDisabled avoids logging
         // the message on old Macs that we've already displayed a warning for.
-        log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
+        log(localize("intellisense.disabled", "intelliSenseEngine is Disabled"));
     }
 
     return cppTools;

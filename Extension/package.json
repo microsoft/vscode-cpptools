@@ -5107,12 +5107,12 @@
         },
         {
           "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
-          "when": "config.C_Cpp.intelliSenseEngine != 'default' && config.C_Cpp.intelliSenseEngine != 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'default' && config.C_Cpp.intelliSenseEngine != 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'default' && config.C_Cpp.intelliSenseEngine != 'Default' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@1"
         },
         {
           "command": "C_Cpp.RestartIntelliSenseForFile",
-          "when": "config.C_Cpp.intelliSenseEngine != 'default' && config.C_Cpp.intelliSenseEngine != 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'default' && config.C_Cpp.intelliSenseEngine != 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'default' && config.C_Cpp.intelliSenseEngine != 'Default' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@2"
         },
         {

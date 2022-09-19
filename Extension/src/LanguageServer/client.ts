@@ -1161,7 +1161,7 @@ export class DefaultClient implements Client {
                 settings_clangFormatStyle.push(setting.clangFormatStyle);
                 settings_clangFormatFallbackStyle.push(setting.clangFormatFallbackStyle);
                 settings_clangFormatSortIncludes.push(setting.clangFormatSortIncludes);
-                settings_intelliSenseEngine.push(setting.intelliSenseEngine ? "enabled" : "disabled");
+                settings_intelliSenseEngine.push(setting.intelliSenseEngine);
                 settings_intelliSenseEngineFallback.push(setting.intelliSenseEngineFallback ? "enabled" : "disabled");
                 settings_errorSquiggles.push(setting.errorSquiggles);
                 settings_dimInactiveRegions.push(setting.dimInactiveRegions);

@@ -166,7 +166,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (config.preLaunchTask) {
             config.configSource = this.getDebugConfigSource(config, folder);
-            const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === false;
+            const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
             // Run the build task if IntelliSense is disabled.
             if (isIntelliSenseDisabled) {
                 try {
