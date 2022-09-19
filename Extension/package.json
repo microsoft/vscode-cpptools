@@ -2970,6 +2970,12 @@
         "category": "C/C++",
         "title": "%c_cpp.command.refreshCppSshTargetsView.title%",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "C_Cpp.sshTerminal",
+        "category": "C/C++",
+        "title": "%c_cpp.command.sshTerminal.title%",
+        "icon": "$(terminal)"
       }
     ],
     "keybindings": [
@@ -5073,12 +5079,17 @@
         {
           "command": "C_Cpp.removeSshTarget",
           "when": "viewItem == CppSshTargetsView.targetLeafRemovable || viewItem == CppSshTargetsView.targetLeafRemovableCanSetActive",
-          "group": "inline@1"
+          "group": "inline@2"
         },
         {
           "command": "C_Cpp.setActiveSshTarget",
           "when": "viewItem == CppSshTargetsView.targetLeafCanSetActive || viewItem == CppSshTargetsView.targetLeafRemovableCanSetActive",
           "group": "inline@0"
+        },
+        {
+          "command": "C_Cpp.sshTerminal",
+          "when": "view == CppSshTargetsView",
+          "group": "inline@1"
         }
       ],
       "editor/title/run": [
@@ -5168,6 +5179,10 @@
         },
         {
           "command": "C_Cpp.refreshCppSshTargetsView",
+          "when": "never"
+        },
+        {
+          "command": "C_Cpp.sshTerminal",
           "when": "never"
         }
       ]
