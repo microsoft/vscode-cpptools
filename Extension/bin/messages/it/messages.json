@@ -3423,7 +3423,7 @@
   "modulo %sq1 posizione del file %d1 (posizione relativa %d2) richiesta per la partizione %sq2, che precede l'inizio della partizione",
   "modulo %sq1 posizione del file %d1 (posizione relativa %d2) richiesta per la partizione %sq2, che causa l'overflow della fine della partizione",
   "modulo %sq1 posizione file %d1 (posizione relativa %d2) richiesta per la partizione %sq2, che non è allineata con i relativi elementi di partizioni",
-  "dal sottocampo %sq",
+  "dal sottocampo %sq (posizione relativa al nodo %d)",
   "dalla partizione %sq elemento %d1 (posizione file %d2, posizione relativa %d3)",
   "attributi lambda non conformi allo standard",
   "l'identificatore %sq potrebbe essere confuso con un identificatore visivamente simile visualizzato %p",
@@ -3462,5 +3462,11 @@
   "il tipo di elemento della condizione vettoriale (%t1) deve avere le stesse dimensioni del tipo di elemento del risultato (%t2)",
   "il tipo di operando di vettore a virgola mobile (%t) non ha un tipo di vettore intero corrispondente",
   "il mangling per le espressioni 'requires' non è ancora implementato",
-  "a causa di un attributo 'non disponibile'"
+  "a causa di un attributo 'non disponibile'",
+  "ha tentato di costruire un elemento dalla partizione IFC %sq utilizzando un indice nella partizione IFC %sq",
+  "la partizione %sq ha specificato la dimensione della voce come %d1 mentre era previsto %d2",
+  "Durante l'elaborazione del modulo %sq1 è stato riscontrato un requisito IFC imprevisto.",
+  "condizione fallita alla riga %d in %s1: %sq2",
+  "il vincolo atomico dipende da se stesso",
+  "La funzione 'noreturn' ha un tipo restituito non void"
 ]

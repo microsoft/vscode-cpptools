@@ -239,6 +239,7 @@
     "c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription": { "message": "If `true`, debugger shell command substitution will use obsolete backtick ``(`)``.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
     "c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription": "Enable pre-v1.10.0 behavior for how shell escaping is handled in compiler arg settings. Shell escaping is no longer expected or supported by default in arg arrays starting in v1.10.0.",
     "c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage": "This setting is temporary to support transitioning to corrected behavior in v1.10.0.",
+    "c_cpp.configuration.sshTargetsView.description": "Controls whether the SSH Targets view is visible. By default, enable the view when an SSH command is invoked.",
     "c_cpp.contributes.views.cppReferencesView.title": "C/C++: Other references results",
     "c_cpp.contributes.views.sshTargetsView.title": { "message": "Cpptools: SSH targets", "comment": [ "Do not localize `Cpptools`." ]  },
     "c_cpp.contributes.viewsWelcome.contents": { "message": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).", "comment": [ "Markdown text between () should not be altered: https://en.wikipedia.org/wiki/Markdown" ] },
