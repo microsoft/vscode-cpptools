@@ -204,7 +204,7 @@ export class CppSettings extends Settings {
     public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
+    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase(); }
     public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
@@ -288,7 +288,7 @@ export class CppSettings extends Settings {
 
     public get enhancedColorization(): boolean {
         return super.Section.get<string>("enhancedColorization")?.toLowerCase() === "enabled"
-            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
@@ -560,7 +560,7 @@ export class CppSettings extends Settings {
 
     public get dimInactiveRegions(): boolean {
         return super.Section.get<boolean>("dimInactiveRegions") === true
-            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && super.Section.get<string>("intelliSenseEngine")?.toLowerCase() === "default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
