@@ -2158,11 +2158,11 @@
         "C_Cpp.intelliSenseEngine": {
           "type": "string",
           "enum": [
-            "Default",
+            "default",
             "Tag Parser",
-            "Disabled"
+            "disabled"
           ],
-          "default": "Default",
+          "default": "default",
           "description": "%c_cpp.configuration.intelliSenseEngine.description%",
           "enumDescriptions": [
             "%c_cpp.configuration.intelliSenseEngine.default.description%",
