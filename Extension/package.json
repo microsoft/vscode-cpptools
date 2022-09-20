@@ -252,7 +252,7 @@
         {
           "id": "CppSshTargetsView",
           "name": "%c_cpp.contributes.views.sshTargetsView.title%",
-          "when": "showCppSshTargetsView"
+          "when": "enableCppSshTargetsView"
         }
       ]
     },
@@ -2761,6 +2761,17 @@
           "default": false,
           "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
           "scope": "resource"
+        },
+        "C_Cpp.sshTargetsView": {
+          "type": "string",
+          "enum": [
+            "enabled",
+            "disabled",
+            "default"
+          ],
+          "default": "default",
+          "description": "%c_cpp.configuration.sshTargetsView.description%",
+          "scope": "window"
         }
       }
     },
