@@ -197,52 +197,6 @@ export class ClientCollection {
             //      this event) will be terminated and restarted so that the (deprecated) rootPath property is
             //      updated to point to the first workspace folder.
 
-            // if (oldDefaultClient) {
-            //     const uri: vscode.Uri | undefined = oldDefaultClient.RootUri;
-            //     // uri will be set.
-            //     if (uri) {
-            //         // Check if there is now another more appropriate client to use.
-            //         this.defaultClient = this.getClientFor(uri);
-            //         needNewDefaultClient = this.defaultClient === oldDefaultClient;
-            //     }
-            //     oldDefaultClient.dispose();
-            // } else {
-            //     const defaultDefaultClient: cpptools.Client | undefined = this.languageClients.get(defaultClientKey);
-            //     if (defaultDefaultClient) {
-            //         // If there is an entry in languageClients for defaultClientKey, we were not previously tracking any workspace folders.
-            //         this.languageClients.delete(defaultClientKey);
-            //         needNewDefaultClient = true;
-            //         if (this.activeClient === this.defaultClient) {
-            //             // Redundant deactivation should be OK.
-            //             this.activeClient.deactivate();
-            //         }
-            //     }
-            // }
-            //
-            // if (needNewDefaultClient) {
-            //     // Use the first workspaceFolder, if any.
-            //     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            //         const key: string = util.asFolder(vscode.workspace.workspaceFolders[0].uri);
-            //         const client: cpptools.Client | undefined = this.languageClients.get(key);
-            //         if (!client) {
-            //             // This should not occur.  If there is a workspace folder, we should have a client for it by now.
-            //             throw new Error("Failed to construct default client");
-            //         }
-            //         this.defaultClient = client;
-            //     } else {
-            //         // The user removed the last workspace folder. Create a new default defaultClient/activeClient
-            //         // using the same approach as used in the constructor.
-            //         this.defaultClient = cpptools.createClient(this);
-            //         this.languageClients.set(defaultClientKey, this.defaultClient);
-            //         this.defaultClient.deactivate();
-            //         if (this.activeDocument) {
-            //             // Only change activeClient if it would not be changed by the later check.
-            //             this.activeClient.deactivate();
-            //             this.activeClient = this.defaultClient;
-            //         }
-            //     }
-            // }
-
             // Ensure the best client for the currently active document is activated.
             if (this.activeDocument) {
                 const newActiveClient: cpptools.Client = this.getClientFor(this.activeDocument.uri);
