@@ -17,10 +17,11 @@ import {
 } from 'ssh-config';
 import { promisify } from 'util';
 import { ISshConfigHostInfo, ISshHostInfo, isWindows, resolveHome } from "../common";
-import { getOutputChannelLogger } from '../logger';
+import { getSshChannel } from '../logger';
 import * as glob from 'glob';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { CppSettings } from '../LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -133,7 +134,7 @@ async function getIncludedConfigFile(config: Configuration, includePath: string)
         const parsed: Configuration = parse(includedContents);
         config.push(...parsed);
     } catch (e) {
-        getOutputChannelLogger().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", includePath));
+        getSshChannel().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", includePath));
     }
 }
 
@@ -143,7 +144,7 @@ export async function writeSshConfiguration(configurationPath: string, configura
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(path.dirname(configurationPath)));
         await fs.writeFile(configurationPath, configuration.toString());
     } catch (e) {
-        getOutputChannelLogger().appendLine(localize("failed.to.write.file", "Failed to write to file {0}.", configurationPath));
+        getSshChannel().appendLine(localize("failed.to.write.file", "Failed to write to file {0}.", configurationPath));
     }
 }
 
@@ -153,7 +154,10 @@ async function getSshConfigSource(configurationPath: string): Promise<string> {
         const buffer: Buffer = await fs.readFile(configurationPath);
         return buffer.toString('utf8');
     } catch (e) {
-        getOutputChannelLogger().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", configurationPath));
+        const settings: CppSettings = new CppSettings();
+        if (settings.loggingLevel !== "None" && settings.loggingLevel !== "Error") {
+            getSshChannel().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", configurationPath));
+        }
     }
 
     return '';
