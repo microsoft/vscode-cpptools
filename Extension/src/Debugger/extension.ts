@@ -133,7 +133,7 @@ export function dispose(): void {
 
 function sshTerminal(node: TargetLeafNode): void {
     const terminal: vscode.Terminal = vscode.window.createTerminal(`SSH: ${node.name}`);
-    terminal.sendText(`ssh ${node.name}`);
+    terminal.sendText(`ssh "${node.name}"`);
     terminal.show();
 }
 
