@@ -21,7 +21,6 @@ import { getSshChannel } from '../logger';
 import * as glob from 'glob';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { CppSettings } from '../LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -154,10 +153,10 @@ async function getSshConfigSource(configurationPath: string): Promise<string> {
         const buffer: Buffer = await fs.readFile(configurationPath);
         return buffer.toString('utf8');
     } catch (e) {
-        const settings: CppSettings = new CppSettings();
-        if (settings.loggingLevel !== "None" && settings.loggingLevel !== "Error") {
-            getSshChannel().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", configurationPath));
+        if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+            return '';
         }
+        getSshChannel().appendLine(localize("failed.to.read.file", "Failed to read file {0}.", configurationPath));
     }
 
     return '';
