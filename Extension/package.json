@@ -1625,8 +1625,8 @@
           "enum": [
             "clangFormat",
             "vcFormat",
-            "Default",
-            "Disabled"
+            "default",
+            "disabled"
           ],
           "markdownEnumDescriptions": [
             "%c_cpp.configuration.formatting.clangFormat.markdownDescription%",
@@ -1634,7 +1634,7 @@
             "%c_cpp.configuration.formatting.Default.markdownDescription%",
             "%c_cpp.configuration.formatting.Disabled.markdownDescription%"
           ],
-          "default": "Default",
+          "default": "default",
           "description": "%c_cpp.configuration.formatting.description%",
           "scope": "resource"
         },
@@ -2158,11 +2158,11 @@
         "C_Cpp.intelliSenseEngine": {
           "type": "string",
           "enum": [
-            "Default",
+            "default",
             "Tag Parser",
-            "Disabled"
+            "disabled"
           ],
-          "default": "Default",
+          "default": "default",
           "description": "%c_cpp.configuration.intelliSenseEngine.description%",
           "enumDescriptions": [
             "%c_cpp.configuration.intelliSenseEngine.default.description%",
@@ -2174,20 +2174,20 @@
         "C_Cpp.intelliSenseEngineFallback": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled"
+            "enabled",
+            "disabled"
           ],
-          "default": "Disabled",
+          "default": "disabled",
           "markdownDescription": "%c_cpp.configuration.intelliSenseEngineFallback.markdownDescription%",
           "scope": "resource"
         },
         "C_Cpp.autocomplete": {
           "type": "string",
           "enum": [
-            "Default",
-            "Disabled"
+            "default",
+            "disabled"
           ],
-          "default": "Default",
+          "default": "default",
           "markdownDescription": "%c_cpp.configuration.autocomplete.markdownDescription%",
           "enumDescriptions": [
             "%c_cpp.configuration.autocomplete.default.description%",
@@ -2198,11 +2198,11 @@
         "C_Cpp.errorSquiggles": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled",
-            "EnabledIfIncludesResolve"
+            "enabled",
+            "disabled",
+            "enabledIfIncludesResolve"
           ],
-          "default": "EnabledIfIncludesResolve",
+          "default": "enabledIfIncludesResolve",
           "description": "%c_cpp.configuration.errorSquiggles.description%",
           "scope": "resource"
         },
@@ -2393,10 +2393,10 @@
         "C_Cpp.configurationWarnings": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled"
+            "enabled",
+            "disabled"
           ],
-          "default": "Enabled",
+          "default": "enabled",
           "description": "%c_cpp.configuration.configurationWarnings.description%",
           "scope": "resource"
         },
@@ -2649,10 +2649,10 @@
         "C_Cpp.experimentalFeatures": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled"
+            "enabled",
+            "disabled"
           ],
-          "default": "Disabled",
+          "default": "disabled",
           "description": "%c_cpp.configuration.experimentalFeatures.description%",
           "scope": "window"
         },
@@ -2675,10 +2675,10 @@
         "C_Cpp.enhancedColorization": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled"
+            "enabled",
+            "disabled"
           ],
-          "default": "Enabled",
+          "default": "enabled",
           "markdownDescription": "%c_cpp.configuration.enhancedColorization.markdownDescription%",
           "scope": "window"
         },
@@ -2709,10 +2709,10 @@
         "C_Cpp.codeFolding": {
           "type": "string",
           "enum": [
-            "Enabled",
-            "Disabled"
+            "enabled",
+            "disabled"
           ],
-          "default": "Enabled",
+          "default": "enabled",
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
         },
@@ -5103,27 +5103,27 @@
       "editor/context": [
         {
           "command": "C_Cpp.SwitchHeaderSource",
-          "when": "config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
           "group": "custom1@1"
         },
         {
           "command": "workbench.action.gotoSymbol",
-          "when": "config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
           "group": "custom1@2"
         },
         {
           "command": "workbench.action.showAllSymbols",
-          "when": "config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
           "group": "custom1@3"
         },
         {
           "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
-          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@1"
         },
         {
           "command": "C_Cpp.RestartIntelliSenseForFile",
-          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp'",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@2"
         },
         {

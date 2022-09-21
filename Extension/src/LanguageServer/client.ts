@@ -457,7 +457,7 @@ interface Excludes {
 interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
     intelliSenseEngine: string | undefined;
-    intelliSenseEngineFallback: string | undefined;
+    intelliSenseEngineFallback: boolean | undefined;
     autocomplete: string | undefined;
     autocompleteAddParentheses: boolean | undefined;
     errorSquiggles: string | undefined;
@@ -568,7 +568,7 @@ interface SettingsParams {
     workspaceSymbols: string | undefined;
     simplifyStructuredComments: boolean | undefined;
     intelliSenseUpdateDelay: number | undefined;
-    experimentalFeatures: string | undefined;
+    experimentalFeatures: boolean | undefined;
     enhancedColorization: boolean | undefined;
     intellisenseMaxCachedProcesses: number | null | undefined;
     intellisenseMaxMemory: number | null | undefined;
@@ -1759,7 +1759,7 @@ export class DefaultClient implements Client {
                     return;
                 }
                 const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === "Enabled" && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                if (settings.configurationWarnings === true && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                     const dismiss: string = localize("dismiss.button", "Dismiss");
                     const disable: string = localize("diable.warnings.button", "Disable Warnings");
                     const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -1776,7 +1776,7 @@ export class DefaultClient implements Client {
                     vscode.window.showInformationMessage(message, dismiss, disable).then(response => {
                         switch (response) {
                             case disable: {
-                                settings.toggleSetting("configurationWarnings", "Enabled", "Disabled");
+                                settings.toggleSetting("configurationWarnings", "enabled", "disabled");
                                 break;
                             }
                         }
