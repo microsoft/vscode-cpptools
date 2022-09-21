@@ -22,7 +22,10 @@
 	"semanticHighlighting": true,
 	"tokenColors": [
 		{
-			"scope": ["meta.embedded", "source.groovy.embedded"],
+			"scope": [
+				"meta.embedded",
+				"source.groovy.embedded"
+			],
 			"settings": {
 				"foreground": "#000000ff"
 			}
@@ -408,7 +411,8 @@
 			"settings": {
 				"foreground": "#008080"
 			}
-		},		{
+		},
+		{
 			"scope": "entity.name.function.preprocessor",
 			"settings": {
 				"foreground": "#BD63C5"
@@ -457,26 +461,10 @@
 			}
 		}
 	],
-	"semanticTokenColors": [
-		{
-			"operatorOverload": {
-				"foreground": "#008080"
-			}
-		},
-		{
-			"operatorOverloadMember": {
-				"foreground": "#008080"
-			}
-		},
-		{
-			"newOperator": {
-				"foreground": "#0000FF"
-			}
-		},
-		{
-			"stringLiteral": {
-				"foreground": "#A31515"
-			}
-		}
-	]
+	"semanticTokenColors": {
+		"operatorOverload": "#008080",
+		"operatorOverloadMember": "#008080",
+		"newOperator": "#0000FF",
+		"stringLiteral": "#A31515"
+	}
 }

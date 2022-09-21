@@ -468,36 +468,12 @@
 			}
 		}
 	],
-	"semanticTokenColors": [
-		{
-			"operatorOverload": {
-				"foreground": "#B4B4B4"
-			}
-		},
-		{
-			"operatorOverloadMember": {
-				"foreground": "#B4B4B4"
-			}
-		},
-		{
-			"newOperator": {
-				"foreground": "#569CD6"
-			}
-		},
-		{
-			"numberLiteral": {
-				"foreground": "#B5CEA8"
-			}
-		},
-		{
-			"customLiteral": {
-				"foreground": "#DADADA"
-			}
-		},
-		{
-			"stringLiteral": {
-				"foreground": "#D69D85"
-			}
-		}
-	]
+	"semanticTokenColors": {
+		"operatorOverload": "#B4B4B4",
+		"operatorOverloadMember": "#B4B4B4",
+		"newOperator": "#569CD6",
+		"numberLiteral": "#B5CEA8",
+		"customLiteral": "#DADADA",
+		"stringLiteral": "#D69D85"
+	}
 }

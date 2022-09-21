@@ -27,12 +27,12 @@
 		"statusBarItem.errorBackground": "#c72e0f",
 		"list.activeSelectionIconForeground": "#FFF",
 		"list.focusAndSelectionOutline": "#90C2F9",
-        "editorLineNumber.foreground": "#2b91af",
+		"editorLineNumber.foreground": "#2b91af",
 		"editorLineNumber.activeForeground": "#2b91af",
 		"terminal.inactiveSelectionBackground": "#E5EBF1"
 	},
 	"tokenColors": [
-        // VISUAL STUDIO LIGHT
+		// VISUAL STUDIO LIGHT
 		{
 			"scope": [
 				"meta.embedded",
@@ -422,8 +422,8 @@
 				"foreground": "#0000ff"
 			}
 		},
-        // LIGHT PLUS
-        {
+		// LIGHT PLUS
+		{
 			"name": "Function declarations",
 			"scope": [
 				"entity.name.function",
@@ -512,7 +512,6 @@
 				"support.variable",
 				"entity.name.variable",
 				"constant.other.placeholder", // placeholders in strings
-
 			],
 			"settings": {
 				"foreground": "#001080"
@@ -611,7 +610,7 @@
 				"foreground": "#000000"
 			}
 		},
-        // VISUAL STUDIO 2019 LIGHT
+		// VISUAL STUDIO 2019 LIGHT
 		{
 			"name": "Control flow / Special keywords",
 			"scope": [
@@ -624,11 +623,11 @@
 				"foreground": "#8F08C4"
 			}
 		},
-        {
+		{
 			"scope": [
 				"keyword.control.directive",
 				"variable.parameter",
-                "punctuation.definition.directive",
+				"punctuation.definition.directive",
 				"entity.other.attribute-name.pragma.preprocessor.cpp"
 			],
 			"settings": {
@@ -644,7 +643,7 @@
 				"variable.other.constant",
 				"variable.other.enummember",
 				"entity.name.scope-resolution",
-                "storage.modifier.pointer",
+				"storage.modifier.pointer",
 				"storage.modifier.reference",
 				"entity.name.function.operator",
 				"keyword.other.operator.overload.cpp",

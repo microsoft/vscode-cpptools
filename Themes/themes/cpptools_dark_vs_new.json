@@ -680,7 +680,7 @@
 	"semanticHighlighting": true,
 	"semanticTokenColors": {
 		"newOperator": "#569CD6",
-		"stringLiteral":"#ce9178",
+		"stringLiteral": "#ce9178",
 		"customLiteral": "#DCDCAA",
 		"numberLiteral": "#b5cea8"
 	}
