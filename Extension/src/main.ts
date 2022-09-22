@@ -23,6 +23,7 @@ import * as nls from 'vscode-nls';
 import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
 import { disposeOutputChannels, log } from './logger';
+import { activate as activateIncludeCpp } from './includeCpp';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -143,6 +144,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         // the message on old Macs that we've already displayed a warning for.
         log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
     }
+
+    activateIncludeCpp(context);
 
     return cppTools;
 }
