@@ -41,7 +41,7 @@ const decorationTypes: (vscode.TextEditorDecorationType | undefined)[] = [
 const hoverMessage: vscode.MarkdownString = new vscode.MarkdownString(
     localize(
         "includecpp.hover",
-        "[#include <C++>](https://www.includecpp.org/) is a global, inclusive, and diverse community for developers interested in C++."
+        "[#include <C++>](https://go.microsoft.com/fwlink/?linkid=2209335) is a global, inclusive, and diverse community for developers interested in C++."
     )
 );
 
