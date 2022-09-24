@@ -30,15 +30,14 @@ import { Location, TextEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
-import { CppSettings, getEditorConfigSettings, OtherSettings } from './settings';
+import { CppSettings, getAllSettings, getEditorConfigSettings, OtherSettings, SettingsParams } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { UI, getUI } from './ui';
-import { ClientCollection } from './clientCollection';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
-import { updateLanguageConfigurations, CppSourceStr } from './extension';
+import { updateLanguageConfigurations, CppSourceStr, clients } from './extension';
 import { SettingsTracker, getTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -65,7 +64,6 @@ let languageClient: LanguageClient;
 let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
-let clientCollection: ClientCollection;
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
@@ -142,7 +140,7 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
     const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
     diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
 
-    clientCollection.timeTelemetryCollector.setUpdateRangeTime(realUri);
+    clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
 }
 
 interface WorkspaceFolderParams {
@@ -450,137 +448,6 @@ export interface TextDocumentWillSaveParams {
     reason: vscode.TextDocumentSaveReason;
 }
 
-interface Excludes {
-    [key: string]: boolean | { when: string };
-};
-
-interface WorkspaceFolderSettingsParams {
-    uri: string | undefined;
-    intelliSenseEngine: string | undefined;
-    intelliSenseEngineFallback: boolean | undefined;
-    autocomplete: string | undefined;
-    autocompleteAddParentheses: boolean | undefined;
-    errorSquiggles: string | undefined;
-    exclusionPolicy: string | undefined;
-    preferredPathSeparator: string | undefined;
-    intelliSenseCachePath: string | undefined;
-    intelliSenseCacheSize: number | undefined;
-    intelliSenseMemoryLimit: number | undefined;
-    dimInactiveRegions: boolean | undefined;
-    suggestSnippets: boolean | undefined;
-    legacyCompilerArgsBehavior: boolean | undefined;
-    defaultSystemIncludePath: string[] | undefined;
-    cppFilesExclude: Excludes | undefined;
-    clangFormatPath: string | undefined;
-    clangFormatStyle: string | undefined;
-    clangFormatFallbackStyle: string | undefined;
-    clangFormatSortIncludes: boolean | undefined | null;
-    codeAnalysisRunAutomatically: boolean | undefined;
-    codeAnalysisExclude: Excludes | undefined;
-    clangTidyEnabled: boolean | undefined;
-    clangTidyPath: string | undefined;
-    clangTidyConfig: string | undefined;
-    clangTidyFallbackConfig: string | undefined;
-    clangTidyHeaderFilter: string | undefined | null;
-    clangTidyArgs: string[] | undefined;
-    clangTidyUseBuildPath: boolean | undefined;
-    clangTidyFixWarnings: boolean | undefined;
-    clangTidyFixErrors: boolean | undefined;
-    clangTidyFixNotes: boolean | undefined;
-    clangTidyChecksEnabled: string[] | undefined;
-    clangTidyChecksDisabled: string[] | undefined;
-    vcFormatIndentBraces: boolean | undefined;
-    vcFormatIndentMultiLineRelativeTo: string | undefined;
-    vcFormatIndentWithinParentheses: string | undefined;
-    vcFormatIndentPreserveWithinParentheses: boolean;
-    vcFormatIndentCaseLabels: boolean | undefined;
-    vcFormatIndentCaseContents: boolean | undefined;
-    vcFormatIndentCaseContentsWhenBlock: boolean | undefined;
-    vcFormatIndentLambdaBracesWhenParameter: boolean | undefined;
-    vcFormatIndentGotoLabels: string | undefined;
-    vcFormatIndentPreprocessor: string | undefined;
-    vcFormatIndentAccesSpecifiers: boolean | undefined;
-    vcFormatIndentNamespaceContents: boolean | undefined;
-    vcFormatIndentPreserveComments: boolean | undefined;
-    vcFormatNewLineScopeBracesOnSeparateLines: boolean | undefined;
-    vcFormatNewLineBeforeOpenBraceNamespace: string | undefined;
-    vcFormatNewLineBeforeOpenBraceType: string | undefined;
-    vcFormatNewLineBeforeOpenBraceFunction: string | undefined;
-    vcFormatNewLineBeforeOpenBraceBlock: string | undefined;
-    vcFormatNewLineBeforeOpenBraceLambda: string | undefined;
-    vcFormatNewLineBeforeCatch: boolean | undefined;
-    vcFormatNewLineBeforeElse: boolean | undefined;
-    vcFormatNewLineBeforeWhileInDoWhile: boolean | undefined;
-    vcFormatNewLineCloseBraceSameLineEmptyType: boolean | undefined;
-    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean | undefined;
-    vcFormatSpaceWithinParameterListParentheses: boolean | undefined;
-    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean | undefined;
-    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean | undefined;
-    vcFormatSpaceWithinControlFlowStatementParentheses: boolean | undefined;
-    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean | undefined;
-    vcFormatSpaceWithinCastParentheses: boolean | undefined;
-    vcFormatSpaceAfterCastCloseParenthesis: boolean | undefined;
-    vcFormatSpaceWithinExpressionParentheses: boolean | undefined;
-    vcFormatSpaceBeforeBlockOpenBrace: boolean | undefined;
-    vcFormatSpaceBetweenEmptyBraces: boolean | undefined;
-    vcFormatSpaceBeforeInitializerListOpenBrace: boolean | undefined;
-    vcFormatSpaceWithinInitializerListBraces: boolean | undefined;
-    vcFormatSpacePreserveInInitializerList: boolean | undefined;
-    vcFormatSpaceBeforeOpenSquareBracket: boolean | undefined;
-    vcFormatSpaceWithinSquareBrackets: boolean | undefined;
-    vcFormatSpaceBeforeEmptySquareBrackets: boolean | undefined;
-    vcFormatSpaceBetweenEmptySquareBrackets: boolean | undefined;
-    vcFormatSpaceGroupSquareBrackets: boolean | undefined;
-    vcFormatSpaceWithinLambdaBrackets: boolean | undefined;
-    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean | undefined;
-    vcFormatSpaceBeforeComma: boolean | undefined;
-    vcFormatSpaceAfterComma: boolean | undefined;
-    vcFormatSpaceRemoveAroundMemberOperators: boolean | undefined;
-    vcFormatSpaceBeforeInheritanceColon: boolean | undefined;
-    vcFormatSpaceBeforeConstructorColon: boolean | undefined;
-    vcFormatSpaceRemoveBeforeSemicolon: boolean | undefined;
-    vcFormatSpaceInsertAfterSemicolon: boolean | undefined;
-    vcFormatSpaceRemoveAroundUnaryOperator: boolean | undefined;
-    vcFormatSpaceBeforeFunctionOpenParenthesis: string | undefined;
-    vcFormatSpaceAroundBinaryOperator: string | undefined;
-    vcFormatSpaceAroundAssignmentOperator: string | undefined;
-    vcFormatSpacePointerReferenceAlignment: string | undefined;
-    vcFormatSpaceAroundTernaryOperator: string | undefined;
-    vcFormatWrapPreserveBlocks: string | undefined;
-    doxygenGenerateOnType: boolean | undefined;
-    doxygenGeneratedStyle: string | undefined;
-    filesExclude: Excludes | undefined;
-    filesAutoSaveAfterDelay: boolean | undefined;
-    filesEncoding: string | undefined;
-    searchExclude: Excludes | undefined;
-    editorAutoClosingBrackets: string | undefined;
-    editorInlayHintsEnabled: boolean | undefined;
-};
-
-interface SettingsParams {
-    filesAssociations: { [key: string]: string } | undefined;
-    workspaceFallbackEncoding: string | undefined;
-    maxConcurrentThreads: number | null | undefined;
-    maxCachedProcesses: number | null | undefined;
-    maxMemory: number | null | undefined;
-    loggingLevel: string | undefined;
-    workspaceParsingPriority: string | undefined;
-    workspaceSymbols: string | undefined;
-    simplifyStructuredComments: boolean | undefined;
-    intelliSenseUpdateDelay: number | undefined;
-    experimentalFeatures: boolean | undefined;
-    enhancedColorization: boolean | undefined;
-    intellisenseMaxCachedProcesses: number | null | undefined;
-    intellisenseMaxMemory: number | null | undefined;
-    referencesMaxConcurrentThreads: number | null | undefined;
-    referencesMaxCachedProcesses: number | null | undefined;
-    referencesMaxMemory: number | null | undefined;
-    codeAnalysisMaxConcurrentThreads: number | null | undefined;
-    codeAnalysisMaxMemory: number | null | undefined;
-    codeAnalysisUpdateDelay: number | undefined;
-    workspaceFolderSettings: WorkspaceFolderSettingsParams[];
-};
-
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
@@ -829,8 +696,8 @@ export interface Client {
     sendDidChangeSettings(): void;
 }
 
-export function createClient(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder): Client {
-    return new DefaultClient(allClients, workspaceFolder);
+export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
+    return new DefaultClient(workspaceFolder);
 }
 
 export function createNullClient(): Client {
@@ -931,7 +798,7 @@ export class DefaultClient implements Client {
         return this.innerConfiguration;
     }
 
-    private get AdditionalEnvironment(): { [key: string]: string | string[] } {
+    public get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return {
             workspaceFolderBasename: this.Name,
             workspaceStorage: this.storagePath,
@@ -952,7 +819,7 @@ export class DefaultClient implements Client {
      * @see awaitUntilLanguageClientReady()
      */
 
-    constructor(allClients: ClientCollection, workspaceFolder?: vscode.WorkspaceFolder) {
+    constructor(workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
         let storagePath: string | undefined;
@@ -978,8 +845,7 @@ export class DefaultClient implements Client {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                 }
-                languageClient = this.createLanguageClient(allClients);
-                clientCollection = allClients;
+                languageClient = this.createLanguageClient();
                 languageClient.registerProposedFeatures();
                 firstClientStarted = languageClient.start();
                 util.setProgress(util.getProgressExecutableStarted());
@@ -1040,9 +906,9 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
                         this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(allClients), undefined));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
-                        // Because formatting and codeFolding can very per folder, we need to register these providers once
+                        // Because formatting and codeFolding can vary per folder, we need to register these providers once
                         // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
                         // within the providers themselves.
                         this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
@@ -1094,155 +960,7 @@ export class DefaultClient implements Client {
         this.languageClient.sendNotification(RenameNotification, params);
     }
 
-    private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
-        return {
-            uri: workspaceFolderUri?.toString(),
-            intelliSenseEngine: settings.intelliSenseEngine,
-            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
-            autocomplete: settings.autocomplete,
-            autocompleteAddParentheses: settings.autocompleteAddParentheses,
-            errorSquiggles: settings.errorSquiggles,
-            exclusionPolicy: settings.exclusionPolicy,
-            preferredPathSeparator: settings.preferredPathSeparator,
-            intelliSenseCachePath: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
-            intelliSenseCacheSize: settings.intelliSenseCacheSize,
-            intelliSenseMemoryLimit: settings.intelliSenseMemoryLimit,
-            dimInactiveRegions: settings.dimInactiveRegions,
-            suggestSnippets: settings.suggestSnippets,
-            legacyCompilerArgsBehavior: settings.legacyCompilerArgsBehavior,
-            defaultSystemIncludePath: settings.defaultSystemIncludePath,
-            cppFilesExclude: settings.filesExclude,
-            clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-            clangFormatStyle: settings.clangFormatStyle,
-            clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
-            clangFormatSortIncludes: settings.clangFormatSortIncludes,
-            codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
-            codeAnalysisExclude: settings.codeAnalysisExclude,
-            clangTidyEnabled: settings.clangTidyEnabled,
-            clangTidyPath:  util.resolveVariables(settings.clangTidyPath, this.AdditionalEnvironment),
-            clangTidyConfig: settings.clangTidyConfig,
-            clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
-            clangTidyHeaderFilter: settings.clangTidyHeaderFilter,
-            clangTidyArgs: settings.clangTidyArgs,
-            clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
-            clangTidyFixWarnings: settings.clangTidyFixWarnings,
-            clangTidyFixErrors: settings.clangTidyFixErrors,
-            clangTidyFixNotes: settings.clangTidyFixNotes,
-            clangTidyChecksEnabled: settings.clangTidyChecksEnabled,
-            clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
-            vcFormatIndentBraces: settings.vcFormatIndentBraces,
-            vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
-            vcFormatIndentWithinParentheses: settings.vcFormatIndentWithinParentheses,
-            vcFormatIndentPreserveWithinParentheses: settings.vcFormatIndentPreserveWithinParentheses,
-            vcFormatIndentCaseLabels: settings.vcFormatIndentCaseLabels,
-            vcFormatIndentCaseContents: settings.vcFormatIndentCaseContents,
-            vcFormatIndentCaseContentsWhenBlock: settings.vcFormatIndentCaseContentsWhenBlock,
-            vcFormatIndentLambdaBracesWhenParameter: settings.vcFormatIndentLambdaBracesWhenParameter,
-            vcFormatIndentGotoLabels: settings.vcFormatIndentGotoLabels,
-            vcFormatIndentPreprocessor: settings.vcFormatIndentPreprocessor,
-            vcFormatIndentAccesSpecifiers: settings.vcFormatIndentAccessSpecifiers,
-            vcFormatIndentNamespaceContents: settings.vcFormatIndentNamespaceContents,
-            vcFormatIndentPreserveComments: settings.vcFormatIndentPreserveComments,
-            vcFormatNewLineScopeBracesOnSeparateLines: settings.vcFormatNewlineScopeBracesOnSeparateLines,
-            vcFormatNewLineBeforeOpenBraceNamespace: settings.vcFormatNewlineBeforeOpenBraceNamespace,
-            vcFormatNewLineBeforeOpenBraceType: settings.vcFormatNewlineBeforeOpenBraceType,
-            vcFormatNewLineBeforeOpenBraceFunction: settings.vcFormatNewlineBeforeOpenBraceFunction,
-            vcFormatNewLineBeforeOpenBraceBlock: settings.vcFormatNewlineBeforeOpenBraceBlock,
-            vcFormatNewLineBeforeOpenBraceLambda: settings.vcFormatNewlineBeforeOpenBraceLambda,
-            vcFormatNewLineBeforeCatch: settings.vcFormatNewlineBeforeCatch,
-            vcFormatNewLineBeforeElse: settings.vcFormatNewlineBeforeElse,
-            vcFormatNewLineBeforeWhileInDoWhile: settings.vcFormatNewlineBeforeWhileInDoWhile,
-            vcFormatNewLineCloseBraceSameLineEmptyType: settings.vcFormatNewlineCloseBraceSameLineEmptyType,
-            vcFormatNewLineCloseBraceSameLineEmptyFunction: settings.vcFormatNewlineCloseBraceSameLineEmptyFunction,
-            vcFormatSpaceBeforeFunctionOpenParenthesis: settings.vcFormatSpaceBeforeFunctionOpenParenthesis,
-            vcFormatSpaceWithinParameterListParentheses: settings.vcFormatSpaceWithinParameterListParentheses,
-            vcFormatSpaceBetweenEmptyParameterListParentheses: settings.vcFormatSpaceBetweenEmptyParameterListParentheses,
-            vcFormatSpaceAfterKeywordsInControlFlowStatements: settings.vcFormatSpaceAfterKeywordsInControlFlowStatements,
-            vcFormatSpaceWithinControlFlowStatementParentheses: settings.vcFormatSpaceWithinControlFlowStatementParentheses,
-            vcFormatSpaceBeforeLambdaOpenParenthesis: settings.vcFormatSpaceBeforeLambdaOpenParenthesis,
-            vcFormatSpaceWithinCastParentheses: settings.vcFormatSpaceWithinCastParentheses,
-            vcFormatSpaceAfterCastCloseParenthesis: settings.vcFormatSpaceAfterCastCloseParenthesis,
-            vcFormatSpaceWithinExpressionParentheses: settings.vcFormatSpaceWithinExpressionParentheses,
-            vcFormatSpaceBeforeBlockOpenBrace: settings.vcFormatSpaceBeforeBlockOpenBrace,
-            vcFormatSpaceBetweenEmptyBraces: settings.vcFormatSpaceBetweenEmptyBraces,
-            vcFormatSpaceBeforeInitializerListOpenBrace: settings.vcFormatSpaceBeforeInitializerListOpenBrace,
-            vcFormatSpaceWithinInitializerListBraces: settings.vcFormatSpaceWithinInitializerListBraces,
-            vcFormatSpacePreserveInInitializerList: settings.vcFormatSpacePreserveInInitializerList,
-            vcFormatSpaceBeforeOpenSquareBracket: settings.vcFormatSpaceBeforeOpenSquareBracket,
-            vcFormatSpaceWithinSquareBrackets: settings.vcFormatSpaceWithinSquareBrackets,
-            vcFormatSpaceBeforeEmptySquareBrackets: settings.vcFormatSpaceBeforeEmptySquareBrackets,
-            vcFormatSpaceBetweenEmptySquareBrackets: settings.vcFormatSpaceBetweenEmptySquareBrackets,
-            vcFormatSpaceGroupSquareBrackets: settings.vcFormatSpaceGroupSquareBrackets,
-            vcFormatSpaceWithinLambdaBrackets: settings.vcFormatSpaceWithinLambdaBrackets,
-            vcFormatSpaceBetweenEmptyLambdaBrackets: settings.vcFormatSpaceBetweenEmptyLambdaBrackets,
-            vcFormatSpaceBeforeComma: settings.vcFormatSpaceBeforeComma,
-            vcFormatSpaceAfterComma: settings.vcFormatSpaceAfterComma,
-            vcFormatSpaceRemoveAroundMemberOperators: settings.vcFormatSpaceRemoveAroundMemberOperators,
-            vcFormatSpaceBeforeInheritanceColon: settings.vcFormatSpaceBeforeInheritanceColon,
-            vcFormatSpaceBeforeConstructorColon: settings.vcFormatSpaceBeforeConstructorColon,
-            vcFormatSpaceRemoveBeforeSemicolon: settings.vcFormatSpaceRemoveBeforeSemicolon,
-            vcFormatSpaceInsertAfterSemicolon: settings.vcFormatSpaceInsertAfterSemicolon,
-            vcFormatSpaceRemoveAroundUnaryOperator: settings.vcFormatSpaceRemoveAroundUnaryOperator,
-            vcFormatSpaceAroundBinaryOperator: settings.vcFormatSpaceAroundBinaryOperator,
-            vcFormatSpaceAroundAssignmentOperator: settings.vcFormatSpaceAroundAssignmentOperator,
-            vcFormatSpacePointerReferenceAlignment: settings.vcFormatSpacePointerReferenceAlignment,
-            vcFormatSpaceAroundTernaryOperator: settings.vcFormatSpaceAroundTernaryOperator,
-            vcFormatWrapPreserveBlocks: settings.vcFormatWrapPreserveBlocks,
-            doxygenGenerateOnType: settings.doxygenGenerateOnType,
-            doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
-            filesExclude: otherSettings.filesExclude,
-            filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
-            filesEncoding: otherSettings.filesEncoding,
-            searchExclude: otherSettings.searchExclude,
-            editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
-            editorInlayHintsEnabled: otherSettings.InlayHintsEnabled
-        };
-    };
-
-    private getAllWorkspaceFolderSettings(): WorkspaceFolderSettingsParams[] {
-        const workspaceSettings: CppSettings = new CppSettings();
-        const workspaceOtherSettings: OtherSettings = new OtherSettings();
-        const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = [];
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-            for (const workspaceFolder of vscode.workspace.workspaceFolders) {
-                workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(workspaceFolder.uri, new CppSettings(workspaceFolder.uri), new OtherSettings(workspaceFolder.uri)));
-            }
-        } else {
-            workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(this.RootUri, workspaceSettings, workspaceOtherSettings));
-        }
-        return workspaceFolderSettingsParams;
-    }
-
-    private getAllSettings(): SettingsParams {
-        const workspaceSettings: CppSettings = new CppSettings();
-        const workspaceOtherSettings: OtherSettings = new OtherSettings();
-        const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
-        return {
-            filesAssociations: workspaceOtherSettings.filesAssociations,
-            workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
-            maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
-            maxCachedProcesses: workspaceSettings.maxCachedProcesses,
-            maxMemory: workspaceSettings.maxMemory,
-            loggingLevel: workspaceSettings.loggingLevel,
-            workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
-            workspaceSymbols: workspaceSettings.workspaceSymbols,
-            simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-            intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-            experimentalFeatures: workspaceSettings.experimentalFeatures,
-            enhancedColorization: workspaceSettings.enhancedColorization,
-            intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
-            intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
-            referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
-            referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
-            referencesMaxMemory: workspaceSettings.referencesMaxMemory,
-            codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
-            codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
-            codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
-            workspaceFolderSettings: workspaceFolderSettingsParams
-        };
-    }
-
-    private createLanguageClient(allClients: ClientCollection): LanguageClient {
+    private createLanguageClient(): LanguageClient {
         const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
@@ -1290,7 +1008,7 @@ export class DefaultClient implements Client {
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
-            settings: this.getAllSettings()
+            settings: getAllSettings()
         };
 
         const clientOptions: LanguageClientOptions = {
@@ -1300,7 +1018,7 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
             initializationOptions: initializationOptions,
-            middleware: createProtocolFilter(allClients),
+            middleware: createProtocolFilter(),
             errorHandler: {
                 error: (error, message, count) => ({ action: ErrorAction.Continue }),
                 closed: () => {
@@ -1308,15 +1026,15 @@ export class DefaultClient implements Client {
                     languageClientCrashedNeedsRestart = true;
                     telemetry.logLanguageServerEvent("languageClientCrash");
                     if (languageClientCrashTimes.length < 5) {
-                        allClients.recreateClients();
+                        clients.recreateClients();
                     } else {
                         const elapsed: number = languageClientCrashTimes[languageClientCrashTimes.length - 1] - languageClientCrashTimes[0];
                         if (elapsed <= 3 * 60 * 1000) {
                             vscode.window.showErrorMessage(localize('server.crashed2', "The language server crashed 5 times in the last 3 minutes. It will not be restarted."));
-                            allClients.recreateClients(true);
+                            clients.recreateClients(true);
                         } else {
                             languageClientCrashTimes.shift();
-                            allClients.recreateClients();
+                            clients.recreateClients();
                         }
                     }
                     return { action: CloseAction.DoNotRestart };
@@ -1334,12 +1052,12 @@ export class DefaultClient implements Client {
     public sendDidChangeSettings(): void {
         // Send settings json to native side
         this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
+            this.languageClient.sendNotification(DidChangeSettingsNotification, getAllSettings());
         });
     }
 
     public onDidChangeSettings(event: vscode.ConfigurationChangeEvent): { [key: string]: string } {
-        const defaultClient: Client = clientCollection.getDefaultClient();
+        const defaultClient: Client = clients.getDefaultClient();
         if (this === defaultClient) {
             // Only send the updated settings information once, as it includes values for all folders.
             this.sendDidChangeSettings();
@@ -1960,8 +1678,11 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
-            const client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(requestFile));
-            client.handleRequestCustomConfig(requestFile);
+            const client: any = clients.getClientFor(vscode.Uri.file(requestFile));
+            if (client instanceof DefaultClient) {
+                const defaultClient: DefaultClient = <DefaultClient>client;
+                defaultClient.handleRequestCustomConfig(requestFile);
+            }
         });
         this.languageClient.onNotification(PublishIntelliSenseDiagnosticsNotification, publishIntelliSenseDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
@@ -2181,43 +1902,46 @@ export class DefaultClient implements Client {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
         } else if (message.endsWith("Unresolved Headers")) {
             if (notificationBody.workspaceFolderUri) {
-                const client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
-                if (!client.configuration.CurrentConfiguration?.configurationProvider) {
-                    const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
-                    if (showIntelliSenseFallbackMessage.Value) {
-                        ui.showConfigureIncludePathMessage(async () => {
-                            const configJSON: string = localize("configure.json.button", "Configure (JSON)");
-                            const configUI: string = localize("configure.ui.button", "Configure (UI)");
-                            const dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
-                            const fallbackMsg: string = client.configuration.VcpkgInstalled ?
-                                localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
-                                localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
-                            return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then(async (value) => {
-                                let commands: string[];
-                                switch (value) {
-                                    case configJSON:
-                                        commands = await vscode.commands.getCommands(true);
-                                        if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                            vscode.commands.executeCommand("workbench.action.problems.focus");
-                                        }
-                                        client.handleConfigurationEditJSONCommand();
-                                        telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
-                                        break;
-                                    case configUI:
-                                        commands = await vscode.commands.getCommands(true);
-                                        if (commands.indexOf("workbench.action.problems.focus") >= 0) {
-                                            vscode.commands.executeCommand("workbench.action.problems.focus");
-                                        }
-                                        client.handleConfigurationEditUICommand();
-                                        telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
-                                        break;
-                                    case dontShowAgain:
-                                        showIntelliSenseFallbackMessage.Value = false;
-                                        break;
-                                }
-                                return true;
-                            });
-                        }, () => showIntelliSenseFallbackMessage.Value = false);
+                const client: any = clients.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
+                if (client instanceof DefaultClient) {
+                    const defaultClient: DefaultClient = <DefaultClient>client;
+                    if (!defaultClient.configuration.CurrentConfiguration?.configurationProvider) {
+                        const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
+                        if (showIntelliSenseFallbackMessage.Value) {
+                            ui.showConfigureIncludePathMessage(async () => {
+                                const configJSON: string = localize("configure.json.button", "Configure (JSON)");
+                                const configUI: string = localize("configure.ui.button", "Configure (UI)");
+                                const dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
+                                const fallbackMsg: string = defaultClient.configuration.VcpkgInstalled ?
+                                    localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
+                                    localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
+                                return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then(async (value) => {
+                                    let commands: string[];
+                                    switch (value) {
+                                        case configJSON:
+                                            commands = await vscode.commands.getCommands(true);
+                                            if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                                vscode.commands.executeCommand("workbench.action.problems.focus");
+                                            }
+                                            defaultClient.handleConfigurationEditJSONCommand();
+                                            telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
+                                            break;
+                                        case configUI:
+                                            commands = await vscode.commands.getCommands(true);
+                                            if (commands.indexOf("workbench.action.problems.focus") >= 0) {
+                                                vscode.commands.executeCommand("workbench.action.problems.focus");
+                                            }
+                                            defaultClient.handleConfigurationEditUICommand();
+                                            telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
+                                            break;
+                                        case dontShowAgain:
+                                            showIntelliSenseFallbackMessage.Value = false;
+                                            break;
+                                    }
+                                    return true;
+                                });
+                            }, () => showIntelliSenseFallbackMessage.Value = false);
+                        }
                     }
                 }
             }
@@ -2287,14 +2011,18 @@ export class DefaultClient implements Client {
     }
 
     public logIntellisenseSetupTime(notification: IntelliSenseSetup): void {
-        clientCollection.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
+        clients.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 
     private promptCompileCommands(params: CompileCommandsPaths): void {
         if (!params.workspaceFolderUri) {
             return;
         }
-        const client: DefaultClient = <DefaultClient>clientCollection.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
+        const potentialClient: any = clients.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
+        if (!(potentialClient instanceof DefaultClient)) {
+            return;
+        }
+        const client: DefaultClient = <DefaultClient>potentialClient;
         if (client.configuration.CurrentConfiguration?.compileCommands || client.configuration.CurrentConfiguration?.configurationProvider) {
             return;
         }
@@ -2866,7 +2594,7 @@ export class DefaultClient implements Client {
             uri: editor.document.uri.toString(),
             position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments?.adjustedCursor.character) : editor.selection.active,
             isCodeAction: isCodeAction,
-            isCursorAboveSignatureLine: (codeActionArguments !== undefined) ? codeActionArguments.isCursorAboveSignatureLine : undefined
+            isCursorAboveSignatureLine: codeActionArguments?.isCursorAboveSignatureLine
         };
         await this.awaitUntilLanguageClientReady();
         const currentFileVersion: number | undefined = openFileVersions.get(params.uri);

@@ -43,7 +43,7 @@ export class ClientCollection {
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
             let isFirstWorkspaceFolder: boolean = true;
             vscode.workspace.workspaceFolders.forEach(folder => {
-                const newClient: cpptools.Client = cpptools.createClient(this, folder);
+                const newClient: cpptools.Client = cpptools.createClient(folder);
                 this.languageClients.set(util.asFolder(folder.uri), newClient);
                 if (isFirstWorkspaceFolder) {
                     isFirstWorkspaceFolder = false;
@@ -58,7 +58,7 @@ export class ClientCollection {
             }
             this.activeClient = client;
         } else {
-            this.activeClient = cpptools.createClient(this);
+            this.activeClient = cpptools.createClient();
         }
         this.defaultClient = this.activeClient;
         this.languageClients.set(key, this.activeClient);
@@ -149,8 +149,6 @@ export class ClientCollection {
         }
 
         if (e !== undefined) {
-            // let oldDefaultClient: cpptools.Client | undefined;
-            // let needNewDefaultClient: boolean = false;
 
             e.removed.forEach(folder => {
                 const path: string = util.asFolder(folder.uri);
@@ -166,12 +164,7 @@ export class ClientCollection {
                         this.activeClient.deactivate();
                     }
 
-                    // // Defer selecting a new default client until all adds and removes have been processed.
-                    // if (this.defaultClient === client) {
-                    //     oldDefaultClient = client;
-                    // } else {
                     client.dispose();
-                    // }
                 }
             });
 
@@ -242,7 +235,7 @@ export class ClientCollection {
     }
 
     public createClient(folder?: vscode.WorkspaceFolder, deactivated?: boolean): cpptools.Client {
-        const newClient: cpptools.Client = this.useFailsafeMode ? cpptools.createNullClient() : cpptools.createClient(this, folder);
+        const newClient: cpptools.Client = this.useFailsafeMode ? cpptools.createNullClient() : cpptools.createClient(folder);
         if (deactivated) {
             newClient.deactivate(); // e.g. prevent the current config from switching.
         }

@@ -12,7 +12,7 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
+import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
@@ -33,7 +33,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
-let clients: ClientCollection;
+export let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 const disposables: vscode.Disposable[] = [];
@@ -273,16 +273,19 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
-    const defaultClient: Client = clients.getDefaultClient();
-    const changedDefaultClientSettings: { [key: string]: string } = defaultClient.onDidChangeSettings(event);
-    clients.forEach(client => {
-        if (client !== defaultClient) {
-            client.onDidChangeSettings(event);
+    const client: Client = clients.getDefaultClient();
+    if (client instanceof DefaultClient) {
+        const defaultClient: DefaultClient = <DefaultClient>client;
+        const changedDefaultClientSettings: { [key: string]: string } = defaultClient.onDidChangeSettings(event);
+        clients.forEach(client => {
+            if (client !== defaultClient) {
+                client.onDidChangeSettings(event);
+            }
+        });
+        const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
+        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
+            UpdateInsidersAccess();
         }
-    });
-    const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
-    if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-        UpdateInsidersAccess();
     }
 }
 

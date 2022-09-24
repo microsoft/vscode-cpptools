@@ -6,13 +6,12 @@
 
 import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
-import { ClientCollection } from './clientCollection';
 import { Client } from './client';
 import * as vscode from 'vscode';
 import { CppSettings } from './settings';
-import { onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
+import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
-export function createProtocolFilter(clients: ClientCollection): Middleware {
+export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
     const defaultHandler: (data: any, callback: (data: any) => Promise<void>) => Promise<void> = async (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenLanguageClientReady(() => callback(data)); };
     // const invoke1 = async (a: any, next: (a: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a); };

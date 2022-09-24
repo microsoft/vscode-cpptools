@@ -1171,7 +1171,7 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
         "ignoreFailures": true
     },
     {
-        "description":  "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
@@ -1210,7 +1210,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
         "ignoreFailures": true
     },
     {
-        "description":  "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }

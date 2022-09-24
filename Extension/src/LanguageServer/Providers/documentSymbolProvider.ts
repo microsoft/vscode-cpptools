@@ -4,16 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
-import { processDelayedDidOpen } from '../extension';
+import { clients, processDelayedDidOpen } from '../extension';
 import { makeVscodeRange } from '../utils';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
-import { ClientCollection } from '../clientCollection';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
-    private clientCollection: ClientCollection;
-    constructor(clientCollection: ClientCollection) {
-        this.clientCollection = clientCollection;
-    }
     private getChildrenSymbols(symbols: LocalizeDocumentSymbol[]): vscode.DocumentSymbol[] {
         const documentSymbols: vscode.DocumentSymbol[] = [];
         if (symbols) {
@@ -59,17 +54,21 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         return documentSymbols;
     }
     public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
-        const client: DefaultClient = <DefaultClient>this.clientCollection.getClientFor(document.uri);
-        if (!client.TrackedDocuments.has(document)) {
-            processDelayedDidOpen(document);
+        const client: any = clients.getClientFor(document.uri);
+        if (client instanceof DefaultClient) {
+            const defaultClient: DefaultClient = <DefaultClient>client;
+            if (!defaultClient.TrackedDocuments.has(document)) {
+                processDelayedDidOpen(document);
+            }
+            return defaultClient.requestWhenReady(async () => {
+                const params: GetDocumentSymbolRequestParams = {
+                    uri: document.uri.toString()
+                };
+                const symbols: LocalizeDocumentSymbol[] = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+                const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
+                return resultSymbols;
+            });
         }
-        return client.requestWhenReady(async () => {
-            const params: GetDocumentSymbolRequestParams = {
-                uri: document.uri.toString()
-            };
-            const symbols: LocalizeDocumentSymbol[] = await client.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
-            const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
-            return resultSymbols;
-        });
+        return [];
     }
 }
