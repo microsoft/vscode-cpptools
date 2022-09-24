@@ -2592,7 +2592,7 @@ export class DefaultClient implements Client {
         const initCursorPosition: vscode.Position = codeActionArguments !== undefined ? new vscode.Position(codeActionArguments.initialCursor.line, codeActionArguments.initialCursor.character) : editor.selection.active;
         const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
-            position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments?.adjustedCursor.character) : editor.selection.active,
+            position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments.adjustedCursor.character) : editor.selection.active,
             isCodeAction: isCodeAction,
             isCursorAboveSignatureLine: codeActionArguments?.isCursorAboveSignatureLine
         };
