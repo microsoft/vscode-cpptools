@@ -29,7 +29,9 @@
 		"list.focusAndSelectionOutline": "#90C2F9",
 		"editorLineNumber.foreground": "#2b91af",
 		"editorLineNumber.activeForeground": "#2b91af",
-		"terminal.inactiveSelectionBackground": "#E5EBF1"
+		"terminal.inactiveSelectionBackground": "#E5EBF1",
+		"editorInlayHint.background": "#E6E6E6",
+		"editorInlayHint.foreground": "#686868"
 	},
 	"tokenColors": [
 		// VISUAL STUDIO LIGHT
@@ -636,27 +638,6 @@
 		},
 		{
 			"scope": [
-				"meta.preprocessor",
-				"entity.name.namespace",
-				"variable.other.global",
-				"variable.other.property",
-				"variable.other.constant",
-				"variable.other.enummember",
-				"entity.name.scope-resolution",
-				"storage.modifier.pointer",
-				"storage.modifier.reference",
-				"entity.name.function.operator",
-				"keyword.other.operator.overload.cpp",
-				"entity.name.operator.cpp",
-				"entity.name.operator.type.reference.cpp",
-				"entity.name.operator.type.pointer.cpp"
-			],
-			"settings": {
-				"foreground": "#000000"
-			}
-		},
-		{
-			"scope": [
 				"comment",
 				"punctuation.definition.comment"
 			],
@@ -667,7 +648,7 @@
 		{
 			"scope": "punctuation.definition.string",
 			"settings": {
-				"foreground": "#FF1F1F"
+				"foreground": "#E21F1F"
 			}
 		},
 		{
@@ -698,13 +679,115 @@
 			"settings": {
 				"foreground": "#098658"
 			}
+		},
+		{
+			"name": "Function declarations",
+			"scope": [
+				"entity.name.function",
+				"support.function",
+				"support.constant.handlebars",
+				"source.powershell variable.other.member",
+				"entity.name.operator.custom-literal" // See https://en.cppreference.com/w/cpp/language/user_literal
+			],
+			"settings": {
+				"foreground": "#74531F"
+			}
+		},
+		{
+			"name": "Types declaration and references",
+			"scope": [
+				"support.class",
+				"support.type",
+				"entity.name.type",
+				"entity.name.namespace",
+				"entity.other.attribute",
+				"entity.name.scope-resolution",
+				"entity.name.class",
+				"storage.type.numeric.go",
+				"storage.type.byte.go",
+				"storage.type.boolean.go",
+				"storage.type.string.go",
+				"storage.type.uintptr.go",
+				"storage.type.error.go",
+				"storage.type.rune.go",
+				"storage.type.cs",
+				"storage.type.generic.cs",
+				"storage.type.modifier.cs",
+				"storage.type.variable.cs",
+				"storage.type.annotation.java",
+				"storage.type.generic.java",
+				"storage.type.java",
+				"storage.type.object.array.java",
+				"storage.type.primitive.array.java",
+				"storage.type.primitive.java",
+				"storage.type.token.java",
+				"storage.type.groovy",
+				"storage.type.annotation.groovy",
+				"storage.type.parameters.groovy",
+				"storage.type.generic.groovy",
+				"storage.type.object.array.groovy",
+				"storage.type.primitive.array.groovy",
+				"storage.type.primitive.groovy"
+			],
+			"settings": {
+				"foreground": "#2B91AF"
+			}
+		},
+		{
+			"name": "Variable and parameter name",
+			"scope": [
+				"variable",
+				"meta.definition.variable.name",
+				"support.variable",
+				"entity.name.variable",
+				"constant.other.placeholder", // placeholders in strings
+			],
+			"settings": {
+				"foreground": "#1F377F"
+			}
+		},
+		{
+			"scope": [
+				"keyword.operator.or.regexp",
+				"keyword.control.anchor.regexp"
+			],
+			"settings": {
+				"foreground": "#B776FB"
+			}
+		},
+		{
+			"scope": "constant.character.escape",
+			"settings": {
+				"foreground": "#B776FB"
+			}
+		},
+		{
+			"scope": [
+				"meta.preprocessor",
+				"entity.name.namespace",
+				"variable.other.global",
+				"variable.other.property",
+				"variable.other.constant",
+				"variable.other.enummember",
+				"entity.name.scope-resolution",
+				"storage.modifier.pointer",
+				"storage.modifier.reference",
+				"entity.name.function.operator",
+				"keyword.other.operator.overload.cpp",
+				"entity.name.operator.cpp",
+				"entity.name.operator.type.reference.cpp",
+				"entity.name.operator.type.pointer.cpp"
+			],
+			"settings": {
+				"foreground": "#000000"
+			}
 		}
 	],
 	"semanticHighlighting": true,
 	"semanticTokenColors": {
 		"newOperator": "#0000FF",
 		"stringLiteral": "#a31515",
-		"customLiteral": "#795E26",
+		"customLiteral": "#74531F",
 		"numberLiteral": "#098658",
 	}
 }

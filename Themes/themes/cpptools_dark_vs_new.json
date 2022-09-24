@@ -3,7 +3,7 @@
 	"name": "Visual Studio 2019 Dark (C++)",
 	"colors": {
 		"editor.background": "#1E1E1E",
-		"editor.foreground": "#D4D4D4",
+		"editor.foreground": "#DADADA",
 		"editor.inactiveSelectionBackground": "#3A3D41",
 		"editorIndentGuide.background": "#404040",
 		"editorIndentGuide.activeBackground": "#707070",
@@ -23,7 +23,9 @@
 		"list.activeSelectionIconForeground": "#FFF",
 		"editorLineNumber.foreground": "#2b91af",
 		"editorLineNumber.activeForeground": "#2b91af",
-		"terminal.inactiveSelectionBackground": "#3A3D41"
+		"terminal.inactiveSelectionBackground": "#3A3D41",
+		"editorInlayHint.background": "#3E3E3E",
+		"editorInlayHint.foreground": "#A9A8A7"
 	},
 	"tokenColors": [
 		// VISUAL STUDIO DARK
@@ -600,7 +602,7 @@
 				"entity.other.attribute-name.pragma.preprocessor.cpp"
 			],
 			"settings": {
-				"foreground": "#9B9B9B"
+				"foreground": "#9A9A9A"
 			}
 		},
 		{
@@ -608,12 +610,17 @@
 				"meta.preprocessor",
 				"entity.name.namespace",
 				"variable.other.global",
-				"variable.other.property",
 				"variable.other.constant",
 				"entity.name.scope-resolution"
 			],
 			"settings": {
-				"foreground": "#D4D4D4"
+				"foreground": "#C8C8C8"
+			}
+		},
+		{
+			"scope": "variable.other.property",
+			"settings": {
+				"foreground": "#DADADA"
 			}
 		},
 		{
@@ -674,6 +681,12 @@
 			"scope": "variable.other.enummember",
 			"settings": {
 				"foreground": "#B5CEA8"
+			}
+		},
+		{
+			"scope": "constant.character.escape",
+			"settings": {
+				"foreground": "#FFD68F"
 			}
 		}
 	],
