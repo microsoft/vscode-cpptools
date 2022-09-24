@@ -100,6 +100,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
         }
     }));
     disposables.push(vscode.commands.registerCommand('C_Cpp.activeSshTarget', () => enableSshTargetsViewAndRun(getActiveSshTarget)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.sshTerminal', (node: TargetLeafNode) => enableSshTargetsViewAndRun(sshTerminal, node)));
     disposables.push(sshTargetsProvider);
 
     // Decide if we should show the SSH Targets View.
@@ -128,6 +129,12 @@ export function dispose(): void {
         sshConfigWatcher = undefined;
     }
     disposables.forEach(d => d.dispose());
+}
+
+function sshTerminal(node: TargetLeafNode): void {
+    const terminal: vscode.Terminal = vscode.window.createTerminal(`SSH: ${node.name}`);
+    terminal.sendText(`ssh "${node.name}"`);
+    terminal.show();
 }
 
 async function enableSshTargetsViewAndRun<T>(func: (...paras: any[]) => T | Promise<T>, ...args: any[]): Promise<T> {
