@@ -75,6 +75,7 @@ export let outputChannel: vscode.OutputChannel | undefined;
 export let diagnosticsChannel: vscode.OutputChannel | undefined;
 export let debugChannel: vscode.OutputChannel | undefined;
 export let warningChannel: vscode.OutputChannel | undefined;
+export let sshChannel: vscode.OutputChannel | undefined;
 
 export function getOutputChannel(): vscode.OutputChannel {
     if (!outputChannel) {
@@ -94,6 +95,13 @@ export function getDiagnosticsChannel(): vscode.OutputChannel {
         diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
     }
     return diagnosticsChannel;
+}
+
+export function getSshChannel(): vscode.OutputChannel {
+    if (!sshChannel) {
+        sshChannel = vscode.window.createOutputChannel(localize("c.cpp.ssh.channel", "{0}: SSH", "Cpptools"));
+    }
+    return sshChannel;
 }
 
 export function showOutputChannel(): void {
