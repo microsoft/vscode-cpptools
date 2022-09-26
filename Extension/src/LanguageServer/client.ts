@@ -1069,6 +1069,7 @@ export class DefaultClient implements Client {
         const settings_spaceAroundTernaryOperator: (string | undefined)[] = [];
         const settings_wrapPreserveBlocks: (string | undefined)[] = [];
         const settings_legacyCompilerArgsBehavior: (boolean | undefined)[] = [];
+        const settings_selectDoxygenTags: (string[] | undefined)[] = [];
 
         {
             const settings: CppSettings[] = [];
@@ -1179,6 +1180,7 @@ export class DefaultClient implements Client {
                 settings_autocompleteAddParentheses.push(setting.autocompleteAddParentheses);
                 settings_cppFilesExclude.push(setting.filesExclude);
                 settings_legacyCompilerArgsBehavior.push(setting.legacyCompilerArgsBehavior);
+                settings_selectDoxygenTags.push(setting.selectDoxygenTags)
             }
 
             for (const otherSetting of otherSettings) {
@@ -1364,7 +1366,8 @@ export class DefaultClient implements Client {
                 simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
                 doxygen: {
                     generatedStyle: settings_doxygenGeneratedCommentStyle,
-                    generateOnType: settings_doxygenGenerateOnType
+                    generateOnType: settings_doxygenGenerateOnType,
+                    selectDoxygenTags: settings_selectDoxygenTags
                 },
                 loggingLevel: workspaceSettings.loggingLevel,
                 workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
