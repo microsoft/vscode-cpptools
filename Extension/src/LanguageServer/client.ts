@@ -1678,7 +1678,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
-            const client: any = clients.getClientFor(vscode.Uri.file(requestFile));
+            const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
                 const defaultClient: DefaultClient = <DefaultClient>client;
                 defaultClient.handleRequestCustomConfig(requestFile);
@@ -1902,7 +1902,7 @@ export class DefaultClient implements Client {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
         } else if (message.endsWith("Unresolved Headers")) {
             if (notificationBody.workspaceFolderUri) {
-                const client: any = clients.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
+                const client: Client = clients.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
                 if (client instanceof DefaultClient) {
                     const defaultClient: DefaultClient = <DefaultClient>client;
                     if (!defaultClient.configuration.CurrentConfiguration?.configurationProvider) {

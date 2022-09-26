@@ -13,7 +13,7 @@ import { execSync } from 'child_process';
 import * as semver from 'semver';
 import * as fs from 'fs';
 import * as path from 'path';
-import { cachedEditorConfigLookups, cachedEditorConfigSettings, DefaultClient } from './client';
+import { cachedEditorConfigLookups, cachedEditorConfigSettings, Client, DefaultClient } from './client';
 import * as editorConfig from 'editorconfig';
 import { PersistentState } from './persistentState';
 import * as nls from 'vscode-nls';
@@ -1146,14 +1146,14 @@ export function getAllWorkspaceFolderSettings(): WorkspaceFolderSettingsParams[]
     const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = [];
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         for (const workspaceFolder of vscode.workspace.workspaceFolders) {
-            const client: any = clients.getClientFor(workspaceFolder.uri);
+            const client: Client = clients.getClientFor(workspaceFolder.uri);
             if (client instanceof DefaultClient) {
                 const defaultClient: DefaultClient = <DefaultClient>client;
                 workspaceFolderSettingsParams.push(getWorkspaceFolderSettings(defaultClient));
             }
         }
     } else {
-        const client: any = clients.getDefaultClient();
+        const client: Client = clients.getDefaultClient();
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = <DefaultClient>client;
             workspaceFolderSettingsParams.push(getWorkspaceFolderSettings(defaultClient));

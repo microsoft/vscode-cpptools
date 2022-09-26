@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
+import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope, Client } from '../client';
 import { clients, processDelayedDidOpen } from '../extension';
 import { makeVscodeRange } from '../utils';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
@@ -54,7 +54,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         return documentSymbols;
     }
     public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
-        const client: any = clients.getClientFor(document.uri);
+        const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = <DefaultClient>client;
             if (!defaultClient.TrackedDocuments.has(document)) {
