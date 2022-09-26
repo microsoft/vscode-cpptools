@@ -2018,7 +2018,7 @@ export class DefaultClient implements Client {
         if (!params.workspaceFolderUri) {
             return;
         }
-        const potentialClient: any = clients.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
+        const potentialClient: Client = clients.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
         if (!(potentialClient instanceof DefaultClient)) {
             return;
         }
