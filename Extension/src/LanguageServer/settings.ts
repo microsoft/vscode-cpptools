@@ -867,7 +867,7 @@ export class CppSettings extends Settings {
     // This is intentionally not async to avoid races due to multiple entrancy.
     public useVcFormat(document: vscode.TextDocument): boolean {
         if (this.formattingEngine !== "default") {
-            return this.formattingEngine === "vcFormat";
+            return this.formattingEngine === "vcformat";
         }
         if (this.clangFormatStyle !== "file") {
             // If a clang-format style other than file is specified, don't try to switch to vcFormat.
