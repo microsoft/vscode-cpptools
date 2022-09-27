@@ -36,5 +36,5 @@ export class LabelLeafNode implements BaseNode {
     }
 }
 
-export const refreshCppSshTargetsView: string = 'C_Cpp.refreshCppSshTargetsView';
-export const addSshTarget: string = 'C_Cpp.addSshTarget';
+export const refreshCppSshTargetsViewCmd: string = 'C_Cpp.refreshCppSshTargetsView';
+export const addSshTargetCmd: string = 'C_Cpp.addSshTarget';

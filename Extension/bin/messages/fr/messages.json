@@ -3467,5 +3467,6 @@
   "le %sq de partition a spécifié sa taille d’entrée %d1 alors que %d2 était attendu.",
   "une exigence IFC inattendue s’est produite lors du traitement du module %sq1.",
   "échec de la condition à la ligne %d dans %s1 : %sq2",
-  "la contrainte atomique dépend d’elle-même."
+  "la contrainte atomique dépend d’elle-même.",
+  "La fonction 'noreturn' a un type de retour non vide"
 ]
