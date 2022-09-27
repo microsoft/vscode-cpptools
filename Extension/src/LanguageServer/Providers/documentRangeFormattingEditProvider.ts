@@ -15,7 +15,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
 
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
-        if (settings.formattingEngine === "Disabled") {
+        if (settings.formattingEngine === "disabled") {
             return [];
         }
         await this.client.awaitUntilLanguageClientReady();

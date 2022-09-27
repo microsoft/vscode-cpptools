@@ -15,7 +15,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
 
     public async provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
-        if (settings.formattingEngine === "Disabled") {
+        if (settings.formattingEngine === "disabled") {
             return [];
         }
         await this.client.awaitUntilLanguageClientReady();

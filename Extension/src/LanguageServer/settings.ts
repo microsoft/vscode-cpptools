@@ -6,18 +6,17 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath, isWindows, resolveVariables, resolveCachePath } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath, isWindows } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
 import * as semver from 'semver';
 import * as fs from 'fs';
 import * as path from 'path';
-import { cachedEditorConfigLookups, cachedEditorConfigSettings, Client, DefaultClient } from './client';
+import { cachedEditorConfigLookups, cachedEditorConfigSettings } from './client';
 import * as editorConfig from 'editorconfig';
 import { PersistentState } from './persistentState';
 import * as nls from 'vscode-nls';
-import { clients } from './extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1033,160 +1032,4 @@ export function getEditorConfigSettings(fsPath: string): Promise<any> {
         cachedEditorConfigSettings.set(fsPath, editorConfigSettings);
     }
     return editorConfigSettings;
-}
-
-export function getWorkspaceFolderSettings(client: DefaultClient): WorkspaceFolderSettingsParams {
-    const settings: CppSettings = new CppSettings(client.RootUri);
-    const otherSettings: OtherSettings = new OtherSettings(client.RootUri);
-    return {
-        uri: client.RootUri?.toString(),
-        intelliSenseEngine: settings.intelliSenseEngine,
-        intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
-        autocomplete: settings.autocomplete,
-        autocompleteAddParentheses: settings.autocompleteAddParentheses,
-        errorSquiggles: settings.errorSquiggles,
-        exclusionPolicy: settings.exclusionPolicy,
-        preferredPathSeparator: settings.preferredPathSeparator,
-        intelliSenseCachePath: resolveCachePath(settings.intelliSenseCachePath, client.AdditionalEnvironment),
-        intelliSenseCacheSize: settings.intelliSenseCacheSize,
-        intelliSenseMemoryLimit: settings.intelliSenseMemoryLimit,
-        dimInactiveRegions: settings.dimInactiveRegions,
-        suggestSnippets: settings.suggestSnippets,
-        legacyCompilerArgsBehavior: settings.legacyCompilerArgsBehavior,
-        defaultSystemIncludePath: settings.defaultSystemIncludePath,
-        cppFilesExclude: settings.filesExclude,
-        clangFormatPath: resolveVariables(settings.clangFormatPath, client.AdditionalEnvironment),
-        clangFormatStyle: settings.clangFormatStyle,
-        clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
-        clangFormatSortIncludes: settings.clangFormatSortIncludes,
-        codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
-        codeAnalysisExclude: settings.codeAnalysisExclude,
-        clangTidyEnabled: settings.clangTidyEnabled,
-        clangTidyPath: resolveVariables(settings.clangTidyPath, client.AdditionalEnvironment),
-        clangTidyConfig: settings.clangTidyConfig,
-        clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
-        clangTidyHeaderFilter: settings.clangTidyHeaderFilter,
-        clangTidyArgs: settings.clangTidyArgs,
-        clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
-        clangTidyFixWarnings: settings.clangTidyFixWarnings,
-        clangTidyFixErrors: settings.clangTidyFixErrors,
-        clangTidyFixNotes: settings.clangTidyFixNotes,
-        clangTidyChecksEnabled: settings.clangTidyChecksEnabled,
-        clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
-        vcFormatIndentBraces: settings.vcFormatIndentBraces,
-        vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
-        vcFormatIndentWithinParentheses: settings.vcFormatIndentWithinParentheses,
-        vcFormatIndentPreserveWithinParentheses: settings.vcFormatIndentPreserveWithinParentheses,
-        vcFormatIndentCaseLabels: settings.vcFormatIndentCaseLabels,
-        vcFormatIndentCaseContents: settings.vcFormatIndentCaseContents,
-        vcFormatIndentCaseContentsWhenBlock: settings.vcFormatIndentCaseContentsWhenBlock,
-        vcFormatIndentLambdaBracesWhenParameter: settings.vcFormatIndentLambdaBracesWhenParameter,
-        vcFormatIndentGotoLabels: settings.vcFormatIndentGotoLabels,
-        vcFormatIndentPreprocessor: settings.vcFormatIndentPreprocessor,
-        vcFormatIndentAccesSpecifiers: settings.vcFormatIndentAccessSpecifiers,
-        vcFormatIndentNamespaceContents: settings.vcFormatIndentNamespaceContents,
-        vcFormatIndentPreserveComments: settings.vcFormatIndentPreserveComments,
-        vcFormatNewLineScopeBracesOnSeparateLines: settings.vcFormatNewlineScopeBracesOnSeparateLines,
-        vcFormatNewLineBeforeOpenBraceNamespace: settings.vcFormatNewlineBeforeOpenBraceNamespace,
-        vcFormatNewLineBeforeOpenBraceType: settings.vcFormatNewlineBeforeOpenBraceType,
-        vcFormatNewLineBeforeOpenBraceFunction: settings.vcFormatNewlineBeforeOpenBraceFunction,
-        vcFormatNewLineBeforeOpenBraceBlock: settings.vcFormatNewlineBeforeOpenBraceBlock,
-        vcFormatNewLineBeforeOpenBraceLambda: settings.vcFormatNewlineBeforeOpenBraceLambda,
-        vcFormatNewLineBeforeCatch: settings.vcFormatNewlineBeforeCatch,
-        vcFormatNewLineBeforeElse: settings.vcFormatNewlineBeforeElse,
-        vcFormatNewLineBeforeWhileInDoWhile: settings.vcFormatNewlineBeforeWhileInDoWhile,
-        vcFormatNewLineCloseBraceSameLineEmptyType: settings.vcFormatNewlineCloseBraceSameLineEmptyType,
-        vcFormatNewLineCloseBraceSameLineEmptyFunction: settings.vcFormatNewlineCloseBraceSameLineEmptyFunction,
-        vcFormatSpaceBeforeFunctionOpenParenthesis: settings.vcFormatSpaceBeforeFunctionOpenParenthesis,
-        vcFormatSpaceWithinParameterListParentheses: settings.vcFormatSpaceWithinParameterListParentheses,
-        vcFormatSpaceBetweenEmptyParameterListParentheses: settings.vcFormatSpaceBetweenEmptyParameterListParentheses,
-        vcFormatSpaceAfterKeywordsInControlFlowStatements: settings.vcFormatSpaceAfterKeywordsInControlFlowStatements,
-        vcFormatSpaceWithinControlFlowStatementParentheses: settings.vcFormatSpaceWithinControlFlowStatementParentheses,
-        vcFormatSpaceBeforeLambdaOpenParenthesis: settings.vcFormatSpaceBeforeLambdaOpenParenthesis,
-        vcFormatSpaceWithinCastParentheses: settings.vcFormatSpaceWithinCastParentheses,
-        vcFormatSpaceAfterCastCloseParenthesis: settings.vcFormatSpaceAfterCastCloseParenthesis,
-        vcFormatSpaceWithinExpressionParentheses: settings.vcFormatSpaceWithinExpressionParentheses,
-        vcFormatSpaceBeforeBlockOpenBrace: settings.vcFormatSpaceBeforeBlockOpenBrace,
-        vcFormatSpaceBetweenEmptyBraces: settings.vcFormatSpaceBetweenEmptyBraces,
-        vcFormatSpaceBeforeInitializerListOpenBrace: settings.vcFormatSpaceBeforeInitializerListOpenBrace,
-        vcFormatSpaceWithinInitializerListBraces: settings.vcFormatSpaceWithinInitializerListBraces,
-        vcFormatSpacePreserveInInitializerList: settings.vcFormatSpacePreserveInInitializerList,
-        vcFormatSpaceBeforeOpenSquareBracket: settings.vcFormatSpaceBeforeOpenSquareBracket,
-        vcFormatSpaceWithinSquareBrackets: settings.vcFormatSpaceWithinSquareBrackets,
-        vcFormatSpaceBeforeEmptySquareBrackets: settings.vcFormatSpaceBeforeEmptySquareBrackets,
-        vcFormatSpaceBetweenEmptySquareBrackets: settings.vcFormatSpaceBetweenEmptySquareBrackets,
-        vcFormatSpaceGroupSquareBrackets: settings.vcFormatSpaceGroupSquareBrackets,
-        vcFormatSpaceWithinLambdaBrackets: settings.vcFormatSpaceWithinLambdaBrackets,
-        vcFormatSpaceBetweenEmptyLambdaBrackets: settings.vcFormatSpaceBetweenEmptyLambdaBrackets,
-        vcFormatSpaceBeforeComma: settings.vcFormatSpaceBeforeComma,
-        vcFormatSpaceAfterComma: settings.vcFormatSpaceAfterComma,
-        vcFormatSpaceRemoveAroundMemberOperators: settings.vcFormatSpaceRemoveAroundMemberOperators,
-        vcFormatSpaceBeforeInheritanceColon: settings.vcFormatSpaceBeforeInheritanceColon,
-        vcFormatSpaceBeforeConstructorColon: settings.vcFormatSpaceBeforeConstructorColon,
-        vcFormatSpaceRemoveBeforeSemicolon: settings.vcFormatSpaceRemoveBeforeSemicolon,
-        vcFormatSpaceInsertAfterSemicolon: settings.vcFormatSpaceInsertAfterSemicolon,
-        vcFormatSpaceRemoveAroundUnaryOperator: settings.vcFormatSpaceRemoveAroundUnaryOperator,
-        vcFormatSpaceAroundBinaryOperator: settings.vcFormatSpaceAroundBinaryOperator,
-        vcFormatSpaceAroundAssignmentOperator: settings.vcFormatSpaceAroundAssignmentOperator,
-        vcFormatSpacePointerReferenceAlignment: settings.vcFormatSpacePointerReferenceAlignment,
-        vcFormatSpaceAroundTernaryOperator: settings.vcFormatSpaceAroundTernaryOperator,
-        vcFormatWrapPreserveBlocks: settings.vcFormatWrapPreserveBlocks,
-        doxygenGenerateOnType: settings.doxygenGenerateOnType,
-        doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
-        filesExclude: otherSettings.filesExclude,
-        filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
-        filesEncoding: otherSettings.filesEncoding,
-        searchExclude: otherSettings.searchExclude,
-        editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
-        editorInlayHintsEnabled: otherSettings.InlayHintsEnabled
-    };
-};
-
-export function getAllWorkspaceFolderSettings(): WorkspaceFolderSettingsParams[] {
-    const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = [];
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-        for (const workspaceFolder of vscode.workspace.workspaceFolders) {
-            const client: Client = clients.getClientFor(workspaceFolder.uri);
-            if (client instanceof DefaultClient) {
-                const defaultClient: DefaultClient = <DefaultClient>client;
-                workspaceFolderSettingsParams.push(getWorkspaceFolderSettings(defaultClient));
-            }
-        }
-    } else {
-        const client: Client = clients.getDefaultClient();
-        if (client instanceof DefaultClient) {
-            const defaultClient: DefaultClient = <DefaultClient>client;
-            workspaceFolderSettingsParams.push(getWorkspaceFolderSettings(defaultClient));
-        }
-    }
-    return workspaceFolderSettingsParams;
-}
-
-export function getAllSettings(): SettingsParams {
-    const workspaceSettings: CppSettings = new CppSettings();
-    const workspaceOtherSettings: OtherSettings = new OtherSettings();
-    const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = getAllWorkspaceFolderSettings();
-    return {
-        filesAssociations: workspaceOtherSettings.filesAssociations,
-        workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
-        maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
-        maxCachedProcesses: workspaceSettings.maxCachedProcesses,
-        maxMemory: workspaceSettings.maxMemory,
-        loggingLevel: workspaceSettings.loggingLevel,
-        workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
-        workspaceSymbols: workspaceSettings.workspaceSymbols,
-        simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-        intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
-        experimentalFeatures: workspaceSettings.experimentalFeatures,
-        enhancedColorization: workspaceSettings.enhancedColorization,
-        intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
-        intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
-        referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
-        referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
-        referencesMaxMemory: workspaceSettings.referencesMaxMemory,
-        codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
-        codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
-        codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
-        workspaceFolderSettings: workspaceFolderSettingsParams
-    };
 }

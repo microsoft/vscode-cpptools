@@ -30,7 +30,7 @@ import { Location, TextEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
-import { CppSettings, getAllSettings, getEditorConfigSettings, OtherSettings, SettingsParams } from './settings';
+import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { UI, getUI } from './ui';
@@ -73,6 +73,7 @@ export let workspaceReferences: refs.ReferencesManager;
 export const openFileVersions: Map<string, number> = new Map<string, number>();
 export const cachedEditorConfigSettings: Map<string, any> = new Map<string, any>();
 export const cachedEditorConfigLookups: Map<string, boolean> = new Map<string, boolean>();
+export let semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
@@ -731,7 +732,6 @@ export class DefaultClient implements Client {
         { scheme: 'file', language: 'cpp' },
         { scheme: 'file', language: 'cuda-cpp' }
     ];
-    public semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -819,9 +819,30 @@ export class DefaultClient implements Client {
      * @see awaitUntilLanguageClientReady()
      */
 
-    constructor(workspaceFolder?: vscode.WorkspaceFolder) {
+    constructor(workspaceFolder?: vscode.WorkspaceFolder, initializeNow?: boolean) {
+        if (!semanticTokensLegend) {
+            // Semantic token types are identified by indexes in this list of types, in the legend.
+            const tokenTypesLegend: string[] = [];
+            for (const e in SemanticTokenTypes) {
+                // An enum is actually a set of mappings from key <=> value.  Enumerate over only the names.
+                // This allow us to represent the constants using an enum, which we can match in native code.
+                if (isNaN(Number(e))) {
+                    tokenTypesLegend.push(e);
+                }
+            }
+            // Semantic token modifiers are bit indexes corresponding to the indexes in this list of modifiers in the legend.
+            const tokenModifiersLegend: string[] = [];
+            for (const e in SemanticTokenModifiers) {
+                if (isNaN(Number(e))) {
+                    tokenModifiersLegend.push(e);
+                }
+            }
+            semanticTokensLegend = new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
+        }
+
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
+
         let storagePath: string | undefined;
         if (util.extensionContext) {
             const path: string | undefined = util.extensionContext.storageUri?.fsPath;
@@ -839,6 +860,7 @@ export class DefaultClient implements Client {
         this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = getTracker(rootUri);
+
         try {
             let isFirstClient: boolean = false;
             if (!languageClient || languageClientCrashedNeedsRestart) {
@@ -868,24 +890,6 @@ export class DefaultClient implements Client {
                     this.innerLanguageClient = languageClient;
                     telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
                     failureMessageShown = false;
-
-                    // Semantic token types are identified by indexes in this list of types, in the legend.
-                    const tokenTypesLegend: string[] = [];
-                    for (const e in SemanticTokenTypes) {
-                        // An enum is actually a set of mappings from key <=> value.  Enumerate over only the names.
-                        // This allow us to represent the constants using an enum, which we can match in native code.
-                        if (isNaN(Number(e))) {
-                            tokenTypesLegend.push(e);
-                        }
-                    }
-                    // Semantic token modifiers are bit indexes corresponding to the indexes in this list of modifiers in the legend.
-                    const tokenModifiersLegend: string[] = [];
-                    for (const e in SemanticTokenModifiers) {
-                        if (isNaN(Number(e))) {
-                            tokenModifiersLegend.push(e);
-                        }
-                    }
-                    this.semanticTokensLegend = new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 
                     if (isFirstClient) {
                         workspaceReferences = new refs.ReferencesManager(this);
@@ -919,9 +923,9 @@ export class DefaultClient implements Client {
                         this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
 
                         const settings: CppSettings = new CppSettings();
-                        if (settings.enhancedColorization && this.semanticTokensLegend) {
+                        if (settings.enhancedColorization && semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
@@ -958,6 +962,154 @@ export class DefaultClient implements Client {
 
     public sendRenameNotification(params: RenameParams): void {
         this.languageClient.sendNotification(RenameNotification, params);
+    }
+
+    private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
+        return {
+            uri: workspaceFolderUri?.toString(),
+            intelliSenseEngine: settings.intelliSenseEngine,
+            intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
+            autocomplete: settings.autocomplete,
+            autocompleteAddParentheses: settings.autocompleteAddParentheses,
+            errorSquiggles: settings.errorSquiggles,
+            exclusionPolicy: settings.exclusionPolicy,
+            preferredPathSeparator: settings.preferredPathSeparator,
+            intelliSenseCachePath: util.resolveCachePath(settings.intelliSenseCachePath, this.AdditionalEnvironment),
+            intelliSenseCacheSize: settings.intelliSenseCacheSize,
+            intelliSenseMemoryLimit: settings.intelliSenseMemoryLimit,
+            dimInactiveRegions: settings.dimInactiveRegions,
+            suggestSnippets: settings.suggestSnippets,
+            legacyCompilerArgsBehavior: settings.legacyCompilerArgsBehavior,
+            defaultSystemIncludePath: settings.defaultSystemIncludePath,
+            cppFilesExclude: settings.filesExclude,
+            clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
+            clangFormatStyle: settings.clangFormatStyle,
+            clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
+            clangFormatSortIncludes: settings.clangFormatSortIncludes,
+            codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
+            codeAnalysisExclude: settings.codeAnalysisExclude,
+            clangTidyEnabled: settings.clangTidyEnabled,
+            clangTidyPath: util.resolveVariables(settings.clangTidyPath, this.AdditionalEnvironment),
+            clangTidyConfig: settings.clangTidyConfig,
+            clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
+            clangTidyHeaderFilter: settings.clangTidyHeaderFilter,
+            clangTidyArgs: settings.clangTidyArgs,
+            clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
+            clangTidyFixWarnings: settings.clangTidyFixWarnings,
+            clangTidyFixErrors: settings.clangTidyFixErrors,
+            clangTidyFixNotes: settings.clangTidyFixNotes,
+            clangTidyChecksEnabled: settings.clangTidyChecksEnabled,
+            clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
+            vcFormatIndentBraces: settings.vcFormatIndentBraces,
+            vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
+            vcFormatIndentWithinParentheses: settings.vcFormatIndentWithinParentheses,
+            vcFormatIndentPreserveWithinParentheses: settings.vcFormatIndentPreserveWithinParentheses,
+            vcFormatIndentCaseLabels: settings.vcFormatIndentCaseLabels,
+            vcFormatIndentCaseContents: settings.vcFormatIndentCaseContents,
+            vcFormatIndentCaseContentsWhenBlock: settings.vcFormatIndentCaseContentsWhenBlock,
+            vcFormatIndentLambdaBracesWhenParameter: settings.vcFormatIndentLambdaBracesWhenParameter,
+            vcFormatIndentGotoLabels: settings.vcFormatIndentGotoLabels,
+            vcFormatIndentPreprocessor: settings.vcFormatIndentPreprocessor,
+            vcFormatIndentAccesSpecifiers: settings.vcFormatIndentAccessSpecifiers,
+            vcFormatIndentNamespaceContents: settings.vcFormatIndentNamespaceContents,
+            vcFormatIndentPreserveComments: settings.vcFormatIndentPreserveComments,
+            vcFormatNewLineScopeBracesOnSeparateLines: settings.vcFormatNewlineScopeBracesOnSeparateLines,
+            vcFormatNewLineBeforeOpenBraceNamespace: settings.vcFormatNewlineBeforeOpenBraceNamespace,
+            vcFormatNewLineBeforeOpenBraceType: settings.vcFormatNewlineBeforeOpenBraceType,
+            vcFormatNewLineBeforeOpenBraceFunction: settings.vcFormatNewlineBeforeOpenBraceFunction,
+            vcFormatNewLineBeforeOpenBraceBlock: settings.vcFormatNewlineBeforeOpenBraceBlock,
+            vcFormatNewLineBeforeOpenBraceLambda: settings.vcFormatNewlineBeforeOpenBraceLambda,
+            vcFormatNewLineBeforeCatch: settings.vcFormatNewlineBeforeCatch,
+            vcFormatNewLineBeforeElse: settings.vcFormatNewlineBeforeElse,
+            vcFormatNewLineBeforeWhileInDoWhile: settings.vcFormatNewlineBeforeWhileInDoWhile,
+            vcFormatNewLineCloseBraceSameLineEmptyType: settings.vcFormatNewlineCloseBraceSameLineEmptyType,
+            vcFormatNewLineCloseBraceSameLineEmptyFunction: settings.vcFormatNewlineCloseBraceSameLineEmptyFunction,
+            vcFormatSpaceBeforeFunctionOpenParenthesis: settings.vcFormatSpaceBeforeFunctionOpenParenthesis,
+            vcFormatSpaceWithinParameterListParentheses: settings.vcFormatSpaceWithinParameterListParentheses,
+            vcFormatSpaceBetweenEmptyParameterListParentheses: settings.vcFormatSpaceBetweenEmptyParameterListParentheses,
+            vcFormatSpaceAfterKeywordsInControlFlowStatements: settings.vcFormatSpaceAfterKeywordsInControlFlowStatements,
+            vcFormatSpaceWithinControlFlowStatementParentheses: settings.vcFormatSpaceWithinControlFlowStatementParentheses,
+            vcFormatSpaceBeforeLambdaOpenParenthesis: settings.vcFormatSpaceBeforeLambdaOpenParenthesis,
+            vcFormatSpaceWithinCastParentheses: settings.vcFormatSpaceWithinCastParentheses,
+            vcFormatSpaceAfterCastCloseParenthesis: settings.vcFormatSpaceAfterCastCloseParenthesis,
+            vcFormatSpaceWithinExpressionParentheses: settings.vcFormatSpaceWithinExpressionParentheses,
+            vcFormatSpaceBeforeBlockOpenBrace: settings.vcFormatSpaceBeforeBlockOpenBrace,
+            vcFormatSpaceBetweenEmptyBraces: settings.vcFormatSpaceBetweenEmptyBraces,
+            vcFormatSpaceBeforeInitializerListOpenBrace: settings.vcFormatSpaceBeforeInitializerListOpenBrace,
+            vcFormatSpaceWithinInitializerListBraces: settings.vcFormatSpaceWithinInitializerListBraces,
+            vcFormatSpacePreserveInInitializerList: settings.vcFormatSpacePreserveInInitializerList,
+            vcFormatSpaceBeforeOpenSquareBracket: settings.vcFormatSpaceBeforeOpenSquareBracket,
+            vcFormatSpaceWithinSquareBrackets: settings.vcFormatSpaceWithinSquareBrackets,
+            vcFormatSpaceBeforeEmptySquareBrackets: settings.vcFormatSpaceBeforeEmptySquareBrackets,
+            vcFormatSpaceBetweenEmptySquareBrackets: settings.vcFormatSpaceBetweenEmptySquareBrackets,
+            vcFormatSpaceGroupSquareBrackets: settings.vcFormatSpaceGroupSquareBrackets,
+            vcFormatSpaceWithinLambdaBrackets: settings.vcFormatSpaceWithinLambdaBrackets,
+            vcFormatSpaceBetweenEmptyLambdaBrackets: settings.vcFormatSpaceBetweenEmptyLambdaBrackets,
+            vcFormatSpaceBeforeComma: settings.vcFormatSpaceBeforeComma,
+            vcFormatSpaceAfterComma: settings.vcFormatSpaceAfterComma,
+            vcFormatSpaceRemoveAroundMemberOperators: settings.vcFormatSpaceRemoveAroundMemberOperators,
+            vcFormatSpaceBeforeInheritanceColon: settings.vcFormatSpaceBeforeInheritanceColon,
+            vcFormatSpaceBeforeConstructorColon: settings.vcFormatSpaceBeforeConstructorColon,
+            vcFormatSpaceRemoveBeforeSemicolon: settings.vcFormatSpaceRemoveBeforeSemicolon,
+            vcFormatSpaceInsertAfterSemicolon: settings.vcFormatSpaceInsertAfterSemicolon,
+            vcFormatSpaceRemoveAroundUnaryOperator: settings.vcFormatSpaceRemoveAroundUnaryOperator,
+            vcFormatSpaceAroundBinaryOperator: settings.vcFormatSpaceAroundBinaryOperator,
+            vcFormatSpaceAroundAssignmentOperator: settings.vcFormatSpaceAroundAssignmentOperator,
+            vcFormatSpacePointerReferenceAlignment: settings.vcFormatSpacePointerReferenceAlignment,
+            vcFormatSpaceAroundTernaryOperator: settings.vcFormatSpaceAroundTernaryOperator,
+            vcFormatWrapPreserveBlocks: settings.vcFormatWrapPreserveBlocks,
+            doxygenGenerateOnType: settings.doxygenGenerateOnType,
+            doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
+            filesExclude: otherSettings.filesExclude,
+            filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
+            filesEncoding: otherSettings.filesEncoding,
+            searchExclude: otherSettings.searchExclude,
+            editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
+            editorInlayHintsEnabled: otherSettings.InlayHintsEnabled
+        };
+    };
+
+    private getAllWorkspaceFolderSettings(): WorkspaceFolderSettingsParams[] {
+        const workspaceSettings: CppSettings = new CppSettings();
+        const workspaceOtherSettings: OtherSettings = new OtherSettings();
+        const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = [];
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            for (const workspaceFolder of vscode.workspace.workspaceFolders) {
+                workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(workspaceFolder.uri, new CppSettings(workspaceFolder.uri), new OtherSettings(workspaceFolder.uri)));
+            }
+        } else {
+            workspaceFolderSettingsParams.push(this.getWorkspaceFolderSettings(this.RootUri, workspaceSettings, workspaceOtherSettings));
+        }
+        return workspaceFolderSettingsParams;
+    }
+
+    private getAllSettings(): SettingsParams {
+        const workspaceSettings: CppSettings = new CppSettings();
+        const workspaceOtherSettings: OtherSettings = new OtherSettings();
+        const workspaceFolderSettingsParams: WorkspaceFolderSettingsParams[] = this.getAllWorkspaceFolderSettings();
+        return {
+            filesAssociations: workspaceOtherSettings.filesAssociations,
+            workspaceFallbackEncoding: workspaceOtherSettings.filesEncoding,
+            maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
+            maxCachedProcesses: workspaceSettings.maxCachedProcesses,
+            maxMemory: workspaceSettings.maxMemory,
+            loggingLevel: workspaceSettings.loggingLevel,
+            workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
+            workspaceSymbols: workspaceSettings.workspaceSymbols,
+            simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
+            intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
+            experimentalFeatures: workspaceSettings.experimentalFeatures,
+            enhancedColorization: workspaceSettings.enhancedColorization,
+            intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
+            intellisenseMaxMemory: workspaceSettings.intelliSenseMaxMemory,
+            referencesMaxConcurrentThreads: workspaceSettings.referencesMaxConcurrentThreads,
+            referencesMaxCachedProcesses: workspaceSettings.referencesMaxCachedProcesses,
+            referencesMaxMemory: workspaceSettings.referencesMaxMemory,
+            codeAnalysisMaxConcurrentThreads: workspaceSettings.codeAnalysisMaxConcurrentThreads,
+            codeAnalysisMaxMemory: workspaceSettings.codeAnalysisMaxMemory,
+            codeAnalysisUpdateDelay: workspaceSettings.codeAnalysisUpdateDelay,
+            workspaceFolderSettings: workspaceFolderSettingsParams
+        };
     }
 
     private createLanguageClient(): LanguageClient {
@@ -1008,7 +1160,7 @@ export class DefaultClient implements Client {
             resetDatabase: resetDatabase,
             edgeMessagesDirectory: path.join(util.getExtensionFilePath("bin"), "messages", getLocaleId()),
             localizedStrings: localizedStrings,
-            settings: getAllSettings()
+            settings: this.getAllSettings()
         };
 
         const clientOptions: LanguageClientOptions = {
@@ -1052,7 +1204,7 @@ export class DefaultClient implements Client {
     public sendDidChangeSettings(): void {
         // Send settings json to native side
         this.notifyWhenLanguageClientReady(() => {
-            this.languageClient.sendNotification(DidChangeSettingsNotification, getAllSettings());
+            this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
         });
     }
 
@@ -1081,9 +1233,9 @@ export class DefaultClient implements Client {
                     }
                     const settings: CppSettings = new CppSettings();
                     if (changedSettings["enhancedColorization"]) {
-                        if (settings.enhancedColorization && this.semanticTokensLegend) {
+                        if (settings.enhancedColorization && semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, this.semanticTokensLegend);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                         } else if (this.semanticTokensProviderDisposable) {
                             this.semanticTokensProviderDisposable.dispose();
                             this.semanticTokensProviderDisposable = undefined;
