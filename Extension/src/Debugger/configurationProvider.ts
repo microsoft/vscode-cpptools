@@ -1253,10 +1253,14 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
     // 2. If there are items, the Add Configuration button will append it to the start of the configuration array. This function inserts a comma at the end of the snippet.
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
         let items: vscode.CompletionItem[] = this.snippets;
-
-        const launch: any = jsonc.parse(document.getText());
+        let hasLaunchConfigs: boolean = false;
+        try {
+            const launch: any = jsonc.parse(document.getText());
+            hasLaunchConfigs = launch.configurations.length !== 0;
+        } catch {
+        }
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
-        if (launch.configurations.length !== 0) {
+        if (hasLaunchConfigs) {
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.

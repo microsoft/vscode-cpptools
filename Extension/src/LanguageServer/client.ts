@@ -965,7 +965,7 @@ export class DefaultClient implements Client {
     }
 
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
-        return {
+        const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
             intelliSenseEngine: settings.intelliSenseEngine,
             intelliSenseEngineFallback: settings.intelliSenseEngineFallback,
@@ -1067,6 +1067,7 @@ export class DefaultClient implements Client {
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.InlayHintsEnabled
         };
+        return result;
     };
 
     private getAllWorkspaceFolderSettings(): WorkspaceFolderSettingsParams[] {
@@ -2901,7 +2902,7 @@ export class DefaultClient implements Client {
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
             const params: IntervalTimerParams = {
-                freeMemory: os.freemem() / 1048576
+                freeMemory: Math.floor(os.freemem() / 1048576)
             };
             this.languageClient.sendNotification(IntervalTimerNotification, params);
             this.configuration.checkCppProperties();
@@ -3073,7 +3074,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
-    handleGenerateDoxygenComment(): Promise<void> { return Promise.resolve(); }
+    handleGenerateDoxygenComment(codeActionArguments: DoxygenCodeActionCommandArguments | undefined): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }

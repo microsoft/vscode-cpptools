@@ -434,7 +434,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (args: DoxygenCodeActionCommandArguments) =>  getActiveClient().handleGenerateDoxygenComment(args)));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
 }
 
 function onDisabledCommand(): void {
@@ -807,6 +807,10 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
     await vscode.env.clipboard.writeText(installCommand);
+}
+
+function onGenerateDoxygenComment(arg: DoxygenCodeActionCommandArguments): void {
+    getActiveClient().handleGenerateDoxygenComment(arg);
 }
 
 function onSetActiveConfigName(configurationName: string): Thenable<void> {
