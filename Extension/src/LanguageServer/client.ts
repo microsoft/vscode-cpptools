@@ -2429,7 +2429,7 @@ export class DefaultClient implements Client {
     private onSelectedConfigurationChanged(index: number): void {
         const params: FolderSelectedSettingParams = {
             currentConfiguration: index,
-            workspaceFolderUri: this.RootUri?.toString(),
+            workspaceFolderUri: this.RootUri?.toString()
         };
         this.notifyWhenLanguageClientReady(() => {
             this.languageClient.sendNotification(ChangeSelectedSettingNotification, params);
