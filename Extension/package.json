@@ -2234,43 +2234,43 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentContainsName": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.referenceOperator.showSpace": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.loggingLevel": {
           "type": "string",

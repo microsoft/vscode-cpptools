@@ -1005,7 +1005,11 @@ function extractArgs(argsString: string): string[] {
             return [];
         }
         const jsonText: string = wordexpResult.toString();
-        return jsonc.parse(jsonText, undefined, true);
+        try {
+            return jsonc.parse(jsonText, undefined, true);
+        } catch {
+            return [];
+        }
     }
 }
 
