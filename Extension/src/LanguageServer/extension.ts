@@ -468,14 +468,14 @@ async function onSwitchHeaderSource(): Promise<void> {
         return;
     }
 
-    let rootPath: string = clients.ActiveClient.RootPath;
+    let rootUri: vscode.Uri | undefined = clients.ActiveClient.RootUri;
     const fileName: string = activeEditor.document.fileName;
 
-    if (!rootPath) {
-        rootPath = path.dirname(fileName); // When switching without a folder open.
+    if (!rootUri) {
+        rootUri = vscode.Uri.file(path.dirname(fileName)); // When switching without a folder open.
     }
 
-    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName);
+    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName);
     // If the targetFileName has a path that is a symlink target of a workspace folder,
     // then replace the RootRealPath with the RootPath (the symlink path).
     let targetFileNameReplaced: boolean = false;

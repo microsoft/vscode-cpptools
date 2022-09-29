@@ -660,7 +660,7 @@ export interface Client {
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     notifyWhenLanguageClientReady(notify: () => void): void;
     awaitUntilLanguageClientReady(): Thenable<void>;
-    requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string>;
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
@@ -2227,10 +2227,10 @@ export class DefaultClient implements Client {
     /**
      * requests to the language server
      */
-    public requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> {
+    public requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> {
         const params: SwitchHeaderSourceParams = {
             switchHeaderSourceFileName: fileName,
-            workspaceFolderUri: this.RootUri?.toString()
+            workspaceFolderUri: rootUri.toString()
         };
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
@@ -3052,7 +3052,7 @@ class NullClient implements Client {
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
     notifyWhenLanguageClientReady(notify: () => void): void { }
     awaitUntilLanguageClientReady(): Thenable<void> { return Promise.resolve(); }
-    requestSwitchHeaderSource(rootPath: string, fileName: string): Thenable<string> { return Promise.resolve(""); }
+    requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
