@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { OctoKit } from '../api/octokit'
-import { getInput, getRequiredInput } from '../common/utils'
-import { Locker } from './Locker'
-import { Action } from '../common/Action'
+import { OctoKit } from '../api/octokit';
+import { getInput, getRequiredInput } from '../common/utils';
+import { Locker } from './Locker';
+import { Action } from '../common/Action';
 
 class LockerAction extends Action {
-	id = 'Locker'
+	id = 'Locker';
 
 	async onTriggered(github: OctoKit) {
 		await new Locker(

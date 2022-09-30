@@ -5,7 +5,7 @@
 
 import { GitHub } from '../api/api'
 import { ActionBase } from '../common/ActionBase'
-import { daysAgoToHumanReadbleDate, daysAgoToTimestamp } from '../common/utils'
+import { daysAgoToHumanReadbleDate, daysAgoToTimestamp, safeLog } from '../common/utils'
 
 export class StaleCloser extends ActionBase {
 	constructor(
@@ -63,21 +63,21 @@ export class StaleCloser extends ActionBase {
 					) {
 						if (pingTimestamp != undefined) {
 							if (lastComment) {
-								console.log(
+								safeLog(
 									`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`,
 								)
 							} else {
-								console.log(`No comments on issue ${hydrated.number}. Closing.`)
+								safeLog(`No comments on issue ${hydrated.number}. Closing.`)
 							}
 						}
 						if (this.closeComment) {
-							console.log(`Posting comment on issue ${hydrated.number}`)
+							safeLog(`Posting comment on issue ${hydrated.number}`)
 							await issue.postComment(this.closeComment)
 						}
 						if (removeLabelsSet.length > 0) {
 							for (const removeLabel of removeLabelsSet) {
 								if (removeLabel && removeLabel.length > 0) {
-									console.log(`Removing label on issue ${hydrated.number}: ${removeLabel}`)
+									safeLog(`Removing label on issue ${hydrated.number}: ${removeLabel}`)
 									await issue.removeLabel(removeLabel)
 								}
 							}
@@ -85,21 +85,21 @@ export class StaleCloser extends ActionBase {
 						if (addLabelsSet.length > 0) {
 							for (const addLabel of addLabelsSet) {
 								if (addLabel && addLabel.length > 0) {
-									console.log(`Adding label on issue ${hydrated.number}: ${addLabel}`)
+									safeLog(`Adding label on issue ${hydrated.number}: ${addLabel}`)
 									await issue.addLabel(addLabel)
 								}
 							}
 						}
-						await issue.closeIssue()
+						await issue.closeIssue("not_planned")
 						if (this.setMilestoneId != undefined) {
-							console.log(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`)
+							safeLog(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`)
 							await issue.setMilestone(+this.setMilestoneId)
 						}
-						console.log(`Closing issue ${hydrated.number}.`)
+						safeLog(`Closing issue ${hydrated.number}.`)
 					} else {
 						// Ping
 						if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
-							console.log(
+							safeLog(
 								`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`,
 							)
 							if (this.pingComment) {
@@ -110,7 +110,7 @@ export class StaleCloser extends ActionBase {
 								)
 							}
 						} else {
-							console.log(
+							safeLog(
 								`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Skipping.${
 									hydrated.assignee ? ' cc @' + hydrated.assignee : ''
 								}`,
@@ -119,7 +119,7 @@ export class StaleCloser extends ActionBase {
 					}
 				} else {
 					if (!hydrated.open) {
-						console.log(`Issue ${hydrated.number} is not open. Ignoring`)
+						safeLog(`Issue ${hydrated.number} is not open. Ignoring`)
 					}
 				}
 			}
