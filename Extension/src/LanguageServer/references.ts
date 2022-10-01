@@ -41,10 +41,6 @@ export interface ReferencesResult {
 
 export type ReferencesResultCallback = (result: ReferencesResult | null, doResolve: boolean) => void;
 
-export interface ReferencesResultMessage {
-    referencesResult: ReferencesResult;
-}
-
 enum ReferencesProgress {
     Started,
     StartedRename,

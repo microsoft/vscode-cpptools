@@ -399,7 +399,7 @@ export class CppProperties {
         if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
-        if (isUnset(settings.defaultCustomConfigurationVariables) || settings.defaultCustomConfigurationVariables === {}) {
+        if (!settings.defaultCustomConfigurationVariables || Object.keys(settings.defaultCustomConfigurationVariables).length === 0) {
             configuration.customConfigurationVariables = this.defaultCustomConfigurationVariables;
         }
     }
@@ -786,10 +786,10 @@ export class CppProperties {
     }
 
     private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
-        if (!property || property === {}) {
+        if (!property || Object.keys(property).length === 0) {
             property = defaultValue;
         }
-        if (!property || property === {}) {
+        if (!property || Object.keys(property).length === 0) {
             return undefined;
         }
         return this.resolveDefaultsDictionary(property, defaultValue, env);
@@ -1240,6 +1240,7 @@ export class CppProperties {
             }
 
             // Try to use the same configuration as before the change.
+            // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
             const newJson: ConfigurationJson = jsonc.parse(readResults, undefined, true);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
                 throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
@@ -1595,6 +1596,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>, except for \"
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             const configurationsText: string = util.escapeForSquiggles(curText);
+            // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
             const configurations: ConfigurationJson = jsonc.parse(configurationsText, undefined, true);
             const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
