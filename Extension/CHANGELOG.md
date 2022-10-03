@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.13.2: October 4, 2022
+## Version 1.13.2: October 5, 2022
 ### Enhancements
 * Enable the inlay hint settings to be set per-workspace folder. [#9782](https://github.com/microsoft/vscode-cpptools/issues/9782)
 * Switch from RapidJSON to VS's internal JSON parser.
