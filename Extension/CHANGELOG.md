@@ -11,6 +11,7 @@
 * Fix IntelliSense crash with range-v3 `ranges::views::addressof`. [#9870](https://github.com/microsoft/vscode-cpptools/issues/9870)
 * Fix slow compiler querying. [#9882](https://github.com/microsoft/vscode-cpptools/issues/9882)
 * Fix clang-tidy errors related to `__SSE__` defines when gcc is used. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
+* Fix issue with parsing SSH configurations that could cause the extension to fail to activate. [#9933](https://github.com/microsoft/vscode-cpptools/pull/9933)
 
 ## Version 1.13.1: September 27, 2022
 ### Enhancements
