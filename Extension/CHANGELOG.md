@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.2: October 4, 2022
+### Enhancements
+* Enable the inlay hint settings to be set per-workspace folder. [#9782](https://github.com/microsoft/vscode-cpptools/issues/9782)
+* Switch from RapidJSON to VS's internal JSON parser.
+
+### Bug Fixes
+* Fix "final" breaking formatting. [#6638](https://github.com/microsoft/vscode-cpptools/issues/6638)
+* Fix or reduce the occurrence of wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
+* Fix slow compiler querying. [#9882](https://github.com/microsoft/vscode-cpptools/issues/9882)
+* Fix clang-tidy errors related to `__SSE__` defines when gcc is used. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
+
 ## Version 1.13.1: September 27, 2022
 ### Enhancements
 * Enable hiding the SSH Targets view with the `C_Cpp.sshTargetsView` setting. [#9836](https://github.com/microsoft/vscode-cpptools/issues/9836)
@@ -13,7 +24,6 @@
 * Add diagnostic changes for the issue with wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
 * Fix `-std=` being passed to clang-tidy in certain cases . [#9776](https://github.com/microsoft/vscode-cpptools/issues/9776)
 * Fix debugger visualization for ArrayItem elements more than 1000. [#9801](https://github.com/microsoft/vscode-cpptools/issues/9801)
-* Fix IntelliSense crash with range-v3 `ranges::views::addressof`. [#9870](https://github.com/microsoft/vscode-cpptools/issues/9870)
 * Handle `-fexperimental-library` clang argument. [#9888](https://github.com/microsoft/vscode-cpptools/issues/9888)
 * Fix compiler querying with multiple -arch. [#9894](https://github.com/microsoft/vscode-cpptools/issues/9894)
 * Fix "Failed to read file C:\ProgramData\ssh\ssh_config." in logging . [#9899](https://github.com/microsoft/vscode-cpptools/issues/9899)
