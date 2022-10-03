@@ -8,6 +8,7 @@
 ### Bug Fixes
 * Fix "final" breaking formatting. [#6638](https://github.com/microsoft/vscode-cpptools/issues/6638)
 * Fix or reduce the occurrence of wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
+* Fix IntelliSense crash with range-v3 `ranges::views::addressof`. [#9870](https://github.com/microsoft/vscode-cpptools/issues/9870)
 * Fix slow compiler querying. [#9882](https://github.com/microsoft/vscode-cpptools/issues/9882)
 * Fix clang-tidy errors related to `__SSE__` defines when gcc is used. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
 
