@@ -3468,5 +3468,12 @@
   "um requisito IFC inesperado foi encontrado durante o processamento do módulo %sq1",
   "condição falhou na linha %d em %s1: %sq2",
   "restrição atômica depende de si mesma",
-  "A função 'noreturn' tem um tipo de retorno não nulo"
+  "A função 'noreturn' tem um tipo de retorno não nulo",
+  "foi feita uma correção eliminando o parâmetro %sq (no índice relativo %d)",
+  "nome de identificador IFC inválido %sq encontrado durante a reconstrução da entidade",
+  "identificador IFC inválido chamado %sq ignorado durante a reconstrução da entidade",
+  "valor de classificação inválido do módulo %sq",
+  "um modelo de função carregado de um módulo IFC foi analisado incorretamente como %nd",
+  "falha ao carregar uma referência de entidade IFC no módulo %sq",
+  "Classificação do índice IFC = %d1, valor = %d2"
 ]
