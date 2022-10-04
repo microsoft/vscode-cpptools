@@ -3468,5 +3468,12 @@
   "Unerwartete IFC-Anforderung beim Verarbeiten des Moduls %sq1",
   "Bedingungsfehler in Zeile %d in %s1: %sq2",
   "Die atomische Einschränkung hängt von sich selbst ab",
-  "Die Funktion \"noreturn\" weist den Rückgabetyp \"nicht void\" auf."
+  "Die Funktion \"noreturn\" weist den Rückgabetyp \"nicht void\" auf.",
+  "Eine Korrektur wurde vorgenommen, indem der Parameter %sq (beim relativen Index %d) weggelassen wurde",
+  "Ungültiger IFC-Bezeichnername %sq bei der Rekonstruktion der Entität gefunden",
+  "Ungültiger IFC-Bezeichnername %sq bei der Rekonstruktion der Entität übersprungen",
+  "Modul %sq ungültiger Sortierwert",
+  "Eine aus einem IFC-Modul geladene Funktionsvorlage wurde fälschlicherweise als %nd analysiert",
+  "Fehler beim Laden eines IFC-Entitätsverweises im Modul \"%sq\"",
+  "IFC-Indexsortierung = %d1, Wert = %d2"
 ]
