@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, GetSemanticTokensResult } from '../client';
+import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, GetSemanticTokensResult, semanticTokensLegend } from '../client';
 
 export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;
@@ -34,7 +34,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
                 if (tokensResult.fileVersion !== openFileVersions.get(uriString)) {
                     throw new vscode.CancellationError();
                 } else {
-                    const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(this.client.semanticTokensLegend);
+                    const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(semanticTokensLegend);
                     tokensResult.tokens.forEach((semanticToken) => {
                         builder.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
                     });

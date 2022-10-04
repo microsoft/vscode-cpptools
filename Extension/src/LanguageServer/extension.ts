@@ -12,12 +12,12 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions } from './client';
+import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings } from './settings';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -33,7 +33,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
-let clients: ClientCollection;
+export let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 const disposables: vscode.Disposable[] = [];
@@ -273,17 +273,19 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
-    const activeClient: Client = clients.ActiveClient;
-    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
-    clients.forEach(client => {
-        if (client !== activeClient) {
-            client.onDidChangeSettings(event, false);
+    const client: Client = clients.getDefaultClient();
+    if (client instanceof DefaultClient) {
+        const defaultClient: DefaultClient = <DefaultClient>client;
+        const changedDefaultClientSettings: { [key: string]: string } = defaultClient.onDidChangeSettings(event);
+        clients.forEach(client => {
+            if (client !== defaultClient) {
+                client.onDidChangeSettings(event);
+            }
+        });
+        const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
+        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
+            UpdateInsidersAccess();
         }
-    });
-
-    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
-    if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-        UpdateInsidersAccess();
     }
 }
 
@@ -346,7 +348,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
                         const fileName: string = path.basename(document.uri.fsPath);
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, "cpp");
-                        client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                        client.sendDidChangeSettings();
                         vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
                             finishDidOpen(newDoc);
                         });
@@ -432,7 +434,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (cursorLine, cursorColumn, line, column, cursorOnEmptyLineAboveSignature) =>  getActiveClient().handleGenerateDoxygenComment(cursorLine, cursorColumn, line, column, cursorOnEmptyLineAboveSignature)));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
 }
 
 function onDisabledCommand(): void {
@@ -466,14 +468,14 @@ async function onSwitchHeaderSource(): Promise<void> {
         return;
     }
 
-    let rootPath: string = clients.ActiveClient.RootPath;
+    let rootUri: vscode.Uri | undefined = clients.ActiveClient.RootUri;
     const fileName: string = activeEditor.document.fileName;
 
-    if (!rootPath) {
-        rootPath = path.dirname(fileName); // When switching without a folder open.
+    if (!rootUri) {
+        rootUri = vscode.Uri.file(path.dirname(fileName)); // When switching without a folder open.
     }
 
-    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName);
+    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName);
     // If the targetFileName has a path that is a symlink target of a workspace folder,
     // then replace the RootRealPath with the RootPath (the symlink path).
     let targetFileNameReplaced: boolean = false;
@@ -788,7 +790,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         const portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndLineNumbers => {
-            docAndLineNumbers[1].forEach(async line => {
+            docAndLineNumbers[1].forEach(line => {
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
@@ -805,6 +807,10 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
     await vscode.env.clipboard.writeText(installCommand);
+}
+
+function onGenerateDoxygenComment(arg: DoxygenCodeActionCommandArguments): void {
+    getActiveClient().handleGenerateDoxygenComment(arg);
 }
 
 function onSetActiveConfigName(configurationName: string): Thenable<void> {
