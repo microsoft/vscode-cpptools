@@ -24,8 +24,8 @@ class LockerAction extends Action {
 			getInput('ignoreMilestoneIds') || undefined,
 			+(getInput('minimumVotes') || 0),
 			+(getInput('maximumVotes') || 9999999)
-		).run()
+		).run();
 	}
 }
 
-new LockerAction().run() // eslint-disable-line
+new LockerAction().run(); // eslint-disable-line

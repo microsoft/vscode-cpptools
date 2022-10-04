@@ -10,7 +10,7 @@ const Action_1 = require("../common/Action");
 class ReopenerAction extends Action_1.Action {
     constructor() {
         super(...arguments);
-        this.id = 'Locker';
+        this.id = 'Reopener';
     }
     async onTriggered(github) {
         const alsoApplyToOpenIssues = (0, utils_1.getInput)('alsoApplyToOpenIssues');

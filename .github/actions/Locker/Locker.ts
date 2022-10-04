@@ -34,18 +34,18 @@ export class Locker extends ActionBase {
 		for await (const page of this.github.query({ q: query })) {
 			await Promise.all(
 				page.map(async (issue) => {
-					const hydrated = await issue.getIssue()
+					const hydrated = await issue.getIssue();
 
 					if (!hydrated.locked && hydrated.open === false && this.validateIssue(hydrated)
 						// TODO: Verify closed and updated timestamps
 					) {
-						safeLog(`Locking issue ${hydrated.number}`)
-						await issue.lockIssue()
+						safeLog(`Locking issue ${hydrated.number}`);
+						await issue.lockIssue();
 					} else {
 						if (hydrated.locked) {
-							safeLog(`Issue ${hydrated.number} is already locked. Ignoring`)
+							safeLog(`Issue ${hydrated.number} is already locked. Ignoring`);
 						} else if (hydrated.open) {
-							safeLog(`Issue ${hydrated.number} is open. Ignoring`)
+							safeLog(`Issue ${hydrated.number} is open. Ignoring`);
 						}
 					}
 				}),

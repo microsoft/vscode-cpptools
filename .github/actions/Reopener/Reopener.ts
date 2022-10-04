@@ -39,43 +39,43 @@ export class Reopener extends ActionBase {
 		for await (const page of this.github.query({ q: query })) {
 			await Promise.all(
 				page.map(async (issue) => {
-					const hydrated = await issue.getIssue()
+					const hydrated = await issue.getIssue();
 					if (!hydrated.locked && (this.alsoApplyToOpenIssues || hydrated.open === false) && this.validateIssue(hydrated)
 						// TODO: Verify closed and updated timestamps
 					) {
 						if (hydrated.open === false) {
-							safeLog(`Reopening issue ${hydrated.number}`)
-							await issue.reopenIssue()
+							safeLog(`Reopening issue ${hydrated.number}`);
+							await issue.reopenIssue();
 						}
 						if (this.setMilestoneId != undefined) {
-							safeLog(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`)
-							await issue.setMilestone(+this.setMilestoneId)
+							safeLog(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`);
+							await issue.setMilestone(+this.setMilestoneId);
 						}
 						if (removeLabelsSet.length > 0) {
 							for (const removeLabel of removeLabelsSet) {
 								if (removeLabel && removeLabel.length > 0) {
-									safeLog(`Removing label on issue ${hydrated.number}: ${removeLabel}`)
-									await issue.removeLabel(removeLabel)
+									safeLog(`Removing label on issue ${hydrated.number}: ${removeLabel}`);
+									await issue.removeLabel(removeLabel);
 								}
 							}
 						}
 						if (addLabelsSet.length > 0) {
 							for (const addLabel of addLabelsSet) {
 								if (addLabel && addLabel.length > 0) {
-									safeLog(`Adding label on issue ${hydrated.number}: ${addLabel}`)
-									await issue.addLabel(addLabel)
+									safeLog(`Adding label on issue ${hydrated.number}: ${addLabel}`);
+									await issue.addLabel(addLabel);
 								}
 							}
 						}
 						if (this.reopenComment) {
-							safeLog(`Posting comment to issue ${hydrated.number}.`)
-							await issue.postComment(this.reopenComment)
+							safeLog(`Posting comment to issue ${hydrated.number}.`);
+							await issue.postComment(this.reopenComment);
 						}
 					} else {
 						if (hydrated.locked) {
-							safeLog(`Issue ${hydrated.number} is locked. Ignoring`)
+							safeLog(`Issue ${hydrated.number} is locked. Ignoring`);
 						} else if (!this.alsoApplyToOpenIssues && hydrated.open) {
-							safeLog(`Issue ${hydrated.number} is open. Ignoring`)
+							safeLog(`Issue ${hydrated.number} is open. Ignoring`);
 						}
 					}
 				}),
