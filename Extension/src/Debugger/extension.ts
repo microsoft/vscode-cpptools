@@ -15,12 +15,12 @@ import { getActiveSshTarget, initializeSshTargets, selectSshTarget, SshTargetsPr
 import { addSshTargetCmd, BaseNode, refreshCppSshTargetsViewCmd } from '../SSH/TargetsView/common';
 import { setActiveSshTarget, TargetLeafNode } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
-import { getSshConfiguration, getSshConfigurationFiles, writeSshConfiguration } from '../SSH/sshHosts';
-import { pathAccessible } from '../common';
-import * as fs from 'fs';
+import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
 import { Configuration } from 'ssh-config';
 import { CppSettings } from '../LanguageServer/settings';
 import * as chokidar from 'chokidar';
+import { getSshChannel } from '../logger';
+import { pathAccessible } from '../common';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];
@@ -100,6 +100,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
         }
     }));
     disposables.push(vscode.commands.registerCommand('C_Cpp.activeSshTarget', () => enableSshTargetsViewAndRun(getActiveSshTarget)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.sshTerminal', (node: TargetLeafNode) => enableSshTargetsViewAndRun(sshTerminal, node)));
     disposables.push(sshTargetsProvider);
 
     // Decide if we should show the SSH Targets View.
@@ -130,6 +131,12 @@ export function dispose(): void {
     disposables.forEach(d => d.dispose());
 }
 
+function sshTerminal(node: TargetLeafNode): void {
+    const terminal: vscode.Terminal = vscode.window.createTerminal(`SSH: ${node.name}`);
+    terminal.sendText(`ssh "${node.name}"`);
+    terminal.show();
+}
+
 async function enableSshTargetsViewAndRun<T>(func: (...paras: any[]) => T | Promise<T>, ...args: any[]): Promise<T> {
     await enableSshTargetsView();
     return func(...args);
@@ -157,6 +164,18 @@ async function disableSshTargetsView(): Promise<void> {
 }
 
 async function addSshTargetImpl(): Promise<string> {
+    const validConfigFiles: string[] = [];
+    for (const configFile of getSshConfigurationFiles()) {
+        if (await pathAccessible(configFile) && parseFailures.get(configFile)) {
+            getSshChannel().appendLine(localize('cannot.modify.config.file', 'Cannot modify SSH configuration file because of parse failure "{0}".', configFile));
+        } else {
+            validConfigFiles.push(configFile);
+        }
+    }
+    if (validConfigFiles.length === 0) {
+        throw new Error(localize('no.valid.ssh.config.file', 'No valid SSH configuration file found.'));
+    }
+
     const name: string | undefined = await vscode.window.showInputBox({
         title: localize('enter.ssh.target.name', 'Enter SSH Target Name'),
         placeHolder: localize('ssh.target.name.place.holder', 'Example: `mySSHTarget`'),
@@ -178,7 +197,7 @@ async function addSshTargetImpl(): Promise<string> {
 
     const newEntry: { [key: string]: string } = sshCommandToConfig(command, name);
 
-    const targetFile: string | undefined = await vscode.window.showQuickPick(getSshConfigurationFiles().filter(file => pathAccessible(file, fs.constants.W_OK)), { title: localize('select.ssh.config.file', 'Select an SSH configuration file') });
+    const targetFile: string | undefined = await vscode.window.showQuickPick(validConfigFiles, { title: localize('select.ssh.config.file', 'Select an SSH configuration file') });
     if (!targetFile) {
         return '';
     }

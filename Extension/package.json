@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.13.0-main",
+  "version": "1.13.2-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -2234,43 +2234,43 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.parameterNames.enabled": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.parameterNames.suppressWhenArgumentContainsName": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.parameterNames.hideLeadingUnderscores": {
           "type": "boolean",
           "default": true,
           "markdownDescription": "%c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.referenceOperator.enabled": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.inlayHints.referenceOperator.showSpace": {
           "type": "boolean",
           "default": false,
           "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
-          "scope": "application"
+          "scope": "resource"
         },
         "C_Cpp.loggingLevel": {
           "type": "string",
@@ -3002,6 +3002,12 @@
         "category": "C/C++",
         "title": "%c_cpp.command.refreshCppSshTargetsView.title%",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "C_Cpp.sshTerminal",
+        "category": "C/C++",
+        "title": "%c_cpp.command.sshTerminal.title%",
+        "icon": "$(terminal)"
       }
     ],
     "keybindings": [
@@ -5103,14 +5109,19 @@
       ],
       "view/item/context": [
         {
-          "command": "C_Cpp.removeSshTarget",
-          "when": "viewItem == CppSshTargetsView.targetLeafRemovable || viewItem == CppSshTargetsView.targetLeafRemovableCanSetActive",
-          "group": "inline@1"
-        },
-        {
           "command": "C_Cpp.setActiveSshTarget",
           "when": "viewItem == CppSshTargetsView.targetLeafCanSetActive || viewItem == CppSshTargetsView.targetLeafRemovableCanSetActive",
           "group": "inline@0"
+        },
+        {
+          "command": "C_Cpp.sshTerminal",
+          "when": "view == CppSshTargetsView",
+          "group": "inline@1"
+        },
+        {
+          "command": "C_Cpp.removeSshTarget",
+          "when": "viewItem == CppSshTargetsView.targetLeafRemovable || viewItem == CppSshTargetsView.targetLeafRemovableCanSetActive",
+          "group": "inline@2"
         }
       ],
       "editor/title/run": [
@@ -5200,6 +5211,10 @@
         },
         {
           "command": "C_Cpp.refreshCppSshTargetsView",
+          "when": "never"
+        },
+        {
+          "command": "C_Cpp.sshTerminal",
           "when": "never"
         }
       ]
