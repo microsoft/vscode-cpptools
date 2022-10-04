@@ -3468,5 +3468,12 @@
   "une exigence IFC inattendue s’est produite lors du traitement du module %sq1.",
   "échec de la condition à la ligne %d dans %s1 : %sq2",
   "la contrainte atomique dépend d’elle-même.",
-  "La fonction 'noreturn' a un type de retour non vide"
+  "La fonction 'noreturn' a un type de retour non vide",
+  "une correction a été effectuée en supprimant le paramètre %sq (au %d d’index relatif)",
+  "nom d’identificateur IFC non valide %sq rencontré lors de la reconstruction de l’entité",
+  "identificateur IFC non valide nommé %sq ignoré lors de la reconstruction de l’entité",
+  "le module %sq valeur de tri non valide",
+  "un modèle de fonction chargé à partir d’un module IFC a été analysé de manière incorrecte en tant que %nd",
+  "échec du chargement d’une référence d’entité IFC dans le module %sq",
+  "Tri d’index IFC = %d1, valeur = %d2"
 ]

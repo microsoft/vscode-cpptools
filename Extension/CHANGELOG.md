@@ -1,11 +1,42 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.2: October 5, 2022
+### Enhancements
+* Enable the inlay hint settings to be set per-workspace folder. [#9782](https://github.com/microsoft/vscode-cpptools/issues/9782)
+* Switch from RapidJSON to VS's internal JSON parser.
+
+### Bug Fixes
+* Fix "final" breaking formatting. [#6638](https://github.com/microsoft/vscode-cpptools/issues/6638)
+* Fix or reduce the occurrence of wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
+* Fix IntelliSense crash with range-v3 `ranges::views::addressof`. [#9870](https://github.com/microsoft/vscode-cpptools/issues/9870)
+* Fix slow compiler querying. [#9882](https://github.com/microsoft/vscode-cpptools/issues/9882)
+* Fix clang-tidy errors related to `__SSE__` defines when gcc is used. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
+* Fix issue with parsing SSH configurations that could cause the extension to fail to activate. [#9933](https://github.com/microsoft/vscode-cpptools/pull/9933)
+
+## Version 1.13.1: September 27, 2022
+### Enhancements
+* Enable hiding the SSH Targets view with the `C_Cpp.sshTargetsView` setting. [#9836](https://github.com/microsoft/vscode-cpptools/issues/9836)
+* Change "Enabled", "Disabled", "Default" settings to camelCase. [PR #9862](https://github.com/microsoft/vscode-cpptools/pull/9862)
+* Add support for C++ modules IFC version 0.42. [#9884](https://github.com/microsoft/vscode-cpptools/issues/9884)
+* Add SSH terminal for targets. [PR #9895](https://github.com/microsoft/vscode-cpptools/pull/9895)
+
+### Bug Fixes
+* Fix incorrect Outline view with C++20 namespace ::inline syntax. [#7216](https://github.com/microsoft/vscode-cpptools/issues/7216)
+* Fix variadic macros not expanding correctly. [#8178](https://github.com/microsoft/vscode-cpptools/issues/8178)
+* Add diagnostic changes for the issue with wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
+* Fix `-std=` being passed to clang-tidy in certain cases . [#9776](https://github.com/microsoft/vscode-cpptools/issues/9776)
+* Fix debugger visualization for ArrayItem elements more than 1000. [#9801](https://github.com/microsoft/vscode-cpptools/issues/9801)
+* Handle `-fexperimental-library` clang argument. [#9888](https://github.com/microsoft/vscode-cpptools/issues/9888)
+* Fix compiler querying with multiple -arch. [#9894](https://github.com/microsoft/vscode-cpptools/issues/9894)
+* Fix "Failed to read file C:\ProgramData\ssh\ssh_config." in logging . [#9899](https://github.com/microsoft/vscode-cpptools/issues/9899)
+* Fix "Natvis: are multi-dimensional arrays supported in gdb natvis?". [MIEngine#980](https://github.com/microsoft/MIEngine/issues/980)
+
 ## Version 1.13.0: September 7, 2022
 ### New Features
 * SSH Target Selector. [PR #9760](https://github.com/microsoft/vscode-cpptools/pull/9760)
 * rsync support in deploySteps. [PR #9808](https://github.com/microsoft/vscode-cpptools/pull/9808)
 
-### Enhancement
+### Enhancements
 * Add `C_Cpp.caseSensitiveFileSupport` for enabling case sensitive file handling on Windows. [#1994](https://github.com/microsoft/vscode-cpptools/issues/1994)
 * Add better build and debug task handling for when a compiler or debugger doesn't exist. [#8836](https://github.com/microsoft/vscode-cpptools/issues/8836)
 

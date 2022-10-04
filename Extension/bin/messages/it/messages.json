@@ -3468,5 +3468,12 @@
   "Durante l'elaborazione del modulo %sq1 è stato riscontrato un requisito IFC imprevisto.",
   "condizione fallita alla riga %d in %s1: %sq2",
   "il vincolo atomico dipende da se stesso",
-  "La funzione 'noreturn' ha un tipo restituito non void"
+  "La funzione 'noreturn' ha un tipo restituito non void",
+  "è stata apportata una correzione eliminando il parametro %sq (in corrispondenza dell'indice relativo %d)",
+  "nome identificatore IFC %sq non valido rilevato durante la ricostruzione dell'entità",
+  "nome identificatore IFC %sq non valido ignorato durante la ricostruzione dell'entità",
+  "il modulo %sq valore di ordinamento non valido",
+  "un modello di funzione caricato da un modulo IFC è stato analizzato erroneamente come %nd",
+  "non è stato possibile caricare un riferimento all'entità IFC nel modulo %sq",
+  "Ordinamento indice IFC = %d1, valore = %d2"
 ]
