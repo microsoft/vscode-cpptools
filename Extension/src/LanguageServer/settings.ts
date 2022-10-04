@@ -120,6 +120,7 @@ export interface WorkspaceFolderSettingsParams {
     vcFormatWrapPreserveBlocks: string | undefined;
     doxygenGenerateOnType: boolean | undefined;
     doxygenGeneratedStyle: string | undefined;
+    doxygenSelectDoxygenTags: string[] | undefined;
     filesExclude: Excludes | undefined;
     filesAutoSaveAfterDelay: boolean | undefined;
     filesEncoding: string | undefined;
@@ -386,7 +387,7 @@ export class CppSettings extends Settings {
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
     public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
-    public get selectDoxygenTags(): string[] | undefined {return super.Section.get<string[]>("doxygen.selectDoxygenTags")}
+    public get doxygenSelectDoxygenTags(): string[] | undefined {return super.Section.get<string[]>("doxygen.selectDoxygenTags"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
