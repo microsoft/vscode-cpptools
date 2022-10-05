@@ -186,7 +186,10 @@
     "deprecated_label": "Deprecated:",
     "date_label" : "Date:",
     "details_label" : "Details:",
-    "exceptions_label": "Exceptions:",
+    "exceptions_label": {
+        "text": "Exceptions:",
+        "hint": "This label is for describing the exceptions to a function Usage example: Exceptiion: std::out_of_range parameter is out of range."
+    },
     "invariant_label": "Invariant:",
     "file_label": "File:",
     "note_label": "Note:",
