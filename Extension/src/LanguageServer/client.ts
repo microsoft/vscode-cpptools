@@ -682,7 +682,7 @@ export interface Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void;
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
-    handleGenerateDoxygenComment(codeActionArguments: DoxygenCodeActionCommandArguments | undefined): Promise<void>;
+    handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void>;
     handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
@@ -2728,7 +2728,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleGenerateDoxygenComment(codeActionArguments: DoxygenCodeActionCommandArguments | undefined): Promise<void> {
+    public async handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor) {
             return;
@@ -2742,12 +2742,15 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const isCodeAction: boolean = codeActionArguments !== undefined;
-        const initCursorPosition: vscode.Position = codeActionArguments !== undefined ? new vscode.Position(codeActionArguments.initialCursor.line, codeActionArguments.initialCursor.character) : editor.selection.active;
+        let codeActionArguments: DoxygenCodeActionCommandArguments | undefined;
+        if (args !== undefined && !(args instanceof vscode.Uri)) {
+            codeActionArguments = args;
+        }
+        const initCursorPosition: vscode.Position = (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.initialCursor.line, codeActionArguments.initialCursor.character) : editor.selection.active;
         const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
             position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments.adjustedCursor.character) : editor.selection.active,
-            isCodeAction: isCodeAction,
+            isCodeAction: codeActionArguments !== undefined,
             isCursorAboveSignatureLine: codeActionArguments?.isCursorAboveSignatureLine
         };
         await this.awaitUntilLanguageClientReady();
@@ -2771,7 +2774,7 @@ export class DefaultClient implements Client {
             // The reason why we need to set different range is because if cursor is immediately above the signature line, we want the comments to be inserted at the line of cursor and to replace everything on the line.
             // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
             if (cursorOnEmptyLineAboveSignature) {
-                if (isCodeAction) {
+                if (codeActionArguments !== undefined) {
                     // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not correct.
                     // In most cases, the finalInsertionLine is the line of the signature line.
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
@@ -2786,7 +2789,7 @@ export class DefaultClient implements Client {
             await vscode.workspace.applyEdit(workspaceEdit);
             // Set the cursor position after @brief
             let newPosition: vscode.Position;
-            if (cursorOnEmptyLineAboveSignature && isCodeAction) {
+            if (cursorOnEmptyLineAboveSignature && codeActionArguments !== undefined) {
                 newPosition = new vscode.Position(result.finalCursorPosition.line - 1, result.finalCursorPosition.character);
             } else {
                 newPosition = new vscode.Position(result.finalCursorPosition.line, result.finalCursorPosition.character);
@@ -3075,7 +3078,7 @@ class NullClient implements Client {
     handleConfigurationEditUICommand(viewColumn?: vscode.ViewColumn): void { }
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
-    handleGenerateDoxygenComment(codeActionArguments: DoxygenCodeActionCommandArguments | undefined): Promise<void> { return Promise.resolve(); }
+    handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> { return Promise.resolve(); }
     handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
