@@ -1066,7 +1066,7 @@ export class DefaultClient implements Client {
             searchExclude: otherSettings.searchExclude,
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.InlayHintsEnabled,
-            editorInlineParameterHintsEnabled: otherSettings.InlineParameterHintsEnabled
+            editorParameterHintsEnabled: otherSettings.ParameterHintsEnabled
         };
         return result;
     };

@@ -126,7 +126,7 @@ export interface WorkspaceFolderSettingsParams {
     searchExclude: Excludes | undefined;
     editorAutoClosingBrackets: string | undefined;
     editorInlayHintsEnabled: boolean | undefined;
-    editorInlineParameterHintsEnabled: boolean | undefined;
+    editorParameterHintsEnabled: boolean | undefined;
 };
 
 export interface SettingsParams {
@@ -960,7 +960,7 @@ export class OtherSettings {
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
     public get InlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
-    public get InlineParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
+    public get ParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
     public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
