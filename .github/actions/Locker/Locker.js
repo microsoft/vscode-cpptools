@@ -15,8 +15,8 @@ class Locker extends ActionBase_1.ActionBase {
         this.daysSinceUpdate = daysSinceUpdate;
     }
     async run() {
-        const closedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.daysSinceClose);
-        const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.daysSinceUpdate);
+        const closedTimestamp = (0, utils_1.daysAgoToHumanReadbleDate)(this.daysSinceClose);
+        const updatedTimestamp = (0, utils_1.daysAgoToHumanReadbleDate)(this.daysSinceUpdate);
         const query = this.buildQuery((this.daysSinceClose ? `closed:<${closedTimestamp} ` : "") + (this.daysSinceUpdate ? `updated:<${updatedTimestamp} ` : "") + "is:closed is:unlocked");
         for await (const page of this.github.query({ q: query })) {
             await Promise.all(page.map(async (issue) => {
@@ -24,15 +24,15 @@ class Locker extends ActionBase_1.ActionBase {
                 if (!hydrated.locked && hydrated.open === false && this.validateIssue(hydrated)
                 // TODO: Verify closed and updated timestamps
                 ) {
-                    console.log(`Locking issue ${hydrated.number}`);
+                    (0, utils_1.safeLog)(`Locking issue ${hydrated.number}`);
                     await issue.lockIssue();
                 }
                 else {
                     if (hydrated.locked) {
-                        console.log(`Issue ${hydrated.number} is already locked. Ignoring`);
+                        (0, utils_1.safeLog)(`Issue ${hydrated.number} is already locked. Ignoring`);
                     }
                     else if (hydrated.open) {
-                        console.log(`Issue ${hydrated.number} is open. Ignoring`);
+                        (0, utils_1.safeLog)(`Issue ${hydrated.number} is open. Ignoring`);
                     }
                 }
             }));
