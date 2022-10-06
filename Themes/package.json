@@ -2,7 +2,7 @@
   "name": "cpptools-themes",
   "displayName": "C/C++ Themes",
   "description": "UI Themes for C/C++ extension.",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "publisher": "ms-vscode",
   "preview": false,
   "icon": "assets/LanguageCCPP_color_128x.png",
@@ -43,8 +43,8 @@
         "path": "./themes/cpptools_dark_vs_new.json"
       },
       {
-        "id": "Visual Studio Classic Dark - C++",
-        "label": "Classic Dark (Visual Studio - C/C++)",
+        "id": "Visual Studio 2017 Dark - C++",
+        "label": "2017 Dark (Visual Studio - C/C++)",
         "uiTheme": "vs-dark",
         "path": "./themes/cpptools_dark_vs.json"
       },
@@ -55,8 +55,8 @@
         "path": "./themes/cpptools_light_vs_new.json"
       },
       {
-        "id": "Visual Studio Classic Light - C++",
-        "label": "Classic Light (Visual Studio - C/C++)",
+        "id": "Visual Studio 2017 Light - C++",
+        "label": "2017 Light (Visual Studio - C/C++)",
         "uiTheme": "vs",
         "path": "./themes/cpptools_light_vs.json"
       }
