@@ -2361,8 +2361,9 @@
           "description": "%c_cpp.configuration.doxygen.generatedStyle.description%",
           "scope": "resource"
         },
-        "C_Cpp.doxygen.selectDoxygenTags": {
+        "C_Cpp.doxygen.sectionTags": {
           "type": "array",
+          "default": ["tparam","param", "returns", "retval", "exceptions", "deprecated", "warning", "note" ],
           "items": {
             "type": "string",
             "enum": [
@@ -2372,6 +2373,7 @@
               "bug",
               "copyright",
               "date",
+              "deprecated",
               "details",
               "exceptions",
               "invariant",
@@ -2382,7 +2384,6 @@
               "remark",
               "remarks",
               "result",
-              "return",
               "returns",
               "retval",
               "since",
@@ -2391,12 +2392,11 @@
               "todo",
               "version",
               "warning"
-              ],
-          "default": [ "brief", "param", "tparam", "returns", "retval", "warning", "note" ],
-          "description": "%c_cpp.configuration.doxygen.selectDoxygenTags.description%",
+              ]
+            },
+          "description": "%c_cpp.configuration.doxygen.sectionTags.description%",
           "scope": "resource"
-          }
-        },
+          },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [

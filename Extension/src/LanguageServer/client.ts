@@ -1060,7 +1060,7 @@ export class DefaultClient implements Client {
             vcFormatWrapPreserveBlocks: settings.vcFormatWrapPreserveBlocks,
             doxygenGenerateOnType: settings.doxygenGenerateOnType,
             doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
-            doxygenSelectDoxygenTags: settings.doxygenSelectDoxygenTags,
+            doxygenSectionTags: settings.doxygenSectionTags,
             filesExclude: otherSettings.filesExclude,
             filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
             filesEncoding: otherSettings.filesEncoding,
