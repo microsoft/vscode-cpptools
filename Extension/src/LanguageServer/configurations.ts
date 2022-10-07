@@ -1021,7 +1021,7 @@ export class CppProperties {
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
     public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): void {
         const otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-        if (otherSettings.settingsEditor === "ui") {
+        if (otherSettings.workbenchSettingsEditor  === "ui") {
             this.handleConfigurationEditUICommand(onBeforeOpen, showDocument, viewColumn);
         } else {
             this.handleConfigurationEditJSONCommand(onBeforeOpen, showDocument, viewColumn);
