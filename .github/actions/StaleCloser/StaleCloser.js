@@ -21,8 +21,8 @@ class StaleCloser extends ActionBase_1.ActionBase {
         this.setMilestoneId = setMilestoneId;
     }
     async run() {
-        const updatedTimestamp = utils_1.daysAgoToHumanReadbleDate(this.closeDays);
-        const pingTimestamp = this.pingDays ? utils_1.daysAgoToTimestamp(this.pingDays) : undefined;
+        const updatedTimestamp = (0, utils_1.daysAgoToHumanReadbleDate)(this.closeDays);
+        const pingTimestamp = this.pingDays ? (0, utils_1.daysAgoToTimestamp)(this.pingDays) : undefined;
         const query = this.buildQuery((this.closeDays ? `updated:<${updatedTimestamp} ` : "") + "is:open is:unlocked");
         const addLabelsSet = this.addLabels ? this.addLabels.split(',') : [];
         const removeLabelsSet = this.removeLabels ? this.removeLabels.split(',') : [];
@@ -45,20 +45,20 @@ class StaleCloser extends ActionBase_1.ActionBase {
                         await issue.hasWriteAccess(lastComment.author)) {
                         if (pingTimestamp != undefined) {
                             if (lastComment) {
-                                console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`);
+                                (0, utils_1.safeLog)(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Closing.`);
                             }
                             else {
-                                console.log(`No comments on issue ${hydrated.number}. Closing.`);
+                                (0, utils_1.safeLog)(`No comments on issue ${hydrated.number}. Closing.`);
                             }
                         }
                         if (this.closeComment) {
-                            console.log(`Posting comment on issue ${hydrated.number}`);
+                            (0, utils_1.safeLog)(`Posting comment on issue ${hydrated.number}`);
                             await issue.postComment(this.closeComment);
                         }
                         if (removeLabelsSet.length > 0) {
                             for (const removeLabel of removeLabelsSet) {
                                 if (removeLabel && removeLabel.length > 0) {
-                                    console.log(`Removing label on issue ${hydrated.number}: ${removeLabel}`);
+                                    (0, utils_1.safeLog)(`Removing label on issue ${hydrated.number}: ${removeLabel}`);
                                     await issue.removeLabel(removeLabel);
                                 }
                             }
@@ -66,22 +66,22 @@ class StaleCloser extends ActionBase_1.ActionBase {
                         if (addLabelsSet.length > 0) {
                             for (const addLabel of addLabelsSet) {
                                 if (addLabel && addLabel.length > 0) {
-                                    console.log(`Adding label on issue ${hydrated.number}: ${addLabel}`);
+                                    (0, utils_1.safeLog)(`Adding label on issue ${hydrated.number}: ${addLabel}`);
                                     await issue.addLabel(addLabel);
                                 }
                             }
                         }
-                        await issue.closeIssue();
+                        await issue.closeIssue("not_planned");
                         if (this.setMilestoneId != undefined) {
-                            console.log(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`);
+                            (0, utils_1.safeLog)(`Setting milestone of issue ${hydrated.number} to id ${+this.setMilestoneId}`);
                             await issue.setMilestone(+this.setMilestoneId);
                         }
-                        console.log(`Closing issue ${hydrated.number}.`);
+                        (0, utils_1.safeLog)(`Closing issue ${hydrated.number}.`);
                     }
                     else {
                         // Ping
                         if (hydrated.updatedAt < pingTimestamp && hydrated.assignee) {
-                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
+                            (0, utils_1.safeLog)(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Pinging @${hydrated.assignee}`);
                             if (this.pingComment) {
                                 await issue.postComment(this.pingComment
                                     .replace('${assignee}', hydrated.assignee)
@@ -89,13 +89,13 @@ class StaleCloser extends ActionBase_1.ActionBase {
                             }
                         }
                         else {
-                            console.log(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Skipping.${hydrated.assignee ? ' cc @' + hydrated.assignee : ''}`);
+                            (0, utils_1.safeLog)(`Last comment on issue ${hydrated.number} by ${lastComment.author.name}. Skipping.${hydrated.assignee ? ' cc @' + hydrated.assignee : ''}`);
                         }
                     }
                 }
                 else {
                     if (!hydrated.open) {
-                        console.log(`Issue ${hydrated.number} is not open. Ignoring`);
+                        (0, utils_1.safeLog)(`Issue ${hydrated.number} is not open. Ignoring`);
                     }
                 }
             }
