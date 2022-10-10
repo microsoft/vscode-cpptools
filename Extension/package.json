@@ -506,6 +506,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
           "scope": "resource"
         },
@@ -1059,6 +1060,7 @@
               "zircon-temporary-objects"
             ]
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription%",
           "scope": "resource"
         },
@@ -1606,6 +1608,7 @@
               "zircon-temporary-objects"
             ]
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.checks.disabled.markdownDescription%",
           "scope": "resource"
         },
@@ -2423,6 +2426,7 @@
               }
             ]
           },
+          "uniqueItems": true,
           "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
           "scope": "window"
         },
@@ -2469,6 +2473,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.includePath.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2477,6 +2482,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.defines.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2485,6 +2491,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.macFrameworkPath.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2504,6 +2511,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.forcedInclude.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2566,6 +2574,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.compilerArgs.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2623,6 +2632,7 @@
             "type": "string"
           },
           "default": null,
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2642,6 +2652,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.systemIncludePath.markdownDescription%",
           "scope": "machine-overridable"
         },
