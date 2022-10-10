@@ -2363,7 +2363,7 @@
         },
         "C_Cpp.doxygen.sectionTags": {
           "type": "array",
-          "default": ["tparam","param", "returns", "retval", "exceptions", "deprecated", "warning", "note" ],
+          "default": ["attention", "tparam", "param", "result", "returns", "retval", "exceptions", "deprecated", "warning", "note" ],
           "items": {
             "type": "string",
             "enum": [
