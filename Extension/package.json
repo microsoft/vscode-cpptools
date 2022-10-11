@@ -2364,6 +2364,42 @@
           "description": "%c_cpp.configuration.doxygen.generatedStyle.description%",
           "scope": "resource"
         },
+        "C_Cpp.doxygen.sectionTags": {
+          "type": "array",
+          "default": ["attention", "tparam", "param", "result", "returns", "retval", "exceptions", "deprecated", "warning", "note" ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "attention",
+              "author",
+              "authors",
+              "bug",
+              "copyright",
+              "date",
+              "deprecated",
+              "details",
+              "exceptions",
+              "invariant",
+              "note",
+              "param",
+              "pre",
+              "post",
+              "remark",
+              "remarks",
+              "result",
+              "returns",
+              "retval",
+              "since",
+              "tparam",
+              "test",
+              "todo",
+              "version",
+              "warning"
+              ]
+            },
+          "description": "%c_cpp.configuration.doxygen.sectionTags.description%",
+          "scope": "resource"
+          },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
