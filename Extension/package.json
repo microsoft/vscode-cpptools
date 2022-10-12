@@ -284,7 +284,7 @@
     ],
     "configuration": [
       {
-        "title": "Configuration",
+        "title": "IntelliSense",
         "properties": {
           "C_Cpp.intelliSense.maxCachedProcesses": {
             "type": [
@@ -349,8 +349,7 @@
             "default": false,
             "markdownDescription": "%c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription%",
             "scope": "resource"
-          }
-          ,
+          },
           "C_Cpp.references.maxConcurrentThreads": {
             "type": [
               "integer",
@@ -411,6 +410,99 @@
               ]
             },
             "scope": "resource"
+          },
+          "C_Cpp.intelliSenseCachePath": {
+            "type": "string",
+            "markdownDescription": "%c_cpp.configuration.intelliSenseCachePath.markdownDescription%",
+            "scope": "machine-overridable"
+          },
+          "C_Cpp.intelliSenseCacheSize": {
+            "type": "number",
+            "default": 5120,
+            "markdownDescription": "%c_cpp.configuration.intelliSenseCacheSize.markdownDescription%",
+            "scope": "machine-overridable",
+            "minimum": 0
+          },
+          "C_Cpp.intelliSenseMemoryLimit": {
+            "type": "number",
+            "default": 4096,
+            "markdownDescription": "%c_cpp.configuration.intelliSenseMemoryLimit.markdownDescription%",
+            "scope": "machine-overridable",
+            "minimum": 256,
+            "maximum": 16384
+          },
+          "C_Cpp.intelliSenseUpdateDelay": {
+            "type": "number",
+            "default": 2000,
+            "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
+            "scope": "application",
+            "minimum": 500,
+            "maximum": 3000
+          },
+          "C_Cpp.codeFolding": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "default": "enabled",
+            "description": "%c_cpp.configuration.codeFolding.description%",
+            "scope": "window"
+          },
+          "C_Cpp.autocompleteAddParentheses": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%c_cpp.configuration.autocompleteAddParentheses.markdownDescription%",
+            "scope": "resource"
+          },
+          "C_Cpp.suggestSnippets": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%c_cpp.configuration.suggestSnippets.markdownDescription%",
+            "scope": "resource"
+          },
+          "C_Cpp.enhancedColorization": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "default": "enabled",
+            "markdownDescription": "%c_cpp.configuration.enhancedColorization.markdownDescription%",
+            "scope": "window"
+          },
+          "C_Cpp.maxConcurrentThreads": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "markdownDescription": "%c_cpp.configuration.maxConcurrentThreads.markdownDescription%",
+            "default": null,
+            "minimum": 1,
+            "maximum": 32,
+            "scope": "machine"
+          },
+          "C_Cpp.maxCachedProcesses": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "markdownDescription": "%c_cpp.configuration.maxCachedProcesses.markdownDescription%",
+            "default": null,
+            "minimum": 0,
+            "maximum": 256,
+            "scope": "machine"
+          },
+          "C_Cpp.maxMemory": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "markdownDescription": "%c_cpp.configuration.maxMemory.markdownDescription%",
+            "default": null,
+            "minimum": 256,
+            "maximum": 65536,
+            "scope": "machine"
           }
       }
       },
@@ -1658,7 +1750,7 @@
         }
       },
       {
-        "title": "VcFormat",
+        "title": "Formatting",
         "properties": {
           "C_Cpp.vcFormat.indent.braces": {
             "type": "boolean",
@@ -2156,6 +2248,55 @@
             "default": "oneLiners",
             "description": "%c_cpp.configuration.vcFormat.wrap.preserveBlocks.description%",
             "scope": "resource"
+          },
+          "C_Cpp.clang_format_path": {
+            "type": "string",
+            "markdownDescription": "%c_cpp.configuration.clang_format_path.markdownDescription%",
+            "scope": "machine-overridable"
+          },
+          "C_Cpp.clang_format_style": {
+            "type": "string",
+            "default": "file",
+            "markdownDescription": "%c_cpp.configuration.clang_format_style.markdownDescription%",
+            "scope": "resource"
+          },
+          "C_Cpp.formatting": {
+            "type": "string",
+            "enum": [
+              "clangFormat",
+              "vcFormat",
+              "default",
+              "disabled"
+            ],
+            "markdownEnumDescriptions": [
+              "%c_cpp.configuration.formatting.clangFormat.markdownDescription%",
+              "%c_cpp.configuration.formatting.vcFormat.markdownDescription%",
+              "%c_cpp.configuration.formatting.Default.markdownDescription%",
+              "%c_cpp.configuration.formatting.Disabled.markdownDescription%"
+            ],
+            "default": "default",
+            "description": "%c_cpp.configuration.formatting.description%",
+            "scope": "resource"
+          },
+          "C_Cpp.clang_format_fallbackStyle": {
+            "type": "string",
+            "default": "Visual Studio",
+            "markdownDescription": "%c_cpp.configuration.clang_format_fallbackStyle.markdownDescription%",
+            "scope": "resource"
+          },
+          "C_Cpp.clang_format_sortIncludes": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "enum": [
+              true,
+              false,
+              null
+            ],
+            "default": null,
+            "markdownDescription": "%c_cpp.configuration.clang_format_sortIncludes.markdownDescription%",
+            "scope": "resource"
           }
         }
       },
@@ -2230,7 +2371,7 @@
         }
       },
       {
-        "title": "Default",
+        "title": "IntelliSense Configuration",
         "properties": {
           "C_Cpp.default.includePath": {
             "type": "array",
@@ -2445,16 +2586,15 @@
             "default": null,
             "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
             "scope": "resource"
-          }
-        }
-      },
-      {
-        "title": "Vcpkg",
-        "properties": {
-          "C_Cpp.vcpkg.enabled": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%c_cpp.configuration.vcpkg.enabled.markdownDescription%",
+          },
+          "C_Cpp.configurationWarnings": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "default": "enabled",
+            "description": "%c_cpp.configuration.configurationWarnings.description%",
             "scope": "resource"
           }
         }
@@ -2472,86 +2612,10 @@
       },
       {
         "properties": {
-          "C_Cpp.maxConcurrentThreads": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "markdownDescription": "%c_cpp.configuration.maxConcurrentThreads.markdownDescription%",
-            "default": null,
-            "minimum": 1,
-            "maximum": 32,
-            "scope": "machine"
-          },
-          "C_Cpp.maxCachedProcesses": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "markdownDescription": "%c_cpp.configuration.maxCachedProcesses.markdownDescription%",
-            "default": null,
-            "minimum": 0,
-            "maximum": 256,
-            "scope": "machine"
-          },
-          "C_Cpp.maxMemory": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "markdownDescription": "%c_cpp.configuration.maxMemory.markdownDescription%",
-            "default": null,
-            "minimum": 256,
-            "maximum": 65536,
-            "scope": "machine"
-          },
-          "C_Cpp.clang_format_path": {
-            "type": "string",
-            "markdownDescription": "%c_cpp.configuration.clang_format_path.markdownDescription%",
-            "scope": "machine-overridable"
-          },
-          "C_Cpp.clang_format_style": {
-            "type": "string",
-            "default": "file",
-            "markdownDescription": "%c_cpp.configuration.clang_format_style.markdownDescription%",
-            "scope": "resource"
-          },
-          "C_Cpp.formatting": {
-            "type": "string",
-            "enum": [
-              "clangFormat",
-              "vcFormat",
-              "default",
-              "disabled"
-            ],
-            "markdownEnumDescriptions": [
-              "%c_cpp.configuration.formatting.clangFormat.markdownDescription%",
-              "%c_cpp.configuration.formatting.vcFormat.markdownDescription%",
-              "%c_cpp.configuration.formatting.Default.markdownDescription%",
-              "%c_cpp.configuration.formatting.Disabled.markdownDescription%"
-            ],
-            "default": "default",
-            "description": "%c_cpp.configuration.formatting.description%",
-            "scope": "resource"
-          },
-          "C_Cpp.clang_format_fallbackStyle": {
-            "type": "string",
-            "default": "Visual Studio",
-            "markdownDescription": "%c_cpp.configuration.clang_format_fallbackStyle.markdownDescription%",
-            "scope": "resource"
-          },
-          "C_Cpp.clang_format_sortIncludes": {
-            "type": [
-              "boolean",
-              "null"
-            ],
-            "enum": [
-              true,
-              false,
-              null
-            ],
-            "default": null,
-            "markdownDescription": "%c_cpp.configuration.clang_format_sortIncludes.markdownDescription%",
+          "C_Cpp.vcpkg.enabled": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%c_cpp.configuration.vcpkg.enabled.markdownDescription%",
             "scope": "resource"
           },
           "C_Cpp.intelliSenseEngine": {
@@ -2730,44 +2794,6 @@
             "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
             "scope": "window"
           },
-          "C_Cpp.configurationWarnings": {
-            "type": "string",
-            "enum": [
-              "enabled",
-              "disabled"
-            ],
-            "default": "enabled",
-            "description": "%c_cpp.configuration.configurationWarnings.description%",
-            "scope": "resource"
-          },
-          "C_Cpp.intelliSenseCachePath": {
-            "type": "string",
-            "markdownDescription": "%c_cpp.configuration.intelliSenseCachePath.markdownDescription%",
-            "scope": "machine-overridable"
-          },
-          "C_Cpp.intelliSenseCacheSize": {
-            "type": "number",
-            "default": 5120,
-            "markdownDescription": "%c_cpp.configuration.intelliSenseCacheSize.markdownDescription%",
-            "scope": "machine-overridable",
-            "minimum": 0
-          },
-          "C_Cpp.intelliSenseMemoryLimit": {
-            "type": "number",
-            "default": 4096,
-            "markdownDescription": "%c_cpp.configuration.intelliSenseMemoryLimit.markdownDescription%",
-            "scope": "machine-overridable",
-            "minimum": 256,
-            "maximum": 16384
-          },
-          "C_Cpp.intelliSenseUpdateDelay": {
-            "type": "number",
-            "default": 2000,
-            "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
-            "scope": "application",
-            "minimum": 500,
-            "maximum": 3000
-          },
           "C_Cpp.updateChannel": {
             "type": "string",
             "enum": [
@@ -2789,12 +2815,6 @@
             "description": "%c_cpp.configuration.experimentalFeatures.description%",
             "scope": "window"
           },
-          "C_Cpp.suggestSnippets": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%c_cpp.configuration.suggestSnippets.markdownDescription%",
-            "scope": "resource"
-          },
           "C_Cpp.caseSensitiveFileSupport": {
             "type": "string",
             "enum": [
@@ -2803,16 +2823,6 @@
             ],
             "default": "default",
             "markdownDescription": "%c_cpp.configuration.caseSensitiveFileSupport.markdownDescription%",
-            "scope": "window"
-          },
-          "C_Cpp.enhancedColorization": {
-            "type": "string",
-            "enum": [
-              "enabled",
-              "disabled"
-            ],
-            "default": "enabled",
-            "markdownDescription": "%c_cpp.configuration.enhancedColorization.markdownDescription%",
             "scope": "window"
           },
           "C_Cpp.addNodeAddonIncludePaths": {
@@ -2826,22 +2836,6 @@
             "default": true,
             "markdownDescription": "%c_cpp.configuration.renameRequiresIdentifier.markdownDescription%",
             "scope": "application"
-          },
-          "C_Cpp.codeFolding": {
-            "type": "string",
-            "enum": [
-              "enabled",
-              "disabled"
-            ],
-            "default": "enabled",
-            "description": "%c_cpp.configuration.codeFolding.description%",
-            "scope": "window"
-          },
-          "C_Cpp.autocompleteAddParentheses": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%c_cpp.configuration.autocompleteAddParentheses.markdownDescription%",
-            "scope": "resource"
           },
           "C_Cpp.debugShortcut": {
             "type": "boolean",
