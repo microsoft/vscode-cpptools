@@ -284,7 +284,7 @@
     ],
     "configuration": [
       {
-        "title": "IntelliSense",
+        "title": "%c_cpp.subheaders.intelliSense.title%",
         "properties": {
           "C_Cpp.intelliSense.maxCachedProcesses": {
             "type": [
@@ -507,7 +507,7 @@
       }
       },
       {
-        "title": "Code Analysis",
+        "title": "%c_cpp.subheaders.codeAnalysis.title%",
         "properties": {
           "C_Cpp.codeAnalysis.maxConcurrentThreads": {
             "type": [
@@ -1750,7 +1750,7 @@
         }
       },
       {
-        "title": "Formatting",
+        "title": "%c_cpp.subheaders.formatting.title%",
         "properties": {
           "C_Cpp.vcFormat.indent.braces": {
             "type": "boolean",
@@ -2301,7 +2301,7 @@
         }
       },
       {
-        "title": "Doxygen",
+        "title": "%c_cpp.subheaders.doxygen.title%",
         "properties": {
           "C_Cpp.doxygen.generateOnType": {
             "type": "boolean",
@@ -2371,7 +2371,7 @@
         }
       },
       {
-        "title": "IntelliSense Configuration",
+        "title": "%c_cpp.subheaders.intelliSenseConfiguration.title%",
         "properties": {
           "C_Cpp.default.includePath": {
             "type": "array",
@@ -2600,7 +2600,7 @@
         }
       },
       {
-        "title": "Debugger",
+        "title": "%c_cpp.subheaders.debugger.title%",
         "properties": {
           "C_Cpp.debugger.useBacktickCommandSubstitution": {
             "type": "boolean",
