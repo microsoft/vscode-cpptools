@@ -410,6 +410,17 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     return resolveHome(ret);
 }
 
+export function resolveVariablesArray(variables: string[] | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string[] {
+    let result: string[] = [];
+    if (variables) {
+        variables.forEach(variable => {
+            const entriesResolved: string[] = [];
+            const entryResolved: string = resolveVariables(variable, additionalEnvironment, entriesResolved);
+            result = result.concat(entriesResolved.length === 0 ? entryResolved : entriesResolved);
+        });
+    }
+    return result;
+}
 // Resolve '~' at the start of the path.
 export function resolveHome(filePath: string): string {
     return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
