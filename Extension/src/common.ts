@@ -414,9 +414,9 @@ export function resolveVariablesArray(variables: string[] | undefined, additiona
     let result: string[] = [];
     if (variables) {
         variables.forEach(variable => {
-            const entriesResolved: string[] = [];
-            const entryResolved: string = resolveVariables(variable, additionalEnvironment, entriesResolved);
-            result = result.concat(entriesResolved.length === 0 ? entryResolved : entriesResolved);
+            const variablesResolved: string[] = [];
+            const variableResolved: string = resolveVariables(variable, additionalEnvironment, variablesResolved);
+            result = result.concat(variablesResolved.length === 0 ? variableResolved : variablesResolved);
         });
     }
     return result;
