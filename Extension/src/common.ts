@@ -421,6 +421,7 @@ export function resolveVariablesArray(variables: string[] | undefined, additiona
     }
     return result;
 }
+
 // Resolve '~' at the start of the path.
 export function resolveHome(filePath: string): string {
     return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
