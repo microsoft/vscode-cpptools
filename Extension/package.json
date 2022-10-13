@@ -3472,6 +3472,15 @@
                   }
                 }
               },
+              "unknownBreakpointHandling": {
+                "type": "string",
+                "enum": [
+                  "throw",
+                  "stop"
+                ],
+                "default": "throw",
+                "description": "%c_cpp.debuggers.unknownBreakpointHandling.description%"
+              },
               "variables": {
                 "type": "object",
                 "description": "%c_cpp.debuggers.variables.description%",
