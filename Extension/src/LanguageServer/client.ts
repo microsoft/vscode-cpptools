@@ -929,7 +929,6 @@ export class DefaultClient implements Client {
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
-                        vscode.commands.executeCommand('setContext', 'Cpptools.isReady', true);
                     } else {
                         this.configuration.CompilerDefaults = compilerDefaults;
                     }

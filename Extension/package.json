@@ -5199,12 +5199,12 @@
         },
         {
           "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
-          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp' && Cpptools.isReady",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@1"
         },
         {
           "command": "C_Cpp.RestartIntelliSenseForFile",
-          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' && Cpptools.isReady || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp' && Cpptools.isReady",
+          "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
           "group": "custom2@2"
         },
         {
@@ -5214,7 +5214,7 @@
         },
         {
           "command": "C_Cpp.GenerateDoxygenComment",
-          "when": "editorLangId == 'c' && Cpptools.isReady|| editorLangId == 'cpp' && Cpptools.isReady || editorLangId == 'cuda-cpp' && Cpptools.isReady",
+          "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
           "group": "custom2@3"
         }
       ],
