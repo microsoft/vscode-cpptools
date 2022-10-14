@@ -993,7 +993,7 @@ export class DefaultClient implements Client {
             clangTidyPath: util.resolveVariables(settings.clangTidyPath, this.AdditionalEnvironment),
             clangTidyConfig: settings.clangTidyConfig,
             clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
-            clangTidyHeaderFilter: (settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null),
+            clangTidyHeaderFilter: settings.clangTidyHeaderFilter,
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
             clangTidyFixWarnings: settings.clangTidyFixWarnings,
