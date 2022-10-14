@@ -383,34 +383,6 @@
             "maximum": 65536,
             "scope": "machine"
           },
-          "C_Cpp.files.exclude": {
-            "type": "object",
-            "markdownDescription": "%c_cpp.configuration.filesExclude.markdownDescription%",
-            "default": {
-              "**/.vscode": true,
-              "**/.vs": true
-            },
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "boolean",
-                  "markdownDescription": "%c_cpp.configuration.filesExcludeBoolean.markdownDescription%"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "when": {
-                      "type": "string",
-                      "pattern": "\\w*\\$\\(basename\\)\\w*",
-                      "default": "$(basename).ext",
-                      "markdownDescription": "%c_cpp.configuration.filesExcludeWhen.markdownDescription%"
-                    }
-                  }
-                }
-              ]
-            },
-            "scope": "resource"
-          },
           "C_Cpp.intelliSenseCachePath": {
             "type": "string",
             "markdownDescription": "%c_cpp.configuration.intelliSenseCachePath.markdownDescription%",
@@ -503,6 +475,12 @@
             "minimum": 256,
             "maximum": 65536,
             "scope": "machine"
+          },
+          "C_Cpp.legacyCompilerArgsBehavior": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
+            "scope": "resource"
           }
       }
       },
@@ -2607,6 +2585,17 @@
             "default": false,
             "markdownDescription": "%c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription%",
             "scope": "window"
+          },
+          "C_Cpp.sshTargetsView": {
+            "type": "string",
+            "enum": [
+              "enabled",
+              "disabled",
+              "default"
+            ],
+            "default": "default",
+            "description": "%c_cpp.configuration.sshTargetsView.description%",
+            "scope": "window"
           }
         }
       },
@@ -2843,22 +2832,33 @@
             "description": "%c_cpp.configuration.debugShortcut.description%",
             "scope": "resource"
           },
-          "C_Cpp.legacyCompilerArgsBehavior": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription%",
+          "C_Cpp.files.exclude": {
+            "type": "object",
+            "markdownDescription": "%c_cpp.configuration.filesExclude.markdownDescription%",
+            "default": {
+              "**/.vscode": true,
+              "**/.vs": true
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean",
+                  "markdownDescription": "%c_cpp.configuration.filesExcludeBoolean.markdownDescription%"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "when": {
+                      "type": "string",
+                      "pattern": "\\w*\\$\\(basename\\)\\w*",
+                      "default": "$(basename).ext",
+                      "markdownDescription": "%c_cpp.configuration.filesExcludeWhen.markdownDescription%"
+                    }
+                  }
+                }
+              ]
+            },
             "scope": "resource"
-          },
-          "C_Cpp.sshTargetsView": {
-            "type": "string",
-            "enum": [
-              "enabled",
-              "disabled",
-              "default"
-            ],
-            "default": "default",
-            "description": "%c_cpp.configuration.sshTargetsView.description%",
-            "scope": "window"
           }
         }
       }
