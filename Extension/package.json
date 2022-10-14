@@ -2363,7 +2363,7 @@
         }
       },
       {
-        "title": "%c_cpp.subheaders.intelliSenseConfiguration.title%",
+        "title": "%c_cpp.subheaders.intelliSenseDefaults.title%",
         "properties": {
           "C_Cpp.default.includePath": {
             "type": "array",
