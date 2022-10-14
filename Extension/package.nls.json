@@ -365,6 +365,7 @@
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.editorPath.description": "The path to the source tree the editor will use.",
     "c_cpp.debuggers.sourceFileMap.sourceFileMapEntry.useForBreakpoints.description": "False if this entry is only used for stack frame location mapping. True if this entry should also be used when specifying breakpoint locations.",
     "c_cpp.debuggers.symbolOptions.description": "Options to control how symbols (.pdb files) are found and loaded.",
+    "c_cpp.debuggers.unknownBreakpointHandling.description": "Controls how breakpoints set externally (usually via raw GDB commands) are handled when hit.\nAllowed values are \"throw\", which acts as if an exception was thrown by the application, and \"stop\", which only pauses the debug session. The default value is \"throw\".",
     "c_cpp.debuggers.VSSymbolOptions.description": "Provides configuration for locating and loading symbols to the debug adapter.",
     "c_cpp.debuggers.VSSymbolOptions.searchPaths.description": "Array of symbol server URLs (example: http\u200b://MyExampleSymbolServer) or directories (example: /build/symbols) to search for .pdb files. These directories will be searched in addition to the default locations -- next to the module and the path where the pdb was originally dropped to.",
     "c_cpp.debuggers.VSSymbolOptions.searchMicrosoftSymbolServer.description": "If 'true' the Microsoft Symbol server (https\u200b://msdl.microsoft.com\u200b/download/symbols) is added to the symbols search path. If unspecified, this option defaults to 'false'.",

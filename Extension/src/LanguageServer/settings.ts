@@ -162,8 +162,8 @@ class Settings {
     private readonly settings: vscode.WorkspaceConfiguration;
 
     /**
-     * create the Settings object.
-     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired
+     * Create the Settings object.
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired. Only provide a resource when accessing settings with a "resource" scope.
      */
     constructor(section: string, public resource?: vscode.Uri) {
         this.settings = vscode.workspace.getConfiguration(section, resource ? resource : null);
@@ -209,6 +209,10 @@ class Settings {
 }
 
 export class CppSettings extends Settings {
+    /**
+     * Create the CppSettings object.
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired. Only provide a resource when accessing settings with a "resource" scope.
+     */
     constructor(resource?: vscode.Uri) {
         super("C_Cpp", resource);
     }
