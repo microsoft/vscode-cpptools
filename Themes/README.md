@@ -2,7 +2,7 @@
 
 [Semantic colorization was added to the C/C++ Extension in version 0.24.0](https://devblogs.microsoft.com/cppblog/visual-studio-code-c-c-extension-july-2019-update/). At the time, colorization in VS Code was purely syntactic/lexical and leveraged TextMate grammar to associate named 'scopes' with syntactic elements. Themes and settings can be used to associate colors with these scopes. Our original implementation of semantic colorization leveraged the same system of associating colors with named scopes. But, some tokens that can be colored by semantic colorization in C/C++ did not have existing analogs in VS Code's TextMate grammar. So, new named scopes are required. Because these scopes were new, existing themes did not include colors for them either.
 
-We created C/C++ Extension UI Themes to closely match Visual Studio themes and include colors for many of the new scopes.
+We created C/C++ Extension UI Themes to closely match Visual Studio themes and include colors for many of the new scopes. The old themes from Visual Studio 2017 can be found alongside new themes that more closely resemble the Enhanced themes from more recent versions of Visual Studio.
 
 VS Code has since provided an API for semantic colorization. The C/C++ Extension has transitioned from its own implementation to this new API. These themes now include colors for some of the new semantic token scopes.
 
@@ -10,11 +10,19 @@ VS Code has since provided an API for semantic colorization. The C/C++ Extension
 
 Light Theme
 
-![Light Theme example](https://raw.githubusercontent.com/microsoft/vscode-cpptools/main/Themes/assets/light.png)
+![Light Theme 2019 example](./assets/light.png)
 
 Dark Theme
 
-![Dark Theme example](https://raw.githubusercontent.com/microsoft/vscode-cpptools/main/Themes/assets/dark.png)
+![Dark Theme 2019 example](./assets/dark.png)
+
+2017 Light Theme
+
+![2017 Light Theme example](./assets/light2017.png)
+
+2017 Dark Theme
+
+![2017 Dark Theme example](./assets/dark2017.png)
 
 ## Contributing
 
