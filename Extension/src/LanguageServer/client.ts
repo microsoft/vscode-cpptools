@@ -929,6 +929,7 @@ export class DefaultClient implements Client {
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
+                        vscode.commands.executeCommand('setContext', 'Cpptools.isReady', true);
                     } else {
                         this.configuration.CompilerDefaults = compilerDefaults;
                     }
@@ -992,7 +993,7 @@ export class DefaultClient implements Client {
             clangTidyPath: util.resolveVariables(settings.clangTidyPath, this.AdditionalEnvironment),
             clangTidyConfig: settings.clangTidyConfig,
             clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
-            clangTidyHeaderFilter: settings.clangTidyHeaderFilter,
+            clangTidyHeaderFilter: (settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null),
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
             clangTidyFixWarnings: settings.clangTidyFixWarnings,
