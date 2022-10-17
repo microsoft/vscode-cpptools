@@ -241,7 +241,7 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidChange(() => {
-                this.handleConfigurationChange();
+            this.handleConfigurationChange();
         });
 
         vscode.workspace.onDidChangeTextDocument((e) => {
