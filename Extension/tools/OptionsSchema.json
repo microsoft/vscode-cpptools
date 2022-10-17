@@ -752,6 +752,15 @@
           "description": "%c_cpp.debuggers.hardwareBreakpoints.description%",
           "default": {}
         },
+        "unknownBreakpointHandling": {
+          "type": "string",
+          "enum": [
+            "throw",
+            "stop"
+          ],
+          "default": "throw",
+          "description": "%c_cpp.debuggers.unknownBreakpointHandling.description%"
+        },
         "variables": {
           "$ref": "#/definitions/Variables"
         },

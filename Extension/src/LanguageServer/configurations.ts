@@ -241,23 +241,12 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidChange(() => {
-            // If the file is one of the textDocument's vscode is tracking, we need to wait for an
-            // onDidChangeTextDocument event, or we may get old/cached contents when we open it.
-            let alreadyTracking: boolean = false;
-            for (let i: number = 0; i < vscode.workspace.textDocuments.length; i++) {
-                if (vscode.workspace.textDocuments[i].uri.fsPath === settingsPath) {
-                    alreadyTracking = true;
-                    break;
-                }
-            }
-            if (!alreadyTracking) {
                 this.handleConfigurationChange();
-            }
         });
 
-        vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+        vscode.workspace.onDidChangeTextDocument((e) => {
             if (e.document.uri.fsPath === settingsPath) {
-                this.handleConfigurationChange();
+                this.handleSquiggles();
             }
         });
 
@@ -1021,7 +1010,7 @@ export class CppProperties {
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
     public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): void {
         const otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-        if (otherSettings.settingsEditor === "ui") {
+        if (otherSettings.workbenchSettingsEditor  === "ui") {
             this.handleConfigurationEditUICommand(onBeforeOpen, showDocument, viewColumn);
         } else {
             this.handleConfigurationEditJSONCommand(onBeforeOpen, showDocument, viewColumn);
@@ -1348,10 +1337,6 @@ export class CppProperties {
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
             vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
-        }
-
-        if (success) {
-            this.handleSquiggles();
         }
 
         return success;

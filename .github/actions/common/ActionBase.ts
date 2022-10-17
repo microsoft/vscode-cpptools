@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Issue } from '../api/api'
+import { safeLog } from './utils';
 
 export class ActionBase {
 	constructor(
@@ -29,15 +30,15 @@ export class ActionBase {
 	buildQuery(baseQuery: string): string {
 		let query = baseQuery;
 
-		console.log(`labels: ${this.labels}`);
-		console.log(`milestoneName: ${this.milestoneName}`);
-		console.log(`milestoneId: ${this.milestoneId}`);
-		console.log(`ignoreLabels: ${this.ignoreLabels}`);
-		console.log(`ignoreMilestoneNames: ${this.ignoreMilestoneNames}`);
-		console.log(`ignoreMilestoneIds: ${this.ignoreMilestoneIds}`);
-		console.log(`minimumVotes: ${this.minimumVotes}`);
-		console.log(`maximumVotes: ${this.maximumVotes}`);
-		console.log(`involves: ${this.involves}`);
+		safeLog(`labels: ${this.labels}`);
+		safeLog(`milestoneName: ${this.milestoneName}`);
+		safeLog(`milestoneId: ${this.milestoneId}`);
+		safeLog(`ignoreLabels: ${this.ignoreLabels}`);
+		safeLog(`ignoreMilestoneNames: ${this.ignoreMilestoneNames}`);
+		safeLog(`ignoreMilestoneIds: ${this.ignoreMilestoneIds}`);
+		safeLog(`minimumVotes: ${this.minimumVotes}`);
+		safeLog(`maximumVotes: ${this.maximumVotes}`);
+		safeLog(`involves: ${this.involves}`);
 
 		// Both milestone name and milestone Id must be provided and must match.
 		// The name is used to construct the query, which does not accept ID.
@@ -117,18 +118,18 @@ export class ActionBase {
 		if (this.ignoreAllWithLabels) {
 			// Validate that the issue does not have labels
 			if (issue.labels && issue.labels.length !== 0) {
-				console.log(`Issue ${issue.number} skipped due to label found after querying for no:label.`);
+				safeLog(`Issue ${issue.number} skipped due to label found after querying for no:label.`);
 				return false;
 			}
 		} else {
 			// Make sure all labels we wanted are present.
 			if ((!issue.labels || issue.labels.length == 0) && this.labelsSet.length > 0) {
-				console.log(`Issue ${issue.number} skipped due to not having a required label set.  No labels found.`);
+				safeLog(`Issue ${issue.number} skipped due to not having a required label set.  No labels found.`);
 				return false;
 			}
 			for (const str of this.labelsSet) {
 				if (!issue.labels.includes(str)) {
-					console.log(`Issue ${issue.number} skipped due to not having a required label set.`);
+					safeLog(`Issue ${issue.number} skipped due to not having a required label set.`);
 					return false;
 				}
 			}
@@ -136,7 +137,7 @@ export class ActionBase {
 			if (issue.labels && issue.labels.length > 0) {
 				for (const str of this.ignoreLabelsSet) {
 					if (issue.labels.includes(str)) {
-						console.log(`Issue ${issue.number} skipped due to having an ignore label set: ${str}`);
+						safeLog(`Issue ${issue.number} skipped due to having an ignore label set: ${str}`);
 						return false;
 					}
 				}
@@ -144,21 +145,21 @@ export class ActionBase {
 		}
 		if (this.ignoreAllWithMilestones) {
 			// Validate that the issue does not have a milestone.
-			if (issue.milestoneId != null) {
-				console.log(`Issue ${issue.number} skipped due to milestone found after querying for no:milestone.`);
+			if (issue.milestone) {
+				safeLog(`Issue ${issue.number} skipped due to milestone found after querying for no:milestone.`);
 				return false;
 			}
 		} else {
 			// Make sure milestone is present, if required.
-			if (this.milestoneId != undefined && issue.milestoneId != +this.milestoneId) {
-				console.log(`Issue ${issue.number} skipped due to not having required milsetone id ${this.milestoneId}.  Had: ${issue.milestoneId}`);
+			if (this.milestoneId != null && issue.milestone?.milestoneId != +this.milestoneId) {
+				safeLog(`Issue ${issue.number} skipped due to not having required milsetone id ${this.milestoneId}.  Had: ${issue.milestone?.milestoneId}`);
 				return false;
 			}
 			// Make sure a milestones we wanted to ignore is not present.
-			if (issue.milestoneId != null) {
+			if (issue.milestone && issue.milestone.milestoneId != null) {
 				for (const str of this.ignoreMilestoneIdsSet) {
-					if (issue.milestoneId == +str) {
-						console.log(`Issue ${issue.number} skipped due to milestone ${issue.milestoneId} found in list of ignored milestone IDs.`);
+					if (issue.milestone.milestoneId == +str) {
+						safeLog(`Issue ${issue.number} skipped due to milestone ${issue.milestone.milestoneId} found in list of ignored milestone IDs.`);
 						return false;
 					}
 				}
@@ -171,14 +172,14 @@ export class ActionBase {
 		}
 		if (this.minimumVotes != undefined) {
 			if (upvotes < this.minimumVotes) {
-				console.log(`Issue ${issue.number} skipped due to not having at least ${this.minimumVotes} upvotes.  Had: ${upvotes}`);
+				safeLog(`Issue ${issue.number} skipped due to not having at least ${this.minimumVotes} upvotes.  Had: ${upvotes}`);
 				return false;
 			}
 		}
 		// Verify the issue does not have too many upvotes
 		if (this.maximumVotes != undefined) {
 			if (upvotes > this.maximumVotes) {
-				console.log(`Issue ${issue.number} skipped due to having more than ${this.maximumVotes} upvotes.  Had: ${upvotes}`);
+				safeLog(`Issue ${issue.number} skipped due to having more than ${this.maximumVotes} upvotes.  Had: ${upvotes}`);
 				return false;
 			}
 		}

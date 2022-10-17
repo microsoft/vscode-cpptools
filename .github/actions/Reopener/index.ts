@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { OctoKit } from '../api/octokit'
-import { getInput, getRequiredInput } from '../common/utils'
-import { Reopener } from './Reopener'
-import { Action } from '../common/Action'
+import { OctoKit } from '../api/octokit';
+import { getInput, getRequiredInput } from '../common/utils';
+import { Reopener } from './Reopener';
+import { Action } from '../common/Action';
 
 class ReopenerAction extends Action {
-	id = 'Locker'
+	id = 'Reopener';
 
 	async onTriggered(github: OctoKit) {
 		const alsoApplyToOpenIssues: string | undefined = getInput('alsoApplyToOpenIssues');
@@ -28,8 +28,8 @@ class ReopenerAction extends Action {
 			getInput('ignoreMilestoneIds') || undefined,
 			+(getInput('minimumVotes') || 0),
 			+(getInput('maximumVotes') || 9999999)
-		).run()
+		).run();
 	}
 }
 
-new ReopenerAction().run() // eslint-disable-line
+new ReopenerAction().run(); // eslint-disable-line

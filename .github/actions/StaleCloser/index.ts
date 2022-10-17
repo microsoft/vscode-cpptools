@@ -9,7 +9,7 @@ import { StaleCloser } from './StaleCloser'
 import { Action } from '../common/Action'
 
 class StaleCloserAction extends Action {
-	id = 'StaleCloser'
+	id = 'StaleCloser';
 
 	async onTriggered(github: OctoKit) {
 		await new StaleCloser(
@@ -31,8 +31,8 @@ class StaleCloserAction extends Action {
 			+(getInput('minimumVotes') || 0),
 			+(getInput('maximumVotes') || 9999999),
 			getInput('involves') || undefined
-		).run()
+		).run();
 	}
 }
 
-new StaleCloserAction().run() // eslint-disable-line
+new StaleCloserAction().run(); // eslint-disable-line
