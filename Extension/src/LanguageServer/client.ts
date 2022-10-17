@@ -993,7 +993,7 @@ export class DefaultClient implements Client {
             clangTidyConfig: settings.clangTidyConfig,
             clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
             clangTidyHeaderFilter: settings.clangTidyHeaderFilter,
-            clangTidyArgs: settings.clangTidyArgs,
+            clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
             clangTidyFixWarnings: settings.clangTidyFixWarnings,
             clangTidyFixErrors: settings.clangTidyFixErrors,
@@ -1060,12 +1060,14 @@ export class DefaultClient implements Client {
             vcFormatWrapPreserveBlocks: settings.vcFormatWrapPreserveBlocks,
             doxygenGenerateOnType: settings.doxygenGenerateOnType,
             doxygenGeneratedStyle: settings.doxygenGeneratedCommentStyle,
+            doxygenSectionTags: settings.doxygenSectionTags,
             filesExclude: otherSettings.filesExclude,
             filesAutoSaveAfterDelay: otherSettings.filesAutoSaveAfterDelay,
             filesEncoding: otherSettings.filesEncoding,
             searchExclude: otherSettings.searchExclude,
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
-            editorInlayHintsEnabled: otherSettings.InlayHintsEnabled
+            editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
+            editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled
         };
         return result;
     };

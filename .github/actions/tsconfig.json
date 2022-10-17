@@ -6,6 +6,7 @@
 		"moduleResolution": "node",
 		"removeComments": false,
 		"resolveJsonModule": true,
+		"skipLibCheck": true,
 		"sourceMap": true,
 		"lib": [
 			"es2020"
