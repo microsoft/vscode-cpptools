@@ -255,8 +255,7 @@ export class CppProperties {
                 this.handleSquiggles();
             }
         });
-
-
+        
         vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
             // For multi-root, the "onDidSaveTextDocument" will be received once for each project folder.
             // To avoid misleading telemetry (for CMake retention) skip if the notifying folder
