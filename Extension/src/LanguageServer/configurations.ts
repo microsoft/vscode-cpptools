@@ -227,6 +227,7 @@ export class CppProperties {
         }
 
         const settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
+        let isCurrentWindow: boolean = false;
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(settingsPath);
         this.disposables.push(this.configFileWatcher);
         this.configFileWatcher.onDidCreate((uri) => {
@@ -245,14 +246,16 @@ export class CppProperties {
         });
 
         vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.fsPath === settingsPath) {
+            if (e.document.uri.fsPath === settingsPath && isCurrentWindow) {
                 this.handleSquiggles();
             }
         });
 
         vscode.window.onDidChangeVisibleTextEditors((editors) => {
+            isCurrentWindow = false;
             editors.forEach(editor => {
                 if (editor.document.uri.fsPath  === settingsPath) {
+                    isCurrentWindow = true;
                     this.handleSquiggles();
                 }
             });
