@@ -245,15 +245,17 @@ export class CppProperties {
         });
 
         vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.fsPath === settingsPath) {
+            if (e.document.uri.fsPath === settingsPath ) {
                 this.handleSquiggles();
             }
         });
 
-        vscode.window.onDidChangeActiveTextEditor((document) => {
-            if (document?.document.uri.fsPath === settingsPath) {
-                this.handleSquiggles();
-            }
+        vscode.window.onDidChangeVisibleTextEditors((editors) => {
+            editors.forEach(editor => {
+                if (editor.document.uri.fsPath  === settingsPath) {
+                    this.handleSquiggles();
+                }
+            });
         });
 
         vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
