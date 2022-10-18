@@ -245,7 +245,7 @@ export class CppProperties {
         });
 
         vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.fsPath === settingsPath ) {
+            if (e.document.uri.fsPath === settingsPath) {
                 this.handleSquiggles();
             }
         });
