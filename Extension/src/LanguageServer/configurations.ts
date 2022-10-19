@@ -21,6 +21,7 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
+import { isAbsolute, join } from 'path';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1480,6 +1481,10 @@ export class CppProperties {
         // Validate files
         errors.forcedInclude = this.validatePath(config.forcedInclude, false, true);
         errors.compileCommands = this.validatePath(config.compileCommands, false);
+        // Make sure compileCommands is in the form of an absolute path
+        if(!errors.compileCommands && config.compileCommands != undefined && !isAbsolute(config.compileCommands as string)){
+            config.compileCommands = join(this.rootUri?.fsPath as string, config.compileCommands);
+        }
         errors.dotConfig = this.validatePath(config.dotConfig, false);
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
