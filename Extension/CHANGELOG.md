@@ -2,7 +2,7 @@
 
 ## Version 1.13.3: October 20, 2022
 ### Enhancement
-* Make Doxygen hover comments customizable with C_Cpp.doxygen.sectionTags`. [#8525](https://github.com/microsoft/vscode-cpptools/issues/8525)
+* Make Doxygen hover comments customizable with `C_Cpp.doxygen.sectionTags`. [#8525](https://github.com/microsoft/vscode-cpptools/issues/8525)
 * Create directories on Linux/Mac with 755 instead of 777 permissions. [#9670](https://github.com/microsoft/vscode-cpptools/issues/9670)
 * Update to clang-format and clang-tidy 15. [#9816](https://github.com/microsoft/vscode-cpptools/issues/9816)
 * Make array settings give a warning for duplicates. [PR #9959](https://github.com/microsoft/vscode-cpptools/pull/9959)
@@ -12,7 +12,7 @@
 * Fix the `editor.parameterHints.enabled` setting not being used when `C_Cpp.autocompleteAddParentheses` is `true`. [#9314](https://github.com/microsoft/vscode-cpptools/issues/9314)
 * Fix wordexp sometimes getting stuck on Mac (and Linux). [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
 * Fix inlay hints showing "type" for lambdas in certain cases. [#9971](https://github.com/microsoft/vscode-cpptools/issues/9971)
-* Resolve variables for `C_Cpp.codeAnalysis.clangTidy.args` and headerFilter`. [#9981](https://github.com/microsoft/vscode-cpptools/issues/9981), [#9996](https://github.com/microsoft/vscode-cpptools/issues/9996)
+* Resolve variables for `C_Cpp.codeAnalysis.clangTidy.args` and `headerFilter`. [#9981](https://github.com/microsoft/vscode-cpptools/issues/9981), [#9996](https://github.com/microsoft/vscode-cpptools/issues/9996)
 * Fix some translations. [#9986](https://github.com/microsoft/vscode-cpptools/issues/9986), [#10011](https://github.com/microsoft/vscode-cpptools/issues/10011), [#10012](https://github.com/microsoft/vscode-cpptools/issues/10012), [#10013](https://github.com/microsoft/vscode-cpptools/issues/10013)
 * Disable the "Generate Doxygen Comment" context menu when IntelliSense is disabled. [PR #10007](https://github.com/microsoft/vscode-cpptools/pull/10007)
 * Fix various bugs with the `C_Cpp.codeAnalysis.clangTidy.headerFilter` setting. [#10023](https://github.com/microsoft/vscode-cpptools/issues/10023)
