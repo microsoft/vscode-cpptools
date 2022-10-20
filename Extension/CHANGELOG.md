@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.13.3: October 20, 2022
-### Enhancement
+### Enhancements
 * Make Doxygen hover comments customizable with `C_Cpp.doxygen.sectionTags`. [#8525](https://github.com/microsoft/vscode-cpptools/issues/8525)
 * Create directories on Linux/Mac with 755 instead of 777 permissions. [#9670](https://github.com/microsoft/vscode-cpptools/issues/9670)
 * Update to clang-format and clang-tidy 15. [#9816](https://github.com/microsoft/vscode-cpptools/issues/9816)
