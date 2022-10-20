@@ -1358,7 +1358,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(path: string | undefined, isWindows: boolean): string {
+    public resolvePath(path: string | undefined, isWindows: boolean): string {
         if (!path || path === "${default}") {
             return "";
         }
@@ -1380,6 +1380,12 @@ export class CppProperties {
         }
         if (result.includes("*")) {
             result = result.replace(/\*/g, "");
+        }
+
+        
+        // Make sure all paths result to an absolute path
+        if(!isAbsolute(result)){
+            result = join(this.rootUri?.fsPath as string, result);
         }
 
         // resolve WSL paths
@@ -1481,10 +1487,6 @@ export class CppProperties {
         // Validate files
         errors.forcedInclude = this.validatePath(config.forcedInclude, false, true);
         errors.compileCommands = this.validatePath(config.compileCommands, false);
-        // Make sure compileCommands is in the form of an absolute path
-        if(!errors.compileCommands && config.compileCommands != undefined && !isAbsolute(config.compileCommands as string)){
-            config.compileCommands = join(this.rootUri?.fsPath as string, config.compileCommands);
-        }
         errors.dotConfig = this.validatePath(config.dotConfig, false);
         errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
 
