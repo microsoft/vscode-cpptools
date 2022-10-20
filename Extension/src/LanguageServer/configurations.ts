@@ -136,6 +136,7 @@ export class CppProperties {
     private defaultIncludes: string[] | null = null;
     private defaultFrameworks?: string[];
     private defaultWindowsSdkVersion: string | null = null;
+    private isCppPropertiesJsonVisible: boolean = false;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private nodeAddonIncludes: string[] = [];
@@ -227,7 +228,6 @@ export class CppProperties {
         }
 
         const settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
-        let isCurrentWindow: boolean = false;
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(settingsPath);
         this.disposables.push(this.configFileWatcher);
         this.configFileWatcher.onDidCreate((uri) => {
@@ -246,16 +246,16 @@ export class CppProperties {
         });
 
         vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.fsPath === settingsPath && isCurrentWindow) {
+            if (e.document.uri.fsPath === settingsPath && this.isCppPropertiesJsonVisible) {
                 this.handleSquiggles();
             }
         });
 
         vscode.window.onDidChangeVisibleTextEditors((editors) => {
-            isCurrentWindow = false;
+            this.isCppPropertiesJsonVisible = false;
             editors.forEach(editor => {
                 if (editor.document.uri.fsPath  === settingsPath) {
-                    isCurrentWindow = true;
+                    this.isCppPropertiesJsonVisible = true;
                     this.handleSquiggles();
                 }
             });
