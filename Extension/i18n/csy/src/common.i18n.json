@@ -13,6 +13,5 @@
 	"warning.file.missing": "Upozornění: Chybí očekávaný soubor {0}.",
 	"warning.debugging.not.tested": "Upozornění: Ladění se pro tuto platformu netestovalo.",
 	"reload.workspace.for.changes": "Načtěte pracovní prostor znovu, aby se změna nastavení projevila.",
-	"reload.string": "Načíst znovu",
-	"invalid.download.location.received": "Přijato neplatné umístění pro stahování"
+	"reload.string": "Načíst znovu"
 }
