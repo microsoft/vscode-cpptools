@@ -120,12 +120,14 @@ export interface WorkspaceFolderSettingsParams {
     vcFormatWrapPreserveBlocks: string | undefined;
     doxygenGenerateOnType: boolean | undefined;
     doxygenGeneratedStyle: string | undefined;
+    doxygenSectionTags: string[] | undefined;
     filesExclude: Excludes | undefined;
     filesAutoSaveAfterDelay: boolean | undefined;
     filesEncoding: string | undefined;
     searchExclude: Excludes | undefined;
     editorAutoClosingBrackets: string | undefined;
     editorInlayHintsEnabled: boolean | undefined;
+    editorParameterHintsEnabled: boolean | undefined;
 };
 
 export interface SettingsParams {
@@ -160,8 +162,8 @@ class Settings {
     private readonly settings: vscode.WorkspaceConfiguration;
 
     /**
-     * create the Settings object.
-     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired
+     * Create the Settings object.
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired. Only provide a resource when accessing settings with a "resource" scope.
      */
     constructor(section: string, public resource?: vscode.Uri) {
         this.settings = vscode.workspace.getConfiguration(section, resource ? resource : null);
@@ -207,6 +209,10 @@ class Settings {
 }
 
 export class CppSettings extends Settings {
+    /**
+     * Create the CppSettings object.
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired. Only provide a resource when accessing settings with a "resource" scope.
+     */
     constructor(resource?: vscode.Uri) {
         super("C_Cpp", resource);
     }
@@ -386,7 +392,7 @@ export class CppSettings extends Settings {
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
     public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
-
+    public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
@@ -958,9 +964,10 @@ export class OtherSettings {
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
-    public get InlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
+    public get editorInlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
+    public get editorParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+    public get workbenchSettingsEditor (): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
     public get colorTheme(): string | undefined { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
 

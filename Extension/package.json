@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.13.2-main",
+  "version": "1.13.3-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -506,6 +506,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription%",
           "scope": "resource"
         },
@@ -607,6 +608,7 @@
               "bugprone-posix-return",
               "bugprone-redundant-branch-condition",
               "bugprone-reserved-identifier",
+              "bugprone-shared-ptr-array-mismatch",
               "bugprone-signal-handler",
               "bugprone-signed-char-misuse",
               "bugprone-sizeof-*",
@@ -630,6 +632,7 @@
               "bugprone-terminating-continue",
               "bugprone-throw-keyword-missing",
               "bugprone-too-small-loop-variable",
+              "bugprone-unchecked-optional-access",
               "bugprone-undefined-memory-manipulation",
               "bugprone-undelegated-constructor",
               "bugprone-unhandled-*",
@@ -706,7 +709,6 @@
               "clang-analyzer-cplusplus.NewDeleteLeaks",
               "clang-analyzer-deadcode.DeadStores",
               "clang-analyzer-nullablity.*",
-              "clang-analyzer-nullability.NullabilityBase",
               "clang-analyzer-nullability.NullableDereferenced",
               "clang-analyzer-nullability.NullablePassedToNonnull",
               "clang-analyzer-nullability.NullableReturnedFromNonnull",
@@ -801,6 +803,7 @@
               "cppcoreguidelines-explicit-virtual-functions",
               "cppcoreguidelines-init-variables",
               "cppcoreguidelines-interfaces-global-init",
+              "cppcoreguidelines-macro-to-enum",
               "cppcoreguidelines-macro-usage",
               "cppcoreguidelines-narrowing-conversions",
               "cppcoreguidelines-no-malloc",
@@ -911,6 +914,8 @@
               "llvmlibc-implementation-in-namespace",
               "llvmlibc-restrict-system-libc-headers",
               "misc-*",
+              "misc-confusable-identifiers",
+              "misc-const-correctness",
               "misc-definitions-in-headers",
               "misc-misleading-*",
               "misc-misleading-bidirectional",
@@ -939,6 +944,7 @@
               "modernize-deprecated-headers",
               "modernize-deprecated-ios-base-aliases",
               "modernize-loop-convert",
+              "modernize-macro-to-enum",
               "modernize-make-*",
               "modernize-make-shared",
               "modernize-make-unique",
@@ -955,6 +961,7 @@
               "modernize-use-*",
               "modernize-use-auto",
               "modernize-use-bool-literals",
+              "modernize-use-default",
               "modernize-use-default-member-init",
               "modernize-use-emplace",
               "modernize-use-equals-*",
@@ -1006,6 +1013,7 @@
               "portability-*",
               "portability-restrict-system-includes",
               "portability-simd-intrinsics",
+              "portability-std-allocator-const",
               "readability-*",
               "readability-avoid-const-params-in-decls",
               "readability-braces-around-statements",
@@ -1059,6 +1067,7 @@
               "zircon-temporary-objects"
             ]
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription%",
           "scope": "resource"
         },
@@ -1154,6 +1163,7 @@
               "bugprone-posix-return",
               "bugprone-redundant-branch-condition",
               "bugprone-reserved-identifier",
+              "bugprone-shared-ptr-array-mismatch",
               "bugprone-signal-handler",
               "bugprone-signed-char-misuse",
               "bugprone-sizeof-*",
@@ -1177,6 +1187,7 @@
               "bugprone-terminating-continue",
               "bugprone-throw-keyword-missing",
               "bugprone-too-small-loop-variable",
+              "bugprone-unchecked-optional-access",
               "bugprone-undefined-memory-manipulation",
               "bugprone-undelegated-constructor",
               "bugprone-unhandled-*",
@@ -1253,7 +1264,6 @@
               "clang-analyzer-cplusplus.NewDeleteLeaks",
               "clang-analyzer-deadcode.DeadStores",
               "clang-analyzer-nullablity.*",
-              "clang-analyzer-nullability.NullabilityBase",
               "clang-analyzer-nullability.NullableDereferenced",
               "clang-analyzer-nullability.NullablePassedToNonnull",
               "clang-analyzer-nullability.NullableReturnedFromNonnull",
@@ -1348,6 +1358,7 @@
               "cppcoreguidelines-explicit-virtual-functions",
               "cppcoreguidelines-init-variables",
               "cppcoreguidelines-interfaces-global-init",
+              "cppcoreguidelines-macro-to-enum",
               "cppcoreguidelines-macro-usage",
               "cppcoreguidelines-narrowing-conversions",
               "cppcoreguidelines-no-malloc",
@@ -1458,6 +1469,8 @@
               "llvmlibc-implementation-in-namespace",
               "llvmlibc-restrict-system-libc-headers",
               "misc-*",
+              "misc-confusable-identifiers",
+              "misc-const-correctness",
               "misc-definitions-in-headers",
               "misc-misleading-*",
               "misc-misleading-bidirectional",
@@ -1486,6 +1499,7 @@
               "modernize-deprecated-headers",
               "modernize-deprecated-ios-base-aliases",
               "modernize-loop-convert",
+              "modernize-macro-to-enum",
               "modernize-make-*",
               "modernize-make-shared",
               "modernize-make-unique",
@@ -1502,6 +1516,7 @@
               "modernize-use-*",
               "modernize-use-auto",
               "modernize-use-bool-literals",
+              "modernize-use-default",
               "modernize-use-default-member-init",
               "modernize-use-emplace",
               "modernize-use-equals-*",
@@ -1553,6 +1568,7 @@
               "portability-*",
               "portability-restrict-system-includes",
               "portability-simd-intrinsics",
+              "portability-std-allocator-const",
               "readability-*",
               "readability-avoid-const-params-in-decls",
               "readability-braces-around-statements",
@@ -1606,6 +1622,7 @@
               "zircon-temporary-objects"
             ]
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.codeAnalysis.clangTidy.checks.disabled.markdownDescription%",
           "scope": "resource"
         },
@@ -2361,6 +2378,42 @@
           "description": "%c_cpp.configuration.doxygen.generatedStyle.description%",
           "scope": "resource"
         },
+        "C_Cpp.doxygen.sectionTags": {
+          "type": "array",
+          "default": ["attention", "tparam", "param", "result", "returns", "retval", "exceptions", "deprecated", "warning", "note" ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "attention",
+              "author",
+              "authors",
+              "bug",
+              "copyright",
+              "date",
+              "deprecated",
+              "details",
+              "exceptions",
+              "invariant",
+              "note",
+              "param",
+              "pre",
+              "post",
+              "remark",
+              "remarks",
+              "result",
+              "returns",
+              "retval",
+              "since",
+              "tparam",
+              "test",
+              "todo",
+              "version",
+              "warning"
+              ]
+            },
+          "description": "%c_cpp.configuration.doxygen.sectionTags.description%",
+          "scope": "resource"
+          },
         "C_Cpp.commentContinuationPatterns": {
           "type": "array",
           "default": [
@@ -2387,6 +2440,7 @@
               }
             ]
           },
+          "uniqueItems": true,
           "description": "%c_cpp.configuration.commentContinuationPatterns.description%",
           "scope": "window"
         },
@@ -2433,6 +2487,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.includePath.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2441,6 +2496,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.defines.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2449,6 +2505,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.macFrameworkPath.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2468,6 +2525,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.forcedInclude.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2530,6 +2588,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.compilerArgs.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2587,6 +2646,7 @@
             "type": "string"
           },
           "default": null,
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.browse.path.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -2606,6 +2666,7 @@
           "items": {
             "type": "string"
           },
+          "uniqueItems": true,
           "markdownDescription": "%c_cpp.configuration.default.systemIncludePath.markdownDescription%",
           "scope": "machine-overridable"
         },
@@ -3410,6 +3471,15 @@
                     "default": 0
                   }
                 }
+              },
+              "unknownBreakpointHandling": {
+                "type": "string",
+                "enum": [
+                  "throw",
+                  "stop"
+                ],
+                "default": "throw",
+                "description": "%c_cpp.debuggers.unknownBreakpointHandling.description%"
               },
               "variables": {
                 "type": "object",
@@ -5144,7 +5214,7 @@
         },
         {
           "command": "C_Cpp.GenerateDoxygenComment",
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
           "group": "custom2@3"
         }
       ],
