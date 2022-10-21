@@ -188,7 +188,7 @@
     "details_label" : "Details:",
     "exceptions_label": {
         "text": "Exceptions:",
-        "hint": "This label is for describing the exceptions to a function Usage example: Exceptiion: std::out_of_range parameter is out of range."
+        "hint": "This label is for describing the exceptions thrown by a function. Usage example: Exception: std::out_of_range parameter is out of range."
     },
     "invariant_label": "Invariant:",
     "file_label": "File:",

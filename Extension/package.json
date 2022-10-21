@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.13.2-main",
+  "version": "1.13.3-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -5214,7 +5214,7 @@
         },
         {
           "command": "C_Cpp.GenerateDoxygenComment",
-          "when": "editorLangId == 'c' || editorLangId == 'cpp' || editorLangId == 'cuda-cpp'",
+          "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
           "group": "custom2@3"
         }
       ],
