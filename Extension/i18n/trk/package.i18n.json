@@ -173,7 +173,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Bağlama duyarlı olmayan \"belirsiz\" sonuçlar sağlar.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "C/C++ dil hizmeti özelliklerini kapatır.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "IntelliSense altyapısının `#include` hatalarını içeren çeviri birimleri için otomatik olarak Etiket Ayrıştırıcısı'na geçip geçmeyeceğini denetler.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Otomatik tamamlama sağlayıcısını denetler. `Disabled` ise ve sözcük tabanlı tamamlama istiyorsanız, aynı zamanda `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (ve aynı şekilde `c` ve `cuda-cpp` dilleri için) ayarını da belirlemeniz gerekir.",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Otomatik tamamlama sağlayıcısını denetler. `disabled` ise ve sözcük tabanlı tamamlama istiyorsanız, aynı zamanda `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (ve aynı şekilde `c` ve `cuda-cpp` dilleri için) ayarını da belirlemeniz gerekir.",
 	"c_cpp.configuration.autocomplete.default.description": "Etkin IntelliSense altyapısını kullanır.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Visual Studio Code tarafından sağlanan sözcük tabanlı tamamlamayı kullanır.",
 	"c_cpp.configuration.errorSquiggles.description": "IntelliSense altyapısı tarafından algılanan şüpheli derleme hatalarının düzenleyiciye geri rapor edilip edilmeyeceğini kontrol eder. Ayrıca, içermeler bulunamazsa kod analizi uyarılarının raporlanıp raporlanmayacağını da kontrol eder. Bu ayar, Etiket Ayrıştırıcı motoru tarafından yok sayılır.",

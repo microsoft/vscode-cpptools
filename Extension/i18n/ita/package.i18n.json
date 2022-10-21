@@ -173,7 +173,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Fornisce risultati 'fuzzy' che non sono compatibili con il contesto.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "Disattiva le funzionalità del servizio di linguaggio C/C++.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "Controlla se il motore IntelliSense passerà automaticamente al parser di tag per le unità di conversione contenenti errori `#include`.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Controlla il provider di completamento automatico. Se è `Disabled` e vuoi il completamento basato su parole, sarà necessario impostare anche `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (e analogamente per i linguaggi `c` e `cuda-cpp`).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Controlla il provider di completamento automatico. Se è `disabled` e vuoi il completamento basato su parole, sarà necessario impostare anche `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (e analogamente per i linguaggi `c` e `cuda-cpp`).",
 	"c_cpp.configuration.autocomplete.default.description": "Usa il motore IntelliSense attivo.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Usa il completamento basato su parole fornito da Visual Studio Code.",
 	"c_cpp.configuration.errorSquiggles.description": "Controlla se i possibili errori di compilazione rilevati dal motore IntelliSense verranno segnalati all'editor. Controlla inoltre se vengono segnalati avvisi di analisi del codice se non è possibile trovare le inclusioni. Questa impostazione viene ignorata dal motore del parser di tag.",

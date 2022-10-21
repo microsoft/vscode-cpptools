@@ -173,7 +173,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Fournit des résultats « flous » qui ne sont pas compatibles avec le contexte.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "Désactive les fonctionnalités du service de langage C/C++.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "Contrôle si le moteur IntelliSense bascule automatiquement vers l'analyseur de balises pour les unités de traduction qui contiennent des erreurs `#include`.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Contrôle le fournisseur de la saisie semi-automatique. Si la valeur est `Disabled` et que vous voulez utiliser la saisie semi-automatique, vous devez également définir `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (et de la même manière pour les langages `c` et `cuda-cpp`).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Contrôle le fournisseur de la saisie semi-automatique. Si la valeur est `disabled` et que vous voulez utiliser la saisie semi-automatique, vous devez également définir `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (et de la même manière pour les langages `c` et `cuda-cpp`).",
 	"c_cpp.configuration.autocomplete.default.description": "Utilise le moteur IntelliSense actif.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Utilise la saisie semi-automatique basée sur le mot fournie par Visual Studio Code.",
 	"c_cpp.configuration.errorSquiggles.description": "Contrôle si les erreurs de compilation suspectes détectées par le moteur IntelliSense seront rapportées à l'éditeur. Il contrôle également si les avertissements d'analyse de code sont signalés si les includes ne peuvent pas être trouvés. Ce paramètre est ignoré par le moteur Tag Parser.",
