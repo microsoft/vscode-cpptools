@@ -21,7 +21,6 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
-import { isAbsolute, join } from 'path';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1358,15 +1357,15 @@ export class CppProperties {
         return success;
     }
 
-    public resolvePath(path: string | undefined, isWindows: boolean): string {
-        if (!path || path === "${default}") {
+    public resolvePath(input_path: string | undefined, isWindows: boolean): string {
+        if (!input_path || input_path === "${default}") {
             return "";
         }
 
         let result: string = "";
 
         // first resolve variables
-        result = util.resolveVariables(path, this.ExtendedEnvironment);
+        result = util.resolveVariables(input_path, this.ExtendedEnvironment);
         if (this.rootUri) {
             if (result.includes("${workspaceFolder}")) {
                 result = result.replace("${workspaceFolder}", this.rootUri.fsPath);
@@ -1382,10 +1381,9 @@ export class CppProperties {
             result = result.replace(/\*/g, "");
         }
 
-        
         // Make sure all paths result to an absolute path
-        if(!isAbsolute(result)){
-            result = join(this.rootUri?.fsPath as string, result);
+        if (!path.isAbsolute(result)) {
+            result = path.join(this.rootUri?.fsPath as string, result);
         }
 
         // resolve WSL paths
