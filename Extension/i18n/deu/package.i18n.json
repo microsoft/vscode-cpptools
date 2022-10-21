@@ -173,7 +173,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Stellt „Fuzzy“-Ergebnisse bereit, die nicht kontextbezogen sind.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "Deaktiviert die Features des C/C++-Sprachdiensts.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "Steuert, ob das IntelliSense-Modul automatisch zum Tagparser für Übersetzungseinheiten wechselt, die `#include#`-Fehler enthalten.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Steuert den Anbieter für AutoVervollständigen. Wenn `disabled` festgelegt ist und Sie die wortbasierte Vervollständigung wünschen, müssen Sie auch \"[cpp]\" festlegen: {\"editor.wordBasedSuggestions\": true} (und ähnlich für die Sprachen `c` und `cuda-cpp`).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Steuert den Anbieter für AutoVervollständigen. Wenn `disabled` festgelegt ist und Sie die wortbasierte Vervollständigung wünschen, müssen Sie auch `\"[cpp]\" festlegen: {\"editor.wordBasedSuggestions\": true}` (und ähnlich für die Sprachen `c` und `cuda-cpp`).",
 	"c_cpp.configuration.autocomplete.default.description": "Verwendet das aktive IntelliSense-Modul.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Verwendet die von Visual Studio Code bereitgestellte wortbasierte Vervollständigung.",
 	"c_cpp.configuration.errorSquiggles.description": "Steuert, ob vermutete Kompilierungsfehler, die von der IntelliSense-Engine erkannt wurden, an den Editor zurückgegeben werden. Außerdem wird gesteuert, ob Codeanalysewarnungen gemeldet werden, wenn keine Enthaltenen gefunden werden können. Diese Einstellung wird von der Tagparser-Engine ignoriert.",
