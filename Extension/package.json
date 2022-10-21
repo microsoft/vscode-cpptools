@@ -2380,7 +2380,7 @@
         },
         "C_Cpp.doxygen.sectionTags": {
           "type": "array",
-          "default": ["attention", "tparam", "param", "result", "returns", "retval", "exceptions", "deprecated", "warning", "note" ],
+          "default": ["attention", "tparam", "param", "result", "returns", "retval", "exception", "deprecated", "warning", "note" ],
           "items": {
             "type": "string",
             "enum": [
@@ -2392,7 +2392,7 @@
               "date",
               "deprecated",
               "details",
-              "exceptions",
+              "exception",
               "invariant",
               "note",
               "param",
