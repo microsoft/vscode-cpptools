@@ -13,6 +13,5 @@
 	"warning.file.missing": "경고: 필요한 파일 {0}이(가) 없습니다.",
 	"warning.debugging.not.tested": "경고: 디버깅이 이 플랫폼에서 테스트되지 않았습니다.",
 	"reload.workspace.for.changes": "설정 변경 내용을 적용하려면 작업 영역을 다시 로드합니다.",
-	"reload.string": "다시 로드",
-	"invalid.download.location.received": "잘못된 다운로드 위치가 수신되었습니다."
+	"reload.string": "다시 로드"
 }
