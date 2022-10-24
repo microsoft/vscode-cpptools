@@ -228,7 +228,6 @@ export class CppProperties {
         }
 
         const settingsPath: string = path.join(this.configFolder, this.configurationGlobPattern);
-        let wasVisible: boolean = false;
         this.configFileWatcher = vscode.workspace.createFileSystemWatcher(settingsPath);
         this.disposables.push(this.configFileWatcher);
         this.configFileWatcher.onDidCreate((uri) => {
@@ -253,6 +252,7 @@ export class CppProperties {
         });
 
         vscode.window.onDidChangeVisibleTextEditors((editors) => {
+            let wasVisible: boolean = false;
             wasVisible = this.isCppPropertiesJsonVisible;
             this.isCppPropertiesJsonVisible = false;
             editors.forEach(editor => {
