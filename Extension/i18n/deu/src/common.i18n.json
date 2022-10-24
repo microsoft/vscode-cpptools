@@ -13,6 +13,5 @@
 	"warning.file.missing": "Warnung: Die erwartete Datei \"{0}\" fehlt.",
 	"warning.debugging.not.tested": "Warnung: Das Debugging wurde für diese Plattform nicht getestet.",
 	"reload.workspace.for.changes": "Laden Sie den Arbeitsbereich neu, damit die Einstellungsänderung wirksam wird.",
-	"reload.string": "Aktualisieren",
-	"invalid.download.location.received": "Ungültiger Downloadspeicherort empfangen."
+	"reload.string": "Aktualisieren"
 }
