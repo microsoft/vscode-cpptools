@@ -2777,6 +2777,16 @@
           "description": "%c_cpp.configuration.codeFolding.description%",
           "scope": "window"
         },
+        "C_Cpp.hover": {
+          "type": "string",
+          "enum": [
+            "default",
+            "disabled"
+          ],
+          "default": "default",
+          "description": "%c_cpp.configuration.hover.description%",
+          "scope": "resource"
+        },
         "C_Cpp.autocompleteAddParentheses": {
           "type": "boolean",
           "default": false,
