@@ -252,12 +252,14 @@ export class CppProperties {
         });
 
         vscode.window.onDidChangeVisibleTextEditors((editors) => {
-            let wasVisible: boolean = this.isCppPropertiesJsonVisible;
+            const wasVisible: boolean = this.isCppPropertiesJsonVisible;
             editors.forEach(editor => {
                 if (editor.document.uri.fsPath === settingsPath) {
                     this.isCppPropertiesJsonVisible = true;
-                    if (!wasVisible)
+                    if (!wasVisible) {
                         this.handleSquiggles();
+
+                    }
                 }
             });
         });
