@@ -63,7 +63,7 @@ export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptoo
 // This prevents having to iterate every time we search
 let flattenedPackageJson: Map<string, any>;
 export function getRawSetting(key: string): any {
-    if (flattenedPackageJson === null || flattenedPackageJson === undefined) {
+    if (flattenedPackageJson === undefined) {
         flattenedPackageJson = new Map();
         for (const subheading of packageJson.contributes.configuration) {
             for (const setting in subheading.properties) {
