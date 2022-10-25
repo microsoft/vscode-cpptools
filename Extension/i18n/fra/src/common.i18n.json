@@ -13,6 +13,5 @@
 	"warning.file.missing": "Avertissement : Le fichier attendu {0} est manquant.",
 	"warning.debugging.not.tested": "Avertissement : Le débogage n'a pas été testé pour cette plateforme.",
 	"reload.workspace.for.changes": "Rechargez l'espace de travail pour appliquer les changements des paramètres.",
-	"reload.string": "Recharger",
-	"invalid.download.location.received": "Emplacement de téléchargement reçu non valide"
+	"reload.string": "Recharger"
 }
