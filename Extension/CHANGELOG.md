@@ -18,7 +18,6 @@
 * Fix inlay hints showing "type" for lambdas in certain cases. [#9971](https://github.com/microsoft/vscode-cpptools/issues/9971)
 * Resolve variables for `C_Cpp.codeAnalysis.clangTidy.args` and `headerFilter`. [#9981](https://github.com/microsoft/vscode-cpptools/issues/9981), [#9996](https://github.com/microsoft/vscode-cpptools/issues/9996)
 * Fix some translations. [#9986](https://github.com/microsoft/vscode-cpptools/issues/9986), [#10011](https://github.com/microsoft/vscode-cpptools/issues/10011), [#10012](https://github.com/microsoft/vscode-cpptools/issues/10012), [#10013](https://github.com/microsoft/vscode-cpptools/issues/10013)
-* Fix clang-tidy errors related to `__SSE__` defines when gcc is used. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
 * Disable the "Generate Doxygen Comment" context menu when IntelliSense is disabled. [PR #10007](https://github.com/microsoft/vscode-cpptools/pull/10007)
 * Fix clang-tidy and clang-format not working on CentOS7 and other Linux OS's without glibc 2.27 or greater. [#10019](https://github.com/microsoft/vscode-cpptools/issues/10019)
 * Fix various bugs with the `C_Cpp.codeAnalysis.clangTidy.headerFilter` setting. [#10023](https://github.com/microsoft/vscode-cpptools/issues/10023)
