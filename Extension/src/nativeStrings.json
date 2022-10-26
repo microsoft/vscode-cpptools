@@ -70,6 +70,8 @@
     "will_use_tag_parser_when_includes_dont_resolve": "The extension will use the Tag Parser for IntelliSense when #includes don't resolve.",
     "autocomplete_is_enabled": "Autocomplete is enabled.",
     "autocomplete_is_disabled": "Autocomplete is disabled.",
+    "hover_is_enabled": "Hover is enabled.",
+    "hover_is_disabled": "Hover is disabled.",
     "enhanced_colorization_is_enabled": "Enhanced Colorization is enabled.",
     "error_squiggles_disabled": "Error squiggles are disabled.",
     "error_squiggles_enabled": "Error squiggles are enabled.",

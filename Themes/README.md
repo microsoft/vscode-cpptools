@@ -10,19 +10,19 @@ VS Code has since provided an API for semantic colorization. The C/C++ Extension
 
 Light Theme
 
-![Light Theme 2019 example](./assets/light.png)
+![Light Theme 2019 example](https://github.com/Microsoft/vscode-cpptools/raw/HEAD/Themes/assets/light.png)
 
 Dark Theme
 
-![Dark Theme 2019 example](./assets/dark.png)
+![Dark Theme 2019 example](https://github.com/Microsoft/vscode-cpptools/raw/HEAD/Themes/assets/dark.png)
 
 2017 Light Theme
 
-![2017 Light Theme example](./assets/light2017.png)
+![2017 Light Theme example](https://github.com/Microsoft/vscode-cpptools/raw/HEAD/Themes/assets/light2017.png)
 
 2017 Dark Theme
 
-![2017 Dark Theme example](./assets/dark2017.png)
+![2017 Dark Theme example](https://github.com/Microsoft/vscode-cpptools/raw/HEAD/Themes/assets/dark2017.png)
 
 ## Contributing
 
