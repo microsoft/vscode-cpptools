@@ -496,6 +496,16 @@
             ],
             "scope": "resource"
           },
+          "C_Cpp.hover": {
+            "type": "string",
+            "enum": [
+              "default",
+              "disabled"
+            ],
+            "default": "default",
+            "description": "%c_cpp.configuration.hover.description%",
+            "scope": "resource"
+          },
           "C_Cpp.dimInactiveRegions": {
             "type": "boolean",
             "default": true,
