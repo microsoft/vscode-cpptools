@@ -136,6 +136,7 @@ export class CppProperties {
     private defaultIncludes: string[] | null = null;
     private defaultFrameworks?: string[];
     private defaultWindowsSdkVersion: string | null = null;
+    private isCppPropertiesJsonVisible: boolean = false;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private nodeAddonIncludes: string[] = [];
@@ -241,24 +242,26 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidChange(() => {
-            // If the file is one of the textDocument's vscode is tracking, we need to wait for an
-            // onDidChangeTextDocument event, or we may get old/cached contents when we open it.
-            let alreadyTracking: boolean = false;
-            for (let i: number = 0; i < vscode.workspace.textDocuments.length; i++) {
-                if (vscode.workspace.textDocuments[i].uri.fsPath === settingsPath) {
-                    alreadyTracking = true;
-                    break;
-                }
-            }
-            if (!alreadyTracking) {
-                this.handleConfigurationChange();
+            this.handleConfigurationChange();
+        });
+
+        vscode.workspace.onDidChangeTextDocument((e) => {
+            if (e.document.uri.fsPath === settingsPath && this.isCppPropertiesJsonVisible) {
+                this.handleSquiggles();
             }
         });
 
-        vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
-            if (e.document.uri.fsPath === settingsPath) {
-                this.handleConfigurationChange();
-            }
+        vscode.window.onDidChangeVisibleTextEditors((editors) => {
+            const wasVisible: boolean = this.isCppPropertiesJsonVisible;
+            editors.forEach(editor => {
+                if (editor.document.uri.fsPath === settingsPath) {
+                    this.isCppPropertiesJsonVisible = true;
+                    if (!wasVisible) {
+                        this.handleSquiggles();
+
+                    }
+                }
+            });
         });
 
         vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
@@ -1348,10 +1351,6 @@ export class CppProperties {
             const failedToParse: string = localize("failed.to.parse.properties", 'Failed to parse "{0}"', this.propertiesFile.fsPath);
             vscode.window.showErrorMessage(`${failedToParse}: ${err.message}`);
             success = false;
-        }
-
-        if (success) {
-            this.handleSquiggles();
         }
 
         return success;

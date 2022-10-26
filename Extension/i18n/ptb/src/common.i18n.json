@@ -13,6 +13,5 @@
 	"warning.file.missing": "Aviso: o arquivo esperado {0} está ausente.",
 	"warning.debugging.not.tested": "Aviso: a depuração não foi testada para esta plataforma.",
 	"reload.workspace.for.changes": "Recarregue o workspace para que a alteração das configurações entre em vigor.",
-	"reload.string": "Recarregar",
-	"invalid.download.location.received": "Recebido um local de download inválido"
+	"reload.string": "Recarregar"
 }

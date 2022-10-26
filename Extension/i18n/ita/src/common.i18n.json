@@ -13,6 +13,5 @@
 	"warning.file.missing": "Avviso: manca il file previsto {0}.",
 	"warning.debugging.not.tested": "Avviso: il debug non è stato testato per questa piattaforma.",
 	"reload.workspace.for.changes": "Ricaricare l'area di lavoro per rendere effettive le modifiche apportate alle impostazioni.",
-	"reload.string": "Ricarica",
-	"invalid.download.location.received": "È stato ricevuto un percorso di download non valido"
+	"reload.string": "Ricarica"
 }

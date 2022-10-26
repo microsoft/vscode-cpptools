@@ -13,6 +13,5 @@
 	"warning.file.missing": "警告: 必要なファイル {0} がありません。",
 	"warning.debugging.not.tested": "警告: このプラットフォームのデバッグはテストされていません。",
 	"reload.workspace.for.changes": "設定の変更を有効にするには、ワークスペースを再度読み込んでください。",
-	"reload.string": "再読み込み",
-	"invalid.download.location.received": "無効なダウンロード場所を受信しました"
+	"reload.string": "再読み込み"
 }

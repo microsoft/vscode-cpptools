@@ -60,6 +60,7 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyFixNotes: boolean | undefined;
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
+    hover: string | undefined;
     vcFormatIndentBraces: boolean | undefined;
     vcFormatIndentMultiLineRelativeTo: string | undefined;
     vcFormatIndentWithinParentheses: string | undefined;
@@ -393,6 +394,7 @@ export class CppSettings extends Settings {
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
     public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
     public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
+    public get hover(): string | undefined { return super.Section.get<string>("hover"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
@@ -893,7 +895,7 @@ export class CppSettings extends Settings {
                         foundEditorConfigWithVcFormatSettings = true;
                         const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                         if (!didEditorConfigNotice.Value) {
-                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks."] },
+                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
                                 "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
                             didEditorConfigNotice.Value = true;
                         }
