@@ -1,20 +1,25 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.13.3: October 20, 2022
+## Version 1.13.3: October 26, 2022
 ### Enhancements
 * Make Doxygen hover comments customizable with `C_Cpp.doxygen.sectionTags`. [#8525](https://github.com/microsoft/vscode-cpptools/issues/8525)
+* Delay applying `c_cpp_properties.json` changes until after a save. [#9185](https://github.com/microsoft/vscode-cpptools/issues/9185)
 * Create directories on Linux/Mac with 755 instead of 777 permissions. [#9670](https://github.com/microsoft/vscode-cpptools/issues/9670)
-* Update to clang-format and clang-tidy 15. [#9816](https://github.com/microsoft/vscode-cpptools/issues/9816)
+* Add a `C_Cpp.hover` setting to enable disabling hover results. [#9793](https://github.com/microsoft/vscode-cpptools/issues/9793)
+* Update to clang-format and clang-tidy 15.0.3. [#9816](https://github.com/microsoft/vscode-cpptools/issues/9816)
 * Make array settings give a warning for duplicates. [PR #9959](https://github.com/microsoft/vscode-cpptools/pull/9959)
 
 ### Bug Fixes
 * Fix "final" breaking formatting. [#6638](https://github.com/microsoft/vscode-cpptools/issues/6638)
+* Fix an IntelliSense crash with the seqan3 library. [#8956](https://github.com/microsoft/vscode-cpptools/issues/8956)
 * Fix the `editor.parameterHints.enabled` setting not being used when `C_Cpp.autocompleteAddParentheses` is `true`. [#9314](https://github.com/microsoft/vscode-cpptools/issues/9314)
 * Fix wordexp sometimes getting stuck on Mac (and Linux). [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
+* Fix ctrl+space completion for Doxygen tags. [#9732](https://github.com/microsoft/vscode-cpptools/issues/9732 )
 * Fix inlay hints showing "type" for lambdas in certain cases. [#9971](https://github.com/microsoft/vscode-cpptools/issues/9971)
 * Resolve variables for `C_Cpp.codeAnalysis.clangTidy.args` and `headerFilter`. [#9981](https://github.com/microsoft/vscode-cpptools/issues/9981), [#9996](https://github.com/microsoft/vscode-cpptools/issues/9996)
 * Fix some translations. [#9986](https://github.com/microsoft/vscode-cpptools/issues/9986), [#10011](https://github.com/microsoft/vscode-cpptools/issues/10011), [#10012](https://github.com/microsoft/vscode-cpptools/issues/10012), [#10013](https://github.com/microsoft/vscode-cpptools/issues/10013)
 * Disable the "Generate Doxygen Comment" context menu when IntelliSense is disabled. [PR #10007](https://github.com/microsoft/vscode-cpptools/pull/10007)
+* Fix clang-tidy and clang-format not working on CentOS7 and other Linux OS's without glibc 2.27 or greater. [#10019](https://github.com/microsoft/vscode-cpptools/issues/10019)
 * Fix various bugs with the `C_Cpp.codeAnalysis.clangTidy.headerFilter` setting. [#10023](https://github.com/microsoft/vscode-cpptools/issues/10023)
 * Fix extensionHost logging an error related to onWillSaveTextDocument whenever a save is done.
 * Fix random "Failed to spawn IntelliSense process" on Mac.
@@ -27,10 +32,9 @@
 
 ### Bug Fixes
 * Fix "final" breaking formatting. [#6638](https://github.com/microsoft/vscode-cpptools/issues/6638)
-* Fix or reduce the occurrence of wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
+* Reduce the occurrence of wordexp getting stuck. [#9688](https://github.com/microsoft/vscode-cpptools/issues/9688)
 * Fix IntelliSense crash with range-v3 `ranges::views::addressof`. [#9870](https://github.com/microsoft/vscode-cpptools/issues/9870)
 * Fix slow compiler querying. [#9882](https://github.com/microsoft/vscode-cpptools/issues/9882)
-* Fix clang-tidy errors related to `__SSE__` defines when gcc is used. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
 * Fix issue with parsing SSH configurations that could cause the extension to fail to activate. [#9933](https://github.com/microsoft/vscode-cpptools/pull/9933)
 
 ## Version 1.13.1: September 27, 2022
