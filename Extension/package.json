@@ -1119,7 +1119,7 @@
               "result",
               "returns",
               "retval",
-              "exceptions",
+              "exception",
               "deprecated",
               "warning",
               "note"
@@ -1135,7 +1135,7 @@
                 "date",
                 "deprecated",
                 "details",
-                "exceptions",
+                "exception",
                 "invariant",
                 "note",
                 "param",
