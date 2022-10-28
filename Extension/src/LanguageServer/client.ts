@@ -2351,8 +2351,8 @@ export class DefaultClient implements Client {
         const currentFileVersion: number | undefined = openFileVersions.get(editor.document.uri.toString());
         // Insert the comment only if the cursor has not moved
         if (result.fileVersion === currentFileVersion &&
-            result.initPosition.line === editor.selection.active.line &&
-            result.initPosition.character === editor.selection.active.character &&
+            result.initPosition.line === editor.selection.start.line &&
+            result.initPosition.character === editor.selection.start.character &&
             result.contents.length > 1) {
             const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             const edits: vscode.TextEdit[] = [];
@@ -2748,10 +2748,10 @@ export class DefaultClient implements Client {
         if (args !== undefined && !(args instanceof vscode.Uri)) {
             codeActionArguments = args;
         }
-        const initCursorPosition: vscode.Position = (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.initialCursor.line, codeActionArguments.initialCursor.character) : editor.selection.active;
+        const initCursorPosition: vscode.Position = (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.initialCursor.line, codeActionArguments.initialCursor.character) : editor.selection.start;
         const params: GenerateDoxygenCommentParams = {
             uri: editor.document.uri.toString(),
-            position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments.adjustedCursor.character) : editor.selection.active,
+            position: (codeActionArguments !== undefined) ? new vscode.Position(codeActionArguments.adjustedCursor.line, codeActionArguments.adjustedCursor.character) : editor.selection.start,
             isCodeAction: codeActionArguments !== undefined,
             isCursorAboveSignatureLine: codeActionArguments?.isCursorAboveSignatureLine
         };
@@ -2763,8 +2763,8 @@ export class DefaultClient implements Client {
         const result: GenerateDoxygenCommentResult | undefined = await this.languageClient.sendRequest(GenerateDoxygenCommentRequest, params);
         // Insert the comment only if the comment has contents and the cursor has not moved
         if (result !== undefined &&
-            initCursorPosition.line === editor.selection.active.line &&
-            initCursorPosition.character === editor.selection.active.character &&
+            initCursorPosition.line === editor.selection.start.line &&
+            initCursorPosition.character === editor.selection.start.character &&
             result.fileVersion !== undefined &&
             result.fileVersion === currentFileVersion &&
             result.contents && result.contents.length > 1) {
