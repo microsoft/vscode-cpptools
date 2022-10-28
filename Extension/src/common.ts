@@ -59,15 +59,19 @@ export function setCachedClangTidyPath(path: string | null): void {
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
-// Use getRawPackageJson to read and write back to package.json
-// This prevents obtaining any of VSCode's expanded variables.
-let rawPackageJson: any = null;
-export function getRawPackageJson(): any {
-    if (rawPackageJson === null || rawPackageJson === undefined) {
-        const fileContents: Buffer = fs.readFileSync(getPackageJsonPath());
-        rawPackageJson = JSON.parse(fileContents.toString());
+// Use getRawSetting to get subcategorized settings from package.json.
+// This prevents having to iterate every time we search.
+let flattenedPackageJson: Map<string, any>;
+export function getRawSetting(key: string): any {
+    if (flattenedPackageJson === undefined) {
+        flattenedPackageJson = new Map();
+        for (const subheading of packageJson.contributes.configuration) {
+            for (const setting in subheading.properties) {
+                flattenedPackageJson.set(setting, subheading.properties[setting]);
+            }
+        }
     }
-    return rawPackageJson;
+    return flattenedPackageJson.get(key);
 }
 
 export async function getRawJson(path: string | undefined): Promise<any> {

@@ -1,4 +1,11 @@
 {
+    "c_cpp.subheaders.intelliSense.title" : "IntelliSense",
+    "c_cpp.subheaders.formatting.title" : "Formatting",
+    "c_cpp.subheaders.codeDocumentation.title" : "Code Documentation",
+    "c_cpp.subheaders.codeAnalysis.title" : "Code Analysis",
+    "c_cpp.subheaders.debugging.title" : "Debugging",
+    "c_cpp.subheaders.resourceManagement.title" : "Resource Management",
+    "c_cpp.subheaders.miscellaneous.title" : "Miscellaneous",
     "c_cpp.capabilities.untrustedWorkspaces.description": "Multiple settings can cause processes local to the workspace to be executed, e.g. C_Cpp.clang_format_path, C_Cpp.codeAnalysis.clangTidy.path, C_Cpp.addNodeAddonIncludePaths, C_Cpp.default.compilerPath, C_Cpp.default.configurationProvider, and C_Cpp.default.compileCommands, and the equivalent properties in c_cpp_properties.json.",
     "c_cpp.command.configurationSelect.title": "Select a Configuration...",
     "c_cpp.command.configurationProviderSelect.title": "Change Configuration Provider...",
