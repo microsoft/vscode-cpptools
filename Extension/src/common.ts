@@ -59,8 +59,8 @@ export function setCachedClangTidyPath(path: string | null): void {
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
-// Use getRawSetting to get subcategorized settings from package.json
-// This prevents having to iterate every time we search
+// Use getRawSetting to get subcategorized settings from package.json.
+// This prevents having to iterate every time we search.
 let flattenedPackageJson: Map<string, any>;
 export function getRawSetting(key: string): any {
     if (flattenedPackageJson === undefined) {
