@@ -353,7 +353,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             } else {
                 const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
                 const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries();
+                processId = await attacher.ShowAttachEntries(token);
             }
 
             if (processId) {

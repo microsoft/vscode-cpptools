@@ -9,6 +9,7 @@ import { AttachItemsProvider } from './attachToProcess';
 import { AttachItem } from './attachQuickPick';
 import * as nls from 'vscode-nls';
 import { findPowerShell } from '../common';
+import * as vscode from 'vscode';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -38,10 +39,10 @@ export class NativeAttachItemsProviderFactory {
 }
 
 abstract class NativeAttachItemsProvider implements AttachItemsProvider {
-    protected abstract getInternalProcessEntries(): Promise<Process[]>;
+    protected abstract getInternalProcessEntries(token?: vscode.CancellationToken): Promise<Process[]>;
 
-    async getAttachItems(): Promise<AttachItem[]> {
-        const processEntries: Process[] = await this.getInternalProcessEntries();
+    async getAttachItems(token?: vscode.CancellationToken): Promise<AttachItem[]> {
+        const processEntries: Process[] = await this.getInternalProcessEntries(token);
         // localeCompare is significantly slower than < and > (2000 ms vs 80 ms for 10,000 elements)
         // We can change to localeCompare if this becomes an issue
         processEntries.sort((a, b) => {
@@ -91,7 +92,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
     // characters. 50 was chosen because that's the maximum length of a "label" in the
     // QuickPick UI in VSCode.
 
-    protected async getInternalProcessEntries(): Promise<Process[]> {
+    protected async getInternalProcessEntries(token?: vscode.CancellationToken): Promise<Process[]> {
         let processCmd: string = '';
         switch (os.platform()) {
             case 'darwin':
@@ -103,7 +104,7 @@ export class PsAttachItemsProvider extends NativeAttachItemsProvider {
             default:
                 throw new Error(localize("os.not.supported", 'Operating system "{0}" not supported.', os.platform()));
         }
-        const processes: string = await execChildProcess(processCmd, undefined);
+        const processes: string = await spawnChildProcess(processCmd, token);
         return PsProcessParser.ParseProcessFromPs(processes);
     }
 }
@@ -164,30 +165,95 @@ export class PsProcessParser {
     }
 }
 
-/**
- * Originally from common.ts. Due to test code not having vscode, it was refactored to not have vscode.OutputChannel.
- */
-function execChildProcess(process: string, workingDirectory?: string): Promise<string> {
+function spawnChildProcess(command: string, token?: vscode.CancellationToken): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error |  null, stdout: string, stderr: string) => {
+        const process: child_process.ChildProcess = child_process.spawn(command, { shell: true });
+        let stdout: string = "";
+        let stderr: string = "";
 
-            if (error) {
-                reject(error);
+        if (process) {
+            let cancellationTokenListener: vscode.Disposable | undefined; // eslint-disable-line prefer-const
+            // Handle timeout
+            const seconds: number = 30;
+            const processTimeout: NodeJS.Timeout = setTimeout(() => {
+                process.removeAllListeners();
+                if (cancellationTokenListener) {
+                    cancellationTokenListener.dispose();
+                }
+
+                try {
+                    process.kill();
+                } catch (e) {
+                    // Failed to kill process.
+                }
+                reject(new Error(localize("timeout.processList.spawn", '"{0}" timed out after {1} seconds.', command, seconds)));
                 return;
+            }, seconds * 1000);
+
+            // Handle cancellation
+            cancellationTokenListener = token?.onCancellationRequested(() => {
+                clearTimeout(processTimeout);
+                process.removeAllListeners();
+
+                try {
+                    process.kill();
+                } catch (e) {
+                    // Failed to kill process.
+                }
+                reject(new Error(localize("cancel.processList.spawn", '"{0}" canceled.', command)));
+                return;
+            });
+
+            const cleanUpCallbacks = () => {
+                clearTimeout(processTimeout);
+                process.removeAllListeners();
+                if (cancellationTokenListener) {
+                    cancellationTokenListener.dispose();
+                }
+            };
+
+            // Handle data streams
+            if (process.stdout) {
+                process.stdout.on('data', (data: string) => {
+                    stdout += data.toString();
+                });
             }
 
-            if (stderr && stderr.length > 0) {
-                if (stderr.indexOf('screen size is bogus') >= 0) {
-                    // ignore this error silently; see https://github.com/microsoft/vscode/issues/75932
-                    // see similar fix for the Node - Debug (Legacy) Extension at https://github.com/microsoft/vscode-node-debug/commit/5298920
-                } else {
-                    reject(new Error(stderr));
+            if (process.stderr) {
+                process.stderr.on('data', (data: string) => {
+                    stderr += data.toString();
+                });
+            }
+
+            // Handle process exit
+            process.on('close', (code: number) => {
+                cleanUpCallbacks();
+                if (code !== 0) {
+                    reject(new Error(localize("error.processList.spawn", '"{0}" exited with code: "{1}".', command, code)));
                     return;
                 }
-            }
 
-            resolve(stdout);
-        });
+                if (stderr && stderr.length > 0) {
+                    if (stderr.indexOf('screen size is bogus') >= 0) {
+                        // ignore this error silently; see https://github.com/microsoft/vscode/issues/75932
+                        // see similar fix for the Node - Debug (Legacy) Extension at https://github.com/microsoft/vscode-node-debug/commit/5298920
+                    } else {
+                        reject(new Error(stderr));
+                        return;
+                    }
+                }
+
+                resolve(stdout);
+            });
+
+            // Handle process error
+            process.on('error', error => {
+                cleanUpCallbacks();
+                reject(error);
+            });
+        } else {
+            reject(new Error(localize("failed.processList.spawn", 'Failed to spawn "{0}".', command)));
+        }
     });
 }
 
@@ -200,9 +266,9 @@ export class WmicAttachItemsProvider extends NativeAttachItemsProvider {
     // |            887 |       746 |
     // |           1308 |      1132 |
 
-    protected async getInternalProcessEntries(): Promise<Process[]> {
+    protected async getInternalProcessEntries(token?: vscode.CancellationToken): Promise<Process[]> {
         const wmicCommand: string = 'wmic process get Name,ProcessId,CommandLine /FORMAT:list';
-        const processes: string = await execChildProcess(wmicCommand, undefined);
+        const processes: string = await spawnChildProcess(wmicCommand, token);
         return WmicProcessParser.ParseProcessFromWmic(processes);
     }
 }
@@ -263,10 +329,10 @@ export class CimAttachItemsProvider extends NativeAttachItemsProvider {
     // Perf numbers on Win10:
     // TODO
 
-    protected async getInternalProcessEntries(): Promise<Process[]> {
+    protected async getInternalProcessEntries(token?: vscode.CancellationToken): Promise<Process[]> {
         const pwshCommand: string = `${this.pwsh} -NoProfile -Command`;
-        const cimCommand: string = 'Get-CimInstance Win32_Process | Select-Object Name,ProcessId,CommandLine | ConvertTo-JSON';
-        const processes: string = await execChildProcess(`${pwshCommand} "${cimCommand}"`, undefined);
+        const cimCommand: string = 'Get-CimInstance Win32_Process | Select-Object Name,ProcessId,CommandLine | ConvertTo-JSON -Compress';
+        const processes: string = await spawnChildProcess(`${pwshCommand} "${cimCommand}"`, token);
         return CimProcessParser.ParseProcessFromCim(processes);
     }
 }
