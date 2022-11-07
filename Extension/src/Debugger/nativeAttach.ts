@@ -229,7 +229,12 @@ function spawnChildProcess(command: string, token?: vscode.CancellationToken): P
             process.on('close', (code: number) => {
                 cleanUpCallbacks();
                 if (code !== 0) {
-                    reject(new Error(localize("error.processList.spawn", '"{0}" exited with code: "{1}".', command, code)));
+                    let errorMessage: string = localize("error.processList.spawn", '"{0}" exited with code: "{1}".', command, code);
+                    if (stderr && stderr.length > 0) {
+                        errorMessage += os.EOL;
+                        errorMessage += stderr;
+                    }
+                    reject(new Error(errorMessage));
                     return;
                 }
 
