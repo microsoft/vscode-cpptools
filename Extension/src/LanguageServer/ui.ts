@@ -132,7 +132,6 @@ export class UI {
     }
 
     private createConfigStatusItem(): void {
-
         if (this.new_configStatusBarItem) {
             return;
         }
@@ -170,6 +169,10 @@ export class UI {
     }
 
     private createBrowseEnginerStatus(): void {
+        if (this.new_browseEngineStatusBarItem) {
+            return;
+        }
+
         this.new_browseEngineStatusBarItem = this.createLanguageStatusItem("c.cpp.tagparser.statusbar2", "C/C++ Tag Parser Status");
         this.new_browseEngineStatusBarItem.detail = localize("discovering.files.tooltip", "Discovering files");
     }
@@ -191,6 +194,8 @@ export class UI {
     }
 
     private setIsParsingWorkspace(val: boolean): void {
+
+        this.createBrowseEnginerStatus();
         /*
          * Common
          */
@@ -210,7 +215,6 @@ export class UI {
         /*
          * New/testing
          */
-        this.createBrowseEnginerStatus();
         if (this.new_browseEngineStatusBarItem) {
             this.new_browseEngineStatusBarItem.text = showIcon ? "$(database)" : "";
             this.new_browseEngineStatusBarItem.detail = (this.isParsingFiles ? this.parsingFilesTooltip : "")
@@ -226,8 +230,8 @@ export class UI {
                 this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
                 this.new_browseEngineStatusBarItem.command = {
                     command: "C_Cpp.ShowParsingCommands",
-                    title: this.new_browseEngineStatusBarItem.name as string,
-                    tooltip: this.new_browseEngineStatusBarItem.name as string
+                    title: "Show Parsing Commands",
+                    tooltip: "Show Parsing Commands"
                 };
             } else {
                 this.browseEngineStatusBarItem.command = undefined;
@@ -259,6 +263,8 @@ export class UI {
     }
 
     private setIsParsingFiles(val: boolean): void {
+
+        this.createBrowseEnginerStatus();
         /*
          * Common
          */
@@ -278,7 +284,6 @@ export class UI {
         /*
          * New/testing
          */
-        this.createBrowseEnginerStatus();
         if (this.new_browseEngineStatusBarItem) {
             this.new_browseEngineStatusBarItem.text = showIcon ? "$(database)" : "";
             this.new_browseEngineStatusBarItem.detail = (val ? this.parsingFilesTooltip : "")
@@ -289,6 +294,7 @@ export class UI {
 
     private setIsUpdatingIntelliSense(val: boolean): void {
 
+        this.createIntellisentStatusItem();
         /*
          * Common
          */
@@ -309,7 +315,6 @@ export class UI {
         /*
          * New/testing
          */
-        this.createIntellisentStatusItem();
         if (this.new_intelliSenseStatusBarItem) {
             this.new_intelliSenseStatusBarItem.text = showIcon ? "$(flame)" : "";
             this.new_intelliSenseStatusBarItem.detail = (val ? this.updatingIntelliSenseTooltip : "")
@@ -325,6 +330,11 @@ export class UI {
             this.codeAnalysisTotal = 0;
             this.codeAnalysisProcessed = 0;
         }
+        this.createIntellisentStatusItem();
+
+        /*
+         * Common
+         */
         this.isRunningCodeAnalysis = val;
         const showIcon: boolean = val || this.isUpdatingIntelliSense;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
@@ -341,7 +351,6 @@ export class UI {
         /*
          * New/testing
          */
-        this.createIntellisentStatusItem();
         if (this.new_intelliSenseStatusBarItem) {
             this.new_intelliSenseStatusBarItem.text = showIcon ? "$(flame)" : "";
             this.new_intelliSenseStatusBarItem.detail = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
