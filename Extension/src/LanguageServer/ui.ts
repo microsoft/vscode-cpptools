@@ -92,7 +92,7 @@ export class UI {
 
     private createLanguageStatusItem(id: string, name: string): vscode.LanguageStatusItem {
         const ret: vscode.LanguageStatusItem = vscode.languages.createLanguageStatusItem(id, this.documentSelector);
-        ret.name = localize(id, name);
+        ret.name = name; // localize(id, name);
 
         return ret;
     }
