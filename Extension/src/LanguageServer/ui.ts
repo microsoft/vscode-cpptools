@@ -90,19 +90,12 @@ export class UI {
             { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
     }
 
-    private createLanguageStatusItem(id: string, name: string): vscode.LanguageStatusItem {
-        const ret: vscode.LanguageStatusItem = vscode.languages.createLanguageStatusItem(id, this.documentSelector);
-        ret.name = name; // localize(id, name);
-
-        return ret;
-    }
-
     private createConfigStatusItem(): void {
         if (this.configStatusBarItem) {
             return;
         }
-
-        this.configStatusBarItem = this.createLanguageStatusItem("c.cpp.configuration.tooltip2", "C/C++ Configuration");
+        this.configStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.configuration.tooltip", this.documentSelector);
+        this.configStatusBarItem.name = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         // TODO: Confirm title and tooltip localization
         this.configStatusBarItem.command = {
             command: "C_Cpp.ConfigurationSelect",
@@ -117,7 +110,8 @@ export class UI {
             return;
         }
 
-        this.referencesStatusBarItem = this.createLanguageStatusItem("c.cpp.references.statusbar2", "C/C++ References Status");
+        this.referencesStatusBarItem  = vscode.languages.createLanguageStatusItem("c.cpp.references.statusbar", this.documentSelector);
+        this.referencesStatusBarItem.name  = localize("c.cpp.references.statusbar", "C/C++ References Status");
         this.referencesStatusBarItem.command = {
             command: "C_Cpp.ShowReferencesProgress",
             title: "",
@@ -130,7 +124,8 @@ export class UI {
             return;
         }
 
-        this.intelliSenseStatusBarItem = this.createLanguageStatusItem("c.cpp.intellisense.statusbar2", "C/C++ IntelliSense Status");
+        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.intellisense.statusbar", this.documentSelector);
+        this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
         this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseTooltip;
     }
 
@@ -139,7 +134,8 @@ export class UI {
             return;
         }
 
-        this.browseEngineStatusBarItem = this.createLanguageStatusItem("c.cpp.tagparser.statusbar2", "C/C++ Tag Parser Status");
+        this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.tagparser.statusbar", this.documentSelector);
+        this.browseEngineStatusBarItem.name = localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status");
         this.browseEngineStatusBarItem.detail = localize("discovering.files.tooltip", "Discovering files");
     }
 
