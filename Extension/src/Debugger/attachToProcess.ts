@@ -18,15 +18,15 @@ nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFo
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface AttachItemsProvider {
-    getAttachItems(): Promise<AttachItem[]>;
+    getAttachItems(token?: vscode.CancellationToken): Promise<AttachItem[]>;
 }
 
 export class AttachPicker {
     constructor(private attachItemsProvider: AttachItemsProvider) { }
 
     // We should not await on this function.
-    public async ShowAttachEntries(): Promise<string | undefined> {
-        return showQuickPick(() => this.attachItemsProvider.getAttachItems());
+    public async ShowAttachEntries(token?: vscode.CancellationToken): Promise<string | undefined> {
+        return showQuickPick(() => this.attachItemsProvider.getAttachItems(token));
     }
 }
 
