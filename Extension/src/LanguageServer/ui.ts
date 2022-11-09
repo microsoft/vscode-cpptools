@@ -319,7 +319,12 @@ export class UI {
         if (this.browseEngineStatusBarItem) {
             this.browseEngineStatusBarItem.busy = show && (this.isParsingWorkspace || this.isParsingFiles);
             if (!this.browseEngineStatusBarItem.busy) {
-                this.dbTimeout = setTimeout(() => {this.browseEngineStatusBarItem?.dispose(); this.browseEngineStatusBarItem = undefined; }, this.iconDelayTime);
+                this.dbTimeout = setTimeout(() => {
+                    if (this.browseEngineStatusBarItem) {
+                        this.browseEngineStatusBarItem.dispose();
+                        this.browseEngineStatusBarItem = undefined;
+                    }
+                }, this.iconDelayTime);
             }
         }
     }
@@ -332,7 +337,12 @@ export class UI {
         if (this.intelliSenseStatusBarItem) {
             this.intelliSenseStatusBarItem.busy = show && (this.isUpdatingIntelliSense || this.isRunningCodeAnalysis);
             if (!this.intelliSenseStatusBarItem.busy) {
-                this.flameTimeout = setTimeout(() => {this.intelliSenseStatusBarItem?.dispose(); this.intelliSenseStatusBarItem = undefined; }, this.iconDelayTime);
+                this.flameTimeout = setTimeout(() => {
+                    if (this.intelliSenseStatusBarItem) {
+                        this.intelliSenseStatusBarItem.dispose();
+                        this.intelliSenseStatusBarItem = undefined;
+                    }
+                }, this.iconDelayTime);
             }
         }
     }
@@ -530,9 +540,9 @@ export class UI {
 
     public dispose(): void {
         this.configStatusBarItem.dispose();
-        this.browseEngineStatusBarItem?.dispose();
-        this.intelliSenseStatusBarItem?.dispose();
-        this.referencesStatusBarItem?.dispose();
+        if (this.browseEngineStatusBarItem) {this.browseEngineStatusBarItem.dispose(); }
+        if (this.intelliSenseStatusBarItem) {this.intelliSenseStatusBarItem.dispose(); }
+        if (this.referencesStatusBarItem) {this.referencesStatusBarItem.dispose(); }
     }
 }
 
