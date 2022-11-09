@@ -67,22 +67,18 @@ export class UI {
     private codeAnalysisPausedTooltip: string = "";
 
     constructor() {
-
-        // TODO: Update item IDs(remove "2" at the end)
-        /* ************* New status items **************** */
-        this.createConfigStatusItem();
+        this.ensureConfigStatusItem();
         this.ShowConfiguration = true;
 
-        this.createReferencesStatusItem();
+        this.ensureReferencesStatusItem();
         this.ShowReferencesIcon = false;
 
-        this.createIntellisentStatusItem();
+        this.ensureIntellisentStatusItem();
         this.ShowFlameIcon = false;
 
-        this.createBrowseEnginerStatus();
+        this.ensureBrowseEnginerStatus();
         this.ShowDBIcon = false;
 
-        /* *************************************************/
         this.codeAnalysisProgram = "clang-tidy";
         this.runningCodeAnalysisTooltip = localize(
             { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
@@ -90,7 +86,7 @@ export class UI {
             { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
     }
 
-    private createConfigStatusItem(): void {
+    private ensureConfigStatusItem(): void {
         if (this.configStatusBarItem) {
             return;
         }
@@ -105,7 +101,7 @@ export class UI {
 
     }
 
-    private createReferencesStatusItem(): void {
+    private ensureReferencesStatusItem(): void {
         if (this.referencesStatusBarItem) {
             return;
         }
@@ -119,7 +115,7 @@ export class UI {
         };
     }
 
-    private createIntellisentStatusItem(): void {
+    private ensureIntellisentStatusItem(): void {
         if (this.intelliSenseStatusBarItem) {
             return;
         }
@@ -129,7 +125,7 @@ export class UI {
         this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseTooltip;
     }
 
-    private createBrowseEnginerStatus(): void {
+    private ensureBrowseEnginerStatus(): void {
         if (this.browseEngineStatusBarItem) {
             return;
         }
@@ -146,7 +142,7 @@ export class UI {
     private set TagParseStatus(label: string) {
         this.workspaceParsingStatus = label;
 
-        this.createBrowseEnginerStatus();
+        this.ensureBrowseEnginerStatus();
         if (this.browseEngineStatusBarItem) {
             this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + label;
         }
@@ -154,7 +150,7 @@ export class UI {
 
     private setIsParsingWorkspace(val: boolean): void {
 
-        this.createBrowseEnginerStatus();
+        this.ensureBrowseEnginerStatus();
         this.isParsingWorkspace = val;
         const showIcon: boolean = val || this.isParsingFiles;
         const twoStatus: boolean = val && this.isParsingFiles;
@@ -169,7 +165,7 @@ export class UI {
     }
 
     private setIsParsingWorkspacePausable(val: boolean): void {
-        this.createBrowseEnginerStatus();
+        this.ensureBrowseEnginerStatus();
         if (this.browseEngineStatusBarItem) {
             if (val) {
                 this.browseEngineStatusBarItem.command = {
@@ -191,7 +187,7 @@ export class UI {
         if (!this.isRunningCodeAnalysis) {
             return;
         }
-        this.createIntellisentStatusItem();
+        this.ensureIntellisentStatusItem();
 
         this.isCodeAnalysisPaused = val;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
@@ -204,7 +200,7 @@ export class UI {
 
     private setIsParsingFiles(val: boolean): void {
 
-        this.createBrowseEnginerStatus();
+        this.ensureBrowseEnginerStatus();
         this.isParsingFiles = val;
         const showIcon: boolean = val || this.isParsingWorkspace;
         const twoStatus: boolean = val && this.isParsingWorkspace;
@@ -219,7 +215,7 @@ export class UI {
 
     private setIsUpdatingIntelliSense(val: boolean): void {
 
-        this.createIntellisentStatusItem();
+        this.ensureIntellisentStatusItem();
         this.isUpdatingIntelliSense = val;
         const showIcon: boolean = val || this.isRunningCodeAnalysis;
         const twoStatus: boolean = val && this.isRunningCodeAnalysis;
@@ -239,7 +235,7 @@ export class UI {
             this.codeAnalysisTotal = 0;
             this.codeAnalysisProcessed = 0;
         }
-        this.createIntellisentStatusItem();
+        this.ensureIntellisentStatusItem();
         this.isRunningCodeAnalysis = val;
         const showIcon: boolean = val || this.isUpdatingIntelliSense;
         const twoStatus: boolean = val && this.isUpdatingIntelliSense;
@@ -279,7 +275,7 @@ export class UI {
     }
 
     private get ReferencesCommand(): ReferencesCommandMode {
-        this.createReferencesStatusItem();
+        this.ensureReferencesStatusItem();
         let tooltip: string|undefined;
         if (this.referencesStatusBarItem) {
             tooltip = this.referencesStatusBarItem.command?.tooltip;
@@ -291,7 +287,7 @@ export class UI {
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
-        this.createReferencesStatusItem();
+        this.ensureReferencesStatusItem();
         if (this.referencesStatusBarItem) {
             if (val === ReferencesCommandMode.None) {
                 this.referencesStatusBarItem.text = "";
