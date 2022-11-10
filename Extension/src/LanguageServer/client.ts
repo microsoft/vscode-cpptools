@@ -536,7 +536,6 @@ export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> 
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
 const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
-//const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, WorkspaceEdit, void> = new RequestType<CreateDeclarationOrDefinitionParams, WorkspaceEdit, void>('cpptools/createDeclDef');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
@@ -2975,19 +2974,19 @@ export class DefaultClient implements Client {
     public async handleCreateDeclarationOrDefinition(): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri| undefined;
-            // range is based on the cursor position.
-            const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-            if (editor) {
-                uri = editor.document.uri;
-                if (editor.selection.isEmpty) {
-                    range = new vscode.Range(editor.selection.active, editor.selection.active);
-                } else if (editor.selection.isReversed) {
-                    range = new vscode.Range(editor.selection.active, editor.selection.anchor);
-                } else {
-                    range = new vscode.Range(editor.selection.anchor, editor.selection.active);
-                }
+        // range is based on the cursor position.
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            uri = editor.document.uri;
+            if (editor.selection.isEmpty) {
+                range = new vscode.Range(editor.selection.active, editor.selection.active);
+            } else if (editor.selection.isReversed) {
+                range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+            } else {
+                range = new vscode.Range(editor.selection.anchor, editor.selection.active);
             }
-        
+        }
+
         if (uri && range) {
             const params: CreateDeclarationOrDefinitionParams = {
                 uri: uri.toString(),
@@ -3004,18 +3003,24 @@ export class DefaultClient implements Client {
             // TODO: return specific errors info in result.
             if (result.changes) {
                 const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                let modifiedDocument: vscode.Uri | undefined;
+                let lastEdit: vscode.TextEdit | undefined;
                 for (const file in result.changes) {
                     const uri: vscode.Uri = vscode.Uri.file(file);
                     const edits: vscode.TextEdit[] = [];
                     for (const edit of result.changes[file]) {
                         const range: vscode.Range = makeVscodeRange(edit.range);
-                        edits.push(new vscode.TextEdit(range, edit.newText));
+                        lastEdit = new vscode.TextEdit(range, edit.newText);
+                        edits.push(lastEdit);
                     }
                     workspaceEdit.set(uri, edits);
+                    modifiedDocument = uri;
                 };
-                // TODO: If the file requiring edits was not already open, open it?
-                // Apply edit, only if file version has not changed (if was already open).
-                await vscode.workspace.applyEdit(workspaceEdit);
+                if (modifiedDocument && lastEdit) {
+                    await vscode.workspace.applyEdit(workspaceEdit);
+                    const selectionRange: vscode.Range = lastEdit.range; // TODO: range should be the new range after text edit was applied.
+                    await vscode.window.showTextDocument(modifiedDocument, {selection: selectionRange});
+                }
             }
         }
     }
