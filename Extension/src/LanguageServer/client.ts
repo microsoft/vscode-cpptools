@@ -2398,8 +2398,27 @@ export class DefaultClient implements Client {
                 modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
             }
 
+            /*
+             * Ensure all paths are absolute
+             */
+            if (modifiedConfig.macFrameworkPath) {
+                const resolvedMacFrameworkPath: string[] = [];
+                modifiedConfig.macFrameworkPath.forEach((path: string) => {resolvedMacFrameworkPath.push(cppProperties.resolvePath(path, os.platform() === "win32")); });
+                modifiedConfig.macFrameworkPath = resolvedMacFrameworkPath;
+            }
+
+            if (modifiedConfig.dotConfig) {
+                modifiedConfig.dotConfig = cppProperties.resolvePath(modifiedConfig.dotConfig, os.platform() === "win32");
+            }
+
             if (modifiedConfig.compileCommands) {
                 modifiedConfig.compileCommands = cppProperties.resolvePath(modifiedConfig.compileCommands, os.platform() === "win32");
+            }
+
+            if (modifiedConfig.forcedInclude) {
+                const resolvedforcedInclude: string[] = [];
+                modifiedConfig.forcedInclude.forEach((path: string) => {resolvedforcedInclude.push(cppProperties.resolvePath(path, os.platform() === "win32")); });
+                modifiedConfig.forcedInclude = resolvedforcedInclude;
             }
 
             if (modifiedConfig.includePath) {
