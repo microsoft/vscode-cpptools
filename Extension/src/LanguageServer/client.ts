@@ -2401,6 +2401,12 @@ export class DefaultClient implements Client {
             if (modifiedConfig.compileCommands) {
                 modifiedConfig.compileCommands = cppProperties.resolvePath(modifiedConfig.compileCommands, os.platform() === "win32");
             }
+
+            if (modifiedConfig.includePath) {
+                const resolvedIncludePath: string[] = [];
+                modifiedConfig.includePath.forEach((path: string) => {resolvedIncludePath.push(cppProperties.resolvePath(path, os.platform() === "win32")); });
+                modifiedConfig.includePath = resolvedIncludePath;
+            }
             params.configurations.push(modifiedConfig);
         });
 
