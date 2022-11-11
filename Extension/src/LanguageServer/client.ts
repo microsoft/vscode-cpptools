@@ -2397,6 +2397,10 @@ export class DefaultClient implements Client {
             } else {
                 modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
             }
+
+            if (modifiedConfig.compileCommands) {
+                modifiedConfig.compileCommands = cppProperties.resolvePath(modifiedConfig.compileCommands, os.platform() === "win32");
+            }
             params.configurations.push(modifiedConfig);
         });
 
