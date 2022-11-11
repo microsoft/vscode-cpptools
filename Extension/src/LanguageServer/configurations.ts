@@ -1378,10 +1378,8 @@ export class CppProperties {
         }
 
         // Make sure all paths result to an absolute path
-        if (!path.isAbsolute(result)) {
-            if (this.rootUri) {
-                result = path.join(this.rootUri.fsPath, result);
-            }
+        if (!path.isAbsolute(result) && this.rootUri) {
+            result = path.join(this.rootUri.fsPath, result);
         }
 
         return result;
