@@ -286,111 +286,84 @@
         "hint": "'Bases' are a C++ class type."
     },
     "cm_classes": {
-        "text": "Classes",
-        "hint": "'Classes' are a C++ class type."
+        "text": "Classes"
     },
     "cm_coclasses": {
-        "text": "CoClasses",
-        "hint": "'CoClasses' are a C++ class type."
+        "text": "CoClasses"
     },
     "cm_delegates": {
-        "text": "Delegates",
-        "hint": "'Delegates' are a C++ delegate."
+        "text": "Delegates"
     },
     "cm_enums": {
-        "text": "Enums",
-        "hint": "'Enums' are a C++ enum."
+        "text": "Enums"
     },
     "cm_events": {
-        "text": "Events",
-        "hint": "'Events' are a C++ event."
+        "text": "Events"
     },
     "cm_functions": {
-        "text": "Functions",
-        "hint": "'Functions' are a C++ function."
+        "text": "Functions"
     },
     "cm_importdirectives": {
-        "text": "Import directives",
-        "hint": "'Import directives' are a C++ ."
+        "text": "Import directives"
     },
     "cm_importlibstatements": {
-        "text": "ImportLib statements",
-        "hint": "'ImportLib statements' are a C++ ."
+        "text": "ImportLib statements"
     },
     "cm_importstatements": {
-        "text": "Import statements",
-        "hint": "'Import statements' are a C++ ."
+        "text": "Import statements"
     },
     "cm_includedirectives": {
-        "text": "Include directives",
-        "hint": "'Include directives' are a C++ ."
+        "text": "Include directives"
     },
     "cm_interfaces": {
-        "text": "Interfaces",
-        "hint": "'Interfaces' are a C++ ."
+        "text": "Interfaces"
     },
     "cm_libraries": {
-        "text": "Libraries",
-        "hint": "'Libraries' are a C++ ."
+        "text": "Libraries"
     },
     "cm_macros": {
-        "text": "Macros",
-        "hint": "'Macros' are a C++ ."
+        "text": "Macros"
     },
     "cm_maps": {
-        "text": "Maps",
-        "hint": "'Maps' are a C++ ."
+        "text": "Maps"
     },
     "cm_mapentries": {
-        "text": "Map entries",
-        "hint": "'Map entries' are a C++ ."
+        "text": "Map entries"
     },
     "cm_miscellaneous": {
-        "text": "Miscellaneous",
-        "hint": "'Miscellaneous' are a C++ ."
+        "text": "Miscellaneous"
     },
     "cm_namespaces": {
-        "text": "Namespaces",
-        "hint": "'Namespaces' are a C++ ."
+        "text": "Namespaces"
     },
     "cm_parameters": {
-        "text": "Parameters",
-        "hint": "'Parameters' are a C++ ."
+        "text": "Parameters"
     },
     "cm_properties": {
-        "text": "Properties",
-        "hint": "'Properties' are a C++ ."
+        "text": "Properties"
     },
     "cm_structs": {
-        "text": "Structs",
-        "hint": "'Structs' are a C++ ."
+        "text": "Structs"
     },
     "cm_todo_insert_return": {
-        "text": "TODO: insert return statement here",
-        "hint": "'TODO: insert return statement here' are a C++ ."
+        "text": "TODO: insert return statement here"
     },
     "cm_typedefs": {
-        "text": "Typedefs",
-        "hint": "'Typedefs' are a C++ ."
+        "text": "Typedefs"
     },
     "cm_unions": {
-        "text": "Unions",
-        "hint": "'Unions' are a C++ ."
+        "text": "Unions"
     },
     "cm_usingaliases": {
-        "text": "Using aliases",
-        "hint": "'Using aliases are a C++ ."
+        "text": "Using aliases"
     },
     "cm_usingdirectives": {
-        "text": "Using directives",
-        "hint": "'Using directives' are a C++ ."
+        "text": "Using directives"
     },
     "cm_variables": {
-        "text": "Variables",
-        "hint": "C/C++ variables."
+        "text": "Variables"
     },
     "cm_addfunction": {
-        "text": "Automatic add function",
-        "hint": "Operation to automatically add a function."
+        "text": "Automatic add function"
     }
 }

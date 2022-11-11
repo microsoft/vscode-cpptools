@@ -307,11 +307,6 @@ export interface CreateDeclarationOrDefinitionResult {
     changes: { [key: string]: any[] };
 }
 
-// interface TextEdit {
-//     range: Range;
-//     newText: string;
-// }
-
 interface ShowMessageWindowParams {
     type: number;
     localizeStringParams: LocalizeStringParams;
@@ -2288,7 +2283,7 @@ export class DefaultClient implements Client {
                 return false;
             });
         },
-        () => ask.Value = false);
+            () => ask.Value = false);
     }
 
     /**
@@ -2973,7 +2968,7 @@ export class DefaultClient implements Client {
 
     public async handleCreateDeclarationOrDefinition(): Promise<void> {
         let range: vscode.Range | undefined;
-        let uri: vscode.Uri| undefined;
+        let uri: vscode.Uri | undefined;
         // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
@@ -2993,10 +2988,12 @@ export class DefaultClient implements Client {
                 range: {
                     start: {
                         character: range.start.character,
-                        line: range.start.line},
+                        line: range.start.line
+                    },
                     end: {
                         character: range.end.character,
-                        line: range.end.line}
+                        line: range.end.line
+                    }
                 }
             };
             const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
@@ -3019,7 +3016,7 @@ export class DefaultClient implements Client {
                 if (modifiedDocument && lastEdit) {
                     await vscode.workspace.applyEdit(workspaceEdit);
                     const selectionRange: vscode.Range = lastEdit.range; // TODO: range should be the new range after text edit was applied.
-                    await vscode.window.showTextDocument(modifiedDocument, {selection: selectionRange});
+                    await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
                 }
             }
         }
