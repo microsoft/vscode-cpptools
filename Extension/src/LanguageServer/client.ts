@@ -168,8 +168,6 @@ function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): v
 
     const fileUri: vscode.Uri = vscode.Uri.parse(params.uri);
     diagnosticsCollectionRefactor.set(fileUri, newDiagnostics);
-
-    clients.timeTelemetryCollector.setUpdateRangeTime(fileUri);
 }
 
 interface WorkspaceFolderParams {
