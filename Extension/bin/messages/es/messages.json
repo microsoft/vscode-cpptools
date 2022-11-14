@@ -3463,6 +3463,8 @@
   "el tipo de operando de vector de punto flotante (%t) no tiene ningún tipo de vector entero coincidente",
   "aún no se ha implementado la limpieza de expresiones \"requires\"",
   "debido a un atributo “no disponible”",
+  "calificador 'asm' duplicado",
+  "un campo de bits con un tipo de enumeración incompleto o una enumeración opaca con un tipo base no válido",
   "intentó construir un elemento a partir de la partición IFC %sq mediante un índice en la partición IFC %sq",
   "la partición %sq especificó su tamaño de entrada como %d1 cuando se esperaba %d2",
   "se encontró un requisito IFC inesperado al procesar el módulo %sq1",
@@ -3470,10 +3472,12 @@
   "la restricción atómica depende de sí misma",
   "La función \"noreturn\" tiene un tipo de valor devuelto distinto de nulo",
   "se ha quitado el parámetro %sq (en el índice relativo %d) para realizar una corrección",
+  "no se puede especificar un argumento de plantilla predeterminado en la definición de una plantilla de miembro fuera de su clase",
   "se encontró un nombre de identificador IFC no válido %sq durante la reconstrucción de entidades",
   "se omitió un nombre de identificador IFC no válido %sq durante la reconstrucción de entidades",
   "el módulo %sq es un valor de ordenación no válido",
   "una plantilla de función cargada desde un módulo IFC se analizó incorrectamente como %nd",
   "no se pudo cargar una referencia de entidad IFC en el módulo %sq",
-  "Ordenación de índice IFC = %d1, valor = %d2"
+  "Ordenación de índice IFC = %d1, valor = %d2",
+  "no se permiten designadores encadenados para un tipo de clase con un destructor no trivial"
 ]
