@@ -4,7 +4,7 @@
 ### New Features
 * Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
 
-### Enhancement
+### Enhancements
 * Add sections to settings. [#8237](https://github.com/microsoft/vscode-cpptools/issues/8237)
 * Check for MSVC environment variables for configuring IntelliSense. [#9745](https://github.com/microsoft/vscode-cpptools/issues/9745)
 * Add "iar" and "armcc5" problem matchers. [#10054](https://github.com/microsoft/vscode-cpptools/issues/10054)
