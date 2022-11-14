@@ -115,7 +115,6 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
-    rootfs: string;
 }
 
 export class CppProperties {
@@ -149,7 +148,6 @@ export class CppProperties {
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
-    private rootfs: string | null = null;
     private settingsPanel?: SettingsPanel;
     private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
@@ -216,7 +214,6 @@ export class CppProperties {
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
-        this.rootfs = compilerDefaults.rootfs;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -1356,15 +1353,15 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(path: string | undefined, isWindows: boolean): string {
-        if (!path || path === "${default}") {
+    public resolvePath(input_path: string | undefined, isWindows: boolean): string {
+        if (!input_path || input_path === "${default}") {
             return "";
         }
 
         let result: string = "";
 
         // first resolve variables
-        result = util.resolveVariables(path, this.ExtendedEnvironment);
+        result = util.resolveVariables(input_path, this.ExtendedEnvironment);
         if (this.rootUri) {
             if (result.includes("${workspaceFolder}")) {
                 result = result.replace("${workspaceFolder}", this.rootUri.fsPath);
@@ -1380,16 +1377,9 @@ export class CppProperties {
             result = result.replace(/\*/g, "");
         }
 
-        // resolve WSL paths
-        if (isWindows && result.startsWith("/")) {
-            const mntStr: string = "/mnt/";
-            if (result.length > "/mnt/c/".length && result.substring(0, mntStr.length) === mntStr) {
-                result = result.substring(mntStr.length);
-                result = result.substring(0, 1) + ":" + result.substring(1);
-            } else if (this.rootfs && this.rootfs.length > 0) {
-                result = this.rootfs + result.substring(1);
-                // TODO: Handle WSL symlinks.
-            }
+        // Make sure all paths result to an absolute path
+        if (!path.isAbsolute(result) && this.rootUri) {
+            result = path.join(this.rootUri.fsPath, result);
         }
 
         return result;
@@ -1777,10 +1767,9 @@ export class CppProperties {
                     }
                 }
             }
-            const isWSL: boolean = isWindows && compilerPath.startsWith("/");
             let compilerPathExists: boolean = true;
             if (this.rootUri && !isClCompiler) {
-                const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, true);
+                const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, true);
                 compilerPathExists = checkPathExists.pathExists;
                 compilerPath = checkPathExists.path;
             }
@@ -1804,12 +1793,11 @@ export class CppProperties {
             dotConfigPath = currentConfiguration.dotConfig;
             dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
             dotConfigPath = this.resolvePath(dotConfigPath, isWindows);
-            const isWSLDotConfig: boolean = isWindows && dotConfigPath.startsWith("/");
             // does not try resolve if the dotConfig property is empty
             dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
 
             if (dotConfigPath && this.rootUri) {
-                const checkPathExists: any = util.checkPathExistsSync(dotConfigPath, this.rootUri.fsPath + path.sep, isWindows, isWSLDotConfig, true);
+                const checkPathExists: any = util.checkPathExistsSync(dotConfigPath, this.rootUri.fsPath + path.sep, isWindows, true);
                 dotConfigPathExists = checkPathExists.pathExists;
                 dotConfigPath = checkPathExists.path;
             }
@@ -1849,7 +1837,7 @@ export class CppProperties {
                 }
                 let pathExists: boolean = true;
                 if (this.rootUri) {
-                    const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, false);
+                    const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, false);
                     pathExists = checkPathExists.pathExists;
                     resolvedPath = checkPathExists.path;
                 }
