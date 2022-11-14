@@ -1,7 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.13.4: November 15, 2022
-
 ### New Features
 * Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
 
