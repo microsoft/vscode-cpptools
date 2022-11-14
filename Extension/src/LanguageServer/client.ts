@@ -67,6 +67,7 @@ const languageClientCrashTimes: number[] = [];
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
+let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -142,6 +143,31 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
     diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
 
     clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
+}
+
+function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
+    if (!diagnosticsCollectionRefactor) {
+        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(CppSourceStr);
+    }
+
+    const newDiagnostics: vscode.Diagnostic[] = [];
+    params.diagnostics.forEach((d) => {
+        const message: string = getLocalizedString(d.localizeStringParams);
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
+        diagnostic.code = d.code;
+        diagnostic.source = CppSourceStr;
+        if (d.relatedInformation) {
+            diagnostic.relatedInformation = [];
+            for (const info of d.relatedInformation) {
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
+            }
+        }
+
+        newDiagnostics.push(diagnostic);
+    });
+
+    const fileUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    diagnosticsCollectionRefactor.set(fileUri, newDiagnostics);
 }
 
 interface WorkspaceFolderParams {
@@ -239,6 +265,11 @@ interface IntelliSenseDiagnosticRelatedInformation {
     message: string;
 }
 
+interface RefactorDiagnosticRelatedInformation {
+    location: Location;
+    message: string;
+}
+
 interface IntelliSenseDiagnostic {
     range: Range;
     code?: number;
@@ -247,9 +278,31 @@ interface IntelliSenseDiagnostic {
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
 }
 
+interface RefactorDiagnostic {
+    range: Range;
+    code?: number;
+    severity: vscode.DiagnosticSeverity;
+    localizeStringParams: LocalizeStringParams;
+    relatedInformation?: RefactorDiagnosticRelatedInformation[];
+}
+
 interface PublishIntelliSenseDiagnosticsParams {
     uri: string;
     diagnostics: IntelliSenseDiagnostic[];
+}
+
+interface PublishRefactorDiagnosticsParams {
+    uri: string;
+    diagnostics: RefactorDiagnostic[];
+}
+
+export interface CreateDeclarationOrDefinitionParams {
+    uri: string;
+    range: Range;
+}
+
+export interface CreateDeclarationOrDefinitionResult {
+    changes: { [key: string]: any[] };
 }
 
 interface ShowMessageWindowParams {
@@ -475,6 +528,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
+const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
@@ -524,6 +578,7 @@ const ReferencesNotification: NotificationType<refs.ReferencesResult> = new Noti
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
 const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
+const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string> = new NotificationType<string>('cpptools/reportTextDocumentLanguage');
@@ -691,6 +746,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
+    handleCreateDeclarationOrDefinition(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -1841,6 +1897,7 @@ export class DefaultClient implements Client {
             }
         });
         this.languageClient.onNotification(PublishIntelliSenseDiagnosticsNotification, publishIntelliSenseDiagnostics);
+        this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
@@ -2907,6 +2964,62 @@ export class DefaultClient implements Client {
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
+    public async handleCreateDeclarationOrDefinition(): Promise<void> {
+        let range: vscode.Range | undefined;
+        let uri: vscode.Uri | undefined;
+        // range is based on the cursor position.
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            uri = editor.document.uri;
+            if (editor.selection.isEmpty) {
+                range = new vscode.Range(editor.selection.active, editor.selection.active);
+            } else if (editor.selection.isReversed) {
+                range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+            } else {
+                range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+            }
+        }
+
+        if (uri && range) {
+            const params: CreateDeclarationOrDefinitionParams = {
+                uri: uri.toString(),
+                range: {
+                    start: {
+                        character: range.start.character,
+                        line: range.start.line
+                    },
+                    end: {
+                        character: range.end.character,
+                        line: range.end.line
+                    }
+                }
+            };
+            const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
+            // TODO: return specific errors info in result.
+            if (result.changes) {
+                const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                let modifiedDocument: vscode.Uri | undefined;
+                let lastEdit: vscode.TextEdit | undefined;
+                for (const file in result.changes) {
+                    const uri: vscode.Uri = vscode.Uri.file(file);
+                    const edits: vscode.TextEdit[] = [];
+                    for (const edit of result.changes[file]) {
+                        const range: vscode.Range = makeVscodeRange(edit.range);
+                        lastEdit = new vscode.TextEdit(range, edit.newText);
+                        edits.push(lastEdit);
+                    }
+                    workspaceEdit.set(uri, edits);
+                    modifiedDocument = uri;
+                };
+                if (modifiedDocument && lastEdit) {
+                    await vscode.workspace.applyEdit(workspaceEdit);
+                    const selectionRange: vscode.Range = lastEdit.range; // TODO: range should be the new range after text edit was applied.
+                    await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
+                }
+            }
+        }
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
@@ -3093,6 +3206,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
