@@ -2402,9 +2402,7 @@ export class DefaultClient implements Client {
              * Ensure all paths are absolute
              */
             if (modifiedConfig.macFrameworkPath) {
-                const resolvedMacFrameworkPath: string[] = [];
-                modifiedConfig.macFrameworkPath.forEach((path: string) => {resolvedMacFrameworkPath.push(cppProperties.resolvePath(path, os.platform() === "win32")); });
-                modifiedConfig.macFrameworkPath = resolvedMacFrameworkPath;
+                modifiedConfig.macFrameworkPath = modifiedConfig.macFrameworkPath.map((path: string) => cppProperties.resolvePath(path, os.platform() === "win32"));
             }
 
             if (modifiedConfig.dotConfig) {
@@ -2416,15 +2414,11 @@ export class DefaultClient implements Client {
             }
 
             if (modifiedConfig.forcedInclude) {
-                const resolvedforcedInclude: string[] = [];
-                modifiedConfig.forcedInclude.forEach((path: string) => {resolvedforcedInclude.push(cppProperties.resolvePath(path, os.platform() === "win32")); });
-                modifiedConfig.forcedInclude = resolvedforcedInclude;
+                modifiedConfig.forcedInclude = modifiedConfig.forcedInclude.map((path: string) => cppProperties.resolvePath(path, os.platform() === "win32"));
             }
 
             if (modifiedConfig.includePath) {
-                const resolvedIncludePath: string[] = [];
-                modifiedConfig.includePath.forEach((path: string) => {resolvedIncludePath.push(cppProperties.resolvePath(path, os.platform() === "win32")); });
-                modifiedConfig.includePath = resolvedIncludePath;
+                modifiedConfig.includePath = modifiedConfig.includePath.map((path: string) => cppProperties.resolvePath(path, os.platform() === "win32"));
             }
             params.configurations.push(modifiedConfig);
         });
