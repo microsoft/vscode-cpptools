@@ -5895,7 +5895,7 @@
     "follow-redirects": "1.14.8",
     "glob-parent": "^5.1.2",
     "hosted-git-info": "^3.0.8",
-    "loader-utils": "^2.0.3",
+    "loader-utils": "^2.0.4",
     "minimatch": "^3.0.5",
     "nanoid": "^3.1.20",
     "path-parse": "^1.0.7",
