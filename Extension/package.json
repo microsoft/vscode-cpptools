@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.13.3-main",
+  "version": "1.13.4-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -58,6 +58,7 @@
     "onCommand:C_Cpp.ConfigurationEditUI",
     "onCommand:C_Cpp.ConfigurationSelect",
     "onCommand:C_Cpp.ConfigurationProviderSelect",
+    "onCommand:C_Cpp.CreateDeclarationOrDefinition",
     "onCommand:C_Cpp.SwitchHeaderSource",
     "onCommand:C_Cpp.EnableErrorSquiggles",
     "onCommand:C_Cpp.DisableErrorSquiggles",
@@ -3034,6 +3035,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.CreateDeclarationOrDefinition",
+        "title": "%c_cpp.command.CreateDeclarationOrDefinition.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
         "title": "%c_cpp.command.RunCodeAnalysisOnActiveFile.title%",
         "category": "C/C++"
@@ -5298,7 +5304,12 @@
         {
           "command": "C_Cpp.GenerateDoxygenComment",
           "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
-          "group": "custom2@3"
+          "group": "custom2@4"
+        },
+        {
+          "command": "C_Cpp.CreateDeclarationOrDefinition",
+          "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
+          "group": "custom2@5"
         }
       ],
       "commandPalette": [
@@ -5884,7 +5895,7 @@
     "follow-redirects": "1.14.8",
     "glob-parent": "^5.1.2",
     "hosted-git-info": "^3.0.8",
-    "loader-utils": "^2.0.3",
+    "loader-utils": "^2.0.4",
     "minimatch": "^3.0.5",
     "nanoid": "^3.1.20",
     "path-parse": "^1.0.7",

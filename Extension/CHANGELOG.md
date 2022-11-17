@@ -1,5 +1,29 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.4: November 17, 2022
+### New Features
+* Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
+
+### Enhancements
+* Add sections to settings. [#8237](https://github.com/microsoft/vscode-cpptools/issues/8237)
+* Check for MSVC environment variables for configuring IntelliSense. [#9745](https://github.com/microsoft/vscode-cpptools/issues/9745)
+* Add "iar" and "armcc5" problem matchers. [#10054](https://github.com/microsoft/vscode-cpptools/issues/10054)
+  * Michael (@morsisko) [PR #10085](https://github.com/microsoft/vscode-cpptools/pull/10085), [PR #10101](https://github.com/microsoft/vscode-cpptools/pull/10101)
+* Pass `--Wno-error=unknown` to clang-format to avoid failing on unsupported settings. [#10072](https://github.com/microsoft/vscode-cpptools/issues/10072)
+* Add support for `/cygdrive` paths returned by some versions of Cygwin. [#10112](https://github.com/microsoft/vscode-cpptools/issues/10112)
+
+### Bug Fixes
+* Fix updates to compile_commands.json not being handled if specified using a relative path. [#7610](https://github.com/microsoft/vscode-cpptools/issues/7610)
+* Fix code analysis errors related to SSE2 being enabled. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
+* Fix Doxygen code action from appearing on a function that already has a `*/` comment. [#10009](https://github.com/microsoft/vscode-cpptools/issues/10009)
+* Fix Doxygen comment generation when there's a selection. [#10028](https://github.com/microsoft/vscode-cpptools/issues/10028)
+* Fixed crash on Linux/Mac when a full command line is specified in `compilerPath` containing invalid arguments. [PR #10070](https://github.com/microsoft/vscode-cpptools/pull/10070)
+* Fix random "Failed to spawn IntelliSense process: 65520" on Mac. [#10091](https://github.com/microsoft/vscode-cpptools/issues/10091)
+
+### Removed Features
+* Removed explicit WSL support in favor of using the WSL extension. [#10066](https://github.com/microsoft/vscode-cpptools/pull/10066)
+* The fix for an IntelliSense crash with the seqan3 library [#8956](https://github.com/microsoft/vscode-cpptools/issues/8956) in 1.13.3 was removed because it caused a regression. [#10075](https://github.com/microsoft/vscode-cpptools/issues/10075)
+
 ## Version 1.13.3: October 26, 2022
 ### Enhancements
 * Make Doxygen hover comments customizable with `C_Cpp.doxygen.sectionTags`. [#8525](https://github.com/microsoft/vscode-cpptools/issues/8525)
