@@ -103,6 +103,8 @@ export interface Browse {
 export interface KnownCompiler {
     path: string;
     isC: boolean;
+    isTrusted: boolean;
+    isCL: boolean;
 }
 
 export interface CompilerDefaults {
@@ -115,6 +117,7 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
+    trustedCompilerFound: boolean;
     rootfs: string;
 }
 
@@ -158,6 +161,7 @@ export class CppProperties {
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
     private configurationIncomplete: boolean = true;
+    trustedCompilerFound: boolean = false;
 
     constructor(rootUri?: vscode.Uri, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootUri = rootUri;
@@ -207,19 +211,11 @@ export class CppProperties {
         return result;
     }
 
-    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
-        this.defaultCompilerPath = compilerDefaults.compilerPath;
-        this.knownCompilers = compilerDefaults.knownCompilers;
-        this.defaultCStandard = compilerDefaults.cStandard;
-        this.defaultCppStandard = compilerDefaults.cppStandard;
-        this.defaultIncludes = compilerDefaults.includes;
-        this.defaultFrameworks = compilerDefaults.frameworks;
-        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
-        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
-        this.rootfs = compilerDefaults.rootfs;
-
+    public setupConfigurations() {
+        
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
+
         const configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (this.rootUri !== null && fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
@@ -299,6 +295,19 @@ export class CppProperties {
         });
 
         this.handleConfigurationChange();
+    }
+
+    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
+        this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.knownCompilers = compilerDefaults.knownCompilers;
+        this.defaultCStandard = compilerDefaults.cStandard;
+        this.defaultCppStandard = compilerDefaults.cppStandard;
+        this.defaultIncludes = compilerDefaults.includes;
+        this.defaultFrameworks = compilerDefaults.frameworks;
+        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
+        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
+        this.rootfs = compilerDefaults.rootfs;
     }
 
     public get VcpkgInstalled(): boolean {
@@ -857,9 +866,9 @@ export class CppProperties {
                 // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
                 // don't set a default when compileCommands is in use.
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
-                configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== undefined;
                 if (configuration.compilerPath === undefined) {
-                    if (!!this.defaultCompilerPath) {
+                    configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== undefined;
+                    if (!!this.defaultCompilerPath && this.trustedCompilerFound) {
                         // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
                         configuration.compilerPath = this.defaultCompilerPath;
                         if (!configuration.cStandard && !!this.defaultCStandard) {
@@ -885,6 +894,9 @@ export class CppProperties {
                             configuration.macFrameworkPath = this.defaultFrameworks;
                         }
                     }
+                } else { 
+                    // add compiler to list of trusted compilers
+                    util.updateTrustedCompilersList(configuration.compilerPath);
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.

@@ -17,6 +17,7 @@ import * as tmp from 'tmp';
 import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
+import { PersistentState } from './LanguageServer/persistentState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -861,17 +862,36 @@ export async function renameAsync(oldName: string, newName: string): Promise<voi
     });
 }
 
-export function promptForReloadWindowDueToSettingsChange(): void {
-    promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
+export async function promptForReloadWindowDueToSettingsChange(): Promise<void> {
+    await promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
-export function promptReloadWindow(message: string): void {
+export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
-        if (value === reload) {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-    });
+    const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+    if (value === reload) {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
+
+}
+
+export async function updateTrustedCompilersList(path: string): Promise<void> {
+    // detect duplicate paths
+    const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
+    let compilerPaths: string[] = compilerPath.Value;
+    compilerPaths.push(path);
+    compilerPath.Value = compilerPaths;
+
+    //     const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
+    //     compilerDefaults = selectedCompilerDefaults;
+    //     clients.forEach(client => {
+    //         if (client instanceof DefaultClient) {
+    //             const defaultClient: DefaultClient = <DefaultClient>client;
+    //             defaultClient.configuration.CompilerDefaults = compilerDefaults;
+    //             defaultClient.configuration.handleConfigurationChange();
+    //         }
+    //     });
+    // }
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
