@@ -3463,6 +3463,8 @@
   "le type d’opérande vectoriel à virgule flottante (%t) n’a pas de type de vecteur entier correspondant.",
   "La gestion des expressions \"requires\" n'est pas encore implémentée.",
   "en raison d’un attribut 'unavailable'",
+  "qualificateur 'asm' dupliqué",
+  "soit un champ de bits avec un type enum incomplet, soit une énumération opaque avec un type de base non valide",
   "a tenté de construire un élément à partir d’une partition IFC %sq à l’aide d’un index dans la partition IFC %sq.",
   "le %sq de partition a spécifié sa taille d’entrée %d1 alors que %d2 était attendu.",
   "une exigence IFC inattendue s’est produite lors du traitement du module %sq1.",
@@ -3470,10 +3472,12 @@
   "la contrainte atomique dépend d’elle-même.",
   "La fonction 'noreturn' a un type de retour non vide",
   "une correction a été effectuée en supprimant le paramètre %sq (au %d d’index relatif)",
+  "impossible de spécifier un argument template par défaut sur la définition d'un membre de modèle en dehors de sa classe",
   "nom d’identificateur IFC non valide %sq rencontré lors de la reconstruction de l’entité",
   "identificateur IFC non valide nommé %sq ignoré lors de la reconstruction de l’entité",
   "le module %sq valeur de tri non valide",
   "un modèle de fonction chargé à partir d’un module IFC a été analysé de manière incorrecte en tant que %nd",
   "échec du chargement d’une référence d’entité IFC dans le module %sq",
-  "Tri d’index IFC = %d1, valeur = %d2"
+  "Tri d’index IFC = %d1, valeur = %d2",
+  "les désignateurs chaînés ne sont pas autorisés pour un type classe avec un destructeur non trivial"
 ]
