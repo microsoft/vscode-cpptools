@@ -2964,6 +2964,16 @@ export class DefaultClient implements Client {
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
+    private static countNewlines(text: string): number {
+        let numNewlines: number = 0;
+        for (let index: number = 0; index < text.length; ++index) {
+            if (text.charAt(index) === "\n") {
+                ++numNewlines;
+            }
+        }
+        return numNewlines;
+    }
+
     public async handleCreateDeclarationOrDefinition(): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
@@ -3000,11 +3010,15 @@ export class DefaultClient implements Client {
                 const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 let modifiedDocument: vscode.Uri | undefined;
                 let lastEdit: vscode.TextEdit | undefined;
+                let numNewlinesFromPreviousEdits: number = 0;
                 for (const file in result.changes) {
                     const uri: vscode.Uri = vscode.Uri.file(file);
                     const edits: vscode.TextEdit[] = [];
                     for (const edit of result.changes[file]) {
-                        const range: vscode.Range = makeVscodeRange(edit.range);
+                        let range: vscode.Range = makeVscodeRange(edit.range);
+                        if (lastEdit && lastEdit.range.isEqual(range)) {
+                            numNewlinesFromPreviousEdits += DefaultClient.countNewlines(lastEdit.newText);
+                        }
                         lastEdit = new vscode.TextEdit(range, edit.newText);
                         edits.push(lastEdit);
                     }
@@ -3013,17 +3027,10 @@ export class DefaultClient implements Client {
                 };
                 if (modifiedDocument && lastEdit) {
                     await vscode.workspace.applyEdit(workspaceEdit);
-
-                    // Compute numNewlines for formatRange.
-                    let numNewlines: number = 0;
-                    for (let index: number = 0; index < lastEdit.newText.length; ++index) {
-                        if (lastEdit.newText.charAt(index) === "\n") {
-                            ++numNewlines;
-                        }
-                    }
+                    let numNewlines: number = DefaultClient.countNewlines(lastEdit.newText);
 
                     // Move the cursor to the new code, accounting for \n or \n\n at the start.
-                    let selectionRange: vscode.Range = new vscode.Range(new vscode.Position(lastEdit.range.start.line, 0), new vscode.Position(lastEdit.range.start.line, 0));
+                    let selectionRange: vscode.Range = new vscode.Range(new vscode.Position(lastEdit.range.start.line + numNewlinesFromPreviousEdits, 0), new vscode.Position(lastEdit.range.start.line + numNewlinesFromPreviousEdits, 0));
                     if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
                         selectionRange = new vscode.Range(new vscode.Position(selectionRange.start.line + 2, 0), new vscode.Position(selectionRange.start.line + 2, 0));
                         numNewlines -= 2;
