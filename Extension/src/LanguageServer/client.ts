@@ -3015,7 +3015,7 @@ export class DefaultClient implements Client {
                     const uri: vscode.Uri = vscode.Uri.file(file);
                     const edits: vscode.TextEdit[] = [];
                     for (const edit of result.changes[file]) {
-                        let range: vscode.Range = makeVscodeRange(edit.range);
+                        const range: vscode.Range = makeVscodeRange(edit.range);
                         if (lastEdit && lastEdit.range.isEqual(range)) {
                             numNewlinesFromPreviousEdits += DefaultClient.countNewlines(lastEdit.newText);
                         }
@@ -3047,7 +3047,7 @@ export class DefaultClient implements Client {
                     const formatOptions: vscode.FormattingOptions = {
                         insertSpaces: settings.editorInsertSpaces ?? true,
                         tabSize: settings.editorTabSize ?? 4
-                    }
+                    };
                     const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
                     if (formatTextEdits && formatTextEdits.length > 0) {
                         formatEdits.set(modifiedDocument, formatTextEdits);
