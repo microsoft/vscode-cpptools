@@ -3023,15 +3023,13 @@ export class DefaultClient implements Client {
                     }
 
                     // Move the cursor to the new code, accounting for \n or \n\n at the start.
-                    let selectionRange: vscode.Range = lastEdit.range;
+                    let selectionRange: vscode.Range = new vscode.Range(new vscode.Position(lastEdit.range.start.line, 0), new vscode.Position(lastEdit.range.start.line, 0));
                     if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
                         selectionRange = new vscode.Range(new vscode.Position(selectionRange.start.line + 2, 0), new vscode.Position(selectionRange.start.line + 2, 0));
                         numNewlines -= 2;
                     } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
                         selectionRange = new vscode.Range(new vscode.Position(selectionRange.start.line + 1, 0), new vscode.Position(selectionRange.start.line + 1, 0));
                         numNewlines -= 1;
-                    } else {
-                        selectionRange = new vscode.Range(new vscode.Position(selectionRange.start.line, 0), new vscode.Position(selectionRange.start.line, 0));
                     }
                     await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
 
