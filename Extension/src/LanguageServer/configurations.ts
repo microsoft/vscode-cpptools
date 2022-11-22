@@ -209,16 +209,7 @@ export class CppProperties {
         return result;
     }
 
-    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
-        this.defaultCompilerPath = compilerDefaults.compilerPath;
-        this.knownCompilers = compilerDefaults.knownCompilers;
-        this.defaultCStandard = compilerDefaults.cStandard;
-        this.defaultCppStandard = compilerDefaults.cppStandard;
-        this.defaultIncludes = compilerDefaults.includes;
-        this.defaultFrameworks = compilerDefaults.frameworks;
-        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
-        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
-        this.rootfs = compilerDefaults.rootfs;
+    public setupConfigurations() {
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -313,7 +304,6 @@ export class CppProperties {
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
         this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
-        this.rootfs = compilerDefaults.rootfs;
     }
 
     public get VcpkgInstalled(): boolean {
