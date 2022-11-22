@@ -3463,6 +3463,8 @@
   "typ operandu vektoru s plovoucí desetinnou čárkou (%t) nemá žádný odpovídající celočíselný vektorový typ.",
   "mangling pro výrazy requires ještě není implementovaný.",
   "kvůli atributu „není k dispozici“",
+  "duplicitní kvalifikátor asm",
+  "bitové pole s nekompletním typem výčtu nebo neprůhledný výčet s neplatným základním typem",
   "došlo k pokusu o vytvoření elementu z oddílu IFC %sq pomocí indexu do oddílu IFC %sq.",
   "oddíl %sq určil svou velikost položky jako %d1, když bylo očekáváno %d2.",
   "při zpracování modulu %sq1 byl zjištěn neočekávaný požadavek IFC.",
@@ -3470,10 +3472,12 @@
   "atomické omezení závisí na sobě",
   "Funkce noreturn má návratový typ, který není void.",
   "oprava byla provedena vyřazením parametru %sq (v relativním indexu %d).",
+  "výchozí argument šablony nelze zadat pro definici členské šablony mimo její třídu.",
   "při rekonstrukci entity se zjistil neplatný název identifikátoru IFC %sq.",
   "neplatný identifikátor IFC s názvem %sq byl během obnovy entity přeskočen.",
   "neplatná hodnota řazení modulu %sq",
   "šablona funkce načtená z modulu IFC byla nesprávně parsována jako %nd.",
   "nepovedlo se načíst odkaz na entitu IFC v modulu %sq.",
-  "Řazení indexu IFC = %d1, hodnota = %d2"
+  "Řazení indexu IFC = %d1, hodnota = %d2",
+  "zřetězené specifikátory nejsou povolené pro typ třídy s netriviálním destruktorem."
 ]

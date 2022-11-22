@@ -3463,6 +3463,8 @@
   "il tipo di operando di vettore a virgola mobile (%t) non ha un tipo di vettore intero corrispondente",
   "il mangling per le espressioni 'requires' non è ancora implementato",
   "a causa di un attributo 'non disponibile'",
+  "qualificatore 'asm' duplicato",
+  "o un campo di bit con un tipo di enumerazione incompleto o un'enumerazione opaca con un tipo di base non valido",
   "ha tentato di costruire un elemento dalla partizione IFC %sq utilizzando un indice nella partizione IFC %sq",
   "la partizione %sq ha specificato la dimensione della voce come %d1 mentre era previsto %d2",
   "Durante l'elaborazione del modulo %sq1 è stato riscontrato un requisito IFC imprevisto.",
@@ -3470,10 +3472,12 @@
   "il vincolo atomico dipende da se stesso",
   "La funzione 'noreturn' ha un tipo restituito non void",
   "è stata apportata una correzione eliminando il parametro %sq (in corrispondenza dell'indice relativo %d)",
+  "non è possibile specificare un argomento di modello predefinito nella definizione di un modello di membro all'esterno della relativa classe",
   "nome identificatore IFC %sq non valido rilevato durante la ricostruzione dell'entità",
   "nome identificatore IFC %sq non valido ignorato durante la ricostruzione dell'entità",
   "il modulo %sq valore di ordinamento non valido",
   "un modello di funzione caricato da un modulo IFC è stato analizzato erroneamente come %nd",
   "non è stato possibile caricare un riferimento all'entità IFC nel modulo %sq",
-  "Ordinamento indice IFC = %d1, valore = %d2"
+  "Ordinamento indice IFC = %d1, valore = %d2",
+  "gli indicatori concatenati non sono consentiti per un tipo di classe con un distruttore non banale"
 ]
