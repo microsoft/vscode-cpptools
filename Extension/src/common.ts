@@ -879,19 +879,13 @@ export async function updateTrustedCompilersList(path: string): Promise<void> {
     // detect duplicate paths
     const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
     let compilerPaths: string[] = compilerPath.Value;
+    compilerPaths.forEach(compiler =>{ 
+        if (compiler === path) {
+            return;
+        }
+    });
     compilerPaths.push(path);
     compilerPath.Value = compilerPaths;
-
-    //     const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
-    //     compilerDefaults = selectedCompilerDefaults;
-    //     clients.forEach(client => {
-    //         if (client instanceof DefaultClient) {
-    //             const defaultClient: DefaultClient = <DefaultClient>client;
-    //             defaultClient.configuration.CompilerDefaults = compilerDefaults;
-    //             defaultClient.configuration.handleConfigurationChange();
-    //         }
-    //     });
-    // }
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
