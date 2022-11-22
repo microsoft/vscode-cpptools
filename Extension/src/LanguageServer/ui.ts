@@ -37,9 +37,9 @@ interface ConfigurationStatus {
 
 export class UI {
     private configStatusBarItem!: vscode.LanguageStatusItem;
-    private browseEngineStatusBarItem!: vscode.LanguageStatusItem | undefined;
-    private intelliSenseStatusBarItem!: vscode.LanguageStatusItem | undefined;
-    private referencesStatusBarItem!: vscode.LanguageStatusItem | undefined;
+    private browseEngineStatusBarItem?: vscode.LanguageStatusItem;
+    private intelliSenseStatusBarItem?: vscode.LanguageStatusItem;
+    private referencesStatusBarItem?: vscode.LanguageStatusItem;
     // This is a duplicate of what's in client.ts
     // TODO: Confirm whether the orignal can be reused here
     private documentSelector: vscode.DocumentFilter[] = [
@@ -98,7 +98,6 @@ export class UI {
             title: this.configStatusBarItem.name as string,
             tooltip: this.configStatusBarItem.name as string
         };
-
     }
 
     private ensureReferencesStatusItem(): void {
@@ -149,7 +148,6 @@ export class UI {
     }
 
     private setIsParsingWorkspace(val: boolean): void {
-
         this.ensureBrowseEnginerStatus();
         this.isParsingWorkspace = val;
         const showIcon: boolean = val || this.isParsingFiles;
@@ -245,7 +243,7 @@ export class UI {
             this.intelliSenseStatusBarItem.detail = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
                 + (twoStatus ? " | " : "")
                 + (val ? this.runningCodeAnalysisTooltip : "");
-            this.intelliSenseStatusBarItem.command = val ? {command: "C_Cpp.ShowCodeAnalysisCommands", title: "Show Code Analysis"} : undefined;
+            this.intelliSenseStatusBarItem.command = val ? {command: "C_Cpp.ShowCodeAnalysisCommands", title: localize("c.cpp.intellisense.statusbar.showCodeAnalysis", "Show Code Analysis")} : undefined;
         }
     }
 
@@ -299,7 +297,7 @@ export class UI {
             } else {
                 this.referencesStatusBarItem.text = "$(search)";
                 if (this.referencesStatusBarItem.command) {
-                    this.referencesStatusBarItem.command.title = "Results";
+                    this.referencesStatusBarItem.command.title = localize("c.cpp.references.statusbar.results", "Results");
                     this.referencesStatusBarItem.command.tooltip =  referencesCommandModeToString(val) + (val !== ReferencesCommandMode.Find ? "" : this.referencesPreviewTooltip);
                 }
                 this.ShowReferencesIcon = true;
@@ -540,9 +538,9 @@ export class UI {
 
     public dispose(): void {
         this.configStatusBarItem.dispose();
-        if (this.browseEngineStatusBarItem) {this.browseEngineStatusBarItem.dispose(); }
-        if (this.intelliSenseStatusBarItem) {this.intelliSenseStatusBarItem.dispose(); }
-        if (this.referencesStatusBarItem) {this.referencesStatusBarItem.dispose(); }
+        this.browseEngineStatusBarItem?.dispose();
+        this.intelliSenseStatusBarItem?.dispose();
+        this.referencesStatusBarItem?.dispose();
     }
 }
 
