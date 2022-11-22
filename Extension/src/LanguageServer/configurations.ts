@@ -965,6 +965,29 @@ export class CppProperties {
                     this.lastCustomBrowseConfiguration.Value = undefined;
                 }
             }
+
+            /*
+             * Ensure all paths are absolute
+             */
+            if (configuration.macFrameworkPath) {
+                configuration.macFrameworkPath = configuration.macFrameworkPath.map((path: string) => this.resolvePath(path, os.platform() === "win32"));
+            }
+
+            if (configuration.dotConfig) {
+                configuration.dotConfig = this.resolvePath(configuration.dotConfig, os.platform() === "win32");
+            }
+
+            if (configuration.compileCommands) {
+                configuration.compileCommands = this.resolvePath(configuration.compileCommands, os.platform() === "win32");
+            }
+
+            if (configuration.forcedInclude) {
+                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path, os.platform() === "win32"));
+            }
+
+            if (configuration.includePath) {
+                configuration.includePath = configuration.includePath.map((path: string) => this.resolvePath(path, os.platform() === "win32"));
+            }
         }
 
         this.updateCompileCommandsFileWatchers();
