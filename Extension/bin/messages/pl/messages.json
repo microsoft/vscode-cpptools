@@ -3463,6 +3463,8 @@
   "typ operandu wektora zmiennoprzecinkowego (%t) nie ma zgodnego typu wektora liczb całkowitych",
   "nie jest jeszcze zaimplementowane dekorowanie wyrażeń typu „requires”.",
   "z powodu atrybutu „unavailable”",
+  "zduplikowany kwalifikator „asm”",
+  "pole bitowe z niekompletnym typem wyliczeniowym lub nieprzezroczyste wyliczenie z nieprawidłowym typem podstawowym",
   "próbowano skonstruować element z partycji IFC %sq przy użyciu indeksu do partycji IFC %sq",
   "partycja %sq określiła swój rozmiar wpisu jako %d1, gdy oczekiwano wartości %d2",
   "napotkano nieoczekiwane wymaganie IFC podczas przetwarzania modułu %sq1",
@@ -3470,10 +3472,12 @@
   "niepodzielne ograniczenie zależy od samego siebie",
   "Funkcja \"noreturn\" ma zwracany typ inny niż void",
   "wprowadzono poprawkę przez usunięcie parametru %sq (względny indeks %d)",
+  "nie można określić domyślnego argumentu szablonu w deklaracji szablonu składowej klasy poza jej klasą",
   "napotkano nieprawidłową nazwę identyfikatora IFC %sq podczas odbudowy jednostki",
   "podczas odbudowy jednostki pominięto nieprawidłowy identyfikator IFC o nazwie %sq",
   "nieprawidłowa wartość sortowania modułu %sq",
   "szablon funkcji załadowany z modułu IFC został niepoprawnie przeanalizowany jako %nd",
   "nie można załadować odwołania do jednostki IFC w module %sq",
-  "Sortowanie indeksu IFC = %d1, wartość = %d2"
+  "Sortowanie indeksu IFC = %d1, wartość = %d2",
+  "desygnator łańcuchowy nie jest dozwolony dla typu klasy z destruktorem nietrywialnym"
 ]

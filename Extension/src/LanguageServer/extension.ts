@@ -174,6 +174,7 @@ export async function activate(): Promise<void> {
 
     console.log("starting language server");
     clients = new ClientCollection();
+    // set a timer that waits for a few seconds
     ui = getUI();
 
     // There may have already been registered CustomConfigurationProviders.
@@ -436,6 +437,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
 }
 
 function onDisabledCommand(): void {
@@ -673,6 +675,10 @@ async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vsco
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
+}
+
+async function onCreateDeclarationOrDefinition(): Promise<void> {
+    getActiveClient().handleCreateDeclarationOrDefinition();
 }
 
 function onAddToIncludePath(path: string): void {

@@ -3463,6 +3463,8 @@
   "o tipo de operando vetorial de ponto flutuante (%t) não tem nenhum tipo de vetor inteiro correspondente",
   "a estruturação para expressões 'requires' ainda não foi implementada",
   "devido a um atributo 'indisponível'",
+  "qualificador 'asm' duplicado",
+  "um campo de bits com um tipo de enumeração incompleto ou uma enumeração opaca com um tipo base inválido",
   "tentou construir um elemento da partição IFC %sq usando um índice na partição IFC %sq",
   "a partição %sq especificou seu tamanho de entrada como %d1 quando %d2 era esperado",
   "um requisito IFC inesperado foi encontrado durante o processamento do módulo %sq1",
@@ -3470,10 +3472,12 @@
   "restrição atômica depende de si mesma",
   "A função 'noreturn' tem um tipo de retorno não nulo",
   "foi feita uma correção eliminando o parâmetro %sq (no índice relativo %d)",
+  "não é possível especificar um argumento de modelo padrão na definição do modelo de um membro fora de sua classe",
   "nome de identificador IFC inválido %sq encontrado durante a reconstrução da entidade",
   "identificador IFC inválido chamado %sq ignorado durante a reconstrução da entidade",
   "valor de classificação inválido do módulo %sq",
   "um modelo de função carregado de um módulo IFC foi analisado incorretamente como %nd",
   "falha ao carregar uma referência de entidade IFC no módulo %sq",
-  "Classificação do índice IFC = %d1, valor = %d2"
+  "Classificação do índice IFC = %d1, valor = %d2",
+  "designadores encadeados não são permitidos para um tipo de classe com um destruidor não trivial"
 ]

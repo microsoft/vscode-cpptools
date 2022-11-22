@@ -60,15 +60,19 @@ export function setCachedClangTidyPath(path: string | null): void {
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
-// Use getRawPackageJson to read and write back to package.json
-// This prevents obtaining any of VSCode's expanded variables.
-let rawPackageJson: any = null;
-export function getRawPackageJson(): any {
-    if (rawPackageJson === null || rawPackageJson === undefined) {
-        const fileContents: Buffer = fs.readFileSync(getPackageJsonPath());
-        rawPackageJson = JSON.parse(fileContents.toString());
+// Use getRawSetting to get subcategorized settings from package.json.
+// This prevents having to iterate every time we search.
+let flattenedPackageJson: Map<string, any>;
+export function getRawSetting(key: string): any {
+    if (flattenedPackageJson === undefined) {
+        flattenedPackageJson = new Map();
+        for (const subheading of packageJson.contributes.configuration) {
+            for (const setting in subheading.properties) {
+                flattenedPackageJson.set(setting, subheading.properties[setting]);
+            }
+        }
     }
-    return rawPackageJson;
+    return flattenedPackageJson.get(key);
 }
 
 export async function getRawJson(path: string | undefined): Promise<any> {
@@ -557,9 +561,9 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
 }
 
 /** Test whether a relative path exists */
-export function checkPathExistsSync(path: string, relativePath: string, _isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
+export function checkPathExistsSync(path: string, relativePath: string, _isWindows: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
     let pathExists: boolean = true;
-    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && _isWindows && !isWSL && fs.existsSync(path + ".exe");
+    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && _isWindows && fs.existsSync(path + ".exe");
     if (!fs.existsSync(path)) {
         if (existsWithExeAdded(path)) {
             path += ".exe";
@@ -879,19 +883,13 @@ export async function updateTrustedCompilersList(path: string): Promise<void> {
     // detect duplicate paths
     const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
     let compilerPaths: string[] = compilerPath.Value;
+    compilerPaths.forEach(compiler =>{ 
+        if (compiler === path) {
+            return;
+        }
+    });
     compilerPaths.push(path);
     compilerPath.Value = compilerPaths;
-
-    //     const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
-    //     compilerDefaults = selectedCompilerDefaults;
-    //     clients.forEach(client => {
-    //         if (client instanceof DefaultClient) {
-    //             const defaultClient: DefaultClient = <DefaultClient>client;
-    //             defaultClient.configuration.CompilerDefaults = compilerDefaults;
-    //             defaultClient.configuration.handleConfigurationChange();
-    //         }
-    //     });
-    // }
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
@@ -1032,12 +1030,12 @@ function extractArgs(argsString: string): string[] {
         }
         return result;
     } else {
-        const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString]);
-        if (wordexpResult === undefined) {
-            return [];
-        }
-        const jsonText: string = wordexpResult.toString();
         try {
+            const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString], { shell: false });
+            if (wordexpResult === undefined) {
+                return [];
+            }
+            const jsonText: string = wordexpResult.toString();
             return jsonc.parse(jsonText, undefined, true);
         } catch {
             return [];
