@@ -117,7 +117,6 @@ export interface CompilerDefaults {
     windowsSdkVersion: string;
     intelliSenseMode: string;
     trustedCompilerFound: boolean; 
-    rootfs: string;
 }
 
 export class CppProperties {
