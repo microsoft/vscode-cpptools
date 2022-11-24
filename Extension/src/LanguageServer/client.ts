@@ -558,6 +558,7 @@ const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigP
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
+const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -923,9 +924,7 @@ export class DefaultClient implements Client {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                 }
-                languageClient = this.createLanguageClient();
-                languageClient.registerProposedFeatures();
-                firstClientStarted = languageClient.start();
+                firstClientStarted = this.createLanguageClient();
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
@@ -1172,7 +1171,7 @@ export class DefaultClient implements Client {
         };
     }
 
-    private createLanguageClient(): LanguageClient {
+    private async createLanguageClient(): Promise<void> {
         const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
@@ -1229,7 +1228,6 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cpp' },
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
-            initializationOptions: initializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
                 error: (error, message, count) => ({ action: ErrorAction.Continue }),
@@ -1257,8 +1255,13 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        this.loggingLevel = clientOptions.initializationOptions.loggingLevel;
-        return new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        this.loggingLevel = initializationOptions.settings.loggingLevel;
+        languageClient =  new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        setupOutputHandlers();
+        languageClient.registerProposedFeatures();
+        await languageClient.start();
+        // Move initialization to a separate message, so we can see log output from it.
+        await languageClient.sendNotification(InitializationNotification, initializationOptions);
     }
 
     public sendDidChangeSettings(): void {
@@ -1909,7 +1912,6 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
-        setupOutputHandlers();
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
