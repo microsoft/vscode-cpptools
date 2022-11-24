@@ -3028,6 +3028,10 @@ export class DefaultClient implements Client {
                         startLine += 1;
                         numNewlines -= 1;
                     }
+                    if (!lastEdit.newText.endsWith("\n")) {
+                        numNewlines++; // Increase the format range.
+                    }
+
                     const selectionPosition: vscode.Position = new vscode.Position(startLine + numNewlinesFromPreviousEdits, 0);
                     const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
                     await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
