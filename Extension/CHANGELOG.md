@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.5: November 29, 2022
+### Bug Fixes
+* Fix "Step Over past a logpoint stops at the wrong place". [#9995](https://github.com/microsoft/vscode-cpptools/issues/9995)
+* Fix "Don't hardcode path to kill in UnixUtilities". [#10124](https://github.com/microsoft/vscode-cpptools/issues/10124)
+	* Thank you by @expipiplus1
+* Fix the create declaration/definition feature not adding the definition if a new source file needs to be created. [#10159](https://github.com/microsoft/vscode-cpptools/issues/10159)
+* Fix the create declaration/definition feature not having the correct cursor location after adding a definition. [#10160](https://github.com/microsoft/vscode-cpptools/issues/10160)
+* Fix the create declaration/definition feature not formatting inserted definitions. [#10161](https://github.com/microsoft/vscode-cpptools/issues/10161)
+   * This has the side-effect of fixing the extra newlines created in a new file if clang-format is used. [#10164](https://github.com/microsoft/vscode-cpptools/issues/10164) 
+   * However, clang-format 15 has a bug which can cause formatting of newly inserted definitions to fail in some cases: [LLVM#59178](https://github.com/llvm/llvm-project/issues/59178)
+* Fix formatting when clang-format 11 or earlier is used (and another issue for version 8 or earlier). [#10178](https://github.com/microsoft/vscode-cpptools/issues/10178)
+
 ## Version 1.13.4: November 17, 2022
 ### New Features
 * Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
