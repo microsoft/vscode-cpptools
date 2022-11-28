@@ -286,7 +286,7 @@
         "name": "iar",
         "source": "iar",
         "owner": "cpptools",
-        "fileLocation" : "absolute",
+        "fileLocation": "absolute",
         "pattern": {
           "regexp": "^\"(.*?)\",(\\d+)\\s+(?:[Ff]atal\\s+)?([Ww]arning|[Ee]rror)\\[(\\w+\\d+)\\]:\\s+(.*)$",
           "file": 1,
@@ -3453,9 +3453,30 @@
                     "default": true
                   },
                   "engineLogging": {
-                    "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
-                    "default": false
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "verbose",
+                          "warning",
+                          "error",
+                          "none"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.logging.category.verbose.description%",
+                          "%c_cpp.debuggers.logging.category.warning.description%",
+                          "%c_cpp.debuggers.logging.category.error.description%",
+                          "%c_cpp.debuggers.logging.category.none.description%"
+                        ],
+                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "default": "none"
+                      },
+                      {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "default": false
+                      }
+                    ]
                   },
                   "trace": {
                     "type": "boolean",
@@ -3466,6 +3487,32 @@
                     "type": "boolean",
                     "description": "%c_cpp.debuggers.logging.traceResponse.description%",
                     "default": false
+                  },
+                  "natvisDiagnostics": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "verbose",
+                          "warning",
+                          "error",
+                          "none"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.logging.category.verbose.description%",
+                          "%c_cpp.debuggers.logging.category.warning.description%",
+                          "%c_cpp.debuggers.logging.category.error.description%",
+                          "%c_cpp.debuggers.logging.category.none.description%"
+                        ],
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
+                        "default": "none"
+                      },
+                      {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "default": false
+                      }
+                    ]
                   }
                 }
               },
@@ -4194,9 +4241,30 @@
                     "default": true
                   },
                   "engineLogging": {
-                    "type": "boolean",
-                    "description": "%c_cpp.debuggers.logging.engineLogging.description%",
-                    "default": false
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "verbose",
+                          "warning",
+                          "error",
+                          "none"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.logging.category.verbose.description%",
+                          "%c_cpp.debuggers.logging.category.warning.description%",
+                          "%c_cpp.debuggers.logging.category.error.description%",
+                          "%c_cpp.debuggers.logging.category.none.description%"
+                        ],
+                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "default": "none"
+                      },
+                      {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "default": false
+                      }
+                    ]
                   },
                   "trace": {
                     "type": "boolean",
@@ -4207,6 +4275,32 @@
                     "type": "boolean",
                     "description": "%c_cpp.debuggers.logging.traceResponse.description%",
                     "default": false
+                  },
+                  "natvisDiagnostics": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "verbose",
+                          "warning",
+                          "error",
+                          "none"
+                        ],
+                        "enumDescriptions": [
+                          "%c_cpp.debuggers.logging.category.verbose.description%",
+                          "%c_cpp.debuggers.logging.category.warning.description%",
+                          "%c_cpp.debuggers.logging.category.error.description%",
+                          "%c_cpp.debuggers.logging.category.none.description%"
+                        ],
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
+                        "default": "none"
+                      },
+                      {
+                        "type": "boolean",
+                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "default": false
+                      }
+                    ]
                   }
                 }
               },
