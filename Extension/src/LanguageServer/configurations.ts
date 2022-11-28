@@ -116,7 +116,7 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
-    trustedCompilerFound: boolean; 
+    trustedCompilerFound: boolean;
     rootfs: string;
 }
 
@@ -209,7 +209,7 @@ export class CppProperties {
         return result;
     }
 
-    public setupConfigurations() {
+    public setupConfigurations(): void {
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -890,7 +890,7 @@ export class CppProperties {
                             configuration.macFrameworkPath = this.defaultFrameworks;
                         }
                     }
-                } else { 
+                } else {
                     // add compiler to list of trusted compilers
                     util.updateTrustedCompilersList(configuration.compilerPath);
                 }

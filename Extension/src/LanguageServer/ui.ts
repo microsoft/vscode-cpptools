@@ -350,20 +350,27 @@ export class UI {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            let compiler: string;
-            if (paths[i].includes('\\')) {
-                compiler = paths[i].split("\\").pop()!;
-            } else { 
-                compiler = paths[i].split("/").pop()!;
+            let compiler: string | undefined;
+            let isCompiler: boolean = false;
+            if (paths[i].indexOf("\\") > 0) {
+                if (paths[i].split("\\").pop() !== undefined) {
+                    compiler = paths[i].split("\\").pop();
+                    isCompiler = true;
+                }
+            } else {
+                isCompiler = false;
             }
-            let path: string = paths[i].replace(compiler, "");
-            items.push({label: compiler, description: "Found at " + path, index: i});
+            if (compiler !== undefined && isCompiler) {
+                const path: string | undefined = paths[i].replace(compiler, "");
+                items.push({ label: compiler, description: "Found at " + path, index: i });
+            } else {
+                items.push({ label: paths[i], index: i });
+            }
         }
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
     }
-
 
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};
