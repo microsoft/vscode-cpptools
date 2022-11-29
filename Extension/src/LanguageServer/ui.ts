@@ -538,9 +538,9 @@ export class UI {
 
     public dispose(): void {
         this.configStatusBarItem.dispose();
-        if (this.browseEngineStatusBarItem) {this.browseEngineStatusBarItem.dispose(); }
-        if (this.intelliSenseStatusBarItem) {this.intelliSenseStatusBarItem.dispose(); }
-        if (this.referencesStatusBarItem) {this.referencesStatusBarItem.dispose(); }
+        this.browseEngineStatusBarItem?.dispose();
+        this.intelliSenseStatusBarItem?.dispose();
+        this.referencesStatusBarItem?.dispose();
     }
 }
 
