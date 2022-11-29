@@ -53,7 +53,7 @@
 	"forced.include.description": "소스 파일의 다른 문자를 처리하기 전에 포함해야 하는 파일의 목록입니다. 파일은 나열된 순서대로 포함됩니다.",
 	"one.file.per.line": "줄당 하나의 파일입니다.",
 	"dot.config": "Dot Config",
-	"dot.config.description": "Kconfig 시스템에서 만든 .config 파일의 경로입니다. Kconfig 시스템은 프로젝트를 빌드하기 위한 모든 정의가 포함된 파일을 생성합니다. Kconfig 시스템을 사용하는 프로젝트의 예로는 Linux 커널 및 NuttX RTOS가 있습니다.",
+	"dot.config.description": "Kconfig 시스템에서 만든 .config 파일의 경로입니다. Kconfig 시스템은 프로젝트를 빌드하기 위한 모든 정의가 포함된 파일을 생성합니다. Kconfig 시스템을 사용하는 프로젝트의 예로는 Linux 커널 및 ExpresstX RTOS가 있습니다.",
 	"compile.commands": "컴파일 명령",
 	"compile.commands.description": "작업 영역의 {0} 파일 전체 경로입니다. 이 파일에서 검색된 포함 경로 및 정의가 {1} 및 {2} 설정에 설정된 값 대신 사용됩니다. 사용자가 편집기에서 연 파일에 해당하는 변환 단위에 대한 항목이 컴파일 명령 데이터베이스에 포함되지 않는 경우, 경고 메시지가 나타나고 확장에서 대신 {3} 및 {4} 설정을 사용합니다.",
 	"merge.configurations": "구성 병합",

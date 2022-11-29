@@ -6,7 +6,7 @@
 {
 	"learn.how.to.install.a.library": "Jak nainstalovat knihovnu pro tuto hlavičku pomocí vcpkg",
 	"copy.vcpkg.command": "Zkopírovat příkaz vcpkg pro instalaci {0} do schránky",
-	"on.disabled.command": "Příkazy související s IntelliSense se nedají spustit, když je `C_Cpp.intelliSenseEngine` nastavené na `disabled`.",
+	"on.disabled.command": "Příkazy související s IntelliSense se nedají spustit, když je C_Cpp.intelliSenseEngine nastavené na disabled.",
 	"client.not.found": "klient se nenašel",
 	"configuration.select.first": "Pokud chcete vybrat konfiguraci, otevřete nejdříve složku.",
 	"configuration.provider.select.first": "Pokud chcete vybrat poskytovatele konfigurace, otevřete nejdříve složku.",
