@@ -69,7 +69,7 @@
 * Fix random "Failed to spawn IntelliSense process" on Mac.
 * Fix redundant rescan when adding a workspace folder.
 
-### Removed Features
+### Removed Feature
 * Removed explicit WSL support in favor of using the WSL extension. [PR #10066](https://github.com/microsoft/vscode-cpptools/pull/10066)
 
 ## Version 1.12.4: August 31, 2022
