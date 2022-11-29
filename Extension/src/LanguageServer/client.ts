@@ -611,6 +611,7 @@ class ClientModel {
     public referencesCommandMode: DataBinding<refs.ReferencesCommandMode>;
     public parsingWorkspaceStatus: DataBinding<string>;
     public activeConfigName: DataBinding<string>;
+    public currentCompiler: DataBinding<string>;
 
     constructor() {
         this.isParsingWorkspace = new DataBinding<boolean>(false);
@@ -625,6 +626,7 @@ class ClientModel {
         this.referencesCommandMode = new DataBinding<refs.ReferencesCommandMode>(refs.ReferencesCommandMode.None);
         this.parsingWorkspaceStatus = new DataBinding<string>("");
         this.activeConfigName = new DataBinding<string>("");
+        this.currentCompiler = new DataBinding<string>("");
     }
 
     public activate(): void {
@@ -640,6 +642,7 @@ class ClientModel {
         this.referencesCommandMode.activate();
         this.parsingWorkspaceStatus.activate();
         this.activeConfigName.activate();
+        this.currentCompiler.activate();
     }
 
     public deactivate(): void {
@@ -655,6 +658,7 @@ class ClientModel {
         this.referencesCommandMode.deactivate();
         this.parsingWorkspaceStatus.deactivate();
         this.activeConfigName.deactivate();
+        this.currentCompiler.deactivate();
     }
 
     public dispose(): void {
@@ -670,6 +674,7 @@ class ClientModel {
         this.referencesCommandMode.dispose();
         this.parsingWorkspaceStatus.dispose();
         this.activeConfigName.dispose();
+        this.currentCompiler.dispose();
     }
 }
 
@@ -686,6 +691,7 @@ export interface Client {
     ReferencesCommandModeChanged: vscode.Event<refs.ReferencesCommandMode>;
     TagParserStatusChanged: vscode.Event<string>;
     ActiveConfigChanged: vscode.Event<string>;
+    CurrentCompilerChanged: vscode.Event<string>;
     RootPath: string;
     RootRealPath: string;
     RootUri?: vscode.Uri;
@@ -812,6 +818,7 @@ export class DefaultClient implements Client {
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
+    public get CurrentCompilerChanged(): vscode.Event<string> { return this.model.currentCompiler.ValueChanged; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -2450,6 +2457,7 @@ export class DefaultClient implements Client {
             const compilerPathAndArgs: util.CompilerPathAndArgs =
                 util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
             modifiedConfig.compilerPath = compilerPathAndArgs.compilerPath;
+            this.model.currentCompiler.setValueIfActive(modifiedConfig.compilerPath ?? "");
             if (settings.legacyCompilerArgsBehavior) {
                 modifiedConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
                 modifiedConfig.compilerArgs = undefined;
@@ -2504,6 +2512,8 @@ export class DefaultClient implements Client {
                 configName = this.configuration.ConfigurationNames[index];
             }
             this.model.activeConfigName.Value = configName;
+            // TODO: Not sure if should trigger a compiler change event here
+            // ...
             this.configuration.onDidChangeSettings();
         });
     }
@@ -3184,6 +3194,7 @@ class NullClient implements Client {
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.referencesCommandModeEvent.event; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.stringEvent.event; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.stringEvent.event; }
+    public get CurrentCompilerChanged(): vscode.Event<string> { return this.stringEvent.event; }
     RootPath: string = "/";
     RootRealPath: string = "/";
     RootUri?: vscode.Uri = vscode.Uri.file("/");

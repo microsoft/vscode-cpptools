@@ -10,6 +10,8 @@ import { ReferencesCommandMode, referencesCommandModeToString } from './referenc
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
+import { CppSettings } from './settings';
+import { basename } from 'path';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -36,10 +38,12 @@ interface ConfigurationStatus {
 }
 
 export class UI {
-    private configStatusBarItem!: vscode.LanguageStatusItem;
+    private configStatusBarItem: vscode.LanguageStatusItem;
     private browseEngineStatusBarItem?: vscode.LanguageStatusItem;
-    private intelliSenseStatusBarItem?: vscode.LanguageStatusItem;
+    private intelliSenseStatusBarItem: vscode.LanguageStatusItem;
     private referencesStatusBarItem?: vscode.LanguageStatusItem;
+    private compilerStatusBarItem: vscode.LanguageStatusItem;
+    private codeAnalysisStatusBarItem: vscode.LanguageStatusItem;
     // This is a duplicate of what's in client.ts
     // TODO: Confirm whether the orignal can be reused here
     private documentSelector: vscode.DocumentFilter[] = [
@@ -52,7 +56,6 @@ export class UI {
     private isParsingWorkspace: boolean = false;
     private isParsingWorkspacePaused: boolean = false;
     private isParsingFiles: boolean = false;
-    private isUpdatingIntelliSense: boolean = false;
     private isRunningCodeAnalysis: boolean = false;
     private isCodeAnalysisPaused: boolean = false;
     private codeAnalysisProcessed: number = 0;
@@ -61,43 +64,46 @@ export class UI {
     private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing open files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
-    private readonly updatingIntelliSenseTooltip: string = localize("updating.intellisense.tooltip", "Updating IntelliSense");
+    private readonly updatingIntelliSenseText: string = localize("updating.intellisense.text", "IntelliSense: Updating");
+    private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
+    private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private runningCodeAnalysisTooltip: string = "";
     private codeAnalysisPausedTooltip: string = "";
 
     constructor() {
-        this.ensureConfigStatusItem();
-        this.ShowConfiguration = true;
-
-        this.ensureReferencesStatusItem();
-        this.ShowReferencesIcon = false;
-
-        this.ensureIntellisentStatusItem();
-        this.ShowFlameIcon = false;
-
-        this.ensureBrowseEnginerStatus();
-        this.ShowDBIcon = false;
-
-        this.codeAnalysisProgram = "clang-tidy";
-        this.runningCodeAnalysisTooltip = localize(
-            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
-        this.codeAnalysisPausedTooltip = localize(
-            { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
-    }
-
-    private ensureConfigStatusItem(): void {
-        if (this.configStatusBarItem) {
-            return;
-        }
         this.configStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.configuration.tooltip", this.documentSelector);
-        this.configStatusBarItem.name = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
+        this.configStatusBarItem.name = localize("c.cpp.configuration.tooltip", "Select a Configuration");
         // TODO: Confirm title and tooltip localization
         this.configStatusBarItem.command = {
             command: "C_Cpp.ConfigurationSelect",
             title: this.configStatusBarItem.name as string,
             tooltip: this.configStatusBarItem.name as string
         };
+        this.ShowConfiguration = true;
+
+        this.ensureReferencesStatusItem();
+        this.ShowReferencesIcon = false;
+
+        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.intellisense.statusbar", this.documentSelector);
+        this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
+        this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseText;
+        // this.ShowFlameIcon = false;
+
+        this.ensureBrowseEnginerStatus();
+        this.ShowDBIcon = false;
+
+        this.compilerStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.compiler.statusbar", this.documentSelector);
+        this.compilerStatusBarItem.name = localize("c.cpp.compiler.statusbar", "C/C++ Compiler Status");
+
+        this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.codeanalysis.statusbar", this.documentSelector);
+        this.codeAnalysisStatusBarItem.name = localize("c.cpp.codeanalysis.statusbar", "C/C++ Code Analysis Status");
+
+        this.codeAnalysisProgram = "clang-tidy";
+        this.runningCodeAnalysisTooltip = localize(
+            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
+        this.codeAnalysisPausedTooltip = localize(
+            { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
     }
 
     private ensureReferencesStatusItem(): void {
@@ -114,16 +120,6 @@ export class UI {
         };
     }
 
-    private ensureIntellisentStatusItem(): void {
-        if (this.intelliSenseStatusBarItem) {
-            return;
-        }
-
-        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.intellisense.statusbar", this.documentSelector);
-        this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
-        this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseTooltip;
-    }
-
     private ensureBrowseEnginerStatus(): void {
         if (this.browseEngineStatusBarItem) {
             return;
@@ -135,7 +131,20 @@ export class UI {
     }
 
     private set ActiveConfig(label: string) {
-        this.configStatusBarItem.text = label;
+        this.configStatusBarItem.text = label ?? "Configuation: Not selected";
+        if (this.configStatusBarItem.command) {
+            this.configStatusBarItem.command.title = label.length > 0 ? "Edit Configuration" : "Select Configuration";
+        }
+    }
+
+    private set CurrentCompiler(label: string) {
+        const text: string = label.length > 0 ? basename(label) : "Not Selected";
+        this.compilerStatusBarItem.text = `Compiler: ${text}`;
+
+        this.compilerStatusBarItem.command = {
+            title: label.length > 0 ? "Manage compiler" : "Select a Compiler",
+            command: "C_Cpp.CheckForCompiler"
+        };
     }
 
     private set TagParseStatus(label: string) {
@@ -172,7 +181,12 @@ export class UI {
                     tooltip: "Show Parsing Commands"
                 };
             } else {
-                this.browseEngineStatusBarItem.command = undefined;
+                // this.browseEngineStatusBarItem.command = undefined;
+                this.browseEngineStatusBarItem.command = {
+                    command: "C_Cpp.RescanWorkspace",
+                    title: "Rescan workspace",
+                    tooltip: "Rescan workspace"
+                };
             }
         }
     }
@@ -185,15 +199,10 @@ export class UI {
         if (!this.isRunningCodeAnalysis) {
             return;
         }
-        this.ensureIntellisentStatusItem();
 
         this.isCodeAnalysisPaused = val;
-        const twoStatus: boolean = val && this.isUpdatingIntelliSense;
-        if (this.intelliSenseStatusBarItem) {
-            this.intelliSenseStatusBarItem.detail = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
-                + (twoStatus ? " | " : "")
-                + (val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip);
-        }
+        // TODO: Figure out what this refers to
+        this.codeAnalysisStatusBarItem.detail = val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip;
     }
 
     private setIsParsingFiles(val: boolean): void {
@@ -211,20 +220,47 @@ export class UI {
         }
     }
 
+    private flameTimeout?: NodeJS.Timeout;
     private setIsUpdatingIntelliSense(val: boolean): void {
 
-        this.ensureIntellisentStatusItem();
-        this.isUpdatingIntelliSense = val;
-        const showIcon: boolean = val || this.isRunningCodeAnalysis;
-        const twoStatus: boolean = val && this.isRunningCodeAnalysis;
-        this.ShowFlameIcon = showIcon;
-        if (this.intelliSenseStatusBarItem) {
-            this.intelliSenseStatusBarItem.text = showIcon ? "$(flame)" : "";
-            this.intelliSenseStatusBarItem.detail = (val ? this.updatingIntelliSenseTooltip : "")
-                + (twoStatus ? " | " : "")
-                + (this.isRunningCodeAnalysis ? this.runningCodeAnalysisTooltip : "");
+        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+
+        // TODO: Redo this. Need to determine the critera for intellisense not being configured
+        // ALSO: Need to figure out what the compiler select quickpick is
+        if (settings.intelliSenseEngine === "disabled") {
+            this.intelliSenseStatusBarItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+            this.intelliSenseStatusBarItem.command = {
+                command: "C_Cpp.CheckForCompiler",
+                title: "Select a Compiler"
+            };
+            return;
         }
+
+        this.intelliSenseStatusBarItem.busy = val;
+
+        if (this.flameTimeout) {
+            clearTimeout(this.flameTimeout);
+        }
+
+        if (val) {
+            this.intelliSenseStatusBarItem.text = "$(flame)";
+            this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseText;
+            this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+        } else {
+            this.flameTimeout = setTimeout(() => {
+                if (this.intelliSenseStatusBarItem) {
+                    this.intelliSenseStatusBarItem.text = this.idleIntelliSenseText;
+                    this.intelliSenseStatusBarItem.detail = "";
+                    this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+                }
+            }, this.iconDelayTime);
+        }
+        this.intelliSenseStatusBarItem.command = {
+            command: "C_Cpp.RestartIntelliSenseForFile",
+            title: "Rescan",
+            tooltip: "Rescan IntelliSense"
+        };
 
     }
 
@@ -233,18 +269,19 @@ export class UI {
             this.codeAnalysisTotal = 0;
             this.codeAnalysisProcessed = 0;
         }
-        this.ensureIntellisentStatusItem();
+        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+
         this.isRunningCodeAnalysis = val;
-        const showIcon: boolean = val || this.isUpdatingIntelliSense;
-        const twoStatus: boolean = val && this.isUpdatingIntelliSense;
-        this.ShowFlameIcon = showIcon;
-        if (this.intelliSenseStatusBarItem) {
-            this.intelliSenseStatusBarItem.text = showIcon ? "$(flame)" : "";
-            this.intelliSenseStatusBarItem.detail = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
-                + (twoStatus ? " | " : "")
-                + (val ? this.runningCodeAnalysisTooltip : "");
-            this.intelliSenseStatusBarItem.command = val ? {command: "C_Cpp.ShowCodeAnalysisCommands", title: localize("c.cpp.intellisense.statusbar.showCodeAnalysis", "Show Code Analysis")} : undefined;
-        }
+        const state: string = `Code Analysis State: ${settings.codeAnalysisRunAutomatically ? "Automatic" : "Manual"}`;
+        this.codeAnalysisStatusBarItem.text = val ? "Code Analysis: Running" : state;
+        this.codeAnalysisStatusBarItem.command = val ? {
+            command: "C_Cpp.ShowCodeAnalysisCommands",
+            title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysis", "Show Code Analysis")
+        } : {
+            command: "C_Cpp.RunCodeAnalysisOnActiveFile",
+            title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now")
+        };
+        this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
     }
 
     private updateCodeAnalysisTooltip(): void {
@@ -277,6 +314,7 @@ export class UI {
         let tooltip: string|undefined;
         if (this.referencesStatusBarItem) {
             tooltip = this.referencesStatusBarItem.command?.tooltip;
+            this.referencesStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
         }
         return tooltip === "" ? ReferencesCommandMode.None :
             (tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
@@ -299,6 +337,7 @@ export class UI {
                 if (this.referencesStatusBarItem.command) {
                     this.referencesStatusBarItem.command.title = localize("c.cpp.references.statusbar.results", "Results");
                     this.referencesStatusBarItem.command.tooltip =  referencesCommandModeToString(val) + (val !== ReferencesCommandMode.Find ? "" : this.referencesPreviewTooltip);
+                    this.referencesStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
                 }
                 this.ShowReferencesIcon = true;
             }
@@ -321,24 +360,6 @@ export class UI {
                     if (this.browseEngineStatusBarItem) {
                         this.browseEngineStatusBarItem.dispose();
                         this.browseEngineStatusBarItem = undefined;
-                    }
-                }, this.iconDelayTime);
-            }
-        }
-    }
-
-    private flameTimeout?: NodeJS.Timeout;
-    private set ShowFlameIcon(show: boolean) {
-        if (this.flameTimeout) {
-            clearTimeout(this.flameTimeout);
-        }
-        if (this.intelliSenseStatusBarItem) {
-            this.intelliSenseStatusBarItem.busy = show && (this.isUpdatingIntelliSense || this.isRunningCodeAnalysis);
-            if (!this.intelliSenseStatusBarItem.busy) {
-                this.flameTimeout = setTimeout(() => {
-                    if (this.intelliSenseStatusBarItem) {
-                        this.intelliSenseStatusBarItem.dispose();
-                        this.intelliSenseStatusBarItem = undefined;
                     }
                 }, this.iconDelayTime);
             }
@@ -401,6 +422,7 @@ export class UI {
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
+        client.CurrentCompilerChanged(value => { this.CurrentCompiler = value; });
     }
 
     public async showConfigurations(configurationNames: string[]): Promise<number> {
@@ -538,9 +560,11 @@ export class UI {
 
     public dispose(): void {
         this.configStatusBarItem.dispose();
-        this.browseEngineStatusBarItem?.dispose();
-        this.intelliSenseStatusBarItem?.dispose();
-        this.referencesStatusBarItem?.dispose();
+        if (this.browseEngineStatusBarItem) {this.browseEngineStatusBarItem.dispose(); }
+        this.intelliSenseStatusBarItem.dispose();
+        if (this.referencesStatusBarItem) {this.referencesStatusBarItem.dispose(); }
+        this.compilerStatusBarItem.dispose();
+        this.codeAnalysisStatusBarItem.dispose();
     }
 }
 
