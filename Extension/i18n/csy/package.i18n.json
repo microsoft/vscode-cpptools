@@ -242,7 +242,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "Určuje, jestli je možné použít experimentální funkce.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Pokud se nastaví na `true`, jazykový server poskytne fragmenty kódu.",
 	"c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": "Když se nastaví na `default`, předpokládá se, že systém souborů pracovního prostoru ve Windows nerozlišuje velká a malá písmena a v macOS nebo Linuxu rozlišuje malá a velká písmena. Když se tato možnost nastaví na `enabled`, předpokládá se, že systém souborů pracovního prostoru ve Windows rozlišuje velká a malá písmena.",
-	"c_cpp.configuration.enhancedColorization.markdownDescription": "Když se tato možnost povolí, kód se bude obarvovat podle IntelliSense. Toto nastavení se použije jen v případě, že možnost `#C_Cpp.intelliSenseEngine#` je nastavená na default.",
+	"c_cpp.configuration.enhancedColorization.markdownDescription": "Když se tato možnost povolí, kód se bude obarvovat podle IntelliSense. Toto nastavení se použije jen v případě, že možnost `#C_Cpp.intelliSenseEngine#` je nastavená na `default`.",
 	"c_cpp.configuration.codeFolding.description": "Když se tato možnost povolí, rozsahy sbalování kódu bude poskytovat jazykový server.",
 	"c_cpp.configuration.hover.description": "Pokud je tato možnost zakázaná, podrobnosti o najetí myší už nebude poskytovat jazykový server.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Povolte integrační služby pro [správce závislostí vcpkg](https://aka.ms/vcpkg/).",
