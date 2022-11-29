@@ -28,6 +28,7 @@
     "c_cpp.command.generateEditorConfig.title": "Generate EditorConfig contents from VC Format settings",
     "c_cpp.command.GoToNextDirectiveInGroup.title": "Go to next preprocessor directive in conditional group",
     "c_cpp.command.GoToPrevDirectiveInGroup.title": "Go to previous preprocessor directive in conditional group",
+    "c_cpp.command.CreateDeclarationOrDefinition.title": "Create Declaration / Definition",
     "c_cpp.command.RunCodeAnalysisOnActiveFile.title": "Run Code Analysis on Active File",
     "c_cpp.command.RunCodeAnalysisOnOpenFiles.title": "Run Code Analysis on Open Files",
     "c_cpp.command.RunCodeAnalysisOnAllFiles.title": "Run Code Analysis on All Files",
@@ -393,5 +394,10 @@
     "c_cpp.semanticTokenTypes.numberLiteral.description": "Style for C++ user-defined literal numbers.",
     "c_cpp.semanticTokenTypes.stringLiteral.description": "Style for C++ user-defined literal strings.",
     "c_cpp.semanticTokenModifiers.global.description": "Style to use for symbols that are global.",
-    "c_cpp.semanticTokenModifiers.local.description": "Style to use for symbols that are local."
+    "c_cpp.semanticTokenModifiers.local.description": "Style to use for symbols that are local.",
+    "c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
+    "c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
+    "c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
+    "c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
+    "c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
 }

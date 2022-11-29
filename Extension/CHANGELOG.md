@@ -1,5 +1,41 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.5: November 28, 2022
+### Bug Fixes
+* Fix "Step Over past a logpoint stops at the wrong place". [#9995](https://github.com/microsoft/vscode-cpptools/issues/9995)
+* Fix "Don't hardcode path to kill in UnixUtilities". [#10124](https://github.com/microsoft/vscode-cpptools/issues/10124)
+  * Ellie Hermaszewska (@expipiplus1) [PR #1373](https://github.com/microsoft/MIEngine/pull/1373)
+* Fix the create declaration/definition feature not adding the definition if a new source file needs to be created. [#10159](https://github.com/microsoft/vscode-cpptools/issues/10159)
+* Fix the create declaration/definition feature not having the correct cursor location after adding a definition. [#10160](https://github.com/microsoft/vscode-cpptools/issues/10160)
+* Fix the create declaration/definition feature not formatting inserted definitions. [#10161](https://github.com/microsoft/vscode-cpptools/issues/10161)
+  * This has the side-effect of fixing the extra newlines created in a new file if clang-format is used. [#10164](https://github.com/microsoft/vscode-cpptools/issues/10164) 
+  * However, clang-format 15 has a bug which can cause formatting of newly inserted definitions to fail in some cases: [LLVM#59178](https://github.com/llvm/llvm-project/issues/59178)
+* Fix formatting when clang-format 11 or earlier is used (and another issue for version 8 or earlier). [#10178](https://github.com/microsoft/vscode-cpptools/issues/10178)
+
+## Version 1.13.4: November 17, 2022
+### New Features
+* Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
+
+### Enhancements
+* Add sections to settings. [#8237](https://github.com/microsoft/vscode-cpptools/issues/8237)
+* Check for MSVC environment variables for configuring IntelliSense. [#9745](https://github.com/microsoft/vscode-cpptools/issues/9745)
+* Add "iar" and "armcc5" problem matchers. [#10054](https://github.com/microsoft/vscode-cpptools/issues/10054)
+  * Michael (@morsisko) [PR #10085](https://github.com/microsoft/vscode-cpptools/pull/10085), [PR #10101](https://github.com/microsoft/vscode-cpptools/pull/10101)
+* Pass `--Wno-error=unknown` to clang-format to avoid failing on unsupported settings. [#10072](https://github.com/microsoft/vscode-cpptools/issues/10072)
+* Add support for `/cygdrive` paths returned by some versions of Cygwin. [#10112](https://github.com/microsoft/vscode-cpptools/issues/10112)
+
+### Bug Fixes
+* Fix updates to compile_commands.json not being handled if specified using a relative path. [#7610](https://github.com/microsoft/vscode-cpptools/issues/7610)
+* Fix code analysis errors related to SSE2 being enabled. [#9898](https://github.com/microsoft/vscode-cpptools/issues/9898)
+* Fix Doxygen code action from appearing on a function that already has a `*/` comment. [#10009](https://github.com/microsoft/vscode-cpptools/issues/10009)
+* Fix Doxygen comment generation when there's a selection. [#10028](https://github.com/microsoft/vscode-cpptools/issues/10028)
+* Fixed crash on Linux/Mac when a full command line is specified in `compilerPath` containing invalid arguments. [PR #10070](https://github.com/microsoft/vscode-cpptools/pull/10070)
+* Fix random "Failed to spawn IntelliSense process: 65520" on Mac. [#10091](https://github.com/microsoft/vscode-cpptools/issues/10091)
+
+### Removed Features
+* Removed explicit WSL support in favor of using the WSL extension. [#10066](https://github.com/microsoft/vscode-cpptools/pull/10066)
+* The fix for an IntelliSense crash with the seqan3 library [#8956](https://github.com/microsoft/vscode-cpptools/issues/8956) in 1.13.3 was removed because it caused a regression. [#10075](https://github.com/microsoft/vscode-cpptools/issues/10075)
+
 ## Version 1.13.3: October 26, 2022
 ### Enhancements
 * Make Doxygen hover comments customizable with `C_Cpp.doxygen.sectionTags`. [#8525](https://github.com/microsoft/vscode-cpptools/issues/8525)

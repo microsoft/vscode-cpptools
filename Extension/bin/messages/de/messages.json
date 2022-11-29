@@ -3463,6 +3463,8 @@
   "der Gleitkomma-Vektoroperandentyp (%t) hat keinen übereinstimmenden ganzzahligen Vektortyp",
   "das Mangling für 'requires'-Ausdrücke ist noch nicht implementiert",
   "aufgrund eines „nicht verfügbaren“ Attributs",
+  "Doppelter „ASM“-Qualifizierer",
+  "entweder ein Bitfeld mit einem unvollständigen Enumerationstyp oder eine opake Enumeration mit einem ungültigen Basistyp",
   "Es wurde versucht, ein Element aus der IFC-Partition %sq mithilfe eines Indexes in der IFC-Partition %sq zu erstellen",
   "Die Partition %sq hat ihre Eintragsgröße mit %d1 angegeben, obwohl %d2 erwartet wurde",
   "Unerwartete IFC-Anforderung beim Verarbeiten des Moduls %sq1",
@@ -3470,10 +3472,12 @@
   "Die atomische Einschränkung hängt von sich selbst ab",
   "Die Funktion \"noreturn\" weist den Rückgabetyp \"nicht void\" auf.",
   "Eine Korrektur wurde vorgenommen, indem der Parameter %sq (beim relativen Index %d) weggelassen wurde",
+  "ein Standardvorlagenargument kann nicht für die Definition einer Membervorlage außerhalb seiner Klasse angegeben werden",
   "Ungültiger IFC-Bezeichnername %sq bei der Rekonstruktion der Entität gefunden",
   "Ungültiger IFC-Bezeichnername %sq bei der Rekonstruktion der Entität übersprungen",
   "Modul %sq ungültiger Sortierwert",
   "Eine aus einem IFC-Modul geladene Funktionsvorlage wurde fälschlicherweise als %nd analysiert",
   "Fehler beim Laden eines IFC-Entitätsverweises im Modul \"%sq\"",
-  "IFC-Indexsortierung = %d1, Wert = %d2"
+  "IFC-Indexsortierung = %d1, Wert = %d2",
+  "verkettete Kennzeichner sind für einen Klassentyp mit einem nichttrivialen Destruktor nicht zulässig"
 ]

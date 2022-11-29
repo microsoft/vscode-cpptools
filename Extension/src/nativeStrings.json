@@ -264,5 +264,106 @@
     "file_tag": "File",
     "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default.",
     "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}. Expected: {1}.",
-    "generate_doxygen_comment": "Generate Doxygen Comment"
+    "generate_doxygen_comment": "Generate Doxygen Comment",
+    "offer_create_declaration": {
+        "text": "Create declaration of {0} in {1}",
+        "hint": "{0} is the name of a C/C++ function, {1} is a file name."
+    },
+    "offer_create_definition": {
+        "text": "Create definition of {0} in {1}",
+        "hint": "{0} is the name of a C/C++ function, {1} is a file name."
+    },
+    "function_definition_not_found": {
+        "text": "Function definition for '{0}' not found.",
+        "hint": "{0} is the name of a C/C++ function."
+    },
+    "cm_attributes": {
+        "text": "Attributes",
+        "hint": "'Attributes' is a C++ specifier."
+    },
+    "cm_bases": {
+        "text": "Bases",
+        "hint": "'Bases' are a C++ class type."
+    },
+    "cm_classes": {
+        "text": "Classes"
+    },
+    "cm_coclasses": {
+        "text": "CoClasses"
+    },
+    "cm_delegates": {
+        "text": "Delegates"
+    },
+    "cm_enums": {
+        "text": "Enums"
+    },
+    "cm_events": {
+        "text": "Events"
+    },
+    "cm_functions": {
+        "text": "Functions"
+    },
+    "cm_importdirectives": {
+        "text": "Import directives"
+    },
+    "cm_importlibstatements": {
+        "text": "ImportLib statements"
+    },
+    "cm_importstatements": {
+        "text": "Import statements"
+    },
+    "cm_includedirectives": {
+        "text": "Include directives"
+    },
+    "cm_interfaces": {
+        "text": "Interfaces"
+    },
+    "cm_libraries": {
+        "text": "Libraries"
+    },
+    "cm_macros": {
+        "text": "Macros"
+    },
+    "cm_maps": {
+        "text": "Maps"
+    },
+    "cm_mapentries": {
+        "text": "Map entries"
+    },
+    "cm_miscellaneous": {
+        "text": "Miscellaneous"
+    },
+    "cm_namespaces": {
+        "text": "Namespaces"
+    },
+    "cm_parameters": {
+        "text": "Parameters"
+    },
+    "cm_properties": {
+        "text": "Properties"
+    },
+    "cm_structs": {
+        "text": "Structs"
+    },
+    "cm_todo_insert_return": {
+        "text": "TODO: insert return statement here"
+    },
+    "cm_typedefs": {
+        "text": "Typedefs"
+    },
+    "cm_unions": {
+        "text": "Unions"
+    },
+    "cm_usingaliases": {
+        "text": "Using aliases"
+    },
+    "cm_usingdirectives": {
+        "text": "Using directives"
+    },
+    "cm_variables": {
+        "text": "Variables"
+    },
+    "cm_addfunction": {
+        "text": "Automatic add function"
+    }
 }

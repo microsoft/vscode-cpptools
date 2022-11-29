@@ -1353,15 +1353,15 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(path: string | undefined, isWindows: boolean): string {
-        if (!path || path === "${default}") {
+    public resolvePath(input_path: string | undefined, isWindows: boolean): string {
+        if (!input_path || input_path === "${default}") {
             return "";
         }
 
         let result: string = "";
 
         // first resolve variables
-        result = util.resolveVariables(path, this.ExtendedEnvironment);
+        result = util.resolveVariables(input_path, this.ExtendedEnvironment);
         if (this.rootUri) {
             if (result.includes("${workspaceFolder}")) {
                 result = result.replace("${workspaceFolder}", this.rootUri.fsPath);
@@ -1375,6 +1375,11 @@ export class CppProperties {
         }
         if (result.includes("*")) {
             result = result.replace(/\*/g, "");
+        }
+
+        // Make sure all paths result to an absolute path
+        if (!path.isAbsolute(result) && this.rootUri) {
+            result = path.join(this.rootUri.fsPath, result);
         }
 
         return result;

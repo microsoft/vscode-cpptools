@@ -67,6 +67,7 @@ const languageClientCrashTimes: number[] = [];
 let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
+let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -142,6 +143,31 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
     diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
 
     clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
+}
+
+function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
+    if (!diagnosticsCollectionRefactor) {
+        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(CppSourceStr);
+    }
+
+    const newDiagnostics: vscode.Diagnostic[] = [];
+    params.diagnostics.forEach((d) => {
+        const message: string = getLocalizedString(d.localizeStringParams);
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
+        diagnostic.code = d.code;
+        diagnostic.source = CppSourceStr;
+        if (d.relatedInformation) {
+            diagnostic.relatedInformation = [];
+            for (const info of d.relatedInformation) {
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
+            }
+        }
+
+        newDiagnostics.push(diagnostic);
+    });
+
+    const fileUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    diagnosticsCollectionRefactor.set(fileUri, newDiagnostics);
 }
 
 interface WorkspaceFolderParams {
@@ -239,6 +265,11 @@ interface IntelliSenseDiagnosticRelatedInformation {
     message: string;
 }
 
+interface RefactorDiagnosticRelatedInformation {
+    location: Location;
+    message: string;
+}
+
 interface IntelliSenseDiagnostic {
     range: Range;
     code?: number;
@@ -247,9 +278,31 @@ interface IntelliSenseDiagnostic {
     relatedInformation?: IntelliSenseDiagnosticRelatedInformation[];
 }
 
+interface RefactorDiagnostic {
+    range: Range;
+    code?: number;
+    severity: vscode.DiagnosticSeverity;
+    localizeStringParams: LocalizeStringParams;
+    relatedInformation?: RefactorDiagnosticRelatedInformation[];
+}
+
 interface PublishIntelliSenseDiagnosticsParams {
     uri: string;
     diagnostics: IntelliSenseDiagnostic[];
+}
+
+interface PublishRefactorDiagnosticsParams {
+    uri: string;
+    diagnostics: RefactorDiagnostic[];
+}
+
+export interface CreateDeclarationOrDefinitionParams {
+    uri: string;
+    range: Range;
+}
+
+export interface CreateDeclarationOrDefinitionResult {
+    changes: { [key: string]: any[] };
 }
 
 interface ShowMessageWindowParams {
@@ -475,6 +528,7 @@ export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetS
 export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
+const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 
@@ -504,6 +558,7 @@ const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigP
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
+const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -524,6 +579,7 @@ const ReferencesNotification: NotificationType<refs.ReferencesResult> = new Noti
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
 const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
+const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string> = new NotificationType<string>('cpptools/reportTextDocumentLanguage');
@@ -691,6 +747,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
+    handleCreateDeclarationOrDefinition(): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -867,9 +924,7 @@ export class DefaultClient implements Client {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                 }
-                languageClient = this.createLanguageClient();
-                languageClient.registerProposedFeatures();
-                firstClientStarted = languageClient.start();
+                firstClientStarted = this.createLanguageClient();
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
@@ -1116,7 +1171,7 @@ export class DefaultClient implements Client {
         };
     }
 
-    private createLanguageClient(): LanguageClient {
+    private async createLanguageClient(): Promise<void> {
         const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
@@ -1173,7 +1228,6 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cpp' },
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
-            initializationOptions: initializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
                 error: (error, message, count) => ({ action: ErrorAction.Continue }),
@@ -1201,8 +1255,13 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        this.loggingLevel = clientOptions.initializationOptions.loggingLevel;
-        return new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        this.loggingLevel = initializationOptions.settings.loggingLevel;
+        languageClient =  new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        setupOutputHandlers();
+        languageClient.registerProposedFeatures();
+        await languageClient.start();
+        // Move initialization to a separate message, so we can see log output from it.
+        await languageClient.sendNotification(InitializationNotification, initializationOptions);
     }
 
     public sendDidChangeSettings(): void {
@@ -1841,6 +1900,7 @@ export class DefaultClient implements Client {
             }
         });
         this.languageClient.onNotification(PublishIntelliSenseDiagnosticsNotification, publishIntelliSenseDiagnostics);
+        this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
@@ -1852,7 +1912,6 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
-        setupOutputHandlers();
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
@@ -2397,6 +2456,10 @@ export class DefaultClient implements Client {
             } else {
                 modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
             }
+
+            if (modifiedConfig.compileCommands) {
+                modifiedConfig.compileCommands = cppProperties.resolvePath(modifiedConfig.compileCommands, os.platform() === "win32");
+            }
             params.configurations.push(modifiedConfig);
         });
 
@@ -2903,6 +2966,98 @@ export class DefaultClient implements Client {
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
+    public async handleCreateDeclarationOrDefinition(): Promise<void> {
+        let range: vscode.Range | undefined;
+        let uri: vscode.Uri | undefined;
+        // range is based on the cursor position.
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (editor) {
+            uri = editor.document.uri;
+            if (editor.selection.isEmpty) {
+                range = new vscode.Range(editor.selection.active, editor.selection.active);
+            } else if (editor.selection.isReversed) {
+                range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+            } else {
+                range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+            }
+        }
+
+        if (uri && range) {
+            const params: CreateDeclarationOrDefinitionParams = {
+                uri: uri.toString(),
+                range: {
+                    start: {
+                        character: range.start.character,
+                        line: range.start.line
+                    },
+                    end: {
+                        character: range.end.character,
+                        line: range.end.line
+                    }
+                }
+            };
+            const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
+            // TODO: return specific errors info in result.
+            if (result.changes) {
+                const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                let modifiedDocument: vscode.Uri | undefined;
+                let lastEdit: vscode.TextEdit | undefined;
+                let numNewlinesFromPreviousEdits: number = 0;
+                for (const file in result.changes) {
+                    const uri: vscode.Uri = vscode.Uri.file(file);
+                    const edits: vscode.TextEdit[] = [];
+                    for (const edit of result.changes[file]) {
+                        const range: vscode.Range = makeVscodeRange(edit.range);
+                        if (lastEdit && lastEdit.range.isEqual(range)) {
+                            numNewlinesFromPreviousEdits += (lastEdit.newText.match(/\n/g) || []).length;
+                        }
+                        lastEdit = new vscode.TextEdit(range, edit.newText);
+                        edits.push(lastEdit);
+                    }
+                    workspaceEdit.set(uri, edits);
+                    modifiedDocument = uri;
+                };
+                if (modifiedDocument && lastEdit) {
+                    await vscode.workspace.applyEdit(workspaceEdit);
+                    let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+
+                    // Move the cursor to the new code, accounting for \n or \n\n at the start.
+                    let startLine: number = lastEdit.range.start.line;
+                    if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
+                        startLine += 2;
+                        numNewlines -= 2;
+                    } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
+                        startLine += 1;
+                        numNewlines -= 1;
+                    }
+                    if (!lastEdit.newText.endsWith("\n")) {
+                        numNewlines++; // Increase the format range.
+                    }
+
+                    const selectionPosition: vscode.Position = new vscode.Position(startLine + numNewlinesFromPreviousEdits, 0);
+                    const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
+                    await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
+
+                    // Run formatRange.
+                    const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                    const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
+                    const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
+                    const formatOptions: vscode.FormattingOptions = {
+                        insertSpaces: settings.editorInsertSpaces ?? true,
+                        tabSize: settings.editorTabSize ?? 4
+                    };
+                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
+                    if (formatTextEdits && formatTextEdits.length > 0) {
+                        formatEdits.set(modifiedDocument, formatTextEdits);
+                    }
+                    if (formatEdits.size > 0) {
+                        await vscode.workspace.applyEdit(formatEdits);
+                    }
+                }
+            }
+        }
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
@@ -3089,6 +3244,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

@@ -3463,6 +3463,8 @@
   "kayan nokta vektörü işlenen türü (%t) eşleşen bir tamsayı vektörü türü içermiyor",
   "'requires' ifadeleri için değiştirme henüz uygulanmadı",
   "'kullanılamayan' bir öznitelik nedeniyle",
+  "yinelenen 'asm' niteleyicisi",
+  "tamamlanmamış sabit listesi türüne sahip bir bit alanı veya geçersiz temel türe sahip opak bir sabit listesi",
   "%sq IFC bölümü içinde bir dizin kullanılarak %sq IFC bölümündeki bir öğe oluşturulmaya çalışıldı",
   "%sq bölümü, %d2 beklenirken girdi boyutunu %d1 olarak belirtti",
   "%sq1 modülü işlenirken beklenmeyen bir IFC gereksinimiyle karşılaşıldı",
@@ -3470,10 +3472,12 @@
   "atomik kısıtlama kendisine bağımlı",
   "'noreturn' işlevi geçersiz olmayan bir dönüş türüne sahiptir",
   "%sq parametresi kaldırılarak bir düzeltme yapıldı (%d göreli dizininde)",
+  "varsayılan bir şablon bağımsız değişkeni, sınıfının dışındaki bir şablon üyesinin tanımında belirtilemez",
   "varlık yeniden oluşturma işlemi sırasında geçersiz %sq IFC tanımlayıcı adı ile karşılaşıldı",
   "varlık yeniden oluşturma işlemi sırasında geçersiz %sq IFC tanımlayıcı adı atlandı",
   "%sq modülü geçersiz sıralama değeri",
   "bir IFC modülünden yüklenen bir fonksiyon şablonu hatalı bir şekilde %nd olarak ayrıştırıldı",
   "%sq modülünde bir IFC varlık referansı yüklenemedi",
-  "IFC dizin sıralaması = %d1, değer = %d2"
+  "IFC dizin sıralaması = %d1, değer = %d2",
+  "zincirli belirleyicilere, önemsiz yıkıcıya sahip bir sınıf türü için izin verilmez"
 ]
