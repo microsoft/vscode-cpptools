@@ -71,6 +71,7 @@
 
 ### Removed Features
 * Removed explicit WSL support in favor of using the WSL extension. [PR #10066](https://github.com/microsoft/vscode-cpptools/pull/10066)
+
 ## Version 1.12.4: August 31, 2022
 ### Other
 * Revert changes to telemetry key format. [PR #9822](https://github.com/microsoft/vscode-cpptools/pull/9822)
