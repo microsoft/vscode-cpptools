@@ -887,6 +887,10 @@ export class DefaultClient implements Client {
         });
     }
 
+    public set defaultCompiler(value: any) {
+        vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Global);
+    }
+
     public async handleCompilerQuickPick(): Promise<void> {
         const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
         const paths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
@@ -894,22 +898,34 @@ export class DefaultClient implements Client {
         paths.push("Help me install a compiler");
         paths.push("Do not configure a compiler (not recommended)");
         const index: number = await ui.showSelectCompiler(paths);
-        util.updateTrustedCompilersList(paths[index]);
         if (index === paths.length - 1) {
             paths[index] = "";
         } else if (index === paths.length - 2) {
-            vscode.commands.executeCommand('vscode.open', "https://learn.microsoft.com/en-us/cpp/build/reference/compiling-a-c-cpp-program?view=msvc-170");
-            return;
+            switch (os.platform()) {
+                case 'win32':
+                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                    return;
+                case 'darwin':
+                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                    return;
+                case 'linux':
+                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                    return;
+                default:
+                    throw new Error(localize("unexpected.os", "Unexpected OS"));
+            }
         } else if (index === paths.length - 3) {
             const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
             if (result !== undefined && result.length > 0) {
-                util.updateTrustedCompilersList(result[0].fsPath);
-                await vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", result[0].fsPath, vscode.ConfigurationTarget.Global);
+                util.addTrustedCompiler(result[0].fsPath);
+                await this.defaultCompiler(result[0].fsPath);
                 const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                 compilerDefaults = selectedCompilerDefaults;
                 this.updateClientConfigurations();
                 return;
             }
+        } else {
+            util.addTrustedCompiler(paths[index]);
         }
         await vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", paths[index], vscode.ConfigurationTarget.Global);
         const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
@@ -917,6 +933,7 @@ export class DefaultClient implements Client {
         this.updateClientConfigurations();
 
     }
+
     async promptSelectCompiler(command: boolean): Promise<void> {
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
@@ -924,10 +941,10 @@ export class DefaultClient implements Client {
 
         if (compilerDefaults.compilerPath !== "") {
             if (!command) {
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", `The ${compilerDefaults.compilerPath} was found on this computer. Do you want to configure it for IntelliSense?`), confirmCompiler, selectCompiler);
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The ${compilerDefaults.compilerPath} was found on this computer. Do you want to configure it for IntelliSense?"), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
-                    util.updateTrustedCompilersList(compilerDefaults.compilerPath);
-                    await vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", compilerDefaults.compilerPath, vscode.ConfigurationTarget.Global);
+                    util.addTrustedCompiler(compilerDefaults.compilerPath);
+                    await this.defaultCompiler(compilerDefaults.compilerPath);
                     const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                     compilerDefaults = selectedCompilerDefaults;
                     this.updateClientConfigurations();
@@ -935,7 +952,7 @@ export class DefaultClient implements Client {
                     this.handleCompilerQuickPick();
                 } else {
                     const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", `You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional`), selectCompiler);
+                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional"), selectCompiler);
                     if (value === setCompiler) {
                         this.handleCompilerQuickPick();
                     }
@@ -1034,7 +1051,6 @@ export class DefaultClient implements Client {
                         const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                         compilerDefaults = inputCompilerDefaults;
                         this.configuration.CompilerDefaults = compilerDefaults;
-                        clientCount++;
                         // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
@@ -1067,9 +1083,9 @@ export class DefaultClient implements Client {
                     } else {
                         // update all client configurations
                         this.configuration.CompilerDefaults = compilerDefaults;
-                        clientCount++;
                     }
                     this.configuration.setupConfigurations();
+                    clientCount++;
                     // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
                     if (clientCount === vscode.workspace.workspaceFolders?.length) {
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
@@ -1347,7 +1363,7 @@ export class DefaultClient implements Client {
 
         // Create the language client
         this.loggingLevel = initializationOptions.settings.loggingLevel;
-        languageClient =  new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         setupOutputHandlers();
         languageClient.registerProposedFeatures();
         await languageClient.start();
@@ -1976,7 +1992,7 @@ export class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
-        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => util.updateTrustedCompilersList(e.compilerPath));
+        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => util.addTrustedCompiler(e.compilerPath));
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
@@ -2664,7 +2680,7 @@ export class DefaultClient implements Client {
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
                     if (itemConfig.compilerPath !== undefined) {
-                        util.updateTrustedCompilersList(itemConfig.compilerPath);
+                        util.addTrustedCompiler(itemConfig.compilerPath);
                     }
                     if (providerVersion < Version.v6) {
                         itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
@@ -2759,7 +2775,7 @@ export class DefaultClient implements Client {
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;
                 if (sanitized.compilerPath !== undefined) {
-                    util.updateTrustedCompilersList(sanitized.compilerPath);
+                    util.addTrustedCompiler(sanitized.compilerPath);
                 }
                 if (providerVersion < Version.v6) {
                     sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
