@@ -3028,7 +3028,7 @@ export class DefaultClient implements Client {
         if (modifiedDocument === undefined || lastEdit === undefined) {
             return;
         }
-        
+
         await vscode.workspace.applyEdit(workspaceEdit);
         let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
 
