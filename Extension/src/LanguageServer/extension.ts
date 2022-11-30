@@ -174,7 +174,6 @@ export async function activate(): Promise<void> {
 
     console.log("starting language server");
     clients = new ClientCollection();
-    // set a timer that waits for a few seconds
     ui = getUI();
 
     // There may have already been registered CustomConfigurationProviders.

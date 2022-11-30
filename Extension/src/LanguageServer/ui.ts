@@ -346,7 +346,7 @@ export class UI {
 
     public async showSelectCompiler(paths: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.compile.commands", "Select a a compiler to configure for intellisense");
+        options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {

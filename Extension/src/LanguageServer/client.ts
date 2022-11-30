@@ -69,7 +69,7 @@ let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
-let defaultCompilerFound: boolean = false;
+let displayedSelectCompiler: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -730,7 +730,7 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
-    promptSelectCompiler(command: boolean | undefined): Promise<void>;
+    promptSelectCompiler(command: boolean): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -900,10 +900,10 @@ export class DefaultClient implements Client {
             vscode.commands.executeCommand('vscode.open', "https://learn.microsoft.com/en-us/cpp/build/reference/compiling-a-c-cpp-program?view=msvc-170");
             return;
         } else if (index === paths.length - 3) {
-            const result: any = await vscode.window.showOpenDialog();
-            if (result?.toString()) {
-                util.updateTrustedCompilersList(result?.toString());
-                await vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", result?.toString(), vscode.ConfigurationTarget.Global);
+            const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
+            if (result !== undefined && result.length > 0) {
+                util.updateTrustedCompilersList(result[0].fsPath);
+                await vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", result[0].fsPath, vscode.ConfigurationTarget.Global);
                 const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                 compilerDefaults = selectedCompilerDefaults;
                 this.updateClientConfigurations();
@@ -934,7 +934,7 @@ export class DefaultClient implements Client {
                     this.handleCompilerQuickPick();
                 } else {
                     const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", `You do not have a compiler configured. Unless you set your own configurations, Intellisense may not be functional`), selectCompiler);
+                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", `You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional`), selectCompiler);
                     if (value === setCompiler) {
                         this.handleCompilerQuickPick();
                     }
@@ -1035,16 +1035,7 @@ export class DefaultClient implements Client {
                         const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                         compilerDefaults = inputCompilerDefaults;
                         this.configuration.CompilerDefaults = compilerDefaults;
-                        this.configuration.setupConfigurations();
                         clientCount++;
-                        // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
-                        if (clientCount === vscode.workspace.workspaceFolders?.length) {
-                            if (!compilerDefaults.trustedCompilerFound && !defaultCompilerFound) {
-                                // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                                this.promptSelectCompiler(false);
-                                defaultCompilerFound = true;
-                            }
-                        }
                         // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
@@ -1077,15 +1068,15 @@ export class DefaultClient implements Client {
                     } else {
                         // update all client configurations
                         this.configuration.CompilerDefaults = compilerDefaults;
-                        this.configuration.setupConfigurations();
                         clientCount++;
-                        // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
-                        if (clientCount === vscode.workspace.workspaceFolders?.length) {
-                            if (!compilerDefaults.trustedCompilerFound && !defaultCompilerFound) {
-                                // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                                this.promptSelectCompiler(false);
-                                defaultCompilerFound = true;
-                            }
+                    }
+                    this.configuration.setupConfigurations();
+                    // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
+                    if (clientCount === vscode.workspace.workspaceFolders?.length) {
+                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
+                            // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
+                            this.promptSelectCompiler(false);
+                            displayedSelectCompiler = true;
                         }
                     }
                 } catch (err) {
@@ -3295,7 +3286,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(command: boolean | undefined): Promise<void> { return Promise.resolve(); }
+    promptSelectCompiler(command: boolean): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }

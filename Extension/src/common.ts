@@ -883,11 +883,12 @@ export async function updateTrustedCompilersList(path: string): Promise<void> {
     // detect duplicate paths
     const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
     const compilerPaths: string[] = compilerPath.Value;
-    compilerPaths.forEach(compiler => {
-        if (compiler === path) {
+    let i: number = 0;
+    for (i = 0; i <= compilerPaths.length; i++) {
+        if (compilerPaths[i] === path) {
             return;
         }
-    });
+    }
     compilerPaths.push(path);
     compilerPath.Value = compilerPaths;
 }
