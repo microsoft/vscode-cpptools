@@ -565,6 +565,7 @@ const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigP
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
 const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
+const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1003,9 +1004,7 @@ export class DefaultClient implements Client {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
                 }
-                languageClient = this.createLanguageClient();
-                languageClient.registerProposedFeatures();
-                firstClientStarted = languageClient.start();
+                firstClientStarted = this.createLanguageClient();
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
@@ -1263,7 +1262,7 @@ export class DefaultClient implements Client {
         };
     }
 
-    private createLanguageClient(): LanguageClient {
+    private async createLanguageClient(): Promise<void> {
         const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
@@ -1320,7 +1319,6 @@ export class DefaultClient implements Client {
                 { scheme: 'file', language: 'cpp' },
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
-            initializationOptions: initializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
                 error: (error, message, count) => ({ action: ErrorAction.Continue }),
@@ -1348,8 +1346,13 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        this.loggingLevel = clientOptions.initializationOptions.loggingLevel;
-        return new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        this.loggingLevel = initializationOptions.settings.loggingLevel;
+        languageClient =  new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        setupOutputHandlers();
+        languageClient.registerProposedFeatures();
+        await languageClient.start();
+        // Move initialization to a separate message, so we can see log output from it.
+        await languageClient.sendNotification(InitializationNotification, initializationOptions);
     }
 
     public sendDidChangeSettings(): void {
@@ -2001,7 +2004,6 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
-        setupOutputHandlers();
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
@@ -3105,11 +3107,15 @@ export class DefaultClient implements Client {
                 const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 let modifiedDocument: vscode.Uri | undefined;
                 let lastEdit: vscode.TextEdit | undefined;
+                let numNewlinesFromPreviousEdits: number = 0;
                 for (const file in result.changes) {
                     const uri: vscode.Uri = vscode.Uri.file(file);
                     const edits: vscode.TextEdit[] = [];
                     for (const edit of result.changes[file]) {
                         const range: vscode.Range = makeVscodeRange(edit.range);
+                        if (lastEdit && lastEdit.range.isEqual(range)) {
+                            numNewlinesFromPreviousEdits += (lastEdit.newText.match(/\n/g) || []).length;
+                        }
                         lastEdit = new vscode.TextEdit(range, edit.newText);
                         edits.push(lastEdit);
                     }
@@ -3118,8 +3124,40 @@ export class DefaultClient implements Client {
                 };
                 if (modifiedDocument && lastEdit) {
                     await vscode.workspace.applyEdit(workspaceEdit);
-                    const selectionRange: vscode.Range = lastEdit.range; // TODO: range should be the new range after text edit was applied.
+                    let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+
+                    // Move the cursor to the new code, accounting for \n or \n\n at the start.
+                    let startLine: number = lastEdit.range.start.line;
+                    if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
+                        startLine += 2;
+                        numNewlines -= 2;
+                    } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
+                        startLine += 1;
+                        numNewlines -= 1;
+                    }
+                    if (!lastEdit.newText.endsWith("\n")) {
+                        numNewlines++; // Increase the format range.
+                    }
+
+                    const selectionPosition: vscode.Position = new vscode.Position(startLine + numNewlinesFromPreviousEdits, 0);
+                    const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
                     await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
+
+                    // Run formatRange.
+                    const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+                    const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
+                    const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
+                    const formatOptions: vscode.FormattingOptions = {
+                        insertSpaces: settings.editorInsertSpaces ?? true,
+                        tabSize: settings.editorTabSize ?? 4
+                    };
+                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
+                    if (formatTextEdits && formatTextEdits.length > 0) {
+                        formatEdits.set(modifiedDocument, formatTextEdits);
+                    }
+                    if (formatEdits.size > 0) {
+                        await vscode.workspace.applyEdit(formatEdits);
+                    }
                 }
             }
         }
