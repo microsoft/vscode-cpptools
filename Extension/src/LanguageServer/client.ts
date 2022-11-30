@@ -2982,80 +2982,99 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (uri && range) {
-            const params: CreateDeclarationOrDefinitionParams = {
-                uri: uri.toString(),
-                range: {
-                    start: {
-                        character: range.start.character,
-                        line: range.start.line
-                    },
-                    end: {
-                        character: range.end.character,
-                        line: range.end.line
-                    }
-                }
-            };
-            const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
-            // TODO: return specific errors info in result.
-            if (result.changes) {
-                const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                let modifiedDocument: vscode.Uri | undefined;
-                let lastEdit: vscode.TextEdit | undefined;
-                let numNewlinesFromPreviousEdits: number = 0;
-                for (const file in result.changes) {
-                    const uri: vscode.Uri = vscode.Uri.file(file);
-                    const edits: vscode.TextEdit[] = [];
-                    for (const edit of result.changes[file]) {
-                        const range: vscode.Range = makeVscodeRange(edit.range);
-                        if (lastEdit && lastEdit.range.isEqual(range)) {
-                            numNewlinesFromPreviousEdits += (lastEdit.newText.match(/\n/g) || []).length;
-                        }
-                        lastEdit = new vscode.TextEdit(range, edit.newText);
-                        edits.push(lastEdit);
-                    }
-                    workspaceEdit.set(uri, edits);
-                    modifiedDocument = uri;
-                };
-                if (modifiedDocument && lastEdit) {
-                    await vscode.workspace.applyEdit(workspaceEdit);
-                    let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+        if (uri === undefined || range === undefined) {
+            return;
+        }
 
-                    // Move the cursor to the new code, accounting for \n or \n\n at the start.
-                    let startLine: number = lastEdit.range.start.line;
-                    if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
-                        startLine += 2;
-                        numNewlines -= 2;
-                    } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
-                        startLine += 1;
-                        numNewlines -= 1;
-                    }
-                    if (!lastEdit.newText.endsWith("\n")) {
-                        numNewlines++; // Increase the format range.
-                    }
-
-                    const selectionPosition: vscode.Position = new vscode.Position(startLine + numNewlinesFromPreviousEdits, 0);
-                    const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
-                    await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
-
-                    // Run formatRange.
-                    const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                    const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
-                    const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
-                    const formatOptions: vscode.FormattingOptions = {
-                        insertSpaces: settings.editorInsertSpaces ?? true,
-                        tabSize: settings.editorTabSize ?? 4
-                    };
-                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
-                    if (formatTextEdits && formatTextEdits.length > 0) {
-                        formatEdits.set(modifiedDocument, formatTextEdits);
-                    }
-                    if (formatEdits.size > 0) {
-                        await vscode.workspace.applyEdit(formatEdits);
-                    }
+        const params: CreateDeclarationOrDefinitionParams = {
+            uri: uri.toString(),
+            range: {
+                start: {
+                    character: range.start.character,
+                    line: range.start.line
+                },
+                end: {
+                    character: range.end.character,
+                    line: range.end.line
                 }
             }
+        };
+
+        const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
+        // TODO: return specific errors info in result.
+        if (result.changes === undefined) {
+            return;
         }
+
+        const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let modifiedDocument: vscode.Uri | undefined;
+        let lastEdit: vscode.TextEdit | undefined;
+        let numNewlinesFromPreviousEdits: number = 0;
+        for (const file in result.changes) {
+            const uri: vscode.Uri = vscode.Uri.file(file);
+            const edits: vscode.TextEdit[] = [];
+            for (const edit of result.changes[file]) {
+                const range: vscode.Range = makeVscodeRange(edit.range);
+                if (lastEdit && lastEdit.range.isEqual(range)) {
+                    numNewlinesFromPreviousEdits += (lastEdit.newText.match(/\n/g) || []).length;
+                }
+                lastEdit = new vscode.TextEdit(range, edit.newText);
+                edits.push(lastEdit);
+            }
+            workspaceEdit.set(uri, edits);
+            modifiedDocument = uri;
+        };
+
+        if (modifiedDocument === undefined || lastEdit === undefined) {
+            return;
+        }
+        
+        await vscode.workspace.applyEdit(workspaceEdit);
+        let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+
+        // Move the cursor to the new code, accounting for \n or \n\n at the start.
+        let startLine: number = lastEdit.range.start.line;
+        if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
+            startLine += 2;
+            numNewlines -= 2;
+        } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
+            startLine += 1;
+            numNewlines -= 1;
+        }
+        if (!lastEdit.newText.endsWith("\n")) {
+            numNewlines++; // Increase the format range.
+        }
+
+        const selectionPosition: vscode.Position = new vscode.Position(startLine + numNewlinesFromPreviousEdits, 0);
+        const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
+        await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
+
+        // Run formatRange.
+        const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
+        const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
+        const formatOptions: vscode.FormattingOptions = {
+            insertSpaces: settings.editorInsertSpaces ?? true,
+            tabSize: settings.editorTabSize ?? 4
+        };
+        const versionBeforeFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
+        if (versionBeforeFormatting === undefined) {
+            return;
+        }
+        const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
+        if (formatTextEdits && formatTextEdits.length > 0) {
+            formatEdits.set(modifiedDocument, formatTextEdits);
+        }
+        if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
+            return;
+        }
+        // Only apply formatting if the document version hasn't changed to prevent
+        // stale formatting results from being applied.
+        const versionAfterFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
+        if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
+            return;
+        }
+        await vscode.workspace.applyEdit(formatEdits);
     }
 
     public onInterval(): void {
