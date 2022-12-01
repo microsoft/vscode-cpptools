@@ -14,6 +14,10 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
     }
 
     public async provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
+        if (settings.formattingEngine === "disabled") {
+            return [];
+        }
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
         const onChanges: string | number | boolean = options.onChanges;
@@ -31,7 +35,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
             }
 
             if (!insertSpacesSet || !tabSizeSet) {
-                const settings: OtherSettings = new OtherSettings(this.client.RootUri);
+                const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
                 if (!insertSpacesSet) {
                     options.insertSpaces = settings.editorInsertSpaces ?? true;
                 }
@@ -40,7 +44,6 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                 }
             }
         }
-        const settings: CppSettings = new CppSettings(this.client.RootUri);
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {

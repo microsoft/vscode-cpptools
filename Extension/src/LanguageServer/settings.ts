@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath, isWindows } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
@@ -21,6 +21,140 @@ import * as nls from 'vscode-nls';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
+export interface Excludes {
+    [key: string]: boolean | { when: string };
+};
+
+export interface WorkspaceFolderSettingsParams {
+    uri: string | undefined;
+    intelliSenseEngine: string | undefined;
+    intelliSenseEngineFallback: boolean | undefined;
+    autocomplete: string | undefined;
+    autocompleteAddParentheses: boolean | undefined;
+    errorSquiggles: string | undefined;
+    exclusionPolicy: string | undefined;
+    preferredPathSeparator: string | undefined;
+    intelliSenseCachePath: string | undefined;
+    intelliSenseCacheSize: number | undefined;
+    intelliSenseMemoryLimit: number | undefined;
+    dimInactiveRegions: boolean | undefined;
+    suggestSnippets: boolean | undefined;
+    legacyCompilerArgsBehavior: boolean | undefined;
+    defaultSystemIncludePath: string[] | undefined;
+    cppFilesExclude: Excludes | undefined;
+    clangFormatPath: string | undefined;
+    clangFormatStyle: string | undefined;
+    clangFormatFallbackStyle: string | undefined;
+    clangFormatSortIncludes: boolean | undefined | null;
+    codeAnalysisRunAutomatically: boolean | undefined;
+    codeAnalysisExclude: Excludes | undefined;
+    clangTidyEnabled: boolean | undefined;
+    clangTidyPath: string | undefined;
+    clangTidyConfig: string | undefined;
+    clangTidyFallbackConfig: string | undefined;
+    clangTidyHeaderFilter: string | undefined | null;
+    clangTidyArgs: string[] | undefined;
+    clangTidyUseBuildPath: boolean | undefined;
+    clangTidyFixWarnings: boolean | undefined;
+    clangTidyFixErrors: boolean | undefined;
+    clangTidyFixNotes: boolean | undefined;
+    clangTidyChecksEnabled: string[] | undefined;
+    clangTidyChecksDisabled: string[] | undefined;
+    hover: string | undefined;
+    vcFormatIndentBraces: boolean | undefined;
+    vcFormatIndentMultiLineRelativeTo: string | undefined;
+    vcFormatIndentWithinParentheses: string | undefined;
+    vcFormatIndentPreserveWithinParentheses: boolean;
+    vcFormatIndentCaseLabels: boolean | undefined;
+    vcFormatIndentCaseContents: boolean | undefined;
+    vcFormatIndentCaseContentsWhenBlock: boolean | undefined;
+    vcFormatIndentLambdaBracesWhenParameter: boolean | undefined;
+    vcFormatIndentGotoLabels: string | undefined;
+    vcFormatIndentPreprocessor: string | undefined;
+    vcFormatIndentAccesSpecifiers: boolean | undefined;
+    vcFormatIndentNamespaceContents: boolean | undefined;
+    vcFormatIndentPreserveComments: boolean | undefined;
+    vcFormatNewLineScopeBracesOnSeparateLines: boolean | undefined;
+    vcFormatNewLineBeforeOpenBraceNamespace: string | undefined;
+    vcFormatNewLineBeforeOpenBraceType: string | undefined;
+    vcFormatNewLineBeforeOpenBraceFunction: string | undefined;
+    vcFormatNewLineBeforeOpenBraceBlock: string | undefined;
+    vcFormatNewLineBeforeOpenBraceLambda: string | undefined;
+    vcFormatNewLineBeforeCatch: boolean | undefined;
+    vcFormatNewLineBeforeElse: boolean | undefined;
+    vcFormatNewLineBeforeWhileInDoWhile: boolean | undefined;
+    vcFormatNewLineCloseBraceSameLineEmptyType: boolean | undefined;
+    vcFormatNewLineCloseBraceSameLineEmptyFunction: boolean | undefined;
+    vcFormatSpaceWithinParameterListParentheses: boolean | undefined;
+    vcFormatSpaceBetweenEmptyParameterListParentheses: boolean | undefined;
+    vcFormatSpaceAfterKeywordsInControlFlowStatements: boolean | undefined;
+    vcFormatSpaceWithinControlFlowStatementParentheses: boolean | undefined;
+    vcFormatSpaceBeforeLambdaOpenParenthesis: boolean | undefined;
+    vcFormatSpaceWithinCastParentheses: boolean | undefined;
+    vcFormatSpaceAfterCastCloseParenthesis: boolean | undefined;
+    vcFormatSpaceWithinExpressionParentheses: boolean | undefined;
+    vcFormatSpaceBeforeBlockOpenBrace: boolean | undefined;
+    vcFormatSpaceBetweenEmptyBraces: boolean | undefined;
+    vcFormatSpaceBeforeInitializerListOpenBrace: boolean | undefined;
+    vcFormatSpaceWithinInitializerListBraces: boolean | undefined;
+    vcFormatSpacePreserveInInitializerList: boolean | undefined;
+    vcFormatSpaceBeforeOpenSquareBracket: boolean | undefined;
+    vcFormatSpaceWithinSquareBrackets: boolean | undefined;
+    vcFormatSpaceBeforeEmptySquareBrackets: boolean | undefined;
+    vcFormatSpaceBetweenEmptySquareBrackets: boolean | undefined;
+    vcFormatSpaceGroupSquareBrackets: boolean | undefined;
+    vcFormatSpaceWithinLambdaBrackets: boolean | undefined;
+    vcFormatSpaceBetweenEmptyLambdaBrackets: boolean | undefined;
+    vcFormatSpaceBeforeComma: boolean | undefined;
+    vcFormatSpaceAfterComma: boolean | undefined;
+    vcFormatSpaceRemoveAroundMemberOperators: boolean | undefined;
+    vcFormatSpaceBeforeInheritanceColon: boolean | undefined;
+    vcFormatSpaceBeforeConstructorColon: boolean | undefined;
+    vcFormatSpaceRemoveBeforeSemicolon: boolean | undefined;
+    vcFormatSpaceInsertAfterSemicolon: boolean | undefined;
+    vcFormatSpaceRemoveAroundUnaryOperator: boolean | undefined;
+    vcFormatSpaceBeforeFunctionOpenParenthesis: string | undefined;
+    vcFormatSpaceAroundBinaryOperator: string | undefined;
+    vcFormatSpaceAroundAssignmentOperator: string | undefined;
+    vcFormatSpacePointerReferenceAlignment: string | undefined;
+    vcFormatSpaceAroundTernaryOperator: string | undefined;
+    vcFormatWrapPreserveBlocks: string | undefined;
+    doxygenGenerateOnType: boolean | undefined;
+    doxygenGeneratedStyle: string | undefined;
+    doxygenSectionTags: string[] | undefined;
+    filesExclude: Excludes | undefined;
+    filesAutoSaveAfterDelay: boolean | undefined;
+    filesEncoding: string | undefined;
+    searchExclude: Excludes | undefined;
+    editorAutoClosingBrackets: string | undefined;
+    editorInlayHintsEnabled: boolean | undefined;
+    editorParameterHintsEnabled: boolean | undefined;
+};
+
+export interface SettingsParams {
+    filesAssociations: { [key: string]: string } | undefined;
+    workspaceFallbackEncoding: string | undefined;
+    maxConcurrentThreads: number | null | undefined;
+    maxCachedProcesses: number | null | undefined;
+    maxMemory: number | null | undefined;
+    loggingLevel: string | undefined;
+    workspaceParsingPriority: string | undefined;
+    workspaceSymbols: string | undefined;
+    simplifyStructuredComments: boolean | undefined;
+    intelliSenseUpdateDelay: number | undefined;
+    experimentalFeatures: boolean | undefined;
+    enhancedColorization: boolean | undefined;
+    intellisenseMaxCachedProcesses: number | null | undefined;
+    intellisenseMaxMemory: number | null | undefined;
+    referencesMaxConcurrentThreads: number | null | undefined;
+    referencesMaxCachedProcesses: number | null | undefined;
+    referencesMaxMemory: number | null | undefined;
+    codeAnalysisMaxConcurrentThreads: number | null | undefined;
+    codeAnalysisMaxMemory: number | null | undefined;
+    codeAnalysisUpdateDelay: number | undefined;
+    workspaceFolderSettings: WorkspaceFolderSettingsParams[];
+};
+
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;
 }
@@ -29,8 +163,8 @@ class Settings {
     private readonly settings: vscode.WorkspaceConfiguration;
 
     /**
-     * create the Settings object.
-     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired
+     * Create the Settings object.
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired. Only provide a resource when accessing settings with a "resource" scope.
      */
     constructor(section: string, public resource?: vscode.Uri) {
         this.settings = vscode.workspace.getConfiguration(section, resource ? resource : null);
@@ -76,6 +210,10 @@ class Settings {
 }
 
 export class CppSettings extends Settings {
+    /**
+     * Create the CppSettings object.
+     * @param resource The path to a resource to which the settings should apply, or null if global settings are desired. Only provide a resource when accessing settings with a "resource" scope.
+     */
     constructor(resource?: vscode.Uri) {
         super("C_Cpp", resource);
     }
@@ -162,16 +300,17 @@ export class CppSettings extends Settings {
         return path;
     }
 
-    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
+    public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
+    public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
     public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }
     public get referencesMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("references.maxConcurrentThreads"); }
     public get referencesMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("references.maxCachedProcesses"); }
     public get referencesMaxMemory(): number | undefined | null { return super.Section.get<number | null>("references.maxMemory"); }
-    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxConcurrentThreads"); }
-    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number>("codeAnalysis.maxMemory"); }
-    public get codeAnalysisUpdateDelay(): number | undefined | null { return super.Section.get<number>("codeAnalysis.updateDelay"); }
+    public get codeAnalysisMaxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("codeAnalysis.maxConcurrentThreads"); }
+    public get codeAnalysisMaxMemory(): number | undefined | null { return super.Section.get<number | null>("codeAnalysis.maxMemory"); }
+    public get codeAnalysisUpdateDelay(): number | undefined { return super.Section.get<number>("codeAnalysis.updateDelay"); }
     public get codeAnalysisExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("codeAnalysis.exclude"); }
     public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
@@ -200,16 +339,16 @@ export class CppSettings extends Settings {
     }
     public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
     public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
-    public get clangFormatSortIncludes(): string | undefined { return super.Section.get<string>("clang_format_sortIncludes"); }
-    public get experimentalFeatures(): string | undefined { return super.Section.get<string>("experimentalFeatures"); }
+    public get clangFormatSortIncludes(): boolean | undefined | null { return super.Section.get<boolean | null>("clang_format_sortIncludes"); }
+    public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
-    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine"); }
-    public get intelliSenseEngineFallback(): string | undefined { return super.Section.get<string>("intelliSenseEngineFallback"); }
+    public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase(); }
+    public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
     public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
     public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number | undefined { return super.Section.get<number>("intelliSenseMemoryLimit"); }
     public get intelliSenseUpdateDelay(): number | undefined { return super.Section.get<number>("intelliSenseUpdateDelay"); }
-    public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles"); }
+    public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles")?.toLowerCase(); }
     public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
     public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
     public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
@@ -224,7 +363,7 @@ export class CppSettings extends Settings {
     public get doxygenGeneratedCommentStyle(): string | undefined { return super.Section.get<string>("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean | undefined { return super.Section.get<boolean>("doxygen.generateOnType"); }
     public get commentContinuationPatterns(): (string | CommentPattern)[] | undefined { return super.Section.get<(string | CommentPattern)[]>("commentContinuationPatterns"); }
-    public get configurationWarnings(): string | undefined { return super.Section.get<string>("configurationWarnings"); }
+    public get configurationWarnings(): boolean | undefined { return super.Section.get<string>("configurationWarnings")?.toLowerCase() !== "disabled"; }
     public get preferredPathSeparator(): string | undefined { return super.Section.get<string>("preferredPathSeparator"); }
     public get updateChannel(): string | undefined { return super.Section.get<string>("updateChannel"); }
     public get vcpkgEnabled(): boolean | undefined { return super.Section.get<boolean>("vcpkg.enabled"); }
@@ -252,8 +391,11 @@ export class CppSettings extends Settings {
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
-    public get codeFolding(): boolean { return super.Section.get<string>("codeFolding") === "Enabled"; }
-    public get legacyCompilerArgsBehavior(): boolean | undefined  { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
+    public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
+    public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
+    public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
+    public get hover(): string | undefined { return super.Section.get<string>("hover"); }
+    public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
         return super.Section.get<boolean>("inlayHints.autoDeclarationTypes.enabled") === true;
@@ -284,13 +426,13 @@ export class CppSettings extends Settings {
     }
 
     public get enhancedColorization(): boolean {
-        return super.Section.get<string>("enhancedColorization") === "Enabled"
-            && super.Section.get<string>("intelliSenseEngine") === "Default"
+        return super.Section.get<string>("enhancedColorization")?.toLowerCase() !== "disabled"
+            && this.intelliSenseEngine === "default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
     }
 
     public get formattingEngine(): string | undefined {
-        return super.Section.get<string>("formatting");
+        return super.Section.get<string>("formatting")?.toLowerCase();
     }
 
     public get vcFormatIndentBraces(): boolean {
@@ -329,7 +471,7 @@ export class CppSettings extends Settings {
         return super.Section.get<boolean>("vcFormat.indent.lambdaBracesWhenParameter") === true;
     }
 
-    public get vcFormatIndentGotoLables(): string {
+    public get vcFormatIndentGotoLabels(): string {
         // These strings have default values in package.json, so should never be undefined.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return super.Section.get<string>("vcFormat.indent.gotoLabels")!;
@@ -557,13 +699,17 @@ export class CppSettings extends Settings {
 
     public get dimInactiveRegions(): boolean {
         return super.Section.get<boolean>("dimInactiveRegions") === true
-            && super.Section.get<string>("intelliSenseEngine") === "Default"
+            && this.intelliSenseEngine === "default"
             && vscode.workspace.getConfiguration("workbench").get<string>("colorTheme") !== "Default High Contrast";
+    }
+
+    public get sshTargetsView(): string {
+        return super.Section.get<string>("sshTargetsView") ?? 'default';
     }
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         const value: string | undefined = super.Section.get<string>(name);
-        super.Section.update(name, value === value1 ? value2 : value1, getTarget());
+        super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
     public update<T>(name: string, value: T): void {
@@ -584,7 +730,7 @@ export class CppSettings extends Settings {
         settingMap.set("cpp_indent_case_contents", this.vcFormatIndentCaseContents.toString());
         settingMap.set("cpp_indent_case_contents_when_block", this.vcFormatIndentCaseContentsWhenBlock.toString());
         settingMap.set("cpp_indent_lambda_braces_when_parameter", this.vcFormatIndentLambdaBracesWhenParameter.toString());
-        settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(this.vcFormatIndentGotoLables));
+        settingMap.set("cpp_indent_goto_labels", mapIndentToEditorConfig(this.vcFormatIndentGotoLabels));
         settingMap.set("cpp_indent_preprocessor", mapIndentToEditorConfig(this.vcFormatIndentPreprocessor));
         settingMap.set("cpp_indent_access_specifiers", this.vcFormatIndentAccessSpecifiers.toString());
         settingMap.set("cpp_indent_namespace_contents", this.vcFormatIndentNamespaceContents.toString());
@@ -723,12 +869,12 @@ export class CppSettings extends Settings {
         this.populateEditorConfig(document);
     }
 
-    // If formattingEngine is set to "Default", searches for .editorconfig with vcFormat
+    // If formattingEngine is set to "default", searches for .editorconfig with vcFormat
     // entries, or a .clang-format file, to determine which settings to use.
     // This is intentionally not async to avoid races due to multiple entrancy.
     public useVcFormat(document: vscode.TextDocument): boolean {
-        if (this.formattingEngine !== "Default") {
-            return this.formattingEngine === "vcFormat";
+        if (this.formattingEngine !== "default") {
+            return this.formattingEngine === "vcformat";
         }
         if (this.clangFormatStyle !== "file") {
             // If a clang-format style other than file is specified, don't try to switch to vcFormat.
@@ -749,8 +895,8 @@ export class CppSettings extends Settings {
                         foundEditorConfigWithVcFormatSettings = true;
                         const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                         if (!didEditorConfigNotice.Value) {
-                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks."] },
-                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'Default' value of the 'C_Cpp.formatting' setting."));
+                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
+                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
                             didEditorConfigNotice.Value = true;
                         }
                         return true;
@@ -820,9 +966,10 @@ export class OtherSettings {
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }
-    public get InlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
+    public get editorInlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
+    public get editorParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get settingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+    public get workbenchSettingsEditor (): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
     public get colorTheme(): string | undefined { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
 
@@ -895,4 +1042,3 @@ export function getEditorConfigSettings(fsPath: string): Promise<any> {
     }
     return editorConfigSettings;
 }
-

@@ -3467,5 +3467,13 @@
   "oddíl %sq určil svou velikost položky jako %d1, když bylo očekáváno %d2.",
   "při zpracování modulu %sq1 byl zjištěn neočekávaný požadavek IFC.",
   "podmínka selhala na řádku %d v %s1: %sq2",
-  "atomické omezení závisí na sobě"
+  "atomické omezení závisí na sobě",
+  "Funkce noreturn má návratový typ, který není void.",
+  "oprava byla provedena vyřazením parametru %sq (v relativním indexu %d).",
+  "při rekonstrukci entity se zjistil neplatný název identifikátoru IFC %sq.",
+  "neplatný identifikátor IFC s názvem %sq byl během obnovy entity přeskočen.",
+  "neplatná hodnota řazení modulu %sq",
+  "šablona funkce načtená z modulu IFC byla nesprávně parsována jako %nd.",
+  "nepovedlo se načíst odkaz na entitu IFC v modulu %sq.",
+  "Řazení indexu IFC = %d1, hodnota = %d2"
 ]

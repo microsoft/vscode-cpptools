@@ -3466,6 +3466,14 @@
   "%sq IFC bölümü içinde bir dizin kullanılarak %sq IFC bölümündeki bir öğe oluşturulmaya çalışıldı",
   "%sq bölümü, %d2 beklenirken girdi boyutunu %d1 olarak belirtti",
   "%sq1 modülü işlenirken beklenmeyen bir IFC gereksinimiyle karşılaşıldı",
-  null,
-  "atomik kısıtlama kendisine bağımlı"
+  "koşul, %d numaralı satırda (%s1 içinde) başarısız oldu: %sq2",
+  "atomik kısıtlama kendisine bağımlı",
+  "'noreturn' işlevi geçersiz olmayan bir dönüş türüne sahiptir",
+  "%sq parametresi kaldırılarak bir düzeltme yapıldı (%d göreli dizininde)",
+  "varlık yeniden oluşturma işlemi sırasında geçersiz %sq IFC tanımlayıcı adı ile karşılaşıldı",
+  "varlık yeniden oluşturma işlemi sırasında geçersiz %sq IFC tanımlayıcı adı atlandı",
+  "%sq modülü geçersiz sıralama değeri",
+  "bir IFC modülünden yüklenen bir fonksiyon şablonu hatalı bir şekilde %nd olarak ayrıştırıldı",
+  "%sq modülünde bir IFC varlık referansı yüklenemedi",
+  "IFC dizin sıralaması = %d1, değer = %d2"
 ]

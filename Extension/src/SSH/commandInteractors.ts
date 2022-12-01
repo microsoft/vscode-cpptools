@@ -5,6 +5,11 @@
 
 import * as vscode from 'vscode';
 import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
+import { getOutputChannelLogger } from '../logger';
+import * as nls from 'vscode-nls';
+
+nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 /**
  * The users that we autofilled their passwords.
@@ -321,6 +326,25 @@ export class ContinueOnInteractor implements IInteractor {
         const re: RegExp = new RegExp(pattern, 'g');
         if (data.match(re)) {
             result.continue = true;
+        }
+        return result;
+    }
+}
+
+export class ConnectionFailureInteractor implements IInteractor {
+    static ID = 'connectionFailure';
+
+    constructor(private readonly hostName: string) { }
+
+    get id(): string {
+        return ConnectionFailureInteractor.ID;
+    }
+
+    async onData(data: string): Promise<IInteraction> {
+        const result: IInteraction = { postAction: 'keep' };
+        if (data.includes('Connection refused') || data.includes('Could not resolve hostname')) {
+            result.postAction = 'consume';
+            getOutputChannelLogger().showErrorMessage(localize('failed.to.connect', 'Failed to connect to {0}', this.hostName));
         }
         return result;
     }

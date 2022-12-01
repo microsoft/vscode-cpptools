@@ -115,7 +115,6 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
-    rootfs: string;
 }
 
 export class CppProperties {
@@ -136,6 +135,7 @@ export class CppProperties {
     private defaultIncludes: string[] | null = null;
     private defaultFrameworks?: string[];
     private defaultWindowsSdkVersion: string | null = null;
+    private isCppPropertiesJsonVisible: boolean = false;
     private vcpkgIncludes: string[] = [];
     private vcpkgPathReady: boolean = false;
     private nodeAddonIncludes: string[] = [];
@@ -148,7 +148,6 @@ export class CppProperties {
     private compileCommandsChanged = new vscode.EventEmitter<string>();
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
-    private rootfs: string | null = null;
     private settingsPanel?: SettingsPanel;
     private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
@@ -215,7 +214,6 @@ export class CppProperties {
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
         this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
-        this.rootfs = compilerDefaults.rootfs;
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
@@ -241,24 +239,26 @@ export class CppProperties {
         });
 
         this.configFileWatcher.onDidChange(() => {
-            // If the file is one of the textDocument's vscode is tracking, we need to wait for an
-            // onDidChangeTextDocument event, or we may get old/cached contents when we open it.
-            let alreadyTracking: boolean = false;
-            for (let i: number = 0; i < vscode.workspace.textDocuments.length; i++) {
-                if (vscode.workspace.textDocuments[i].uri.fsPath === settingsPath) {
-                    alreadyTracking = true;
-                    break;
-                }
-            }
-            if (!alreadyTracking) {
-                this.handleConfigurationChange();
+            this.handleConfigurationChange();
+        });
+
+        vscode.workspace.onDidChangeTextDocument((e) => {
+            if (e.document.uri.fsPath === settingsPath && this.isCppPropertiesJsonVisible) {
+                this.handleSquiggles();
             }
         });
 
-        vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
-            if (e.document.uri.fsPath === settingsPath) {
-                this.handleConfigurationChange();
-            }
+        vscode.window.onDidChangeVisibleTextEditors((editors) => {
+            const wasVisible: boolean = this.isCppPropertiesJsonVisible;
+            editors.forEach(editor => {
+                if (editor.document.uri.fsPath === settingsPath) {
+                    this.isCppPropertiesJsonVisible = true;
+                    if (!wasVisible) {
+                        this.handleSquiggles();
+
+                    }
+                }
+            });
         });
 
         vscode.workspace.onDidSaveTextDocument((doc: vscode.TextDocument) => {
@@ -399,7 +399,7 @@ export class CppProperties {
         if (isUnset(settings.defaultIntelliSenseMode) || settings.defaultIntelliSenseMode === "") {
             configuration.intelliSenseMode = this.defaultIntelliSenseMode;
         }
-        if (isUnset(settings.defaultCustomConfigurationVariables) || settings.defaultCustomConfigurationVariables === {}) {
+        if (!settings.defaultCustomConfigurationVariables || Object.keys(settings.defaultCustomConfigurationVariables).length === 0) {
             configuration.customConfigurationVariables = this.defaultCustomConfigurationVariables;
         }
     }
@@ -786,10 +786,10 @@ export class CppProperties {
     }
 
     private updateConfigurationStringDictionary(property: { [key: string]: string } | undefined, defaultValue: { [key: string]: string } | undefined, env: Environment): { [key: string]: string } | undefined {
-        if (!property || property === {}) {
+        if (!property || Object.keys(property).length === 0) {
             property = defaultValue;
         }
-        if (!property || property === {}) {
+        if (!property || Object.keys(property).length === 0) {
             return undefined;
         }
         return this.resolveDefaultsDictionary(property, defaultValue, env);
@@ -1021,7 +1021,7 @@ export class CppProperties {
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
     public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): void {
         const otherSettings: OtherSettings = new OtherSettings(this.rootUri);
-        if (otherSettings.settingsEditor === "ui") {
+        if (otherSettings.workbenchSettingsEditor  === "ui") {
             this.handleConfigurationEditUICommand(onBeforeOpen, showDocument, viewColumn);
         } else {
             this.handleConfigurationEditJSONCommand(onBeforeOpen, showDocument, viewColumn);
@@ -1240,6 +1240,7 @@ export class CppProperties {
             }
 
             // Try to use the same configuration as before the change.
+            // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
             const newJson: ConfigurationJson = jsonc.parse(readResults, undefined, true);
             if (!newJson || !newJson.configurations || newJson.configurations.length === 0) {
                 throw { message: localize("invalid.configuration.file", "Invalid configuration file. There must be at least one configuration present in the array.") };
@@ -1349,22 +1350,18 @@ export class CppProperties {
             success = false;
         }
 
-        if (success) {
-            this.handleSquiggles();
-        }
-
         return success;
     }
 
-    private resolvePath(path: string | undefined, isWindows: boolean): string {
-        if (!path || path === "${default}") {
+    public resolvePath(input_path: string | undefined, isWindows: boolean): string {
+        if (!input_path || input_path === "${default}") {
             return "";
         }
 
         let result: string = "";
 
         // first resolve variables
-        result = util.resolveVariables(path, this.ExtendedEnvironment);
+        result = util.resolveVariables(input_path, this.ExtendedEnvironment);
         if (this.rootUri) {
             if (result.includes("${workspaceFolder}")) {
                 result = result.replace("${workspaceFolder}", this.rootUri.fsPath);
@@ -1380,16 +1377,9 @@ export class CppProperties {
             result = result.replace(/\*/g, "");
         }
 
-        // resolve WSL paths
-        if (isWindows && result.startsWith("/")) {
-            const mntStr: string = "/mnt/";
-            if (result.length > "/mnt/c/".length && result.substring(0, mntStr.length) === mntStr) {
-                result = result.substring(mntStr.length);
-                result = result.substring(0, 1) + ":" + result.substring(1);
-            } else if (this.rootfs && this.rootfs.length > 0) {
-                result = this.rootfs + result.substring(1);
-                // TODO: Handle WSL symlinks.
-            }
+        // Make sure all paths result to an absolute path
+        if (!path.isAbsolute(result) && this.rootUri) {
+            result = path.join(this.rootUri.fsPath, result);
         }
 
         return result;
@@ -1595,6 +1585,7 @@ export class CppProperties {
             // Replace all \<escape character> with \\<character>, except for \"
             // Otherwise, the JSON.parse result will have the \<escape character> missing.
             const configurationsText: string = util.escapeForSquiggles(curText);
+            // TODO?: Handle when jsonc.parse() throws an exception due to invalid JSON contents.
             const configurations: ConfigurationJson = jsonc.parse(configurationsText, undefined, true);
             const currentConfiguration: Configuration = configurations.configurations[this.CurrentConfigurationIndex];
 
@@ -1776,10 +1767,9 @@ export class CppProperties {
                     }
                 }
             }
-            const isWSL: boolean = isWindows && compilerPath.startsWith("/");
             let compilerPathExists: boolean = true;
             if (this.rootUri && !isClCompiler) {
-                const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, true);
+                const checkPathExists: any = util.checkPathExistsSync(compilerPath, this.rootUri.fsPath + path.sep, isWindows, true);
                 compilerPathExists = checkPathExists.pathExists;
                 compilerPath = checkPathExists.path;
             }
@@ -1803,12 +1793,11 @@ export class CppProperties {
             dotConfigPath = currentConfiguration.dotConfig;
             dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
             dotConfigPath = this.resolvePath(dotConfigPath, isWindows);
-            const isWSLDotConfig: boolean = isWindows && dotConfigPath.startsWith("/");
             // does not try resolve if the dotConfig property is empty
             dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
 
             if (dotConfigPath && this.rootUri) {
-                const checkPathExists: any = util.checkPathExistsSync(dotConfigPath, this.rootUri.fsPath + path.sep, isWindows, isWSLDotConfig, true);
+                const checkPathExists: any = util.checkPathExistsSync(dotConfigPath, this.rootUri.fsPath + path.sep, isWindows, true);
                 dotConfigPathExists = checkPathExists.pathExists;
                 dotConfigPath = checkPathExists.path;
             }
@@ -1848,7 +1837,7 @@ export class CppProperties {
                 }
                 let pathExists: boolean = true;
                 if (this.rootUri) {
-                    const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, isWSL, false);
+                    const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, false);
                     pathExists = checkPathExists.pathExists;
                     resolvedPath = checkPathExists.path;
                 }

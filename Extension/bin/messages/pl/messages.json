@@ -3467,5 +3467,13 @@
   "partycja %sq określiła swój rozmiar wpisu jako %d1, gdy oczekiwano wartości %d2",
   "napotkano nieoczekiwane wymaganie IFC podczas przetwarzania modułu %sq1",
   "warunek nie powiódł się w wierszu %d w %s1: %sq2",
-  "niepodzielne ograniczenie zależy od samego siebie"
+  "niepodzielne ograniczenie zależy od samego siebie",
+  "Funkcja \"noreturn\" ma zwracany typ inny niż void",
+  "wprowadzono poprawkę przez usunięcie parametru %sq (względny indeks %d)",
+  "napotkano nieprawidłową nazwę identyfikatora IFC %sq podczas odbudowy jednostki",
+  "podczas odbudowy jednostki pominięto nieprawidłowy identyfikator IFC o nazwie %sq",
+  "nieprawidłowa wartość sortowania modułu %sq",
+  "szablon funkcji załadowany z modułu IFC został niepoprawnie przeanalizowany jako %nd",
+  "nie można załadować odwołania do jednostki IFC w module %sq",
+  "Sortowanie indeksu IFC = %d1, wartość = %d2"
 ]

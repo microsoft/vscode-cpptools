@@ -12,12 +12,12 @@ import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
 import { UI, getUI } from './ui';
-import { Client, openFileVersions } from './client';
+import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
 import { makeCpptoolsRange, rangeEquals } from './utils';
 import { ClientCollection } from './clientCollection';
-import { CppSettings, OtherSettings } from './settings';
+import { CppSettings } from './settings';
 import { PersistentState } from './persistentState';
 import { getLanguageConfig } from './languageConfig';
 import { getCustomConfigProviders } from './customProviders';
@@ -26,7 +26,6 @@ import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
-import { UpdateInsidersAccess } from '../main';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -34,7 +33,7 @@ export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
-let clients: ClientCollection;
+export let clients: ClientCollection;
 let activeDocument: string;
 let ui: UI;
 const disposables: vscode.Disposable[] = [];
@@ -274,17 +273,19 @@ export function updateLanguageConfigurations(): void {
  * workspace events
  */
 function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
-    const activeClient: Client = clients.ActiveClient;
-    const changedActiveClientSettings: { [key: string]: string } = activeClient.onDidChangeSettings(event, true);
-    clients.forEach(client => {
-        if (client !== activeClient) {
-            client.onDidChangeSettings(event, false);
+    const client: Client = clients.getDefaultClient();
+    if (client instanceof DefaultClient) {
+        const defaultClient: DefaultClient = <DefaultClient>client;
+        const changedDefaultClientSettings: { [key: string]: string } = defaultClient.onDidChangeSettings(event);
+        clients.forEach(client => {
+            if (client !== defaultClient) {
+                client.onDidChangeSettings(event);
+            }
+        });
+        const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
+        if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
+            UpdateInsidersAccess();
         }
-    });
-
-    const newUpdateChannel: string = changedActiveClientSettings['updateChannel'];
-    if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
-        UpdateInsidersAccess();
     }
 }
 
@@ -347,7 +348,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
                         const fileName: string = path.basename(document.uri.fsPath);
                         const mappingString: string = fileName + "@" + document.uri.fsPath;
                         client.addFileAssociations(mappingString, "cpp");
-                        client.sendDidChangeSettings({ files: { associations: new OtherSettings().filesAssociations }});
+                        client.sendDidChangeSettings();
                         vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
                             finishDidOpen(newDoc);
                         });
@@ -433,7 +434,8 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('cpptools.activeConfigCustomVariable', enabled ? onGetActiveConfigCustomVariable : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('cpptools.setActiveConfigName', enabled ? onSetActiveConfigName : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', (cursorLine, cursorColumn, line, column, cursorOnEmptyLineAboveSignature) =>  getActiveClient().handleGenerateDoxygenComment(cursorLine, cursorColumn, line, column, cursorOnEmptyLineAboveSignature)));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
 }
 
 function onDisabledCommand(): void {
@@ -444,7 +446,7 @@ function onDisabledCommand(): void {
                 "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
             ]
         },
-        "IntelliSense-related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `Disabled`.");
+        "IntelliSense-related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `disabled`.");
     vscode.window.showWarningMessage(message);
 }
 
@@ -467,14 +469,14 @@ async function onSwitchHeaderSource(): Promise<void> {
         return;
     }
 
-    let rootPath: string = clients.ActiveClient.RootPath;
+    let rootUri: vscode.Uri | undefined = clients.ActiveClient.RootUri;
     const fileName: string = activeEditor.document.fileName;
 
-    if (!rootPath) {
-        rootPath = path.dirname(fileName); // When switching without a folder open.
+    if (!rootUri) {
+        rootUri = vscode.Uri.file(path.dirname(fileName)); // When switching without a folder open.
     }
 
-    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootPath, fileName);
+    let targetFileName: string = await clients.ActiveClient.requestSwitchHeaderSource(rootUri, fileName);
     // If the targetFileName has a path that is a symlink target of a workspace folder,
     // then replace the RootRealPath with the RootPath (the symlink path).
     let targetFileNameReplaced: boolean = false;
@@ -669,6 +671,10 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
+async function onCreateDeclarationOrDefinition(): Promise<void> {
+    getActiveClient().handleCreateDeclarationOrDefinition();
+}
+
 function onAddToIncludePath(path: string): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('add.includepath.open.first', 'Open a folder first to add to {0}', "includePath"));
@@ -682,19 +688,19 @@ function onAddToIncludePath(path: string): void {
 function onEnableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "Enabled");
+    settings.update<string>("errorSquiggles", "enabled");
 }
 
 function onDisableSquiggles(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.update<string>("errorSquiggles", "Disabled");
+    settings.update<string>("errorSquiggles", "disabled");
 }
 
 function onToggleIncludeFallback(): void {
     // This only applies to the active client.
     const settings: CppSettings = new CppSettings(clients.ActiveClient.RootUri);
-    settings.toggleSetting("intelliSenseEngineFallback", "Enabled", "Disabled");
+    settings.toggleSetting("intelliSenseEngineFallback", "enabled", "disabled");
 }
 
 function onToggleDimInactiveRegions(): void {
@@ -789,7 +795,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
         // Queue look ups in the vcpkg database for missing ports; filter out duplicate results
         const portsPromises: Promise<string[]>[] = [];
         missingIncludeLocations.forEach(docAndLineNumbers => {
-            docAndLineNumbers[1].forEach(async line => {
+            docAndLineNumbers[1].forEach(line => {
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
@@ -806,6 +812,10 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': source, 'action': 'vcpkgClipboardInstallSuggested', 'ports': ports.toString() });
 
     await vscode.env.clipboard.writeText(installCommand);
+}
+
+function onGenerateDoxygenComment(arg: DoxygenCodeActionCommandArguments): void {
+    getActiveClient().handleGenerateDoxygenComment(arg);
 }
 
 function onSetActiveConfigName(configurationName: string): Thenable<void> {
@@ -1022,4 +1032,43 @@ export function getClients(): ClientCollection {
 
 export function getActiveClient(): Client {
     return clients.ActiveClient;
+}
+
+export function UpdateInsidersAccess(): void {
+    let installPrerelease: boolean = false;
+
+    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
+    const settings: CppSettings = new CppSettings();
+    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
+    if (settings.updateChannel === "Insiders") {
+        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
+        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+            installPrerelease = true;
+            migratedInsiders.Value = true;
+        }
+    } else {
+        // Reset persistent value, so we register again if they switch to "Insiders" again.
+        if (migratedInsiders.Value) {
+            migratedInsiders.Value = false;
+        }
+    }
+
+    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
+    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
+    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
+    if (util.isVsCodeInsiders()) {
+        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
+        if (!insidersMitigationDone.Value) {
+            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
+                if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
+                    installPrerelease = true;
+                }
+            }
+            insidersMitigationDone.Value = true;
+        }
+    }
+
+    if (installPrerelease) {
+        vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+    }
 }
