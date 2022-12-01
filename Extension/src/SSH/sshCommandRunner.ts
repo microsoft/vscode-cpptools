@@ -19,10 +19,12 @@ import {
     ContinueOnInteractor,
     ISystemInteractor,
     IInteraction,
-    autoFilledPasswordForUsers
+    autoFilledPasswordForUsers,
+    ConnectionFailureInteractor
 } from './commandInteractors';
 import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
-import { getOutputChannelLogger } from '../logger';
+import { getSshChannel } from '../logger';
+import { CppSettings } from '../LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -203,7 +205,8 @@ export async function runSshTerminalCommandWithLogin(
             new DifferingHostKeyInteractor(showDifferingHostConfirmation),
             new PasswordInteractor(host, showPasswordInputBox),
             new TwoFacInteractor(showVerificationCodeInputBox),
-            new DuoTwoFacInteractor(showVerificationCodeInputBox)
+            new DuoTwoFacInteractor(showVerificationCodeInputBox),
+            new ConnectionFailureInteractor(host.hostName)
         );
     }
 
@@ -255,6 +258,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
     const disposables: vscode.Disposable[] = [];
     const { systemInteractor, command, interactors, nickname, token } = args;
     let logIsPaused: boolean = false;
+    const loggingLevel: string | undefined = new CppSettings().loggingLevel;
     return new Promise(async (resolve, reject) => {
         let stdout: string = '';
         let windowListener: vscode.Disposable | undefined;
@@ -290,11 +294,13 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             if (!noClean) {
                 clean();
             }
-            getOutputChannelLogger().appendLine(cancel ? localize('ssh.terminal.command.canceled', '"{0}" terminal command canceled.', nickname) : localize('ssh.terminal.command.done', '"{0}" terminal command done.', nickname));
+            getSshChannel().appendLine(cancel ? localize('ssh.terminal.command.canceled', '"{0}" terminal command canceled.', nickname) : localize('ssh.terminal.command.done', '"{0}" terminal command done.', nickname));
 
             if (cancel) {
                 if (continueWithoutExiting) {
-                    getOutputChannelLogger().showWarningMessage(localize('ssh.continuing.command.canceled', 'Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command));
+                    const warningMessage: string = localize('ssh.continuing.command.canceled', 'Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command);
+                    getSshChannel().appendLine(warningMessage);
+                    vscode.window.showWarningMessage(warningMessage);
                 }
                 return reject(new CanceledError());
             }
@@ -306,7 +312,9 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
 
         const failed = (error?: any) => {
             clean();
-            getOutputChannelLogger().showErrorMessage(localize('ssh.process.failed', '"{0}" process failed: {1}', nickname, error));
+            const errorMessage: string = localize('ssh.process.failed', '"{0}" process failed: {1}', nickname, error);
+            getSshChannel().appendLine(errorMessage);
+            vscode.window.showErrorMessage(errorMessage);
             reject(error);
         };
 
@@ -339,7 +347,9 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
         };
 
         const handleTerminalOutput = async (dataWrite: vscode.TerminalDataWriteEvent): Promise<void> => {
-            handleOutputLogging(dataWrite.data);
+            if (loggingLevel !== 'None') {
+                handleOutputLogging(dataWrite.data);
+            }
             stdout += dataWrite.data;
 
             if (interactors) {
@@ -383,7 +393,9 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                                 const logOutput: string = interaction.isPassword
                                     ? interaction.response.replace(/./g, '*')
                                     : interaction.response;
-                                getOutputChannelLogger().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
+                                if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
+                                    getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
+                                }
                             }
                         }
                     } catch (e) {
@@ -445,7 +457,9 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                 const sendText: string = terminalIsWindows ? `(${args.sendText})\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
 
                 terminal.sendText(sendText);
-                getOutputChannelLogger().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
+                if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
+                    getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
+                }
             }
 
             if (args.showLoginTerminal) {
@@ -491,7 +505,7 @@ function logReceivedData(data: string, nickname: string): void {
         .map(line => `${nickname}> ${line}`)
         .join('\n');
 
-    getOutputChannelLogger().appendLine(markedLines);
+    getSshChannel().appendLine(markedLines);
 }
 
 function lastNonemptyLine(str: string): string | undefined {

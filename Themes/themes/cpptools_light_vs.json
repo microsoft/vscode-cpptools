@@ -9,20 +9,37 @@
 		"editorIndentGuide.activeBackground": "#939393",
 		"editor.selectionHighlightBackground": "#ADD6FF80",
 		"editorSuggestWidget.background": "#F3F3F3",
-		"editorWhitespace.foreground": "#2B91AF",
 		"activityBarBadge.background": "#007ACC",
 		"sideBarTitle.foreground": "#6F6F6F",
 		"list.hoverBackground": "#E8E8E8",
 		"input.placeholderForeground": "#767676",
+		"searchEditor.textInputBorder": "#CECECE",
 		"settings.textInputBorder": "#CECECE",
 		"settings.numberInputBorder": "#CECECE",
 		"statusBarItem.remoteForeground": "#FFF",
-		"statusBarItem.remoteBackground": "#16825D"
+		"statusBarItem.remoteBackground": "#16825D",
+		"ports.iconRunningProcessForeground": "#369432",
+		"sideBarSectionHeader.background": "#0000",
+		"sideBarSectionHeader.border": "#61616130",
+		"tab.lastPinnedBorder": "#61616130",
+		"notebook.cellBorderColor": "#E8E8E8",
+		"notebook.selectedCellBackground": "#c8ddf150",
+		"statusBarItem.errorBackground": "#c72e0f",
+		"list.activeSelectionIconForeground": "#FFF",
+		"list.focusAndSelectionOutline": "#90C2F9",
+		"editorLineNumber.foreground": "#2b91af",
+		"editorLineNumber.activeForeground": "#2b91af",
+		"terminal.inactiveSelectionBackground": "#E5EBF1",
+		"editorWhitespace.foreground": "#2B91AF"
 	},
 	"semanticHighlighting": true,
 	"tokenColors": [
 		{
-			"scope": ["meta.embedded", "source.groovy.embedded"],
+			"scope": [
+				"meta.embedded",
+				"source.groovy.embedded",
+				"string meta.image.inline.markdown"
+			],
 			"settings": {
 				"foreground": "#000000ff"
 			}
@@ -59,10 +76,13 @@
 		},
 		{
 			"scope": [
-				"constant.numeric"
+				"constant.numeric",
+				"variable.other.enummember",
+				"keyword.operator.plus.exponent",
+				"keyword.operator.minus.exponent"
 			],
 			"settings": {
-				"foreground": "#000000"
+				"foreground": "#098658"
 			}
 		},
 		{
@@ -99,7 +119,6 @@
 				"entity.other.attribute-name.pseudo-class.css",
 				"entity.other.attribute-name.pseudo-element.css",
 				"source.css.less entity.other.attribute-name.id",
-				"entity.other.attribute-name.attribute.scss",
 				"entity.other.attribute-name.scss"
 			],
 			"settings": {
@@ -139,9 +158,15 @@
 			}
 		},
 		{
+			"scope": "markup.strikethrough",
+			"settings": {
+				"fontStyle": "strikethrough"
+			}
+		},
+		{
 			"scope": "markup.inserted",
 			"settings": {
-				"foreground": "#09885a"
+				"foreground": "#098658"
 			}
 		},
 		{
@@ -179,7 +204,10 @@
 			}
 		},
 		{
-			"scope": "meta.preprocessor",
+			"scope": [
+				"meta.preprocessor",
+				"entity.name.function.preprocessor"
+			],
 			"settings": {
 				"foreground": "#0000ff"
 			}
@@ -193,7 +221,7 @@
 		{
 			"scope": "meta.preprocessor.numeric",
 			"settings": {
-				"foreground": "#09885a"
+				"foreground": "#098658"
 			}
 		},
 		{
@@ -215,13 +243,19 @@
 			}
 		},
 		{
-			"scope": "storage.modifier",
+			"scope": [
+				"storage.modifier",
+				"keyword.operator.noexcept"
+			],
 			"settings": {
 				"foreground": "#0000ff"
 			}
 		},
 		{
-			"scope": "string",
+			"scope": [
+				"string",
+				"meta.embedded.assembly"
+			],
 			"settings": {
 				"foreground": "#a31515"
 			}
@@ -333,8 +367,12 @@
 				"keyword.operator.expression",
 				"keyword.operator.cast",
 				"keyword.operator.sizeof",
+				"keyword.operator.alignof",
+				"keyword.operator.typeid",
+				"keyword.operator.alignas",
 				"keyword.operator.instanceof",
-				"keyword.operator.logical.python"
+				"keyword.operator.logical.python",
+				"keyword.operator.wordlike"
 			],
 			"settings": {
 				"foreground": "#0000ff"
@@ -343,7 +381,7 @@
 		{
 			"scope": "keyword.other.unit",
 			"settings": {
-				"foreground": "#09885a"
+				"foreground": "#098658"
 			}
 		},
 		{
@@ -364,7 +402,7 @@
 		{
 			"scope": "constant.sha.git-rebase",
 			"settings": {
-				"foreground": "#09885a"
+				"foreground": "#098658"
 			}
 		},
 		{
@@ -408,7 +446,8 @@
 			"settings": {
 				"foreground": "#008080"
 			}
-		},		{
+		},
+		{
 			"scope": "entity.name.function.preprocessor",
 			"settings": {
 				"foreground": "#BD63C5"
@@ -457,26 +496,10 @@
 			}
 		}
 	],
-	"semanticTokenColors": [
-		{
-			"operatorOverload": {
-				"foreground": "#008080"
-			}
-		},
-		{
-			"operatorOverloadMember": {
-				"foreground": "#008080"
-			}
-		},
-		{
-			"newOperator": {
-				"foreground": "#0000FF"
-			}
-		},
-		{
-			"stringLiteral": {
-				"foreground": "#A31515"
-			}
-		}
-	]
+	"semanticTokenColors": {
+		"operatorOverload": "#008080",
+		"operatorOverloadMember": "#008080",
+		"newOperator": "#0000FF",
+		"stringLiteral": "#A31515"
+	}
 }

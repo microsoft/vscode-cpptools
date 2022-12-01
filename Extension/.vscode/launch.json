@@ -10,7 +10,6 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
@@ -25,7 +24,6 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
@@ -40,7 +38,6 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
@@ -54,7 +51,6 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
@@ -69,7 +65,6 @@
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
@@ -85,7 +80,6 @@
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/unitTests/index"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
@@ -102,7 +96,6 @@
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/languageServer/index"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
@@ -119,7 +112,6 @@
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/IntelliSenseFeatures/index"
 			],
-			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"

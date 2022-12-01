@@ -55,7 +55,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     // Initialize the DebuggerExtension and register the related commands and providers.
-    DebuggerExtension.initialize(context);
+    await DebuggerExtension.initialize(context);
 
     const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
     sendTelemetry(info);
@@ -67,7 +67,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Notify users if debugging may not be supported on their OS.
     util.checkDistro(info);
     await checkVsixCompatibility();
-    UpdateInsidersAccess();
+    LanguageServer.UpdateInsidersAccess();
 
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     let isOldMacOs: boolean = false;
@@ -81,21 +81,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Read the setting and determine whether we should activate the language server prior to installing callbacks,
     // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
     // function, to allow any further setup to occur here, prior to activation.
-    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "Disabled";
+    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "disabled";
     const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
         vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
     } else {
-        if (settings.intelliSenseEngine === "Disabled") {
+        if (settings.intelliSenseEngine === "disabled") {
             languageServiceDisabled = true;
         }
         let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
         disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
             const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
             if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
-                if (currentIntelliSenseEngineValue === "Disabled") {
+                if (currentIntelliSenseEngineValue === "disabled") {
                     // If switching from disabled to enabled, we can continue activation.
                     currentIntelliSenseEngineValue = settings.intelliSenseEngine;
                     languageServiceDisabled = false;
@@ -141,7 +141,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         LanguageServer.registerCommands(false);
         // The check here for isIntelliSenseEngineDisabled avoids logging
         // the message on old Macs that we've already displayed a warning for.
-        log(localize("intellisense.disabled", "intelliSenseEngine is Disabled"));
+        log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
     }
 
     return cppTools;
@@ -212,45 +212,6 @@ function sendTelemetry(info: PlatformInformation): void {
             break;
     }
     Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
-}
-
-export function UpdateInsidersAccess(): void {
-    let installPrerelease: boolean = false;
-
-    // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
-    const settings: CppSettings = new CppSettings();
-    const migratedInsiders: PersistentState<boolean> = new PersistentState<boolean>("CPP.migratedInsiders", false);
-    if (settings.updateChannel === "Insiders") {
-        // Don't do anything while the user has autoUpdate disabled, so we do not cause the extension to be updated.
-        if (!migratedInsiders.Value && vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-            installPrerelease = true;
-            migratedInsiders.Value = true;
-        }
-    } else {
-        // Reset persistent value, so we register again if they switch to "Insiders" again.
-        if (migratedInsiders.Value) {
-            migratedInsiders.Value = false;
-        }
-    }
-
-    // Mitigate an issue with VS Code not recognizing a programmatically installed VSIX as Prerelease.
-    // If using VS Code Insiders, and updateChannel is not explicitly set, default to Prerelease.
-    // Only do this once. If the user manually switches to Release, we don't want to switch them back to Prerelease again.
-    if (util.isVsCodeInsiders()) {
-        const insidersMitigationDone: PersistentState<boolean> = new PersistentState<boolean>("CPP.insidersMitigationDone", false);
-        if (!insidersMitigationDone.Value) {
-            if (vscode.workspace.getConfiguration("extensions", null).get<boolean>("autoUpdate")) {
-                if (settings.getWithUndefinedDefault<string>("updateChannel") === undefined) {
-                    installPrerelease = true;
-                }
-            }
-            insidersMitigationDone.Value = true;
-        }
-    }
-
-    if (installPrerelease) {
-        vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
-    }
 }
 
 async function checkVsixCompatibility(): Promise<void> {

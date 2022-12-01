@@ -24,7 +24,7 @@ import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
 import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
-import { scp, ssh } from '../SSH/commands';
+import { rsync, scp, ssh } from '../SSH/commands';
 import * as glob from 'glob';
 import { promisify } from 'util';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
@@ -35,6 +35,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 enum StepType {
     scp = 'scp',
+    rsync = 'rsync',
     ssh = 'ssh',
     shell = 'shell',
     remoteShell = 'remoteShell',
@@ -165,7 +166,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
         if (config.preLaunchTask) {
             config.configSource = this.getDebugConfigSource(config, folder);
-            const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "Disabled";
+            const isIntelliSenseDisabled: boolean = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined).intelliSenseEngine === "disabled";
             // Run the build task if IntelliSense is disabled.
             if (isIntelliSenseDisabled) {
                 try {
@@ -352,7 +353,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             } else {
                 const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
                 const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
-                processId = await attacher.ShowAttachEntries();
+                processId = await attacher.ShowAttachEntries(token);
             }
 
             if (processId) {
@@ -407,9 +408,18 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // Generating a task is async, therefore we must *await* *all* map(task => config) Promises to resolve.
         let configs: CppDebugConfiguration[] = [];
         if (buildTasks.length !== 0) {
-            configs = await Promise.all(buildTasks.map<Promise<CppDebugConfiguration>>(async task => {
+            configs = (await Promise.all(buildTasks.map<Promise<CppDebugConfiguration | undefined>>(async task => {
                 const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
                 const compilerPath: string = definition.command;
+                // Filter out the tasks that has an invalid compiler path.
+                const compilerPathExists: boolean = path.isAbsolute(compilerPath) ?
+                    // Absolute path, just check if it exists
+                    await util.checkFileExists(compilerPath) :
+                    // Non-absolute. Check on $PATH
+                    ((await util.whichAsync(compilerPath)) !== undefined);
+                if (!compilerPathExists) {
+                    logger.getOutputChannelLogger().appendLine(localize('compiler.path.not.exists', "Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
+                }
                 const compilerName: string = path.basename(compilerPath);
                 const newConfig: CppDebugConfiguration = { ...defaultTemplateConfig }; // Copy enumerables and properties
                 newConfig.existing = false;
@@ -438,20 +448,24 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const isCl: boolean = compilerName === "cl.exe";
                 newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
-                return new Promise<CppDebugConfiguration>(resolve => {
+                return new Promise<CppDebugConfiguration | undefined>(async resolve => {
                     if (platformInfo.platform === "darwin") {
                         return resolve(newConfig);
                     } else {
                         let debuggerName: string;
                         if (compilerName.startsWith("clang")) {
                             newConfig.MIMode = "lldb";
-                            debuggerName = "lldb-mi";
-                            // Search for clang-8, clang-10, etc.
-                            if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
-                                const suffixIndex: number = compilerName.indexOf("-");
-                                if (suffixIndex !== -1) {
-                                    const suffix: string = compilerName.substring(suffixIndex);
-                                    debuggerName += suffix;
+                            if (isWindows) {
+                                debuggerName = "lldb";
+                            } else {
+                                debuggerName = "lldb-mi";
+                                // Search for clang-8, clang-10, etc.
+                                if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
+                                    const suffixIndex: number = compilerName.indexOf("-");
+                                    if (suffixIndex !== -1) {
+                                        const suffix: string = compilerName.substring(suffixIndex);
+                                        debuggerName += suffix;
+                                    }
                                 }
                             }
                             newConfig.type = DebuggerType.cppdbg;
@@ -467,22 +481,27 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         }
                         const compilerDirname: string = path.dirname(compilerPath);
                         const debuggerPath: string = path.join(compilerDirname, debuggerName);
-                        if (isWindows) {
+
+                        // Check if debuggerPath exists.
+                        if (await util.checkFileExists(debuggerPath)) {
                             newConfig.miDebuggerPath = debuggerPath;
-                            return resolve(newConfig);
+                        } else if ((await util.whichAsync(debuggerName)) !== undefined) {
+                            // Check if debuggerName exists on $PATH
+                            newConfig.miDebuggerPath = debuggerName;
                         } else {
-                            fs.stat(debuggerPath, (err, stats: fs.Stats) => {
-                                if (!err && stats && stats.isFile()) {
-                                    newConfig.miDebuggerPath = debuggerPath;
-                                } else {
-                                    newConfig.miDebuggerPath = path.join("/usr", "bin", debuggerName);
-                                }
-                                return resolve(newConfig);
-                            });
+                            // Try the usr path for non-windows platforms.
+                            const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
+                            if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
+                                newConfig.miDebuggerPath = usrDebuggerPath;
+                            } else {
+                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
+                                return resolve(undefined);
+                            }
                         }
+                        return resolve(newConfig);
                     }
                 });
-            }));
+            }))).filter((item): item is CppDebugConfiguration => !!item);
         }
         configs.push(defaultTemplateConfig);
         const existingConfigs: CppDebugConfiguration[] | undefined = this.getLaunchConfigs(folder, type)?.map(config => {
@@ -1011,7 +1030,8 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             // Skip steps that doesn't match current launch mode. Explicit true/false check, since a step is always run when debug is undefined.
             return true;
         }
-        switch (step.type) {
+        const stepType: StepType = step.type;
+        switch (stepType) {
             case StepType.command: {
                 // VS Code commands are the same regardless of which extension invokes them, so just invoke them here.
                 if (step.args && !Array.isArray(step.args)) {
@@ -1021,12 +1041,14 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const returnCode: unknown = await vscode.commands.executeCommand(step.command, ...step.args);
                 return !returnCode;
             }
-            case StepType.scp: {
+            case StepType.scp:
+            case StepType.rsync: {
+                const isScp: boolean = stepType === StepType.scp;
                 if (!step.files || !step.targetDir || !step.host) {
-                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.scp', '"host", "files", and "targetDir" are required in scp steps.'));
+                    logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.copyFile', '"host", "files", and "targetDir" are required in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
-                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 let files: vscode.Uri[] = [];
                 if (util.isString(step.files)) {
@@ -1036,10 +1058,17 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
                     }
                 } else {
-                    logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.scp', '"files" must be a string or an array of strings in scp steps.'));
+                    logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.copyFile', '"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
                     return false;
                 }
-                const scpResult: util.ProcessReturnType = await scp(files, host, step.targetDir, config.scpPath, jumpHosts, cancellationToken);
+
+                let scpResult: util.ProcessReturnType;
+                if (isScp) {
+                    scpResult = await scp(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
+                } else {
+                    scpResult = await rsync(files, host, step.targetDir, config.scpPath, config.recursive, jumpHosts, cancellationToken);
+                }
+
                 if (!scpResult.succeeded || cancellationToken?.isCancellationRequested) {
                     return false;
                 }
@@ -1050,7 +1079,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     logger.getOutputChannelLogger().showErrorMessage(localize('missing.properties.ssh', '"host" and "command" are required for ssh steps.'));
                     return false;
                 }
-                const host: util.ISshHostInfo = { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
+                const host: util.ISshHostInfo = util.isString(step.host) ? { hostName: step.host } : { hostName: step.host.hostName, user: step.host.user, port: step.host.port };
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 const localForwards: util.ISshLocalForwardInfo[] = step.host.localForwards;
                 const continueOn: string = step.continueOn;
@@ -1142,7 +1171,7 @@ class WindowsConfigurationProvider extends DefaultConfigurationProvider {
         "ignoreFailures": true
     },
     {
-        "description":  "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
@@ -1181,7 +1210,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
         "ignoreFailures": true
     },
     {
-        "description":  "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
+        "description": "${localize("enable.intel.disassembly.flavor", "Set Disassembly Flavor to {0}", "Intel").replace(/\"/g, "\\\"")}",
         "text": "-gdb-set disassembly-flavor intel",
         "ignoreFailures": true
     }
@@ -1224,10 +1253,14 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
     // 2. If there are items, the Add Configuration button will append it to the start of the configuration array. This function inserts a comma at the end of the snippet.
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Thenable<vscode.CompletionList> {
         let items: vscode.CompletionItem[] = this.snippets;
-
-        const launch: any = jsonc.parse(document.getText());
+        let hasLaunchConfigs: boolean = false;
+        try {
+            const launch: any = jsonc.parse(document.getText());
+            hasLaunchConfigs = launch.configurations.length !== 0;
+        } catch {
+        }
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
-        if (launch.configurations.length !== 0) {
+        if (hasLaunchConfigs) {
             items = [];
 
             // Make a copy of each snippet since we are adding a comma to the end of the insertText.

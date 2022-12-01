@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult, CppFoldingRange } from '../client';
+import { CppSettings } from '../settings';
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
@@ -13,8 +14,11 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         this.client = client;
         this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
-    async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
-        token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
+    async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
+        const settings: CppSettings = new CppSettings();
+        if (!settings.codeFolding) {
+            return [];
+        }
         const params: GetFoldingRangesParams = {
             uri: document.uri.toString()
         };

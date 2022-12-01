@@ -3467,5 +3467,13 @@
   "la partición %sq especificó su tamaño de entrada como %d1 cuando se esperaba %d2",
   "se encontró un requisito IFC inesperado al procesar el módulo %sq1",
   "error de condición en la línea %d en %s1: %sq2",
-  "la restricción atómica depende de sí misma"
+  "la restricción atómica depende de sí misma",
+  "La función \"noreturn\" tiene un tipo de valor devuelto distinto de nulo",
+  "se ha quitado el parámetro %sq (en el índice relativo %d) para realizar una corrección",
+  "se encontró un nombre de identificador IFC no válido %sq durante la reconstrucción de entidades",
+  "se omitió un nombre de identificador IFC no válido %sq durante la reconstrucción de entidades",
+  "el módulo %sq es un valor de ordenación no válido",
+  "una plantilla de función cargada desde un módulo IFC se analizó incorrectamente como %nd",
+  "no se pudo cargar una referencia de entidad IFC en el módulo %sq",
+  "Ordenación de índice IFC = %d1, valor = %d2"
 ]

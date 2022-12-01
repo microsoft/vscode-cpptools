@@ -12,8 +12,11 @@ import { runSshTerminalCommandWithLogin } from './sshCommandRunner';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, scpPath?: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, recursive: boolean = true, scpPath?: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     const args: string[] = [];
+    if (recursive) {
+        args.push('-r');
+    }
     if (jumpHosts && jumpHosts.length > 0) {
         args.push('-J', jumpHosts.map(getFullHostAddress).join(','));
     }
@@ -24,6 +27,30 @@ export async function scp(files: vscode.Uri[], host: ISshHostInfo, targetDir: st
     args.push(files.map(uri => `"${uri.fsPath}"`).join(' '), `${getFullHostAddressNoPort(host)}:${targetDir}`);
 
     return runSshTerminalCommandWithLogin(host, { systemInteractor: defaultSystemInteractor, nickname: 'scp', command: `"${scpPath || 'scp'}" ${args.join(' ')}`, token: cancellationToken });
+}
+
+// Recursive is less important in rsync thank in SCP. SCP under recursive mode always follows symlinks, and potentially causes problems.
+// In rsync, there are options to avoid this issue (-l, -K). To mitigate confusion, we still provide a recursive option here like in SCP.
+export async function rsync(files: vscode.Uri[], host: ISshHostInfo, targetDir: string, recursive: boolean = true, rsyncPath?: string, jumpHosts?: ISshHostInfo[], cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+    // --links, -l            When symlinks are encountered, recreate the symlink on the destination.
+    // --keep-dirlinks, -K    Treat symlinked dir on receiver as dir.
+    // --perms, -p            Keep permissions.
+    // --verbose, -v          Verbose.
+    // --compress, -z         Compress file data during the transfer.
+    const args: string[] = ['-lKpvz'];
+    if (recursive) {
+        args.push('-r');
+    }
+    if (jumpHosts && jumpHosts.length > 0) {
+        args.push('-e', `ssh -J ${jumpHosts.map(getFullHostAddress).join(',')}`);
+    }
+    if (host.port) {
+        // upper case P
+        args.push(`--port=${host.port}`);
+    }
+    args.push(files.map(uri => `"${uri.fsPath}"`).join(' '), `${getFullHostAddressNoPort(host)}:${targetDir}`);
+
+    return runSshTerminalCommandWithLogin(host, { systemInteractor: defaultSystemInteractor, nickname: 'rsync', command: `"${rsyncPath || 'rsync'}" ${args.join(' ')}`, token: cancellationToken });
 }
 
 export function ssh(host: ISshHostInfo, command: string, sshPath?: string, jumpHosts?: ISshHostInfo[], localForwards?: ISshLocalForwardInfo[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {

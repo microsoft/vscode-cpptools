@@ -104,7 +104,7 @@ export class CppBuildTaskProvider implements TaskProvider {
             userCompilerPath = userCompilerPathAndArgs.compilerPath;
             if (userCompilerPath && userCompilerPathAndArgs.compilerName) {
                 userCompilerPath = userCompilerPath.trim();
-                if (isWindows && userCompilerPath.startsWith("/")) { // TODO: Add WSL compiler support.
+                if (isWindows && userCompilerPath.startsWith("/")) {
                     userCompilerPath = undefined;
                 } else {
                     userCompilerPath = userCompilerPath.replace(/\\\\/g, "\\");
@@ -134,7 +134,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 ) &&
                 (
                     !isWindows || !info.path.startsWith("/")
-                ); // TODO: Add WSL compiler support.
+                );
             const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
                 ((path.basename(info.path) === "cl.exe") && compiler_condition(info)));
             knownCompilers = knownCompilers.filter(info =>
