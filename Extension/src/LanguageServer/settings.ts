@@ -964,8 +964,8 @@ export class OtherSettings {
     public set filesAssociations(value: any) {
         vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
     }
-    public set defaultCompiler(value: any) {
-        vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Global);
+    public set defaultCompiler(value: string) {
+        vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", value, vscode.ConfigurationTarget.Global);
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }

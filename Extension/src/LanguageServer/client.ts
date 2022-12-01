@@ -887,12 +887,9 @@ export class DefaultClient implements Client {
         });
     }
 
-    public set defaultCompiler(value: any) {
-        vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Global);
-    }
-
     public async handleCompilerQuickPick(): Promise<void> {
         const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
+        const settings: OtherSettings = new OtherSettings();
         const paths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
         paths.push("Select another compiler on my machine");
         paths.push("Help me install a compiler");
@@ -918,7 +915,7 @@ export class DefaultClient implements Client {
             const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
             if (result !== undefined && result.length > 0) {
                 util.addTrustedCompiler(result[0].fsPath);
-                await this.defaultCompiler(result[0].fsPath);
+                settings.defaultCompiler = result[0].fsPath;
                 const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                 compilerDefaults = selectedCompilerDefaults;
                 this.updateClientConfigurations();
@@ -927,7 +924,7 @@ export class DefaultClient implements Client {
         } else {
             util.addTrustedCompiler(paths[index]);
         }
-        await vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", paths[index], vscode.ConfigurationTarget.Global);
+        settings.defaultCompiler = paths[index];
         const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
         compilerDefaults = selectedCompilerDefaults;
         this.updateClientConfigurations();
@@ -938,13 +935,13 @@ export class DefaultClient implements Client {
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
         const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
-
+        const settings: OtherSettings = new OtherSettings();
         if (compilerDefaults.compilerPath !== "") {
             if (!command) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The ${compilerDefaults.compilerPath} was found on this computer. Do you want to configure it for IntelliSense?"), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     util.addTrustedCompiler(compilerDefaults.compilerPath);
-                    await this.defaultCompiler(compilerDefaults.compilerPath);
+                    settings.defaultCompiler = compilerDefaults.compilerPath;
                     const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
                     compilerDefaults = selectedCompilerDefaults;
                     this.updateClientConfigurations();
@@ -1081,9 +1078,9 @@ export class DefaultClient implements Client {
                         // Listen for messages from the language server.
                         this.registerNotifications();
                     } else {
-                        // update all client configurations
                         this.configuration.CompilerDefaults = compilerDefaults;
                     }
+                    // update all client configurations
                     this.configuration.setupConfigurations();
                     clientCount++;
                     // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
@@ -2138,8 +2135,8 @@ export class DefaultClient implements Client {
         const settings: OtherSettings = new OtherSettings();
         const assocs: any = settings.filesAssociations;
 
-        const filesAndPaths: string[] = fileAssociations.split(";");
         let foundNewAssociation: boolean = false;
+        const filesAndPaths: string[] = fileAssociations.split(";");
         for (let i: number = 0; i < filesAndPaths.length; ++i) {
             const fileAndPath: string[] = filesAndPaths[i].split("@");
             // Skip empty or malformed
