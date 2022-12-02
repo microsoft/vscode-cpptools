@@ -3026,11 +3026,11 @@ export class DefaultClient implements Client {
                         selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
                     } else {
                         // Destination file is not empty.
-                        // VSCode workspace.applyEdit calculates the position of subsequent edits.
+                        // VS Code workspace.applyEdit calculates the position of subsequent edits.
                         // That is, the positions of text edits that are originally calculated by the language server
-                        // are adjusted based on the number of text edits applied by VSCode workspace.applyEdit.
+                        // are adjusted based on the number of text edits applied by VS Code workspace.applyEdit.
                         // Since the language server's refactoring API already pre-calculates the positions of multiple text edits,
-                        // re-adjust the new line of the next text edit for the VSCode applyEdit to calculate again.
+                        // re-adjust the new line of the next text edit for the VS Code applyEdit to calculate again.
                         editPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
                     }
                 }
