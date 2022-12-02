@@ -3019,14 +3019,13 @@ export class DefaultClient implements Client {
             for (const edit of result.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
-                if (lastEdit &&  lastEdit.newText.includes("#include")) {
+                if (lastEdit && lastEdit.newText.includes("#include")) {
                     if (lastEdit.range.isEqual(range)) {
                         // Destination file is empty.
                         // The edit positions for #include header file and definition or declaration are the same.
                         selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
-                    }
-                    else
-                    {   // Destiniation file is not empty.
+                    } else {
+                        // Destiniation file is not empty.
                         // VSCode workspace.applyEdit calculates the position of subsequent edits.
                         // That is, the positions of text edits that are originally calculated by the langauge server
                         // are adjusted based on the number of text edits applied by VSCode workspace.applyEdit.
