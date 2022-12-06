@@ -737,7 +737,8 @@ export interface Client {
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
-    handleShowCodeAnalysisCommands(): Promise<void>;
+    handleShowActiveCodeAnalysisCommands(): Promise<void>;
+    handleShowIdleCodeAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
@@ -2173,14 +2174,14 @@ export class DefaultClient implements Client {
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
         this.model.parsingWorkspaceStatus.Value = getLocalizedString(notificationBody);
         if (notificationBody.text.startsWith("Workspace parsing paused")) {
-            this.model.isParsingWorkspacePausable.Value = true;
             this.model.isParsingWorkspacePaused.Value = true;
-        } else if (notificationBody.text.startsWith("Parsing workspace")) {
             this.model.isParsingWorkspacePausable.Value = true;
+        } else if (notificationBody.text.startsWith("Parsing workspace")) {
             this.model.isParsingWorkspacePaused.Value = false;
+            this.model.isParsingWorkspacePausable.Value = true;
         } else {
-            this.model.isParsingWorkspacePausable.Value = false;
             this.model.isParsingWorkspacePaused.Value = false;
+            this.model.isParsingWorkspacePausable.Value = false;
         }
     }
 
@@ -2753,13 +2754,23 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleShowCodeAnalysisCommands(): Promise<void> {
+    public async handleShowActiveCodeAnalysisCommands(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        const index: number = await ui.showCodeAnalysisCommands();
+        const index: number = await ui.showActiveCodeAnalysisCommands();
         switch (index) {
             case 0: this.CancelCodeAnalysis(); break;
             case 1: this.PauseCodeAnalysis(); break;
             case 2: this.ResumeCodeAnalysis(); break;
+        }
+    }
+
+    public async handleShowIdleCodeAnalysisCommands(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        const index: number = await ui.showIdleCodeAnalysisCommands();
+        switch (index) {
+            case 0: this.handleRunCodeAnalysisOnActiveFile(); break;
+            case 1: this.handleRunCodeAnalysisOnAllFiles(); break;
+            case 2: this.handleRunCodeAnalysisOnOpenFiles(); break;
         }
     }
 
@@ -3239,7 +3250,8 @@ class NullClient implements Client {
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
-    handleShowCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
+    handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
+    handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }

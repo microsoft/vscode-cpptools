@@ -406,7 +406,8 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', enabled ? onResumeCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', enabled ? onCancelCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', enabled ? onShowParsingCommands : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', enabled ? onShowCodeAnalysisCommands : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', enabled ? onTakeSurvey : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', enabled ? onLogDiagnostics : onDisabledCommand));
@@ -733,8 +734,12 @@ function onShowParsingCommands(): void {
     clients.ActiveClient.handleShowParsingCommands();
 }
 
-function onShowCodeAnalysisCommands(): void {
-    clients.ActiveClient.handleShowCodeAnalysisCommands();
+function onShowActiveCodeAnalysisCommands(): void {
+    clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
+}
+
+function onShowIdleCodeAnalysisCommands(): void {
+    clients.ActiveClient.handleShowIdleCodeAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {
