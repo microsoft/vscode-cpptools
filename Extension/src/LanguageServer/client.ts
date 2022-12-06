@@ -3004,22 +3004,38 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let modifiedDocument: vscode.Uri | undefined;
         let lastEdit: vscode.TextEdit | undefined;
-        let numNewlinesFromPreviousEdits: number = 0;
+        let editPositionAdjustment: number = 0;
+        let selectionPositionAdjustment: number = 0;
         for (const file in result.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
-            const edits: vscode.TextEdit[] = [];
+            // At most, there will only be two text edits:
+            // 1.) an edit for: #include header file
+            // 2.) an edit for: definition or declaration
             for (const edit of result.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
-                if (lastEdit && lastEdit.range.isEqual(range)) {
-                    numNewlinesFromPreviousEdits += (lastEdit.newText.match(/\n/g) || []).length;
+                // Get new lines from an edit for: #include header file.
+                if (lastEdit && lastEdit.newText.includes("#include")) {
+                    if (lastEdit.range.isEqual(range)) {
+                        // Destination file is empty.
+                        // The edit positions for #include header file and definition or declaration are the same.
+                        selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
+                    } else {
+                        // Destination file is not empty.
+                        // VS Code workspace.applyEdit calculates the position of subsequent edits.
+                        // That is, the positions of text edits that are originally calculated by the language server
+                        // are adjusted based on the number of text edits applied by VS Code workspace.applyEdit.
+                        // Since the language server's refactoring API already pre-calculates the positions of multiple text edits,
+                        // re-adjust the new line of the next text edit for the VS Code applyEdit to calculate again.
+                        editPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
+                    }
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
-                edits.push(lastEdit);
+                const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
+                workspaceEdits.insert(uri, position, edit.newText);
             }
-            workspaceEdit.set(uri, edits);
             modifiedDocument = uri;
         };
 
@@ -3027,11 +3043,12 @@ export class DefaultClient implements Client {
             return;
         }
 
-        await vscode.workspace.applyEdit(workspaceEdit);
-        let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+        // Apply the create declaration/definition text edits.
+        await vscode.workspace.applyEdit(workspaceEdits);
 
-        // Move the cursor to the new code, accounting for \n or \n\n at the start.
+        // Move the cursor to the new declaration/definition edit, accounting for \n or \n\n at the start.
         let startLine: number = lastEdit.range.start.line;
+        let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
         if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
             startLine += 2;
             numNewlines -= 2;
@@ -3043,11 +3060,11 @@ export class DefaultClient implements Client {
             numNewlines++; // Increase the format range.
         }
 
-        const selectionPosition: vscode.Position = new vscode.Position(startLine + numNewlinesFromPreviousEdits, 0);
+        const selectionPosition: vscode.Position = new vscode.Position(startLine + selectionPositionAdjustment, 0);
         const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
         await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
 
-        // Run formatRange.
+        // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
         const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
