@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.13.6: November 30, 2022
+## Version 1.13.6: December 6, 2022
 ### New Features
 * Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
 * Add SSH Target Selector. [PR #9760](https://github.com/microsoft/vscode-cpptools/pull/9760)
@@ -68,6 +68,7 @@
 * Fix include completion sorting extensionless headers (e.g. string) after headers with an extension (e.g. string.h).
 * Fix extensionHost logging an error related to onWillSaveTextDocument whenever a save is done.
 * Fix random "Failed to spawn IntelliSense process" on Mac.
+* Fix a deadlock when IntelliSense errors are updating.
 * Fix redundant rescan when adding a workspace folder.
 
 ### Removed Feature
