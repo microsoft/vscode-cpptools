@@ -9,7 +9,7 @@ import { Middleware } from 'vscode-languageclient';
 import { Client } from './client';
 import * as vscode from 'vscode';
 import { CppSettings } from './settings';
-import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
+import { clients, onDidChangeActiveTextEditor } from './extension';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
@@ -36,13 +36,11 @@ export function createProtocolFilter(): Middleware {
                         me.TrackedDocuments.add(document);
                         const finishDidOpen = (doc: vscode.TextDocument) => {
                             me.provideCustomConfiguration(doc.uri, undefined);
-                            me.notifyWhenLanguageClientReady(() => {
-                                sendMessage(doc);
-                                me.onDidOpenTextDocument(doc);
-                                if (editor && editor === vscode.window.activeTextEditor) {
-                                    onDidChangeActiveTextEditor(editor);
-                                }
-                            });
+                            sendMessage(doc);
+                            me.onDidOpenTextDocument(doc);
+                            if (editor && editor === vscode.window.activeTextEditor) {
+                                onDidChangeActiveTextEditor(editor);
+                            }
                         };
                         let languageChanged: boolean = false;
                         if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
@@ -75,11 +73,8 @@ export function createProtocolFilter(): Middleware {
         },
         didChange: async (textDocumentChangeEvent, sendMessage) => {
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
-            if (!me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
-                processDelayedDidOpen(textDocumentChangeEvent.document);
-            }
             me.onDidChangeTextDocument(textDocumentChangeEvent);
-            me.notifyWhenLanguageClientReady(() => sendMessage(textDocumentChangeEvent));
+            sendMessage(textDocumentChangeEvent);
         },
         willSave: defaultHandler,
         willSaveWaitUntil: async (event, sendMessage) => {
@@ -97,7 +92,7 @@ export function createProtocolFilter(): Middleware {
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
-                me.notifyWhenLanguageClientReady(() => sendMessage(document));
+                sendMessage(document);
             }
         },
 
