@@ -152,7 +152,7 @@ export class CppProperties {
     private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
-    private isWin32 = os.platform() === "win32";
+    private isWin32: boolean = os.platform() === "win32";
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
