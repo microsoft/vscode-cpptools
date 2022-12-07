@@ -66,10 +66,12 @@ export class UI {
     private isCodeAnalysisPaused: boolean = false;
     private codeAnalysisProcessed: number = 0;
     private codeAnalysisTotal: number = 0;
-    private workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
-    private workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parking Workspace: Paused");
+    private readonly workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
+    private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parking Workspace: Paused");
+    private readonly workspaceParseingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
+    private readonly workspaceRescanText = localize("rescan.tagparse.text", "Re-scan workspace");
     private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing Open Files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
@@ -79,6 +81,8 @@ export class UI {
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private runningCodeAnalysisTooltip: string = "";
     private codeAnalysisPausedTooltip: string = "";
+    // Prevent icons from appearing too often and for too short of a time.
+    private readonly iconDelayTime: number = 1000;
 
     constructor() {
         this.configStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.configuration.tooltip", this.configDocumentSelector);
@@ -106,7 +110,7 @@ export class UI {
         this.browseEngineStatusBarItem.text = "$(database)";
         this.browseEngineStatusBarItem.command = {
             command: "C_Cpp.RescanWorkspace",
-            title: "Re-scan workspace"
+            title: this.workspaceRescanText
         };
         this.workspaceParsingStatus = this.workspaceParsingRunningText;
 
@@ -127,15 +131,18 @@ export class UI {
     }
 
     private set ActiveConfig(label: string) {
-        this.configStatusBarItem.text = label ?? "Configuation: Not selected";
+        this.configStatusBarItem.text = label ?? localize("configuration.notselected.text", "Configuation: Not selected");
         if (this.configStatusBarItem.command) {
-            this.configStatusBarItem.command.title = label.length > 0 ? "Edit Configuration" : "Select Configuration";
+            this.configStatusBarItem.command.title = label.length > 0 ?
+                localize("configuration.edit.text", "Edit Configuration") :
+                localize("configuration.selected.text", "Select Configuration");
         }
     }
 
     private set TagParseStatus(label: string) {
         this.workspaceParsingProgress = label;
         if (this.browseEngineStatusBarItem.command) {
+            // Currently need to update entire command for tooltip to update
             this.browseEngineStatusBarItem.command = {
                 command: this.browseEngineStatusBarItem.command.command,
                 title: this.browseEngineStatusBarItem.command.title,
@@ -163,11 +170,11 @@ export class UI {
 
         if (!showIcon) {
             this.dbTimeout = setTimeout(() => {
-                this.browseEngineStatusBarItem.text = "Parsing Complete";
+                this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
                     command: "C_Cpp.RescanWorkspace",
-                    title: "Re-scan workspace"
+                    title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
         }
@@ -177,7 +184,7 @@ export class UI {
         if (val && this.isParsingWorkspace) {
             this.browseEngineStatusBarItem.command = {
                 command: "C_Cpp.PauseParsing",
-                title: "Pause Workspace"
+                title:  localize("tagparser.pause.text", "Pause Workspace")
             };
         }
     }
@@ -189,10 +196,10 @@ export class UI {
         this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
         this.browseEngineStatusBarItem.command = val ? {
             command: "C_Cpp.ResumeParsing",
-            title: "Resume"
+            title: localize("tagparser.resume.text", "Resume")
         } : {
             command: "C_Cpp.PauseParsing",
-            title: "Pause Workspace"
+            title: localize("tagparser.pause.text", "Pause Workspace")
         };
     }
 
@@ -220,11 +227,11 @@ export class UI {
 
         if (!this.isParsingWorkspace && !val) {
             this.dbTimeout = setTimeout(() => {
-                this.browseEngineStatusBarItem.text = "Parsing Complete";
+                this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
                     command: "C_Cpp.RescanWorkspace",
-                    title: "Re-scan workspace"
+                    title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
         }
@@ -241,7 +248,7 @@ export class UI {
             this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
             this.intelliSenseStatusBarItem.command = {
                 command: "C_Cpp.CheckForCompiler",
-                title: "Select a Compiler"
+                title: localize("intellisense.select.text", "Select a Compiler")
             };
             return;
         }
@@ -267,8 +274,8 @@ export class UI {
         }
         this.intelliSenseStatusBarItem.command = {
             command: "C_Cpp.RestartIntelliSenseForFile",
-            title: "Rescan",
-            tooltip: "Rescan IntelliSense"
+            title: localize("rescan.intellisense.text", "Rescan"),
+            tooltip: localize("rescan.intellisense.tooltip", "Rescan IntelliSense")
         };
 
     }
@@ -340,27 +347,6 @@ export class UI {
         }
     }
 
-    // Prevent icons from appearing too often and for too short of a time.
-    private readonly iconDelayTime: number = 1000;
-
-    // private set ShowDBIcon(show: boolean) {
-
-    //     if (this.dbTimeout) {
-    //         clearTimeout(this.dbTimeout);
-    //     }
-    //     if (this.browseEngineStatusBarItem) {
-    //         this.browseEngineStatusBarItem.busy = show && (this.isParsingWorkspace || this.isParsingFiles);
-    //         if (!this.browseEngineStatusBarItem.busy) {
-    //             this.dbTimeout = setTimeout(() => {
-    //                 if (this.browseEngineStatusBarItem) {
-    //                     this.browseEngineStatusBarItem.dispose();
-    //                     this.browseEngineStatusBarItem = undefined;
-    //                 }
-    //             }, this.iconDelayTime);
-    //         }
-    //     }
-    // }
-
     private set ShowReferencesIcon(show: boolean) {
         if (show && this.ReferencesCommand !== ReferencesCommandMode.None) {
             this.referencesStatusBarItem.show();
@@ -381,15 +367,6 @@ export class UI {
                     vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
                 }
             }
-
-            // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
-            // TODO: Check some "AlwaysShow" setting here.
-            // this.ShowConfiguration = isCpp || isCppPropertiesJson ||
-            //     activeEditor.document.uri.scheme === "output" ||
-            //     activeEditor.document.fileName.endsWith("settings.json") ||
-            //     activeEditor.document.fileName.endsWith("tasks.json") ||
-            //     activeEditor.document.fileName.endsWith("launch.json") ||
-            //     activeEditor.document.fileName.endsWith(".code-workspace");
         }
     }
 
