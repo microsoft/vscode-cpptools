@@ -79,8 +79,9 @@ export class UI {
     private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
     private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
-    private runningCodeAnalysisTooltip: string = "";
-    private codeAnalysisPausedTooltip: string = "";
+    private readonly codeAnalysisRunningText: string = localize("running.analysis.tooltip", "Analyzing code");
+    private readonly codeAnalysisPausedText: string = localize("paused.analysis.tooltip", "Analyzing code: Paused");
+    private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
 
@@ -123,11 +124,6 @@ export class UI {
         };
         this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
 
-        this.codeAnalysisProgram = "clang-tidy";
-        this.runningCodeAnalysisTooltip = localize(
-            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
-        this.codeAnalysisPausedTooltip = localize(
-            { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
     }
 
     private set ActiveConfig(label: string) {
@@ -210,6 +206,7 @@ export class UI {
 
         this.isCodeAnalysisPaused = val;
         this.codeAnalysisStatusBarItem.busy = !val;
+        this.codeAnalysisStatusBarItem.text = val ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
         // TODO: Figure out what this refers to
         // this.codeAnalysisStatusBarItem.detail = val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip;
     }
@@ -306,8 +303,16 @@ export class UI {
     }
 
     private updateCodeAnalysisTooltip(): void {
-        this.runningCodeAnalysisTooltip = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
+        this.codeAnalysProgress = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
             this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
+
+        if (this.codeAnalysisStatusBarItem.command) {
+            this.codeAnalysisStatusBarItem.command = {
+                command: this.codeAnalysisStatusBarItem.command.command,
+                title: this.codeAnalysisStatusBarItem.command.title,
+                tooltip: this.codeAnalysProgress
+            };
+        }
         this.setIsRunningCodeAnalysis(true);
     }
 
