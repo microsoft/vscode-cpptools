@@ -92,7 +92,13 @@ export function createProtocolFilter(): Middleware {
         },
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: invoke3,
+        provideHover: (document, position, token, next: (document: any, position: any, token: any) => any) => {
+            const me: Client = clients.getClientFor(document.uri);
+            if (me.TrackedDocuments.has(document)) {
+                return next(document, position, token);
+            }
+            return null;
+        },
         provideSignatureHelp: invoke4,
         provideDefinition: invoke3,
         provideReferences: invoke4,
