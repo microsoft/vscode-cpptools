@@ -67,7 +67,7 @@ export class UI {
     private codeAnalysisProcessed: number = 0;
     private codeAnalysisTotal: number = 0;
     private readonly workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
-    private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parking Workspace: Paused");
+    private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parsing Workspace: Paused");
     private readonly workspaceParseingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
