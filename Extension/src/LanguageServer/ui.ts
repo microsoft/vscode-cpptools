@@ -209,8 +209,9 @@ export class UI {
         }
 
         this.isCodeAnalysisPaused = val;
+        this.codeAnalysisStatusBarItem.busy = !val;
         // TODO: Figure out what this refers to
-        this.codeAnalysisStatusBarItem.detail = val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip;
+        // this.codeAnalysisStatusBarItem.detail = val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip;
     }
 
     private setIsParsingFiles(val: boolean): void {
