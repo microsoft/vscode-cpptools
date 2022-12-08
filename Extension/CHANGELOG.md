@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.7: December 8, 2022
+### Bug Fix
+* Fix `files.associations` not working. [#10244](https://github.com/microsoft/vscode-cpptools/issues/10244)
+
 ## Version 1.13.6: December 6, 2022
 ### New Features
 * Add the ability to generate definitions from declarations and vice versa. [#664](https://github.com/microsoft/vscode-cpptools/issues/664)
@@ -30,6 +34,7 @@
 
 ### Bug Fixes
 * Fix "final" breaking formatting. [#6638](https://github.com/microsoft/vscode-cpptools/issues/6638)
+* Fix incorrect "expected concept name" IntelliSense error. [#6876](https://github.com/microsoft/vscode-cpptools/issues/6876)
 * Fix incorrect Outline view with C++20 namespace ::inline syntax. [#7216](https://github.com/microsoft/vscode-cpptools/issues/7216)
 * Fix updates to compile_commands.json not being handled if specified using a relative path. [#7610](https://github.com/microsoft/vscode-cpptools/issues/7610)
 * Fix variadic macros not expanding correctly. [#8178](https://github.com/microsoft/vscode-cpptools/issues/8178)
