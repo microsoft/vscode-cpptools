@@ -223,6 +223,9 @@ export class UI {
             + (twoStatus ? " | " : "")
             + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
 
+        if (this.dbTimeout) {
+            clearTimeout(this.dbTimeout);
+        }
         if (!this.isParsingWorkspace && !val) {
             this.dbTimeout = setTimeout(() => {
                 this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
