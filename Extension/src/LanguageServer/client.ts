@@ -1550,7 +1550,8 @@ export class DefaultClient implements Client {
     }
 
     public async logDiagnostics(): Promise<void> {
-        const response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
+        await this.awaitUntilLanguageClientReady();
+        const response: GetDiagnosticsResult = await this.languageClient.sendRequest(GetDiagnosticsRequest, null);
         const diagnosticsChannel: vscode.OutputChannel = getDiagnosticsChannel();
         diagnosticsChannel.clear();
 

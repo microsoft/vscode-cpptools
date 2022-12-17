@@ -60,14 +60,16 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
             if (!defaultClient.TrackedDocuments.has(document)) {
                 processDelayedDidOpen(document);
             }
-            return defaultClient.requestWhenReady(async () => {
-                const params: GetDocumentSymbolRequestParams = {
-                    uri: document.uri.toString()
-                };
-                const symbols: LocalizeDocumentSymbol[] = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
-                const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
-                return resultSymbols;
-            });
+            await defaultClient.awaitUntilLanguageClientReady();
+            const params: GetDocumentSymbolRequestParams = {
+                uri: document.uri.toString()
+            };
+            const symbols: LocalizeDocumentSymbol[] = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+            if (token.isCancellationRequested) {
+                return [];
+            };
+            const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
+            return resultSymbols;
         }
         return [];
     }
