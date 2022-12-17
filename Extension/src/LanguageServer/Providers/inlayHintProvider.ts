@@ -75,10 +75,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             const cacheEntry: InlayHintsCacheEntry = this.createCacheEntry(inlayHintsResult);
             this.cache.set(uriString, cacheEntry);
             return this.buildVSCodeHints(document.uri, cacheEntry);
-        } else {
-            // Force another request because file versions do not match.
-            this.onDidChangeInlayHintsEvent.fire();
         }
+        // Force another request because file versions do not match.
+        this.onDidChangeInlayHintsEvent.fire();
         return undefined;
     }
 
