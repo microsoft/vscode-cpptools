@@ -21,7 +21,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
         const symbols: LocalizeSymbolInformation[] = await this.client.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
         const resultSymbols: vscode.SymbolInformation[] = [];
         if (token.isCancellationRequested) {
-            throw new vscode.CancellationError();
+            return resultSymbols;
         }
 
         // Convert to vscode.Command array

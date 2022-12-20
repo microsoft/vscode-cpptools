@@ -68,7 +68,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const params: GetInlayHintsParams = { uri: uriString };
         const inlayHintsResult: GetInlayHintsResult = await this.client.languageClient.sendRequest(GetInlayHintsRequest, params, token);
         if (token.isCancellationRequested || inlayHintsResult.canceled) {
-            throw new vscode.CancellationError();
+            return undefined;
         }
 
         if (inlayHintsResult.fileVersion === openFileVersions.get(uriString)) {

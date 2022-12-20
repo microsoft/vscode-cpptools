@@ -25,7 +25,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         await this.client.awaitUntilLanguageClientReady();
         const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
         if (token.isCancellationRequested || ranges.canceled) {
-            throw new vscode.CancellationError();
+            return undefined;
         }
         const result: vscode.FoldingRange[] = [];
         ranges.ranges.forEach((r: CppFoldingRange) => {
