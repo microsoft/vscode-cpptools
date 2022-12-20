@@ -884,7 +884,7 @@ export async function addTrustedCompiler(path: string): Promise<void> {
     const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
     const compilerPaths: string[] = compilerPath.Value;
     let i: number = 0;
-    for (i = 0; i <= compilerPaths.length; i++) {
+    for (i = 0; i < compilerPaths.length; i++) {
         if (compilerPaths[i] === path) {
             return;
         }

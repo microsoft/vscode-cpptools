@@ -350,19 +350,19 @@ export class UI {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            let compiler: string | undefined;
+            let option: string | undefined;
             let isCompiler: boolean = false;
             if (paths[i].indexOf("\\") > 0) {
                 if (paths[i].split("\\").pop() !== undefined) {
-                    compiler = paths[i].split("\\").pop();
+                    option = paths[i].split("\\").pop();
                     isCompiler = true;
                 }
             } else {
                 isCompiler = false;
             }
-            if (compiler !== undefined && isCompiler) {
-                const path: string | undefined = paths[i].replace(compiler, "");
-                items.push({ label: compiler, description: "Found at " + path, index: i });
+            if (option !== undefined && isCompiler) {
+                const path: string | undefined = paths[i].replace(option, "");
+                items.push({ label: option, description: "Found at " + path, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }

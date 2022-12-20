@@ -891,9 +891,9 @@ export class DefaultClient implements Client {
         const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
         const settings: OtherSettings = new OtherSettings();
         const paths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
-        paths.push("Select another compiler on my machine");
-        paths.push("Help me install a compiler");
-        paths.push("Do not configure a compiler (not recommended)");
+        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
+        paths.push(localize("installCompiler.string", "Help me install a compiler"));
+        paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await ui.showSelectCompiler(paths);
         if (index === paths.length - 1) {
             paths[index] = "";
@@ -916,8 +916,7 @@ export class DefaultClient implements Client {
             if (result !== undefined && result.length > 0) {
                 util.addTrustedCompiler(result[0].fsPath);
                 settings.defaultCompiler = result[0].fsPath;
-                const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
-                compilerDefaults = selectedCompilerDefaults;
+                compilerDefaults = await this.requestCompiler(compilerPath.Value);
                 this.updateClientConfigurations();
                 return;
             }
@@ -925,10 +924,8 @@ export class DefaultClient implements Client {
             util.addTrustedCompiler(paths[index]);
         }
         settings.defaultCompiler = paths[index];
-        const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
-        compilerDefaults = selectedCompilerDefaults;
+        compilerDefaults = await this.requestCompiler(compilerPath.Value);
         this.updateClientConfigurations();
-
     }
 
     async promptSelectCompiler(command: boolean): Promise<void> {
@@ -938,12 +935,11 @@ export class DefaultClient implements Client {
         const settings: OtherSettings = new OtherSettings();
         if (compilerDefaults.compilerPath !== "") {
             if (!command) {
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The ${compilerDefaults.compilerPath} was found on this computer. Do you want to configure it for IntelliSense?"), confirmCompiler, selectCompiler);
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler ${compilerDefaults.compilerPath} was found on this computer. Do you want to configure it for IntelliSense?"), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     util.addTrustedCompiler(compilerDefaults.compilerPath);
                     settings.defaultCompiler = compilerDefaults.compilerPath;
-                    const selectedCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPath.Value);
-                    compilerDefaults = selectedCompilerDefaults;
+                    compilerDefaults = await this.requestCompiler(compilerPath.Value);
                     this.updateClientConfigurations();
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick();
