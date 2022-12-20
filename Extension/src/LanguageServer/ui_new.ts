@@ -16,7 +16,7 @@ import { UI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-let ui: UI;
+// let ui: UI;
 
 interface IndexableQuickPickItem extends vscode.QuickPickItem {
     index: number;
