@@ -67,18 +67,13 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         // Get new results from the language server
         const params: GetInlayHintsParams = { uri: uriString };
         const inlayHintsResult: GetInlayHintsResult = await this.client.languageClient.sendRequest(GetInlayHintsRequest, params, token);
-        if (token.isCancellationRequested || inlayHintsResult.canceled) {
+        if (token.isCancellationRequested || inlayHintsResult.canceled || inlayHintsResult.fileVersion === openFileVersions.get(uriString)) {
             throw new vscode.CancellationError();
         }
 
-        if (inlayHintsResult.fileVersion === openFileVersions.get(uriString)) {
-            const cacheEntry: InlayHintsCacheEntry = this.createCacheEntry(inlayHintsResult);
-            this.cache.set(uriString, cacheEntry);
-            return this.buildVSCodeHints(document.uri, cacheEntry);
-        }
-        // Force another request because file versions do not match.
-        this.onDidChangeInlayHintsEvent.fire();
-        return undefined;
+        const cacheEntry: InlayHintsCacheEntry = this.createCacheEntry(inlayHintsResult);
+        this.cache.set(uriString, cacheEntry);
+        return this.buildVSCodeHints(document.uri, cacheEntry);
     }
 
     public invalidateFile(uri: string): void {
