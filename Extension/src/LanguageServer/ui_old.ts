@@ -168,7 +168,7 @@ export class OldUI implements UI {
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
             + (twoStatus ? " | " : "")
             + (val ? this.runningCodeAnalysisTooltip : "");
-        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : undefined;
+        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowActiveCodeAnalysisCommands" : undefined;
     }
 
     private updateCodeAnalysisTooltip(): void {
