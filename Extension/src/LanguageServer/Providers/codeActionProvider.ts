@@ -59,9 +59,6 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             GetCodeActionsRequest, params, token);
 
         const resultCodeActions: vscode.CodeAction[] = [];
-
-        // It's necessary to check the CancellationToken before attempting to use the
-        // returned object, as it may not be valid if a generic LSP cancelation response was returned.
         if (token.isCancellationRequested) {
             throw new vscode.CancellationError();
         }
