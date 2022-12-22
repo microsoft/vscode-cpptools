@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, FormatParams, FormatRangeRequest } from '../client';
+import { TextEdit } from '../commonTypes';
 import { CppSettings, getEditorConfigSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
@@ -45,7 +46,11 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             // because there is not currently cancellation logic for formatting
             // in the native process. Formatting is currently done directly in
             // message handling thread.
-            return makeVscodeTextEdits(await this.client.languageClient.sendRequest(FormatRangeRequest, params));
+            const response: TextEdit[] = await this.client.languageClient.sendRequest(FormatRangeRequest, params, token);
+            if (token.isCancellationRequested) {
+                throw new vscode.CancellationError();
+            }
+            return makeVscodeTextEdits(response);
         };
         if (!useVcFormat) {
             return configCallBack(undefined);
