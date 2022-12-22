@@ -35,7 +35,7 @@ export const configPrefix: string = "C/C++: ";
 let prevCrashFile: string;
 export let clients: ClientCollection;
 let activeDocument: string;
-let ui: UI;
+let ui: UI | undefined;
 const disposables: vscode.Disposable[] = [];
 const commandDisposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
@@ -174,7 +174,9 @@ export async function activate(): Promise<void> {
 
     console.log("starting language server");
     clients = new ClientCollection();
-    ui = getUI();
+    getActiveClient().awaitUntilLanguageClientReady().then(async () =>
+        ui = await getUI()
+    );
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
@@ -184,7 +186,7 @@ export async function activate(): Promise<void> {
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    void ui?.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
@@ -304,7 +306,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         clients.activeDocumentChanged(editor.document);
         clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     }
-    ui.activeDocumentChanged();
+    void ui?.activeDocumentChanged();
 }
 
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
@@ -319,7 +321,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
         activeDocument = event.textEditor.document.uri.toString();
         clients.activeDocumentChanged(event.textEditor.document);
-        ui.activeDocumentChanged();
+        void ui?.activeDocumentChanged();
     }
     clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
@@ -514,8 +516,8 @@ async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
         return clients.ActiveClient;
     } else {
-        const key: string = await ui.showWorkspaces(clients.Names);
-        if (key !== "") {
+        const key: string | undefined = await ui?.showWorkspaces(clients.Names);
+        if (key !== undefined && key !== "") {
             const client: Client | undefined = clients.get(key);
             if (client) {
                 return client;
@@ -1020,7 +1022,7 @@ export function deactivate(): Thenable<void> {
     commandDisposables.forEach(d => d.dispose());
     disposables.forEach(d => d.dispose());
     languageConfigurations.forEach(d => d.dispose());
-    ui.dispose();
+    void ui?.dispose();
     if (codeActionProvider) {
         codeActionProvider.dispose();
     }

@@ -8,6 +8,8 @@ import { Client } from './client';
 import * as nls from 'vscode-nls';
 import { NewUI } from './ui_new';
 import { OldUI } from './ui_old';
+import * as telemetry from '../telemetry';
+import { IExperimentationService } from 'tas-client';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 
@@ -29,9 +31,13 @@ export interface UI {
     dispose(): void;
 }
 
-export function getUI(): UI {
+export async function getUI(): Promise<UI> {
     if (!ui) {
-        ui = true ? new NewUI() : new OldUI();
+        const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
+        if (experimentationService !== undefined) {
+            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "splitUIUsers");
+            ui = useNewUI ? new NewUI() : new OldUI();
+        }
     }
     return ui;
 }

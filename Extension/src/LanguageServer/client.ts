@@ -936,11 +936,11 @@ export class DefaultClient implements Client {
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
-            ui = getUI();
-            ui.bind(this);
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(async () => {
+                ui = await getUI();
+                ui.bind(this);
                 await firstClientStarted;
                 try {
                     const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
@@ -2763,6 +2763,7 @@ export class DefaultClient implements Client {
             case 0: this.CancelCodeAnalysis(); break;
             case 1: this.PauseCodeAnalysis(); break;
             case 2: this.ResumeCodeAnalysis(); break;
+            case 3: this.handleShowIdleCodeAnalysisCommands(); break;
         }
     }
 
