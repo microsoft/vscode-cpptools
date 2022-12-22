@@ -1933,9 +1933,28 @@ export class DefaultClient implements Client {
         const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
         if (!!document && document.languageId !== languageId) {
+            if (document.languageId === "cpp" && languageId === "c") {
+                if (DefaultClient.shouldChangeFromCToCpp(document)) {
+                    DefaultClient.docsChangedFromCppToC.add(document.fileName);
+                }
+            }
             vscode.languages.setTextDocumentLanguage(document, languageId);
         }
     }
+
+    // Check this before attempting to switch a document from C to C++.
+    public static shouldChangeFromCToCpp(document: vscode.TextDocument): boolean {
+        if ((document.fileName.endsWith(".C") || document.fileName.endsWith(".H"))) {
+            const cppSettings: CppSettings = new CppSettings();
+            if (cppSettings.autoAddFileAssociations) {
+                return !DefaultClient.docsChangedFromCppToC.has(document.fileName);
+            }
+            // We could potentially add a new setting to enable switching to cpp even when files.associations isn't changed.
+        }
+        return false;
+    }
+
+    private static docsChangedFromCppToC: Set<string> = new Set<string>();
 
     private associations_for_did_change?: Set<string>;
 

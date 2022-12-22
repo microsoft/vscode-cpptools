@@ -6,9 +6,8 @@
 
 import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
-import { Client } from './client';
+import { Client, DefaultClient } from './client';
 import * as vscode from 'vscode';
-import { CppSettings } from './settings';
 import { clients, onDidChangeActiveTextEditor } from './extension';
 
 export function createProtocolFilter(): Middleware {
@@ -43,18 +42,15 @@ export function createProtocolFilter(): Middleware {
                             }
                         };
                         let languageChanged: boolean = false;
-                        if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                            const cppSettings: CppSettings = new CppSettings();
-                            if (cppSettings.autoAddFileAssociations) {
-                                const fileName: string = path.basename(document.uri.fsPath);
-                                const mappingString: string = fileName + "@" + document.uri.fsPath;
-                                me.addFileAssociations(mappingString, "cpp");
-                                me.sendDidChangeSettings();
-                                vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                                    finishDidOpen(newDoc);
-                                });
-                                languageChanged = true;
-                            }
+                        if (document.languageId === "c" && DefaultClient.shouldChangeFromCToCpp(document)) {
+                            const baesFileName: string = path.basename(document.fileName);
+                            const mappingString: string = baesFileName + "@" + document.fileName;
+                            me.addFileAssociations(mappingString, "cpp");
+                            me.sendDidChangeSettings();
+                            vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                                finishDidOpen(newDoc);
+                            });
+                            languageChanged = true;
                         }
                         if (!languageChanged) {
                             finishDidOpen(document);
