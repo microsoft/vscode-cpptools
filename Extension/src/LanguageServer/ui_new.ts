@@ -145,7 +145,6 @@ export class NewUI implements UI {
                 title: this.browseEngineStatusBarItem.command.title,
                 tooltip: (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress
             };
-            // this.browseEngineStatusBarItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
         }
     }
 
@@ -481,6 +480,7 @@ export class NewUI implements UI {
         } else {
             items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint]}, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
         }
+        items.push({ label: localize({ key: "another.analysis", comment: [this.codeAnalysisTranslationHint]}, "Start Another {0}...", this.codeAnalysisProgram), description: "", index: 3 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
     }
