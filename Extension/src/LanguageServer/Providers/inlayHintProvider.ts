@@ -59,7 +59,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const uriString: string = document.uri.toString();
 
         // Get results from cache if available.
-        const cacheEntry: InlayHintsCacheEntry | undefined = this.cache.get(uriString);
+        let cacheEntry: InlayHintsCacheEntry | undefined = this.cache.get(uriString);
         if (cacheEntry?.FileVersion === document.version) {
             return this.buildVSCodeHints(document.uri, cacheEntry);
         }
@@ -67,13 +67,14 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         // Get new results from the language server
         const params: GetInlayHintsParams = { uri: uriString };
         const inlayHintsResult: GetInlayHintsResult = await this.client.languageClient.sendRequest(GetInlayHintsRequest, params, token);
-        if (token.isCancellationRequested || inlayHintsResult.canceled || inlayHintsResult.fileVersion === openFileVersions.get(uriString)) {
+        if (token.isCancellationRequested || inlayHintsResult.canceled || inlayHintsResult.fileVersion !== openFileVersions.get(uriString)) {
             throw new vscode.CancellationError();
         }
 
-        const cacheEntry: InlayHintsCacheEntry = this.createCacheEntry(inlayHintsResult);
+        cacheEntry = this.createCacheEntry(inlayHintsResult);
         this.cache.set(uriString, cacheEntry);
         return this.buildVSCodeHints(document.uri, cacheEntry);
+
     }
 
     public invalidateFile(uri: string): void {
