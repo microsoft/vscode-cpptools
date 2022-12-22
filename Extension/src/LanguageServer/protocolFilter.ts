@@ -6,9 +6,10 @@
 
 import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
-import { Client, DefaultClient } from './client';
+import { Client } from './client';
 import * as vscode from 'vscode';
 import { clients, onDidChangeActiveTextEditor } from './extension';
+import { shouldChangeFromCToCpp } from './utils';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
@@ -42,7 +43,7 @@ export function createProtocolFilter(): Middleware {
                             }
                         };
                         let languageChanged: boolean = false;
-                        if (document.languageId === "c" && DefaultClient.shouldChangeFromCToCpp(document)) {
+                        if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                             const baesFileName: string = path.basename(document.fileName);
                             const mappingString: string = baesFileName + "@" + document.fileName;
                             me.addFileAssociations(mappingString, "cpp");

@@ -15,7 +15,7 @@ import { UI, getUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
-import { makeCpptoolsRange, rangeEquals } from './utils';
+import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
 import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentState } from './persistentState';
@@ -342,7 +342,7 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
                 };
                 let languageChanged: boolean = false;
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-                if (document.languageId === "c" && DefaultClient.shouldChangeFromCToCpp(document)) {
+                if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                     const baseFileName: string = path.basename(document.fileName);
                     const mappingString: string = baseFileName + "@" + document.fileName;
                     client.addFileAssociations(mappingString, "cpp");
