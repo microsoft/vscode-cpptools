@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.13.9: January 4, 2022
+## Version 1.13.9: January 4, 2023
 ### Bug Fix
 * Fix clang-format and clang-tidy not working for macOS 11 arm64. [#10282](https://github.com/microsoft/vscode-cpptools/issues/10282)
 
