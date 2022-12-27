@@ -1,11 +1,14 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.13.9: January 4, 2022
+### Bug Fix
+* Fix clang-format and clang-tidy not working for macOS 11 arm64. [#10282](https://github.com/microsoft/vscode-cpptools/issues/10282)
+
 ## Version 1.13.8: December 15, 2022
 ### Bug Fixes
 * Fix tag parser failure on machines with multiple extension users. [#10224](https://github.com/microsoft/vscode-cpptools/issues/10224)
 * Fix a `--using_directory` IntelliSense error if LIBPATH is defined with non-msvc IntelliSense modes. [#10249](https://github.com/microsoft/vscode-cpptools/issues/10249)
 * Fix a crash when the configuration name is missing. [#10251](https://github.com/microsoft/vscode-cpptools/issues/10251)
-* Fix clang-format and clang-tidy not working for macOS 11 arm64. [#10282](https://github.com/microsoft/vscode-cpptools/issues/10282)
 
 ## Version 1.13.7: December 8, 2022
 ### Bug Fix
