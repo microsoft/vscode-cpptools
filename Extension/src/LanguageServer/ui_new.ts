@@ -279,7 +279,6 @@ export class NewUI implements UI {
             title: localize("rescan.intellisense.text", "Rescan"),
             tooltip: localize("rescan.intellisense.tooltip", "Rescan IntelliSense")
         };
-
     }
 
     private codeAnalysisCurrentState(): string {
