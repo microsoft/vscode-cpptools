@@ -365,21 +365,6 @@ export class NewUI implements UI {
         }
     }
 
-    public activeDocumentChanged(): void {
-        const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (activeEditor) {
-            // const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
-
-            let isCppPropertiesJson: boolean = false;
-            if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
-                isCppPropertiesJson = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
-                if (isCppPropertiesJson) {
-                    vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
-                }
-            }
-        }
-    }
-
     public bind(client: Client): void {
         client.ParsingWorkspaceChanged(value => { this.setIsParsingWorkspace(value); });
         client.ParsingWorkspacePausableChanged(value => { this.setIsParsingWorkspacePausable(value); });

@@ -17,7 +17,6 @@ let ui: UI;
 
 export interface UI {
     whichUI: boolean;
-    activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
