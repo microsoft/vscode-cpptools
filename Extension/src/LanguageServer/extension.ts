@@ -439,6 +439,73 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    // ---------------- Wrappers -------------
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelectUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ConfigurationSelect");
+            onSelectConfiguration();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspaceUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("RescanWorkspace");
+            onRescanWorkspace();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ShowIdleCodeAnalysisCommands");
+            onShowIdleCodeAnalysisCommands();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ShowActiveCodeAnalysisCommands");
+            onShowActiveCodeAnalysisCommands();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsingUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ParsingCommands");
+            onPauseParsing();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsingUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ParsingCommands");
+            onResumeParsing();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompilerUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("CheckForCompiler");
+            onCheckForCompiler();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFileUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("RestartIntelliSenseForFile");
+            onRestartIntelliSenseForFile();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgressUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ShowReferencesProgress");
+            onShowReferencesProgress();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommandsUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ParsingCommands");
+            onShowParsingCommands();
+        }
+        : onDisabledCommand));
+    // ----------------------------------------
+}
+
+async function logForUIExperiment(command: string): Promise<void> {
+    const whichUI: string = (await getUI()).whichUI ? "New UI" : "Old UI";
+    telemetry.logLanguageServerEvent(`${whichUI} ${command}`);
 }
 
 function onDisabledCommand(): void {

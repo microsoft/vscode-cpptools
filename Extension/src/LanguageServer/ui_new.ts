@@ -85,13 +85,14 @@ export class NewUI implements UI {
     private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
+    get whichUI(): boolean { return true; };
 
     constructor() {
         this.configStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.configuration.tooltip", this.configDocumentSelector);
         this.configStatusBarItem.name = localize("c.cpp.configuration.tooltip", "Select Configuration");
         // TODO: Confirm title and tooltip localization
         this.configStatusBarItem.command = {
-            command: "C_Cpp.ConfigurationSelect",
+            command: "C_Cpp.ConfigurationSelectUI_Telemetry",
             title: this.configStatusBarItem.name as string,
             tooltip: this.configStatusBarItem.name as string
         };
@@ -99,7 +100,7 @@ export class NewUI implements UI {
         this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
         this.referencesStatusBarItem.tooltip = "";
-        this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
+        this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgressUI_Telemetry";
         this.ShowReferencesIcon = false;
 
         this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.intellisense.statusbar", this.documentSelector);
@@ -111,7 +112,7 @@ export class NewUI implements UI {
         this.browseEngineStatusBarItem.detail = localize("indexing.files.tooltip", "Indexing Workspace");
         this.browseEngineStatusBarItem.text = "$(database)";
         this.browseEngineStatusBarItem.command = {
-            command: "C_Cpp.RescanWorkspace",
+            command: "C_Cpp.RescanWorkspaceUI_Telemetry",
             title: this.workspaceRescanText
         };
         this.workspaceParsingStatus = this.workspaceParsingRunningText;
@@ -120,7 +121,7 @@ export class NewUI implements UI {
         this.codeAnalysisStatusBarItem.name = localize("c.cpp.codeanalysis.statusbar", "C/C++ Code Analysis Status");
         this.codeAnalysisStatusBarItem.text = `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = {
-            command: "C_Cpp.ShowIdleCodeAnalysisCommands",
+            command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now")
         };
         this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
@@ -169,7 +170,7 @@ export class NewUI implements UI {
                 this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
-                    command: "C_Cpp.RescanWorkspace",
+                    command: "C_Cpp.RescanWorkspaceUI_Telemetry",
                     title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
@@ -179,7 +180,7 @@ export class NewUI implements UI {
     private setIsParsingWorkspacePausable(val: boolean): void {
         if (val && this.isParsingWorkspace) {
             this.browseEngineStatusBarItem.command = {
-                command: "C_Cpp.PauseParsing",
+                command: "C_Cpp.PauseParsingUI_Telemetry",
                 title:  localize("tagparser.pause.text", "Pause Workspace")
             };
         }
@@ -191,10 +192,10 @@ export class NewUI implements UI {
         this.workspaceParsingStatus = val ? this.workspaceParsingPausedText : this.workspaceParsingRunningText;
         this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
         this.browseEngineStatusBarItem.command = val ? {
-            command: "C_Cpp.ResumeParsing",
+            command: "C_Cpp.ResumeParsingUI_Telemetry",
             title: localize("tagparser.resume.text", "Resume")
         } : {
-            command: "C_Cpp.PauseParsing",
+            command: "C_Cpp.PauseParsingUI_Telemetry",
             title: localize("tagparser.pause.text", "Pause Workspace")
         };
     }
@@ -231,7 +232,7 @@ export class NewUI implements UI {
                 this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
-                    command: "C_Cpp.RescanWorkspace",
+                    command: "C_Cpp.RescanWorkspaceUI_Telemetry",
                     title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
@@ -248,7 +249,7 @@ export class NewUI implements UI {
             this.intelliSenseStatusBarItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
             this.intelliSenseStatusBarItem.command = {
-                command: "C_Cpp.CheckForCompiler",
+                command: "C_Cpp.CheckForCompilerUI_Telemetry",
                 title: localize("intellisense.select.text", "Select a Compiler")
             };
             return;
@@ -274,7 +275,7 @@ export class NewUI implements UI {
             }, this.iconDelayTime);
         }
         this.intelliSenseStatusBarItem.command = {
-            command: "C_Cpp.RestartIntelliSenseForFile",
+            command: "C_Cpp.RestartIntelliSenseForFileUI_Telemetry",
             title: localize("rescan.intellisense.text", "Rescan"),
             tooltip: localize("rescan.intellisense.tooltip", "Rescan IntelliSense")
         };
@@ -296,10 +297,10 @@ export class NewUI implements UI {
         this.codeAnalysisStatusBarItem.busy = val;
         this.codeAnalysisStatusBarItem.text = val ? "Code Analysis: Running" : `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = val ? {
-            command: "C_Cpp.ShowActiveCodeAnalysisCommands",
+            command: "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options")
         } : {
-            command: "C_Cpp.ShowIdleCodeAnalysisCommands",
+            command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showRunNowOptions", "Run Now")
         };
         this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
