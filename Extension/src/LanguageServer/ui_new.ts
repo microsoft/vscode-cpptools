@@ -90,7 +90,7 @@ export class NewUI implements UI {
     constructor() {
         this.configStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.configuration.tooltip", this.configDocumentSelector);
         this.configStatusBarItem.name = localize("c.cpp.configuration.tooltip", "Select Configuration");
-        // TODO: Confirm title and tooltip localization
+        this.configStatusBarItem.text = "Loading configuration...";
         this.configStatusBarItem.command = {
             command: "C_Cpp.ConfigurationSelectUI_Telemetry",
             title: this.configStatusBarItem.name as string,
@@ -124,7 +124,7 @@ export class NewUI implements UI {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now")
         };
-        this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+        // this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Information;
 
     }
 
@@ -141,11 +141,9 @@ export class NewUI implements UI {
         this.workspaceParsingProgress = label;
         if (this.browseEngineStatusBarItem.command) {
             // Currently need to update entire command for tooltip to update
-            this.browseEngineStatusBarItem.command = {
-                command: this.browseEngineStatusBarItem.command.command,
-                title: this.browseEngineStatusBarItem.command.title,
-                tooltip: (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress
-            };
+            this.browseEngineStatusBarItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
+            this.browseEngineStatusBarItem.severity = vscode.LanguageStatusSeverity.Information;
+            // this.browseEngineStatusBarItem.
         }
     }
 
@@ -247,7 +245,7 @@ export class NewUI implements UI {
         // TODO: Integrate with Tarik's feature to determine if compiler/bare-intellisense is configured
         if (settings.intelliSenseEngine === "disabled") {
             this.intelliSenseStatusBarItem.text = this.missingIntelliSenseText;
-            this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+            // this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
             this.intelliSenseStatusBarItem.command = {
                 command: "C_Cpp.CheckForCompilerUI_Telemetry",
                 title: localize("intellisense.select.text", "Select a Compiler")
@@ -264,13 +262,13 @@ export class NewUI implements UI {
         if (val) {
             this.intelliSenseStatusBarItem.text = "$(flame)";
             this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseText;
-            this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+            // this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
         } else {
             this.flameTimeout = setTimeout(() => {
                 if (this.intelliSenseStatusBarItem) {
                     this.intelliSenseStatusBarItem.text = this.idleIntelliSenseText;
                     this.intelliSenseStatusBarItem.detail = "";
-                    this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+                    // this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
                 }
             }, this.iconDelayTime);
         }
@@ -302,7 +300,7 @@ export class NewUI implements UI {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showRunNowOptions", "Run Now")
         };
-        this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
+        // this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
     }
 
     private updateCodeAnalysisTooltip(): void {
