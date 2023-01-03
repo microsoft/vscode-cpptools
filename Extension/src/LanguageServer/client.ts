@@ -21,7 +21,7 @@ import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
 // End provider imports
 
-import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
+import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
@@ -791,11 +791,6 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private loggingLevel: string | undefined;
     private configurationProvider?: string;
-    private documentSelector: DocumentFilter[] = [
-        { scheme: 'file', language: 'c' },
-        { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'cuda-cpp' }
-    ];
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -969,26 +964,26 @@ export class DefaultClient implements Client {
 
                         this.inlayHintsProvider = new InlayHintsProvider(this);
 
-                        this.disposables.push(vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider));
-                        this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
-                        this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
+                        this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
+                        this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
+                        this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(), undefined));
-                        this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, new DocumentSymbolProvider(), undefined));
+                        this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, new CodeActionProvider(this), undefined));
                         // Because formatting and codeFolding can vary per folder, we need to register these providers once
                         // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
                         // within the providers themselves.
-                        this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
-                        this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                        this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                        this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, new DocumentFormattingEditProvider(this));
+                        this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                        this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
 
                         this.codeFoldingProvider = new FoldingRangeProvider(this);
-                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
+                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
 
                         const settings: CppSettings = new CppSettings();
                         if (settings.enhancedColorization && semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
@@ -1311,7 +1306,7 @@ export class DefaultClient implements Client {
                     if (changedSettings["enhancedColorization"]) {
                         if (settings.enhancedColorization && semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                         } else if (this.semanticTokensProviderDisposable) {
                             this.semanticTokensProviderDisposable.dispose();
                             this.semanticTokensProviderDisposable = undefined;

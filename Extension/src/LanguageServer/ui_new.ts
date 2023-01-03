@@ -5,6 +5,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { documentSelector } from '../common';
 import { Client } from './client';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
@@ -43,13 +44,6 @@ export class NewUI implements UI {
     private intelliSenseStatusBarItem: vscode.LanguageStatusItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private codeAnalysisStatusBarItem: vscode.LanguageStatusItem;
-    // This is a duplicate of what's in client.ts
-    // TODO: Confirm whether the orignal can be reused here
-    private documentSelector: vscode.DocumentFilter[] = [
-        { scheme: 'file', language: 'c' },
-        { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'cuda-cpp' }
-    ];
     private configDocumentSelector: vscode.DocumentFilter[] = [
         { scheme: 'file', language: 'c' },
         { scheme: 'file', language: 'cpp' },
@@ -103,11 +97,11 @@ export class NewUI implements UI {
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgressUI_Telemetry";
         this.ShowReferencesIcon = false;
 
-        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.intellisense.statusbar", this.documentSelector);
+        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.intellisense.statusbar", documentSelector);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
         this.intelliSenseStatusBarItem.text = this.idleIntelliSenseText;
 
-        this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.tagparser.statusbar", this.documentSelector);
+        this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.tagparser.statusbar", documentSelector);
         this.browseEngineStatusBarItem.name = localize("c.cpp.tagparser.statusbar", "C/C++ Tag Parser Status");
         this.browseEngineStatusBarItem.detail = localize("indexing.files.tooltip", "Indexing Workspace");
         this.browseEngineStatusBarItem.text = "$(database)";
@@ -117,7 +111,7 @@ export class NewUI implements UI {
         };
         this.workspaceParsingStatus = this.workspaceParsingRunningText;
 
-        this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.codeanalysis.statusbar", this.documentSelector);
+        this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.codeanalysis.statusbar", documentSelector);
         this.codeAnalysisStatusBarItem.name = localize("c.cpp.codeanalysis.statusbar", "C/C++ Code Analysis Status");
         this.codeAnalysisStatusBarItem.text = `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = {
@@ -142,8 +136,8 @@ export class NewUI implements UI {
         if (this.browseEngineStatusBarItem.command) {
             // Currently need to update entire command for tooltip to update
             this.browseEngineStatusBarItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
-            this.browseEngineStatusBarItem.severity = vscode.LanguageStatusSeverity.Information;
-            // this.browseEngineStatusBarItem.
+            // this.browseEngineStatusBarItem.severity = vscode.LanguageStatusSeverity.Information;
+            this.browseEngineStatusBarItem.text = this.browseEngineStatusBarItem.text;
         }
     }
 
