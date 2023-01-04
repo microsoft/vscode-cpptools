@@ -987,7 +987,7 @@ export class CppProperties {
             }
 
             if (configuration.includePath) {
-                configuration.includePath = configuration.includePath.map((path: string) => this.resolvePath(path, this.isWin32));
+                configuration.includePath = configuration.includePath.map((path: string) => this.resolvePath(path, this.isWin32, false));
             }
         }
 
@@ -1377,7 +1377,7 @@ export class CppProperties {
         return success;
     }
 
-    public resolvePath(input_path: string | undefined, isWindows: boolean): string {
+    public resolvePath(input_path: string | undefined, isWindows: boolean, replaceAsterisks: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1397,7 +1397,7 @@ export class CppProperties {
         if (result.includes("${vcpkgRoot}") && util.getVcpkgRoot()) {
             result = result.replace("${vcpkgRoot}", util.getVcpkgRoot());
         }
-        if (result.includes("*")) {
+        if (replaceAsterisks && result.includes("*")) {
             result = result.replace(/\*/g, "");
         }
 
