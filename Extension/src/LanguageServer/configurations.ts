@@ -154,6 +154,7 @@ export class CppProperties {
     private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     private lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
+    private isWin32: boolean = os.platform() === "win32";
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -975,6 +976,29 @@ export class CppProperties {
                     this.lastCustomBrowseConfiguration.Value = undefined;
                 }
             }
+
+            /*
+             * Ensure all paths are absolute
+             */
+            if (configuration.macFrameworkPath) {
+                configuration.macFrameworkPath = configuration.macFrameworkPath.map((path: string) => this.resolvePath(path, this.isWin32));
+            }
+
+            if (configuration.dotConfig) {
+                configuration.dotConfig = this.resolvePath(configuration.dotConfig, this.isWin32);
+            }
+
+            if (configuration.compileCommands) {
+                configuration.compileCommands = this.resolvePath(configuration.compileCommands, this.isWin32);
+            }
+
+            if (configuration.forcedInclude) {
+                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path, this.isWin32));
+            }
+
+            if (configuration.includePath) {
+                configuration.includePath = configuration.includePath.map((path: string) => this.resolvePath(path, this.isWin32));
+            }
         }
 
         this.updateCompileCommandsFileWatchers();
@@ -995,7 +1019,7 @@ export class CppProperties {
             const filePaths: Set<string> = new Set<string>();
             this.configurationJson.configurations.forEach(c => {
                 if (c.compileCommands) {
-                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, os.platform() === "win32");
+                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, this.isWin32);
                     if (fs.existsSync(fileSystemCompileCommandsPath)) {
                         filePaths.add(fileSystemCompileCommandsPath);
                     }
@@ -2083,7 +2107,7 @@ export class CppProperties {
         if (!compileCommands) {
             return;
         }
-        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands, os.platform() === "win32");
+        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands, this.isWin32);
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
