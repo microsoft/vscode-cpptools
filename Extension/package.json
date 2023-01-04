@@ -5990,14 +5990,15 @@
     "follow-redirects": "1.14.8",
     "glob-parent": "^5.1.2",
     "hosted-git-info": "^3.0.8",
+    "json5": "^1.0.2",
     "loader-utils": "^2.0.4",
     "minimatch": "^3.0.5",
+    "minimist": "^1.2.7",
     "nanoid": "^3.1.20",
     "path-parse": "^1.0.7",
     "set-value": "^4.0.1",
+    "terser": "^5.14.2",
     "yargs-parser": "^15.0.1",
-    "y18n": "^5.0.5",
-    "minimist": "^1.2.6",
-    "terser": "^5.14.2"
+    "y18n": "^5.0.5"
   }
 }
