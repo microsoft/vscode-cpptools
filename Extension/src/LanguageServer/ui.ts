@@ -362,7 +362,7 @@ export class UI {
             }
             if (option !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(option, "");
-                items.push({ label: option, description: "Found at " + path, index: i });
+                items.push({ label: option, description: localize("found.string","Found at") + path, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }

@@ -178,7 +178,7 @@
         "hint": "Refers to C++ template specializations. This is part of a description indicating there are N additional specializations of a function.  %d is replaced with that number."
     },
     "compiler": {
-        "text": "Note: IntelliSense is not fully configured. Use the Select Default Compiler command to finish configuration."
+        "text": "Note: IntelliSense is not fully configured. Use the 'Select Default Compiler' command to finish configuration."
     },
     "expands_to": "Expands to:",
     "attention_label": "Attention:",

@@ -58,7 +58,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
-let clientCount: number = 0;
+let initializedClientCount: number = 0;
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
@@ -1078,9 +1078,9 @@ export class DefaultClient implements Client {
                     }
                     // update all client configurations
                     this.configuration.setupConfigurations();
-                    clientCount++;
+                    initializedClientCount++;
                     // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
-                    if (clientCount === vscode.workspace.workspaceFolders?.length) {
+                    if (initializedClientCount === vscode.workspace.workspaceFolders?.length) {
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);

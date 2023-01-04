@@ -876,21 +876,20 @@ export async function promptReloadWindow(message: string): Promise<void> {
     if (value === reload) {
         vscode.commands.executeCommand("workbench.action.reloadWindow");
     }
-
 }
 
 export async function addTrustedCompiler(path: string): Promise<void> {
     // detect duplicate paths
-    const compilerPath: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
-    const compilerPaths: string[] = compilerPath.Value;
+    const  persistentCompilerPaths: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
+    const compilerPaths: string[] = persistentCompilerPaths.Value;
     let i: number = 0;
     for (i = 0; i < compilerPaths.length; i++) {
-        if (compilerPaths[i] === path) {
+        if (compilerPaths.includes(path)) {
             return;
         }
     }
     compilerPaths.push(path);
-    compilerPath.Value = compilerPaths;
+    persistentCompilerPaths.Value = compilerPaths;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
