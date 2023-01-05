@@ -15,7 +15,7 @@ import { UI, getUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
-import { makeCpptoolsRange, rangeEquals } from './utils';
+import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
 import { ClientCollection } from './clientCollection';
 import { CppSettings } from './settings';
 import { PersistentState } from './persistentState';
@@ -345,18 +345,15 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
                 };
                 let languageChanged: boolean = false;
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-                if ((document.uri.path.endsWith(".C") || document.uri.path.endsWith(".H")) && document.languageId === "c") {
-                    const cppSettings: CppSettings = new CppSettings();
-                    if (cppSettings.autoAddFileAssociations) {
-                        const fileName: string = path.basename(document.uri.fsPath);
-                        const mappingString: string = fileName + "@" + document.uri.fsPath;
-                        client.addFileAssociations(mappingString, "cpp");
-                        client.sendDidChangeSettings();
-                        vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                            finishDidOpen(newDoc);
-                        });
-                        languageChanged = true;
-                    }
+                if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
+                    const baseFileName: string = path.basename(document.fileName);
+                    const mappingString: string = baseFileName + "@" + document.fileName;
+                    client.addFileAssociations(mappingString, "cpp");
+                    client.sendDidChangeSettings();
+                    vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
+                        finishDidOpen(newDoc);
+                    });
+                    languageChanged = true;
                 }
                 if (!languageChanged) {
                     finishDidOpen(document);
