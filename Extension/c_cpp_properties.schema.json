@@ -21,8 +21,8 @@
                         "type": "string"
                     },
                     "compilerArgs": {
-                        "markdownDescription": "Compiler arguments to modify the includes or defines used, e.g. `-nostdinc++`, `-m32`, etc.",
-                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
+                        "markdownDescription": "Compiler arguments to modify the includes or defines used, e.g. `-nostdinc++`, `-m32`, etc. Arguments that take additional space-delimited arguments should be entered as separate arguments in the array, e.g. for `--sysroot <arg>` use `\"--sysroot\", \"<arg>\"`.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered, except potentially the `arg` text which is a placeholder and not literal text, i.e. an abbreviation for `argument`.",
                         "type": "array",
                         "items": {
                             "type": "string"
