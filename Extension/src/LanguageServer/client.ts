@@ -27,7 +27,7 @@ import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileCo
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
 import { Location, TextEdit } from './commonTypes';
-import { makeVscodeRange, makeVscodeLocation } from './utils';
+import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
@@ -2034,6 +2034,9 @@ export class DefaultClient implements Client {
         const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
         if (!!document && document.languageId !== languageId) {
+            if (document.languageId === "cpp" && languageId === "c") {
+                handleChangedFromCppToC(document);
+            }
             vscode.languages.setTextDocumentLanguage(document, languageId);
         }
     }

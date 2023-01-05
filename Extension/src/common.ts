@@ -709,14 +709,14 @@ export interface ProcessReturnType {
 }
 
 export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
-    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
-    const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     // Do not use CppSettings to avoid circular require()
     const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
     const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
     if (loggingLevel === "Information" || loggingLevel === "Debug") {
-        getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}\n${programOutput.stderr || programOutput.stdout}\n`);
+        getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
     }
+    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
+    const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     if (programOutput.exitCode) {
         return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
     } else {
@@ -739,6 +739,10 @@ interface ProcessOutput {
 
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
     return new Promise(async (resolve, reject) => {
+        // Do not use CppSettings to avoid circular require()
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+
         let proc: child_process.ChildProcess;
         if (await isExecutable(program)) {
             proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
@@ -762,7 +766,11 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
         let stderr: string = '';
         if (proc.stdout) {
             proc.stdout.on('data', data => {
-                stdout += data.toString();
+                const str: string = data.toString();
+                if (loggingLevel !== "None") {
+                    getOutputChannelLogger().append(str);
+                }
+                stdout += str;
                 if (continueOn) {
                     const continueOnReg: string = escapeStringForRegex(continueOn);
                     if (stdout.search(continueOnReg)) {
