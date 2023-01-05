@@ -880,13 +880,10 @@ export async function promptReloadWindow(message: string): Promise<void> {
 
 export async function addTrustedCompiler(path: string): Promise<void> {
     // detect duplicate paths
-    const  persistentCompilerPaths: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
+    const persistentCompilerPaths: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
     const compilerPaths: string[] = persistentCompilerPaths.Value;
-    let i: number = 0;
-    for (i = 0; i < compilerPaths.length; i++) {
-        if (compilerPaths.includes(path)) {
-            return;
-        }
+    if (compilerPaths.includes(path)) {
+        return;
     }
     compilerPaths.push(path);
     persistentCompilerPaths.Value = compilerPaths;
