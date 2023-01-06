@@ -35,7 +35,7 @@ export async function getUI(): Promise<UI> {
     if (!ui) {
         const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
         if (experimentationService !== undefined) {
-            const useNewUI: boolean | undefined = true; // experimentationService.getTreatmentVariable<boolean>("vscode", "splitUIUsers");
+            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "splitUIUsers");
             ui = useNewUI ? new NewUI() : new OldUI();
         }
     }
