@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.13.8-main",
+  "version": "1.13.9-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -5944,7 +5944,7 @@
     "gulp-mocha": "^8.0.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
-    "minimist": "^1.2.6",
+    "minimist": "^1.2.7",
     "mocha": "^8.3.2",
     "parse-git-config": "^3.0.0",
     "parse5": "^5.1.0",
@@ -5961,6 +5961,7 @@
     "xml2js": "^0.4.19"
   },
   "dependencies": {
+    "@vscode/extension-telemetry": "^0.6.2",
     "chokidar": "^3.5.3",
     "comment-json": "^4.1.1",
     "editorconfig": "^0.15.3",
@@ -5970,12 +5971,11 @@
     "mkdirp": "^0.5.5",
     "node-loader": "^2.0.0",
     "plist": "^3.0.5",
-    "tmp": "^0.2.1",
     "posix-getopt": "^1.2.1",
     "shell-quote": "^1.7.3",
     "ssh-config": "^4.1.0",
+    "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
-    "@vscode/extension-telemetry": "^0.6.2",
     "vscode-languageclient": "^8.1.0-next.4",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
@@ -5990,14 +5990,15 @@
     "follow-redirects": "1.14.8",
     "glob-parent": "^5.1.2",
     "hosted-git-info": "^3.0.8",
+    "json5": "^1.0.2",
     "loader-utils": "^2.0.4",
     "minimatch": "^3.0.5",
+    "minimist": "^1.2.7",
     "nanoid": "^3.1.20",
     "path-parse": "^1.0.7",
     "set-value": "^4.0.1",
+    "terser": "^5.14.2",
     "yargs-parser": "^15.0.1",
-    "y18n": "^5.0.5",
-    "minimist": "^1.2.6",
-    "terser": "^5.14.2"
+    "y18n": "^5.0.5"
   }
 }
