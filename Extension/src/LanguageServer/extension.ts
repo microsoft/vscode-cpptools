@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
-import { UI, getUI } from './ui';
+import { UI, OldUI, getUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
@@ -26,7 +26,6 @@ import * as yauzl from 'yauzl';
 import { Readable } from 'stream';
 import * as nls from 'vscode-nls';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
-import { OldUI } from './ui_old';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
