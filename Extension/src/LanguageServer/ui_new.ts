@@ -144,17 +144,19 @@ export class NewUI implements UI {
         const showIcon: boolean = val || this.isParsingFiles;
         const twoStatus: boolean = val && this.isParsingFiles;
 
+        // Leave this outside for more realtime respone
         this.browseEngineStatusBarItem.busy = showIcon;
-        this.browseEngineStatusBarItem.text = showIcon ? "$(database)" : "";
-        this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? this.parsingFilesTooltip : "")
-            + (twoStatus ? " | " : "")
-            + (val ? this.workspaceParsingStatus : "");
 
-        if (this.dbTimeout) {
-            clearTimeout(this.dbTimeout);
-        }
+        if (showIcon) {
+            this.browseEngineStatusBarItem.text = "$(database)";
+            this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? this.parsingFilesTooltip : "")
+                + (twoStatus ? " | " : "")
+                + (val ? this.workspaceParsingStatus : "");
 
-        if (!showIcon) {
+            if (this.dbTimeout) {
+                clearTimeout(this.dbTimeout);
+            }
+        } else {
             this.dbTimeout = setTimeout(() => {
                 this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
@@ -205,16 +207,19 @@ export class NewUI implements UI {
         const showIcon: boolean = val || (!this.isParsingWorkspacePaused && this.isParsingWorkspace);
         const twoStatus: boolean = val && this.isParsingWorkspace;
 
+        // Leave this outside for more realtime respone
         this.browseEngineStatusBarItem.busy = showIcon;
-        this.browseEngineStatusBarItem.text = "$(database)";
-        this.browseEngineStatusBarItem.detail = (val ? this.parsingFilesTooltip : "")
-            + (twoStatus ? " | " : "")
-            + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
 
-        if (this.dbTimeout) {
-            clearTimeout(this.dbTimeout);
-        }
-        if (!this.isParsingWorkspace && !val) {
+        if (showIcon) {
+            this.browseEngineStatusBarItem.text = "$(database)";
+            this.browseEngineStatusBarItem.detail = (val ? this.parsingFilesTooltip : "")
+                + (twoStatus ? " | " : "")
+                + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
+
+            if (this.dbTimeout) {
+                clearTimeout(this.dbTimeout);
+            }
+        } else if (!this.isParsingWorkspace && !val) {
             this.dbTimeout = setTimeout(() => {
                 this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
