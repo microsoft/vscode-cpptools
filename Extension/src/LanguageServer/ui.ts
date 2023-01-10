@@ -13,6 +13,7 @@ import { ReferencesCommandMode, referencesCommandModeToString } from './referenc
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as telemetry from '../telemetry';
 import { IExperimentationService } from 'tas-client';
+import { CppSettings } from './settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -464,8 +465,9 @@ export async function getUI(): Promise<UI> {
     if (!ui) {
         const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
         if (experimentationService !== undefined) {
+            const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
             const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "splitUIUsers");
-            ui = useNewUI ? new NewUI() : new OldUI();
+            ui = useNewUI || settings.experimentalFeatures ? new NewUI() : new OldUI();
         }
     }
     return ui;
