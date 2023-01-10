@@ -77,7 +77,7 @@ export class NewUI implements UI {
     private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
-    get whichUI(): boolean { return true; };
+    get isNewUI(): boolean { return true; };
 
     constructor() {
         this.configStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.configuration.tooltip", this.configDocumentSelector);

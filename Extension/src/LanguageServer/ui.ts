@@ -20,7 +20,7 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 let ui: UI;
 
 export interface UI {
-    whichUI: boolean;
+    isNewUI: boolean;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
@@ -76,7 +76,7 @@ export class OldUI implements UI {
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private runningCodeAnalysisTooltip: string = "";
     private codeAnalysisPausedTooltip: string = "";
-    get whichUI(): boolean { return false; };
+    get isNewUI(): boolean { return false; };
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");

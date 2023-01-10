@@ -507,7 +507,7 @@ export function registerCommands(enabled: boolean): void {
 }
 
 async function logForUIExperiment(command: string): Promise<void> {
-    const whichUI: string = (await getUI()).whichUI ? "New UI" : "Old UI";
+    const whichUI: string = (await getUI()).isNewUI ? "New UI" : "Old UI";
     telemetry.logLanguageServerEvent(`${whichUI} ${command}`);
 }
 
