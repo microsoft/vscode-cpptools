@@ -17,8 +17,6 @@ import { UI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-// let ui: UI;
-
 interface IndexableQuickPickItem extends vscode.QuickPickItem {
     index: number;
 }
@@ -134,7 +132,7 @@ export class NewUI implements UI {
     private set TagParseStatus(label: string) {
         this.workspaceParsingProgress = label;
         if (this.browseEngineStatusBarItem.command) {
-            // Currently need to update entire command for tooltip to update
+            // Currently needed in order to update hover tooltip
             this.browseEngineStatusBarItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
             this.browseEngineStatusBarItem.text = this.browseEngineStatusBarItem.text;
         }
@@ -199,8 +197,6 @@ export class NewUI implements UI {
         this.isCodeAnalysisPaused = val;
         this.codeAnalysisStatusBarItem.busy = !val;
         this.codeAnalysisStatusBarItem.text = val ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
-        // TODO: Figure out what this refers to
-        // this.codeAnalysisStatusBarItem.detail = val ? this.codeAnalysisPausedTooltip : this.runningCodeAnalysisTooltip;
     }
 
     private setIsParsingFiles(val: boolean): void {
@@ -238,7 +234,6 @@ export class NewUI implements UI {
         // TODO: Integrate with Tarik's feature to determine if compiler/bare-intellisense is configured
         if (settings.intelliSenseEngine === "disabled") {
             this.intelliSenseStatusBarItem.text = this.missingIntelliSenseText;
-            // this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
             this.intelliSenseStatusBarItem.command = {
                 command: "C_Cpp.CheckForCompilerUI_Telemetry",
                 title: localize("intellisense.select.text", "Select a Compiler")
@@ -255,13 +250,11 @@ export class NewUI implements UI {
         if (val) {
             this.intelliSenseStatusBarItem.text = "$(flame)";
             this.intelliSenseStatusBarItem.detail = this.updatingIntelliSenseText;
-            // this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
         } else {
             this.flameTimeout = setTimeout(() => {
                 if (this.intelliSenseStatusBarItem) {
                     this.intelliSenseStatusBarItem.text = this.idleIntelliSenseText;
                     this.intelliSenseStatusBarItem.detail = "";
-                    // this.intelliSenseStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
                 }
             }, this.iconDelayTime);
         }
@@ -296,7 +289,6 @@ export class NewUI implements UI {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showRunNowOptions", "Run Now")
         };
-        // this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Warning;
     }
 
     private updateCodeAnalysisTooltip(): void {
@@ -307,11 +299,6 @@ export class NewUI implements UI {
             this.codeAnalysisStatusBarItem.command.tooltip = this.codeAnalysProgress;
             this.codeAnalysisStatusBarItem.text = this.codeAnalysisStatusBarItem.text;
 
-            // this.codeAnalysisStatusBarItem.command = {
-            //     command: this.codeAnalysisStatusBarItem.command.command,
-            //     title: this.codeAnalysisStatusBarItem.command.title,
-            //     tooltip: this.codeAnalysProgress
-            // };
         }
         this.setIsRunningCodeAnalysis(true);
     }

@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import { Client } from './client';
 import * as nls from 'vscode-nls';
 import { NewUI } from './ui_new';
-// import { OldUI } from './ui_old';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as telemetry from '../telemetry';
