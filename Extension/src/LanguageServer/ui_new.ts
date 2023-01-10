@@ -74,8 +74,8 @@ export class NewUI implements UI {
     private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
     private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
-    private readonly codeAnalysisRunningText: string = localize("running.analysis.tooltip", "Analyzing code");
-    private readonly codeAnalysisPausedText: string = localize("paused.analysis.tooltip", "Analyzing code: Paused");
+    private readonly codeAnalysisRunningText: string = localize("running.analysis.tooltip", "Code Analysis: Running");
+    private readonly codeAnalysisPausedText: string = localize("paused.analysis.tooltip", "Code Analysis: Paused");
     private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
@@ -136,7 +136,6 @@ export class NewUI implements UI {
         if (this.browseEngineStatusBarItem.command) {
             // Currently need to update entire command for tooltip to update
             this.browseEngineStatusBarItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
-            // this.browseEngineStatusBarItem.severity = vscode.LanguageStatusSeverity.Information;
             this.browseEngineStatusBarItem.text = this.browseEngineStatusBarItem.text;
         }
     }
@@ -286,10 +285,13 @@ export class NewUI implements UI {
         }
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusBarItem.busy = val;
-        this.codeAnalysisStatusBarItem.text = val ? "Code Analysis: Running" : `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
+        const activeText: string = this.isCodeAnalysisPaused ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
+        this.codeAnalysisStatusBarItem.text = val ? activeText : `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = val ? {
             command: "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry",
-            title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options")
+            title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options"),
+            // Make sure not to overwrite current progress
+            tooltip: this.codeAnalysisStatusBarItem.command?.tooltip ?? "Starting..."
         } : {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showRunNowOptions", "Run Now")
@@ -302,11 +304,14 @@ export class NewUI implements UI {
             this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
 
         if (this.codeAnalysisStatusBarItem.command) {
-            this.codeAnalysisStatusBarItem.command = {
-                command: this.codeAnalysisStatusBarItem.command.command,
-                title: this.codeAnalysisStatusBarItem.command.title,
-                tooltip: this.codeAnalysProgress
-            };
+            this.codeAnalysisStatusBarItem.command.tooltip = this.codeAnalysProgress;
+            this.codeAnalysisStatusBarItem.text = this.codeAnalysisStatusBarItem.text;
+
+            // this.codeAnalysisStatusBarItem.command = {
+            //     command: this.codeAnalysisStatusBarItem.command.command,
+            //     title: this.codeAnalysisStatusBarItem.command.title,
+            //     tooltip: this.codeAnalysProgress
+            // };
         }
         this.setIsRunningCodeAnalysis(true);
     }
