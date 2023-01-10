@@ -186,7 +186,9 @@ export async function activate(): Promise<void> {
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    if (ui instanceof OldUI) { void ui?.activeDocumentChanged(); } // Handle already active documents (for non-cpp files that we don't register didOpen).
+    if (ui instanceof OldUI) {
+        void ui?.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    }
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
 
@@ -306,7 +308,9 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         if (ui instanceof OldUI) { clients.activeDocumentChanged(editor.document); }
         clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     }
-    if (ui instanceof OldUI) { void ui?.activeDocumentChanged(); }
+    if (ui instanceof OldUI) {
+        void ui?.activeDocumentChanged();
+    }
 }
 
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
@@ -321,7 +325,9 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
         activeDocument = event.textEditor.document.uri.toString();
         clients.activeDocumentChanged(event.textEditor.document);
-        if (ui instanceof OldUI) { void ui?.activeDocumentChanged(); }
+        if (ui instanceof OldUI) {
+            void ui?.activeDocumentChanged();
+        }
     }
     clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
