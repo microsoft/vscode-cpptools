@@ -357,12 +357,10 @@ export class UI {
                     option = paths[i].split("\\").pop();
                     isCompiler = true;
                 }
-            } else {
-                isCompiler = false;
             }
             if (option !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(option, "");
-                items.push({ label: option, description: localize("found.string", "Found at") + path, index: i });
+                items.push({ label: option, description: localize("found.string", "Found at {0}", path), index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }

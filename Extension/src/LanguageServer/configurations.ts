@@ -21,6 +21,7 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
+import { compilerPaths } from './client';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -102,7 +103,7 @@ export interface Browse {
 export interface KnownCompiler {
     path: string;
     isC: boolean;
-    isTrusted: boolean;
+    isTrusted: boolean; // May be used in the future for build tasks.
     isCL: boolean;
 }
 
@@ -892,7 +893,7 @@ export class CppProperties {
                     }
                 } else {
                     // add compiler to list of trusted compilers
-                    util.addTrustedCompiler(configuration.compilerPath);
+                    util.addTrustedCompiler(compilerPaths, configuration.compilerPath);
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.

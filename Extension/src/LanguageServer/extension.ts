@@ -537,7 +537,7 @@ function selectDefaultCompiler(): void {
 
 function onSelectConfiguration(): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration'));
+        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
@@ -547,7 +547,7 @@ function onSelectConfiguration(): void {
 
 function onSelectConfigurationProvider(): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
+        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider.'));
     } else {
         selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
     }

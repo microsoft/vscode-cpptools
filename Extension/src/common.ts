@@ -17,7 +17,6 @@ import * as tmp from 'tmp';
 import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
-import { PersistentState } from './LanguageServer/persistentState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -878,15 +877,13 @@ export async function promptReloadWindow(message: string): Promise<void> {
     }
 }
 
-export async function addTrustedCompiler(path: string): Promise<void> {
-    // detect duplicate paths
-    const persistentCompilerPaths: PersistentState<string[]> = new PersistentState<string[]>("CPP.trustedCompilerPaths", []);
-    const compilerPaths: string[] = persistentCompilerPaths.Value;
-    if (compilerPaths.includes(path)) {
-        return;
+export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
+    // Detect duplicate paths or invalid paths.
+    if (compilers.includes(path) || path === null || path === undefined) {
+        return compilers;
     }
-    compilerPaths.push(path);
-    persistentCompilerPaths.Value = compilerPaths;
+    compilers.push(path);
+    return compilers;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
