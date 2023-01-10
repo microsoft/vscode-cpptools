@@ -63,10 +63,8 @@ export function createProtocolFilter(): Middleware {
         didChange: async (textDocumentChangeEvent, sendMessage) => {
             await clients.ActiveClient.awaitUntilLanguageClientReady();
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
-            if (me.TrackedDocuments.has(textDocumentChangeEvent.document)) {
-                me.onDidChangeTextDocument(textDocumentChangeEvent);
-                await sendMessage(textDocumentChangeEvent);
-            }
+            me.onDidChangeTextDocument(textDocumentChangeEvent);
+            await sendMessage(textDocumentChangeEvent);
         },
         willSave: invoke1,
         willSaveWaitUntil: async (event, sendMessage) => {
