@@ -64,7 +64,7 @@ export class NewUI implements UI {
     private readonly workspaceParseingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
-    private readonly workspaceRescanText = localize("rescan.tagparse.text", "Re-scan workspace");
+    private readonly workspaceRescanText = localize("rescan.tagparse.text", "Rescan workspace");
     private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing Open Files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
