@@ -123,9 +123,7 @@ export class NewUI implements UI {
     private set ActiveConfig(label: string) {
         this.configStatusBarItem.text = label ?? localize("configuration.notselected.text", "Configuration: Not selected");
         if (this.configStatusBarItem.command) {
-            this.configStatusBarItem.command.title = label.length > 0 ?
-                localize("configuration.edit.text", "Edit Configuration") :
-                localize("configuration.selected.text", "Select Configuration");
+            this.configStatusBarItem.command.title = localize("configuration.selected.text", "Select Configuration");
         }
     }
 
