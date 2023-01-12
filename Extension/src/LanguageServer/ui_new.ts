@@ -111,7 +111,7 @@ export class NewUI implements UI {
 
         this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem("c.cpp.codeanalysis.statusbar", documentSelector);
         this.codeAnalysisStatusBarItem.name = localize("c.cpp.codeanalysis.statusbar", "C/C++ Code Analysis Status");
-        this.codeAnalysisStatusBarItem.text = `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
+        this.codeAnalysisStatusBarItem.text = `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now")
@@ -282,7 +282,7 @@ export class NewUI implements UI {
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusBarItem.busy = val;
         const activeText: string = this.isCodeAnalysisPaused ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
-        this.codeAnalysisStatusBarItem.text = val ? activeText : `Code Analysis State: ${this.codeAnalysisCurrentState()}`;
+        this.codeAnalysisStatusBarItem.text = val ? activeText : `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = val ? {
             command: "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options"),
