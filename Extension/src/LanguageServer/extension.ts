@@ -510,7 +510,7 @@ export function registerCommands(enabled: boolean): void {
 
 async function logForUIExperiment(command: string): Promise<void> {
     const isNewUI: string = (await getUI()).isNewUI.toString();
-    telemetry.logLanguageServerEvent(`experiment${command}`, { isNewUI: isNewUI });
+    telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI });
 }
 
 function onDisabledCommand(): void {
