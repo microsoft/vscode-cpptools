@@ -192,7 +192,7 @@ export class NewUI implements UI {
             title: localize("tagparser.resume.text", "Resume")
         } : {
             command: "C_Cpp.PauseParsingUI_Telemetry",
-            title: localize("tagparser.pause.text", "Pause Workspace")
+            title: localize("tagparser.pause.text", "Pause")
         };
     }
 
