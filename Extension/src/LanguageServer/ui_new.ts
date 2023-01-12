@@ -36,7 +36,7 @@ interface ConfigurationStatus {
     priority: ConfigurationPriority;
 }
 
-enum LanguageStatusPriroty {
+enum LanguageStatusPriority {
     First = 0,
     High = 1,
     Mid = 2,
@@ -87,7 +87,7 @@ export class NewUI implements UI {
     get isNewUI(): boolean { return true; };
 
     constructor() {
-        this.configStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriroty.First}.configuration`, this.configDocumentSelector);
+        this.configStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.First}.configuration`, this.configDocumentSelector);
         this.configStatusBarItem.name = localize("cpptools.status.configuration", "Select Configuration");
         this.configStatusBarItem.text = "Loading configuration...";
         this.configStatusBarItem.command = {
@@ -102,11 +102,11 @@ export class NewUI implements UI {
         this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgressUI_Telemetry";
         this.ShowReferencesIcon = false;
 
-        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriroty.Mid}.intellisense`, documentSelector);
+        this.intelliSenseStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusBarItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
         this.intelliSenseStatusBarItem.text = this.idleIntelliSenseText;
 
-        this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriroty.Mid}.tagparser`, documentSelector);
+        this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.tagparser`, documentSelector);
         this.browseEngineStatusBarItem.name = localize("cpptools.status..tagparser", "C/C++ Tag Parser Status");
         this.browseEngineStatusBarItem.detail = localize("indexing.files.tooltip", "Indexing Workspace");
         this.browseEngineStatusBarItem.text = "$(database)";
@@ -116,7 +116,7 @@ export class NewUI implements UI {
         };
         this.workspaceParsingStatus = this.workspaceParsingRunningText;
 
-        this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriroty.Low}.codeanalysis`, documentSelector);
+        this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Low}.codeanalysis`, documentSelector);
         this.codeAnalysisStatusBarItem.name = localize("cpptools.status.codeanalysis", "C/C++ Code Analysis Status");
         this.codeAnalysisStatusBarItem.text = `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`;
         this.codeAnalysisStatusBarItem.command = {
