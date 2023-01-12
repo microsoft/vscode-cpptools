@@ -266,11 +266,11 @@
     "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}. Expected: {1}.",
     "generate_doxygen_comment": "Generate Doxygen Comment",
     "offer_create_declaration": {
-        "text": "Create declaration of {0} in {1}",
+        "text": "Create declaration of '{0}' in {1}",
         "hint": "{0} is the name of a C/C++ function, {1} is a file name."
     },
     "offer_create_definition": {
-        "text": "Create definition of {0} in {1}",
+        "text": "Create definition of '{0}' in {1}",
         "hint": "{0} is the name of a C/C++ function, {1} is a file name."
     },
     "function_definition_not_found": {
