@@ -24,8 +24,12 @@ interface CodeActionCommand {
     uri?: string;
 }
 
-export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void> =
-    new RequestType<GetCodeActionsRequestParams, CodeActionCommand[], void>('cpptools/getCodeActions');
+interface GetCodeActionsResult {
+    commands: CodeActionCommand[];
+}
+
+export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void> =
+    new RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void>('cpptools/getCodeActions');
 
 export class CodeActionProvider implements vscode.CodeActionProvider {
     private client: DefaultClient;
@@ -55,16 +59,16 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             uri: document.uri.toString()
         };
 
-        const commands: CodeActionCommand[] = await this.client.languageClient.sendRequest(
+        const response: GetCodeActionsResult = await this.client.languageClient.sendRequest(
             GetCodeActionsRequest, params, token);
 
         const resultCodeActions: vscode.CodeAction[] = [];
-        if (token.isCancellationRequested) {
+        if (token.isCancellationRequested || response.commands === undefined) {
             throw new vscode.CancellationError();
         }
 
         // Convert to vscode.CodeAction array
-        commands.forEach((command) => {
+        response.commands.forEach((command) => {
             const title: string = getLocalizedString(command.localizeStringParams);
             let wsEdit: vscode.WorkspaceEdit | undefined;
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;

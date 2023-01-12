@@ -28,7 +28,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
             uri: uriString
         };
         const tokensResult: GetSemanticTokensResult = await this.client.languageClient.sendRequest(GetSemanticTokensRequest, params, token);
-        if (token.isCancellationRequested || tokensResult.canceled || tokensResult.fileVersion !== openFileVersions.get(uriString)) {
+        if (token.isCancellationRequested || tokensResult.tokens === undefined || tokensResult.fileVersion !== openFileVersions.get(uriString)) {
             throw new vscode.CancellationError();
         }
         const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(semanticTokensLegend);

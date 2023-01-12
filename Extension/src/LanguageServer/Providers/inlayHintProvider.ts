@@ -29,7 +29,6 @@ interface CppInlayHint {
 
 interface GetInlayHintsResult {
     fileVersion: number;
-    canceled: boolean;
     inlayHints: CppInlayHint[];
 }
 
@@ -67,7 +66,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         // Get new results from the language server
         const params: GetInlayHintsParams = { uri: uriString };
         const inlayHintsResult: GetInlayHintsResult = await this.client.languageClient.sendRequest(GetInlayHintsRequest, params, token);
-        if (token.isCancellationRequested || inlayHintsResult.canceled || inlayHintsResult.fileVersion !== openFileVersions.get(uriString)) {
+        if (token.isCancellationRequested || inlayHintsResult.inlayHints === undefined || inlayHintsResult.fileVersion !== openFileVersions.get(uriString)) {
             throw new vscode.CancellationError();
         }
 

@@ -23,12 +23,12 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             uri: document.uri.toString()
         };
         await this.client.awaitUntilLanguageClientReady();
-        const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
-        if (token.isCancellationRequested || ranges.canceled) {
+        const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
+        if (token.isCancellationRequested || response.ranges === undefined) {
             throw new vscode.CancellationError();
         }
         const result: vscode.FoldingRange[] = [];
-        ranges.ranges.forEach((r: CppFoldingRange) => {
+        response.ranges.forEach((r: CppFoldingRange) => {
             const foldingRange: vscode.FoldingRange = {
                 start: r.range.startLine,
                 end: r.range.endLine
