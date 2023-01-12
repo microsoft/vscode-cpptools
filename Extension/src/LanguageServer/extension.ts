@@ -305,7 +305,9 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
-        if (ui instanceof OldUI) { clients.activeDocumentChanged(editor.document); }
+        if (ui instanceof OldUI) {
+            clients.activeDocumentChanged(editor.document);
+        }
         clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     }
     if (ui instanceof OldUI) {
@@ -508,7 +510,7 @@ export function registerCommands(enabled: boolean): void {
 
 async function logForUIExperiment(command: string): Promise<void> {
     const isNewUI: string = (await getUI()).isNewUI.toString();
-    telemetry.logLanguageServerEvent(`experiment${command}`, { ui: isNewUI });
+    telemetry.logLanguageServerEvent(`experiment${command}`, { isNewUI: isNewUI });
 }
 
 function onDisabledCommand(): void {
