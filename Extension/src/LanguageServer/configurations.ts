@@ -16,6 +16,7 @@ import { SettingsPanel } from './settingsPanel';
 import * as os from 'os';
 import escapeStringRegExp = require('escape-string-regexp');
 import * as jsonc from 'comment-json';
+import * as fastGlob from 'fast-glob';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
@@ -156,7 +157,6 @@ export class CppProperties {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private settingsPanel?: SettingsPanel;
-    private isWin32: boolean = os.platform() === "win32";
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
@@ -591,7 +591,7 @@ export class CppProperties {
             configuration.intelliSenseMode === "${default}") {
             return "";
         }
-        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath, true);
+        const resolvedCompilerPath: string = this.resolvePath(configuration.compilerPath);
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
@@ -738,16 +738,35 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] {
-        let result: string[] = [];
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob = false): string[] {
+        const result: string[] = [];
         if (paths) {
             paths = this.resolveDefaults(paths, defaultValue);
             paths.forEach(entry => {
-                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).filter(e => e);
-                result = result.concat(entries);
+                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
+                result.push(...entries);
             });
         }
-        return result;
+        if (!glob) {
+            return result;
+        }
+
+        const globResult: string[] = [];
+        for (let res of result) {
+            // fastGlob will expand the ending double wildcard. temporary strip them before expanding
+            const recursive: boolean = res.endsWith('**');
+            if (recursive) {
+                res = res.slice(0, res.length - 2);
+            }
+            // fastGlob can't deal with backslash-separated path => remove them
+            const normalized: string = res.replace(/\\/g, '/');
+            const cwd: string = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+            // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
+            const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
+                fastGlob.sync(normalized, { onlyDirectories: true, cwd}) : [res];
+            globResult.push(...matches.map(s => recursive ? s + '**' : s));
+        }
+        return globResult;
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
@@ -772,10 +791,10 @@ export class CppProperties {
 
     private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
         if (paths) {
-            return this.resolveAndSplit(paths, defaultValue, env);
+            return this.resolveAndSplit(paths, defaultValue, env, true);
         }
         if (!paths && defaultValue) {
-            return this.resolveAndSplit(defaultValue, [], env);
+            return this.resolveAndSplit(defaultValue, [], env, true);
         }
         return paths;
     }
@@ -816,10 +835,8 @@ export class CppProperties {
     }
 
     private getDotconfigDefines(dotConfigPath: string): string[] {
-        const isWindows: boolean = os.platform() === 'win32';
-
         if (dotConfigPath !== undefined) {
-            const path: string = this.resolvePath(dotConfigPath, isWindows);
+            const path: string = this.resolvePath(dotConfigPath);
             try {
                 const configContent: string[] = fs.readFileSync(path, "utf-8").split("\n");
                 return configContent.filter(i => !i.startsWith("#") && i !== "");
@@ -844,7 +861,6 @@ export class CppProperties {
             configuration.compilerPathInCppPropertiesJson = configuration.compilerPath;
             configuration.compileCommandsInCppPropertiesJson = configuration.compileCommands;
             configuration.configurationProviderInCppPropertiesJson = configuration.configurationProvider;
-
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
             const origIncludePath: string[] | undefined = configuration.includePath;
@@ -997,23 +1013,23 @@ export class CppProperties {
              * Ensure all paths are absolute
              */
             if (configuration.macFrameworkPath) {
-                configuration.macFrameworkPath = configuration.macFrameworkPath.map((path: string) => this.resolvePath(path, this.isWin32));
+                configuration.macFrameworkPath = configuration.macFrameworkPath.map((path: string) => this.resolvePath(path));
             }
 
             if (configuration.dotConfig) {
-                configuration.dotConfig = this.resolvePath(configuration.dotConfig, this.isWin32);
+                configuration.dotConfig = this.resolvePath(configuration.dotConfig);
             }
 
             if (configuration.compileCommands) {
-                configuration.compileCommands = this.resolvePath(configuration.compileCommands, this.isWin32);
+                configuration.compileCommands = this.resolvePath(configuration.compileCommands);
             }
 
             if (configuration.forcedInclude) {
-                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path, this.isWin32));
+                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path));
             }
 
             if (configuration.includePath) {
-                configuration.includePath = configuration.includePath.map((path: string) => this.resolvePath(path, this.isWin32, false));
+                configuration.includePath = configuration.includePath.map((path: string) => this.resolvePath(path, false));
             }
         }
 
@@ -1035,7 +1051,7 @@ export class CppProperties {
             const filePaths: Set<string> = new Set<string>();
             this.configurationJson.configurations.forEach(c => {
                 if (c.compileCommands) {
-                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands, this.isWin32);
+                    const fileSystemCompileCommandsPath: string = this.resolvePath(c.compileCommands);
                     if (fs.existsSync(fileSystemCompileCommandsPath)) {
                         filePaths.add(fileSystemCompileCommandsPath);
                     }
@@ -1411,7 +1427,7 @@ export class CppProperties {
         return success;
     }
 
-    public resolvePath(input_path: string | undefined, isWindows: boolean, replaceAsterisks: boolean = true): string {
+    public resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1455,7 +1471,7 @@ export class CppProperties {
         errors.name = this.isConfigNameUnique(config.name);
 
         // Validate compilerPath
-        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath, isWindows);
+        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath);
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath
@@ -1520,15 +1536,15 @@ export class CppProperties {
         }
 
         // Validate paths (directories)
-        errors.includePath = this.validatePath(config.includePath);
+        errors.includePath = this.validatePath(config.includePath, {globPaths: true});
         errors.macFrameworkPath = this.validatePath(config.macFrameworkPath);
         errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, false, true);
-        errors.compileCommands = this.validatePath(config.compileCommands, false);
-        errors.dotConfig = this.validatePath(config.dotConfig, false);
-        errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), false);
+        errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, skipRelativePaths: true});
+        errors.compileCommands = this.validatePath(config.compileCommands, {isDirectory: false});
+        errors.dotConfig = this.validatePath(config.dotConfig, {isDirectory: false});
+        errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), {isDirectory: false});
 
         // Validate intelliSenseMode
         if (isWindows) {
@@ -1541,12 +1557,11 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, isDirectory: boolean = true, skipRelativePaths: boolean = false): string | undefined {
+    private validatePath(input: string | string[] | undefined, {isDirectory = true, skipRelativePaths = false, globPaths = false} = {}): string | undefined {
         if (!input) {
             return undefined;
         }
 
-        const isWindows: boolean = os.platform() === 'win32';
         let errorMsg: string | undefined;
         const errors: string[] = [];
         let paths: string[] = [];
@@ -1558,11 +1573,11 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, globPaths);
 
         for (const p of paths) {
             let pathExists: boolean = true;
-            let resolvedPath: string = this.resolvePath(p, isWindows);
+            let resolvedPath: string = this.resolvePath(p);
             if (!resolvedPath) {
                 continue;
             }
@@ -1768,7 +1783,7 @@ export class CppProperties {
             // Skip the relative forcedInclude files.
             if (currentConfiguration.forcedInclude) {
                 for (const file of currentConfiguration.forcedInclude) {
-                    const resolvedFilePath: string = this.resolvePath(file, isWindows);
+                    const resolvedFilePath: string = this.resolvePath(file);
                     if (path.isAbsolute(resolvedFilePath)) {
                         paths.push(`${file}`);
                     }
@@ -1786,7 +1801,7 @@ export class CppProperties {
             // Resolve and split any environment variables
             paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
             compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
-            compilerPath = this.resolvePath(compilerPath, isWindows);
+            compilerPath = this.resolvePath(compilerPath);
 
             // Get the start/end for properties that are file-only.
             const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1850,7 +1865,7 @@ export class CppProperties {
 
             dotConfigPath = currentConfiguration.dotConfig;
             dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
-            dotConfigPath = this.resolvePath(dotConfigPath, isWindows);
+            dotConfigPath = this.resolvePath(dotConfigPath);
             // does not try resolve if the dotConfig property is empty
             dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
 
@@ -1889,7 +1904,7 @@ export class CppProperties {
                     continue;
                 }
 
-                let resolvedPath: string = this.resolvePath(curPath, isWindows);
+                let resolvedPath: string = this.resolvePath(curPath);
                 if (!resolvedPath) {
                     continue;
                 }
@@ -2131,7 +2146,7 @@ export class CppProperties {
         if (!compileCommands) {
             return;
         }
-        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands, this.isWin32);
+        const compileCommandsFile: string | undefined = this.resolvePath(compileCommands);
         fs.stat(compileCommandsFile, (err, stats) => {
             if (err) {
                 if (err.code === "ENOENT" && this.compileCommandsFile) {
