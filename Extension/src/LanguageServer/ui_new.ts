@@ -13,7 +13,6 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import { CppSettings } from './settings';
 import { UI } from './ui';
-import { stat } from 'fs';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -82,6 +81,7 @@ export class NewUI implements UI {
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private readonly codeAnalysisRunningText: string = localize("running.analysis.text", "Code Analysis: Running");
     private readonly codeAnalysisPausedText: string = localize("paused.analysis.text", "Code Analysis: Paused");
+    private readonly codeAnalysisModePrefix: string = localize("mode.analysis.prefix", "Code Analysis Mode: ");
     private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
@@ -119,7 +119,7 @@ export class NewUI implements UI {
 
         this.codeAnalysisStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Low}.codeanalysis`, documentSelector);
         this.codeAnalysisStatusBarItem.name = localize("cpptools.status.codeanalysis", "C/C++ Code Analysis Status");
-        this.codeAnalysisStatusBarItem.text = `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`;
+        this.codeAnalysisStatusBarItem.text = `Code Analysis Mode: ${this.codeAnalysisCurrentMode()}`;
         this.codeAnalysisStatusBarItem.command = {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now")
@@ -277,7 +277,7 @@ export class NewUI implements UI {
         };
     }
 
-    private codeAnalysisCurrentState(): string {
+    private codeAnalysisCurrentMode(): string {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
         const state: string = (settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled)
             ? localize("mode.codeanalysis.status", "Automatic")
@@ -293,7 +293,7 @@ export class NewUI implements UI {
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusBarItem.busy = val;
         const activeText: string = this.isCodeAnalysisPaused ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
-        const idleText: string = localize("mode.analysis.text", `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`);
+        const idleText: string = this.codeAnalysisModePrefix + this.codeAnalysisCurrentMode();
         this.codeAnalysisStatusBarItem.text = val ? activeText : idleText;
         this.codeAnalysisStatusBarItem.command = val ? {
             command: "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry",
