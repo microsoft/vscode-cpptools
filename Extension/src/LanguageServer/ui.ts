@@ -465,7 +465,7 @@ export async function getUI(): Promise<UI> {
         const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
         if (experimentationService !== undefined) {
             const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "splitUIUsers");
+            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
             ui = useNewUI || settings.experimentalFeatures ? new NewUI() : new OldUI();
         }
     }
