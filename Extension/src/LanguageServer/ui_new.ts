@@ -13,6 +13,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import { CppSettings } from './settings';
 import { UI } from './ui';
+import { stat } from 'fs';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -278,8 +279,10 @@ export class NewUI implements UI {
 
     private codeAnalysisCurrentState(): string {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-        const state: string = settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled ? "Automatic" : "Manual";
-        return localize("mode.codeanalysis.status", state);
+        const state: string = (settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled)
+            ? localize("mode.codeanalysis.status", "Automatic")
+            : localize("mode.codeanalysis.status", "Manual");
+        return state;
     }
 
     private setIsRunningCodeAnalysis(val: boolean): void {
