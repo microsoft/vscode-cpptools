@@ -71,7 +71,7 @@ export class NewUI implements UI {
     private readonly workspaceParseingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
-    private readonly workspaceRescanText = localize("rescan.tagparse.text", "Rescan workspace");
+    private readonly workspaceRescanText = localize("rescan.tagparse.text", "Rescan Workspace");
     private codeAnalysisProgram: string = "";
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing Open Files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
@@ -79,8 +79,8 @@ export class NewUI implements UI {
     private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
     private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
-    private readonly codeAnalysisRunningText: string = localize("running.analysis.tooltip", "Code Analysis: Running");
-    private readonly codeAnalysisPausedText: string = localize("paused.analysis.tooltip", "Code Analysis: Paused");
+    private readonly codeAnalysisRunningText: string = localize("running.analysis.text", "Code Analysis: Running");
+    private readonly codeAnalysisPausedText: string = localize("paused.analysis.text", "Code Analysis: Paused");
     private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
@@ -107,7 +107,7 @@ export class NewUI implements UI {
         this.intelliSenseStatusBarItem.text = this.idleIntelliSenseText;
 
         this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.tagparser`, documentSelector);
-        this.browseEngineStatusBarItem.name = localize("cpptools.status..tagparser", "C/C++ Tag Parser Status");
+        this.browseEngineStatusBarItem.name = localize("cpptools.status.tagparser", "C/C++ Tag Parser Status");
         this.browseEngineStatusBarItem.detail = localize("indexing.files.tooltip", "Indexing Workspace");
         this.browseEngineStatusBarItem.text = "$(database)";
         this.browseEngineStatusBarItem.command = {
@@ -185,6 +185,7 @@ export class NewUI implements UI {
     private setIsParsingWorkspacePaused(val: boolean): void {
         this.isParsingWorkspacePaused = val;
         this.browseEngineStatusBarItem.busy = !val || this.isParsingFiles;
+        this.browseEngineStatusBarItem.text = "$(database)";
         this.workspaceParsingStatus = val ? this.workspaceParsingPausedText : this.workspaceParsingRunningText;
         this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
         this.browseEngineStatusBarItem.command = val ? {
@@ -278,7 +279,7 @@ export class NewUI implements UI {
     private codeAnalysisCurrentState(): string {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
         const state: string = settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled ? "Automatic" : "Manual";
-        return state;
+        return localize("mode.codeanalysis.status", state);
     }
 
     private setIsRunningCodeAnalysis(val: boolean): void {
@@ -289,12 +290,13 @@ export class NewUI implements UI {
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusBarItem.busy = val;
         const activeText: string = this.isCodeAnalysisPaused ? this.codeAnalysisPausedText : this.codeAnalysisRunningText;
-        this.codeAnalysisStatusBarItem.text = val ? activeText : `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`;
+        const idleText: string = localize("mode.analysis.text", `Code Analysis Mode: ${this.codeAnalysisCurrentState()}`);
+        this.codeAnalysisStatusBarItem.text = val ? activeText : idleText;
         this.codeAnalysisStatusBarItem.command = val ? {
             command: "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showCodeAnalysisOptions", "Options"),
             // Make sure not to overwrite current progress
-            tooltip: this.codeAnalysisStatusBarItem.command?.tooltip ?? "Starting..."
+            tooltip: this.codeAnalysisStatusBarItem.command?.tooltip ?? localize("startup.codeanalysis.status", "Starting...")
         } : {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.showRunNowOptions", "Run Now")
