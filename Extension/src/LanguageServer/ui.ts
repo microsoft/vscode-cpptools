@@ -466,7 +466,7 @@ export async function getUI(): Promise<UI> {
     if (!uiPromise) {
         uiPromise = _getUI();
     }
-    return uikkPromise;
+    return uiPromise;
 }
 
 async function _getUI(): Promise<UI> {
