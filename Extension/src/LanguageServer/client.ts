@@ -904,11 +904,9 @@ export class DefaultClient implements Client {
                 case 'darwin':
                     vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
                     return;
-                case 'linux':
+                default: // Linux
                     vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
                     return;
-                default:
-                    throw new Error(localize("unexpected.os", "Unexpected OS"));
             }
         } else if (index === paths.length - 3) {
             const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
@@ -1039,11 +1037,6 @@ export class DefaultClient implements Client {
 
                     if (isFirstClient) {
                         workspaceReferences = new refs.ReferencesManager(this);
-                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                        // The event handlers must be set before this happens.
-                        const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPaths);
-                        compilerDefaults = inputCompilerDefaults;
-                        this.configuration.CompilerDefaults = compilerDefaults;
                         // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
@@ -1080,10 +1073,17 @@ export class DefaultClient implements Client {
                     this.configuration.setupConfigurations();
                     initializedClientCount++;
                     // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
-                    if ((initializedClientCount === vscode.workspace.workspaceFolders?.length) && (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler)) {
-                        // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                        this.promptSelectCompiler(false);
-                        displayedSelectCompiler = true;
+                    if ((initializedClientCount === vscode.workspace.workspaceFolders?.length)) {
+                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                        // The event handlers must be set before this happens.
+                        const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPaths);
+                        compilerDefaults = inputCompilerDefaults;
+                        this.configuration.CompilerDefaults = compilerDefaults;
+                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
+                            // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
+                            this.promptSelectCompiler(false);
+                            displayedSelectCompiler = true;
+                        }
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
