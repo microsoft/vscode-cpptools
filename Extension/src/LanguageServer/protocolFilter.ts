@@ -13,16 +13,14 @@ import { shouldChangeFromCToCpp } from './utils';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
-    const defaultHandler: (data: any, callback: (data: any) => Promise<void>) => Promise<void> = async (data, callback: (data: any) => void) => { clients.ActiveClient.notifyWhenLanguageClientReady(() => callback(data)); };
-    // const invoke1 = async (a: any, next: (a: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a); };
+    const invoke1 = async (a: any, next: (a: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a); };
     const invoke2 = async (a: any, b: any, next: (a: any, b: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b); };
     const invoke3 = async (a: any, b: any, c: any, next: (a: any, b: any, c: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c); };
-    const invoke4 = async (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c, d); };
-    // const invoke5 = async (a: any, b: any, c: any, d: any, e: any, next: (a: any, b: any, c: any, d: any, e: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c, d, e); };
-    /* tslint:enable */
+    const invoke4 = async (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any) => { await clients.ActiveClient.awaitUntilLanguageClientReady(); return next(a, b, c, d); };    /* tslint:enable */
 
     return {
         didOpen: async (document, sendMessage) => {
+            await clients.ActiveClient.awaitUntilLanguageClientReady();
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
@@ -34,28 +32,22 @@ export function createProtocolFilter(): Middleware {
                     clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                     if (clients.checkOwnership(me, document)) {
                         me.TrackedDocuments.add(document);
-                        const finishDidOpen = (doc: vscode.TextDocument) => {
-                            me.provideCustomConfiguration(doc.uri, undefined);
-                            sendMessage(doc);
+                        const finishDidOpen = async (doc: vscode.TextDocument) => {
+                            await me.provideCustomConfiguration(doc.uri, undefined);
+                            await sendMessage(doc);
                             me.onDidOpenTextDocument(doc);
                             if (editor && editor === vscode.window.activeTextEditor) {
                                 onDidChangeActiveTextEditor(editor);
                             }
                         };
-                        let languageChanged: boolean = false;
                         if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                             const baesFileName: string = path.basename(document.fileName);
                             const mappingString: string = baesFileName + "@" + document.fileName;
                             me.addFileAssociations(mappingString, "cpp");
                             me.sendDidChangeSettings();
-                            vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                                finishDidOpen(newDoc);
-                            });
-                            languageChanged = true;
+                            document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
                         }
-                        if (!languageChanged) {
-                            finishDidOpen(document);
-                        }
+                        await finishDidOpen(document);
                     }
                 }
             } else {
@@ -69,36 +61,39 @@ export function createProtocolFilter(): Middleware {
             }
         },
         didChange: async (textDocumentChangeEvent, sendMessage) => {
+            await clients.ActiveClient.awaitUntilLanguageClientReady();
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
             me.onDidChangeTextDocument(textDocumentChangeEvent);
-            sendMessage(textDocumentChangeEvent);
+            await sendMessage(textDocumentChangeEvent);
         },
-        willSave: defaultHandler,
+        willSave: invoke1,
         willSaveWaitUntil: async (event, sendMessage) => {
+            // await clients.ActiveClient.awaitUntilLanguageClientReady();
+            // Don't use awaitUntilLanguageClientReady.
+            // Otherwise, the message can be delayed too long.
             const me: Client = clients.getClientFor(event.document.uri);
             if (me.TrackedDocuments.has(event.document)) {
-                // Don't use me.requestWhenReady or notifyWhenLanguageClientReady;
-                // otherwise, the message can be delayed too long.
                 return sendMessage(event);
             }
-            return Promise.resolve([]);
+            return [];
         },
-        didSave: defaultHandler,
+        didSave: invoke1,
         didClose: async (document, sendMessage) => {
+            await clients.ActiveClient.awaitUntilLanguageClientReady();
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
                 me.TrackedDocuments.delete(document);
-                sendMessage(document);
+                await sendMessage(document);
             }
         },
-
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: (document, position, token, next: (document: any, position: any, token: any) => any) => {
+        provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => {
+            await clients.ActiveClient.awaitUntilLanguageClientReady();
             const me: Client = clients.getClientFor(document.uri);
-            if (clients.checkOwnership(me, document)) {
-                return clients.ActiveClient.requestWhenReady(() => next(document, position, token));
+            if (me.TrackedDocuments.has(document)) {
+                return next(document, position, token);
             }
             return null;
         },
@@ -106,10 +101,9 @@ export function createProtocolFilter(): Middleware {
         provideDefinition: invoke3,
         provideReferences: invoke4,
         provideDocumentHighlights: invoke3,
-        provideDeclaration: invoke3
-        // I believe the default handler will do the same thing.
-        // workspace: {
-        //     didChangeConfiguration: (sections, sendMessage) => sendMessage(sections)
-        // }
+        provideDeclaration: invoke3,
+        workspace: {
+            didChangeConfiguration: invoke1
+        }
     };
 }
