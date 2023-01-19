@@ -999,7 +999,7 @@ function extractArgs(argsString: string): string[] {
                 }
                 const still_escaping: boolean = (backslashCount % 2) !== 0;
                 if (!reachedEnd && c === '\"') {
-                    backslashCount /= 2;
+                    backslashCount = Math.floor(backslashCount / 2);
                 }
                 while (backslashCount--) {
                     currentArg += '\\';
