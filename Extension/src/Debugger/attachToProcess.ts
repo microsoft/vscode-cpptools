@@ -200,7 +200,7 @@ export class RemoteAttachPicker {
     pid      usr      command     cores
     1        ?
     2        ?
-    3                 /usr/bin/sample 0
+    3                 /usr/bin/sample 0,2
     4        root     /usr/bin/gdbserver --multi :6000 0
 
     Returns an AttachItem array, each item contains a label of "<user   >command", and a pid.
@@ -217,7 +217,7 @@ export class RemoteAttachPicker {
         for (const line of lines) {
             const trimmedLine: string = line.trim();
             if (!trimmedLine.endsWith('?')) {
-                const matches: RegExpMatchArray | null = trimmedLine.match(/^(\d+)\s+(.+?)\s+\d+$/);
+                const matches: RegExpMatchArray | null = trimmedLine.match(/^(\d+)\s+(.+?)\s+(?:\d+,)*\d+$/);
                 if (matches?.length === 3) {
                     const id: string = matches[1];
                     const userCommand: string = matches[2];
