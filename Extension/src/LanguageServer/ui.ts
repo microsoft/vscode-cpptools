@@ -17,6 +17,7 @@ import { CppSettings } from './settings';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
+let uiPromise: Promise<UI>;
 let ui: UI;
 
 export interface UI {
@@ -462,6 +463,13 @@ export class OldUI implements UI {
 }
 
 export async function getUI(): Promise<UI> {
+    if (!uiPromise) {
+        uiPromise = _getUI();
+    }
+    return uikkPromise;
+}
+
+async function _getUI(): Promise<UI> {
     if (!ui) {
         const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
         if (experimentationService !== undefined) {
