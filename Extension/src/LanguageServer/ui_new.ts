@@ -124,7 +124,6 @@ export class NewUI implements UI {
             command: "C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry",
             title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now")
         };
-        // this.codeAnalysisStatusBarItem.severity = vscode.LanguageStatusSeverity.Information;
 
     }
 

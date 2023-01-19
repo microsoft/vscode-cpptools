@@ -501,7 +501,7 @@ export function registerCommands(enabled: boolean): void {
 }
 
 async function logForUIExperiment(command: string): Promise<void> {
-    const isNewUI: string = (await getUI()).isNewUI.toString();
+    const isNewUI: string = ui.isNewUI.toString();
     telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI });
 }
 
