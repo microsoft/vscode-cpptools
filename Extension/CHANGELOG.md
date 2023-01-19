@@ -14,7 +14,7 @@
 * Fix function inlay hints not working with `std::string_literal` arguments. [#10078](https://github.com/microsoft/vscode-cpptools/issues/10078)
 * Fix IntelliSense completion for `std::string` with `?:` and `string()`. [#10103](https://github.com/microsoft/vscode-cpptools/issues/10103)
 * Fix semantic colorization not working in a certain case. [#10105](https://github.com/microsoft/vscode-cpptools/issues/10105)
-* Fix IntelliSense completion not working inside constuctor calls that are incomplete. [#10111](https://github.com/microsoft/vscode-cpptools/issues/10111)
+* Fix IntelliSense completion not working inside constructor calls that are incomplete. [#10111](https://github.com/microsoft/vscode-cpptools/issues/10111)
 * Fix changes to the enclosing type not being taken into account after "Create Declaration / Definition" is used once. [#10162](https://github.com/microsoft/vscode-cpptools/issues/10162)
 * Fix "False positive expression must have a constant value with __builtin_choose_expr in _Static_assert". [#10168](https://github.com/microsoft/vscode-cpptools/issues/10168)
 * Fix file exclusions not being applied to the first directory found for each browse.path entry. [#10205](https://github.com/microsoft/vscode-cpptools/issues/10205)
