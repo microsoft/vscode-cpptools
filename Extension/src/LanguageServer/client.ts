@@ -955,8 +955,7 @@ export class DefaultClient implements Client {
                 if (value === setCompiler) {
                     this.handleCompilerQuickPick();
                 }
-            }
-            else {
+            } else {
                 this.handleCompilerQuickPick();
             }
         }
