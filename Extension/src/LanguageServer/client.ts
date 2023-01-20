@@ -21,7 +21,7 @@ import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
 // End provider imports
 
-import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position, DocumentFilter } from 'vscode-languageclient';
+import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
@@ -737,7 +737,8 @@ export interface Client {
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
     handleShowParsingCommands(): Promise<void>;
-    handleShowCodeAnalysisCommands(): Promise<void>;
+    handleShowActiveCodeAnalysisCommands(): Promise<void>;
+    handleShowIdleCodeAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void;
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void;
@@ -790,11 +791,6 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private loggingLevel: string | undefined;
     private configurationProvider?: string;
-    private documentSelector: DocumentFilter[] = [
-        { scheme: 'file', language: 'c' },
-        { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'cuda-cpp' }
-    ];
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -934,11 +930,11 @@ export class DefaultClient implements Client {
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
-            ui = getUI();
-            ui.bind(this);
 
             // requests/notifications are deferred until this.languageClient is set.
             this.queueBlockingTask(async () => {
+                ui = await getUI();
+                ui.bind(this);
                 await firstClientStarted;
                 try {
                     const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
@@ -967,26 +963,26 @@ export class DefaultClient implements Client {
 
                         this.inlayHintsProvider = new InlayHintsProvider(this);
 
-                        this.disposables.push(vscode.languages.registerInlayHintsProvider(this.documentSelector, this.inlayHintsProvider));
-                        this.disposables.push(vscode.languages.registerRenameProvider(this.documentSelector, new RenameProvider(this)));
-                        this.disposables.push(vscode.languages.registerReferenceProvider(this.documentSelector, new FindAllReferencesProvider(this)));
+                        this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
+                        this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
+                        this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(this.documentSelector, new DocumentSymbolProvider(), undefined));
-                        this.disposables.push(vscode.languages.registerCodeActionsProvider(this.documentSelector, new CodeActionProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, new DocumentSymbolProvider(), undefined));
+                        this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, new CodeActionProvider(this), undefined));
                         // Because formatting and codeFolding can vary per folder, we need to register these providers once
                         // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
                         // within the providers themselves.
-                        this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(this.documentSelector, new DocumentFormattingEditProvider(this));
-                        this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(this.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                        this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(this.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+                        this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, new DocumentFormattingEditProvider(this));
+                        this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                        this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
 
                         this.codeFoldingProvider = new FoldingRangeProvider(this);
-                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(this.documentSelector, this.codeFoldingProvider);
+                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
 
                         const settings: CppSettings = new CppSettings();
                         if (settings.enhancedColorization && semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
@@ -1309,7 +1305,7 @@ export class DefaultClient implements Client {
                     if (changedSettings["enhancedColorization"]) {
                         if (settings.enhancedColorization && semanticTokensLegend) {
                             this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(this.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
+                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                         } else if (this.semanticTokensProviderDisposable) {
                             this.semanticTokensProviderDisposable.dispose();
                             this.semanticTokensProviderDisposable = undefined;
@@ -2181,14 +2177,14 @@ export class DefaultClient implements Client {
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
         this.model.parsingWorkspaceStatus.Value = getLocalizedString(notificationBody);
         if (notificationBody.text.startsWith("Workspace parsing paused")) {
-            this.model.isParsingWorkspacePausable.Value = true;
             this.model.isParsingWorkspacePaused.Value = true;
-        } else if (notificationBody.text.startsWith("Parsing workspace")) {
             this.model.isParsingWorkspacePausable.Value = true;
+        } else if (notificationBody.text.startsWith("Parsing workspace")) {
             this.model.isParsingWorkspacePaused.Value = false;
+            this.model.isParsingWorkspacePausable.Value = true;
         } else {
-            this.model.isParsingWorkspacePausable.Value = false;
             this.model.isParsingWorkspacePaused.Value = false;
+            this.model.isParsingWorkspacePausable.Value = false;
         }
     }
 
@@ -2755,13 +2751,24 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleShowCodeAnalysisCommands(): Promise<void> {
+    public async handleShowActiveCodeAnalysisCommands(): Promise<void> {
         await this.awaitUntilLanguageClientReady();
-        const index: number = await ui.showCodeAnalysisCommands();
+        const index: number = await ui.showActiveCodeAnalysisCommands();
         switch (index) {
             case 0: this.CancelCodeAnalysis(); break;
             case 1: this.PauseCodeAnalysis(); break;
             case 2: this.ResumeCodeAnalysis(); break;
+            case 3: this.handleShowIdleCodeAnalysisCommands(); break;
+        }
+    }
+
+    public async handleShowIdleCodeAnalysisCommands(): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
+        const index: number = await ui.showIdleCodeAnalysisCommands();
+        switch (index) {
+            case 0: this.handleRunCodeAnalysisOnActiveFile(); break;
+            case 1: this.handleRunCodeAnalysisOnAllFiles(); break;
+            case 2: this.handleRunCodeAnalysisOnOpenFiles(); break;
         }
     }
 
@@ -3276,7 +3283,8 @@ class NullClient implements Client {
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
-    handleShowCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
+    handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
+    handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
     handleConfigurationEditCommand(viewColumn?: vscode.ViewColumn): void { }
     handleConfigurationEditJSONCommand(viewColumn?: vscode.ViewColumn): void { }
