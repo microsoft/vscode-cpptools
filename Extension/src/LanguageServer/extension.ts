@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
-import { UI, OldUI, getUI } from './ui';
+import { UI, getUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
@@ -301,9 +301,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
-        if (ui instanceof OldUI) {
-            clients.activeDocumentChanged(editor.document);
-        }
+        clients.activeDocumentChanged(editor.document);
         clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     }
     ui.activeDocumentChanged();
