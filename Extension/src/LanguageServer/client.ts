@@ -952,8 +952,6 @@ export class DefaultClient implements Client {
             } else {
                 this.handleCompilerQuickPick();
             }
-        } else {
-            vscode.window.showInformationMessage(localize("noCompiler.message", "No compiler detected, please install a compiler."));
         }
     }
 
