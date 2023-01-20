@@ -174,7 +174,7 @@ export async function activate(): Promise<void> {
 
     console.log("starting language server");
     clients = new ClientCollection();
-    ui = getUI();
+    ui = await getUI();
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
@@ -403,7 +403,8 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', enabled ? onResumeCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', enabled ? onCancelCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', enabled ? onShowParsingCommands : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowCodeAnalysisCommands', enabled ? onShowCodeAnalysisCommands : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.TakeSurvey', enabled ? onTakeSurvey : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.LogDiagnostics', enabled ? onLogDiagnostics : onDisabledCommand));
@@ -433,6 +434,73 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    // ---------------- Wrappers -------------
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelectUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ConfigurationSelect");
+            onSelectConfiguration();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspaceUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("RescanWorkspace");
+            onRescanWorkspace();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ShowIdleCodeAnalysisCommands");
+            onShowIdleCodeAnalysisCommands();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ShowActiveCodeAnalysisCommands");
+            onShowActiveCodeAnalysisCommands();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsingUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ParsingCommands");
+            onPauseParsing();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsingUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ParsingCommands");
+            onResumeParsing();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompilerUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("CheckForCompiler");
+            onCheckForCompiler();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFileUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("RestartIntelliSenseForFile");
+            onRestartIntelliSenseForFile();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgressUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ShowReferencesProgress");
+            onShowReferencesProgress();
+        }
+        : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommandsUI_Telemetry', enabled ?
+        () => {
+            logForUIExperiment("ParsingCommands");
+            onShowParsingCommands();
+        }
+        : onDisabledCommand));
+    // ----------------------------------------
+}
+
+async function logForUIExperiment(command: string): Promise<void> {
+    const isNewUI: string = ui.isNewUI.toString();
+    telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI });
 }
 
 function onDisabledCommand(): void {
@@ -510,8 +578,8 @@ async function selectClient(): Promise<Client> {
     if (clients.Count === 1) {
         return clients.ActiveClient;
     } else {
-        const key: string = await ui.showWorkspaces(clients.Names);
-        if (key !== "") {
+        const key: string | undefined = await ui.showWorkspaces(clients.Names);
+        if (key !== undefined && key !== "") {
             const client: Client | undefined = clients.get(key);
             if (client) {
                 return client;
@@ -730,8 +798,12 @@ function onShowParsingCommands(): void {
     clients.ActiveClient.handleShowParsingCommands();
 }
 
-function onShowCodeAnalysisCommands(): void {
-    clients.ActiveClient.handleShowCodeAnalysisCommands();
+function onShowActiveCodeAnalysisCommands(): void {
+    clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
+}
+
+function onShowIdleCodeAnalysisCommands(): void {
+    clients.ActiveClient.handleShowIdleCodeAnalysisCommands();
 }
 
 function onShowReferencesProgress(): void {
