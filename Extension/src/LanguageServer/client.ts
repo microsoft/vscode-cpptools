@@ -949,7 +949,14 @@ export class DefaultClient implements Client {
                         this.handleCompilerQuickPick();
                     }
                 }
-            } else {
+            } else if (!command && (compilerDefaults.compilerPath === undefined)) {
+                const setCompiler: string = localize("setCompiler.string", "Set Compiler");
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), selectCompiler);
+                if (value === setCompiler) {
+                    this.handleCompilerQuickPick();
+                }
+            }
+            else {
                 this.handleCompilerQuickPick();
             }
         }
