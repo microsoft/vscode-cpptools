@@ -366,31 +366,6 @@ export class OldUI implements UI {
         return (selection) ? selection.index : -1;
     }
 
-    public async showSelectCompiler(paths: string[]): Promise<number> {
-        const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
-
-        const items: IndexableQuickPickItem[] = [];
-        for (let i: number = 0; i < paths.length; i++) {
-            let option: string | undefined;
-            let isCompiler: boolean = false;
-            if (paths[i].indexOf("\\") > 0) {
-                if (paths[i].split("\\").pop() !== undefined) {
-                    option = paths[i].split("\\").pop();
-                    isCompiler = true;
-                }
-            }
-            if (option !== undefined && isCompiler) {
-                const path: string | undefined = paths[i].replace(option, "");
-                items.push({ label: option, description: localize("found.string", "Found at {0}", path), index: i });
-            } else {
-                items.push({ label: paths[i], index: i });
-            }
-        }
-
-        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
-    }
 
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};

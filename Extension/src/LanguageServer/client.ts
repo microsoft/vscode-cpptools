@@ -469,6 +469,9 @@ export interface GenerateDoxygenCommentResult {
     isCursorAboveSignatureLine: boolean;
 }
 
+export interface IndexableQuickPickItem extends vscode.QuickPickItem {
+    index: number;
+}
 export interface UpdateTrustedCompilerPathsResult {
     compilerPath: string;
 }
@@ -883,6 +886,32 @@ export class DefaultClient implements Client {
         });
     }
 
+    public async showSelectCompiler(paths: string[]): Promise<number> {
+        const options: vscode.QuickPickOptions = {};
+        options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
+
+        const items: IndexableQuickPickItem[] = [];
+        for (let i: number = 0; i < paths.length; i++) {
+            let option: string | undefined;
+            let isCompiler: boolean = false;
+            if (paths[i].indexOf("\\") > 0) {
+                if (paths[i].split("\\").pop() !== undefined) {
+                    option = paths[i].split("\\").pop();
+                    isCompiler = true;
+                }
+            }
+            if (option !== undefined && isCompiler) {
+                const path: string | undefined = paths[i].replace(option, "");
+                items.push({ label: option, description: localize("found.string", "Found at {0}", path), index: i });
+            } else {
+                items.push({ label: paths[i], index: i });
+            }
+        }
+
+        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.index : -1;
+    }
+
     public async handleCompilerQuickPick(): Promise<void> {
         const settings: OtherSettings = new OtherSettings();
         let paths: string[] = [];
@@ -892,7 +921,7 @@ export class DefaultClient implements Client {
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
-        const index: number = await ui.showSelectCompiler(paths);
+        const index: number = await this.showSelectCompiler(paths);
         if (index === paths.length - 1) {
             paths[index] = "";
             settings.defaultCompiler = "";
