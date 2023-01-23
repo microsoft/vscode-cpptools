@@ -952,7 +952,7 @@ export class DefaultClient implements Client {
             }
         }
         // If a compiler is selected, update the default.compilerPath user setting.
-        if (index < paths.length - 3) {
+        if (index < paths.length - 3 && index !== -1) {
             settings.defaultCompiler = paths[index];
         }
         compilerDefaults = await this.requestCompiler(compilerPaths);
