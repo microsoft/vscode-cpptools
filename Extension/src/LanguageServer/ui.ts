@@ -366,7 +366,6 @@ export class OldUI implements UI {
         return (selection) ? selection.index : -1;
     }
 
-
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.workspace", "Select a workspace folder...");
