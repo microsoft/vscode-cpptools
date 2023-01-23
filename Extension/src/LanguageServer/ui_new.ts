@@ -210,7 +210,7 @@ export class NewUI implements UI {
     private setIsParsingFiles(val: boolean): void {
 
         this.isParsingFiles = val;
-        const showIcon: boolean = val || (!this.isParsingWorkspacePaused && this.isParsingWorkspace);
+        const showIcon: boolean = val || this.isParsingWorkspace;
         const twoStatus: boolean = val && this.isParsingWorkspace;
 
         // Leave this outside for more realtime respone
@@ -221,11 +221,12 @@ export class NewUI implements UI {
             this.browseEngineStatusBarItem.detail = (val ? this.parsingFilesTooltip : "")
                 + (twoStatus ? " | " : "")
                 + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
+            this.browseEngineStatusBarItem.busy = val && this.isParsingWorkspacePaused;
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
             }
-        } else if (!this.isParsingWorkspace && !val) {
+        } else {
             this.dbTimeout = setTimeout(() => {
                 this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
@@ -234,7 +235,9 @@ export class NewUI implements UI {
                     title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
+            return;
         }
+
     }
 
     private flameTimeout?: NodeJS.Timeout;
