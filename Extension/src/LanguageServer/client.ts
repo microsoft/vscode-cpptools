@@ -889,13 +889,17 @@ export class DefaultClient implements Client {
 
     public async handleCompilerQuickPick(): Promise<void> {
         const settings: OtherSettings = new OtherSettings();
-        const paths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
+        let paths: string[] = [];
+        if (compilerDefaults.knownCompilers !== undefined) {
+            paths = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
+        }
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await ui.showSelectCompiler(paths);
         if (index === paths.length - 1) {
             paths[index] = "";
+            settings.defaultCompiler = "";
         } else if (index === paths.length - 2) {
             switch (os.platform()) {
                 case 'win32':
@@ -918,7 +922,9 @@ export class DefaultClient implements Client {
                 return;
             }
         } else {
-            util.addTrustedCompiler(compilerPaths, paths[index]);
+            if (index !== -1) {
+                util.addTrustedCompiler(compilerPaths, paths[index]);
+            }
         }
         // If a compiler is selected, update the default.compilerPath user setting.
         if (index < paths.length - 3) {
@@ -1070,14 +1076,12 @@ export class DefaultClient implements Client {
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
-                    } else {
-                        this.configuration.CompilerDefaults = compilerDefaults;
                     }
                     // update all client configurations
                     this.configuration.setupConfigurations();
                     initializedClientCount++;
                     // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
-                    if ((initializedClientCount === vscode.workspace.workspaceFolders?.length)) {
+                    if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
                         const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPaths);
