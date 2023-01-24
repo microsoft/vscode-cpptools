@@ -1087,7 +1087,7 @@ export class DefaultClient implements Client {
                         // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
-
+                        initializedClientCount = 1;
                         this.inlayHintsProvider = new InlayHintsProvider(this);
 
                         this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
