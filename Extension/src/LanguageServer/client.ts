@@ -922,8 +922,10 @@ export class DefaultClient implements Client {
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await this.showSelectCompiler(paths);
+        if (index === -1) {
+            return;
+        }
         if (index === paths.length - 1) {
-            paths[index] = "";
             settings.defaultCompiler = "";
         } else if (index === paths.length - 2) {
             switch (os.platform()) {
@@ -947,12 +949,10 @@ export class DefaultClient implements Client {
                 return;
             }
         } else {
-            if (index !== -1) {
-                util.addTrustedCompiler(compilerPaths, paths[index]);
-            }
+            util.addTrustedCompiler(compilerPaths, paths[index]);
         }
         // If a compiler is selected, update the default.compilerPath user setting.
-        if (index < paths.length - 3 && index !== -1) {
+        if (index < paths.length - 3) {
             settings.defaultCompiler = paths[index];
         }
         compilerDefaults = await this.requestCompiler(compilerPaths);
