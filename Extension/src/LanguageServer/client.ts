@@ -894,24 +894,15 @@ export class DefaultClient implements Client {
         for (let i: number = 0; i < paths.length; i++) {
             let option: string | undefined;
             let isCompiler: boolean = false;
-            switch (os.platform()) {
-                case 'win32':
-                    if (paths[i].includes("\\")) {
-                        if (paths[i].split("\\").pop() !== undefined) {
-                            option = paths[i].split("\\").pop();
-                            isCompiler = true;
-                        }
-                    }
-                    break;
-                default: // Linux
-                    if (paths[i].includes("/")) {
-                        if (paths[i].split("/").pop() !== undefined) {
-                            option = paths[i].split("/").pop();
-                            isCompiler = true;
-                        }
-                    }
-                    break;
+            const slash: string = (os.platform() == 'win32') ? "\\" : "/";
+
+            if (paths[i].includes(slash)) {
+                if (paths[i].split(slash).pop() !== undefined) {
+                    option = paths[i].split(slash).pop();
+                    isCompiler = true;
+                }
             }
+
             if (option !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(option, "");
                 items.push({ label: option, description: localize("found.string", "Found at {0}", path), index: i });
