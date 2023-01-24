@@ -894,11 +894,23 @@ export class DefaultClient implements Client {
         for (let i: number = 0; i < paths.length; i++) {
             let option: string | undefined;
             let isCompiler: boolean = false;
-            if (paths[i].indexOf("\\") > 0) {
-                if (paths[i].split("\\").pop() !== undefined) {
-                    option = paths[i].split("\\").pop();
-                    isCompiler = true;
-                }
+            switch (os.platform()) {
+                case 'win32':
+                    if (paths[i].includes("\\")) {
+                        if (paths[i].split("\\").pop() !== undefined) {
+                            option = paths[i].split("\\").pop();
+                            isCompiler = true;
+                        }
+                    }
+                    break;
+                default: // Linux
+                    if (paths[i].includes("/")) {
+                        if (paths[i].split("/").pop() !== undefined) {
+                            option = paths[i].split("/").pop();
+                            isCompiler = true;
+                        }
+                    }
+                    break;
             }
             if (option !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(option, "");
@@ -1111,7 +1123,13 @@ export class DefaultClient implements Client {
                         // The event handlers must be set before this happens.
                         const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPaths);
                         compilerDefaults = inputCompilerDefaults;
-                        this.configuration.CompilerDefaults = compilerDefaults;
+                        clients.forEach(client => {
+                            if (client instanceof DefaultClient) {
+                                const defaultClient: DefaultClient = <DefaultClient>client;
+                                defaultClient.configuration.CompilerDefaults = compilerDefaults;
+                                defaultClient.configuration.handleConfigurationChange();
+                            }
+                        });
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);
