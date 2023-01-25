@@ -2935,7 +2935,7 @@
   "type interdit %t dans ce pointeur pour la fonction membre %nfd restreinte à amp",
   "type de retour interdit %t pour la fonction à restriction amp %nfd",
   "type de paramètre interdit %t pour la fonction à restriction amp %nfd",
-  null,
+  "construction non conforme dans la fonction à restriction amp %nfd",
   "classe de stockage interdite %s dans la fonction à restriction amp %nfd",
   "%s non autorisé dans la fonction à restriction amp %nfd",
   "cast non conforme dans la fonction à restriction amp",
@@ -3465,7 +3465,7 @@
   "en raison d’un attribut 'unavailable'",
   "qualificateur 'asm' dupliqué",
   "soit un champ de bits avec un type enum incomplet, soit une énumération opaque avec un type de base non valide",
-  "a tenté de construire un élément à partir d’une partition IFC %sq à l’aide d’un index dans la partition IFC %sq.",
+  "a tenté de construire un élément à partir d’une partition IFC %sq à l’aide d’un index dans la partition IFC %sq2.",
   "le %sq de partition a spécifié sa taille d’entrée %d1 alors que %d2 était attendu.",
   "une exigence IFC inattendue s’est produite lors du traitement du module %sq1.",
   "échec de la condition à la ligne %d dans %s1 : %sq2",
@@ -3478,9 +3478,10 @@
   "le module %sq valeur de tri non valide",
   "un modèle de fonction chargé à partir d’un module IFC a été analysé de manière incorrecte en tant que %nd",
   "échec du chargement d’une référence d’entité IFC dans le module %sq",
-  "Tri d’index IFC = %d1, valeur = %d2",
+  "à partir de la partition %sq, élément %d1 (position de fichier %d2, position relative %d3)",
   "les désignateurs chaînés ne sont pas autorisés pour un type classe avec un destructeur non trivial",
   "une déclaration de spécialisation explicite ne peut pas être une déclaration friend",
   "le type std::float128_t n’est pas pris en charge ; std::float64_t sera utilisé à la place",
-  "le type std::bfloat16_t n’est pas pris en charge ; std::float32_t sera utilisé à la place"
+  "le type std::bfloat16_t n’est pas pris en charge ; std::float32_t sera utilisé à la place",
+  "un guide de déduction ne peut pas être déclaré pour le modèle d’alias %no"
 ]
