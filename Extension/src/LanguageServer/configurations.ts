@@ -21,7 +21,7 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
-
+import { compilerPaths } from './client';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -103,6 +103,8 @@ export interface Browse {
 export interface KnownCompiler {
     path: string;
     isC: boolean;
+    isTrusted: boolean; // May be used in the future for build tasks.
+    isCL: boolean;
 }
 
 export interface CompilerDefaults {
@@ -115,6 +117,7 @@ export interface CompilerDefaults {
     frameworks: string[];
     windowsSdkVersion: string;
     intelliSenseMode: string;
+    trustedCompilerFound: boolean;
 }
 
 export class CppProperties {
@@ -157,6 +160,7 @@ export class CppProperties {
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
     // we want to track when the default includes have been added to it.
     private configurationIncomplete: boolean = true;
+    trustedCompilerFound: boolean = false;
 
     constructor(rootUri?: vscode.Uri, workspaceFolder?: vscode.WorkspaceFolder) {
         this.rootUri = rootUri;
@@ -206,18 +210,11 @@ export class CppProperties {
         return result;
     }
 
-    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
-        this.defaultCompilerPath = compilerDefaults.compilerPath;
-        this.knownCompilers = compilerDefaults.knownCompilers;
-        this.defaultCStandard = compilerDefaults.cStandard;
-        this.defaultCppStandard = compilerDefaults.cppStandard;
-        this.defaultIncludes = compilerDefaults.includes;
-        this.defaultFrameworks = compilerDefaults.frameworks;
-        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
-        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+    public setupConfigurations(): void {
 
         // defaultPaths is only used when there isn't a c_cpp_properties.json, but we don't send the configuration changed event
         // to the language server until the default include paths and frameworks have been sent.
+
         const configFilePath: string = path.join(this.configFolder, "c_cpp_properties.json");
         if (this.rootUri !== null && fs.existsSync(configFilePath)) {
             this.propertiesFile = vscode.Uri.file(configFilePath);
@@ -273,7 +270,7 @@ export class CppProperties {
             const savedDocWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(doc.uri);
             const notifyingWorkspaceFolder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(settingsPath));
             if ((!savedDocWorkspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0 && notifyingWorkspaceFolder === vscode.workspace.workspaceFolders[0])
-               || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
+                || savedDocWorkspaceFolder === notifyingWorkspaceFolder) {
                 let fileType: string | undefined;
                 const documentPath: string = doc.uri.fsPath.toLowerCase();
                 if (documentPath.endsWith("cmakelists.txt")) {
@@ -297,6 +294,17 @@ export class CppProperties {
         });
 
         this.handleConfigurationChange();
+    }
+    public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
+        this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.knownCompilers = compilerDefaults.knownCompilers;
+        this.defaultCStandard = compilerDefaults.cStandard;
+        this.defaultCppStandard = compilerDefaults.cppStandard;
+        this.defaultIncludes = compilerDefaults.includes;
+        this.defaultFrameworks = compilerDefaults.frameworks;
+        this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
+        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
     }
 
     public get VcpkgInstalled(): boolean {
@@ -857,7 +865,7 @@ export class CppProperties {
                 configuration.compilerPath = this.updateConfigurationString(configuration.compilerPath, settings.defaultCompilerPath, env, true);
                 configuration.compilerPathIsExplicit = configuration.compilerPathIsExplicit || settings.defaultCompilerPath !== undefined;
                 if (configuration.compilerPath === undefined) {
-                    if (!!this.defaultCompilerPath) {
+                    if (!!this.defaultCompilerPath && this.trustedCompilerFound) {
                         // If no config value yet set for these, pick up values from the defaults, but don't consider them explicit.
                         configuration.compilerPath = this.defaultCompilerPath;
                         if (!configuration.cStandard && !!this.defaultCStandard) {
@@ -883,6 +891,9 @@ export class CppProperties {
                             configuration.macFrameworkPath = this.defaultFrameworks;
                         }
                     }
+                } else {
+                    // add compiler to list of trusted compilers
+                    util.addTrustedCompiler(compilerPaths, configuration.compilerPath);
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.

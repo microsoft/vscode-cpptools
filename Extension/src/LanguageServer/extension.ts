@@ -387,6 +387,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.selectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', enabled ? onSelectConfigurationProvider : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', enabled ? onEditConfigurationJSON : onDisabledCommand));
@@ -595,9 +596,13 @@ function onResetDatabase(): void {
     clients.ActiveClient.resetDatabase();
 }
 
+function selectDefaultCompiler(): void {
+    clients.ActiveClient.promptSelectCompiler(true);
+}
+
 function onSelectConfiguration(): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration'));
+        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
@@ -607,7 +612,7 @@ function onSelectConfiguration(): void {
 
 function onSelectConfigurationProvider(): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider'));
+        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider.'));
     } else {
         selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
     }

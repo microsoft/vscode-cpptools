@@ -58,7 +58,8 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
-
+let initializedClientCount: number = 0;
+export let compilerPaths: string[] = [];
 // Data shared by all clients.
 let languageClient: LanguageClient;
 let firstClientStarted: Promise<void>;
@@ -68,6 +69,7 @@ let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
+let displayedSelectCompiler: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -184,7 +186,8 @@ interface ReportStatusNotificationBody extends WorkspaceFolderParams {
     status: string;
 }
 
-interface QueryCompilerDefaultsParams {
+interface QueryDefaultCompilerParams {
+    trustedCompilerPaths: string[];
 }
 
 interface CppPropertiesParams extends WorkspaceFolderParams {
@@ -466,6 +469,13 @@ export interface GenerateDoxygenCommentResult {
     isCursorAboveSignatureLine: boolean;
 }
 
+export interface IndexableQuickPickItem extends vscode.QuickPickItem {
+    index: number;
+}
+export interface UpdateTrustedCompilerPathsResult {
+    compilerPath: string;
+}
+
 export interface DoxygenCodeActionCommandArguments {
     initialCursor: Position;
     adjustedCursor: Position;
@@ -517,7 +527,7 @@ interface InitializationOptions {
 };
 
 // Requests
-const QueryCompilerDefaultsRequest: RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void> = new RequestType<QueryCompilerDefaultsParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
+const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
@@ -568,6 +578,7 @@ const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysi
 
 // Notifications from the server
 const ReloadWindowNotification: NotificationType<void> = new NotificationType<void>('cpptools/reloadWindow');
+const UpdateTrustedCompilersNotification: NotificationType<UpdateTrustedCompilerPathsResult> = new NotificationType<UpdateTrustedCompilerPathsResult>('cpptools/updateTrustedCompilersList');
 const LogTelemetryNotification: NotificationType<TelemetryPayload> = new NotificationType<TelemetryPayload>('cpptools/logTelemetry');
 const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
@@ -723,6 +734,7 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
+    promptSelectCompiler(command: boolean): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -844,7 +856,7 @@ export class DefaultClient implements Client {
         return this.innerLanguageClient;
     }
 
-    private get configuration(): configs.CppProperties {
+    public get configuration(): configs.CppProperties {
         if (!this.innerConfiguration) {
             throw new Error("Attempting to use configuration before initialized");
         }
@@ -862,6 +874,125 @@ export class DefaultClient implements Client {
 
     private getName(workspaceFolder?: vscode.WorkspaceFolder): string {
         return workspaceFolder ? workspaceFolder.name : "untitled";
+    }
+
+    public updateClientConfigurations(): void {
+        clients.forEach(client => {
+            if (client instanceof DefaultClient) {
+                const defaultClient: DefaultClient = <DefaultClient>client;
+                defaultClient.configuration.CompilerDefaults = compilerDefaults;
+                defaultClient.configuration.handleConfigurationChange();
+            }
+        });
+    }
+
+    public async showSelectCompiler(paths: string[]): Promise<number> {
+        const options: vscode.QuickPickOptions = {};
+        options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
+
+        const items: IndexableQuickPickItem[] = [];
+        for (let i: number = 0; i < paths.length; i++) {
+            let option: string | undefined;
+            let isCompiler: boolean = false;
+            const slash: string = (os.platform() === 'win32') ? "\\" : "/";
+
+            if (paths[i].includes(slash)) {
+                if (paths[i].split(slash).pop() !== undefined) {
+                    option = paths[i].split(slash).pop();
+                    isCompiler = true;
+                }
+            }
+
+            if (option !== undefined && isCompiler) {
+                const path: string | undefined = paths[i].replace(option, "");
+                items.push({ label: option, description: localize("found.string", "Found at {0}", path), index: i });
+            } else {
+                items.push({ label: paths[i], index: i });
+            }
+        }
+
+        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
+        return (selection) ? selection.index : -1;
+    }
+
+    public async handleCompilerQuickPick(): Promise<void> {
+        const settings: OtherSettings = new OtherSettings();
+        let paths: string[] = [];
+        if (compilerDefaults.knownCompilers !== undefined) {
+            paths = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
+        }
+        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
+        paths.push(localize("installCompiler.string", "Help me install a compiler"));
+        paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
+        const index: number = await this.showSelectCompiler(paths);
+        if (index === -1) {
+            return;
+        }
+        if (index === paths.length - 1) {
+            settings.defaultCompiler = "";
+        } else if (index === paths.length - 2) {
+            switch (os.platform()) {
+                case 'win32':
+                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                    return;
+                case 'darwin':
+                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                    return;
+                default: // Linux
+                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                    return;
+            }
+        } else if (index === paths.length - 3) {
+            const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
+            if (result !== undefined && result.length > 0) {
+                util.addTrustedCompiler(compilerPaths, result[0].fsPath);
+                settings.defaultCompiler = result[0].fsPath;
+                compilerDefaults = await this.requestCompiler(compilerPaths);
+                this.updateClientConfigurations();
+                return;
+            }
+        } else {
+            util.addTrustedCompiler(compilerPaths, paths[index]);
+        }
+        // If a compiler is selected, update the default.compilerPath user setting.
+        if (index < paths.length - 3) {
+            settings.defaultCompiler = paths[index];
+        }
+        compilerDefaults = await this.requestCompiler(compilerPaths);
+        this.updateClientConfigurations();
+    }
+
+    async promptSelectCompiler(command: boolean): Promise<void> {
+        const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
+        const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
+        const settings: OtherSettings = new OtherSettings();
+        if (compilerDefaults.compilerPath !== "") {
+            if (!command) {
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found on this computer. Do you want to configure it for IntelliSense?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
+                if (value === confirmCompiler) {
+                    compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
+                    settings.defaultCompiler = compilerDefaults.compilerPath;
+                    compilerDefaults = await this.requestCompiler(compilerPaths);
+                    this.updateClientConfigurations();
+                } else if (value === selectCompiler) {
+                    this.handleCompilerQuickPick();
+                } else {
+                    const setCompiler: string = localize("setCompiler.string", "Set Compiler");
+                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), selectCompiler);
+                    if (value === setCompiler) {
+                        this.handleCompilerQuickPick();
+                    }
+                }
+            } else if (!command && (compilerDefaults.compilerPath === undefined)) {
+                const setCompiler: string = localize("setCompiler.string", "Set Compiler");
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), selectCompiler);
+                if (value === setCompiler) {
+                    this.handleCompilerQuickPick();
+                }
+            } else {
+                this.handleCompilerQuickPick();
+            }
+        }
     }
 
     /**
@@ -944,17 +1075,10 @@ export class DefaultClient implements Client {
 
                     if (isFirstClient) {
                         workspaceReferences = new refs.ReferencesManager(this);
-
-                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                        // The event handlers must be set before this happens.
-                        const inputCompilerDefaults: configs.CompilerDefaults = await languageClient.sendRequest(QueryCompilerDefaultsRequest, {});
-                        compilerDefaults = inputCompilerDefaults;
-                        this.configuration.CompilerDefaults = compilerDefaults;
-
                         // Only register file watchers and providers after the extension has finished initializing,
                         // e.g. prevents empty c_cpp_properties.json from generation.
                         this.registerFileWatcher();
-
+                        initializedClientCount = 0;
                         this.inlayHintsProvider = new InlayHintsProvider(this);
 
                         this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
@@ -980,8 +1104,28 @@ export class DefaultClient implements Client {
                         }
                         // Listen for messages from the language server.
                         this.registerNotifications();
-                    } else {
-                        this.configuration.CompilerDefaults = compilerDefaults;
+                    }
+                    // update all client configurations
+                    this.configuration.setupConfigurations();
+                    initializedClientCount++;
+                    // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
+                    if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
+                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                        // The event handlers must be set before this happens.
+                        const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPaths);
+                        compilerDefaults = inputCompilerDefaults;
+                        clients.forEach(client => {
+                            if (client instanceof DefaultClient) {
+                                const defaultClient: DefaultClient = <DefaultClient>client;
+                                defaultClient.configuration.CompilerDefaults = compilerDefaults;
+                                defaultClient.configuration.handleConfigurationChange();
+                            }
+                        });
+                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
+                            // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
+                            this.promptSelectCompiler(false);
+                            displayedSelectCompiler = true;
+                        }
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -1255,7 +1399,7 @@ export class DefaultClient implements Client {
 
         // Create the language client
         this.loggingLevel = initializationOptions.settings.loggingLevel;
-        languageClient =  new LanguageClient(`cpptools`, serverOptions, clientOptions);
+        languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         setupOutputHandlers();
         languageClient.registerProposedFeatures();
         await languageClient.start();
@@ -1884,6 +2028,7 @@ export class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
+        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => util.addTrustedCompiler(compilerPaths, e.compilerPath));
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
         this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
@@ -2032,8 +2177,8 @@ export class DefaultClient implements Client {
         const settings: OtherSettings = new OtherSettings();
         const assocs: any = settings.filesAssociations;
 
-        const filesAndPaths: string[] = fileAssociations.split(";");
         let foundNewAssociation: boolean = false;
+        const filesAndPaths: string[] = fileAssociations.split(";");
         for (let i: number = 0; i < filesAndPaths.length; ++i) {
             const fileAndPath: string[] = filesAndPaths[i].split("@");
             // Skip empty or malformed
@@ -2297,6 +2442,13 @@ export class DefaultClient implements Client {
             workspaceFolderUri: rootUri.toString()
         };
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+    }
+
+    public requestCompiler(compilerPath: string[]): Thenable<configs.CompilerDefaults> {
+        const params: QueryDefaultCompilerParams = {
+            trustedCompilerPaths: compilerPath
+        };
+        return this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
     }
 
     private async updateActiveDocumentTextOptions(): Promise<void> {
@@ -2563,6 +2715,9 @@ export class DefaultClient implements Client {
                         itemConfig.compilerPath,
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
+                    if (itemConfig.compilerPath !== undefined) {
+                        util.addTrustedCompiler(compilerPaths, itemConfig.compilerPath);
+                    }
                     if (providerVersion < Version.v6) {
                         itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
                         itemConfig.compilerArgs = undefined;
@@ -2655,6 +2810,9 @@ export class DefaultClient implements Client {
                     sanitized.compilerPath,
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;
+                if (sanitized.compilerPath !== undefined) {
+                    util.addTrustedCompiler(compilerPaths, sanitized.compilerPath);
+                }
                 if (providerVersion < Version.v6) {
                     sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
                     sanitized.compilerArgs = undefined;
@@ -3265,6 +3423,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
+    promptSelectCompiler(command: boolean): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }
