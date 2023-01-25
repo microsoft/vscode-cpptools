@@ -2935,7 +2935,7 @@
   "tipo ilegal %t neste ponteiro para a função membro restrita por amp %nfd",
   "tipo de retorno %t ilícito para a função restrita por amp %nfd",
   "tipo de parâmetro %t ilícito para a função restrita por amp %nfd",
-  null,
+  "constructo ilícito na função restrita por amp %nfd",
   "classe de armazenamento %s ilícito na função restrita por amp %nfd",
   "%s não é permitido na função restrita por amp %nfd",
   "conversão ilícita na função restrita por amp",
@@ -3465,7 +3465,7 @@
   "devido a um atributo 'indisponível'",
   "qualificador 'asm' duplicado",
   "um campo de bits com um tipo de enumeração incompleto ou uma enumeração opaca com um tipo base inválido",
-  "tentou construir um elemento da partição IFC %sq usando um índice na partição IFC %sq",
+  "tentou construir um elemento da partição IFC %sq usando um índice na partição IFC %sq2",
   "a partição %sq especificou seu tamanho de entrada como %d1 quando %d2 era esperado",
   "um requisito IFC inesperado foi encontrado durante o processamento do módulo %sq1",
   "condição falhou na linha %d em %s1: %sq2",
@@ -3478,9 +3478,10 @@
   "valor de classificação inválido do módulo %sq",
   "um modelo de função carregado de um módulo IFC foi analisado incorretamente como %nd",
   "falha ao carregar uma referência de entidade IFC no módulo %sq",
-  "Classificação do índice IFC = %d1, valor = %d2",
+  "da partição %sq elemento %d1 (posição do arquivo %d2, posição relativa %d3)",
   "designadores encadeados não são permitidos para um tipo de classe com um destruidor não trivial",
   "uma declaração de especialização explícita não pode ser uma declaração de friend",
   "o tipo std::float128_t não tem suporte; em vez disso, std::float64_t será usado",
-  "o tipo std::bfloat16_t não tem suporte; em vez disso, std::float32_t será usado"
+  "o tipo std::bfloat16_t não tem suporte; em vez disso, std::float32_t será usado",
+  "um guia de dedução não pode ser declarado para o modelo de alias %no"
 ]
