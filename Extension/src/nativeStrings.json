@@ -371,7 +371,7 @@
     },
     "refactor_create_declaration_definition_unknown_error": "Create declaration/definition failed from an unknown error.",
     "refactor_create_default_delete": "Creating defaulted or deleted functions is not supported.",
-    "refactor_function_copied_to_clipboard": "The function signature was copied to clipboard.",
+    "refactor_function_copied_to_clipboard": "The function signature was copied to the clipboard.",
     "refactor_function_not_created": "Unable to create function '{0}'.",
     "refactor_ambiguous_locations": "Unable to find an unambiguous location for function '{0}'.",
     "refactor_file_not_found": "File '{0}' was not found.",
