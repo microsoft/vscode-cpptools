@@ -894,7 +894,7 @@ export class DefaultClient implements Client {
         for (let i: number = 0; i < paths.length; i++) {
             let option: string | undefined;
             let isCompiler: boolean = false;
-            const slash: string = (os.platform() == 'win32') ? "\\" : "/";
+            const slash: string = (os.platform() === 'win32') ? "\\" : "/";
 
             if (paths[i].includes(slash)) {
                 if (paths[i].split(slash).pop() !== undefined) {
