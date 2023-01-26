@@ -2935,7 +2935,7 @@
   "il tipo %t nel puntatore this per la funzione membro con limitazioni amp %nfd non è valido",
   "il tipo restituito %t per la funzione con restrizioni AMP %nfd non è valido",
   "il tipo di parametro %t per la funzione con restrizioni AMP %nfd non è valido",
-  null,
+  "il costrutto nella funzione con restrizioni AMP %nfd non è valido",
   "la classe di archiviazione %s nella funzione con restrizioni AMP %nfd non è valida",
   "%s non è consentito nella funzione con restrizioni AMP %nfd",
   "il cast nella funzione con restrizioni AMP non è valido",
@@ -3465,7 +3465,7 @@
   "a causa di un attributo 'non disponibile'",
   "qualificatore 'asm' duplicato",
   "o un campo di bit con un tipo di enumerazione incompleto o un'enumerazione opaca con un tipo di base non valido",
-  "ha tentato di costruire un elemento dalla partizione IFC %sq utilizzando un indice nella partizione IFC %sq",
+  "ha tentato di costruire un elemento dalla partizione IFC %sq utilizzando un indice nella partizione IFC %sq2",
   "la partizione %sq ha specificato la dimensione della voce come %d1 mentre era previsto %d2",
   "Durante l'elaborazione del modulo %sq1 è stato riscontrato un requisito IFC imprevisto.",
   "condizione fallita alla riga %d in %s1: %sq2",
@@ -3478,9 +3478,10 @@
   "il modulo %sq valore di ordinamento non valido",
   "un modello di funzione caricato da un modulo IFC è stato analizzato erroneamente come %nd",
   "non è stato possibile caricare un riferimento all'entità IFC nel modulo %sq",
-  "Ordinamento indice IFC = %d1, valore = %d2",
+  "dalla partizione %sq elemento %d1 (posizione file %d2, posizione relativa %d3)",
   "gli indicatori concatenati non sono consentiti per un tipo di classe con un distruttore non banale",
   "una dichiarazione di specializzazione esplicita non può essere una dichiarazione Friend",
   "il tipo std::float128_t non è supportato; verrà invece usato std::float64_t",
-  "il tipo std::bfloat16_t non è supportato; verrà utilizzato std::float32_t"
+  "il tipo std::bfloat16_t non è supportato; verrà utilizzato std::float32_t",
+  "non è possibile dichiarare una guida alla deduzione per il modello di alias %no"
 ]
