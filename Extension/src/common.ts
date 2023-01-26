@@ -874,17 +874,25 @@ export async function renameAsync(oldName: string, newName: string): Promise<voi
     });
 }
 
-export function promptForReloadWindowDueToSettingsChange(): void {
-    promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
+export async function promptForReloadWindowDueToSettingsChange(): Promise<void> {
+    await promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
-export function promptReloadWindow(message: string): void {
+export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
-        if (value === reload) {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-    });
+    const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+    if (value === reload) {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
+}
+
+export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
+    // Detect duplicate paths or invalid paths.
+    if (compilers.includes(path) || path === null || path === undefined) {
+        return compilers;
+    }
+    compilers.push(path);
+    return compilers;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {

@@ -11,6 +11,7 @@
     "c_cpp.command.configurationProviderSelect.title": "Change Configuration Provider...",
     "c_cpp.command.configurationEditJSON.title": "Edit Configurations (JSON)",
     "c_cpp.command.configurationEditUI.title": "Edit Configurations (UI)",
+    "c_cpp.command.selectDefaultCompiler.title": "Select Default Compiler",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
     "c_cpp.command.disableErrorSquiggles.title": "Disable Error Squiggles",
