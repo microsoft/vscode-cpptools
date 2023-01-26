@@ -886,7 +886,7 @@ export class DefaultClient implements Client {
         });
     }
 
-    public async showSelectCompiler(paths: string[]): Promise<number> {
+    public async showSelectDefaultCompiler(paths: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
 
@@ -915,8 +915,16 @@ export class DefaultClient implements Client {
         return (selection) ? selection.index : -1;
     }
 
+    public async showPrompt(promptMessage: string): Promise<void> {
+        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), promptMessage);
+        if (value === promptMessage) {
+            this.handleCompilerQuickPick(true);
+        }
+    }
+
     public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
         const settings: OtherSettings = new OtherSettings();
+        const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         let paths: string[] = [];
         if (compilerDefaults.knownCompilers !== undefined) {
             paths = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
@@ -924,25 +932,17 @@ export class DefaultClient implements Client {
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
-        const index: number = await this.showSelectCompiler(paths);
+        const index: number = await this.showSelectDefaultCompiler(paths);
         if (index === -1) {
             settings.defaultCompiler = "";
             if (showSecondPrompt) {
-                const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), setCompiler);
-                if (value === setCompiler) {
-                    this.handleCompilerQuickPick(true);
-                }
+                this.showPrompt(selectCompiler);
             }
             return;
         }
         if (index === paths.length - 1) {
             settings.defaultCompiler = "";
-            const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-            const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), setCompiler);
-            if (value === setCompiler) {
-                this.handleCompilerQuickPick(true);
-            }
+            this.showPrompt(selectCompiler);
         } else if (index === paths.length - 2) {
             switch (os.platform()) {
                 case 'win32':
@@ -990,18 +990,10 @@ export class DefaultClient implements Client {
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
                 } else {
-                    const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), setCompiler);
-                    if (value === setCompiler) {
-                        this.handleCompilerQuickPick(true);
-                    }
+                    this.showPrompt(selectCompiler);
                 }
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), setCompiler);
-                if (value === setCompiler) {
-                    this.handleCompilerQuickPick(true);
-                }
+                this.showPrompt(selectCompiler);
             } else {
                 this.handleCompilerQuickPick(false);
             }
