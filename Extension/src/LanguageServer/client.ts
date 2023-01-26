@@ -973,7 +973,7 @@ export class DefaultClient implements Client {
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
         const settings: OtherSettings = new OtherSettings();
         if (compilerDefaults.compilerPath !== "") {
-            if (!command) {
+            if (!command && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found on this computer. Do you want to configure it for IntelliSense?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
