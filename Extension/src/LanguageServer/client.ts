@@ -916,7 +916,7 @@ export class DefaultClient implements Client {
     }
 
     public async showPrompt(promptMessage: string): Promise<void> {
-        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), promptMessage);
+        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), promptMessage);
         if (value === promptMessage) {
             this.handleCompilerQuickPick(true);
         }
