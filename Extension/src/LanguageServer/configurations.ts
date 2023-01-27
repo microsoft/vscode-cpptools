@@ -893,7 +893,9 @@ export class CppProperties {
                     }
                 } else {
                     // add compiler to list of trusted compilers
-                    util.addTrustedCompiler(compilerPaths, configuration.compilerPath);
+                    if (i === this.CurrentConfigurationIndex) {
+                        util.addTrustedCompiler(compilerPaths, configuration.compilerPath);
+                    }
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
