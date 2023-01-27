@@ -214,7 +214,7 @@ export class NewUI implements UI {
         const twoStatus: boolean = val && this.isParsingWorkspace;
 
         // Leave this outside for more realtime respone
-        this.browseEngineStatusBarItem.busy = showIcon;
+        this.browseEngineStatusBarItem.busy = val || (!this.isParsingWorkspacePaused && this.isParsingWorkspace);
 
         if (showIcon) {
             this.browseEngineStatusBarItem.text = "$(database)";
