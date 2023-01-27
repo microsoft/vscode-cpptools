@@ -915,9 +915,9 @@ export class DefaultClient implements Client {
         return (selection) ? selection.index : -1;
     }
 
-    public async showPrompt(promptMessage: string): Promise<void> {
+    public async showPrompt(buttonMessage: string): Promise<void> {
         const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), promptMessage);
-        if (value === promptMessage) {
+        if (value === buttonMessage) {
             this.handleCompilerQuickPick(true);
         }
     }
@@ -2435,7 +2435,7 @@ export class DefaultClient implements Client {
                 return false;
             });
         },
-        () => ask.Value = false);
+            () => ask.Value = false);
     }
 
     /**
