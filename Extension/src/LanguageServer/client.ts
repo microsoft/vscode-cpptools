@@ -337,6 +337,10 @@ export interface LocalizeDocumentSymbol {
     children: LocalizeDocumentSymbol[];
 }
 
+export interface GetDocumentSymbolResult {
+    symbols: LocalizeDocumentSymbol[];
+}
+
 export interface LocalizeSymbolInformation {
     name: string;
     kind: vscode.SymbolKind;
@@ -368,6 +372,10 @@ export interface FormatParams {
     onChanges: boolean;
 }
 
+export interface FormatResult {
+    edits: TextEdit[];
+}
+
 export interface GetFoldingRangesParams {
     uri: string;
 }
@@ -385,7 +393,6 @@ export interface CppFoldingRange {
 }
 
 export interface GetFoldingRangesResult {
-    canceled: boolean;
     ranges: CppFoldingRange[];
 }
 
@@ -403,7 +410,6 @@ interface SemanticToken {
 
 export interface GetSemanticTokensResult {
     fileVersion: number;
-    canceled: boolean;
     tokens: SemanticToken[];
 }
 
@@ -531,13 +537,13 @@ const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, conf
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
 const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new RequestType<void, GetDiagnosticsResult, void>('cpptools/getDiagnostics');
-export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void> = new RequestType<GetDocumentSymbolRequestParams, LocalizeDocumentSymbol[], void>('cpptools/getDocumentSymbols');
+export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
 export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
 export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
 export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void>('cpptools/getSemanticTokens');
-export const FormatDocumentRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatDocument');
-export const FormatRangeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatRange');
-export const FormatOnTypeRequest: RequestType<FormatParams, TextEdit[], void> = new RequestType<FormatParams, TextEdit[], void>('cpptools/formatOnType');
+export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
+export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
+export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
 const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
@@ -1688,7 +1694,8 @@ export class DefaultClient implements Client {
     }
 
     public async logDiagnostics(): Promise<void> {
-        const response: GetDiagnosticsResult = await this.requestWhenReady(() => this.languageClient.sendRequest(GetDiagnosticsRequest, null));
+        await this.awaitUntilLanguageClientReady();
+        const response: GetDiagnosticsResult = await this.languageClient.sendRequest(GetDiagnosticsRequest, null);
         const diagnosticsChannel: vscode.OutputChannel = getDiagnosticsChannel();
         diagnosticsChannel.clear();
 
