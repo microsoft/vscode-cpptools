@@ -221,7 +221,6 @@ export class NewUI implements UI {
             this.browseEngineStatusBarItem.detail = (val ? this.parsingFilesTooltip : "")
                 + (twoStatus ? " | " : "")
                 + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
-            this.browseEngineStatusBarItem.busy = val && this.isParsingWorkspacePaused;
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
