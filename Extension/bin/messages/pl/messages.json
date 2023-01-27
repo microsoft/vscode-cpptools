@@ -2935,7 +2935,7 @@
   "niedozwolony typ %t we wskaźniku this dla funkcji składowej ograniczonej przez amp %nfd",
   "niedozwolony zwracany typ %t dla funkcji z ograniczeniem amp %nfd",
   "niedozwolony typ parametru %t dla funkcji z ograniczeniem amp %nfd",
-  null,
+  "niedozwolona konstrukcja w funkcji z ograniczeniami amp %nfd",
   "niedozwolona klasa magazynu %s w funkcji z ograniczeniem amp %nfd",
   "element %s nie jest dozwolony w funkcji z ograniczeniem amp %nfd",
   "niedozwolone rzutowanie w funkcji z ograniczeniem amp",
@@ -3478,9 +3478,10 @@
   "nieprawidłowa wartość sortowania modułu %sq",
   "szablon funkcji załadowany z modułu IFC został niepoprawnie przeanalizowany jako %nd",
   "nie można załadować odwołania do jednostki IFC w module %sq",
-  "Sortowanie indeksu IFC = %d1, wartość = %d2",
+  "z partycji %sq element %d1 (pozycja pliku %d2, względna pozycja %d3)",
   "desygnator łańcuchowy nie jest dozwolony dla typu klasy z destruktorem nietrywialnym",
   "jawna deklaracja specjalizacji nie może być deklaracją zaprzyjaźnioną",
   "typ std::float128_t nie jest obsługiwany; zamiast tego zostanie użyty std::float64_t",
-  "Typ std::bfloat16_t nie jest obsługiwany; zamiast tego zostanie użyty std::float32_t"
+  "Typ std::bfloat16_t nie jest obsługiwany; zamiast tego zostanie użyty std::float32_t",
+  "nie można zadeklarować przewodnika wnioskowania dla szablonu aliasu %no"
 ]
