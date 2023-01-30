@@ -68,7 +68,8 @@ export class NewUI implements UI {
     private codeAnalysisTotal: number = 0;
     private readonly workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
     private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parsing Workspace: Paused");
-    private readonly workspaceParseingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
+    private readonly workspaceParsingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
+    private readonly workspaceParsingIndexing: string = localize("indexing.tagparser.text", "Indexing Workspace");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
     private readonly workspaceRescanText = localize("rescan.tagparse.text", "Rescan Workspace");
@@ -109,7 +110,7 @@ export class NewUI implements UI {
 
         this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.tagparser`, documentSelector);
         this.browseEngineStatusBarItem.name = localize("cpptools.status.tagparser", "C/C++ Tag Parser Status");
-        this.browseEngineStatusBarItem.detail = localize("indexing.files.tooltip", "Indexing Workspace");
+        this.browseEngineStatusBarItem.detail = localize("cpptools.detail.tagparser", "Warming up...");
         this.browseEngineStatusBarItem.text = "$(database)";
         this.browseEngineStatusBarItem.command = {
             command: "C_Cpp.RescanWorkspaceUI_Telemetry",
@@ -144,6 +145,11 @@ export class NewUI implements UI {
     }
 
     private dbTimeout?: NodeJS.Timeout;
+    private setIsIndexingWorkspace(val: boolean): void {
+        if (val) {
+            this.browseEngineStatusBarItem.detail = this.workspaceParsingIndexing;
+        }
+    }
     private setIsParsingWorkspace(val: boolean): void {
         this.isParsingWorkspace = val;
         const showIcon: boolean = val || this.isParsingFiles;
@@ -160,7 +166,7 @@ export class NewUI implements UI {
             }
         } else {
             this.dbTimeout = setTimeout(() => {
-                this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
+                this.browseEngineStatusBarItem.text = this.workspaceParsingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
                     command: "C_Cpp.RescanWorkspaceUI_Telemetry",
@@ -232,7 +238,7 @@ export class NewUI implements UI {
             }
         } else {
             this.dbTimeout = setTimeout(() => {
-                this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
+                this.browseEngineStatusBarItem.text = this.workspaceParsingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
                     command: "C_Cpp.RescanWorkspaceUI_Telemetry",
@@ -383,6 +389,7 @@ export class NewUI implements UI {
     }
 
     public bind(client: Client): void {
+        client.IndexingWorkspaceChanged(value => { this.setIsIndexingWorkspace(value); });
         client.ParsingWorkspaceChanged(value => { this.setIsParsingWorkspace(value); });
         client.ParsingWorkspacePausableChanged(value => { this.setIsParsingWorkspacePausable(value); });
         client.ParsingWorkspacePausedChanged(value => { this.setIsParsingWorkspacePaused(value); });
