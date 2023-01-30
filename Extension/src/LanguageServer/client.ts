@@ -70,6 +70,7 @@ let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 let displayedSelectCompiler: boolean = false;
+let secondPromptCounter: number = 0;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -916,9 +917,12 @@ export class DefaultClient implements Client {
     }
 
     public async showPrompt(buttonMessage: string): Promise<void> {
-        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
-        if (value === buttonMessage) {
-            this.handleCompilerQuickPick(true);
+        if (secondPromptCounter < 2) {
+            const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
+            secondPromptCounter++;
+            if (value === buttonMessage) {
+                this.handleCompilerQuickPick(true);
+            }
         }
     }
 
@@ -942,7 +946,6 @@ export class DefaultClient implements Client {
         }
         if (index === paths.length - 1) {
             settings.defaultCompiler = "";
-            this.showPrompt(selectCompiler);
         } else if (index === paths.length - 2) {
             switch (os.platform()) {
                 case 'win32':
@@ -981,7 +984,7 @@ export class DefaultClient implements Client {
         const settings: OtherSettings = new OtherSettings();
         if (compilerDefaults.compilerPath !== "") {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found on this computer. Do you want to configure it for IntelliSense?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
                     settings.defaultCompiler = compilerDefaults.compilerPath;
@@ -1126,6 +1129,7 @@ export class DefaultClient implements Client {
                                 defaultClient.configuration.handleConfigurationChange();
                             }
                         });
+                        compilerDefaults.trustedCompilerFound = false;
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);
@@ -2435,7 +2439,7 @@ export class DefaultClient implements Client {
                 return false;
             });
         },
-            () => ask.Value = false);
+        () => ask.Value = false);
     }
 
     /**
