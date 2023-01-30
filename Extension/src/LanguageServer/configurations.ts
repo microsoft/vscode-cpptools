@@ -296,7 +296,7 @@ export class CppProperties {
         this.handleConfigurationChange();
     }
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
-        this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.defaultCompilerPath = compilerDefaults.trustedCompilerFound ? compilerDefaults.compilerPath : null;
         this.knownCompilers = compilerDefaults.knownCompilers;
         this.defaultCStandard = compilerDefaults.cStandard;
         this.defaultCppStandard = compilerDefaults.cppStandard;
