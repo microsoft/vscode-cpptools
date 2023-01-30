@@ -303,7 +303,7 @@ export class CppProperties {
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
-        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode !== "" ? compilerDefaults.intelliSenseMode : undefined;
         this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
     }
 
