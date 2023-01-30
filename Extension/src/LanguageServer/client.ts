@@ -2244,7 +2244,7 @@ export class DefaultClient implements Client {
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
             // Check which UI
-            if (ui instanceof NewUI) {
+            if (ui.isNewUI) {
                 // Set indexingWorksapce if new UI and message starts with Discovering or Parsing and set appropriate boolean
                 this.model.isIndexingWorkspace.Value = true;
             }
