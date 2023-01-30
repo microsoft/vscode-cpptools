@@ -2233,7 +2233,6 @@ export class DefaultClient implements Client {
         const message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
-        console.log("message: ", message);
         if (message.endsWith("Idle")) {
             // nothing to do
         } else if (message.endsWith("Parsing")) {
