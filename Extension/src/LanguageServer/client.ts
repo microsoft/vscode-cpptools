@@ -2328,10 +2328,11 @@ export class DefaultClient implements Client {
 
     private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
         this.model.parsingWorkspaceStatus.Value = getLocalizedString(notificationBody);
-        if (notificationBody.text.startsWith("Workspace parsing paused")) {
+        const text: string = lookupString(notificationBody.stringId);
+        if (text.startsWith("Workspace parsing paused")) {
             this.model.isParsingWorkspacePaused.Value = true;
             this.model.isParsingWorkspacePausable.Value = true;
-        } else if (notificationBody.text.startsWith("Parsing workspace")) {
+        } else if (text.startsWith("Parsing workspace")) {
             this.model.isParsingWorkspacePaused.Value = false;
             this.model.isParsingWorkspacePausable.Value = true;
         } else {
