@@ -2237,15 +2237,15 @@ export class DefaultClient implements Client {
             // nothing to do
         } else if (message.endsWith("Parsing")) {
             this.model.isParsingWorkspace.Value = true;
-            this.model.isIndexingWorkspace.Value = message.includes("Discovering");
+            this.model.isIndexingWorkspace.Value = false;
             this.model.isParsingWorkspacePausable.Value = false;
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
-            // Check which UI
             if (ui.isNewUI) {
-                // Set indexingWorksapce if new UI and message starts with Discovering or Parsing and set appropriate boolean
                 this.model.isIndexingWorkspace.Value = true;
+            } else {
+                this.model.isParsingWorkspace.Value = true;
             }
         } else if (message.endsWith("files")) {
             this.model.isParsingFiles.Value = true;

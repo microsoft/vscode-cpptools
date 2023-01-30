@@ -147,6 +147,7 @@ export class NewUI implements UI {
     private dbTimeout?: NodeJS.Timeout;
     private setIsIndexingWorkspace(val: boolean): void {
         if (val) {
+            this.browseEngineStatusBarItem.text = "$(database)";
             this.browseEngineStatusBarItem.detail = this.workspaceParsingIndexing;
         }
     }
