@@ -533,6 +533,12 @@ interface InitializationOptions {
     settings: SettingsParams;
 };
 
+interface TagParseStatus {
+    localizeStringParams: LocalizeStringParams;
+    isPausable: boolean;
+    isPaused: boolean;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
@@ -587,7 +593,7 @@ const RemoveCodeAnalysisProblemsNotification: NotificationType<RemoveCodeAnalysi
 const ReloadWindowNotification: NotificationType<void> = new NotificationType<void>('cpptools/reloadWindow');
 const UpdateTrustedCompilersNotification: NotificationType<UpdateTrustedCompilerPathsResult> = new NotificationType<UpdateTrustedCompilerPathsResult>('cpptools/updateTrustedCompilersList');
 const LogTelemetryNotification: NotificationType<TelemetryPayload> = new NotificationType<TelemetryPayload>('cpptools/logTelemetry');
-const ReportTagParseStatusNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/reportTagParseStatus');
+const ReportTagParseStatusNotification: NotificationType<TagParseStatus> = new NotificationType<TagParseStatus>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
 const DebugLogNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/debugLog');
@@ -2326,18 +2332,10 @@ export class DefaultClient implements Client {
         }
     }
 
-    private updateTagParseStatus(notificationBody: LocalizeStringParams): void {
-        this.model.parsingWorkspaceStatus.Value = getLocalizedString(notificationBody);
-        if (notificationBody.text.startsWith("Workspace parsing paused")) {
-            this.model.isParsingWorkspacePaused.Value = true;
-            this.model.isParsingWorkspacePausable.Value = true;
-        } else if (notificationBody.text.startsWith("Parsing workspace")) {
-            this.model.isParsingWorkspacePaused.Value = false;
-            this.model.isParsingWorkspacePausable.Value = true;
-        } else {
-            this.model.isParsingWorkspacePaused.Value = false;
-            this.model.isParsingWorkspacePausable.Value = false;
-        }
+    private updateTagParseStatus(tagParseStatus: TagParseStatus): void {
+        this.model.parsingWorkspaceStatus.Value = getLocalizedString(tagParseStatus.localizeStringParams);
+        this.model.isParsingWorkspacePausable.Value = tagParseStatus.isPausable;
+        this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
     private updateInactiveRegions(params: InactiveRegionParams): void {
