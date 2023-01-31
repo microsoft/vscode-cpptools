@@ -736,9 +736,9 @@ export interface Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): Promise<void>;
     queueTask<T>(task: () => Thenable<T>): Promise<T>;
-    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
-    notifyWhenLanguageClientReady(notify: () => void): void;
-    awaitUntilLanguageClientReady(): Thenable<void>;
+    requestWhenReady<T>(request: () => Thenable<T>): Promise<T>;
+    notifyWhenLanguageClientReady<T>(notify: () => T): Promise<T>;
+    awaitUntilLanguageClientReady(): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
     activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -1945,8 +1945,7 @@ export class DefaultClient implements Client {
         };
         await this.updateActiveDocumentTextOptions();
         this.trackedDocuments.add(document);
-        await this.awaitUntilLanguageClientReady();
-        await this.languageClient.sendNotification(DidOpenNotification, params);
+        await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
     }
 
     /**
@@ -2017,7 +2016,7 @@ export class DefaultClient implements Client {
             });
     }
 
-    public requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> {
+    public requestWhenReady<T>(request: () => Thenable<T>): Promise<T> {
         return this.queueTask(request);
     }
 
@@ -2028,7 +2027,7 @@ export class DefaultClient implements Client {
         return this.queueTask(task);
     }
 
-    public awaitUntilLanguageClientReady(): Thenable<void> {
+    public awaitUntilLanguageClientReady(): Promise<void> {
         const task: () => Thenable<void> = () => new Promise<void>(resolve => {
             resolve();
         });
@@ -3420,9 +3419,9 @@ class NullClient implements Client {
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     queueTask<T>(task: () => Thenable<T>): Promise<T> { return Promise.resolve(task()); }
-    requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
-    notifyWhenLanguageClientReady(notify: () => void): void { }
-    awaitUntilLanguageClientReady(): Thenable<void> { return Promise.resolve(); }
+    requestWhenReady<T>(request: () => Thenable<T>): Promise<T> { return Promise.resolve(request()); }
+    notifyWhenLanguageClientReady<T>(notify: () => T): Promise<T> { return Promise.resolve(notify()); }
+    awaitUntilLanguageClientReady(): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
     activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
