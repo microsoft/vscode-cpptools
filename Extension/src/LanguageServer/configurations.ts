@@ -295,14 +295,14 @@ export class CppProperties {
         this.handleConfigurationChange();
     }
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
-        this.defaultCompilerPath = compilerDefaults.compilerPath;
+        this.defaultCompilerPath = compilerDefaults.trustedCompilerFound ? compilerDefaults.compilerPath : null;
         this.knownCompilers = compilerDefaults.knownCompilers;
         this.defaultCStandard = compilerDefaults.cStandard;
         this.defaultCppStandard = compilerDefaults.cppStandard;
         this.defaultIncludes = compilerDefaults.includes;
         this.defaultFrameworks = compilerDefaults.frameworks;
         this.defaultWindowsSdkVersion = compilerDefaults.windowsSdkVersion;
-        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode;
+        this.defaultIntelliSenseMode = compilerDefaults.intelliSenseMode !== "" ? compilerDefaults.intelliSenseMode : undefined;
         this.trustedCompilerFound = compilerDefaults.trustedCompilerFound;
     }
 
