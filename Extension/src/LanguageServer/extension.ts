@@ -324,7 +324,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
 
-export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
+export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<boolean> {
     const client: Client = clients.getClientFor(document.uri);
     if (client) {
         // Log warm start.
@@ -333,28 +333,17 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 client.TrackedDocuments.add(document);
-                const finishDidOpen = (doc: vscode.TextDocument) => {
-                    client.provideCustomConfiguration(doc.uri, undefined);
-                    client.notifyWhenLanguageClientReady(() => {
-                        client.takeOwnership(doc);
-                        client.onDidOpenTextDocument(doc);
-                    });
-                };
-                let languageChanged: boolean = false;
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                     const baseFileName: string = path.basename(document.fileName);
                     const mappingString: string = baseFileName + "@" + document.fileName;
                     client.addFileAssociations(mappingString, "cpp");
                     client.sendDidChangeSettings();
-                    vscode.languages.setTextDocumentLanguage(document, "cpp").then((newDoc: vscode.TextDocument) => {
-                        finishDidOpen(newDoc);
-                    });
-                    languageChanged = true;
+                    document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
                 }
-                if (!languageChanged) {
-                    finishDidOpen(document);
-                }
+                await client.provideCustomConfiguration(document.uri, undefined);
+                client.onDidOpenTextDocument(document);
+                await client.sendDidOpen(document);
                 return true;
             }
         }
@@ -364,12 +353,11 @@ export function processDelayedDidOpen(document: vscode.TextDocument): boolean {
 
 function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
-    editors.forEach(editor => {
+    editors.forEach(async (editor) => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
-            if (!processDelayedDidOpen(editor.document)) {
-                const client: Client = clients.getClientFor(editor.document.uri);
-                client.onDidChangeVisibleTextEditor(editor);
-            }
+            const client: Client = clients.getClientFor(editor.document.uri);
+            await client.requestWhenReady(() => processDelayedDidOpen(editor.document));
+            client.onDidChangeVisibleTextEditor(editor);
         }
     });
 }
