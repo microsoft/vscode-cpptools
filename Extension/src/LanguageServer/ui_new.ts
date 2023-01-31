@@ -69,6 +69,7 @@ export class NewUI implements UI {
     private readonly workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
     private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parsing Workspace: Paused");
     private readonly workspaceParsingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
+    private readonly workspaceParsingInitializing: string = localize("initializing.tagparser.text", "Initializing Workspace");
     private readonly workspaceParsingIndexing: string = localize("indexing.tagparser.text", "Indexing Workspace");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
@@ -144,13 +145,20 @@ export class NewUI implements UI {
         }
     }
 
-    private dbTimeout?: NodeJS.Timeout;
+    private setIsInitializingWorkspace(val: boolean): void {
+        if (val) {
+            this.browseEngineStatusBarItem.text = "$(database)";
+            this.browseEngineStatusBarItem.detail = this.workspaceParsingInitializing;
+        }
+    }
     private setIsIndexingWorkspace(val: boolean): void {
         if (val) {
             this.browseEngineStatusBarItem.text = "$(database)";
             this.browseEngineStatusBarItem.detail = this.workspaceParsingIndexing;
         }
     }
+
+    private dbTimeout?: NodeJS.Timeout;
     private setIsParsingWorkspace(val: boolean): void {
         this.isParsingWorkspace = val;
         const showIcon: boolean = val || this.isParsingFiles;
@@ -390,6 +398,7 @@ export class NewUI implements UI {
     }
 
     public bind(client: Client): void {
+        client.InitializingWorkspaceChanged(value => { this.setIsInitializingWorkspace(value); });
         client.IndexingWorkspaceChanged(value => { this.setIsIndexingWorkspace(value); });
         client.ParsingWorkspaceChanged(value => { this.setIsParsingWorkspace(value); });
         client.ParsingWorkspacePausableChanged(value => { this.setIsParsingWorkspacePausable(value); });
