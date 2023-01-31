@@ -35,13 +35,13 @@ jobs:
         working-directory: Extension
 
       - name: Run unit tests
-        uses: GabrielBB/xvfb-action@v1.4
+        uses: GabrielBB/xvfb-action@v1.6
         with:
           run: yarn run unitTests
           working-directory: Extension
 
 #      - name: Run languageServer integration tests
-#        uses: GabrielBB/xvfb-action@v1.4
+#        uses: GabrielBB/xvfb-action@v1.6
 #        with:
 #          run: yarn run integrationTests
 #          working-directory: Extension
