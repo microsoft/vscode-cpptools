@@ -344,7 +344,7 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                 }
                 await client.provideCustomConfiguration(document.uri, undefined);
                 client.onDidOpenTextDocument(document);
-                await client.takeOwnership(document);
+                await client.sendDidOpen(document);
                 return true;
             }
         }
@@ -356,8 +356,8 @@ function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): v
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(async (editor) => {
         if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
-            await processDelayedDidOpen(editor.document);
             const client: Client = clients.getClientFor(editor.document.uri);
+            await client.requestWhenReady(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
         }
     });

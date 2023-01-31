@@ -18,8 +18,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     }
 
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-        await processDelayedDidOpen(document);
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
         const uriString: string = document.uri.toString();
         // First check the semantic token cache to see if we already have results for that file and version
         const cache: [number, vscode.SemanticTokens] | undefined = this.tokenCaches.get(uriString);

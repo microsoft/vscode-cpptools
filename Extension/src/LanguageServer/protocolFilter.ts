@@ -23,7 +23,7 @@ export function createProtocolFilter(): Middleware {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
-                await processDelayedDidOpen(document);
+                await clients.ActiveClient.requestWhenReady(() => processDelayedDidOpen(document));
                 if (editor && editor === vscode.window.activeTextEditor) {
                     onDidChangeActiveTextEditor(editor);
                 }

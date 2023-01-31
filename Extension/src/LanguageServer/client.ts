@@ -735,6 +735,7 @@ export interface Client {
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): Promise<void>;
+    sendDidOpen(document: vscode.TextDocument): Promise<void>;
     queueTask<T>(task: () => Thenable<T>): Promise<T>;
     requestWhenReady<T>(request: () => Thenable<T>): Promise<T>;
     notifyWhenLanguageClientReady<T>(notify: () => T): Promise<T>;
@@ -1935,6 +1936,12 @@ export class DefaultClient implements Client {
      * tracked documents.
      */
     public async takeOwnership(document: vscode.TextDocument): Promise<void> {
+        this.trackedDocuments.add(document);
+        this.updateActiveDocumentTextOptions();
+        await this.requestWhenReady(() => this.sendDidOpen(document));
+    }
+
+    public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
         const params: DidOpenTextDocumentParams = {
             textDocument: {
                 uri: document.uri.toString(),
@@ -1943,9 +1950,7 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
-        await this.updateActiveDocumentTextOptions();
-        this.trackedDocuments.add(document);
-        await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
+        await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
     /**
@@ -2116,7 +2121,7 @@ export class DefaultClient implements Client {
                 if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
                     cachedEditorConfigLookups.clear();
-                    await this.updateActiveDocumentTextOptions();
+                    this.updateActiveDocumentTextOptions();
                 }
                 if (fileName === ".clang-format" || fileName === "_clang-format") {
                     cachedEditorConfigLookups.clear();
@@ -2144,7 +2149,7 @@ export class DefaultClient implements Client {
                 if (fileName === ".editorconfig") {
                     cachedEditorConfigSettings.clear();
                     cachedEditorConfigLookups.clear();
-                    await this.updateActiveDocumentTextOptions();
+                    this.updateActiveDocumentTextOptions();
                 }
                 if (dotIndex !== -1) {
                     const ext: string = uri.fsPath.substring(dotIndex + 1);
@@ -2456,7 +2461,7 @@ export class DefaultClient implements Client {
         return this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
     }
 
-    private async updateActiveDocumentTextOptions(): Promise<void> {
+    private updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor?.document?.uri.scheme === "file"
             && (editor.document.languageId === "c"
@@ -2493,7 +2498,7 @@ export class DefaultClient implements Client {
      * notifications to the language server
      */
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
-        await this.updateActiveDocumentTextOptions();
+        this.updateActiveDocumentTextOptions();
         await this.awaitUntilLanguageClientReady();
         this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
     }
@@ -3418,6 +3423,7 @@ class NullClient implements Client {
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     queueTask<T>(task: () => Thenable<T>): Promise<T> { return Promise.resolve(task()); }
     requestWhenReady<T>(request: () => Thenable<T>): Promise<T> { return Promise.resolve(request()); }
     notifyWhenLanguageClientReady<T>(notify: () => T): Promise<T> { return Promise.resolve(notify()); }
