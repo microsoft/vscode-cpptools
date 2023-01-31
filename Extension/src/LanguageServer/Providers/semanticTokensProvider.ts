@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, GetSemanticTokensResult, semanticTokensLegend } from '../client';
+import { processDelayedDidOpen } from '../extension';
 
 export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
     private client: DefaultClient;
@@ -17,6 +18,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     }
 
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+        await processDelayedDidOpen(document);
         await this.client.awaitUntilLanguageClientReady();
         const uriString: string = document.uri.toString();
         // First check the semantic token cache to see if we already have results for that file and version

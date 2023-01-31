@@ -734,7 +734,7 @@ export interface Client {
     getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
-    takeOwnership(document: vscode.TextDocument): void;
+    takeOwnership(document: vscode.TextDocument): Promise<void>;
     queueTask<T>(task: () => Thenable<T>): Promise<T>;
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T>;
     notifyWhenLanguageClientReady(notify: () => void): void;
@@ -1934,7 +1934,7 @@ export class DefaultClient implements Client {
      * that it knows about the file, as well as adding it to this client's set of
      * tracked documents.
      */
-    public takeOwnership(document: vscode.TextDocument): void {
+    public async takeOwnership(document: vscode.TextDocument): Promise<void> {
         const params: DidOpenTextDocumentParams = {
             textDocument: {
                 uri: document.uri.toString(),
@@ -1943,9 +1943,10 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
-        this.updateActiveDocumentTextOptions();
-        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(DidOpenNotification, params));
+        await this.updateActiveDocumentTextOptions();
         this.trackedDocuments.add(document);
+        await this.awaitUntilLanguageClientReady();
+        await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
     /**
@@ -3417,7 +3418,7 @@ class NullClient implements Client {
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
-    takeOwnership(document: vscode.TextDocument): void { }
+    takeOwnership(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     queueTask<T>(task: () => Thenable<T>): Promise<T> { return Promise.resolve(task()); }
     requestWhenReady<T>(request: () => Thenable<T>): Thenable<T> { return request(); }
     notifyWhenLanguageClientReady(notify: () => void): void { }

@@ -253,7 +253,6 @@ export class CppProperties {
                     this.isCppPropertiesJsonVisible = true;
                     if (!wasVisible) {
                         this.handleSquiggles();
-
                     }
                 }
             });

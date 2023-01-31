@@ -4,12 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
 import { Middleware } from 'vscode-languageclient';
 import { Client } from './client';
 import * as vscode from 'vscode';
-import { clients, onDidChangeActiveTextEditor } from './extension';
-import { shouldChangeFromCToCpp } from './utils';
+import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
@@ -20,35 +18,14 @@ export function createProtocolFilter(): Middleware {
 
     return {
         didOpen: async (document, sendMessage) => {
-            await clients.ActiveClient.awaitUntilLanguageClientReady();
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
-                const me: Client = clients.getClientFor(document.uri);
-                if (!me.TrackedDocuments.has(document)) {
-                    // Log warm start.
-                    clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-                    if (clients.checkOwnership(me, document)) {
-                        me.TrackedDocuments.add(document);
-                        const finishDidOpen = async (doc: vscode.TextDocument) => {
-                            await me.provideCustomConfiguration(doc.uri, undefined);
-                            await sendMessage(doc);
-                            me.onDidOpenTextDocument(doc);
-                            if (editor && editor === vscode.window.activeTextEditor) {
-                                onDidChangeActiveTextEditor(editor);
-                            }
-                        };
-                        if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
-                            const baesFileName: string = path.basename(document.fileName);
-                            const mappingString: string = baesFileName + "@" + document.fileName;
-                            me.addFileAssociations(mappingString, "cpp");
-                            me.sendDidChangeSettings();
-                            document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
-                        }
-                        await finishDidOpen(document);
-                    }
+                await processDelayedDidOpen(document);
+                if (editor && editor === vscode.window.activeTextEditor) {
+                    onDidChangeActiveTextEditor(editor);
                 }
             } else {
                 // NO-OP
