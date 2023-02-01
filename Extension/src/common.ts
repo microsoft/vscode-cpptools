@@ -17,6 +17,7 @@ import * as tmp from 'tmp';
 import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
+import { DocumentFilter } from 'vscode-languageclient';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -873,17 +874,25 @@ export async function renameAsync(oldName: string, newName: string): Promise<voi
     });
 }
 
-export function promptForReloadWindowDueToSettingsChange(): void {
-    promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
+export async function promptForReloadWindowDueToSettingsChange(): Promise<void> {
+    await promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
-export function promptReloadWindow(message: string): void {
+export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
-        if (value === reload) {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-    });
+    const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+    if (value === reload) {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
+}
+
+export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
+    // Detect duplicate paths or invalid paths.
+    if (compilers.includes(path) || path === null || path === undefined) {
+        return compilers;
+    }
+    compilers.push(path);
+    return compilers;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
@@ -991,7 +1000,7 @@ function extractArgs(argsString: string): string[] {
                 }
                 const still_escaping: boolean = (backslashCount % 2) !== 0;
                 if (!reachedEnd && c === '\"') {
-                    backslashCount /= 2;
+                    backslashCount = Math.floor(backslashCount / 2);
                 }
                 while (backslashCount--) {
                     currentArg += '\\';
@@ -1037,10 +1046,11 @@ function extractArgs(argsString: string): string[] {
     }
 }
 
-function isCl(compilerPath: string): boolean {
+export function isCl(compilerPath: string): boolean {
     const compilerPathLowercase: string = compilerPath.toLowerCase();
-    return (compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl") || (compilerPathLowercase === "cl"));
+    return compilerPathLowercase === "cl" || compilerPathLowercase === "cl.exe"
+        || compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe")
+        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl");
 }
 
 /** CompilerPathAndArgs retains original casing of text input for compiler path and args */
@@ -1452,3 +1462,9 @@ export function whichAsync(name: string): Promise<string | undefined> {
         });
     });
 }
+
+export const documentSelector: DocumentFilter[] = [
+    { scheme: 'file', language: 'c' },
+    { scheme: 'file', language: 'cpp' },
+    { scheme: 'file', language: 'cuda-cpp' }
+];

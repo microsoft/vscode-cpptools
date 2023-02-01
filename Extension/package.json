@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.14.0-main",
+  "version": "1.14.1-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -56,6 +56,7 @@
     "onCommand:C_Cpp.RestartIntelliSenseForFile",
     "onCommand:C_Cpp.ConfigurationEditJSON",
     "onCommand:C_Cpp.ConfigurationEditUI",
+    "onCommand:C_Cpp.selectDefaultCompiler",
     "onCommand:C_Cpp.ConfigurationSelect",
     "onCommand:C_Cpp.ConfigurationProviderSelect",
     "onCommand:C_Cpp.CreateDeclarationOrDefinition",
@@ -2939,6 +2940,11 @@
       {
         "command": "C_Cpp.ConfigurationEditUI",
         "title": "%c_cpp.command.configurationEditUI.title%",
+        "category": "C/C++"
+      },
+      {
+        "command": "C_Cpp.selectDefaultCompiler",
+        "title": "%c_cpp.command.selectDefaultCompiler.title%",
         "category": "C/C++"
       },
       {
@@ -5976,7 +5982,7 @@
     "ssh-config": "^4.1.0",
     "tmp": "^0.2.1",
     "vscode-cpptools": "^6.1.0",
-    "vscode-languageclient": "^8.0.1",
+    "vscode-languageclient": "^8.1.0-next.4",
     "vscode-nls": "^5.0.0",
     "vscode-tas-client": "^0.1.27",
     "which": "^2.0.2",

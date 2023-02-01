@@ -1,5 +1,22 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.14.1: February 2, 2023
+### New Features
+* Add recursive macro expansion on hover. [#3579](https://github.com/microsoft/vscode-cpptools/issues/3579)
+* Move status bar items to the language status UI. [#8405](https://github.com/microsoft/vscode-cpptools/issues/8405)
+* Add the Select Default Compiler command that lets you choose a default compiler to configure IntelliSense. [#10027](https://github.com/microsoft/vscode-cpptools/issues/10027)
+
+### Enhancements
+* Exclude rename results external to the workspace. [#9235](https://github.com/microsoft/vscode-cpptools/issues/9235)
+* Reorder commands in the code action context menu. [#10400](https://github.com/microsoft/vscode-cpptools/issues/10400)
+
+### Bug Fixes
+* Fix Create Declaration / Definition with an anonymous namespace. [#10189](https://github.com/microsoft/vscode-cpptools/issues/10189)
+* Potential fix for cpptools getting shutdown after waking up from sleep. [#10362](https://github.com/microsoft/vscode-cpptools/issues/10362)
+* Fix the process id picker only showing part of the process on a remote machine. [#10379](https://github.com/microsoft/vscode-cpptools/issues/10379)
+* Fix temp files generating at the incorrect path. [#10386](https://github.com/microsoft/vscode-cpptools/issues/10386)
+* Fix a crash in extractArgs. [PR #10394](https://github.com/microsoft/vscode-cpptools/pull/10394)
+
 ## Version 1.14.0: January 12, 2023
 ### Enhancements
 * Add support for LLVM-based Intel C/C++ compilers. [#10218](https://github.com/microsoft/vscode-cpptools/issues/10218)
@@ -14,7 +31,7 @@
 * Fix function inlay hints not working with `std::string_literal` arguments. [#10078](https://github.com/microsoft/vscode-cpptools/issues/10078)
 * Fix IntelliSense completion for `std::string` with `?:` and `string()`. [#10103](https://github.com/microsoft/vscode-cpptools/issues/10103)
 * Fix semantic colorization not working in a certain case. [#10105](https://github.com/microsoft/vscode-cpptools/issues/10105)
-* Fix IntelliSense completion not working inside constuctor calls that are incomplete. [#10111](https://github.com/microsoft/vscode-cpptools/issues/10111)
+* Fix IntelliSense completion not working inside constructor calls that are incomplete. [#10111](https://github.com/microsoft/vscode-cpptools/issues/10111)
 * Fix changes to the enclosing type not being taken into account after "Create Declaration / Definition" is used once. [#10162](https://github.com/microsoft/vscode-cpptools/issues/10162)
 * Fix "False positive expression must have a constant value with __builtin_choose_expr in _Static_assert". [#10168](https://github.com/microsoft/vscode-cpptools/issues/10168)
 * Fix file exclusions not being applied to the first directory found for each browse.path entry. [#10205](https://github.com/microsoft/vscode-cpptools/issues/10205)

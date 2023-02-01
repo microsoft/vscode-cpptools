@@ -2935,7 +2935,7 @@
   "Unzulässiger Typ %t im this-Zeiger für die eingeschränkte amp-Memberfunktion %nfd",
   "Unzulässiger Rückgabetyp \"%t\" für die auf AMP begrenzte Funktion \"%nfd\".",
   "Unzulässiger Parametertyp \"%t\" für die auf AMP begrenzte Funktion \"%nfd\".",
-  null,
+  "Unzulässiges Konstrukt in auf AMP begrenzter Funktion %nfd",
   "Unzulässige Speicherklasse \"%s\" in der auf AMP begrenzten Funktion \"%nfd\".",
   "\"%s\" ist in der auf AMP begrenzten Funktion \"%nfd\" unzulässig.",
   "Unzulässige Umwandlung in auf AMP begrenzte Funktion.",
@@ -3465,7 +3465,7 @@
   "aufgrund eines „nicht verfügbaren“ Attributs",
   "Doppelter „ASM“-Qualifizierer",
   "entweder ein Bitfeld mit einem unvollständigen Enumerationstyp oder eine opake Enumeration mit einem ungültigen Basistyp",
-  "Es wurde versucht, ein Element aus der IFC-Partition %sq mithilfe eines Indexes in der IFC-Partition %sq zu erstellen",
+  "Es wurde versucht, ein Element aus der IFC-Partition %sq mithilfe eines Indexes in der IFC-Partition %sq2 zu erstellen",
   "Die Partition %sq hat ihre Eintragsgröße mit %d1 angegeben, obwohl %d2 erwartet wurde",
   "Unerwartete IFC-Anforderung beim Verarbeiten des Moduls %sq1",
   "Bedingungsfehler in Zeile %d in %s1: %sq2",
@@ -3478,9 +3478,10 @@
   "Modul %sq ungültiger Sortierwert",
   "Eine aus einem IFC-Modul geladene Funktionsvorlage wurde fälschlicherweise als %nd analysiert",
   "Fehler beim Laden eines IFC-Entitätsverweises im Modul \"%sq\"",
-  "IFC-Indexsortierung = %d1, Wert = %d2",
+  "von Partition %sq Element %d1 (Dateiposition %d2, relative Position %d3)",
   "verkettete Kennzeichner sind für einen Klassentyp mit einem nichttrivialen Destruktor nicht zulässig",
   "Eine explizite Spezialisierungsdeklaration darf keine Frienddeklaration sein",
   "der Typ „std::float128_t“ wird nicht unterstützt. Stattdessen wird „std::float64_t“ verwendet",
-  "der Typ „std::bfloat16_t“ wird nicht unterstützt. Stattdessen wird „std::float32_t“ verwendet"
+  "der Typ „std::bfloat16_t“ wird nicht unterstützt. Stattdessen wird „std::float32_t“ verwendet",
+  "Für die Aliasvorlage %no darf keine Deduktionsanleitung deklariert werden."
 ]
