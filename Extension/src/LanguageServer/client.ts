@@ -945,12 +945,12 @@ export class DefaultClient implements Client {
     public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
         const settings: OtherSettings = new OtherSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
-        let paths: string[] = [];
+        const paths: string[] = [];
         if (compilerDefaults.knownCompilers !== undefined) {
-            let tempPaths = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
+            const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
             let clFound: boolean = false;
             // Remove all but the first cl path.
-            for (let path of tempPaths) {
+            for (const path of tempPaths) {
                 if (clFound) {
                     if (!util.isCl(path)) {
                         paths.push(path);
