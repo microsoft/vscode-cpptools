@@ -8,7 +8,7 @@
 
 ### Enhancements
 * Exclude rename results external to the workspace. [#9235](https://github.com/microsoft/vscode-cpptools/issues/9235)
-* Reorder commands in code action context menu. [#10400](https://github.com/microsoft/vscode-cpptools/issues/10400)
+* Reorder commands in the code action context menu. [#10400](https://github.com/microsoft/vscode-cpptools/issues/10400)
 
 ### Bug Fixes
 * Fix Create Declaration / Definition with an anonymous namespace. [#10189](https://github.com/microsoft/vscode-cpptools/issues/10189)
