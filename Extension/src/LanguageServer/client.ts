@@ -70,6 +70,7 @@ let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 let displayedSelectCompiler: boolean = false;
+let secondPromptCounter: number = 0;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -889,7 +890,7 @@ export class DefaultClient implements Client {
         return workspaceFolder ? workspaceFolder.name : "untitled";
     }
 
-    public updateClientConfigurations(): void {
+    public static updateClientConfigurations(): void {
         clients.forEach(client => {
             if (client instanceof DefaultClient) {
                 const defaultClient: DefaultClient = <DefaultClient>client;
@@ -899,7 +900,7 @@ export class DefaultClient implements Client {
         });
     }
 
-    public async showSelectCompiler(paths: string[]): Promise<number> {
+    public async showSelectDefaultCompiler(paths: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
 
@@ -907,9 +908,11 @@ export class DefaultClient implements Client {
         for (let i: number = 0; i < paths.length; i++) {
             let option: string | undefined;
             let isCompiler: boolean = false;
+            let isCl: boolean = false;
             const slash: string = (os.platform() === 'win32') ? "\\" : "/";
 
             if (paths[i].includes(slash)) {
+                isCl = util.isCl(paths[i]);
                 if (paths[i].split(slash).pop() !== undefined) {
                     option = paths[i].split(slash).pop();
                     isCompiler = true;
@@ -918,7 +921,8 @@ export class DefaultClient implements Client {
 
             if (option !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(option, "");
-                items.push({ label: option, description: localize("found.string", "Found at {0}", path), index: i });
+                const description: string = isCl ? "" : localize("found.string", "Found at {0}", path);
+                items.push({ label: option, description: description, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }
@@ -928,22 +932,55 @@ export class DefaultClient implements Client {
         return (selection) ? selection.index : -1;
     }
 
-    public async handleCompilerQuickPick(): Promise<void> {
+    public async showPrompt(buttonMessage: string, showSecondPrompt: boolean): Promise<void> {
+        if (secondPromptCounter < 1) {
+            const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
+            secondPromptCounter++;
+            if (value === buttonMessage) {
+                this.handleCompilerQuickPick(showSecondPrompt);
+            }
+        }
+    }
+
+    public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
         const settings: OtherSettings = new OtherSettings();
-        let paths: string[] = [];
+        const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
+        const paths: string[] = [];
         if (compilerDefaults.knownCompilers !== undefined) {
-            paths = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
+            const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
+            let clFound: boolean = false;
+            // Remove all but the first cl path.
+            for (const path of tempPaths) {
+                if (clFound) {
+                    if (!util.isCl(path)) {
+                        paths.push(path);
+                    }
+                } else {
+                    if (util.isCl(path)) {
+                        clFound = true;
+                    }
+                    paths.push(path);
+                }
+            }
         }
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
-        const index: number = await this.showSelectCompiler(paths);
+        const index: number = await this.showSelectDefaultCompiler(paths);
         if (index === -1) {
+            if (showSecondPrompt) {
+                this.showPrompt(selectCompiler, true);
+            }
             return;
         }
         if (index === paths.length - 1) {
             settings.defaultCompiler = "";
-        } else if (index === paths.length - 2) {
+            if (showSecondPrompt) {
+                this.showPrompt(selectCompiler, true);
+            }
+            return;
+        }
+        if (index === paths.length - 2) {
             switch (os.platform()) {
                 case 'win32':
                     vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
@@ -955,55 +992,45 @@ export class DefaultClient implements Client {
                     vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
                     return;
             }
-        } else if (index === paths.length - 3) {
+        }
+        if (index === paths.length - 3) {
             const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
-            if (result !== undefined && result.length > 0) {
-                util.addTrustedCompiler(compilerPaths, result[0].fsPath);
-                settings.defaultCompiler = result[0].fsPath;
-                compilerDefaults = await this.requestCompiler(compilerPaths);
-                this.updateClientConfigurations();
+            if (result === undefined || result.length === 0) {
                 return;
             }
+            settings.defaultCompiler = result[0].fsPath;
         } else {
-            util.addTrustedCompiler(compilerPaths, paths[index]);
+            settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
         }
-        // If a compiler is selected, update the default.compilerPath user setting.
-        if (index < paths.length - 3) {
-            settings.defaultCompiler = paths[index];
-        }
+        util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
         compilerDefaults = await this.requestCompiler(compilerPaths);
-        this.updateClientConfigurations();
+        DefaultClient.updateClientConfigurations();
     }
 
-    async promptSelectCompiler(command: boolean): Promise<void> {
+    async promptSelectCompiler(isCommand: boolean): Promise<void> {
+        if (compilerDefaults === undefined) {
+            return;
+        }
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
         const settings: OtherSettings = new OtherSettings();
-        if (compilerDefaults.compilerPath !== "") {
-            if (!command && (compilerDefaults.compilerPath !== undefined)) {
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found on this computer. Do you want to configure it for IntelliSense?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
+        if (isCommand || compilerDefaults.compilerPath !== "") {
+            if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
+                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
                     settings.defaultCompiler = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
-                    this.updateClientConfigurations();
+                    DefaultClient.updateClientConfigurations();
                 } else if (value === selectCompiler) {
-                    this.handleCompilerQuickPick();
+                    this.handleCompilerQuickPick(true);
                 } else {
-                    const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                    const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), selectCompiler);
-                    if (value === setCompiler) {
-                        this.handleCompilerQuickPick();
-                    }
+                    this.showPrompt(selectCompiler, true);
                 }
-            } else if (!command && (compilerDefaults.compilerPath === undefined)) {
-                const setCompiler: string = localize("setCompiler.string", "Set Compiler");
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have a compiler configured. Unless you set your own configurations, IntelliSense may not be functional."), selectCompiler);
-                if (value === setCompiler) {
-                    this.handleCompilerQuickPick();
-                }
+            } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
+                this.showPrompt(selectCompiler, false);
             } else {
-                this.handleCompilerQuickPick();
+                this.handleCompilerQuickPick(false);
             }
         }
     }
@@ -1125,16 +1152,9 @@ export class DefaultClient implements Client {
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
-                        const inputCompilerDefaults: configs.CompilerDefaults = await this.requestCompiler(compilerPaths);
-                        compilerDefaults = inputCompilerDefaults;
-                        clients.forEach(client => {
-                            if (client instanceof DefaultClient) {
-                                const defaultClient: DefaultClient = <DefaultClient>client;
-                                defaultClient.configuration.CompilerDefaults = compilerDefaults;
-                                defaultClient.configuration.handleConfigurationChange();
-                            }
-                        });
-                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler) {
+                        compilerDefaults = await this.requestCompiler(compilerPaths);
+                        DefaultClient.updateClientConfigurations();
+                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);
                             displayedSelectCompiler = true;
