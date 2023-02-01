@@ -1,5 +1,22 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.14.1: February 2, 2023
+### New Features
+* Add recursive macro expansion on hover. [#3579](https://github.com/microsoft/vscode-cpptools/issues/3579)
+* Move status bar items to the language status UI. [#8405](https://github.com/microsoft/vscode-cpptools/issues/8405)
+* Add the Select Default Compiler command that lets you choose a default compiler to configure IntelliSense. [#10027](https://github.com/microsoft/vscode-cpptools/issues/10027)
+
+### Enhancements
+* Exclude rename results external to the workspace. [#9235](https://github.com/microsoft/vscode-cpptools/issues/9235)
+* Reorder commands in code action context menu. [#10400](https://github.com/microsoft/vscode-cpptools/issues/10400)
+
+### Bug Fixes
+* Fix Create Declaration / Definition with an anonymous namespace. [#10189](https://github.com/microsoft/vscode-cpptools/issues/10189)
+* Potential fix for cpptools getting shutdown after waking up from sleep. [#10362](https://github.com/microsoft/vscode-cpptools/issues/10362)
+* Fix the process id picker only showing part of the process on a remote machine. [#10379](https://github.com/microsoft/vscode-cpptools/issues/10379)
+* Fix temp files generating at the incorrect path. [#10386](https://github.com/microsoft/vscode-cpptools/issues/10386)
+* Fix a crash in extractArgs. [PR #10394](https://github.com/microsoft/vscode-cpptools/pull/10394)
+
 ## Version 1.14.0: January 12, 2023
 ### Enhancements
 * Add support for LLVM-based Intel C/C++ compilers. [#10218](https://github.com/microsoft/vscode-cpptools/issues/10218)
