@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { DefaultClient, openFileVersions } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
 import { CppSettings } from '../settings';
+import { processDelayedDidOpen } from '../extension';
 
 interface GetInlayHintsParams {
     uri: string;
@@ -54,7 +55,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     public async provideInlayHints(document: vscode.TextDocument, range: vscode.Range,
         token: vscode.CancellationToken): Promise<vscode.InlayHint[] | undefined> {
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
         const uriString: string = document.uri.toString();
 
         // Get results from cache if available.
