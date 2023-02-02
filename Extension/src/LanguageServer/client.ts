@@ -38,7 +38,7 @@ import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
 import { updateLanguageConfigurations, CppSourceStr, clients } from './extension';
-import { SettingsTracker, getTracker } from './settingsTracker';
+import { SettingsTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import * as fs from 'fs';
@@ -916,7 +916,7 @@ export class DefaultClient implements Client {
         }
         this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
-        this.settingsTracker = getTracker(rootUri);
+        this.settingsTracker = new SettingsTracker(rootUri);
 
         try {
             let isFirstClient: boolean = false;

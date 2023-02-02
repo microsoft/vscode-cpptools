@@ -207,10 +207,3 @@ export class SettingsTracker {
         return value1 === value2;
     }
 }
-
-export function getTracker(resource: vscode.Uri | undefined): SettingsTracker {
-    if (!cache) {
-        cache = new SettingsTracker(resource);
-    }
-    return cache;
-}
