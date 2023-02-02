@@ -600,10 +600,14 @@
               "c99",
               "c11",
               "c17",
+              "c20",
+              "c23",
               "gnu89",
               "gnu99",
               "gnu11",
-              "gnu17"
+              "gnu17",
+              "gnu20",
+              "gnu23"
             ],
             "markdownDescription": "%c_cpp.configuration.default.cStandard.markdownDescription%",
             "scope": "resource"
