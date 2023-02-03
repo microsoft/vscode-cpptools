@@ -1804,57 +1804,67 @@ export class DefaultClient implements Client {
             // Need to loop through candidates, to see if we can get a custom configuration from any of them.
             // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
             const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
+                const uris: vscode.Uri[] = [];
                 for (let i: number = 0; i < response.candidates.length; ++i) {
+                    const candidate: string = response.candidates[i];
+                    const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
                     try {
-                        const candidate: string = response.candidates[i];
-                        const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
                         if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                            const configs: util.Mutable<SourceFileConfigurationItem>[] = await provider.provideConfigurations([tuUri], tokenSource.token);
-                            if (configs && configs.length > 0 && configs[0]) {
-                                const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
-                                if (fileConfiguration?.mergeConfigurations) {
-                                    configs.forEach(config => {
-                                        if (fileConfiguration.includePath) {
-                                            fileConfiguration.includePath.forEach(p => {
-                                                if (!config.configuration.includePath.includes(p)) {
-                                                    config.configuration.includePath.push(p);
-                                                }
-                                            });
-                                        }
-
-                                        if (fileConfiguration.defines) {
-                                            fileConfiguration.defines.forEach(d => {
-                                                if (!config.configuration.defines.includes(d)) {
-                                                    config.configuration.defines.push(d);
-                                                }
-                                            });
-                                        }
-
-                                        if (!config.configuration.forcedInclude) {
-                                            config.configuration.forcedInclude = [];
-                                        }
-
-                                        if (fileConfiguration.forcedInclude) {
-                                            fileConfiguration.forcedInclude.forEach(i => {
-                                                if (config.configuration.forcedInclude) {
-                                                    if (!config.configuration.forcedInclude.includes(i)) {
-                                                        config.configuration.forcedInclude.push(i);
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-
-                                return configs as SourceFileConfigurationItem[];
-                            }
-                        }
-                        if (tokenSource.token.isCancellationRequested) {
-                            return null;
+                            uris.push(tuUri);
                         }
                     } catch (err) {
-                        console.warn("Caught exception request configuration");
+                        console.warn("Caught exception from canProvideConfiguration");
                     }
+                }
+                if (!uris.length) {
+                    return [];
+                }
+                let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
+                try {
+                    configs = await provider.provideConfigurations(uris, tokenSource.token);
+                } catch (err) {
+                    console.warn("Caught exception from provideConfigurations");
+                }
+
+                if (configs && configs.length > 0 && configs[0]) {
+                    const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
+                    if (fileConfiguration?.mergeConfigurations) {
+                        configs.forEach(config => {
+                            if (fileConfiguration.includePath) {
+                                fileConfiguration.includePath.forEach(p => {
+                                    if (!config.configuration.includePath.includes(p)) {
+                                        config.configuration.includePath.push(p);
+                                    }
+                                });
+                            }
+
+                            if (fileConfiguration.defines) {
+                                fileConfiguration.defines.forEach(d => {
+                                    if (!config.configuration.defines.includes(d)) {
+                                        config.configuration.defines.push(d);
+                                    }
+                                });
+                            }
+
+                            if (!config.configuration.forcedInclude) {
+                                config.configuration.forcedInclude = [];
+                            }
+
+                            if (fileConfiguration.forcedInclude) {
+                                fileConfiguration.forcedInclude.forEach(i => {
+                                    if (config.configuration.forcedInclude) {
+                                        if (!config.configuration.forcedInclude.includes(i)) {
+                                            config.configuration.forcedInclude.push(i);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    return configs as SourceFileConfigurationItem[];
+                }
+                if (tokenSource.token.isCancellationRequested) {
+                    return null;
                 }
             };
             const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
