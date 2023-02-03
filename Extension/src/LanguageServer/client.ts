@@ -2729,9 +2729,16 @@ export class DefaultClient implements Client {
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item, providerVersion)) {
-                this.configurationLogging.set(item.uri.toString(), JSON.stringify(item.configuration, null, 4));
+                let uri: string;
+                if (util.isString(item.uri) && !item.uri.startsWith("file://")) {
+                    // If the uri field is a string, it may actually contain an fsPath.
+                    uri = vscode.Uri.file(item.uri).toString();
+                } else {
+                    uri = item.uri.toString();
+                }
+                this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
                 if (settings.loggingLevel === "Debug") {
-                    out.appendLine(`  uri: ${item.uri.toString()}`);
+                    out.appendLine(`  uri: ${uri}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
                 }
                 if (item.configuration.includePath.some(path => path.endsWith('**'))) {
@@ -2756,7 +2763,7 @@ export class DefaultClient implements Client {
                     }
                 }
                 sanitized.push({
-                    uri: item.uri.toString(),
+                    uri: uri,
                     configuration: itemConfig
                 });
             } else {
