@@ -14,7 +14,6 @@ type FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfi
 type KeyValuePair = { key: string; value: string };
 
 const maxSettingLengthForTelemetry: number = 50;
-let cache: SettingsTracker;
 
 export class SettingsTracker {
     private previousCppSettings: { [key: string]: any } = {};
@@ -206,11 +205,4 @@ export class SettingsTracker {
         }
         return value1 === value2;
     }
-}
-
-export function getTracker(resource: vscode.Uri | undefined): SettingsTracker {
-    if (!cache) {
-        cache = new SettingsTracker(resource);
-    }
-    return cache;
 }
