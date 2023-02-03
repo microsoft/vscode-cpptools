@@ -378,27 +378,27 @@
         "hint": "Do not localized 'vsCMFunctionComMethod', it is code implementation."
     },
     "e_invalid_ftype": {
-        "text": "Invalid C/C++ file: '%s'",
+        "text": "Invalid C/C++ file: '%s'.",
         "hint": "%s is the invalid file."
     },
     "e_fname_to_long": {
-        "text": "File name too long: '%s'",
+        "text": "File name too long: '%s'.",
         "hint": "%s is the file that has a long name."
     },
     "e_create_file": {
-        "text": "Cannot create file '%s'",
+        "text": "Cannot create file '%s'.",
         "hint": "%s is the file that could not be created."
     },
     "e_access_file": {
-        "text":  "Cannot access directory or file '%s' for writing",
+        "text":  "Cannot access directory or file '%s' for writing.",
         "hint": "%s is the directory or file that could not be accessed for writing."
     },
     "e_invalid_pathname": {
-        "text":  "Invalid file path: '%s'",
+        "text":  "Invalid file path: '%s'.",
         "hint": "%s is the file that has an invalid path."
     },
     "e_cm_file_not_in_project": {
-        "text":  "File '%s' was not found",
+        "text":  "File '%s' was not found.",
         "hint": "%s is the file that was not found."
     },
     "refactor_create_declaration_definition_failed":
