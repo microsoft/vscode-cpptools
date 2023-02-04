@@ -368,5 +368,74 @@
     },
     "cm_addfunction": {
         "text": "Automatic add function"
-    }
+    },
+    "e_com_virtual_redundant": {
+        "text": "vsCMFunctionVirtual is redundant and must not be specified when with vsCMFunctionComMethod.",
+        "hint": "Do not localized 'vsCMFunctionVirtual' and 'vsCMFunctionComMethod', they are code implementation."
+    },
+    "e_static_com_method": {
+        "text": "vsCMFunctionComMethod cannot be static.",
+        "hint": "Do not localized 'vsCMFunctionComMethod', it is code implementation."
+    },
+    "e_invalid_ftype": {
+        "text": "Invalid C/C++ file: '%s'.",
+        "hint": "%s is the invalid file."
+    },
+    "e_fname_to_long": {
+        "text": "File name too long: '%s'.",
+        "hint": "%s is the file that has a long name."
+    },
+    "e_create_file": {
+        "text": "Cannot create file '%s'.",
+        "hint": "%s is the file that could not be created."
+    },
+    "e_access_file": {
+        "text":  "Cannot access directory or file '%s' for writing.",
+        "hint": "%s is the directory or file that could not be accessed for writing."
+    },
+    "e_invalid_pathname": {
+        "text":  "Invalid file path: '%s'.",
+        "hint": "%s is the file that has an invalid path."
+    },
+    "e_cm_file_not_in_project": {
+        "text":  "File '%s' was not found.",
+        "hint": "%s is the file that was not found."
+    },
+    "refactor_create_declaration_definition_failed":
+    {
+        "text": "Create Declaration / Definition failed:",
+        "hint": "The operation 'Create Declaration / Definition' on a function was not successfully."
+    },
+    "refactor_create_default_delete":
+    {
+        "text": "Unable to create function '%s'. Creating defaulted or deleted functions is not supported.",
+        "hint": "%s is the function that could not be created."
+    },
+    "refactor_function_copied_to_clipboard": "The function signature was copied to the clipboard.",
+    "refactor_function_not_created":
+    {
+        "text": "Unable to create function '%s'.",
+        "hint": "%s is the function that could not be created."
+    },
+    "refactor_ambiguous_locations":
+    {
+        "text": "Unable to find an unambiguous location for function '%s'.",
+        "hint": "%s is the function for the unambiguous location."
+    },
+    "refactor_file_not_in_project":
+    {
+        "text": "File '%s' was not found.",
+        "hint": "%s is the file that was not found."
+    },
+    "refactor_not_class_namespace":
+    {
+        "text": "Could not find class or namespace '%s'.",
+        "hint": "%s is the class or namespace code that could not be found."
+    },
+    "refactor_operation_unsupported":
+    {
+        "text": "The operation is not supported for '%s'.",
+        "hint": "%s is the function that is not supported for an operation that involves automatically generating code."
+    },
+    "unknown_error": "Unknown error."
 }
