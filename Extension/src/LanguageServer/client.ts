@@ -2763,7 +2763,7 @@ export class DefaultClient implements Client {
                     }
                 }
                 sanitized.push({
-                    uri: uri,
+                    uri,
                     configuration: itemConfig
                 });
             } else {
