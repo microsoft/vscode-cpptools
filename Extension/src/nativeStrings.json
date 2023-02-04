@@ -404,7 +404,7 @@
     "refactor_create_declaration_definition_failed":
     {
         "text": "Create Declaration / Definition failed: %s",
-        "hint": "The operation 'Create Declaration / Definition' on a function was not successful. %s is the info why it failed."
+        "hint": "The operation 'Create Declaration / Definition' on a function was not successful. %s is the error info that has a period at the end of the string."
     },
     "refactor_create_default_delete":
     {
