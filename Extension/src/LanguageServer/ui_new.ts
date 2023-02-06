@@ -256,7 +256,6 @@ export class NewUI implements UI {
             }, this.iconDelayTime);
             return;
         }
-
     }
 
     private flameTimeout?: NodeJS.Timeout;
