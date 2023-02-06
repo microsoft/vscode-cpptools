@@ -111,7 +111,7 @@ export class NewUI implements UI {
 
         this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.tagparser`, documentSelector);
         this.browseEngineStatusBarItem.name = localize("cpptools.status.tagparser", "C/C++ Tag Parser Status");
-        this.browseEngineStatusBarItem.detail = localize("cpptools.detail.tagparser", "Warming up...");
+        this.browseEngineStatusBarItem.detail = localize("cpptools.detail.tagparser", "Initializing...");
         this.browseEngineStatusBarItem.text = "$(database)";
         this.browseEngineStatusBarItem.command = {
             command: "C_Cpp.RescanWorkspaceUI_Telemetry",
