@@ -1046,10 +1046,11 @@ function extractArgs(argsString: string): string[] {
     }
 }
 
-function isCl(compilerPath: string): boolean {
+export function isCl(compilerPath: string): boolean {
     const compilerPathLowercase: string = compilerPath.toLowerCase();
-    return (compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl") || (compilerPathLowercase === "cl"));
+    return compilerPathLowercase === "cl" || compilerPathLowercase === "cl.exe"
+        || compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe")
+        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl");
 }
 
 /** CompilerPathAndArgs retains original casing of text input for compiler path and args */
