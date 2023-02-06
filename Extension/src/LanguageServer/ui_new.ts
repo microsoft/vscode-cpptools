@@ -254,7 +254,6 @@ export class NewUI implements UI {
                     title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
-            return;
         }
     }
 
