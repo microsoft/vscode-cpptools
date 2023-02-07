@@ -22,6 +22,7 @@ import * as which from 'which';
 import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
 import { compilerPaths } from './client';
+import { getFileFromPath } from './utils';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -396,7 +397,15 @@ export class CppProperties {
             (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands === "") && !configuration.compileCommands) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
-            configuration.compilerPath = this.defaultCompilerPath;
+
+            // if the compiler is a cl.exe compiler, replace the full path with the "cl.exe" string.
+            let compiler: string | undefined = getFileFromPath(this.defaultCompilerPath);
+
+            if (compiler === "cl.exe") {
+                configuration.compilerPath = "cl.exe";
+            } else {
+                configuration.compilerPath = this.defaultCompilerPath;
+            }
         }
         if ((isUnset(settings.defaultCStandard) || settings.defaultCStandard === "") && this.defaultCStandard) {
             configuration.cStandard = this.defaultCStandard;

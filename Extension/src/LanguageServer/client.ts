@@ -27,7 +27,7 @@ import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileCo
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
 import { Location, TextEdit } from './commonTypes';
-import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
+import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC, getFileFromPath } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
@@ -906,21 +906,13 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            let option: string | undefined;
-            let isCompiler: boolean = false;
-            const slash: string = (os.platform() === 'win32') ? "\\" : "/";
+            let compiler: string | undefined = getFileFromPath(paths[i]);
+            let isCompiler: boolean = compiler !== undefined;
 
-            if (paths[i].includes(slash)) {
-                if (paths[i].split(slash).pop() !== undefined) {
-                    option = paths[i].split(slash).pop();
-                    isCompiler = true;
-                }
-            }
-
-            if (option !== undefined && isCompiler) {
-                const path: string | undefined = paths[i].replace(option, "");
+            if (compiler !== undefined && isCompiler) {
+                const path: string | undefined = paths[i].replace(compiler, "");
                 const description: string = localize("found.string", "Found at {0}", path);
-                items.push({ label: option, description: description, index: i });
+                items.push({ label: compiler, description: description, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }
