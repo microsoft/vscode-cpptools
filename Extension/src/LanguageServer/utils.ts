@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import { Location, TextEdit } from './commonTypes';
 import { CppSettings } from './settings';
-import * as os from 'os';
 
 export function makeCpptoolsRange(vscRange: vscode.Range): Range {
     return { start: { line: vscRange.start.line, character: vscRange.start.character },
