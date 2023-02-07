@@ -3515,7 +3515,7 @@
                       },
                       {
                         "type": "boolean",
-                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
                         "default": false
                       }
                     ]
@@ -4303,7 +4303,7 @@
                       },
                       {
                         "type": "boolean",
-                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
                         "default": false
                       }
                     ]
