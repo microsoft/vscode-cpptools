@@ -906,10 +906,10 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            const compiler: string | undefined = getFileFromPath(paths[i]);
-            const isCompiler: boolean = compiler !== undefined;
+            const compiler: string = getFileFromPath(paths[i]);
+            const isCompiler: boolean = compiler !== paths[i];
 
-            if (compiler !== undefined && isCompiler) {
+            if (isCompiler) {
                 const path: string | undefined = paths[i].replace(compiler, "");
                 const description: string = localize("found.string", "Found at {0}", path);
                 items.push({ label: compiler, description: description, index: i });
