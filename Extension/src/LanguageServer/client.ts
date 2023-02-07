@@ -908,11 +908,9 @@ export class DefaultClient implements Client {
         for (let i: number = 0; i < paths.length; i++) {
             let option: string | undefined;
             let isCompiler: boolean = false;
-            let isCl: boolean = false;
             const slash: string = (os.platform() === 'win32') ? "\\" : "/";
 
             if (paths[i].includes(slash)) {
-                isCl = util.isCl(paths[i]);
                 if (paths[i].split(slash).pop() !== undefined) {
                     option = paths[i].split(slash).pop();
                     isCompiler = true;
@@ -921,7 +919,7 @@ export class DefaultClient implements Client {
 
             if (option !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(option, "");
-                const description: string = isCl ? "" : localize("found.string", "Found at {0}", path);
+                const description: string = localize("found.string", "Found at {0}", path);
                 items.push({ label: option, description: description, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
