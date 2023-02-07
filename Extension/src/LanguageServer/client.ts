@@ -27,7 +27,7 @@ import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileCo
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
 import { Location, TextEdit } from './commonTypes';
-import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC, getFileFromPath } from './utils';
+import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
@@ -906,7 +906,7 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            const compiler: string = getFileFromPath(paths[i]);
+            const compiler: string = path.basename(paths[i]).toLowerCase();
             const isCompiler: boolean = compiler !== paths[i];
 
             if (isCompiler) {
