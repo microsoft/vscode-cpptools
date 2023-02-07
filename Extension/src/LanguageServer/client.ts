@@ -906,8 +906,8 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            let compiler: string | undefined = getFileFromPath(paths[i]);
-            let isCompiler: boolean = compiler !== undefined;
+            const compiler: string | undefined = getFileFromPath(paths[i]);
+            const isCompiler: boolean = compiler !== undefined;
 
             if (compiler !== undefined && isCompiler) {
                 const path: string | undefined = paths[i].replace(compiler, "");

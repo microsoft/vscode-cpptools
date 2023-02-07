@@ -399,7 +399,7 @@ export class CppProperties {
             // don't set a default when compileCommands is in use.
 
             // if the compiler is a cl.exe compiler, replace the full path with the "cl.exe" string.
-            let compiler: string | undefined = getFileFromPath(this.defaultCompilerPath);
+            const compiler: string | undefined = getFileFromPath(this.defaultCompilerPath);
 
             if (compiler === "cl.exe") {
                 configuration.compilerPath = "cl.exe";
