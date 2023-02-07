@@ -8,7 +8,6 @@ import { Range } from 'vscode-languageclient';
 import { Location, TextEdit } from './commonTypes';
 import { CppSettings } from './settings';
 import * as os from 'os';
-import { file } from 'tmp';
 
 export function makeCpptoolsRange(vscRange: vscode.Range): Range {
     return { start: { line: vscRange.start.line, character: vscRange.start.character },
@@ -36,10 +35,11 @@ export function getFileFromPath(filePath: string): string {
     const slash: string = (os.platform() === 'win32') ? "\\" : "/";
 
     if (filePath.includes(slash)) {
-         return filePath.split(slash).pop() ?? filePath;
+        return filePath.split(slash).pop() ?? filePath;
     }
     return filePath;
 }
+
 // Check this before attempting to switch a document from C to C++.
 export function shouldChangeFromCToCpp(document: vscode.TextDocument): boolean {
     if ((document.fileName.endsWith(".C") || document.fileName.endsWith(".H"))) {
