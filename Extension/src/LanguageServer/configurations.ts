@@ -400,8 +400,8 @@ export class CppProperties {
             // if the compiler is a cl.exe compiler, replace the full path with the "cl.exe" string.
             const compiler: string = path.basename(this.defaultCompilerPath).toLowerCase();
 
-            configuration.compilerPath = "cl.exe";
             if (compiler === "cl.exe") {
+                configuration.compilerPath = "cl.exe";
             } else {
                 configuration.compilerPath = this.defaultCompilerPath;
             }

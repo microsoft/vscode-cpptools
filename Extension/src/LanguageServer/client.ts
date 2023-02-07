@@ -906,7 +906,7 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            const compiler: string = path.basename(paths[i]).toLowerCase();
+            const compiler: string = path.basename(paths[i]);
             const isCompiler: boolean = compiler !== paths[i];
 
             if (isCompiler) {
