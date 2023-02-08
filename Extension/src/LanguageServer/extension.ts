@@ -488,8 +488,10 @@ export function registerCommands(enabled: boolean): void {
 }
 
 async function logForUIExperiment(command: string): Promise<void> {
+    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     const isNewUI: string = ui.isNewUI.toString();
-    telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI });
+    const isOverridden: string = (settings.experimentalFeatures ?? false).toString();
+    telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI, uiOverride: isOverridden });
 }
 
 function onDisabledCommand(): void {
