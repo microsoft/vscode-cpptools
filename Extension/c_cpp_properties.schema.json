@@ -41,7 +41,6 @@
                             "gnu99",
                             "gnu11",
                             "gnu17",
-                            "gnu20",
                             "gnu23",
                             "${default}"
                         ]
