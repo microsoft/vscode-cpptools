@@ -68,7 +68,9 @@ export class NewUI implements UI {
     private codeAnalysisTotal: number = 0;
     private readonly workspaceParsingRunningText: string = localize("running.tagparser.text", "Parsing Workspace");
     private readonly workspaceParsingPausedText: string = localize("paused.tagparser.text", "Parsing Workspace: Paused");
-    private readonly workspaceParseingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
+    private readonly workspaceParsingDoneText: string = localize("complete.tagparser.text", "Parsing Complete");
+    private readonly workspaceParsingInitializing: string = localize("initializing.tagparser.text", "Initializing Workspace");
+    private readonly workspaceParsingIndexing: string = localize("indexing.tagparser.text", "Indexing Workspace");
     private workspaceParsingStatus: string = "";
     private workspaceParsingProgress: string = "";
     private readonly workspaceRescanText = localize("rescan.tagparse.text", "Rescan Workspace");
@@ -109,7 +111,7 @@ export class NewUI implements UI {
 
         this.browseEngineStatusBarItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.tagparser`, documentSelector);
         this.browseEngineStatusBarItem.name = localize("cpptools.status.tagparser", "C/C++ Tag Parser Status");
-        this.browseEngineStatusBarItem.detail = localize("indexing.files.tooltip", "Indexing Workspace");
+        this.browseEngineStatusBarItem.detail = localize("cpptools.detail.tagparser", "Initializing...");
         this.browseEngineStatusBarItem.text = "$(database)";
         this.browseEngineStatusBarItem.command = {
             command: "C_Cpp.RescanWorkspaceUI_Telemetry",
@@ -143,33 +145,54 @@ export class NewUI implements UI {
         }
     }
 
+    private setIsInitializingWorkspace(val: boolean): void {
+        if (val) {
+            this.browseEngineStatusBarItem.text = "$(database)";
+            this.browseEngineStatusBarItem.detail = this.workspaceParsingInitializing;
+        }
+    }
+    private setIsIndexingWorkspace(val: boolean): void {
+        if (val) {
+            this.browseEngineStatusBarItem.text = "$(database)";
+            this.browseEngineStatusBarItem.detail = this.workspaceParsingIndexing;
+        }
+    }
+
     private dbTimeout?: NodeJS.Timeout;
     private setIsParsingWorkspace(val: boolean): void {
         this.isParsingWorkspace = val;
         const showIcon: boolean = val || this.isParsingFiles;
-        const twoStatus: boolean = val && this.isParsingFiles;
 
         // Leave this outside for more realtime respone
         this.browseEngineStatusBarItem.busy = showIcon;
 
         if (showIcon) {
             this.browseEngineStatusBarItem.text = "$(database)";
-            this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? this.parsingFilesTooltip : "")
-                + (twoStatus ? " | " : "")
-                + (val ? this.workspaceParsingStatus : "");
+            this.browseEngineStatusBarItem.detail = this.tagParseText();
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
             }
         } else {
             this.dbTimeout = setTimeout(() => {
-                this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
+                this.browseEngineStatusBarItem.text = this.workspaceParsingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
                     command: "C_Cpp.RescanWorkspaceUI_Telemetry",
                     title: this.workspaceRescanText
                 };
             }, this.iconDelayTime);
+        }
+    }
+
+    private tagParseText(): string {
+        if (this.isParsingWorkspacePaused) {
+            const twoStatus: boolean = this.isParsingFiles && this.isParsingWorkspace;
+            return (this.isParsingFiles ? this.parsingFilesTooltip : "")
+                + (twoStatus ? " | " : "")
+                + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
+        } else {
+            return this.isParsingWorkspace ? this.workspaceParsingStatus : this.parsingFilesTooltip;
         }
     }
 
@@ -187,7 +210,7 @@ export class NewUI implements UI {
         this.browseEngineStatusBarItem.busy = !val || this.isParsingFiles;
         this.browseEngineStatusBarItem.text = "$(database)";
         this.workspaceParsingStatus = val ? this.workspaceParsingPausedText : this.workspaceParsingRunningText;
-        this.browseEngineStatusBarItem.detail = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingStatus;
+        this.browseEngineStatusBarItem.detail = this.tagParseText();
         this.browseEngineStatusBarItem.command = val ? {
             command: "C_Cpp.ResumeParsingUI_Telemetry",
             title: localize("tagparser.resume.text", "Resume")
@@ -210,24 +233,21 @@ export class NewUI implements UI {
     private setIsParsingFiles(val: boolean): void {
 
         this.isParsingFiles = val;
-        const showIcon: boolean = val || (!this.isParsingWorkspacePaused && this.isParsingWorkspace);
-        const twoStatus: boolean = val && this.isParsingWorkspace;
+        const showIcon: boolean = val || this.isParsingWorkspace;
 
         // Leave this outside for more realtime respone
-        this.browseEngineStatusBarItem.busy = showIcon;
+        this.browseEngineStatusBarItem.busy = val || (!this.isParsingWorkspacePaused && this.isParsingWorkspace);
 
         if (showIcon) {
             this.browseEngineStatusBarItem.text = "$(database)";
-            this.browseEngineStatusBarItem.detail = (val ? this.parsingFilesTooltip : "")
-                + (twoStatus ? " | " : "")
-                + (this.isParsingWorkspace ? this.workspaceParsingStatus : "");
+            this.browseEngineStatusBarItem.detail = this.tagParseText();
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
             }
-        } else if (!this.isParsingWorkspace && !val) {
+        } else {
             this.dbTimeout = setTimeout(() => {
-                this.browseEngineStatusBarItem.text = this.workspaceParseingDoneText;
+                this.browseEngineStatusBarItem.text = this.workspaceParsingDoneText;
                 this.browseEngineStatusBarItem.detail = "";
                 this.browseEngineStatusBarItem.command = {
                     command: "C_Cpp.RescanWorkspaceUI_Telemetry",
@@ -376,6 +396,8 @@ export class NewUI implements UI {
     }
 
     public bind(client: Client): void {
+        client.InitializingWorkspaceChanged(value => { this.setIsInitializingWorkspace(value); });
+        client.IndexingWorkspaceChanged(value => { this.setIsIndexingWorkspace(value); });
         client.ParsingWorkspaceChanged(value => { this.setIsParsingWorkspace(value); });
         client.ParsingWorkspacePausableChanged(value => { this.setIsParsingWorkspacePausable(value); });
         client.ParsingWorkspacePausedChanged(value => { this.setIsParsingWorkspacePaused(value); });
