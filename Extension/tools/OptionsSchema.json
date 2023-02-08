@@ -655,9 +655,20 @@
           "default": "exec-run"
         },
         "visualizerFile": {
-          "type": "string",
-          "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
-          "default": ""
+          "anyOf": [
+            {
+              "type": "string",
+              "default": ""
+            },
+            {
+              "type": "array",
+              "default": [],
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%"
         },
         "svdPath": {
           "type": "string",
