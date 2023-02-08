@@ -920,21 +920,13 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            let option: string | undefined;
-            let isCompiler: boolean = false;
-            const slash: string = (os.platform() === 'win32') ? "\\" : "/";
+            const compilerName: string = path.basename(paths[i]);
+            const isCompiler: boolean = compilerName !== paths[i];
 
-            if (paths[i].includes(slash)) {
-                if (paths[i].split(slash).pop() !== undefined) {
-                    option = paths[i].split(slash).pop();
-                    isCompiler = true;
-                }
-            }
-
-            if (option !== undefined && isCompiler) {
-                const path: string | undefined = paths[i].replace(option, "");
+            if (isCompiler) {
+                const path: string | undefined = paths[i].replace(compilerName, "");
                 const description: string = localize("found.string", "Found at {0}", path);
-                items.push({ label: option, description: description, index: i });
+                items.push({ label: compilerName, description: description, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }
