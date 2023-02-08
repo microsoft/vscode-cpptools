@@ -906,13 +906,13 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            const compiler: string = path.basename(paths[i]);
-            const isCompiler: boolean = compiler !== paths[i];
+            const compilerName: string = path.basename(paths[i]);
+            const isCompiler: boolean = compilerName !== paths[i];
 
             if (isCompiler) {
-                const path: string | undefined = paths[i].replace(compiler, "");
+                const path: string | undefined = paths[i].replace(compilerName, "");
                 const description: string = localize("found.string", "Found at {0}", path);
-                items.push({ label: compiler, description: description, index: i });
+                items.push({ label: compilerName, description: description, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }
