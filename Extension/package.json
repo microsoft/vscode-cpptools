@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.14.1-main",
+  "version": "1.14.2-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -3146,6 +3146,7 @@
         "type": "cppdbg",
         "label": "C++ (GDB/LLDB)",
         "languages": [
+          "ada",
           "c",
           "cpp",
           "cuda-cpp",
@@ -3515,7 +3516,7 @@
                       },
                       {
                         "type": "boolean",
-                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
                         "default": false
                       }
                     ]
@@ -4303,7 +4304,7 @@
                       },
                       {
                         "type": "boolean",
-                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
                         "default": false
                       }
                     ]
@@ -4893,6 +4894,7 @@
         "label": "C++ (Windows)",
         "when": "workspacePlatform == windows",
         "languages": [
+          "ada",
           "c",
           "cpp",
           "cuda-cpp",
@@ -5289,6 +5291,9 @@
       }
     ],
     "breakpoints": [
+      {
+        "language": "ada"
+      },
       {
         "language": "c"
       },
@@ -5962,8 +5967,8 @@
     "vscode-debugprotocol": "^1.35.0",
     "vscode-dts": "^0.3.2",
     "vscode-nls-dev": "^4.0.0-next.1",
-    "webpack": "^5.28.0",
-    "webpack-cli": "^4.5.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
     "xml2js": "^0.4.19"
   },
   "dependencies": {
