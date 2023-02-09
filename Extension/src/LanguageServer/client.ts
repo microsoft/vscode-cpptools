@@ -1034,7 +1034,7 @@ export class DefaultClient implements Client {
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
-                this.handleCompilerQuickPick(false);
+                this.handleCompilerQuickPick(isCommand);
             }
         }
     }
@@ -1158,6 +1158,7 @@ export class DefaultClient implements Client {
                         // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
+                        compilerDefaults.trustedCompilerFound = false;
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);
