@@ -3146,6 +3146,7 @@
         "type": "cppdbg",
         "label": "C++ (GDB/LLDB)",
         "languages": [
+          "ada",
           "c",
           "cpp",
           "cuda-cpp",
@@ -4303,7 +4304,7 @@
                       },
                       {
                         "type": "boolean",
-                        "description": "%c_cpp.debuggers.logging.engineLogging.description%",
+                        "description": "%c_cpp.debuggers.logging.natvisDiagnostics.description%",
                         "default": false
                       }
                     ]
@@ -4893,6 +4894,7 @@
         "label": "C++ (Windows)",
         "when": "workspacePlatform == windows",
         "languages": [
+          "ada",
           "c",
           "cpp",
           "cuda-cpp",
@@ -5289,6 +5291,9 @@
       }
     ],
     "breakpoints": [
+      {
+        "language": "ada"
+      },
       {
         "language": "c"
       },
