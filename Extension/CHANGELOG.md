@@ -1,5 +1,16 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.14.2: February 9, 2023
+### Enhancements
+* Add error messages for Create Declaration / Definition. [#10163](https://github.com/microsoft/vscode-cpptools/issues/10163)
+* Follow up changes to the new status UI. [#10413](https://github.com/microsoft/vscode-cpptools/issues/10413)
+* Add Ada to supported languages for debugging. [#10475](https://github.com/microsoft/vscode-cpptools/issues/10475)
+  * Anthony Leonardo Gracio (@AnthonyLeonardoGracio). [PR #10476](https://github.com/microsoft/vscode-cpptools/pull/10476)
+
+### Bug Fixes
+* Show reload prompt after `C_Cpp.hover` is changed. [#10076](https://github.com/microsoft/vscode-cpptools/issues/10076)
+* Fix a crash with empty PATH entries on Linux/Mac.
+
 ## Version 1.14.1: February 2, 2023
 ### New Features
 * Add recursive macro expansion on hover. [#3579](https://github.com/microsoft/vscode-cpptools/issues/3579)
@@ -40,6 +51,7 @@
 * Fix an incorrect IntelliSense error with `std::bind`, c++17, and windows-msvc-arm64 mode. [#10304](https://github.com/microsoft/vscode-cpptools/issues/10304)
 * Fix vcFormat when using lambda functions. [#10326](https://github.com/microsoft/vscode-cpptools/issues/10326)
 * Fix IntelliSense crash in field_for_lambda_capture. [#10359](https://github.com/microsoft/vscode-cpptools/issues/10359)
+* Fix an IntelliSense crash when using the French language pack. [#10374](https://github.com/microsoft/vscode-cpptools/issues/10374)
 
 ## Version 1.13.9: January 4, 2023
 ### Bug Fix
