@@ -155,6 +155,7 @@ export class NewUI implements UI {
         if (val) {
             this.browseEngineStatusBarItem.text = "$(database)";
             this.browseEngineStatusBarItem.detail = this.workspaceParsingIndexing;
+            this.browseEngineStatusBarItem.busy = true;
         }
     }
 
