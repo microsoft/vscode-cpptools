@@ -8,7 +8,7 @@
   * Anthony Leonardo Gracio (@AnthonyLeonardoGracio) [PR #10476](https://github.com/microsoft/vscode-cpptools/pull/10476)
 
 ### Bug Fixes
-* Show reload prompt after `C_Cpp.hover` is changed. [#10076](https://github.com/microsoft/vscode-cpptools/issues/10076)
+* Show a reload prompt after `C_Cpp.hover` is changed. [#10076](https://github.com/microsoft/vscode-cpptools/issues/10076)
 * Fix a crash with empty PATH entries on Linux/Mac.
 
 ## Version 1.14.1: February 2, 2023
