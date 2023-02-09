@@ -5,7 +5,7 @@
 * Add error messages for Create Declaration / Definition. [#10163](https://github.com/microsoft/vscode-cpptools/issues/10163)
 * Follow up changes to the new status UI. [#10413](https://github.com/microsoft/vscode-cpptools/issues/10413)
 * Add Ada to supported languages for debugging. [#10475](https://github.com/microsoft/vscode-cpptools/issues/10475)
-  * Anthony Leonardo Gracio (@AnthonyLeonardoGracio). [PR #10476](https://github.com/microsoft/vscode-cpptools/pull/10476)
+  * Anthony Leonardo Gracio (@AnthonyLeonardoGracio) [PR #10476](https://github.com/microsoft/vscode-cpptools/pull/10476)
 
 ### Bug Fixes
 * Show reload prompt after `C_Cpp.hover` is changed. [#10076](https://github.com/microsoft/vscode-cpptools/issues/10076)
