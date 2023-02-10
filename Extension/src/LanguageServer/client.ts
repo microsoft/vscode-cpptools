@@ -1031,6 +1031,7 @@ export class DefaultClient implements Client {
     }
 
     async promptSelectCompiler(isCommand: boolean): Promise<void> {
+        secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
         }
@@ -1053,7 +1054,7 @@ export class DefaultClient implements Client {
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
-                this.handleCompilerQuickPick(false);
+                this.handleCompilerQuickPick(isCommand);
             }
         }
     }
