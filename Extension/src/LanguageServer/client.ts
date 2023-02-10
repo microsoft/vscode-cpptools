@@ -971,6 +971,25 @@ export class DefaultClient implements Client {
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await this.showSelectDefaultCompiler(paths);
+        let action: string;
+        switch (index) {
+            case -1:
+                action = 'escaped';
+                break;
+            case paths.length - 1:
+                action = 'disable';
+                break;
+            case paths.length - 2:
+                action = 'help';
+                break;
+            case paths.length - 3:
+                action = 'browse';
+                break;
+            default:
+                action = 'select compiler';
+                break;
+        }
+        telemetry.logLanguageServerEvent('compilerSelection', { action });
         if (index === -1) {
             if (showSecondPrompt) {
                 this.showPrompt(selectCompiler, true);
