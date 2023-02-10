@@ -1012,6 +1012,7 @@ export class DefaultClient implements Client {
     }
 
     async promptSelectCompiler(isCommand: boolean): Promise<void> {
+        secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
         }
