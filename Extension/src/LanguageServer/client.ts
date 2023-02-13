@@ -970,7 +970,7 @@ export class DefaultClient implements Client {
             }
         }
         const compilerCountString: string = compilerCount.toString();
-        telemetry.logLanguageServerEvent('compilerSelection', { compilerCountString });
+        telemetry.logLanguageServerEvent('compilerCount', { compilerCountString });
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
