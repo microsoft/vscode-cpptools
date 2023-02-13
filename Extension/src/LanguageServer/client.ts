@@ -969,69 +969,60 @@ export class DefaultClient implements Client {
             }
         }
         compilerCount = paths.length;
-        telemetry.logLanguageServerEvent('compilerSelection', { action :"compilerCount"}, { compilerCount })
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await this.showSelectDefaultCompiler(paths);
-        let action: string;
-        switch (index) {
-            case -1:
-                action = 'escaped';
-                break;
-            case paths.length - 1:
-                action = 'disable';
-                break;
-            case paths.length - 2:
-                action = 'help';
-                break;
-            case paths.length - 3:
-                action = 'browse';
-                break;
-            default:
-                action = 'select compiler';
-                break;
-        }
-        telemetry.logLanguageServerEvent('compilerSelection', { action });
-        if (index === -1) {
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 1) {
-            settings.defaultCompiler = "";
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 2) {
-            switch (os.platform()) {
-                case 'win32':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
-                    return;
-                case 'darwin':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
-                    return;
-                default: // Linux
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
-                    return;
-            }
-        }
-        if (index === paths.length - 3) {
-            const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
-            if (result === undefined || result.length === 0) {
+        let action: string = "";
+        try {
+            if (index === -1) {
+                action = "escaped";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
                 return;
             }
-            settings.defaultCompiler = result[0].fsPath;
-            telemetry.logLanguageServerEvent('compilerSelection', { action: "compiler browsed"  });
-        } else {
-            settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            if (index === paths.length - 1) {
+                action = "disable";
+                settings.defaultCompiler = "";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
+                return;
+            }
+            if (index === paths.length - 2) {
+                action = "help";
+                switch (os.platform()) {
+                    case 'win32':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                        return;
+                    case 'darwin':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                        return;
+                    default: // Linux
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                        return;
+                }
+            }
+            if (index === paths.length - 3) {
+                action = "browse";
+                const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
+                if (result === undefined || result.length === 0) {
+                    return;
+                }
+                action = "compiler browsed";
+                settings.defaultCompiler = result[0].fsPath;
+            } else {
+                action = "select compiler";
+                settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            }
+
+            util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
+            compilerDefaults = await this.requestCompiler(compilerPaths);
+            DefaultClient.updateClientConfigurations();
+        } finally {
+            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount });
         }
-        util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
-        compilerDefaults = await this.requestCompiler(compilerPaths);
-        DefaultClient.updateClientConfigurations();
     }
 
     async promptSelectCompiler(isCommand: boolean): Promise<void> {
