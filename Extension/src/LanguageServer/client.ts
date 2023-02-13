@@ -950,11 +950,13 @@ export class DefaultClient implements Client {
         const settings: OtherSettings = new OtherSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const paths: string[] = [];
+        let compilerCount: number = 0;
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
             let clFound: boolean = false;
             // Remove all but the first cl path.
             for (const path of tempPaths) {
+                compilerCount++;
                 if (clFound) {
                     if (!util.isCl(path)) {
                         paths.push(path);
@@ -967,6 +969,8 @@ export class DefaultClient implements Client {
                 }
             }
         }
+        const compilerCountString: string = compilerCount.toString();
+        telemetry.logLanguageServerEvent('compilerSelection', { compilerCountString });
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
@@ -1037,6 +1041,7 @@ export class DefaultClient implements Client {
         }
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
+        let action: string;
         const settings: OtherSettings = new OtherSettings();
         if (isCommand || compilerDefaults.compilerPath !== "") {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
@@ -1046,8 +1051,12 @@ export class DefaultClient implements Client {
                     settings.defaultCompiler = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
+                    action = "configure compiler";
+                    telemetry.logLanguageServerEvent('compilerNotification', { action });
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
+                    action = "show quickpick";
+                    telemetry.logLanguageServerEvent('compilerNotification', { action });
                 } else {
                     this.showPrompt(selectCompiler, true);
                 }
