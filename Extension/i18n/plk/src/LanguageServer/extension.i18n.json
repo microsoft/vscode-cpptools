@@ -6,10 +6,10 @@
 {
 	"learn.how.to.install.a.library": "Dowiedz się, jak zainstalować bibliotekę dla tego nagłówka przy użyciu menedżera vcpkg",
 	"copy.vcpkg.command": "Skopiuj polecenie vcpkg, aby zainstalować element „{0}” w schowku",
-	"on.disabled.command": "Nie można wykonywać poleceń związanych z funkcją IntelliSense, gdy właściwość `C_Cpp.intelliSenseEngine` ma wartość `disabled`.",
+	"on.disabled.command": "Nie można wykonywać poleceń związanych z funkcją IntelliSense, gdy właściwość „C_Cpp.intelliSenseEngine” ma wartość „disabled”.",
 	"client.not.found": "nie znaleziono klienta",
-	"configuration.select.first": "Otwórz najpierw folder, aby wybrać konfigurację",
-	"configuration.provider.select.first": "Otwórz najpierw folder, aby wybrać dostawcę konfiguracji",
+	"configuration.select.first": "Najpierw otwórz folder, aby wybrać konfigurację.",
+	"configuration.provider.select.first": "Najpierw otwórz folder, aby wybrać dostawcę konfiguracji.",
 	"edit.configurations.open.first": "Otwórz najpierw folder, aby edytować konfiguracje",
 	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony.",
 	"add.includepath.open.first": "Otwórz najpierw folder, aby dodać go do {0}"

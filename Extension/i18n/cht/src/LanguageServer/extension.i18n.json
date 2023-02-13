@@ -6,10 +6,10 @@
 {
 	"learn.how.to.install.a.library": "了解如何使用 vcpkg 安裝此標頭的程式庫",
 	"copy.vcpkg.command": "將用於安裝 '{0}' 的 vcpkg 命令複製到剪貼簿",
-	"on.disabled.command": "當 `C_Cpp.intelliSenseEngine` 設為 `disabled` 時，無法執行IntelliSense 的相關命令。",
+	"on.disabled.command": "當 `C_Cpp.intelliSenseEngine` 設為 `Disabled` 時，無法執行IntelliSense 的相關命令。",
 	"client.not.found": "找不到用戶端",
-	"configuration.select.first": "先開啟資料夾以選取組態",
-	"configuration.provider.select.first": "先開啟資料夾以選取組態提供者",
+	"configuration.select.first": "先開啟資料夾以選取設定。",
+	"configuration.provider.select.first": "先開啟資料夾以選取設定提供者。",
 	"edit.configurations.open.first": "先開啟資料夾以編輯組態",
 	"code.action.aborted": "無法套用程式碼分析修正，因為文件已變更。",
 	"add.includepath.open.first": "先開啟資料夾以新增至 {0}"

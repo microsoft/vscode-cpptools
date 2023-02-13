@@ -6,7 +6,7 @@
 {
 	"learn.how.to.install.a.library": "Découvrir comment installer une bibliothèque pour cet en-tête avec vcpkg",
 	"copy.vcpkg.command": "Copier la commande vcpkg pour installer '{0}' dans le Presse-papiers",
-	"on.disabled.command": "Les commandes liées à IntelliSense ne peuvent pas être exécutées quand `C_Cpp.intelliSenseEngine` a la valeur `disabled`.",
+	"on.disabled.command": "Les commandes liées à IntelliSense ne peuvent pas être exécutées quand `C_Cpp.intelliSenseEngine` a la valeur `Disabled`.",
 	"client.not.found": "client introuvable",
 	"configuration.select.first": "Commencer par ouvrir un dossier pour sélectionner une configuration",
 	"configuration.provider.select.first": "Commencer par ouvrir un dossier pour sélectionner un fournisseur de configuration",

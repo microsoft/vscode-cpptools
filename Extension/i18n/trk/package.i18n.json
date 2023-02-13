@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Yapılandırma Sağlayıcısını Değiştir...",
 	"c_cpp.command.configurationEditJSON.title": "Yapılandırmaları Düzenle (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Yapılandırmaları Düzenle (UI)",
+	"c_cpp.command.selectDefaultCompiler.title": "Varsayılan Derleyiciyi Seç",
 	"c_cpp.command.switchHeaderSource.title": "Üst Bilgiyi/Kaynağı Değiştir",
 	"c_cpp.command.enableErrorSquiggles.title": "Hata İlişkilendirmelerini Etkinleştir",
 	"c_cpp.command.disableErrorSquiggles.title": "Hata İlişkilendirmelerini Devre Dışı Bırak",
@@ -181,7 +182,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Bağlama duyarlı olmayan \"belirsiz\" sonuçlar sağlar.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "C/C++ dil hizmeti özelliklerini kapatır.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "IntelliSense altyapısının `#include` hatalarını içeren çeviri birimleri için otomatik olarak Etiket Ayrıştırıcısı'na geçip geçmeyeceğini denetler.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Otomatik tamamlama sağlayıcısını denetler. `disabled` ise ve sözcük tabanlı tamamlama istiyorsanız, aynı zamanda `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (ve aynı şekilde `c` ve `cuda-cpp` dilleri için) ayarını da belirlemeniz gerekir.",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Otomatik tamamlama sağlayıcısını denetler. `Disabled` ise ve sözcük tabanlı tamamlama istiyorsanız, aynı zamanda `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (ve aynı şekilde `c` ve `cuda-cpp` dilleri için) ayarını da belirlemeniz gerekir.",
 	"c_cpp.configuration.autocomplete.default.description": "Etkin IntelliSense altyapısını kullanır.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Visual Studio Code tarafından sağlanan sözcük tabanlı tamamlamayı kullanır.",
 	"c_cpp.configuration.errorSquiggles.description": "IntelliSense altyapısı tarafından algılanan şüpheli derleme hatalarının düzenleyiciye geri rapor edilip edilmeyeceğini kontrol eder. Ayrıca, içermeler bulunamazsa kod analizi uyarılarının raporlanıp raporlanmayacağını da kontrol eder. Bu ayar, Etiket Ayrıştırıcı motoru tarafından yok sayılır.",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "C++ kullanıcı tanımlı sabit dizeleri için kullanılacak stil.",
 	"c_cpp.semanticTokenModifiers.global.description": "Genel semboller için kullanılacak stil.",
 	"c_cpp.semanticTokenModifiers.local.description": "Yerel semboller için kullanılacak stil.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Tanılama natvis iletilerinin Hata Ayıklama Konsoluna kaydedilmesi gerekip gerekmediğini belirleyen isteğe bağlı bayrak. Varsayılan olarak Hiçbiri değerini alır.",
+	"c_cpp.debuggers.logging.category.verbose.description": "Geliştirme sırasında etkileşimli araştırma için kullanılan günlükler. Bu günlükler öncelikle hata ayıklama için yararlı bilgiler içermeli ve uzun vadeli bir değere sahip olmamalıdır.",
+	"c_cpp.debuggers.logging.category.warning.description": "Uygulama akışında olağan dışı veya beklenmeyen bir olayı vurgulayan, ancak uygulama yürütmenin durdurulmasına neden olmayan günlükler.",
+	"c_cpp.debuggers.logging.category.error.description": "Bir hata nedeniyle geçerli yürütme akışı durdurulurken vurgulayan günlükler. Bunlar, uygulama genelindeki bir hatayı değil, geçerli etkinlikte bir hata olduğunu göstermelidir.",
+	"c_cpp.debuggers.logging.category.none.description": "Günlük iletilerini yazmak için kullanılmaz. Bir günlük kategorisinin ileti yazmaması gerektiğini belirtir."
 }
