@@ -249,7 +249,7 @@
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "为 [vcpkg 依存关系管理器](https://aka.ms/vcpkg/) 启用集成服务。",
 	"c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": "当来自 `nan` 和 `node-addon-api` 的包含路径为依赖项时，请将其添加。",
 	"c_cpp.configuration.renameRequiresIdentifier.markdownDescription": "如果为 `true`，则“重命名符号”将需要有效的 C/C++ 标识符。",
-	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "如果为 `true`，则自动完成将在函数调用后自动添加 `(` ，在这种情况下，也可以添加 `(` ，具体取决于 `#editor.autoClosingBrackets#` 设置的值。",
+	"c_cpp.configuration.autocompleteAddParentheses.markdownDescription": "如果为 `true`，则自动完成将在函数调用后自动添加 `(` ，在这种情况下，也可以添加 `)` ，具体取决于 `#editor.autoClosingBrackets#` 设置的值。",
 	"c_cpp.configuration.filesExclude.markdownDescription": "为排除文件夹(以及文件 - 如果更改了 `#C_Cpp.exclusionPolicy#`)配置 glob 模式。这些特定于 C/C++ 扩展，并且是 `#files.exclude#` 的补充，但与 `#files.exclude#` 不同，它们也适用于当前工作区文件夹之外的路径，并且不会从资源管理器视图中删除。[此处](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options)。",
 	"c_cpp.configuration.filesExcludeBoolean.markdownDescription": "要与文件路径匹配的 glob 模式。设置为 `true` 或 `false` 以启用或禁用模式。",
 	"c_cpp.configuration.filesExcludeWhen.markdownDescription": "对匹配文件同辈进行其他检查。将 `$(basename)` 用作匹配文件名变量。",

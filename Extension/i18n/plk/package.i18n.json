@@ -243,7 +243,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "Określa, czy można używać funkcji „eksperymentalnych”.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Jeśli wartość to `true`, fragmenty kodu będą dostarczane przez serwer języka.",
 	"c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": "W przypadku ustawienia wartości „default” przyjmuje się, że system plików obszaru roboczego w systemie Windows nie uwzględnia wielkości liter, a w systemie macOS lub Linux wielkość liter jest uwzględniana. W przypadku ustawienia wartości „enabled” przyjmuje się, że system plików obszaru roboczego uwzględnia wielkość liter w systemie Windows.",
-	"c_cpp.configuration.enhancedColorization.markdownDescription": "Jeśli ta opcja jest włączona, kod jest kolorowany na podstawie funkcji IntelliSense. To ustawienie ma zastosowanie tylko wtedy, gdy właściwość „#C_Cpp.intelliSenseEngine#” jest ustawiony na wartość „default”.",
+	"c_cpp.configuration.enhancedColorization.markdownDescription": "Jeśli ta opcja jest włączona, kod jest kolorowany na podstawie funkcji IntelliSense. To ustawienie ma zastosowanie tylko wtedy, gdy właściwość `#C_Cpp.intelliSenseEngine#` jest ustawiony na wartość `default`.",
 	"c_cpp.configuration.codeFolding.description": "Jeśli ta opcja jest włączona, zakresy składania kodu są dostarczane przez serwer języka.",
 	"c_cpp.configuration.hover.description": "W przypadku wyłączenia szczegóły dotyczące umieszczania wskaźnika myszy nie będą już udostępniane przez serwer języka.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Włącz usługi integracji dla elementu [vcpkg dependency manager](https://aka.ms/vcpkg/).",

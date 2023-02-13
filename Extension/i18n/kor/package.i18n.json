@@ -242,7 +242,7 @@
 	"c_cpp.configuration.default.dotConfig.markdownDescription": "`dotConfig`가 지정되지 않은 경우 구성에서 사용할 값 또는 `${default}`가 `dotConfig`에 있는 경우 삽입할 값입니다.",
 	"c_cpp.configuration.experimentalFeatures.description": "\"실험적\" 기능을 사용할 수 있는지 여부를 제어합니다.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "`true`이면 언어 서버에서 코드 조각을 제공합니다.",
-	"c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": "'default'로 설정하면 작업 공간의 파일 시스템이 Windows에서는 대소문자를 구분하지 않고 macOS 또는 Linux에서는 대소문자를 구분하는 것으로 간주됩니다. '활성화됨'으로 설정하면 작업 영역의 파일 시스템이 Windows에서 대소문자를 구분하는 것으로 간주됩니다.",
+	"c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": "`default`로 설정하면 작업 공간의 파일 시스템이 Windows에서는 대소문자를 구분하지 않고 macOS 또는 Linux에서는 대소문자를 구분하는 것으로 간주됩니다. `enabled`으로 설정하면 작업 영역의 파일 시스템이 Windows에서 대소문자를 구분하는 것으로 간주됩니다.",
 	"c_cpp.configuration.enhancedColorization.markdownDescription": "사용하도록 설정된 경우 IntelliSense를 기반으로 코드 색이 지정됩니다. `#C_Cpp.intelliSenseEngine#`이 `default`로 설정된 경우에만 이 설정이 적용됩니다.",
 	"c_cpp.configuration.codeFolding.description": "사용하도록 설정하면 언어 서버에서 코드 접기 범위를 제공합니다.",
 	"c_cpp.configuration.hover.description": "사용하지 않도록 설정하면 언어 서버에서 마우스로 가리키기 세부 정보를 더 이상 제공하지 않습니다.",
