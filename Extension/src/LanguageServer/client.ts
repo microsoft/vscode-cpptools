@@ -968,7 +968,6 @@ export class DefaultClient implements Client {
                 }
             }
         }
-        compilerCount = paths.length;
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
@@ -1021,7 +1020,7 @@ export class DefaultClient implements Client {
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
-            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount });
+            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount: paths.length });
         }
     }
 
