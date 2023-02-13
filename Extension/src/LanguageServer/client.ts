@@ -1026,6 +1026,8 @@ export class DefaultClient implements Client {
                 return;
             }
             settings.defaultCompiler = result[0].fsPath;
+            action = "compiler browsed";
+            telemetry.logLanguageServerEvent('compilerBrowsed', { action });
         } else {
             settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
         }
