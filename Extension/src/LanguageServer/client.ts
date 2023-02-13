@@ -956,7 +956,6 @@ export class DefaultClient implements Client {
             let clFound: boolean = false;
             // Remove all but the first cl path.
             for (const path of tempPaths) {
-                compilerCount++;
                 if (clFound) {
                     if (!util.isCl(path)) {
                         paths.push(path);
@@ -969,8 +968,8 @@ export class DefaultClient implements Client {
                 }
             }
         }
-        const compilerCountString: string = compilerCount.toString();
-        telemetry.logLanguageServerEvent('compilerCount', { compilerCountString });
+        compilerCount = paths.length;
+        telemetry.logLanguageServerEvent('compilerSelection', { action :"compilerCount"}, { compilerCount })
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
@@ -1026,8 +1025,7 @@ export class DefaultClient implements Client {
                 return;
             }
             settings.defaultCompiler = result[0].fsPath;
-            action = "compiler browsed";
-            telemetry.logLanguageServerEvent('compilerBrowsed', { action });
+            telemetry.logLanguageServerEvent('compilerSelection', { action: "compiler browsed"  });
         } else {
             settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
         }
@@ -1053,15 +1051,15 @@ export class DefaultClient implements Client {
                     settings.defaultCompiler = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
-                    action = "configure compiler";
-                    telemetry.logLanguageServerEvent('compilerNotification', { action });
+                    action = "confirm compiler";
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
                     action = "show quickpick";
-                    telemetry.logLanguageServerEvent('compilerNotification', { action });
                 } else {
                     this.showPrompt(selectCompiler, true);
+                    action = "dismissed";
                 }
+                telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
