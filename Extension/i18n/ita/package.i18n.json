@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Cambia provider di configurazione...",
 	"c_cpp.command.configurationEditJSON.title": "Modifica configurazioni (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Modifica configurazioni (interfaccia utente)",
+	"c_cpp.command.selectDefaultCompiler.title": "Seleziona compilatore predefinito",
 	"c_cpp.command.switchHeaderSource.title": "Scambia intestazione/origine",
 	"c_cpp.command.enableErrorSquiggles.title": "Abilita i segni di revisione per gli errori",
 	"c_cpp.command.disableErrorSquiggles.title": "Disabilita i segni di revisione per gli errori",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "Stile per le stringhe letterali definite dall'utente di C++.",
 	"c_cpp.semanticTokenModifiers.global.description": "Stile da usare per i simboli globali.",
 	"c_cpp.semanticTokenModifiers.local.description": "Stile da usare per i simboli locali.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Flag facoltativo per determinare se i messaggi nativi di diagnostica devono essere registrati nella Console di debug. Il valore predefinito è None.",
+	"c_cpp.debuggers.logging.category.verbose.description": "Log usati per l'indagine interattiva durante lo sviluppo. Questi log devono contenere principalmente informazioni utili per il debug e non devono contenere valori a lungo termine.",
+	"c_cpp.debuggers.logging.category.warning.description": "Log che evidenziano un evento anomalo o imprevisto nel flusso dell'applicazione, ma non causano altrimenti l'arresto dell'esecuzione dell'applicazione.",
+	"c_cpp.debuggers.logging.category.error.description": "Log che evidenziano quando il flusso corrente di esecuzione viene arrestato a causa di un errore. Devono indicare un errore nell'attività corrente, non un errore a livello di applicazione.",
+	"c_cpp.debuggers.logging.category.none.description": "Non utilizzato per la scrittura di messaggi di log. Specifica che una categoria di registrazione non deve scrivere messaggi."
 }

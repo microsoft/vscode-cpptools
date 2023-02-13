@@ -6,7 +6,7 @@
 {
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.name": "組態識別碼。`Mac`、`Linux` 及 `Win32` 是會在這些平台上自動選取之組態的特殊識別碼，但識別碼可以是任何內容。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerPath": "所用編譯器的完整路徑，例如 `/usr/bin/gcc`，讓 IntelliSense 更準確。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "用來修改所用 include 或 define 的編譯器引數，例如 `-nostdinc++`、`-m32` 等。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "用來修改所用 include 或 define 的編譯器引數，例如 `-nostdinc++`、`-m32` 等。採用其他空格分隔引數的引數應在陣列中輸入為個別的引數，例如，針對 `--sysroot <arg>` 使用 `\"--sysroot\", \"<arg>\"`。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "用於 IntelliSense 的 C 語言標準版本。注意: GNU 標準僅會用於查詢設定編譯器以取得 GNU 定義，而 IntelliSense 將會模擬相同的 C 標準版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "用於 IntelliSense 的 C++ 語言標準版本。注意: GNU 標準僅會用於查詢設定編譯器以取得 GNU 定義，而 IntelliSense 將會模擬相同的 C++ 標準版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "工作區 `compile_commands.json` 檔案的完整路徑。",

@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Określ ścieżkę kompilatora lub wybierz wykrytą ścieżkę kompilatora z listy rozwijanej.",
 	"no.compiler.paths.detected": "(Nie wykryto ścieżek kompilatora)",
 	"compiler.args": "Argumenty kompilatora",
-	"compiler.arguments": "Argumenty kompilatora do modyfikacji użytych elementów include lub define, np. {0}, {1} itp.",
+	"compiler.arguments": "Argumenty kompilatora do modyfikowania użytych dołączeń lub definicji, np. {0}, {1} itp. Argumenty, które przyjmują dodatkowe argumenty rozdzielone spacjami, powinny być wprowadzane jako oddzielne argumenty w tablicy, np. dla {2} należy użyć {3}.",
 	"one.argument.per.line": "Jeden argument na wiersz.",
 	"intellisense.mode": "Tryb funkcji IntelliSense",
 	"intellisense.mode.description": "Tryb funkcji IntelliSense do użycia, który jest mapowany na odpowiedni dla platformy i architektury wariant kompilatora MSVC, gcc albo Clang. Jeśli ta wartość nie zostanie ustawiona lub zostanie ustawiona na {0}, rozszerzenie wybierze ustawienie domyślne dla danej platformy. Dla systemu Windows jest używana wartość domyślna {1}, dla systemu Linux — {2}, a dla systemu macOS — {3}. Wybierz określony tryb funkcji IntelliSense, aby zastąpić tryb {4}. Tryby funkcji IntelliSense, które określają tylko warianty {5} (np. {6}) to starsze tryby i są one automatycznie konwertowane na warianty {7} w oparciu o platformę hosta.",

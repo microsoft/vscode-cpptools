@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "構成プロバイダーを変更する...",
 	"c_cpp.command.configurationEditJSON.title": "構成の編集 (JSON)",
 	"c_cpp.command.configurationEditUI.title": "構成の編集 (UI)",
+	"c_cpp.command.selectDefaultCompiler.title": "既定のコンパイラの選択",
 	"c_cpp.command.switchHeaderSource.title": "ヘッダー/ソースの切り替え",
 	"c_cpp.command.enableErrorSquiggles.title": "エラーの波線を有効にする",
 	"c_cpp.command.disableErrorSquiggles.title": "エラーの波線を無効にする",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "C++ ユーザー定義リテラル文字列のスタイルです。",
 	"c_cpp.semanticTokenModifiers.global.description": "グローバルの記号に使用するスタイルです。",
 	"c_cpp.semanticTokenModifiers.local.description": "ローカルの記号に使用するスタイルです。",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "診断 Natvis メッセージをデバッグ コンソールに記録するかどうかを決定するオプションのフラグです。既定値は None です。",
+	"c_cpp.debuggers.logging.category.verbose.description": "開発中の対話型調査に使用されるログ。これらのログには、主にデバッグに役立つ情報が含まれている必要があり、長期的な値は含めません。",
+	"c_cpp.debuggers.logging.category.warning.description": "アプリケーション フローで異常または予期しないイベントを強調表示するログですが、それ以外の場合はアプリケーションの実行が停止することはありません。",
+	"c_cpp.debuggers.logging.category.error.description": "エラーが原因で現在の実行フローが停止したときに強調表示されるログ。これは、アプリケーション全体のエラーではなく、現在のアクティビティのエラーを示している必要があります。",
+	"c_cpp.debuggers.logging.category.none.description": "ログ メッセージの書き込みには使用されません。ログ カテゴリがメッセージを書き込まないことを指定します。"
 }
