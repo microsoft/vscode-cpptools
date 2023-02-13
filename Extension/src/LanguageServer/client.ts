@@ -950,7 +950,6 @@ export class DefaultClient implements Client {
         const settings: OtherSettings = new OtherSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const paths: string[] = [];
-        let compilerCount: number = 0;
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
             let clFound: boolean = false;
