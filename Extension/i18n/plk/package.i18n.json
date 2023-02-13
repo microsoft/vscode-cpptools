@@ -182,7 +182,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "Dostarcza wyników typu „wątpliwy”, które nie są oparte na kontekstach.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "Wyłącza funkcje usługi języka C/C++.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "Określa, czy aparat funkcji IntelliSense automatycznie przełączy się na parser znaczników dla jednostek translacji zawierających błędy dyrektywy `#include`.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "Kontroluje dostawcę funkcji automatycznego uzupełniania. Jeśli ma wartość „disabled” i chcesz stosować uzupełnianie oparte na wyrazach, musisz również ustawić element „\"[cpp]\": {\"editor.wordBasedSuggestions\": true}” (oraz podobnie w przypadku języków „c” i „cuda-cpp”).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "Kontroluje dostawcę funkcji automatycznego uzupełniania. Jeśli ma wartość `disabled` i chcesz stosować uzupełnianie oparte na wyrazach, musisz również ustawić element `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (oraz podobnie w przypadku języków `c` i `cuda-cpp`).",
 	"c_cpp.configuration.autocomplete.default.description": "Używa aktywnego aparatu funkcji IntelliSense.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Używa uzupełnienia opartego na wyrazach zapewnianego przez program Visual Studio Code.",
 	"c_cpp.configuration.errorSquiggles.description": "Określa, czy podejrzane błędy kompilacji wykryte przez aparat funkcji IntelliSense będą raportowane z powrotem do edytora. Określa również, czy ostrzeżenia dotyczące analizy kodu są zgłaszane, jeśli nie można znaleźć dołączeń. To ustawienie jest ignorowane przez aparat analizatora tagów.",
