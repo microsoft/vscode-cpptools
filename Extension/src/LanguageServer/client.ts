@@ -1003,7 +1003,7 @@ export class DefaultClient implements Client {
                 }
             }
             if (index === paths.length - 3) {
-                action = "browse";
+                action = "browse dismissed";
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     return;
