@@ -396,7 +396,15 @@ export class CppProperties {
             (isUnset(settings.defaultCompileCommands) || settings.defaultCompileCommands === "") && !configuration.compileCommands) {
             // compile_commands.json already specifies a compiler. compilerPath overrides the compile_commands.json compiler so
             // don't set a default when compileCommands is in use.
-            configuration.compilerPath = this.defaultCompilerPath;
+
+            // if the compiler is a cl.exe compiler, replace the full path with the "cl.exe" string.
+            const compiler: string = path.basename(this.defaultCompilerPath).toLowerCase();
+
+            if (compiler === "cl.exe") {
+                configuration.compilerPath = "cl.exe";
+            } else {
+                configuration.compilerPath = this.defaultCompilerPath;
+            }
         }
         if ((isUnset(settings.defaultCStandard) || settings.defaultCStandard === "") && this.defaultCStandard) {
             configuration.cStandard = this.defaultCStandard;
