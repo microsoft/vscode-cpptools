@@ -6,7 +6,7 @@
 {
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.name": "구성 식별자입니다. `Mac`, `Linux`, `Win32`는 해당 플랫폼에서 자동으로 선택되는 구성의 특수 식별자이지만, 식별자는 무엇이든 될 수 있습니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerPath": "더 정확한 IntelliSense를 사용하도록 설정하는 데 사용되는 컴파일러의 전체 경로입니다(예: `/usr/bin/gcc`).",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "사용되는 포함 또는 정의를 수정하기 위한 컴파일러 인수입니다(예: `-nostdinc++`, `-m32` 등).",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "사용된 포함 또는 정의를 수정하기 위한 컴파일러 인수입니다. `-nostdinc++`, `-m32` 등 추가 공백으로 구분된 인수를 사용하는 인수는 배열에 별도의 인수로 입력해야 합니다(예: `--sysroot <arg>`의 경우 `\"--sysroot\", \"<arg>\"`를 사용하세요).",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "IntelliSense에 사용할 C 언어 표준의 버전입니다. 참고: GNU 표준은 GNU 정의를 가져오기 위해 설정된 컴파일러를 쿼리하는 데만 사용되며, IntelliSense는 해당 C 표준 버전을 에뮬레이트합니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "IntelliSense에 사용할 C++ 언어 표준의 버전입니다. 참고: GNU 표준은 GNU 정의를 가져오기 위해 설정된 컴파일러를 쿼리하는 데만 사용되며, IntelliSense는 해당 C++ 표준 버전을 에뮬레이트합니다.",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "작업 영역의 `compile_commands.json` 파일 전체 경로입니다.",

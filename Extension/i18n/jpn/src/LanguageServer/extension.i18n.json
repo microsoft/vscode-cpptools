@@ -8,8 +8,8 @@
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
 	"on.disabled.command": "`C_Cpp.intelliSenseEngine` が `disabled` に設定されている場合、IntelliSense 関連のコマンドは実行できません。",
 	"client.not.found": "クライアントが見つかりませんでした",
-	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください",
-	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください",
+	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください。",
+	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください。",
 	"edit.configurations.open.first": "構成を編集するには、まずフォルダーを開いてください",
 	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。",
 	"add.includepath.open.first": "{0} に追加するには、まずフォルダーを開いてください"
