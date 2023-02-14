@@ -6,15 +6,36 @@
 
 import * as vscode from 'vscode';
 import { Client } from './client';
+import * as nls from 'vscode-nls';
+import { NewUI } from './ui_new';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
-import * as nls from 'vscode-nls';
-import { setTimeout } from 'timers';
+import * as telemetry from '../telemetry';
+import { IExperimentationService } from 'tas-client';
+import { CppSettings } from './settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
+let uiPromise: Promise<UI>;
 let ui: UI;
+
+export interface UI {
+    isNewUI: boolean;
+    activeDocumentChanged(): void;
+    bind(client: Client): void;
+    showConfigurations(configurationNames: string[]): Promise<number>;
+    showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
+    showCompileCommands(paths: string[]): Promise<number>;
+    showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
+    showParsingCommands(): Promise<number>;
+    showActiveCodeAnalysisCommands(): Promise<number>;
+    showIdleCodeAnalysisCommands(): Promise<number>;
+    showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): void;
+    showConfigureCompileCommandsMessage(prompt: () => Promise<boolean>, onSkip: () => void): void;
+    showConfigureCustomProviderMessage(prompt: () => Promise<boolean>, onSkip: () => void): void;
+    dispose(): void;
+}
 
 interface IndexableQuickPickItem extends vscode.QuickPickItem {
     index: number;
@@ -35,7 +56,7 @@ interface ConfigurationStatus {
     priority: ConfigurationPriority;
 }
 
-export class UI {
+export class OldUI implements UI {
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
@@ -57,19 +78,20 @@ export class UI {
     private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private runningCodeAnalysisTooltip: string = "";
     private codeAnalysisPausedTooltip: string = "";
+    get isNewUI(): boolean { return false; };
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         this.configStatusBarItem = vscode.window.createStatusBarItem("c.cpp.configuration.tooltip", vscode.StatusBarAlignment.Right, 0);
         this.configStatusBarItem.name = configTooltip;
-        this.configStatusBarItem.command = "C_Cpp.ConfigurationSelect";
+        this.configStatusBarItem.command = "C_Cpp.ConfigurationSelectUI_Telemetry";
         this.configStatusBarItem.tooltip = configTooltip;
         this.ShowConfiguration = true;
 
         this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
         this.referencesStatusBarItem.tooltip = "";
-        this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgress";
+        this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgressUI_Telemetry";
         this.ShowReferencesIcon = false;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
@@ -111,7 +133,7 @@ export class UI {
 
     private setIsParsingWorkspacePausable(val: boolean): void {
         if (val) {
-            this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommands";
+            this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommandsUI_Telemetry";
         } else {
             this.browseEngineStatusBarItem.command = undefined;
         }
@@ -167,7 +189,7 @@ export class UI {
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
             + (twoStatus ? " | " : "")
             + (val ? this.runningCodeAnalysisTooltip : "");
-        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowCodeAnalysisCommands" : undefined;
+        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry" : undefined;
     }
 
     private updateCodeAnalysisTooltip(): void {
@@ -371,7 +393,7 @@ export class UI {
         return (selection) ? selection.index : -1;
     }
 
-    public async showCodeAnalysisCommands(): Promise<number> {
+    public async showActiveCodeAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = this.selectACommandString;
 
@@ -386,6 +408,8 @@ export class UI {
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
     }
+
+    public async showIdleCodeAnalysisCommands(): Promise<number> {return -1; }
 
     public showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
         setTimeout(() => {
@@ -438,9 +462,21 @@ export class UI {
     }
 }
 
-export function getUI(): UI {
+export async function getUI(): Promise<UI> {
+    if (!uiPromise) {
+        uiPromise = _getUI();
+    }
+    return uiPromise;
+}
+
+async function _getUI(): Promise<UI> {
     if (!ui) {
-        ui = new UI();
+        const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
+        if (experimentationService !== undefined) {
+            const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
+            ui = useNewUI || settings.experimentalFeatures ? new NewUI() : new OldUI();
+        }
     }
     return ui;
 }

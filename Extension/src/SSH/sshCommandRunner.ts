@@ -350,6 +350,12 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             if (loggingLevel !== 'None') {
                 handleOutputLogging(dataWrite.data);
             }
+
+            if (continueWithoutExiting) {
+                // Skip the interactors after we have continued since I haven't see a use case for now.
+                return;
+            }
+
             stdout += dataWrite.data;
 
             if (interactors) {

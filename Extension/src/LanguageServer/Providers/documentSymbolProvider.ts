@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope, Client } from '../client';
+import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope, Client, GetDocumentSymbolResult } from '../client';
 import { clients, processDelayedDidOpen } from '../extension';
 import { makeVscodeRange } from '../utils';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
@@ -57,17 +57,16 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = <DefaultClient>client;
-            if (!defaultClient.TrackedDocuments.has(document)) {
-                processDelayedDidOpen(document);
-            }
-            return defaultClient.requestWhenReady(async () => {
-                const params: GetDocumentSymbolRequestParams = {
-                    uri: document.uri.toString()
-                };
-                const symbols: LocalizeDocumentSymbol[] = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
-                const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
-                return resultSymbols;
-            });
+            await client.requestWhenReady(() => processDelayedDidOpen(document));
+            const params: GetDocumentSymbolRequestParams = {
+                uri: document.uri.toString()
+            };
+            const response: GetDocumentSymbolResult = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+            if (token.isCancellationRequested || response.symbols === undefined) {
+                throw new vscode.CancellationError();
+            };
+            const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(response.symbols);
+            return resultSymbols;
         }
         return [];
     }

@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult, CppFoldingRange } from '../client';
+import { processDelayedDidOpen } from '../extension';
 import { CppSettings } from '../settings';
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
@@ -22,13 +23,13 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         const params: GetFoldingRangesParams = {
             uri: document.uri.toString()
         };
-        await this.client.awaitUntilLanguageClientReady();
-        const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
-        if (ranges.canceled) {
-            return undefined;
+        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
+        const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
+        if (token.isCancellationRequested || response.ranges === undefined) {
+            throw new vscode.CancellationError();
         }
         const result: vscode.FoldingRange[] = [];
-        ranges.ranges.forEach((r: CppFoldingRange) => {
+        response.ranges.forEach((r: CppFoldingRange) => {
             const foldingRange: vscode.FoldingRange = {
                 start: r.range.startLine,
                 end: r.range.endLine
