@@ -2925,6 +2925,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.ToggleAssistantEditor",
+        "title": "%c_cpp.command.toggleAssistantEditor.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.EnableErrorSquiggles",
         "title": "%c_cpp.command.enableErrorSquiggles.title%",
         "category": "C/C++"
