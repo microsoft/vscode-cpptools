@@ -297,7 +297,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     }
 
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
+    if (!editor || activeEditor?.document.uri.scheme !== "file" || !util.isCppToolsFile(activeEditor.document)) {
         activeDocument = "";
     } else {
         activeDocument = editor.document.uri.toString();
@@ -354,7 +354,7 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
 function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     editors.forEach(async (editor) => {
-        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+        if (editor.document.uri.scheme === "file" && util.isCppToolsFile(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
             await client.requestWhenReady(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
@@ -508,8 +508,7 @@ function onDisabledCommand(): void {
 
 function onRestartIntelliSenseForFile(): void {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
-        (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
+    if (activeEditor?.document.uri.scheme !== "file" || !util.isCppToolsFile(activeEditor.document)) {
         return;
     }
     clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
@@ -517,11 +516,7 @@ function onRestartIntelliSenseForFile(): void {
 
 async function onSwitchHeaderSource(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || !activeEditor.document) {
-        return;
-    }
-
-    if (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp") {
+    if (!activeEditor?.document || !util.isCppToolsFile(activeEditor?.document)) {
         return;
     }
 

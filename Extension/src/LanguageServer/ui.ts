@@ -13,6 +13,7 @@ import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSame
 import * as telemetry from '../telemetry';
 import { IExperimentationService } from 'tas-client';
 import { CppSettings } from './settings';
+import { isCppToolsFile } from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -283,7 +284,7 @@ export class OldUI implements UI {
         if (!activeEditor) {
             this.ShowConfiguration = false;
         } else {
-            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
+            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && isCppToolsFile(activeEditor.document));
 
             let isCppPropertiesJson: boolean = false;
             if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
