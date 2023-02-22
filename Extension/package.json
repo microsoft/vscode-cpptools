@@ -5932,7 +5932,6 @@
     "parse-git-config": "^3.0.0",
     "parse5": "^5.1.0",
     "parse5-traverse": "^1.0.3",
-    "source-map": "^0.8.0-beta.0",
     "ts-loader": "^8.1.0",
     "tslint": "^5.19.0",
     "typescript": "^4.4.3",
@@ -5981,6 +5980,7 @@
     "nanoid": "^3.1.20",
     "path-parse": "^1.0.7",
     "set-value": "^4.0.1",
+    "source-map": "^0.8.0-beta.0",
     "terser": "^5.14.2",
     "yargs-parser": "^15.0.1",
     "y18n": "^5.0.5"
