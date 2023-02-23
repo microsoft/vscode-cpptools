@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Изменение поставщика конфигурации...",
 	"c_cpp.command.configurationEditJSON.title": "Изменить конфигурации (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Изменить конфигурации (пользовательский интерфейс)",
+	"c_cpp.command.selectDefaultCompiler.title": "Выбрать компилятор по умолчанию",
 	"c_cpp.command.switchHeaderSource.title": "Переключить заголовок/источник",
 	"c_cpp.command.enableErrorSquiggles.title": "Включить волнистые линии для ошибок",
 	"c_cpp.command.disableErrorSquiggles.title": "Отключить волнистые линии для ошибок",
@@ -173,7 +174,7 @@
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription": "Любой код, в котором открывающая и закрывающая фигурные скобки введены в одной строке, остается в ней вне зависимости от значений параметров `C_Cpp.vcFormat.newLine.*`.",
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription": "Блоки кода всегда форматируются на основе значений параметров `C_Cpp.vcFormat.newLine.*`.",
 	"c_cpp.configuration.clang_format_path.markdownDescription": "Полный путь к исполняемому файлу `clang-format`. Если значение не указано, а `clang-format` доступен в пути среды, используется `clang-format`. Если `clang-format` не найден в пути среды, будет использоваться `clang-format` вместе с расширением.",
-	"c_cpp.configuration.clang_format_style.markdownDescription": "Стиль кодирования сейчас поддерживает: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`. Используйте `file`, чтобы загрузить стиль из файла `.clang-format` в текущем или родительском каталоге, или используйте `file:<path>/.clang-format`, чтобы сослаться на определенный путь. Используйте `{ключ: значение, ...}`, чтобы установить определенные параметры. Например, стиль `Visual Studio` похож на: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: - 4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
+	"c_cpp.configuration.clang_format_style.markdownDescription": "Стиль кодирования сейчас поддерживает: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`. Используйте `file`, чтобы загрузить стиль из файла `.clang-format` в текущем или родительском каталоге, или используйте `file:<path>/.clang-format`, чтобы сослаться на определенный. Используйте `{ключ: значение, ...}`, чтобы установить определенные параметры. Например, стиль `Visual Studio` похож на: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
 	"c_cpp.configuration.clang_format_fallbackStyle.markdownDescription": "Имя предварительно определенного стиля, используемое в качестве резервного варианта при вызове `clang-format` со стилем `file`, когда файл `.clang-format` не найден. Возможные значения: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`, `none`. Используйте синтаксис `{ключ: значение, ...}`, чтобы задать конкретные параметры. Например, стиль `Visual Studio` похож на следующий: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
 	"c_cpp.configuration.clang_format_sortIncludes.markdownDescription": "Если параметр задан, он переопределяет поведение сортировки включения, определяемое параметром `SortIncludes`.",
 	"c_cpp.configuration.intelliSenseEngine.description": "Управляет поставщиком IntelliSense.",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "Стиль для определяемых пользователем строковых литералов C++.",
 	"c_cpp.semanticTokenModifiers.global.description": "Стиль для символов, которые являются глобальными.",
 	"c_cpp.semanticTokenModifiers.local.description": "Стиль для символов, которые являются локальными.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Необязательный флаг, определяющий, следует ли регистрировать диагностические сообщения NATVIS в консоли отладки. По умолчанию принимает значение \"Нет\".",
+	"c_cpp.debuggers.logging.category.verbose.description": "Журналы, используемые для интерактивного исследования во время разработки. Эти журналы должны в основном содержать полезные сведения для отладки и не имеют длительной ценности.",
+	"c_cpp.debuggers.logging.category.warning.description": "Журналы, которые выделяют аномальное или непредвиденное событие в потоке приложения, но не вызывают остановку выполнения приложения иным образом.",
+	"c_cpp.debuggers.logging.category.error.description": "Журналы, которые выделяют остановку текущего потока выполнения из-за сбоя. Они должны указывать на сбой в текущем действии, а не на сбой на уровне приложения.",
+	"c_cpp.debuggers.logging.category.none.description": "Не используется для записи сообщений журнала. Указывает, что категория ведения журнала не должна записывать сообщения."
 }
