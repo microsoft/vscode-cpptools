@@ -56,6 +56,8 @@ interface ConfigurationStatus {
     priority: ConfigurationPriority;
 }
 
+const commandArguments: string[] = ['oldUI']; // We report the sender of the command
+
 export class OldUI implements UI {
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
@@ -84,14 +86,22 @@ export class OldUI implements UI {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
         this.configStatusBarItem = vscode.window.createStatusBarItem("c.cpp.configuration.tooltip", vscode.StatusBarAlignment.Right, 0);
         this.configStatusBarItem.name = configTooltip;
-        this.configStatusBarItem.command = "C_Cpp.ConfigurationSelectUI_Telemetry";
+        this.configStatusBarItem.command = {
+            command: "C_Cpp.ConfigurationSelect",
+            title: configTooltip,
+            arguments: commandArguments
+        };
         this.configStatusBarItem.tooltip = configTooltip;
         this.ShowConfiguration = true;
 
         this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
         this.referencesStatusBarItem.tooltip = "";
-        this.referencesStatusBarItem.command = "C_Cpp.ShowReferencesProgressUI_Telemetry";
+        this.referencesStatusBarItem.command = {
+            command: "C_Cpp.ShowReferencesProgress",
+            title: this.referencesStatusBarItem.name,
+            arguments: commandArguments
+        };
         this.ShowReferencesIcon = false;
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
@@ -133,7 +143,11 @@ export class OldUI implements UI {
 
     private setIsParsingWorkspacePausable(val: boolean): void {
         if (val) {
-            this.browseEngineStatusBarItem.command = "C_Cpp.ShowParsingCommandsUI_Telemetry";
+            this.browseEngineStatusBarItem.command = {
+                command: "C_Cpp.ShowParsingCommands",
+                title: this.browseEngineStatusBarItem.name ?? '',
+                arguments: commandArguments
+            };
         } else {
             this.browseEngineStatusBarItem.command = undefined;
         }
@@ -189,7 +203,11 @@ export class OldUI implements UI {
         this.intelliSenseStatusBarItem.tooltip = (this.isUpdatingIntelliSense ? this.updatingIntelliSenseTooltip : "")
             + (twoStatus ? " | " : "")
             + (val ? this.runningCodeAnalysisTooltip : "");
-        this.intelliSenseStatusBarItem.command = val ? "C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry" : undefined;
+        this.intelliSenseStatusBarItem.command = val ? {
+            command: "C_Cpp.ShowActiveCodeAnalysisCommands",
+            title: this.intelliSenseStatusBarItem.name ?? '',
+            arguments: commandArguments
+        } : undefined;
     }
 
     private updateCodeAnalysisTooltip(): void {
