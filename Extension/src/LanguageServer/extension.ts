@@ -487,11 +487,20 @@ export function registerCommands(enabled: boolean): void {
     // ----------------------------------------
 }
 
-async function logForUIExperiment(command: string): Promise<void> {
+function logForUIExperiment(command: string): void {
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     const isNewUI: string = ui.isNewUI.toString();
     const isOverridden: string = (settings.experimentalFeatures ?? false).toString();
     telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI, uiOverride: isOverridden });
+}
+
+function getSenderType(sender?: any): string {
+    if (util.isString(sender)) {
+        return sender;
+    } else if (util.isUri(sender)) {
+        return 'contextMenu';
+    }
+    return 'commandPalette';
 }
 
 function onDisabledCommand(): void {
@@ -731,7 +740,11 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
-async function onCreateDeclarationOrDefinition(): Promise<void> {
+async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     getActiveClient().handleCreateDeclarationOrDefinition();
 }
 
