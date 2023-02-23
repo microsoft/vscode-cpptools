@@ -147,7 +147,7 @@ export class OldUI implements UI {
                 command: "C_Cpp.ShowParsingCommands",
                 title: this.browseEngineStatusBarItem.name ?? '',
                 arguments: commandArguments
-            }
+            };
         } else {
             this.browseEngineStatusBarItem.command = undefined;
         }
