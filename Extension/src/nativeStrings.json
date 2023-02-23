@@ -180,6 +180,12 @@
     "compiler": {
         "text": "Note: IntelliSense is not fully configured. Use the 'Select Default Compiler' command to finish configuration."
     },
+    "select_compiler": {
+        "text": "Select a compiler to locate system headers"
+    },
+    "run_select_compiler": {
+        "text": " Please run the 'Select Default Compiler' command to help the C/C++ extension locate your system headers"
+    },
     "expands_to": "Expands to:",
     "attention_label": "Attention:",
     "author_label": "Author:",
