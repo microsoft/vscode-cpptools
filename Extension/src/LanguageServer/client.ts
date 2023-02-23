@@ -920,21 +920,13 @@ export class DefaultClient implements Client {
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
-            let option: string | undefined;
-            let isCompiler: boolean = false;
-            const slash: string = (os.platform() === 'win32') ? "\\" : "/";
+            const compilerName: string = path.basename(paths[i]);
+            const isCompiler: boolean = compilerName !== paths[i];
 
-            if (paths[i].includes(slash)) {
-                if (paths[i].split(slash).pop() !== undefined) {
-                    option = paths[i].split(slash).pop();
-                    isCompiler = true;
-                }
-            }
-
-            if (option !== undefined && isCompiler) {
-                const path: string | undefined = paths[i].replace(option, "");
+            if (isCompiler) {
+                const path: string | undefined = paths[i].replace(compilerName, "");
                 const description: string = localize("found.string", "Found at {0}", path);
-                items.push({ label: option, description: description, index: i });
+                items.push({ label: compilerName, description: description, index: i });
             } else {
                 items.push({ label: paths[i], index: i });
             }
@@ -979,52 +971,66 @@ export class DefaultClient implements Client {
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await this.showSelectDefaultCompiler(paths);
-        if (index === -1) {
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 1) {
-            settings.defaultCompiler = "";
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 2) {
-            switch (os.platform()) {
-                case 'win32':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
-                    return;
-                case 'darwin':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
-                    return;
-                default: // Linux
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
-                    return;
-            }
-        }
-        if (index === paths.length - 3) {
-            const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
-            if (result === undefined || result.length === 0) {
+        let action: string = "";
+        try {
+            if (index === -1) {
+                action = "escaped";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
                 return;
             }
-            settings.defaultCompiler = result[0].fsPath;
-        } else {
-            settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            if (index === paths.length - 1) {
+                action = "disable";
+                settings.defaultCompiler = "";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
+                return;
+            }
+            if (index === paths.length - 2) {
+                action = "help";
+                switch (os.platform()) {
+                    case 'win32':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                        return;
+                    case 'darwin':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                        return;
+                    default: // Linux
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                        return;
+                }
+            }
+            if (index === paths.length - 3) {
+                const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
+                if (result === undefined || result.length === 0) {
+                    action = "browse dismissed";
+                    return;
+                }
+                action = "compiler browsed";
+                settings.defaultCompiler = result[0].fsPath;
+            } else {
+                action = "select compiler";
+                settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            }
+
+            util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
+            compilerDefaults = await this.requestCompiler(compilerPaths);
+            DefaultClient.updateClientConfigurations();
+        } finally {
+            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount: paths.length });
         }
-        util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
-        compilerDefaults = await this.requestCompiler(compilerPaths);
-        DefaultClient.updateClientConfigurations();
     }
 
     async promptSelectCompiler(isCommand: boolean): Promise<void> {
+        secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
         }
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
+        let action: string;
         const settings: OtherSettings = new OtherSettings();
         if (isCommand || compilerDefaults.compilerPath !== "") {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
@@ -1034,15 +1040,19 @@ export class DefaultClient implements Client {
                     settings.defaultCompiler = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
+                    action = "confirm compiler";
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
+                    action = "show quickpick";
                 } else {
                     this.showPrompt(selectCompiler, true);
+                    action = "dismissed";
                 }
+                telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
-                this.handleCompilerQuickPick(false);
+                this.handleCompilerQuickPick(isCommand);
             }
         }
     }
@@ -1494,6 +1504,9 @@ export class DefaultClient implements Client {
                         }
                     }
                     if (changedSettings["caseSensitiveFileSupport"] && util.isWindows()) {
+                        util.promptForReloadWindowDueToSettingsChange();
+                    }
+                    if (changedSettings["hover"]) {
                         util.promptForReloadWindowDueToSettingsChange();
                     }
                     // if addNodeAddonIncludePaths was turned on but no includes have been found yet then 1) presume that nan

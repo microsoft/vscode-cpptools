@@ -155,6 +155,7 @@ export class NewUI implements UI {
         if (val) {
             this.browseEngineStatusBarItem.text = "$(database)";
             this.browseEngineStatusBarItem.detail = this.workspaceParsingIndexing;
+            this.browseEngineStatusBarItem.busy = true;
         }
     }
 
@@ -206,6 +207,10 @@ export class NewUI implements UI {
     }
 
     private setIsParsingWorkspacePaused(val: boolean): void {
+        if (!this.isParsingFiles && !this.isParsingWorkspace) {
+            // Ignore a pause change if no parsing is actually happening.
+            return;
+        }
         this.isParsingWorkspacePaused = val;
         this.browseEngineStatusBarItem.busy = !val || this.isParsingFiles;
         this.browseEngineStatusBarItem.text = "$(database)";
