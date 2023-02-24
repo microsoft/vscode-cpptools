@@ -425,7 +425,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
 }
 
-function logForUIExperiment(command: string, sender?: any): Promise<void> {
+function logForUIExperiment(command: string, sender?: any): void {
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     const properties: {[key: string]: string} = {
         newUI: ui.isNewUI.toString(),
