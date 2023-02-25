@@ -425,14 +425,23 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
 }
 
-async function logForUIExperiment(command: string, sender?: any): Promise<void> {
+function logForUIExperiment(command: string, sender?: any): void {
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     const properties: {[key: string]: string} = {
         newUI: ui.isNewUI.toString(),
         uiOverride: (settings.experimentalFeatures ?? false).toString(),
-        sender: util.isString(sender) ? sender : 'commandPalette'
+        sender: getSenderType(sender)
     };
     telemetry.logLanguageServerEvent(`experiment${command}`, properties);
+}
+
+function getSenderType(sender?: any): string {
+    if (util.isString(sender)) {
+        return sender;
+    } else if (util.isUri(sender)) {
+        return 'contextMenu';
+    }
+    return 'commandPalette';
 }
 
 function onDisabledCommand(): void {
@@ -675,7 +684,11 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
-async function onCreateDeclarationOrDefinition(): Promise<void> {
+async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     getActiveClient().handleCreateDeclarationOrDefinition();
 }
 
