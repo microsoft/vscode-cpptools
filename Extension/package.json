@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.14.3-main",
+  "version": "1.14.4-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -572,10 +572,12 @@
               "c99",
               "c11",
               "c17",
+              "c23",
               "gnu89",
               "gnu99",
               "gnu11",
-              "gnu17"
+              "gnu17",
+              "gnu23"
             ],
             "markdownDescription": "%c_cpp.configuration.default.cStandard.markdownDescription%",
             "scope": "resource"
