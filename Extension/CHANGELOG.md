@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.14.4: February 27, 2023
+## Version 1.14.4: February 28, 2023
 ### Enhancements
 * Add `c23` and `c2x` support for clang and gcc modes. [#7471](https://github.com/microsoft/vscode-cpptools/issues/7471)
 * Filter out clang-tidy `#pragma once in main file` warnings. [#10539](https://github.com/microsoft/vscode-cpptools/issues/10539)
@@ -9,6 +9,7 @@
 * Fix `--` in args making compiler querying fail. [#10529](https://github.com/microsoft/vscode-cpptools/issues/10529)
 * Fix every .C file being opened in a compile_commands.json if it's build for C++. [#10540](https://github.com/microsoft/vscode-cpptools/issues/10540)
 * Fix `-std=c++` not being used in compile_commands.json for .C files. [#10541](https://github.com/microsoft/vscode-cpptools/issues/10541)
+* Fix a crash when an error occurs in a forced include. [#10598](https://github.com/microsoft/vscode-cpptools/issues/10598)
 * Fix a bug that could cause IntelliSense to randomly stop updating.
 * Fix some random failures that could happen during database deletion.
 * Fix some random crashes on shutdown.
