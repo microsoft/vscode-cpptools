@@ -2915,8 +2915,8 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.selectDefaultCompiler",
-        "title": "%c_cpp.command.selectDefaultCompiler.title%",
+        "command": "C_Cpp.SelectDefaultCompiler",
+        "title": "%c_cpp.command.SelectDefaultCompiler.title%",
         "category": "C/C++"
       },
       {
