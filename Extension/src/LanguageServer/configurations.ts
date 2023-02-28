@@ -951,8 +951,6 @@ export class CppProperties {
                 // and there is only 1 registered custom config provider, default to using that provider.
                 const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
                 const hasEmptyConfiguration: boolean = !this.propertiesFile
-                    && !settings.defaultCompilerPath
-                    && settings.defaultCompilerPath !== ""
                     && !settings.defaultIncludePath
                     && !settings.defaultDefines
                     && !settings.defaultMacFrameworkPath
