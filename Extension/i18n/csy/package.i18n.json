@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Změnit poskytovatele konfigurací...",
 	"c_cpp.command.configurationEditJSON.title": "Upravit konfigurace (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Upravit konfigurace (uživatelské rozhraní)",
+	"c_cpp.command.selectDefaultCompiler.title": "Vybrat výchozí kompilátor",
 	"c_cpp.command.switchHeaderSource.title": "Přepnout hlavičku/zdroj",
 	"c_cpp.command.enableErrorSquiggles.title": "Povolit podtrhávání chyb vlnovkou",
 	"c_cpp.command.disableErrorSquiggles.title": "Zakázat podtrhávání chyb vlnovkou",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "Styl pro uživatelem definované řetězcové literály jazyka C++.",
 	"c_cpp.semanticTokenModifiers.global.description": "Styl, který se má použít pro globální symboly.",
 	"c_cpp.semanticTokenModifiers.local.description": "Styl, který se má použít pro místní symboly.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Nepovinný příznak, který určuje, jestli se do konzoly ladění mají protokolovat diagnostické zprávy natvis. Výchozí hodnota je None.",
+	"c_cpp.debuggers.logging.category.verbose.description": "Protokoly, které se používají k interaktivnímu prověřování během vývoje. Tyto protokoly by měly primárně obsahovat informace užitečné pro ladění a neměly by mít dlouhodobou hodnotu.",
+	"c_cpp.debuggers.logging.category.warning.description": "Protokoly, které zvýrazňují neobvyklou nebo neočekávanou událost v toku aplikace, ale jinak nezpůsobí zastavení spuštění aplikace.",
+	"c_cpp.debuggers.logging.category.error.description": "Protokoly, které zvýrazňují, když se aktuální tok provádění zastaví kvůli selhání. Ty by měly značit selhání v aktuální aktivitě, nikoli selhání v celé aplikaci.",
+	"c_cpp.debuggers.logging.category.none.description": "Nepoužívá se k zápisu zpráv protokolu. Určuje, že kategorie protokolování by neměla zapisovat žádné zprávy."
 }

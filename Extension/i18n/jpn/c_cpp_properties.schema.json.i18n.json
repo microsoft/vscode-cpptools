@@ -6,7 +6,7 @@
 {
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.name": "構成識別子です。`Mac`、`Linux`、`Win32` は、それらのプラットフォームで自動選択される構成の特別な識別子ですが、どの識別子でも使用できます。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerPath": "より正確な IntelliSense を有効にするために使用されているコンパイラの完全なパスです (例: `/usr/bin/gcc`)。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "たとえば `-nostdinc++`、`-m32` など、使用されているインクルードや定義を変更するコンパイラ引数です。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "たとえば `-nostdinc++`、`-m32` など、使用されているインクルードや定義を変更するコンパイラ引数。追加のスペース区切りの引数を受け取る引数は、配列内の別の引数として入力する必要があります。たとえば、`--sysroot <arg>` の場合、`\"--sysroot\", \"<arg>\"` を使用します。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "IntelliSense に使用する C 言語標準のバージョンです。注意: GNU 標準は、set コンパイラをクエリして GNU 定義を取得するためにのみ使用されるため、IntelliSense は同等の C 標準バージョンをエミュレートします。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "IntelliSense に使用する C++ 言語標準のバージョンです。注意: GNU 標準は、set コンパイラをクエリして GNU 定義を取得するためにのみ使用されるため、IntelliSense は同等の C++ 標準バージョンをエミュレートします。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "ワークスペースの `compile_commands.json` ファイルへの完全なパス。",
