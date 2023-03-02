@@ -37,7 +37,7 @@ import { UI, getUI } from './ui';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
-import { updateLanguageConfigurations, CppSourceStr, clients } from './extension';
+import { updateLanguageConfigurations, CppSourceStr, configPrefix, clients } from './extension';
 import { SettingsTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -122,7 +122,7 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
 
 function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(configPrefix + "IntelliSense");
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
@@ -150,7 +150,7 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
 
 function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
     if (!diagnosticsCollectionRefactor) {
-        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(CppSourceStr);
+        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(configPrefix + "Refactor");
     }
 
     const newDiagnostics: vscode.Diagnostic[] = [];
