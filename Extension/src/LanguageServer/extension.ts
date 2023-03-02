@@ -426,7 +426,7 @@ export function registerCommands(enabled: boolean): void {
 }
 
 function logForUIExperiment(command: string, sender?: any): void {
-    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+    const settings: CppSettings = new CppSettings();
     const properties: {[key: string]: string} = {
         newUI: ui.isNewUI.toString(),
         uiOverride: (settings.experimentalFeatures ?? false).toString(),

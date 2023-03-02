@@ -491,9 +491,11 @@ async function _getUI(): Promise<UI> {
     if (!ui) {
         const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
         if (experimentationService !== undefined) {
-            const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+            const settings: CppSettings = new CppSettings();
             const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
             ui = useNewUI || settings.experimentalFeatures ? new NewUI() : new OldUI();
+        } else {
+            ui = new NewUI();
         }
     }
     return ui;
