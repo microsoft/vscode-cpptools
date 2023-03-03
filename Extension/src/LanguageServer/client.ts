@@ -1892,8 +1892,8 @@ export class DefaultClient implements Client {
                     return null;
                 }
             };
-            const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             try {
+                const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs, provider.version);
                 }
