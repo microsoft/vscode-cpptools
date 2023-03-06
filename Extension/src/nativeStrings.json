@@ -442,6 +442,6 @@
     },
     "unknown_error": "Unknown error.",
     "run_select_compiler": {
-        "text": "Please run the 'Select Default Compiler' command to locate your system headers"
+        "text": "Please run the 'Select Default Compiler' command to locate your system headers."
     }
 }
