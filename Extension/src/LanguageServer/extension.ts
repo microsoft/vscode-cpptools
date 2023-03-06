@@ -423,75 +423,25 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
-    // ---------------- Wrappers -------------
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelectUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ConfigurationSelect");
-            onSelectConfiguration();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanWorkspaceUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("RescanWorkspace");
-            onRescanWorkspace();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommandsUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ShowIdleCodeAnalysisCommands");
-            onShowIdleCodeAnalysisCommands();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommandsUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ShowActiveCodeAnalysisCommands");
-            onShowActiveCodeAnalysisCommands();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseParsingUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ParsingCommands");
-            onPauseParsing();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeParsingUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ParsingCommands");
-            onResumeParsing();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompilerUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("CheckForCompiler");
-            onCheckForCompiler();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFileUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("RestartIntelliSenseForFile");
-            onRestartIntelliSenseForFile();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgressUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ShowReferencesProgress");
-            onShowReferencesProgress();
-        }
-        : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommandsUI_Telemetry', enabled ?
-        () => {
-            logForUIExperiment("ParsingCommands");
-            onShowParsingCommands();
-        }
-        : onDisabledCommand));
-    // ----------------------------------------
 }
 
-async function logForUIExperiment(command: string): Promise<void> {
-    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-    const isNewUI: string = ui.isNewUI.toString();
-    const isOverridden: string = (settings.experimentalFeatures ?? false).toString();
-    telemetry.logLanguageServerEvent(`experiment${command}`, { newUI: isNewUI, uiOverride: isOverridden });
+function logForUIExperiment(command: string, sender?: any): void {
+    const settings: CppSettings = new CppSettings();
+    const properties: {[key: string]: string} = {
+        newUI: ui.isNewUI.toString(),
+        uiOverride: (settings.experimentalFeatures ?? false).toString(),
+        sender: getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent(`experiment${command}`, properties);
+}
+
+function getSenderType(sender?: any): string {
+    if (util.isString(sender)) {
+        return sender;
+    } else if (util.isUri(sender)) {
+        return 'contextMenu';
+    }
+    return 'commandPalette';
 }
 
 function onDisabledCommand(): void {
@@ -506,7 +456,8 @@ function onDisabledCommand(): void {
     vscode.window.showWarningMessage(message);
 }
 
-function onRestartIntelliSenseForFile(): void {
+function onRestartIntelliSenseForFile(sender?: any): void {
+    logForUIExperiment("RestartIntelliSenseForFile", sender);
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
         (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
@@ -590,7 +541,8 @@ function selectDefaultCompiler(): void {
     clients.ActiveClient.promptSelectCompiler(true);
 }
 
-function onSelectConfiguration(): void {
+function onSelectConfiguration(sender?: any): void {
+    logForUIExperiment("ConfigurationSelect", sender);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
@@ -656,7 +608,8 @@ function onGoToPrevDirectiveInGroup(): void {
     client.handleGoToDirectiveInGroup(false);
 }
 
-function onCheckForCompiler(): void {
+function onCheckForCompiler(sender?: any): void {
+    logForUIExperiment("CheckForCompiler", sender);
     const client: Client = getActiveClient();
     client.handleCheckForCompiler();
 }
@@ -731,7 +684,11 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
-async function onCreateDeclarationOrDefinition(): Promise<void> {
+async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     getActiveClient().handleCreateDeclarationOrDefinition();
 }
 
@@ -769,11 +726,13 @@ function onToggleDimInactiveRegions(): void {
     settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
 }
 
-function onPauseParsing(): void {
+function onPauseParsing(sender?: any): void {
+    logForUIExperiment("ParsingCommands", sender);
     clients.ActiveClient.pauseParsing();
 }
 
-function onResumeParsing(): void {
+function onResumeParsing(sender?: any): void {
+    logForUIExperiment("ParsingCommands", sender);
     clients.ActiveClient.resumeParsing();
 }
 
@@ -789,19 +748,23 @@ function onCancelCodeAnalysis(): void {
     clients.ActiveClient.CancelCodeAnalysis();
 }
 
-function onShowParsingCommands(): void {
+function onShowParsingCommands(sender?: any): void {
+    logForUIExperiment("ParsingCommands", sender);
     clients.ActiveClient.handleShowParsingCommands();
 }
 
-function onShowActiveCodeAnalysisCommands(): void {
+function onShowActiveCodeAnalysisCommands(sender?: any): void {
+    logForUIExperiment("ShowActiveCodeAnalysisCommands", sender);
     clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
 }
 
-function onShowIdleCodeAnalysisCommands(): void {
+function onShowIdleCodeAnalysisCommands(sender?: any): void {
+    logForUIExperiment("ShowIdleCodeAnalysisCommands", sender);
     clients.ActiveClient.handleShowIdleCodeAnalysisCommands();
 }
 
-function onShowReferencesProgress(): void {
+function onShowReferencesProgress(sender?: any): void {
+    logForUIExperiment("ShowReferencesProgress", sender);
     clients.ActiveClient.handleReferencesIcon();
 }
 
@@ -898,7 +861,8 @@ function onLogDiagnostics(): void {
     clients.ActiveClient.logDiagnostics();
 }
 
-function onRescanWorkspace(): void {
+function onRescanWorkspace(sender?: string): void {
+    logForUIExperiment("RescanWorkspace", sender);
     clients.ActiveClient.rescanFolder();
 }
 

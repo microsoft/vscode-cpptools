@@ -169,6 +169,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 resultCodeActions.push(...docCodeActions);
                 return;
             }
+            if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
+                command.arguments = ['codeAction']; // We report the sender of the command
+            }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,
                 command: command.command === "edit" ? undefined : {
