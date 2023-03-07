@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Especifique um caminho do compilador ou selecione um caminho de compilador detectado na lista suspensa.",
 	"no.compiler.paths.detected": "(Nenhum caminho de compilador detectado)",
 	"compiler.args": "Argumentos do compilador",
-	"compiler.arguments": "Argumentos do compilador para modificar as inclusões ou definições usadas, por exemplo, {0}, {1} etc.",
+	"compiler.arguments": "Argumentos do compilador para modificar as inclusões ou definições usadas, por exemplo {0}, {1}, etc. Os argumentos que usam argumentos adicionais delimitados por espaço devem ser inseridos como argumentos separados na matriz, por exemplo para {2} uso {3}.",
 	"one.argument.per.line": "Um argumento por linha.",
 	"intellisense.mode": "Modo do IntelliSense",
 	"intellisense.mode.description": "O modo do IntelliSense a ser usado, que é mapeado para uma plataforma e uma variante de arquitetura do MSVC, do gcc ou do Clang. Se esta opção não for definida ou se for definida como {0}, a extensão escolherá o padrão dessa plataforma. O Windows usa {1}, o Linux usa {2} e o macOS usa {3} como padrão. Selecione um modo do IntelliSense específico para substituir o modo {4}. Os modos do IntelliSense que só especificam variantes {5} (por exemplo, {6}) são os modos herdados, que são convertidos automaticamente nas variantes {7} com base na plataforma host.",

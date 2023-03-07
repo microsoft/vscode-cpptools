@@ -8,8 +8,8 @@
 	"copy.vcpkg.command": "Копировать команду vcpkg для установки \"{0}\" в буфер обмена",
 	"on.disabled.command": "Команды, связанные с IntelliSense, не могут быть выполнены, если для `C_Cpp.intelliSenseEngine` установлено значение `disabled`.",
 	"client.not.found": "Клиент не найден.",
-	"configuration.select.first": "Сначала откройте папку, чтобы выбрать конфигурацию",
-	"configuration.provider.select.first": "Сначала откройте папку, чтобы выбрать поставщик конфигурации",
+	"configuration.select.first": "Сначала откройте папку, чтобы выбрать конфигурацию.",
+	"configuration.provider.select.first": "Сначала откройте папку, чтобы выбрать поставщика конфигурации.",
 	"edit.configurations.open.first": "Сначала откройте папку для изменения конфигураций",
 	"code.action.aborted": "Не удалось применить исправление анализа кода, так как документ был изменен.",
 	"add.includepath.open.first": "Сначала откройте папку для добавления в {0}"

@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Alterar Provedor de Configuração...",
 	"c_cpp.command.configurationEditJSON.title": "Editar Configurações (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Editar Configurações (IU)",
+	"c_cpp.command.selectDefaultCompiler.title": "Selecionar Compilador Padrão",
 	"c_cpp.command.switchHeaderSource.title": "Alternar Cabeçalho/Origem",
 	"c_cpp.command.enableErrorSquiggles.title": "Habilitar Rabiscos de Erro",
 	"c_cpp.command.disableErrorSquiggles.title": "Desabilitar Rabiscos de Erro",
@@ -173,7 +174,7 @@
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription": "Qualquer código onde a chave de abertura e fechamento é inserida em uma linha é mantido em uma linha, independentemente dos valores de qualquer uma das configurações `C_Cpp.vcFormat.newLine.*`.",
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription": "Os blocos de código são sempre formatados com base nos valores das configurações `C_Cpp.vcFormat.newLine. *`.",
 	"c_cpp.configuration.clang_format_path.markdownDescription": "O caminho completo do executável `clang-format`. Se não for especificado, o `clang-format` estará disponível no caminho do ambiente usado. Se não for encontrado no caminho do ambiente, o `clang-format` empacotado com a extensão será usado.",
-	"c_cpp.configuration.clang_format_style.markdownDescription": "Estilo de codificação, atualmente suporta: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`. Use `file` para carregar o estilo de um arquivo `.clang-format` no diretório atual ou pai, ou use `file:<path>/.clang-format` para referenciar um caminho específico. Use `{key: value, ...}` para definir parâmetros específicos. Por exemplo, o estilo `Visual Studio` é semelhante a: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: - 4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
+	"c_cpp.configuration.clang_format_style.markdownDescription": "Estilo de codificação, atualmente suporta: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`. Use `file` para carregar o estilo de um arquivo `.clang-format` no diretório atual ou pai, ou use `file:<path>/.clang-format` para referenciar um caminho específico. Use `{chave: valor, ...}` para definir parâmetros específicos. Por exemplo, o estilo `Visual Studio` é semelhante a: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: - 4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
 	"c_cpp.configuration.clang_format_fallbackStyle.markdownDescription": "Nome do estilo predefinido usado como fallback no caso de `clang-format` ser invocado com o estilo `file`, mas o arquivo `.clang-format` não for encontrado. Os valores possíveis são `Visual Studio`,`LLVM`, `Google`,`Chromium`, `Mozilla`,`WebKit`, `Microsoft`, `GNU`, `none` ou use `{key: value, .. .}` para definir parâmetros específicos. Por exemplo, o estilo `Visual Studio` é semelhante a: `{BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifier: - 4, NamespaceIndentation: All, FixNamespaceComments: false}`.",
 	"c_cpp.configuration.clang_format_sortIncludes.markdownDescription": "Se definido, substitui o comportamento de classificação de inclusão determinado pelo parâmetro `SortIncludes`.",
 	"c_cpp.configuration.intelliSenseEngine.description": "Controla o provedor IntelliSense.",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "Estilo para cadeias de caracteres literais definidas pelo usuário em C++.",
 	"c_cpp.semanticTokenModifiers.global.description": "Estilo a ser usado para símbolos que são globais.",
 	"c_cpp.semanticTokenModifiers.local.description": "Estilo a ser usado para símbolos locais.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Sinalizador opcional para determinar se as mensagens natvis de diagnóstico devem ser registradas no Console de Depuração. O padrão é None.",
+	"c_cpp.debuggers.logging.category.verbose.description": "Logs usados para investigação interativa durante o desenvolvimento. Esses logs devem conter principalmente informações úteis para depuração e não têm nenhum valor de longo prazo.",
+	"c_cpp.debuggers.logging.category.warning.description": "Logs que realçam um evento anormal ou inesperado no fluxo do aplicativo, mas não fazem com que a execução do aplicativo pare.",
+	"c_cpp.debuggers.logging.category.error.description": "Logs que realçam quando o fluxo atual de execução é interrompido devido a uma falha. Isso deve indicar uma falha na atividade atual, não uma falha em todo o aplicativo.",
+	"c_cpp.debuggers.logging.category.none.description": "Não usado para gravar mensagens de log. Especifica que uma categoria de registro em log não deve gravar nenhuma mensagem."
 }

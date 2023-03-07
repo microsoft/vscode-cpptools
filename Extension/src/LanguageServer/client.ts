@@ -37,7 +37,7 @@ import { UI, getUI } from './ui';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
-import { updateLanguageConfigurations, CppSourceStr, clients } from './extension';
+import { updateLanguageConfigurations, CppSourceStr, configPrefix, clients } from './extension';
 import { SettingsTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -122,7 +122,7 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
 
 function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(configPrefix + "IntelliSense");
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
@@ -150,7 +150,7 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
 
 function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
     if (!diagnosticsCollectionRefactor) {
-        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(CppSourceStr);
+        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(configPrefix + "Refactor");
     }
 
     const newDiagnostics: vscode.Diagnostic[] = [];
@@ -971,63 +971,56 @@ export class DefaultClient implements Client {
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await this.showSelectDefaultCompiler(paths);
-        let action: string;
-        switch (index) {
-            case -1:
-                action = 'escaped';
-                break;
-            case paths.length - 1:
-                action = 'disable';
-                break;
-            case paths.length - 2:
-                action = 'help';
-                break;
-            case paths.length - 3:
-                action = 'browse';
-                break;
-            default:
-                action = 'select compiler';
-                break;
-        }
-        telemetry.logLanguageServerEvent('compilerSelection', { action });
-        if (index === -1) {
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 1) {
-            settings.defaultCompiler = "";
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 2) {
-            switch (os.platform()) {
-                case 'win32':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
-                    return;
-                case 'darwin':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
-                    return;
-                default: // Linux
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
-                    return;
-            }
-        }
-        if (index === paths.length - 3) {
-            const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
-            if (result === undefined || result.length === 0) {
+        let action: string = "";
+        try {
+            if (index === -1) {
+                action = "escaped";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
                 return;
             }
-            settings.defaultCompiler = result[0].fsPath;
-        } else {
-            settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            if (index === paths.length - 1) {
+                action = "disable";
+                settings.defaultCompiler = "";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
+                return;
+            }
+            if (index === paths.length - 2) {
+                action = "help";
+                switch (os.platform()) {
+                    case 'win32':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                        return;
+                    case 'darwin':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                        return;
+                    default: // Linux
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                        return;
+                }
+            }
+            if (index === paths.length - 3) {
+                const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
+                if (result === undefined || result.length === 0) {
+                    action = "browse dismissed";
+                    return;
+                }
+                action = "compiler browsed";
+                settings.defaultCompiler = result[0].fsPath;
+            } else {
+                action = "select compiler";
+                settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            }
+
+            util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
+            compilerDefaults = await this.requestCompiler(compilerPaths);
+            DefaultClient.updateClientConfigurations();
+        } finally {
+            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount: paths.length });
         }
-        util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
-        compilerDefaults = await this.requestCompiler(compilerPaths);
-        DefaultClient.updateClientConfigurations();
     }
 
     async promptSelectCompiler(isCommand: boolean): Promise<void> {
@@ -1037,6 +1030,7 @@ export class DefaultClient implements Client {
         }
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
+        let action: string;
         const settings: OtherSettings = new OtherSettings();
         if (isCommand || compilerDefaults.compilerPath !== "") {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
@@ -1046,11 +1040,15 @@ export class DefaultClient implements Client {
                     settings.defaultCompiler = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
+                    action = "confirm compiler";
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
+                    action = "show quickpick";
                 } else {
                     this.showPrompt(selectCompiler, true);
+                    action = "dismissed";
                 }
+                telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
@@ -1894,8 +1892,8 @@ export class DefaultClient implements Client {
                     return null;
                 }
             };
-            const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             try {
+                const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs, provider.version);
                 }
