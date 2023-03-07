@@ -280,7 +280,7 @@ export class NewUI implements UI {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
 
         // TODO: Integrate with Tarik's feature to determine if compiler/bare-intellisense is configured
-        if (settings.intelliSenseEngine === "default" && !compilerDefaults.trustedCompilerFound ) {
+        if (settings.intelliSenseEngine === "default" && !compilerDefaults.trustedCompilerFound) {
             this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusItem.command = {
                 command: "C_Cpp.SelectDefaultCompiler",
