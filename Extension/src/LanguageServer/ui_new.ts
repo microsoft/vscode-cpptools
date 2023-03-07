@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { documentSelector } from '../common';
-import { Client } from './client';
+import { Client, compilerDefaults } from './client';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as nls from 'vscode-nls';
@@ -280,10 +280,10 @@ export class NewUI implements UI {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
 
         // TODO: Integrate with Tarik's feature to determine if compiler/bare-intellisense is configured
-        if (settings.intelliSenseEngine === "disabled") {
+        if (settings.intelliSenseEngine === "default" && !compilerDefaults.trustedCompilerFound ) {
             this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusItem.command = {
-                command: "C_Cpp.CheckForCompiler",
+                command: "C_Cpp.SelectDefaultCompiler",
                 title: localize("intellisense.select.text", "Select a Compiler"),
                 arguments: commandArguments
             };

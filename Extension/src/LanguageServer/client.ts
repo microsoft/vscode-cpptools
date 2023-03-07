@@ -66,7 +66,7 @@ let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let pendingTask: util.BlockingTask<any> | undefined;
-let compilerDefaults: configs.CompilerDefaults;
+export let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 let displayedSelectCompiler: boolean = false;
@@ -1176,6 +1176,7 @@ export class DefaultClient implements Client {
                         // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
+                        compilerDefaults.trustedCompilerFound = false;
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);
