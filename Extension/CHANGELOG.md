@@ -3,7 +3,6 @@
 ## Version 1.15.0: March 13, 2023
 ### Enhancements
 * Support multiple natvis files in `visualizerFile`. [#925](https://github.com/microsoft/vscode-cpptools/issues/925)
-  * gc46 (@gc46) [PR #10487](https://github.com/microsoft/vscode-cpptools/pull/10487)
 * Enable error squiggles for single file mode if includes resolve. [#10062](https://github.com/microsoft/vscode-cpptools/issues/10062)
 * Add a 'Select Default Compiler' code action and error message for standard headers which can't be found. [#10531](https://github.com/microsoft/vscode-cpptools/issues/10531)
 
