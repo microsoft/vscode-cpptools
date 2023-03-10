@@ -22,7 +22,7 @@
 * Fix 'Reset IntelliSense Database' being delayed until parsing is finished. [#10616](https://github.com/microsoft/vscode-cpptools/issues/10616)
 * Fix uncaught exception with some configuration providers. [PR #10629](https://github.com/microsoft/vscode-cpptools/pull/10629)
 * Fix `__GXX_RTTI` incorrectly being defined by IntelliSense with clang and `-fms-compatibility`.
-* Reduce the likelihood of an onWillSaveWaitUntil timeout.
+* Reduce the likelihood of an `onWillSaveWaitUntil` timeout.
 * Fix an IntelliSense crash with C++20 concepts.
 * Stop querying clang-cl.exe as C.
 
