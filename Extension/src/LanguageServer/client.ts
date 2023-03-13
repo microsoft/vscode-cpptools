@@ -975,7 +975,7 @@ export class DefaultClient implements Client {
         try {
             if (index === -1) {
                 action = "escaped";
-                if (showSecondPrompt) {
+                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
                     this.showPrompt(selectCompiler, true);
                 }
                 return;
@@ -1005,6 +1005,9 @@ export class DefaultClient implements Client {
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
+                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
+                        this.showPrompt(selectCompiler, true);
+                    }
                     action = "browse dismissed";
                     return;
                 }
