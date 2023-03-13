@@ -332,6 +332,10 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
+                if (!client.isInitialized()) {
+                    // This can randomly get hit when adding/removing workspace folders.
+                    await client.awaitUntilLanguageClientReady();
+                }
                 client.TrackedDocuments.add(document);
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {

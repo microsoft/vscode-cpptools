@@ -21,6 +21,7 @@
 * Fix uncaught exception with some configuration providers. [PR #10629](https://github.com/microsoft/vscode-cpptools/pull/10629)
 * Fix bugs with the "You do not have IntelliSense configured" prompt. [#10658](https://github.com/microsoft/vscode-cpptools/issues/10658), [#10659](https://github.com/microsoft/vscode-cpptools/issues/10659)
 * Fix `__GXX_RTTI` incorrectly being defined by IntelliSense with clang and `-fms-compatibility`.
+* Fix random failures when adding or removing workspace folders.
 * Reduce the likelihood of an `onWillSaveWaitUntil` timeout.
 * Fix an IntelliSense crash with C++20 concepts.
 * Stop querying clang-cl.exe as C.
