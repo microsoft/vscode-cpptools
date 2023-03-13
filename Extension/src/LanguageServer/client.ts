@@ -849,7 +849,7 @@ export class DefaultClient implements Client {
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
-    public isInitialized() : boolean { return this.innerLanguageClient !== undefined; }
+    public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
