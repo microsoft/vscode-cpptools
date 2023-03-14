@@ -1,10 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.15.0: March 14, 2023
+## Version 1.15.0: March 15, 2023
 ### Enhancements
 * Support multiple natvis files in `visualizerFile`. [#925](https://github.com/microsoft/vscode-cpptools/issues/925)
 * Enable error squiggles for single file mode if includes resolve. [#10062](https://github.com/microsoft/vscode-cpptools/issues/10062)
+* Improve the description of the `C_Cpp.codeAnalysis.clangTidy.enabled` setting. [#10454](https://github.com/microsoft/vscode-cpptools/issues/10454)
 * Add a 'Select Default Compiler' code action and error message for standard headers which can't be found. [#10531](https://github.com/microsoft/vscode-cpptools/issues/10531)
+* Change the 'Edit "includePath" setting' code action to reference "compilerPath" for missing system includes. [#10675](https://github.com/microsoft/vscode-cpptools/issues/10675)
 
 ### Bug Fixes
 * Enable `-fms-extensions` by default for Cygwin and MinGW. [#8353](https://github.com/microsoft/vscode-cpptools/issues/8353)
@@ -20,9 +22,10 @@
 * Fix 'Reset IntelliSense Database' being delayed until parsing is finished. [#10616](https://github.com/microsoft/vscode-cpptools/issues/10616)
 * Fix uncaught exception with some configuration providers. [PR #10629](https://github.com/microsoft/vscode-cpptools/pull/10629)
 * Fix bugs with the "You do not have IntelliSense configured" prompt. [#10658](https://github.com/microsoft/vscode-cpptools/issues/10658), [#10659](https://github.com/microsoft/vscode-cpptools/issues/10659)
+* Fix random failures when adding or removing workspace folders. [PR #10665](https://github.com/microsoft/vscode-cpptools/pull/10665)
 * Fix missing clang-tidy checks setting values. [#10667](https://github.com/microsoft/vscode-cpptools/issues/10667)
+* Fix 'Select Default Compiler' so that it works if it's already set in the workspace or workspace folder settings. [#10674](https://github.com/microsoft/vscode-cpptools/issues/10674)
 * Fix `__GXX_RTTI` incorrectly being defined by IntelliSense with clang and `-fms-compatibility`.
-* Fix random failures when adding or removing workspace folders.
 * Reduce the likelihood of an `onWillSaveWaitUntil` timeout.
 * Fix an IntelliSense crash with C++20 concepts.
 * Stop querying clang-cl.exe as C.
