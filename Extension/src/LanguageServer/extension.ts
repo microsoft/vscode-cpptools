@@ -332,6 +332,10 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
+                if (!client.isInitialized()) {
+                    // This can randomly get hit when adding/removing workspace folders.
+                    await client.awaitUntilLanguageClientReady();
+                }
                 client.TrackedDocuments.add(document);
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
@@ -375,7 +379,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.selectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', enabled ? onSelectConfigurationProvider : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', enabled ? onEditConfigurationJSON : onDisabledCommand));

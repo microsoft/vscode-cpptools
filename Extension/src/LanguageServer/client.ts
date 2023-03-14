@@ -791,6 +791,7 @@ export interface Client {
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
+    isInitialized(): boolean;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -848,6 +849,7 @@ export class DefaultClient implements Client {
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
+    public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -908,6 +910,10 @@ export class DefaultClient implements Client {
         clients.forEach(client => {
             if (client instanceof DefaultClient) {
                 const defaultClient: DefaultClient = <DefaultClient>client;
+                if (!client.isInitialized()) {
+                    // This can randomly get hit when adding/removing workspace folders.
+                    return;
+                }
                 defaultClient.configuration.CompilerDefaults = compilerDefaults;
                 defaultClient.configuration.handleConfigurationChange();
             }
@@ -975,7 +981,7 @@ export class DefaultClient implements Client {
         try {
             if (index === -1) {
                 action = "escaped";
-                if (showSecondPrompt) {
+                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
                     this.showPrompt(selectCompiler, true);
                 }
                 return;
@@ -1005,6 +1011,9 @@ export class DefaultClient implements Client {
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
+                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
+                        this.showPrompt(selectCompiler, true);
+                    }
                     action = "browse dismissed";
                     return;
                 }
@@ -3548,4 +3557,5 @@ class NullClient implements Client {
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
+    isInitialized(): boolean { return true; }
 }
