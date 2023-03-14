@@ -58,6 +58,7 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
+    rawCompilerPath?: string;
     compilerPath?: string;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
@@ -837,6 +838,7 @@ export class CppProperties {
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
+            configuration.rawCompilerPath = configuration.compilerPath;
 
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below

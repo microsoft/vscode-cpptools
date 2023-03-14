@@ -953,7 +953,7 @@ export class DefaultClient implements Client {
     }
 
     public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
-        const settings: OtherSettings = new OtherSettings();
+        const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const paths: string[] = [];
         if (compilerDefaults.knownCompilers !== undefined) {
@@ -988,7 +988,7 @@ export class DefaultClient implements Client {
             }
             if (index === paths.length - 1) {
                 action = "disable";
-                settings.defaultCompiler = "";
+                settings.defaultCompilerPath = "";
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true);
                 }
@@ -1018,13 +1018,13 @@ export class DefaultClient implements Client {
                     return;
                 }
                 action = "compiler browsed";
-                settings.defaultCompiler = result[0].fsPath;
+                settings.defaultCompilerPath = result[0].fsPath;
             } else {
                 action = "select compiler";
-                settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
             }
 
-            util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
+            util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
@@ -1040,13 +1040,13 @@ export class DefaultClient implements Client {
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
         let action: string;
-        const settings: OtherSettings = new OtherSettings();
+        const settings: CppSettings = new CppSettings();
         if (isCommand || compilerDefaults.compilerPath !== "") {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
-                    settings.defaultCompiler = compilerDefaults.compilerPath;
+                    settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
