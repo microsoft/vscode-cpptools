@@ -43,14 +43,25 @@ export function getLocaleId(): string {
     // This replicates the language detection used by initializeSettings() in vscode-nls
     if (typeof process.env.VSCODE_NLS_CONFIG === 'string') {
         const vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
+        let language: string | undefined;
         if (vscodeOptions.availableLanguages) {
-            const value: any = vscodeOptions.availableLanguages['*'];
+            const value: string = vscodeOptions.availableLanguages['*'];
             if (typeof value === 'string') {
-                return value;
+                language = value;
             }
         }
+        let locale: string | undefined;
         if (typeof vscodeOptions.locale === 'string') {
-            return vscodeOptions.locale.toLowerCase();
+            locale = vscodeOptions.locale.toLowerCase();
+        }
+        let result: string | undefined;
+        if (language === undefined) {
+            result = locale;
+        } else if (language !== 'en') {
+            result = language;
+        }
+        if (result !== undefined) {
+            return result;
         }
     }
     return "en";
