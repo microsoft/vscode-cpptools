@@ -171,7 +171,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
                 command.arguments = ['codeAction']; // We report the sender of the command
             } else if (command.command === "C_Cpp.SelectDefaultCompiler") {
-                const defaultCompilerPath: string | undefined = new CppSettings().defaultCompilerPath;
+                const defaultCompilerPath: string | undefined = new CppSettings(this.client.RootUri).defaultCompilerPath;
                 if (defaultCompilerPath !== undefined) {
                     return;
                 }
