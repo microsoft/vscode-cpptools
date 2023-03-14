@@ -168,9 +168,13 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 resultCodeActions.push(...disableCodeActions);
                 resultCodeActions.push(...docCodeActions);
                 return;
-            }
-            if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
+            } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
                 command.arguments = ['codeAction']; // We report the sender of the command
+            } else if (command.command === "C_Cpp.SelectDefaultCompiler") {
+                const defaultCompilerPath: string | undefined = new CppSettings().defaultCompilerPath;
+                if (defaultCompilerPath !== undefined) {
+                    return;
+                }
             }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,
