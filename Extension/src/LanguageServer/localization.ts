@@ -9,6 +9,7 @@ import { lookupString } from '../nativeStrings';
 import * as nls from 'vscode-nls';
 import path = require('path');
 import * as fs from 'fs';
+import * as vscode from 'vscode';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -32,39 +33,39 @@ export function getLocalizedString(params: LocalizeStringParams): string {
     return indent + text;
 }
 
-interface VSCodeNlsConfig {
-    locale: string;
-    availableLanguages: {
-        [pack: string]: string;
-    };
-}
-
 export function getLocaleId(): string {
-    // This replicates the language detection used by initializeSettings() in vscode-nls
-    if (typeof process.env.VSCODE_NLS_CONFIG === 'string') {
-        const vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
-        let language: string | undefined;
-        if (vscodeOptions.availableLanguages) {
-            const value: string = vscodeOptions.availableLanguages['*'];
-            if (typeof value === 'string') {
-                language = value;
-            }
+
+    let locale: string = vscode.env.language;
+
+    // Restrict to locale identifiers we support.
+    if (locale.startsWith("cs")) {
+        locale = "cs";
+    } else if (locale.startsWith("de")) {
+        locale = "de";
+    } else if (locale.startsWith("es")) {
+        locale = "es";
+    } else if (locale.startsWith("fr")) {
+        locale = "fr";
+    } else if (locale.startsWith("it")) {
+        locale = "it";
+    } else if (locale.startsWith("ja")) {
+        locale = "ja";
+    } else if (locale.startsWith("ko")) {
+        locale = "ko";
+    } else if (locale.startsWith("pl")) {
+        locale = "pl";
+    } else if (locale.startsWith("pt")) {
+        locale = "pt-br";
+    } else if (locale.startsWith("ru")) {
+        locale = "ru";
+    } else if (locale.startsWith("zh")) {
+        if (!locale.startsWith("zh-tw")) {
+            locale = "zh-cn";
         }
-        let locale: string | undefined;
-        if (typeof vscodeOptions.locale === 'string') {
-            locale = vscodeOptions.locale.toLowerCase();
-        }
-        let result: string | undefined;
-        if (language === undefined) {
-            result = locale;
-        } else if (language !== 'en') {
-            result = language;
-        }
-        if (result !== undefined) {
-            return result;
-        }
+    } else {
+        locale = "en";
     }
-    return "en";
+    return locale;
 }
 
 export function getLocalizedHtmlPath(originalPath: string): string {
