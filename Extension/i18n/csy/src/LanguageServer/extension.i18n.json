@@ -6,14 +6,11 @@
 {
 	"learn.how.to.install.a.library": "Jak nainstalovat knihovnu pro tuto hlavičku pomocí vcpkg",
 	"copy.vcpkg.command": "Zkopírovat příkaz vcpkg pro instalaci {0} do schránky",
-	"insiders.available": "Je k dispozici verze {0} pro účastníky programu Insider. Chcete se přepnout na kanál pro účastníky programu Insider a nainstalovat tuto aktualizaci?",
-	"yes.button": "Ano",
-	"ask.me.later.button": "Požádat později",
-	"dont.show.again.button": "Příště už nezobrazovat",
-	"extension.updated": "Rozšíření C/C++ se aktualizovalo na verzi {0}. Načtěte prosím okno znovu, aby se změny projevily.",
+	"on.disabled.command": "Příkazy související s IntelliSense se nedají spustit, když je `C_Cpp.intelliSenseEngine` nastavené na `disabled`.",
 	"client.not.found": "klient se nenašel",
 	"configuration.select.first": "Pokud chcete vybrat konfiguraci, otevřete nejdříve složku.",
 	"configuration.provider.select.first": "Pokud chcete vybrat poskytovatele konfigurace, otevřete nejdříve složku.",
 	"edit.configurations.open.first": "Pokud chcete upravit konfigurace, otevřete nejdříve složku.",
+	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn.",
 	"add.includepath.open.first": "Nejdříve otevřete složku, která se má přidat do {0}."
 }

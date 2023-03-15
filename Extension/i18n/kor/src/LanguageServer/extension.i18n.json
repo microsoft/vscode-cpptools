@@ -6,14 +6,11 @@
 {
 	"learn.how.to.install.a.library": "vcpkg를 사용하여 이 헤더의 라이브러리를 설치하는 방법 알아보기",
 	"copy.vcpkg.command": "'{0}'을(를) 설치할 vcpkg 명령을 클립보드에 복사",
-	"insiders.available": "참가자 버전 {0}을(를) 사용할 수 있습니다. 참가자 채널로 전환하고 이 업데이트를 설치하시겠습니까?",
-	"yes.button": "예",
-	"ask.me.later.button": "나중에 묻기",
-	"dont.show.again.button": "다시 표시 안 함",
-	"extension.updated": "C/C++ 확장이 {0} 버전으로 업데이트되었습니다. 변경 내용을 적용하려면 창을 다시 로드하세요.",
+	"on.disabled.command": "IntelliSense 관련 명령은 `C_Cpp.intelliSenseEngine`이 `disabled`로 설정된 경우 실행할 수 없습니다.",
 	"client.not.found": "클라이언트를 찾을 수 없음",
-	"configuration.select.first": "먼저 구성을 선택할 폴더 열기",
-	"configuration.provider.select.first": "먼저 구성 공급자를 선택할 폴더 열기",
+	"configuration.select.first": "먼저 구성을 선택할 폴더를 엽니다.",
+	"configuration.provider.select.first": "먼저 구성 공급자를 선택할 폴더를 엽니다.",
 	"edit.configurations.open.first": "먼저 구성을 편집할 폴더 열기",
+	"code.action.aborted": "문서가 변경되어 코드 분석 수정 사항을 적용할 수 없습니다.",
 	"add.includepath.open.first": "먼저 {0}에 추가할 폴더 열기"
 }

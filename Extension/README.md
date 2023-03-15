@@ -1,13 +1,33 @@
 # C/C++ for Visual Studio Code
 
-#### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/main/Code%20Samples)&nbsp;&nbsp;|&nbsp;&nbsp;[Offline Installers](https://github.com/microsoft/vscode-cpptools/releases)
+#### [Repository](https://github.com/microsoft/vscode-cpptools)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/microsoft/vscode-cpptools/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Documentation](https://code.visualstudio.com/docs/languages/cpp)&nbsp;&nbsp;|&nbsp;&nbsp;[Code Samples](https://github.com/microsoft/vscode-cpptools/tree/main/Code%20Samples)
 
 [![Badge](https://aka.ms/vsls-badge)](https://aka.ms/vsls)
 
-The C/C++ extension adds language support for C/C++ to Visual Studio Code, including features such as IntelliSense and debugging.
+The C/C++ extension adds language support for C/C++ to Visual Studio Code, including [editing (IntelliSense)](https://code.visualstudio.com/docs/cpp/cpp-ide) and [debugging](https://code.visualstudio.com/docs/cpp/cpp-debug) features.
+
+## Pre-requisites
+C++ is a compiled language meaning your program's source code must be translated (compiled) before it can be run on your computer. VS Code is first and foremost an editor, and relies on command-line tools to do much of the development workflow. The C/C++ extension **does not include a C++ compiler or debugger**. You will need to install these tools or use those already installed on your computer.
+ * C++ compiler pre-installed
+ * C++ debugger pre-installed
+
+<br/>
+
+Here is a list of compilers and architectures per platform officially supported by the extension. These are reflected by the available [IntelliSense modes](https://code.visualstudio.com/docs/cpp/configure-intellisense-crosscompilation#_intellisense-mode) from the extension's IntelliSense configuration. Note that support for other compilers may be limited.
+
+Platform | Compilers | Architectures
+:--- | :--- | :--- 
+Windows | MSVC, Clang, GCC | x64, x86, arm64, arm
+Linux | Clang, GCC | x64, x86, arm64, arm
+macOS | Clang, GCC | x64, x86, arm64
+
+For more information about installing the required tools or setting up the extension, please follow the tutorials below.
+<br/>
+<br/>
 
 ## Overview and tutorials
 * [C/C++ extension overview](https://code.visualstudio.com/docs/languages/cpp)
+* [Introductory Videos](https://code.visualstudio.com/docs/cpp/introvideos-cpp)
 
 C/C++ extension tutorials per compiler and platform
 * [Microsoft C++ compiler (MSVC) on Windows](https://code.visualstudio.com/docs/cpp/config-msvc)
@@ -44,21 +64,6 @@ If someone has already filed an issue that encompasses your feedback, please lea
 **[Quick survey](https://www.research.net/r/VBVV6C6)**
 <br>
 Let us know what you think of the extension by taking the quick survey.
-
-## Offline installation
-
-The extension has platform-specific binary dependencies, therefore installation via the Marketplace requires an Internet connection in order to download additional dependencies. If you are working on a computer that does not have access to the Internet or is behind a strict firewall, you may need to use our platform-specific packages and install them by running VS Code's `"Install from VSIX..."` command. These "offline' packages are available at: https://github.com/Microsoft/vscode-cpptools/releases.
-
- Package | Platform
-:--- | :---
-`cpptools-linux.vsix` | Linux 64-bit
-`cpptools-linux-armhf.vsix` | Linux ARM 32-bit
-`cpptools-linux-aarch64.vsix` | Linux ARM 64-bit
-`cpptools-osx.vsix` | macOS 64-bit
-`cpptools-osx-arm64.vsix` | macOS ARM64
-`cpptools-win32.vsix` | Windows 64-bit & 32-bit
-`cpptools-win-arm64.vsix` | Windows ARM64
-`cpptools-linux32.vsix` | Linux 32-bit ([available up to version 0.27.0](https://github.com/microsoft/vscode-cpptools/issues/5346))
 
 ## Contribution
 

@@ -4,6 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult, CppFoldingRange } from '../client';
+import { processDelayedDidOpen } from '../extension';
+import { CppSettings } from '../settings';
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
@@ -13,21 +15,21 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         this.client = client;
         this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
-    async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext,
-        token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
-        const id: number = ++DefaultClient.abortRequestId;
+    async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
+        const settings: CppSettings = new CppSettings();
+        if (!settings.codeFolding) {
+            return [];
+        }
         const params: GetFoldingRangesParams = {
-            id: id,
             uri: document.uri.toString()
         };
-        await this.client.awaitUntilLanguageClientReady();
-        token.onCancellationRequested(e => this.client.abortRequest(id));
-        const ranges: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params);
-        if (ranges.canceled) {
-            return undefined;
+        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
+        const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
+        if (token.isCancellationRequested || response.ranges === undefined) {
+            throw new vscode.CancellationError();
         }
         const result: vscode.FoldingRange[] = [];
-        ranges.ranges.forEach((r: CppFoldingRange) => {
+        response.ranges.forEach((r: CppFoldingRange) => {
             const foldingRange: vscode.FoldingRange = {
                 start: r.range.startLine,
                 end: r.range.endLine

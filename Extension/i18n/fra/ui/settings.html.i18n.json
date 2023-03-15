@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Spécifiez un chemin de compilateur ou sélectionnez un chemin de compilateur détecté dans la liste déroulante.",
 	"no.compiler.paths.detected": "(Aucun chemin de compilateur détecté)",
 	"compiler.args": "Arguments du compilateur",
-	"compiler.arguments": "Arguments du compilateur permettant de modifier les inclusions ou les définitions utilisées, par exemple, {0}, {1}, etc.",
+	"compiler.arguments": "Arguments du compilateur pour modifier les include ou defines utilisés, par exemple {0}, {1}, etc. Les arguments qui acceptent des arguments supplémentaires délimités par des espaces doivent être entrés en tant qu’arguments distincts dans le tableau, par exemple pour {2} utiliser {3}.",
 	"one.argument.per.line": "Un argument par ligne.",
 	"intellisense.mode": "Mode IntelliSense",
 	"intellisense.mode.description": "Mode IntelliSense à utiliser, qui est mappé à une variante de plateforme et d'architecture de MSVC, gcc ou Clang. En l'absence de valeur définie, ou si la valeur est {0}, l'extension choisit la valeur par défaut pour cette plateforme. Pour Windows, la valeur par défaut est {1}. Pour Linux, la valeur par défaut est {2}. Pour macOS, la valeur par défaut est {3}. Sélectionnez un mode IntelliSense spécifique pour remplacer le mode {4}. Les modes IntelliSense qui spécifient uniquement les variantes {5} (par exemple {6}) sont des modes hérités. Ils sont convertis automatiquement en variantes {7} en fonction de la plateforme hôte.",
@@ -52,6 +52,8 @@
 	"forced.include": "Inclusion forcée",
 	"forced.include.description": "Liste des fichiers qui doivent être inclus avant le traitement de tous les autres caractères du fichier source. Les fichiers sont inclus dans l'ordre indiqué.",
 	"one.file.per.line": "Un fichier par ligne.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Chemin d’accès à un fichier .config créé par le système Kconfig. Le système Kconfig génère un fichier avec toutes les définitions pour générer un projet. Les exemples de projets qui utilisent le système Kconfig sont le noyau Linux et NuttX RTOS.",
 	"compile.commands": "Commandes de compilation",
 	"compile.commands.description": "Chemin complet du fichier {0} pour l'espace de travail. Les chemins d'inclusion et les définitions découverts dans ce fichier sont utilisés à la place des valeurs définies pour les paramètres {1} et {2}. Si la base de données des commandes de compilation n'a pas d'entrée pour l'unité de traduction qui correspond au fichier que vous avez ouvert dans l'éditeur, un message d'avertissement s'affiche et l'extension utilise les paramètres {3} et {4} à la place.",
 	"merge.configurations": "Fusionner les configurations",
@@ -62,5 +64,5 @@
 	"limit.symbols": "Parcourir : limiter les symboles aux en-têtes inclus",
 	"limit.symbols.checkbox": "Lorsque {0} (ou activé), l’analyseur de balise analyse uniquement les fichiers de code qui ont été inclus directement ou indirectement par un fichier source dans {1}. Lorsque {2} (ou non activé), l’analyseur de balise analyse tous les fichiers de code trouvés dans les chemins d’accès spécifiés dans la liste {3} .",
 	"database.filename": "Parcourir : nom de fichier de base de données",
-	"database.filename.description": "Chemin de la base de données de symboles générée. Cela indique à l'extension d'enregistrer la base de données de symboles de l'analyseur de balises à un emplacement autre que l'emplacement de stockage par défaut de l'espace de travail. Si un chemin relatif est spécifié, il est relatif à l'emplacement de stockage par défaut de l'espace de travail et non au dossier d'espace de travail lui-même. La variable {0} peut être utilisée pour spécifier un chemin relatif au dossier d'espace de travail (par ex., {1})"
+	"database.filename.description": "Chemin de la base de données de symboles générée. Cela indique à l'extension d'enregistrer la base de données de symboles de l'analyseur de balises à un emplacement autre que l'emplacement de stockage par défaut de l'espace de travail. Si un chemin relatif est spécifié, il est relatif à l'emplacement de stockage par défaut de l'espace de travail et non au dossier d'espace de travail lui-même. La variable {0} peut être utilisée pour spécifier un chemin relatif au dossier d'espace de travail (par ex., {1})."
 }

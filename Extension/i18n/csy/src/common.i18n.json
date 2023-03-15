@@ -7,11 +7,11 @@
 	"failed.to.parse.json": "Nepovedlo se parsovat soubor json, pravděpodobně kvůli komentářům nebo čárkám na konci.",
 	"extension.not.ready": "Rozšíření C/C++ se stále instaluje. Další informace najdete v okně výstupu.",
 	"refer.read.me": "Informace o řešení problémů najdete v {0}. Problémy se dají vytvořit v {1}.",
-	"process.exited.with.code": "{0} se ukončilo s kódem chyby {1}.",
+	"process.exited": "Proces byl ukončen s kódem {0}",
+	"process.succeeded": "Proces byl úspěšně proveden.",
+	"killing.process": "Ukončuje se proces {0}",
 	"warning.file.missing": "Upozornění: Chybí očekávaný soubor {0}.",
 	"warning.debugging.not.tested": "Upozornění: Ladění se pro tuto platformu netestovalo.",
 	"reload.workspace.for.changes": "Načtěte pracovní prostor znovu, aby se změna nastavení projevila.",
-	"reload.string": "Načíst znovu",
-	"invalid.download.location.received": "Přijato neplatné umístění pro stahování",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"reload.string": "Načíst znovu"
 }

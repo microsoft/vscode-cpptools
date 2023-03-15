@@ -7,24 +7,30 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { QuickPickConfigurationProvider, ConfigurationAssetProviderFactory, CppVsDbgConfigurationProvider, CppDbgConfigurationProvider, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
+import { DebugConfigurationProvider, ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
-import * as util from '../common';
-import * as Telemetry from '../telemetry';
+import { DebuggerType } from './configurations';
 import * as nls from 'vscode-nls';
-import { cppBuildTaskProvider } from '../LanguageServer/extension';
+import { getActiveSshTarget, initializeSshTargets, selectSshTarget, SshTargetsProvider } from '../SSH/TargetsView/sshTargetsProvider';
+import { addSshTargetCmd, BaseNode, refreshCppSshTargetsViewCmd } from '../SSH/TargetsView/common';
+import { setActiveSshTarget, TargetLeafNode } from '../SSH/TargetsView/targetNodes';
+import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
+import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
+import { Configuration } from 'ssh-config';
+import { CppSettings } from '../LanguageServer/settings';
+import * as chokidar from 'chokidar';
+import { getSshChannel } from '../logger';
+import { pathAccessible } from '../common';
 
-nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
+// The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
+const disposables: vscode.Disposable[] = [];
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-// The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensonContext.subscriptions.
-const disposables: vscode.Disposable[] = [];
+let sshTargetsViewEnabled: boolean = false;
+let sshTargetsViewSetting: string | undefined;
+let sshConfigWatcher: chokidar.FSWatcher | undefined;
 
-export function buildAndDebugActiveFileStr(): string {
-    return ` - ${localize("build.and.debug.active.file", 'Build and debug active file')}`;
-}
-
-export function initialize(context: vscode.ExtensionContext): void {
+export async function initialize(context: vscode.ExtensionContext): Promise<void> {
     // Activate Process Picker Commands
     const attachItemsProvider: AttachItemsProvider = NativeAttachItemsProviderFactory.Get();
     const attacher: AttachPicker = new AttachPicker(attachItemsProvider);
@@ -33,102 +39,31 @@ export function initialize(context: vscode.ExtensionContext): void {
     disposables.push(vscode.commands.registerCommand('extension.pickRemoteNativeProcess', (any) => remoteAttacher.ShowAttachEntries(any)));
 
     // Activate ConfigurationProvider
-    const configurationProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
-    // On non-windows platforms, the cppvsdbg debugger will not be registered for initial configurations.
-    // This will cause it to not show up on the dropdown list.
-    let vsdbgProvider: CppVsDbgConfigurationProvider | null = null;
-    if (os.platform() === 'win32') {
-        vsdbgProvider = new CppVsDbgConfigurationProvider(configurationProvider);
-        disposables.push(vscode.debug.registerDebugConfigurationProvider('cppvsdbg', new QuickPickConfigurationProvider(vsdbgProvider)));
-    }
-    const provider: CppDbgConfigurationProvider = new CppDbgConfigurationProvider(configurationProvider);
-    disposables.push(vscode.debug.registerDebugConfigurationProvider('cppdbg', new QuickPickConfigurationProvider(provider)));
+    const assetProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
 
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugActiveFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
+    // Register DebugConfigurationProviders for "Run and Debug" in Debug Panel.
+    // On windows platforms, the cppvsdbg debugger will also be registered for initial configurations.
+    let cppVsDebugProvider: DebugConfigurationProvider | null = null;
+    if (os.platform() === 'win32') {
+        cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
+        disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppvsdbg, cppVsDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+    }
+    const cppDebugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppdbg);
+    disposables.push(vscode.debug.registerDebugConfigurationProvider(DebuggerType.cppdbg, cppDebugProvider, vscode.DebugConfigurationProviderTriggerKind.Dynamic));
+
+    // Register DebugConfigurationProviders for "Run and Debug" play button.
+    const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.AddDebugConfiguration", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
-            // Not enabled because we do not react to single-file mode correctly yet.
-            // We get an ENOENT when the user's c_cpp_properties.json is attempted to be parsed.
-            // The DefaultClient will also have its configuration accessed, but since it doesn't exist it errors out.
-            vscode.window.showErrorMessage(localize("single_file_mode_not_available", "This command is not available for single-file mode."));
-            return Promise.resolve();
+            vscode.window.showWarningMessage(localize("add.debug.configuration.not.available.for.single.file", "Add debug configuration is not available for single file."));
         }
-
-        if (!util.fileIsCOrCppSource(textEditor.document.uri.fsPath)) {
-            vscode.window.showErrorMessage(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.'));
-            return Promise.resolve();
-        }
-
-        const configs: vscode.DebugConfiguration[] = (await provider.provideDebugConfigurations(folder)).filter(config =>
-            config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
-
-        if (vsdbgProvider) {
-            const vsdbgConfigs: vscode.DebugConfiguration[] = (await vsdbgProvider.provideDebugConfigurations(folder)).filter(config =>
-                config.name.indexOf(buildAndDebugActiveFileStr()) !== -1);
-            if (vsdbgConfigs) {
-                configs.push(...vsdbgConfigs);
-            }
-        }
-
-        interface MenuItem extends vscode.QuickPickItem {
-            configuration: vscode.DebugConfiguration;
-        }
-
-        const items: MenuItem[] = configs.map<MenuItem>(config => ({ label: config.name, configuration: config, description: config.detail }));
-
-        const selection: MenuItem | undefined = await vscode.window.showQuickPick(items, {
-            placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.configuration", "Select a configuration")) });
-        if (!selection) {
-            return; // User canceled it.
-        }
-        if (selection.label.startsWith("cl.exe")) {
-            if (!process.env.DevEnvDir || process.env.DevEnvDir.length === 0) {
-                vscode.window.showErrorMessage(localize("cl.exe.not.available", '{0} build and debug is only usable when VS Code is run from the Developer Command Prompt for VS.', "cl.exe"));
-                return;
-            }
-        }
-        if (selection.configuration.preLaunchTask) {
-            if (folder) {
-                try {
-                    await cppBuildTaskProvider.ensureBuildTaskExists(selection.configuration.preLaunchTask);
-                    Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-                } catch (errJS) {
-                    const e: Error = errJS as Error;
-                    if (e && e.message === util.failedToParseJson) {
-                        vscode.window.showErrorMessage(util.failedToParseJson);
-                    }
-                    return;
-                }
-            } else {
-                return;
-                // TODO uncomment this when single file mode works correctly.
-                // const buildTasks: vscode.Task[] = await getBuildTasks(true);
-                // const task: vscode.Task = buildTasks.find(task => task.name === selection.configuration.preLaunchTask);
-                // await vscode.tasks.executeTask(task);
-                // delete selection.configuration.preLaunchTask;
-            }
-        }
-
-        // Attempt to use the user's (possibly) modified configuration before using the generated one.
-        try {
-            await cppBuildTaskProvider.ensureDebugConfigExists(selection.configuration.name);
-            try {
-                await vscode.debug.startDebugging(folder, selection.configuration.name);
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-            } catch (e) {
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-            }
-        } catch (e) {
-            try {
-                await vscode.debug.startDebugging(folder, selection.configuration);
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "true" });
-            } catch (e) {
-                Telemetry.logDebuggerEvent("buildAndDebug", { "success": "false" });
-            }
-        }
+        await debugProvider.addDebugConfiguration(textEditor);
     }));
 
-    configurationProvider.getConfigurationSnippets();
+    assetProvider.getConfigurationSnippets();
 
     const launchJsonDocumentSelector: vscode.DocumentSelector = [{
         scheme: 'file',
@@ -137,15 +72,154 @@ export function initialize(context: vscode.ExtensionContext): void {
     }];
 
     // ConfigurationSnippetProvider needs to be initiallized after configurationProvider calls getConfigurationSnippets.
-    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(configurationProvider)));
+    disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(assetProvider)));
 
     // Register Debug Adapters
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppvsdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppvsdbgDebugAdapterDescriptorFactory(context)));
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(CppdbgDebugAdapterDescriptorFactory.DEBUG_TYPE, new CppdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg , new CppvsdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
 
-    vscode.Disposable.from(...disposables);
+    // SSH Targets View
+    await initializeSshTargets();
+    const sshTargetsProvider: SshTargetsProvider = new SshTargetsProvider();
+    disposables.push(vscode.window.registerTreeDataProvider('CppSshTargetsView', sshTargetsProvider));
+    disposables.push(vscode.commands.registerCommand(addSshTargetCmd, () => enableSshTargetsViewAndRun(addSshTargetImpl)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.removeSshTarget', (node?: BaseNode) => enableSshTargetsViewAndRun(removeSshTargetImpl, node)));
+    disposables.push(vscode.commands.registerCommand(refreshCppSshTargetsViewCmd, (node?: BaseNode) => enableSshTargetsViewAndRun((node?: BaseNode) => sshTargetsProvider.refresh(node), node)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.setActiveSshTarget', async (node: TargetLeafNode) => {
+        await enableSshTargetsView();
+        await setActiveSshTarget(node.name);
+        await vscode.commands.executeCommand(refreshCppSshTargetsViewCmd);
+    }));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.selectSshTarget', () => enableSshTargetsViewAndRun(selectSshTarget)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.selectActiveSshTarget', async () => {
+        await enableSshTargetsView();
+        const name: string | undefined = await selectSshTarget();
+        if (name) {
+            await setActiveSshTarget(name);
+            await vscode.commands.executeCommand(refreshCppSshTargetsViewCmd);
+        }
+    }));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.activeSshTarget', () => enableSshTargetsViewAndRun(getActiveSshTarget)));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.sshTerminal', (node: TargetLeafNode) => enableSshTargetsViewAndRun(sshTerminal, node)));
+    disposables.push(sshTargetsProvider);
+
+    // Decide if we should show the SSH Targets View.
+    sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
+    // Active SSH Target initialized in initializeSshTargets()
+    if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
+        // Don't wait
+        enableSshTargetsView();
+    }
+
+    disposables.push(vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration('C_Cpp.sshTargetsView')) {
+            sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
+            if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
+                await enableSshTargetsView();
+            } else if (sshTargetsViewSetting === 'disabled') {
+                await disableSshTargetsView();
+            }
+        }
+    }));
 }
 
 export function dispose(): void {
+    if (sshConfigWatcher) {
+        sshConfigWatcher.close();
+        sshConfigWatcher = undefined;
+    }
     disposables.forEach(d => d.dispose());
+}
+
+function sshTerminal(node: TargetLeafNode): void {
+    const terminal: vscode.Terminal = vscode.window.createTerminal(`SSH: ${node.name}`);
+    terminal.sendText(`ssh "${node.name}"`);
+    terminal.show();
+}
+
+async function enableSshTargetsViewAndRun<T>(func: (...paras: any[]) => T | Promise<T>, ...args: any[]): Promise<T> {
+    await enableSshTargetsView();
+    return func(...args);
+}
+
+async function enableSshTargetsView(): Promise<void> {
+    if (sshTargetsViewEnabled || sshTargetsViewSetting === 'disabled') {
+        return;
+    }
+    await vscode.commands.executeCommand('setContext', 'enableCppSshTargetsView', true);
+    sshConfigWatcher = chokidar.watch(getSshConfigurationFiles(), { ignoreInitial: true })
+        .on('add', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
+        .on('change', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
+        .on('unlink', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd));
+    sshTargetsViewEnabled = true;
+}
+
+async function disableSshTargetsView(): Promise<void> {
+    await vscode.commands.executeCommand('setContext', 'enableCppSshTargetsView', false);
+    if (sshConfigWatcher) {
+        sshConfigWatcher.close();
+        sshConfigWatcher = undefined;
+    }
+    sshTargetsViewEnabled = false;
+}
+
+async function addSshTargetImpl(): Promise<string> {
+    const validConfigFiles: string[] = [];
+    for (const configFile of getSshConfigurationFiles()) {
+        if (await pathAccessible(configFile) && parseFailures.get(configFile)) {
+            getSshChannel().appendLine(localize('cannot.modify.config.file', 'Cannot modify SSH configuration file because of parse failure "{0}".', configFile));
+        } else {
+            validConfigFiles.push(configFile);
+        }
+    }
+    if (validConfigFiles.length === 0) {
+        throw new Error(localize('no.valid.ssh.config.file', 'No valid SSH configuration file found.'));
+    }
+
+    const name: string | undefined = await vscode.window.showInputBox({
+        title: localize('enter.ssh.target.name', 'Enter SSH Target Name'),
+        placeHolder: localize('ssh.target.name.place.holder', 'Example: `mySSHTarget`'),
+        ignoreFocusOut: true
+    });
+    if (name === undefined) {
+        // Cancelled
+        return '';
+    }
+
+    const command: string | undefined = await vscode.window.showInputBox({
+        title: localize('enter.ssh.connection.command', 'Enter SSH Connection Command'),
+        placeHolder: localize('ssh.connection.command.place.holder', 'Example: `ssh hello@microsoft.com -A`'),
+        ignoreFocusOut: true
+    });
+    if (!command) {
+        return '';
+    }
+
+    const newEntry: { [key: string]: string } = sshCommandToConfig(command, name);
+
+    const targetFile: string | undefined = await vscode.window.showQuickPick(validConfigFiles, { title: localize('select.ssh.config.file', 'Select an SSH configuration file') });
+    if (!targetFile) {
+        return '';
+    }
+
+    const parsedSshConfig: Configuration = await getSshConfiguration(targetFile, false);
+    parsedSshConfig.prepend(newEntry, true);
+    await writeSshConfiguration(targetFile, parsedSshConfig);
+
+    return name;
+}
+
+async function removeSshTargetImpl(node: TargetLeafNode): Promise<boolean> {
+    const labelYes: string = localize('yes', 'Yes');
+    const labelNo: string = localize('no', 'No');
+    const confirm: string | undefined = await vscode.window.showInformationMessage(localize('ssh.target.delete.confirmation', 'Are you sure you want to permanamtly delete "{0}"?', node.name), labelYes, labelNo);
+    if (!confirm || confirm === labelNo) {
+        return false;
+    }
+
+    const parsedSshConfig: Configuration = await getSshConfiguration(node.sshConfigHostInfo.file, false);
+    parsedSshConfig.remove({ Host: node.name });
+    await writeSshConfiguration(node.sshConfigHostInfo.file, parsedSshConfig);
+
+    return true;
 }

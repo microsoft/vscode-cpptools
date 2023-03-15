@@ -53,7 +53,7 @@ export class FindAllRefsView {
         const fileRefs: string[] = [];
 
         if (!this.referencesModel) {
-            throw new Error("Missiung ReferencesModel in getResultsAsText()");
+            throw new Error("Missing ReferencesModel in getResultsAsText()");
         }
         for (const ref of this.referencesModel.getAllReferenceNodes()) {
             let line: string = "";

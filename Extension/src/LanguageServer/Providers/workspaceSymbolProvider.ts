@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, GetSymbolInfoRequest, WorkspaceSymbolParams, LocalizeSymbolInformation, SymbolScope } from '../client';
-import * as util from '../../common';
+import { makeVscodeLocation } from '../utils';
+import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
     private client: DefaultClient;
@@ -17,18 +18,21 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
             query: query
         };
 
-        const symbols: LocalizeSymbolInformation[] = await this.client.languageClient.sendRequest(GetSymbolInfoRequest, params);
+        const symbols: LocalizeSymbolInformation[] = await this.client.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
         const resultSymbols: vscode.SymbolInformation[] = [];
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        }
 
         // Convert to vscode.Command array
         symbols.forEach((symbol) => {
-            let suffix: string = util.getLocalizedString(symbol.suffix);
+            let suffix: string = getLocalizedString(symbol.suffix);
             let name: string = symbol.name;
             if (suffix.length) {
                 if (symbol.scope === SymbolScope.Private) {
-                    suffix = util.getLocalizedSymbolScope("private", suffix);
+                    suffix = getLocalizedSymbolScope("private", suffix);
                 } else if (symbol.scope === SymbolScope.Protected) {
-                    suffix = util.getLocalizedSymbolScope("protected", suffix);
+                    suffix = getLocalizedSymbolScope("protected", suffix);
                 }
                 name = name + ' (' + suffix + ')';
             } else {
@@ -38,13 +42,11 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
                     name = name + " (protected)";
                 }
             }
-            const range: vscode.Range = new vscode.Range(symbol.location.range.start.line, symbol.location.range.start.character, symbol.location.range.end.line, symbol.location.range.end.character);
-            const uri: vscode.Uri = vscode.Uri.parse(symbol.location.uri.toString());
             const vscodeSymbol: vscode.SymbolInformation = new vscode.SymbolInformation(
                 name,
                 symbol.kind,
                 symbol.containerName,
-                new vscode.Location(uri, range)
+                makeVscodeLocation(symbol.location)
             );
             resultSymbols.push(vscodeSymbol);
         });

@@ -21,8 +21,8 @@
                         "type": "string"
                     },
                     "compilerArgs": {
-                        "markdownDescription": "Compiler arguments to modify the includes or defines used, e.g. `-nostdinc++`, `-m32`, etc.",
-                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
+                        "markdownDescription": "Compiler arguments to modify the includes or defines used, e.g. `-nostdinc++`, `-m32`, etc. Arguments that take additional space-delimited arguments should be entered as separate arguments in the array, e.g. for `--sysroot <arg>` use `\"--sysroot\", \"<arg>\"`.",
+                        "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered, except potentially the `arg` text which is a placeholder and not literal text, i.e. an abbreviation for `argument`.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -36,10 +36,12 @@
                             "c99",
                             "c11",
                             "c17",
+                            "c23",
                             "gnu89",
                             "gnu99",
                             "gnu11",
                             "gnu17",
+                            "gnu23",
                             "${default}"
                         ]
                     },
@@ -53,12 +55,14 @@
                             "c++14",
                             "c++17",
                             "c++20",
+                            "c++23",
                             "gnu++98",
                             "gnu++03",
                             "gnu++11",
                             "gnu++14",
                             "gnu++17",
                             "gnu++20",
+                            "gnu++23",
                             "${default}"
                         ]
                     },
@@ -87,6 +91,10 @@
                         "descriptionHint": "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered.",
                         "type": "string",
                         "pattern": "^\\d{2}\\.\\d{1}\\.\\d{5}\\.\\d{1}$|^8\\.1$"
+                    },
+                    "dotConfig": {
+                        "description": "A path to a .config file created by Kconfig system. Kconfig system generates a file with all the defines to build a project. Examples of projects that use Kconfig system are the Linux Kernel and NuttX RTOS.",
+                        "type": "string"
                     },
                     "defines": {
                         "markdownDescription": "A list of preprocessor definitions for the IntelliSense engine to use while parsing files. Optionally, use `=` to set a value, e.g. `VERSION=1`.",

@@ -3,8 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, FormatDocumentRequest } from '../client';
-import { CppSettings, getEditorConfigSettings } from '../settings';
+import { DefaultClient, FormatParams, FormatDocumentRequest, FormatResult } from '../client';
+import { CppSettings, getEditorConfigSettings, OtherSettings } from '../settings';
+import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentFormattingEditProvider implements vscode.DocumentFormattingEditProvider {
     private client: DefaultClient;
@@ -13,9 +14,36 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
     }
 
     public async provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
+        if (settings.formattingEngine === "disabled") {
+            return [];
+        }
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
-        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const onChanges: string | number | boolean = options.onChanges;
+        if (onChanges) {
+            let insertSpacesSet: boolean = false;
+            let tabSizeSet: boolean = false;
+            const editor: vscode.TextEditor = await vscode.window.showTextDocument(document, undefined, true);
+            if (editor.options.insertSpaces && typeof editor.options.insertSpaces === "boolean") {
+                options.insertSpaces = editor.options.insertSpaces;
+                insertSpacesSet = true;
+            }
+            if (editor.options.tabSize && typeof editor.options.tabSize === "number") {
+                options.tabSize = editor.options.tabSize;
+                tabSizeSet = true;
+            }
+
+            if (!insertSpacesSet || !tabSizeSet) {
+                const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
+                if (!insertSpacesSet) {
+                    options.insertSpaces = settings.editorInsertSpaces ?? true;
+                }
+                if (!tabSizeSet) {
+                    options.tabSize = settings.editorTabSize ?? 4;
+                }
+            }
+        }
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
@@ -34,16 +62,18 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
                         character: 0,
                         line: 0
                     }
-                }
+                },
+                onChanges: onChanges === true
             };
-            const textEdits: any = await this.client.languageClient.sendRequest(FormatDocumentRequest, params);
-            const results: vscode.TextEdit[] = [];
-            textEdits.forEach((textEdit: any) => {
-                results.push({
-                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
-                    newText: textEdit.newText
-                });
-            });
+            // We do not currently pass the CancellationToken to sendRequest
+            // because there is not currently cancellation logic for formatting
+            // in the native process. Formatting is currently done directly in
+            // message handling thread.
+            const response: FormatResult = await this.client.languageClient.sendRequest(FormatDocumentRequest, params, token);
+            if (token.isCancellationRequested || response.edits === undefined) {
+                throw new vscode.CancellationError();
+            }
+            const results: vscode.TextEdit[] = makeVscodeTextEdits(response.edits);
             // Apply insert_final_newline from .editorconfig
             if (document.lineCount > 0 && editorConfigSettings !== undefined && editorConfigSettings.insert_final_newline) {
                 // Check if there is already a newline at the end.  If so, formatting edits should not replace it.

@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Specificare un percorso del compilatore o selezionare un percorso del compilatore rilevato dall'elenco a discesa.",
 	"no.compiler.paths.detected": "(Non sono stati rilevati percorsi del compilatore)",
 	"compiler.args": "Argomenti del compilatore",
-	"compiler.arguments": "Argomenti del compilatore per modificare le direttive include o define usate, ad esempio {0}, {1} e così via.",
+	"compiler.arguments": "Argomenti del compilatore per modificare le inclusioni o le definizioni usate, ad esempio {0}, {1} e così via. Gli argomenti che utilizzano argomenti delimitati da spazi aggiuntivi devono essere immessi come argomenti separati nella matrice, ad esempio per {2} usare {3}.",
 	"one.argument.per.line": "Un argomento per riga.",
 	"intellisense.mode": "Modalità IntelliSense",
 	"intellisense.mode.description": "Modalità IntelliSense da usare per eseguire il mapping a una variante della piattaforma e dell'architettura di MSVC, gcc o Clang. Se non è impostata o se è impostata su {0}, sarà l'estensione a scegliere il valore predefinito per tale piattaforma. L'impostazione predefinita di Windows è {1}, quella di Linux è {2} e quella di macOS è {3}. Selezionare una modalità IntelliSense specifica per eseguire l'override della modalità {4}. Le modalità IntelliSense che specificano solo varianti {5} (ad esempio {6}) sono modalità legacy e vengono convertite automaticamente nelle varianti {7} in base alla piattaforma host.",
@@ -52,6 +52,8 @@
 	"forced.include": "Inclusione forzata",
 	"forced.include.description": "Elenco di file che devono essere inclusi prima dell'elaborazione di altri caratteri nel file di origine. I file vengono inclusi nell'ordine elencato.",
 	"one.file.per.line": "Un file per riga.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Il percorso a un file .config creato dal sistema Kconfig. Il sistema Kconfig genera un file con tutte le define per compilare un progetto. Esempi di progetti che usano il sistema Kconfig sono Kernel Linux e NuttX RTOS.",
 	"compile.commands": "Comandi di compilazione",
 	"compile.commands.description": "Percorso completo del file {0} per l'area di lavoro. Verranno usati i percorsi di inclusione e le direttive define individuati in questo file invece dei valori specificati per le impostazioni {1} e {2}. Se il database dei comandi di compilazione non contiene una voce per l'unità di conversione corrispondente al file aperto nell'editor, verrà visualizzato un messaggio di avviso e l'estensione userà le impostazioni {3} e {4}.",
 	"merge.configurations": "Unire configurazioni",
@@ -62,5 +64,5 @@
 	"limit.symbols": "Sfoglia: limita i simboli alle intestazioni incluse",
 	"limit.symbols.checkbox": "Quando è impostato su {0} (o selezionato), il parser tag analizzerà solo i file di codice che sono stati inclusi direttamente o indirettamente da un file di origine in {1}. Quando è impostato su {2} (o non è selezionato), il parser tag analizzerà tutti i file di codice trovati nei percorsi specificati nell'elenco di {3}.",
 	"database.filename": "Sfoglia: nome del file di database",
-	"database.filename.description": "Percorso del database dei simboli generato. Indica all'estensione di salvare il database dei simboli del parser di tag in un percorso diverso da quello di archiviazione predefinito dell'area di lavoro. Se viene specificato un percorso relativo, sarà relativo al percorso di archiviazione predefinito dell'area di lavoro e non alla cartella dell'area di lavoro. È possibile usare la variabile {0} per specificare un percorso relativo alla cartella dell'area di lavoro, ad esempio {1}"
+	"database.filename.description": "Percorso del database dei simboli generato. Indica all'estensione di salvare il database dei simboli del parser di tag in una posizione diversa da quella di archiviazione predefinita dell'area di lavoro. Se viene specificato un percorso relativo, sarà relativo alla posizione di archiviazione predefinita dell'area di lavoro e non alla cartella dell'area di lavoro. È possibile usare la variabile {0} per specificare un percorso relativo alla cartella dell'area di lavoro, ad esempio {1}."
 }

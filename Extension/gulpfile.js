@@ -26,7 +26,8 @@ const https = require('https');
 
 // Patterns to find HTML files
 const htmlFilesPatterns = [
-    "ui/**/*.html"
+    "ui/**/*.html",
+    "Reinstalling the Extension.md"
 ];
 
 // HTML files for walkthroughs are handled differently, as localization support
@@ -71,17 +72,6 @@ gulp.task('lint', function () {
         .pipe(eslint.failAfterError());
 });
 
-gulp.task('pr-check', (done) => {
-    const packageJson = JSON.parse(fs.readFileSync('./package.json').toString());
-    if (packageJson.activationEvents.length !== 1 && packageJson.activationEvents[0] !== '*') {
-        console.log('Please make sure to not check in package.json that has been rewritten by the extension activation. If you intended to have changes in package.json, please only check-in your changes. If you did not, please run `git checkout -- package.json`.');
-        done();
-        process.exit(1);
-    }
-
-    done();
-});
-
 
 // ****************************
 // Command: translations-export
@@ -104,11 +94,11 @@ function removePathPrefix(path, prefix) {
     }
     let ch = prefix.charAt(prefix.length - 1);
     if (ch === '/' || ch === '\\') {
-        return path.substr(prefix.length);
+        return path.substring(prefix.length);
     }
     ch = path.charAt(prefix.length);
     if (ch === '/' || ch === '\\') {
-        return path.substr(prefix.length + 1);
+        return path.substring(prefix.length + 1);
     }
     return path;
 }
@@ -302,109 +292,6 @@ gulp.task("translations-import", (done) => {
 });
 
 // ****************************
-// Command: generate-package-hashes
-// Generates a hash for each dependency package
-// ****************************
-
-async function DownloadFile(urlString) {
-    const buffers = [];
-    return new Promise((resolve, reject) => {
-        const req = https.request(urlString, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) {
-                // Redirect - download from new location
-                let redirectUrl;
-                if (typeof response.headers.location === "string") {
-                    redirectUrl = response.headers.location;
-                } else {
-                    if (!response.headers.location) {
-                        console.log(`Invalid download location received`);
-                        return reject();
-                    }
-                    redirectUrl = response.headers.location[0];
-                }
-                console.log(`Using redirectUrl: '${redirectUrl}'`);
-                return resolve(DownloadFile(redirectUrl));
-            } else if (response.statusCode !== 200) {
-                if (response.statusCode === undefined || response.statusCode === null) {
-                    console.log("unknown error code.");
-                    return reject();
-                }
-                console.log(`failed with error code: '${response.statusCode}'`);
-                return reject();
-            }
-
-            response.on('data', (data) => {
-                buffers.push(data);
-            });
-
-            response.on('end', () => {
-                if (buffers.length > 0) {
-                    return resolve(Buffer.concat(buffers));
-                } else {
-                    return reject();
-                }
-            });
-
-            response.on('error', err => {
-                console.log(`problem with request: '${err.message}'`);
-                return reject();
-            });
-        });
-
-        req.on('error', err => {
-            console.log(`problem with request: '${err.message}'`);
-            return reject();
-        });
-
-        // Execute the request
-        req.end();
-    });
-
-}
-
-async function generatePackageHashes(packageJson) {
-    const downloadAndGetHash = async (url) => {
-        console.log(url);
-        try {
-            const buf = await DownloadFile(url);
-            if (buf) {
-                const hash = crypto.createHash('sha256');
-                hash.update(buf);
-                const value = hash.digest('hex').toUpperCase();
-                return value;
-            }
-            return undefined;
-        } catch (err) {
-            return undefined;
-        }
-    };
-
-    for (let dependency of packageJson.runtimeDependencies) {
-        console.log(`-------- Downloading package: '${dependency.description}' --------`);
-        const hash = await downloadAndGetHash(dependency.url);
-        if (hash) {
-            dependency.integrity = hash;
-            console.log(`integrity: '${hash}'`);
-        } else {
-            console.log(`No hash generated for package '${dependency.description}`);
-        }
-        console.log(`\n`);
-    }
-
-    let content = JSON.stringify(packageJson, null, 2);
-    return content;
-}
-
-gulp.task('generate-package-hashes', async (done) => {
-    const packageJsonPath = './package.json';
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
-    const content = await generatePackageHashes(packageJson);
-    fs.writeFileSync(packageJsonPath, content);
-    done();
-});
-
-
-// ****************************
 // Command: translations-generate
 // The following is used to import an i18n directory structure and generate files used at runtime.
 // ****************************
@@ -484,11 +371,6 @@ const generateLocalizedHtmlFiles = () => {
                 contents: Buffer.from(newContent, 'utf8')
             }));
         });
-        // Put the original in an 'en' directory.
-        this.queue(new vinyl({
-            path: path.join("html/en", relativePath),
-            contents: file.contents
-        }));
     });
 };
 
@@ -496,7 +378,7 @@ const generateLocalizedWalkthroughHtmlFiles = () => {
     return es.through(function (file) {
         let relativePath = removePathPrefix(file.path, file.cwd);
         languages.map((language) => {
-            let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + `.nls.${language.id}.md`;
+            let newPath = relativePath.substring(0, relativePath.lastIndexOf(".")) + `.nls.${language.id}.md`;
             let newContent = generateLocalizedHtmlFilesImpl(file, relativePath, language, true);
             this.queue(new vinyl({
                 path: newPath,
@@ -504,7 +386,7 @@ const generateLocalizedWalkthroughHtmlFiles = () => {
             }));
         });
         // Put the original in an 'en' file.
-        let newPath = relativePath.substr(0, relativePath.lastIndexOf(".")) + ".nls.en.md";
+        let newPath = relativePath.substring(0, relativePath.lastIndexOf(".")) + ".nls.en.md";
         this.queue(new vinyl({
             path: newPath,
             contents: file.contents

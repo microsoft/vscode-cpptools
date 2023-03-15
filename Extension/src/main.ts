@@ -5,25 +5,24 @@
 'use strict';
 
 import * as DebuggerExtension from './Debugger/extension';
-import * as fs from 'fs';
 import * as LanguageServer from './LanguageServer/extension';
 import * as os from 'os';
 import * as path from 'path';
 import * as Telemetry from './telemetry';
 import * as util from './common';
 import * as vscode from 'vscode';
-import * as nls from 'vscode-nls';
-import { PersistentState } from './LanguageServer/persistentState';
 
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
-import { getTemporaryCommandRegistrarInstance, initializeTemporaryCommandRegistrar } from './commands';
-import { PlatformInformation, GetOSName } from './platform';
-import { PackageManager, PackageManagerError, IPackage, VersionsMatch, ArchitecturesMatch, PlatformsMatch } from './packageManager';
-import { getInstallationInformation, InstallationInformation, setInstallationStage, setInstallationType, InstallationType } from './installationInformation';
-import { Logger, getOutputChannelLogger, showOutputChannel } from './logger';
-import { CppTools1, NullCppTools } from './cppTools1';
+import { PlatformInformation } from './platform';
+import { CppTools1 } from './cppTools1';
 import { CppSettings } from './LanguageServer/settings';
-import { vsixNameForPlatform, releaseDownloadUrl } from './githubAPI';
+import { PersistentState } from './LanguageServer/persistentState';
+import { TargetPopulation } from 'vscode-tas-client';
+import * as semver from 'semver';
+import * as nls from 'vscode-nls';
+import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
+import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
+import { disposeOutputChannels, log } from './logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -34,22 +33,7 @@ let reloadMessageShown: boolean = false;
 const disposables: vscode.Disposable[] = [];
 
 export async function activate(context: vscode.ExtensionContext): Promise<CppToolsApi & CppToolsExtension> {
-    await util.checkCuda();
-
-    let errMsg: string = "";
-    const arch: string = PlatformInformation.GetArchitecture();
-    if (arch !== 'x64' && (process.platform !== 'win32' || (arch !== 'x86' && arch !== 'arm64')) && ((process.platform === 'win32' || process.platform === 'darwin') || (arch !== 'arm' && arch !== 'arm64')) && (process.platform !== 'darwin' || arch !== 'arm64')) {
-        errMsg = localize("architecture.not.supported", "Architecture {0} is not supported. ", String(arch));
-    } else if (process.platform === 'linux' && await util.checkDirectoryExists('/etc/alpine-release')) {
-        errMsg = localize("apline.containers.not.supported", "Alpine containers are not supported.");
-    }
-    if (errMsg) {
-        vscode.window.showErrorMessage(errMsg);
-        return new NullCppTools();
-    }
-
     util.setExtensionContext(context);
-    initializeTemporaryCommandRegistrar();
     Telemetry.activate();
     util.setProgress(0);
 
@@ -57,8 +41,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
             console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
-            const fileName: string = uri.path.substr(1);
-            const locale: string = util.getLocaleId();
+            const fileName: string = uri.path.substring(1);
+            const locale: string = getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
             const fileExists: boolean = await util.checkFileExists(localizedFilePath);
             if (!fileExists) {
@@ -71,408 +55,254 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
 
     // Initialize the DebuggerExtension and register the related commands and providers.
-    DebuggerExtension.initialize(context);
+    await DebuggerExtension.initialize(context);
 
-    await processRuntimeDependencies();
+    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+    sendTelemetry(info);
 
-    // Read archictures of binaries from install.lock
-    const fileContents: string = await util.readFileText(util.getInstallLockPath());
-    // Assume current platform if install.lock is empty.
-    let installedPlatformAndArchitecture: util.InstallLockContents = {
-        platform: process.platform,
-        architecture: arch
-    };
-    if (fileContents.length !== 0) {
-        try {
-            installedPlatformAndArchitecture = <util.InstallLockContents>JSON.parse(fileContents);
-        } catch (error) {
-            // If the contents of install.lock are corrupted, treat as if it's empty.
+    // Always attempt to make the binaries executable, not just when installedVersion changes.
+    // The user may have uninstalled and reinstalled the same version.
+    await makeBinariesExecutable();
+
+    // Notify users if debugging may not be supported on their OS.
+    util.checkDistro(info);
+    await checkVsixCompatibility();
+    LanguageServer.UpdateInsidersAccess();
+
+    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+    let isOldMacOs: boolean = false;
+    if (info.platform === 'darwin') {
+        const releaseParts: string[] = os.release().split(".");
+        if (releaseParts.length >= 1) {
+            isOldMacOs = parseInt(releaseParts[0]) < 16;
         }
     }
 
-    // Check the main binaries files to declare if the extension has been installed successfully.
-    if (process.platform !== installedPlatformAndArchitecture.platform
-        || (arch !== installedPlatformAndArchitecture.architecture
-            && !(process.platform === "win32"
-                // On x64 Windows, allow x86 binaries.
-                && ((arch === "x64" && installedPlatformAndArchitecture.architecture === "x86")
-                // On arm64 Windows, allow x86 or x64 binaries.
-                || (arch === "arm64" && ((installedPlatformAndArchitecture.architecture === "x86") || (installedPlatformAndArchitecture.architecture === "x64")))))
-            // On arm64 macOS, allow x64 binaries.
-            && !(process.platform === "darwin" && arch === "arm64" && installedPlatformAndArchitecture.architecture === "x64"))) {
-        // Check if the correct offline/insiders vsix is installed on the correct platform.
-        const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-        const vsixName: string = vsixNameForPlatform(platformInfo);
-        const downloadLink: string = localize("download.button", "Go to Download Page");
-        errMsg = localize("native.binaries.not.supported", "This {0} {1} version of the extension is incompatible with your OS. Please download and install the \"{2}\" version of the extension.", GetOSName(installedPlatformAndArchitecture.platform), installedPlatformAndArchitecture.architecture, vsixName);
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
+    // Read the setting and determine whether we should activate the language server prior to installing callbacks,
+    // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
+    // function, to allow any further setup to occur here, prior to activation.
+    const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "disabled";
+    const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
+
+    if (isOldMacOs) {
+        languageServiceDisabled = true;
+        vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
+    } else {
+        if (settings.intelliSenseEngine === "disabled") {
+            languageServiceDisabled = true;
+        }
+        let currentIntelliSenseEngineValue: string | undefined = settings.intelliSenseEngine;
+        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
+            const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+            if (!reloadMessageShown && settings.intelliSenseEngine !== currentIntelliSenseEngineValue) {
+                if (currentIntelliSenseEngineValue === "disabled") {
+                    // If switching from disabled to enabled, we can continue activation.
+                    currentIntelliSenseEngineValue = settings.intelliSenseEngine;
+                    languageServiceDisabled = false;
+                    LanguageServer.activate();
+                } else {
+                    // We can't deactivate or change engines on the fly, so prompt for window reload.
+                    reloadMessageShown = true;
+                    util.promptForReloadWindowDueToSettingsChange();
+                }
             }
-        });
-    } else if (!(await util.checkInstallBinariesExist())) {
-        errMsg = localize("extension.installation.failed", "The C/C++ extension failed to install successfully. You will need to repair or reinstall the extension for C/C++ language features to function properly.");
-        const reload: string = localize("remove.extension", "Attempt to Repair");
-        vscode.window.showErrorMessage(errMsg, reload).then(async (value?: string) => {
-            if (value === reload) {
-                await util.removeInstallLockFile();
-                vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }));
+    }
+
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        for (let i: number = 0; i < vscode.workspace.workspaceFolders.length; ++i) {
+            const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
+            if (await util.checkFileExists(config)) {
+                const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
+                vscode.languages.setTextDocumentLanguage(doc, "jsonc");
             }
-        });
-    } else if (!(await util.checkInstallJsonsExist())) {
-        // Check the Json files to declare if the extension has been installed successfully.
-        errMsg = localize("json.files.missing", "The C/C++ extension failed to install successfully. You will need to reinstall the extension for C/C++ language features to function properly.");
-        const downloadLink: string = localize("download.button", "Go to Download Page");
-        vscode.window.showErrorMessage(errMsg, downloadLink).then(async (selection) => {
-            if (selection === downloadLink) {
-                vscode.env.openExternal(vscode.Uri.parse(releaseDownloadUrl));
-            }
-        });
+        }
+    }
+
+    disposables.push(vscode.tasks.registerTaskProvider(CppBuildTaskProvider.CppBuildScriptType, cppBuildTaskProvider));
+
+    vscode.tasks.onDidStartTask(event => {
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(LanguageServer.configPrefix)) {
+            Telemetry.logLanguageServerEvent('buildTaskStarted');
+        }
+    });
+
+    vscode.tasks.onDidEndTask(event => {
+        if (event.execution.task.definition.type === CppBuildTaskProvider.CppBuildScriptType
+            || event.execution.task.name.startsWith(LanguageServer.configPrefix)) {
+            Telemetry.logLanguageServerEvent('buildTaskFinished');
+        }
+    });
+
+    if (shouldActivateLanguageServer) {
+        await LanguageServer.activate();
+    } else if (isIntelliSenseEngineDisabled) {
+        LanguageServer.registerCommands(false);
+        // The check here for isIntelliSenseEngineDisabled avoids logging
+        // the message on old Macs that we've already displayed a warning for.
+        log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
     }
 
     return cppTools;
 }
 
-export function deactivate(): Thenable<void> {
+export async function deactivate(): Promise<void> {
     DebuggerExtension.dispose();
     Telemetry.deactivate();
     disposables.forEach(d => d.dispose());
-
     if (languageServiceDisabled) {
         return Promise.resolve();
     }
-    return LanguageServer.deactivate();
+    await LanguageServer.deactivate();
+    disposeOutputChannels();
 }
 
-async function processRuntimeDependencies(): Promise<void> {
-    const installLockExists: boolean = await util.checkInstallLockFile();
-
-    setInstallationStage('getPlatformInfo');
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-
-    let forceOnlineInstall: boolean = false;
-    if (info.platform === "darwin" && info.version) {
-        const darwinVersion: PersistentState<string | undefined> = new PersistentState("Cpp.darwinVersion", info.version);
-
-        // macOS version has changed
-        if (darwinVersion.Value !== info.version) {
-            const highSierraOrLowerRegex: RegExp = new RegExp('10\\.(1[0-3]|[0-9])(\\..*)*$');
-            const lldbMiFolderPath: string = util.getExtensionFilePath('./debugAdapters/lldb-mi');
-
-            // For macOS and if a user has upgraded their OS, check to see if we are on Mojave or later
-            // and that the debugAdapters/lldb-mi folder exists. This will force a online install to get the correct binaries.
-            if (!highSierraOrLowerRegex.test(info.version) &&
-                !await util.checkDirectoryExists(lldbMiFolderPath)) {
-
-                forceOnlineInstall = true;
-
-                setInstallationStage('cleanUpUnusedBinaries');
-                await cleanUpUnusedBinaries(info);
+async function makeBinariesExecutable(): Promise<void> {
+    const promises: Thenable<void>[] = [];
+    if (process.platform !== 'win32') {
+        const commonBinaries: string[] = [
+            "./bin/cpptools",
+            "./bin/cpptools-srv",
+            "./bin/cpptools-wordexp",
+            "./LLVM/bin/clang-format",
+            "./LLVM/bin/clang-tidy",
+            "./debugAdapters/bin/OpenDebugAD7"
+        ];
+        commonBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+        if (process.platform === "darwin") {
+            const macBinaries: string[] = [
+                "./debugAdapters/lldb-mi/bin/lldb-mi"
+            ];
+            macBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
+            if (os.arch() === "x64") {
+                const oldMacBinaries: string[] = [
+                    "./debugAdapters/lldb/bin/debugserver",
+                    "./debugAdapters/lldb/bin/lldb-mi",
+                    "./debugAdapters/lldb/bin/lldb-argdumper",
+                    "./debugAdapters/lldb/bin/lldb-launcher"
+                ];
+                oldMacBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
             }
         }
     }
-
-    const doOfflineInstall: boolean = installLockExists && !forceOnlineInstall;
-
-    if (doOfflineInstall) {
-        // Offline Scenario: Lock file exists but package.json has not had its activationEvents rewritten.
-        if (util.packageJson.activationEvents && util.packageJson.activationEvents.length === 1) {
-            try {
-                await offlineInstallation(info);
-            } catch (error) {
-                getOutputChannelLogger().showErrorMessage(localize('initialization.failed', 'The installation of the C/C++ extension failed. Please see the output window for more information.'));
-                showOutputChannel();
-
-                // Send the failure telemetry since postInstall will not be called.
-                sendTelemetry(info);
-            }
-        } else {
-            // The extension has been installed and activated before.
-            await finalizeExtensionActivation();
-        }
-    } else {
-        // No lock file, need to download and install dependencies.
-        try {
-            await onlineInstallation(info);
-        } catch (errJS) {
-            const error: Error = errJS as Error;
-            handleError(error);
-
-            // Send the failure telemetry since postInstall will not be called.
-            sendTelemetry(info);
-        }
-    }
-}
-
-async function offlineInstallation(info: PlatformInformation): Promise<void> {
-    setInstallationType(InstallationType.Offline);
-
-    setInstallationStage('cleanUpUnusedBinaries');
-    await cleanUpUnusedBinaries(info);
-
-    setInstallationStage('makeOfflineBinariesExecutable');
-    await makeOfflineBinariesExecutable(info);
-
-    setInstallationStage('rewriteManifest');
-    await rewriteManifest();
-
-    setInstallationStage('postInstall');
-    await postInstall(info);
-}
-
-async function onlineInstallation(info: PlatformInformation): Promise<void> {
-    setInstallationType(InstallationType.Online);
-
-    await downloadAndInstallPackages(info);
-
-    setInstallationStage('rewriteManifest');
-    await rewriteManifest();
-
-    setInstallationStage('touchInstallLockFile');
-    await touchInstallLockFile(info);
-
-    setInstallationStage('postInstall');
-    await postInstall(info);
-}
-
-async function downloadAndInstallPackages(info: PlatformInformation): Promise<void> {
-    const outputChannelLogger: Logger = getOutputChannelLogger();
-    outputChannelLogger.appendLine(localize("updating.dependencies", "Updating C/C++ dependencies..."));
-
-    const packageManager: PackageManager = new PackageManager(info, outputChannelLogger);
-
-    return vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        cancellable: false
-    }, async (progress, token) => {
-
-        progress.report({ message: "C/C++ Extension" , increment: 0});
-        outputChannelLogger.appendLine('');
-        setInstallationStage('downloadPackages');
-        await packageManager.DownloadPackages(progress);
-
-        outputChannelLogger.appendLine('');
-        setInstallationStage('installPackages');
-        await packageManager.InstallPackages(progress);
-    });
-}
-
-function packageMatchesPlatform(pkg: IPackage, info: PlatformInformation): boolean {
-    return PlatformsMatch(pkg, info) &&
-           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
-           VersionsMatch(pkg, info);
-}
-
-function invalidPackageVersion(pkg: IPackage, info: PlatformInformation): boolean {
-    return PlatformsMatch(pkg, info) &&
-           (pkg.architectures === undefined || ArchitecturesMatch(pkg, info)) &&
-           !VersionsMatch(pkg, info);
-}
-
-async function makeOfflineBinariesExecutable(info: PlatformInformation): Promise<void> {
-    const promises: Thenable<void>[] = [];
-    const packages: IPackage[] = util.packageJson["runtimeDependencies"];
-    packages.forEach(p => {
-        if (p.binaries && p.binaries.length > 0 &&
-            packageMatchesPlatform(p, info)) {
-            p.binaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
-        }
-    });
     await Promise.all(promises);
 }
 
-async function cleanUpUnusedBinaries(info: PlatformInformation): Promise<void> {
-    const promises: Thenable<void>[] = [];
-    const packages: IPackage[] = util.packageJson["runtimeDependencies"];
-    const logger: Logger = getOutputChannelLogger();
-
-    packages.forEach(p => {
-        if (p.binaries && p.binaries.length > 0 &&
-            invalidPackageVersion(p, info)) {
-            p.binaries.forEach(binary => {
-                const path: string = util.getExtensionFilePath(binary);
-                if (fs.existsSync(path)) {
-                    logger.appendLine(`deleting: ${path}`);
-                    promises.push(util.deleteFile(path));
-                }
-            });
-        }
-    });
-    await Promise.all(promises);
-}
-
-function touchInstallLockFile(info: PlatformInformation): Promise<void> {
-    return util.touchInstallLockFile(info);
-}
-
-function handleError(error: Error): void {
-    const installationInformation: InstallationInformation = getInstallationInformation();
-    installationInformation.hasError = true;
-    installationInformation.telemetryProperties['stage'] = installationInformation.stage ?? "";
-    let errorMessage: string;
-
-    if (error instanceof PackageManagerError) {
-        const packageError: PackageManagerError = error;
-
-        installationInformation.telemetryProperties['error.methodName'] = packageError.methodName;
-        installationInformation.telemetryProperties['error.message'] = packageError.message;
-
-        if (packageError.innerError) {
-            errorMessage = packageError.innerError.toString();
-            installationInformation.telemetryProperties['error.innerError'] = util.removePotentialPII(errorMessage);
-        } else {
-            errorMessage = packageError.localizedMessageText;
-        }
-
-        if (packageError.pkg) {
-            installationInformation.telemetryProperties['error.packageName'] = packageError.pkg.description;
-            installationInformation.telemetryProperties['error.packageUrl'] = packageError.pkg.url;
-        }
-
-        if (packageError.errorCode) {
-            installationInformation.telemetryProperties['error.errorCode'] = util.removePotentialPII(packageError.errorCode);
-        }
-    } else {
-        errorMessage = error.toString();
-        installationInformation.telemetryProperties['error.toString'] = util.removePotentialPII(errorMessage);
-    }
-
-    const outputChannelLogger: Logger = getOutputChannelLogger();
-    if (installationInformation.stage === 'downloadPackages') {
-        outputChannelLogger.appendLine("");
-    }
-    // Show the actual message and not the sanitized one
-    outputChannelLogger.appendLine(localize('failed.at.stage', "Failed at stage: {0}", installationInformation.stage));
-    outputChannelLogger.appendLine(errorMessage);
-    outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine(localize('failed.at.stage2', 'If you work in an offline environment or repeatedly see this error, try downloading a version of the extension with all the dependencies pre-included from {0}, then use the "Install from VSIX" command in VS Code to install it.', releaseDownloadUrl));
-    showOutputChannel();
-}
-
-function sendTelemetry(info: PlatformInformation): boolean {
-    const installBlob: InstallationInformation = getInstallationInformation();
-    const success: boolean = !installBlob.hasError;
-
-    installBlob.telemetryProperties['success'] = success.toString();
-    installBlob.telemetryProperties['type'] = installBlob.type === InstallationType.Online ? "online" : "offline";
-
+function sendTelemetry(info: PlatformInformation): void {
+    const telemetryProperties: { [key: string]: string } = {};
     if (info.distribution) {
-        installBlob.telemetryProperties['linuxDistroName'] = info.distribution.name;
-        installBlob.telemetryProperties['linuxDistroVersion'] = info.distribution.version;
+        telemetryProperties['linuxDistroName'] = info.distribution.name;
+        telemetryProperties['linuxDistroVersion'] = info.distribution.version;
     }
-
-    if (success) {
-        util.setProgress(util.getProgressInstallSuccess());
+    telemetryProperties['osArchitecture'] = os.arch();
+    telemetryProperties['infoArchitecture'] = info.architecture;
+    const targetPopulation: TargetPopulation = util.getCppToolsTargetPopulation();
+    switch (targetPopulation) {
+        case TargetPopulation.Public:
+            telemetryProperties['targetPopulation'] = "Public";
+            break;
+        case TargetPopulation.Internal:
+            telemetryProperties['targetPopulation'] = "Internal";
+            break;
+        case TargetPopulation.Insiders:
+            telemetryProperties['targetPopulation'] = "Insiders";
+            break;
+        default:
+            break;
     }
-
-    installBlob.telemetryProperties['osArchitecture'] = os.arch();
-    installBlob.telemetryProperties['infoArchitecture'] = info.architecture;
-
-    Telemetry.logDebuggerEvent("acquisition", installBlob.telemetryProperties);
-
-    return success;
+    Telemetry.logDebuggerEvent("acquisition", telemetryProperties);
 }
 
-async function postInstall(info: PlatformInformation): Promise<void> {
-    const outputChannelLogger: Logger = getOutputChannelLogger();
-    outputChannelLogger.appendLine("");
-    outputChannelLogger.appendLine(localize('finished.installing.dependencies', "Finished installing dependencies"));
-    outputChannelLogger.appendLine("");
+async function checkVsixCompatibility(): Promise<void> {
+    const ignoreMismatchedCompatibleVsix: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".ignoreMismatchedCompatibleVsix", false);
+    let resetIgnoreMismatchedCompatibleVsix: boolean = true;
 
-    const installSuccess: boolean = sendTelemetry(info);
-
-    // If there is a download failure, we shouldn't continue activating the extension in some broken state.
-    if (!installSuccess) {
-        throw new Error(localize("failed.installing.dependencies", "Failed installing dependencies"));
-    } else {
-        // Notify users if debugging may not be supported on their OS.
-        util.checkDistro(info);
-
-        return finalizeExtensionActivation();
-    }
-}
-
-async function finalizeExtensionActivation(): Promise<void> {
-    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-    if (settings.intelliSenseEngine === "Disabled") {
-        languageServiceDisabled = true;
-        getTemporaryCommandRegistrarInstance().disableLanguageServer();
-        disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-            if (!reloadMessageShown && settings.intelliSenseEngine !== "Disabled") {
-                reloadMessageShown = true;
-                util.promptForReloadWindowDueToSettingsChange();
+    // Check to ensure the correct platform-specific VSIX was installed.
+    const vsixManifestPath: string = path.join(util.extensionPath, ".vsixmanifest");
+    // Skip the check if the file does not exist, such as when debugging cpptools.
+    if (await util.checkFileExists(vsixManifestPath)) {
+        const content: string = await util.readFileText(vsixManifestPath);
+        const matches: RegExpMatchArray | null = content.match(/TargetPlatform="(?<platform>[^"]*)"/);
+        if (matches && matches.length > 0 && matches.groups) {
+            const vsixTargetPlatform: string = matches.groups['platform'];
+            const platformInfo: PlatformInformation = await PlatformInformation.GetPlatformInformation();
+            let isPlatformCompatible: boolean = true;
+            let isPlatformMatching: boolean = true;
+            switch (vsixTargetPlatform) {
+                case "win32-x64":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x64";
+                    // x64 binaries can also be run on arm64 Windows 11.
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x64" || (platformInfo.architecture === "arm64" && semver.gte(os.release(), "10.0.22000")));
+                    break;
+                case "win32-ia32":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "x86";
+                    // x86 binaries can also be run on x64 and arm64 Windows.
+                    isPlatformCompatible = platformInfo.platform === "win32" && (platformInfo.architecture === "x86" || platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    break;
+                case "win32-arm64":
+                    isPlatformMatching = platformInfo.platform === "win32" && platformInfo.architecture === "arm64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-x64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name !== "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-arm64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name !== "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "linux-armhf":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm" && platformInfo.distribution?.name !== "alpine";
+                    // armhf binaries can also be run on aarch64 linux.
+                    isPlatformCompatible = platformInfo.platform === "linux" && (platformInfo.architecture === "arm" || platformInfo.architecture === "arm64") && platformInfo.distribution?.name !== "alpine";
+                    break;
+                case "alpine-x64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "x64" && platformInfo.distribution?.name === "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "alpine-arm64":
+                    isPlatformMatching = platformInfo.platform === "linux" && platformInfo.architecture === "arm64" && platformInfo.distribution?.name === "alpine";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-x64":
+                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "x64";
+                    isPlatformCompatible = isPlatformMatching;
+                    break;
+                case "darwin-arm64":
+                    isPlatformMatching = platformInfo.platform === "darwin" && platformInfo.architecture === "arm64";
+                    // x64 binaries can also be run on arm64 macOS.
+                    isPlatformCompatible = platformInfo.platform === "darwin" && (platformInfo.architecture === "x64" || platformInfo.architecture === "arm64");
+                    break;
+                default:
+                    console.log("Unrecognized TargetPlatform in .vsixmanifest");
+                    break;
             }
-        }));
-        return;
-    }
-    disposables.push(vscode.workspace.onDidChangeConfiguration(() => {
-        if (!reloadMessageShown && settings.intelliSenseEngine === "Disabled") {
-            reloadMessageShown = true;
-            util.promptForReloadWindowDueToSettingsChange();
-        }
-    }));
-    getTemporaryCommandRegistrarInstance().activateLanguageServer();
-}
-
-function rewriteManifest(): Promise<void> {
-    // Replace activationEvents with the events that the extension should be activated for subsequent sessions.
-    const packageJson: any = util.getRawPackageJson();
-
-    packageJson.activationEvents = [
-        "onLanguage:c",
-        "onLanguage:cpp",
-        "onLanguage:cuda-cpp",
-        "onCommand:extension.pickNativeProcess",
-        "onCommand:extension.pickRemoteNativeProcess",
-        "onCommand:C_Cpp.BuildAndDebugActiveFile",
-        "onCommand:C_Cpp.RestartIntelliSenseForFile",
-        "onCommand:C_Cpp.ConfigurationEditJSON",
-        "onCommand:C_Cpp.ConfigurationEditUI",
-        "onCommand:C_Cpp.ConfigurationSelect",
-        "onCommand:C_Cpp.ConfigurationProviderSelect",
-        "onCommand:C_Cpp.SwitchHeaderSource",
-        "onCommand:C_Cpp.EnableErrorSquiggles",
-        "onCommand:C_Cpp.DisableErrorSquiggles",
-        "onCommand:C_Cpp.ToggleIncludeFallback",
-        "onCommand:C_Cpp.ToggleDimInactiveRegions",
-        "onCommand:C_Cpp.ResetDatabase",
-        "onCommand:C_Cpp.TakeSurvey",
-        "onCommand:C_Cpp.LogDiagnostics",
-        "onCommand:C_Cpp.RescanWorkspace",
-        "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
-        "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
-        "onCommand:C_Cpp.GenerateEditorConfig",
-        "onCommand:C_Cpp.GoToNextDirectiveInGroup",
-        "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
-        "onCommand:C_Cpp.OpenCompilerQuickpick",
-        "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
-        "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
-        "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
-        "onCommand:C_Cpp.ClearCodeAnalysisSquiggles",
-        "onDebugInitialConfigurations",
-        "onDebugResolve:cppdbg",
-        "onDebugResolve:cppvsdbg",
-        "workspaceContains:/.vscode/c_cpp_properties.json",
-        "onFileSystem:cpptools-schema"
-    ];
-
-    let doTouchExtension: boolean = false;
-
-    const packageJsonPath: string = util.getExtensionFilePath("package.json");
-    if (packageJsonPath.includes(".vscode-insiders") ||
-        packageJsonPath.includes(".vscode-server-insiders") ||
-        packageJsonPath.includes(".vscode-exploration") ||
-        packageJsonPath.includes(".vscode-server-exploration")) {
-        if (packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default === 'Default') {
-            packageJson.contributes.configuration.properties['C_Cpp.updateChannel'].default = 'Insiders';
-            doTouchExtension = true;
+            const moreInfoButton: string = localize("more.info.button", "More Info");
+            const ignoreButton: string = localize("ignore.button", "Ignore");
+            let promise: Thenable<string | undefined> | undefined;
+            if (!isPlatformCompatible) {
+                promise = vscode.window.showErrorMessage(localize("vsix.platform.incompatible", "The C/C++ extension installed does not match your system.", vsixTargetPlatform), moreInfoButton);
+            } else if (!isPlatformMatching) {
+                if (!ignoreMismatchedCompatibleVsix.Value) {
+                    resetIgnoreMismatchedCompatibleVsix = false;
+                    promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
+                }
+            }
+            if (promise) {
+                promise.then(async (value) => {
+                    if (value === moreInfoButton) {
+                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                    } else if (value === ignoreButton) {
+                        ignoreMismatchedCompatibleVsix.Value = true;
+                    }
+                });
+            }
+        } else {
+            console.log("Unable to find TargetPlatform in .vsixmanifest");
         }
     }
-
-    return util.writeFileText(util.getPackageJsonPath(), util.stringifyPackageJson(packageJson)).then(() => {
-        if (doTouchExtension) {
-            // This is required to prevent VS Code from using the cached version with the old updateChannel setting.
-            util.touchExtensionFolder();
-        }
-    });
+    if (resetIgnoreMismatchedCompatibleVsix) {
+        ignoreMismatchedCompatibleVsix.Value = false;
+    }
 }

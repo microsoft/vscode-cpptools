@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Geben Sie einen Compilerpfad an, oder wählen Sie einen erkannten Compilerpfad aus der Dropdownliste aus.",
 	"no.compiler.paths.detected": "(Keine Compilerpfade erkannt)",
 	"compiler.args": "Compilerargumente",
-	"compiler.arguments": "Compilerargumente zum Ändern der verwendeten Include- oder Define-Anweisungen. Beispiel: \"{0}\", \"{1}\" usw.",
+	"compiler.arguments": "Compilerargumente zum Ändern der verwendeten Include- oder Define-Anweisungen. Beispiel: {0}, {1} usw. Argumente, die zusätzliche durch Leerzeichen getrennte Argumente enthalten, sollten als separate Argumente im Array eingegeben werden, z. B. für {2} {3} verwenden.",
 	"one.argument.per.line": "Ein Argument pro Zeile.",
 	"intellisense.mode": "IntelliSense-Modus",
 	"intellisense.mode.description": "Der zu verwendende IntelliSense-Modus, der einer Plattform- und Architekturvariante von MSVC, gcc oder Clang zugeordnet wird. Wenn er nicht oder auf \"{0}\" festgelegt wird, wählt die Erweiterung den Standardwert für diese Plattform aus. Bei Windows lautet dieser \"{1}\", bei Linux \"{2}\" und bei macOS \"{3}\". Wählen Sie einen bestimmten IntelliSense-Modus aus, um den Modus \"{4}\" zu überschreiben. IntelliSense-Modi, die nur Varianten in der Form \"{5}\" angeben (z. B. {6}) sind Legacymodi, die basierend auf der Hostplattform automatisch in Varianten des Formats \"{7}\" konvertiert werden.",
@@ -52,6 +52,8 @@
 	"forced.include": "Erzwungene Include-Anweisung",
 	"forced.include.description": "Eine Liste der Dateien, die eingefügt werden sollen, bevor andere Zeichen in der Quelldatei verarbeitet werden. Die Dateien sind in der aufgelisteten Reihenfolge enthalten.",
 	"one.file.per.line": "Eine Datei pro Zeile.",
+	"dot.config": "„dotConfig“",
+	"dot.config.description": "Ein Pfad zu einer „.config“-Datei, die vom „Kconfig“-System erstellt wurde. Das „Kconfig“-System generiert eine Datei mit allen Definitionen zum Erstellen eines Projekts. Beispiele für Projekte, die das „Kconfig“-System verwenden, sind Linux-Kernel und NuttX-RTOS.",
 	"compile.commands": "Kompilierungsbefehle",
 	"compile.commands.description": "Der vollständige Pfad zur {0}-Datei für den Arbeitsbereich. Die in dieser Datei ermittelten Includepfade und Define-Anweisungen werden anstelle der für die Einstellungen \"{1}\" und \"{2}\" festgelegten Werte verwendet. Wenn die Datenbank für Kompilierungsbefehle keinen Eintrag für die Übersetzungseinheit enthält, die der im Editor geöffneten Datei entspricht, wird eine Warnmeldung angezeigt, und die Erweiterung verwendet stattdessen die Einstellungen \"{3}\" und \"{4}\".",
 	"merge.configurations": "Konfigurationen zusammenführen",
@@ -62,5 +64,5 @@
 	"limit.symbols": "Durchsuchen: Symbole auf eingeschlossene Header begrenzen",
 	"limit.symbols.checkbox": "Wenn {0} (oder aktiviert) ist, analysiert der Tagparser nur Codedateien, die direkt oder indirekt von einer Quelldatei in {1} eingeschlossen wurden. Wenn {2} (oder nicht aktiviert) ist, analysiert der Tagparser alle Codedateien, die in den in der {3} Liste angegebenen Pfaden gefunden wurden.",
 	"database.filename": "Durchsuchen: Datenbankdateiname",
-	"database.filename.description": "Der Pfad zur generierten Symboldatenbank. Hiermit wird die Erweiterung angewiesen, die Symboldatenbank des Tagparsers an einem anderen Speicherort als dem Standardspeicherort des Arbeitsbereichs zu speichern. Bei Angabe eines relativen Pfads wird dieser relativ zum Standardspeicherort des Arbeitsbereichs und nicht zum Arbeitsbereichsordner selbst erstellt. Mit der Variablen \"{0}\" kann ein Pfad relativ zum Arbeitsbereichsordner angegeben werden (Beispiel: {1})."
+	"database.filename.description": "Der Pfad zur generierten Symboldatenbank. Hiermit wird die Erweiterung angewiesen, die Symboldatenbank des Tagparsers an einem anderen Speicherort als dem Standardspeicherort des Arbeitsbereichs zu speichern. Bei Angabe eines relativen Pfads wird dieser relativ zum Standardspeicherort des Arbeitsbereichs und nicht zum Arbeitsbereichsordner selbst erstellt. Die Variable „{0}“ kann verwendet werden, um einen Pfad relativ zum Arbeitsbereichsordner (Beispiel: {1}) anzugeben."
 }

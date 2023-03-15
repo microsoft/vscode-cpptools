@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Especifique la ruta de acceso de un compilador o seleccione la ruta de acceso de un compilador detectado en la lista desplegable.",
 	"no.compiler.paths.detected": "(No se han detectado rutas de acceso del compilador).",
 	"compiler.args": "Argumentos del compilador",
-	"compiler.arguments": "Argumentos del compilador para modificar las inclusiones o definiciones utilizadas; por ejemplo, {0}, {1}, etc.",
+	"compiler.arguments": "Argumentos del compilador para modificar las inclusiones o definiciones usadas, por ejemplo, {0}, {1}, etc. Los argumentos que toman argumentos adicionales delimitados por espacios deben especificarse como argumentos independientes en la matriz; por ejemplo, para {2} usar {3}.",
 	"one.argument.per.line": "Un argumento por línea.",
 	"intellisense.mode": "Modo de IntelliSense",
 	"intellisense.mode.description": "Modo IntelliSense que se usa y que se asigna a una variante de plataforma y arquitectura de MSVC, gcc o Clang. Si se establece en {0} o no se establece, la extensión usará el valor predeterminado para esa plataforma. De forma predeterminada, Windows usa {1}, Linux usa {2} y macOS usa {3}. Seleccione un modo IntelliSense específico para reemplazar el modo {4}. Los modos IntelliSense que solo especifican variantes de {5} (por ejemplo, {6}) son modos heredados y se convierten automáticamente a las variantes de {7} en función de la plataforma del host.",
@@ -52,6 +52,8 @@
 	"forced.include": "Inclusión forzada",
 	"forced.include.description": "Lista de los archivos que deben incluirse antes de que se procesen más caracteres en el archivo de código fuente. Los archivos se incluyen en el orden indicado.",
 	"one.file.per.line": "Un archivo por línea.",
+	"dot.config": "Dot Config",
+	"dot.config.description": "Ruta de acceso a un archivo .config creado por el sistema Kconfig. El sistema Kconfig genera un archivo con todas las definiciones para compilar un proyecto. Algunos ejemplos de proyectos que usan el sistema Kconfig son Kernel Linux y NuttX RTOS.",
 	"compile.commands": "Comandos de compilación",
 	"compile.commands.description": "Ruta de acceso completa al archivo {0} del área de trabajo. Se usarán las definiciones y rutas de acceso de inclusión detectadas en el archivo, en lugar de los valores establecidos para las opciones {1} y {2}. Si la base de datos de comandos de compilación no contiene una entrada para la unidad de traducción que se corresponda con el archivo que ha abierto en el editor, se mostrará un mensaje de advertencia y la extensión usará las opciones {3} y {4} en su lugar.",
 	"merge.configurations": "Combinar configuraciones",
@@ -62,5 +64,5 @@
 	"limit.symbols": "Examinar: símbolos de límite de los encabezados incluidos",
 	"limit.symbols.checkbox": "Cuando {0} (o activado), el analizador de etiquetas solo analizará los archivos de código que un archivo de código fuente haya incluido directa o indirectamente en {1}. Cuando {2} (o no está activado), el analizador de etiquetas analizará todos los archivos de código que se encuentran en las rutas de acceso especificadas en la lista de {3} .",
 	"database.filename": "Examinar: nombre del archivo de base de datos",
-	"database.filename.description": "La ruta a la base de datos de símbolos generada. Esto indica a la extensión que guarde la base de datos de símbolos del analizador de etiquetas en una ubicación distinta de la ubicación de almacenamiento predeterminada del área de trabajo. Si se especifica una ruta de acceso relativa, será relativa a la ubicación de almacenamiento predeterminada del área de trabajo, no a la carpeta del área de trabajo en sí. La variable {0} se puede usar para especificar una ruta de acceso relativa a la carpeta del área de trabajo (por ejemplo, {1})."
+	"database.filename.description": "La ruta de acceso a la base de datos de símbolos generada. Esto indica a la extensión que guarde la base de datos de símbolos del analizador de etiquetas en una ubicación distinta de la ubicación de almacenamiento predeterminada del área de trabajo. Si se especifica una ruta de acceso relativa, será relativa a la ubicación de almacenamiento predeterminada del área de trabajo, no a la carpeta del área de trabajo en sí. La variable {0} se puede usar para especificar una ruta de acceso relativa a la carpeta del área de trabajo (por ejemplo, {1})."
 }

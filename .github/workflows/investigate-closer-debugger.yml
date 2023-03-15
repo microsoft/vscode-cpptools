@@ -23,4 +23,4 @@ jobs:
           labels: investigate,debugger
           ignoreLabels: language service,internal
           closeDays: 180
-          closeComment: "This issue has been closed automatically because it has not had recent activity."
+          closeComment: "This issue has been closed as lower priority. We're sorry if this issue still impacts you but unfortunately we're not able to address this. We will accept a pull request from the community if it's applicable for this issue."

@@ -6,14 +6,11 @@
 {
 	"learn.how.to.install.a.library": "vcpkg ile bu üst bilgi için bir kitaplık yüklemeyi öğrenin",
 	"copy.vcpkg.command": "'{0}' yükleme vcpkg komutunu panoya kopyalayın",
-	"insiders.available": "Insider üyeleri için {0} sürümü kullanıma sunuldu. Insider üyeleri kanalına geçmek ve bu güncelleştirmeyi yüklemek ister misiniz?",
-	"yes.button": "Evet",
-	"ask.me.later.button": "Daha Sonra Sor",
-	"dont.show.again.button": "Bir Daha Gösterme",
-	"extension.updated": "C/C++ Uzantısı, {0} sürümüne güncelleştirildi. Değişikliklerin etkili olması için lütfen pencereyi yeniden yükleyin.",
+	"on.disabled.command": "`C_Cpp.intelliSenseEngine` `disabled` olarak ayarlandığında IntelliSense ile ilgili komutlar yürütülemez.",
 	"client.not.found": "istemci bulunamadı",
-	"configuration.select.first": "Yapılandırma seçmek için önce bir klasör açın",
-	"configuration.provider.select.first": "Yapılandırma sağlayıcısı seçmek için önce bir klasör açın",
+	"configuration.select.first": "Yapılandırma seçmek için önce bir klasör açın.",
+	"configuration.provider.select.first": "Yapılandırma sağlayıcısı seçmek için önce bir klasör açın.",
 	"edit.configurations.open.first": "Yapılandırmaları düzenlemek için önce bir klasör açın",
+	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı.",
 	"add.includepath.open.first": "{0} öğesine eklemek için önce bir klasör açın"
 }

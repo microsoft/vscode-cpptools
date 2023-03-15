@@ -6,14 +6,11 @@
 {
 	"learn.how.to.install.a.library": "Más información sobre el modo de instalar una biblioteca para este encabezado con vcpkg",
 	"copy.vcpkg.command": "Copie el comando vcpkg para instalar \"{0}\" en el Portapapeles",
-	"insiders.available": "La versión {0} de Insiders está disponible. ¿Quiere cambiar al canal de Insiders para instalar esta actualización?",
-	"yes.button": "Sí",
-	"ask.me.later.button": "Preguntarme más tarde",
-	"dont.show.again.button": "No volver a mostrar",
-	"extension.updated": "La extensión de C/C++ se ha actualizado a la versión {0}. Recargue la ventana para que los cambios surtan efecto.",
+	"on.disabled.command": "Los comandos relacionados con IntelliSense no se pueden ejecutar cuando `C_Cpp.intelliSenseEngine` está establecido en `disabled`.",
 	"client.not.found": "No se encuentra el cliente",
-	"configuration.select.first": "Abra una carpeta primero para seleccionar una configuración",
-	"configuration.provider.select.first": "Abra una carpeta primero para seleccionar un proveedor de configuración",
+	"configuration.select.first": "Abre primero una carpeta para seleccionar una configuración.",
+	"configuration.provider.select.first": "Abre primero una carpeta para seleccionar un proveedor de configuración.",
 	"edit.configurations.open.first": "Abra una carpeta primero para editar las configuraciones",
+	"code.action.aborted": "No se pudo aplicar la corrección de análisis de código porque el documento ha cambiado.",
 	"add.includepath.open.first": "Abra primero una carpeta para agregarla a {0}"
 }

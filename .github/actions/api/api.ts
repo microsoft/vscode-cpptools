@@ -4,43 +4,53 @@
  *--------------------------------------------------------------------------------------------*/
 
 export interface GitHub {
-	query(query: Query): AsyncIterableIterator<GitHubIssue[]>
+	repoOwner: string;
+	repoName: string;
 
-	hasWriteAccess(user: User): Promise<boolean>
+	query(query: Query): AsyncIterableIterator<GitHubIssue[]>;
 
-	repoHasLabel(label: string): Promise<boolean>
-	createLabel(label: string, color: string, description: string): Promise<void>
-	deleteLabel(label: string): Promise<void>
+	hasWriteAccess(user: User): Promise<boolean>;
 
-	readConfig(path: string): Promise<any>
+	repoHasLabel(label: string): Promise<boolean>;
+	createLabel(label: string, color: string, description: string): Promise<void>;
+	deleteLabel(label: string): Promise<void>;
 
-	dispatch(title: string): Promise<void>
+	readConfig(path: string): Promise<any>;
 
-	createIssue(owner: string, repo: string, title: string, body: string): Promise<void>
+	dispatch(title: string): Promise<void>;
 
-	releaseContainsCommit(release: string, commit: string): Promise<'yes' | 'no' | 'unknown'>
+	createIssue(owner: string, repo: string, title: string, body: string): Promise<void>;
+
+	releaseContainsCommit(release: string, commit: string): Promise<'yes' | 'no' | 'unknown'>;
+
+	/**
+	 * Returns what we think the current milestone for the repo is based on the due on date.
+	 * @returns The milestone id if one is found, else undefined
+	 */
+	getCurrentRepoMilestone(): Promise<number | undefined>;
 }
 
 export interface GitHubIssue extends GitHub {
-	getIssue(): Promise<Issue>
+	getIssue(): Promise<Issue>;
 
-	postComment(body: string): Promise<void>
-	deleteComment(id: number): Promise<void>
-	getComments(last?: boolean): AsyncIterableIterator<Comment[]>
+	postComment(body: string): Promise<void>;
+	deleteComment(id: number): Promise<void>;
+	getComments(last?: boolean): AsyncIterableIterator<Comment[]>;
 
-	closeIssue(): Promise<void>
-	lockIssue(): Promise<void>
-	reopenIssue(): Promise<void>
+	closeIssue(reason: 'completed' | 'not_planned'): Promise<void>;
+	lockIssue(): Promise<void>;
+	unlockIssue(): Promise<void>;
+	reopenIssue(): Promise<void>;
 
-	setMilestone(milestoneId: number): Promise<void>
+	setMilestone(milestoneId: number): Promise<void>;
 
-	addLabel(label: string): Promise<void>
-	removeLabel(label: string): Promise<void>
+	addLabel(label: string): Promise<void>;
+	removeLabel(label: string): Promise<void>;
 
-	addAssignee(assignee: string): Promise<void>
-	removeAssignee(assignee: string): Promise<void>
+	addAssignee(assignee: string): Promise<void>;
+	removeAssignee(assignee: string): Promise<void>;
 
-	getClosingInfo(): Promise<{ hash: string | undefined; timestamp: number } | undefined>
+	getClosingInfo(): Promise<{ hash: string | undefined; timestamp: number } | undefined>;
 }
 
 type SortVar =
@@ -54,47 +64,60 @@ type SortVar =
 	| 'reactions-tada'
 	| 'interactions'
 	| 'created'
-	| 'updated'
-type SortOrder = 'asc' | 'desc'
+	| 'updated';
+type SortOrder = 'asc' | 'desc';
 export type Reactions = {
-	'+1': number
-	'-1': number
-	laugh: number
-	hooray: number
-	confused: number
-	heart: number
-	rocket: number
-	eyes: number
-}
+	'+1': number;
+	'-1': number;
+	laugh: number;
+	hooray: number;
+	confused: number;
+	heart: number;
+	rocket: number;
+	eyes: number;
+};
 
 export interface User {
-	name: string
-	isGitHubApp?: boolean
+	name: string;
+	isGitHubApp?: boolean;
 }
 export interface Comment {
-	author: User
-	body: string
-	id: number
-	timestamp: number
+	author: User;
+	body: string;
+	id: number;
+	timestamp: number;
 }
 export interface Issue {
-	author: User
-	body: string
-	title: string
-	labels: string[]
-	open: boolean
-	locked: boolean
-	number: number
-	numComments: number
-	reactions: Reactions
-	milestoneId: number | null
-	assignee?: string
-	createdAt: number
-	updatedAt: number
-	closedAt?: number
+	author: User;
+	body: string;
+	title: string;
+	labels: string[];
+	open: boolean;
+	locked: boolean;
+	number: number;
+	isPr: boolean;
+	numComments: number;
+	reactions: Reactions;
+	milestone: Milestone | null;
+	assignee?: string;
+	assignees: string[];
+	createdAt: number;
+	updatedAt: number;
+	closedAt?: number;
+}
+export interface Milestone {
+	milestoneId: number;
+	title: string;
+	description: string;
+	numClosedIssues: number;
+	numOpenIssues: number;
+	dueOn: Date | null;
+	createdAt: Date | null;
+	closedAt: Date | null;
+	state: 'open' | 'closed';
 }
 export interface Query {
-	q: string
-	sort?: SortVar
-	order?: SortOrder
+	q: string;
+	sort?: SortVar;
+	order?: SortOrder;
 }

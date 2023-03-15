@@ -27,7 +27,7 @@
 	"specify.a.compiler": "Derleyici yolunu belirtin veya açılan listeden, algılanan bir derleyici yolu seçin.",
 	"no.compiler.paths.detected": "(Derleyici yolu algılanmadı)",
 	"compiler.args": "Derleyici bağımsız değişkenleri",
-	"compiler.arguments": "Kullanılan eklemeleri veya tanımları değiştirmek için derleyici bağımsız değişkenleri. Örneğin {0}, {1}, vb.",
+	"compiler.arguments": "Kullanılan içermeleri veya tanımları değiştirmek için derleyici bağımsız değişkenleri (örneğin, {0}, {1} vb.). Boşlukla ayrılmış ek bağımsız değişkenler alan bağımsız değişkenler, diziye ayrı bağımsız değişkenler olarak girilmelidir. Örneğin {2} için {3} bağımsız değişkenlerini kullanın.",
 	"one.argument.per.line": "Satır başına bir bağımsız değişken.",
 	"intellisense.mode": "IntelliSense modu",
 	"intellisense.mode.description": "MSVC, gcc veya Clang'in platform ve mimari varyantına eşlemek için kullanılacak IntelliSense modu. Ayarlanmazsa veya {0} olarak belirlenirse uzantı, ilgili platform için varsayılan ayarı seçer. Windows için varsayılan olarak {1}, Linux için varsayılan olarak {2} ve macOS için varsayılan olarak {3} kullanılır. {4} modunu geçersiz kılmak için belirli bir IntelliSense modunu seçin. Yalnızca {5} varyantlarını belirten IntelliSense modları (yani {6}), eski modlardır ve konak platformuna göre otomatik olarak {7} varyantlarına dönüştürülür.",
@@ -52,6 +52,8 @@
 	"forced.include": "Zorlamalı ekleme",
 	"forced.include.description": "Kaynak dosyadaki başka herhangi bir karakter işlenmeden önce eklenmesi gereken dosyaların listesi. Dosyalar listelendikleri sırada eklenir.",
 	"one.file.per.line": "Satır başına bir dosya.",
+	"dot.config": "Nokta Yapılandırması",
+	"dot.config.description": "Kconfig sistemi tarafından oluşturulan bir .config dosyasının yolu. Kconfig sistemi, bir proje oluşturmak için tüm tanımlamaları içeren bir dosya oluşturur. Kconfig sistemini kullanan projelere örnek olarak Linux Çekirdeği ve NuttX RTOS verilebilir.",
 	"compile.commands": "Derleme komutları",
 	"compile.commands.description": "Çalışma alanı için {0} dosyasının tam yolu. {1} ve {2} ayarları için ayarlanan değerler yerine bu dosyada bulunan içerme yolları ve tanımlar kullanılır. Derleme komutları veritabanı, düzenleyicide açtığınız dosyaya karşılık gelen çeviri birimi için bir giriş içermiyorsa, bir uyarı mesajı görüntülenir ve uzantı bunun yerine {3} ve {4} ayarlarını kullanır.",
 	"merge.configurations": "Yapılandırmaları birleştir",
@@ -62,5 +64,5 @@
 	"limit.symbols": "Gözat: sembolleri eklenen üst bilgilerle sınırla",
 	"limit.symbols.checkbox": "{0} (veya işaretli) olduğunda, Etiket Ayrıştırıcı yalnızca {1} içindeki bir kaynak dosya tarafından doğrudan veya dolaylı olarak dahil edilen kod dosyalarını ayrıştırır. {2} olduğunda (veya işaretlenmediğinde), Etiket Ayrıştırıcı {3} listesinde belirtilen yollarda bulunan tüm kod dosyalarını ayrıştırır.",
 	"database.filename": "Gözat: veritabanı dosya adı",
-	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1})"
+	"database.filename.description": "Oluşturulan sembol veritabanının yolu. Bu, uzantının Etiket Ayrıştırıcısının sembol veritabanının çalışma alanı varsayılan depolama konumundan başka bir yerde kaydedilmesini sağlar. Göreli yol belirtilirse, çalışma alanı klasörünün kendisi değil, çalışma alanının varsayılan depolama konumuyla göreli olarak yapılır. {0} değişkeni, çalışma alanı klasörüne göreli bir yol belirtmek için kullanılabilir (örneğin, {1})."
 }

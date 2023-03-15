@@ -23,4 +23,4 @@ jobs:
           labels: external,debugger
           ignoreLabels: language service,internal
           closeDays: 0
-          closeComment: "This issue has been closed automatically because it's labeled as 'external'."
+          closeComment: "This issue has been closed because it is external or not applicable to the extension."

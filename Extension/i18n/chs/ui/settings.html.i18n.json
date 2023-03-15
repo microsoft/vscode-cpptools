@@ -27,7 +27,7 @@
 	"specify.a.compiler": "指定编译器路径或从下拉列表中选择检测到的编译器路径。",
 	"no.compiler.paths.detected": "(未检测到编译器路径)",
 	"compiler.args": "编译器参数",
-	"compiler.arguments": "用于修改所使用的包含或定义的编译器参数，例如 {0}、{1} 等。",
+	"compiler.arguments": "用于修改所使用的包含或定义的编译器参数，例如 {0}、{1} 等。采用其他空格分隔参数的参数应在数组中作为为单独的参数输入，例如，对于 {2} 使用 {3}。",
 	"one.argument.per.line": "每行一个参数。",
 	"intellisense.mode": "IntelliSense 模式",
 	"intellisense.mode.description": "要使用的 IntelliSense 模式，该模式映射到 MSVC、gcc 或 Clang 的平台和体系结构变体。如果未设置或设置为 {0}，则扩展将选择该平台的默认值。Windows 默认为 {1}，Linux 默认为 {2}，macOS 默认为 {3}。选择特定 IntelliSense 模式以替代 {4} 模式。仅指定 {5} 变体(例如 {6})的 IntelliSense 模式是旧模式，它们会根据主机平台自动转换为 {7} 变体。",
@@ -52,6 +52,8 @@
 	"forced.include": "强制包含",
 	"forced.include.description": "在处理源文件中的任何其他字符之前应包含的文件的列表。按列出的顺序包含文件。",
 	"one.file.per.line": "每行一个文件。",
+	"dot.config": "点配置",
+	"dot.config.description": "Kconfig 系统创建的 .config 文件的路径。Kconfig 系统生成包含所有定义的文件以生成项目。使用 Kconfig 系统的项目示例包括 Linux 内核和 NuttX RTOS。",
 	"compile.commands": "编译命令",
 	"compile.commands.description": "工作区的 {0} 文件的完整路径。将使用在此文件中所发现的包含路径和定义，而不是为 {1} 和 {2} 设置设定的值。如果编译命令数据库不包含与你在编辑器中打开的文件对应的翻译单元条目，则将显示一条警告消息，并且扩展将改用 {3} 和 {4} 设置。",
 	"merge.configurations": "合并配置",
@@ -62,5 +64,5 @@
 	"limit.symbols": "浏览: 将符号限制为包含的标头",
 	"limit.symbols.checkbox": "如果为 {0} (或已勾选)，则标记分析器将仅分析在 {1} 中由源文件直接或间接包含的代码文件。如果为 {2} (或未选中)，标记分析器将分析在 {3} 列表内指定路径中找到的所有代码文件。",
 	"database.filename": "浏览: 数据库文件名",
-	"database.filename.description": "所生成的符号数据库的路径。这指示扩展将标记分析器的符号数据库保存在工作区默认存储位置以外的其他位置。如果指定了相对路径，则它将相对于工作区的默认存储位置(而不是工作区文件夹本身)。{0} 变量可用于指定相对于工作区文件夹的路径(例如 {1})"
+	"database.filename.description": "所生成的符号数据库的路径。这指示扩展将标记分析器的符号数据库保存在工作区默认存储位置以外的其他位置。如果指定了相对路径，则它将相对于工作区的默认存储位置(而不是工作区文件夹本身)。{0} 变量可用于指定相对于工作区文件夹的路径(例如 {1})。"
 }

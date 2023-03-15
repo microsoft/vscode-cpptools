@@ -7,7 +7,7 @@ import * as util from '../common';
 import * as vscode from 'vscode';
 
 interface TimeStampSequence {
-    firstFile?: number; // when the extension is activated by realActivation. Defined only for "cold" start cases.
+    firstFile?: number; // when the extension is activated. Defined only for "cold" start cases.
     didOpen: number; // when the file appears in the editor. Defined for "warm" start cases.
     setup: number; // when the Intellisense_client constructor is completed
     updateRange: number; // when publishDiagnostics & provideSemanticTokens is completed
@@ -18,7 +18,7 @@ export class TimeTelemetryCollector {
     private cachedTimeStamps: Map<string, any> = new Map<string, any>(); // a map of uri's string to TimeStampSequence
 
     public setFirstFile(uri: vscode.Uri): void {
-        if (util.fileIsCOrCppSource(uri.path)) {
+        if (util.isCppOrCFile(uri)) {
             const curTimeStamps: TimeStampSequence = this.getTimeStamp(uri.path);
             curTimeStamps.firstFile = new Date().getTime();
             this.cachedTimeStamps.set(uri.path, curTimeStamps);

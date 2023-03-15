@@ -6,14 +6,11 @@
 {
 	"learn.how.to.install.a.library": "このヘッダーのライブラリを vcpkg でインストールする方法の詳細",
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
-	"insiders.available": "Insider のバージョン {0} が利用可能です。Insider のチャネルに切り替えて、この更新プログラムをインストールしますか?",
-	"yes.button": "はい",
-	"ask.me.later.button": "後で尋ねる",
-	"dont.show.again.button": "今後は表示しない",
-	"extension.updated": "C/C++ の拡張機能がバージョン {0} に更新されました。変更を有効にするには、ウィンドウを再度読み込んでください。",
+	"on.disabled.command": "`C_Cpp.intelliSenseEngine` が `disabled` に設定されている場合、IntelliSense 関連のコマンドは実行できません。",
 	"client.not.found": "クライアントが見つかりませんでした",
-	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください",
-	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください",
+	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください。",
+	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください。",
 	"edit.configurations.open.first": "構成を編集するには、まずフォルダーを開いてください",
+	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。",
 	"add.includepath.open.first": "{0} に追加するには、まずフォルダーを開いてください"
 }

@@ -3,8 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, FormatRangeRequest } from '../client';
+import { DefaultClient, FormatParams, FormatRangeRequest, FormatResult } from '../client';
 import { CppSettings, getEditorConfigSettings } from '../settings';
+import { makeVscodeTextEdits } from '../utils';
 
 export class DocumentRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
     private client: DefaultClient;
@@ -13,9 +14,12 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
     }
 
     public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
+        if (settings.formattingEngine === "disabled") {
+            return [];
+        }
         await this.client.awaitUntilLanguageClientReady();
         const filePath: string = document.uri.fsPath;
-        const settings: CppSettings = new CppSettings(this.client.RootUri);
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
             const params: FormatParams = {
@@ -34,17 +38,18 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
                         character: range.end.character,
                         line: range.end.line
                     }
-                }
+                },
+                onChanges: false
             };
-            const textEdits: any = await this.client.languageClient.sendRequest(FormatRangeRequest, params);
-            const result: vscode.TextEdit[] = [];
-            textEdits.forEach((textEdit: any) => {
-                result.push({
-                    range: new vscode.Range(textEdit.range.start.line, textEdit.range.start.character, textEdit.range.end.line, textEdit.range.end.character),
-                    newText: textEdit.newText
-                });
-            });
-            return result;
+            // We do not currently pass the CancellationToken to sendRequest
+            // because there is not currently cancellation logic for formatting
+            // in the native process. Formatting is currently done directly in
+            // message handling thread.
+            const response: FormatResult = await this.client.languageClient.sendRequest(FormatRangeRequest, params, token);
+            if (token.isCancellationRequested || response.edits === undefined) {
+                throw new vscode.CancellationError();
+            }
+            return makeVscodeTextEdits(response.edits);
         };
         if (!useVcFormat) {
             return configCallBack(undefined);

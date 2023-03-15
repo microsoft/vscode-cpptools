@@ -14,6 +14,8 @@
 	"include": [
 		"test/**/*.ts",
 		"tools/**/*.ts",
-		"ui/**/*.ts"
+		"ui/**/*.ts",
+		"./vscode*.d.ts",
+		"src/types/*.d.ts"
 	]
 }

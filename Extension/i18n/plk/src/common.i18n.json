@@ -7,11 +7,11 @@
 	"failed.to.parse.json": "Nie można przeanalizować pliku json, prawdopodobnie z powodu komentarzy lub końcowych przecinków.",
 	"extension.not.ready": "Nadal trwa instalowanie rozszerzenia języka C/C++. Zobacz okno danych wyjściowych, aby uzyskać więcej informacji.",
 	"refer.read.me": "Aby uzyskać informacje dotyczące rozwiązywania problemów, zobacz {0}. Problemy można tworzyć pod adresem {1}",
-	"process.exited.with.code": "Element {0} zostało zakończony z kodem błędu {1}",
+	"process.exited": "Proces został zakończony z kodem {0}",
+	"process.succeeded": "Proces został wykonany pomyślnie.",
+	"killing.process": "Proces zamykania {0}",
 	"warning.file.missing": "Ostrzeżenie: brak oczekiwanego pliku {0}.",
 	"warning.debugging.not.tested": "Ostrzeżenie: nie przetestowano debugowania dla tej platformy.",
 	"reload.workspace.for.changes": "Załaduj ponownie obszar roboczy, aby zmiany ustawień zostały zastosowane.",
-	"reload.string": "Załaduj ponownie",
-	"invalid.download.location.received": "Odebrano nieprawidłową lokalizację pobierania",
-	"c.cpp.symbolscope.separator": "{0}, {1}"
+	"reload.string": "Załaduj ponownie"
 }

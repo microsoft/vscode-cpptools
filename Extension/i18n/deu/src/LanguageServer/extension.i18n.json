@@ -6,14 +6,11 @@
 {
 	"learn.how.to.install.a.library": "Erfahren Sie, wie Sie mit vcpkg eine Bibliothek für diesen Header installieren.",
 	"copy.vcpkg.command": "vcpkg-Befehl zum Installieren von \"{0}\" in die Zwischenablage kopieren",
-	"insiders.available": "Die Insiders-Version {0} ist verfügbar. Möchten Sie zum Insiders-Kanal wechseln und dieses Update installieren?",
-	"yes.button": "Ja",
-	"ask.me.later.button": "Später nachfragen",
-	"dont.show.again.button": "Nicht mehr anzeigen",
-	"extension.updated": "Die C/C++-Erweiterung wurde auf Version {0} aktualisiert. Laden Sie das Fenster neu, damit die Änderungen wirksam werden.",
+	"on.disabled.command": "IntelliSense-bezogene Befehle können nicht ausgeführt werden, wenn `C_Cpp.intelliSenseEngine` auf `disabled` festgelegt ist.",
 	"client.not.found": "Client nicht gefunden.",
-	"configuration.select.first": "Zum Auswählen einer Konfiguration zuerst einen Ordner öffnen",
-	"configuration.provider.select.first": "Zum Auswählen eines Konfigurationsanbieters zuerst einen Ordner öffnen",
+	"configuration.select.first": "Öffnen Sie zum Auswählen einer Konfiguration zuerst einen Ordner.",
+	"configuration.provider.select.first": "Öffnen Sie zum Auswählen eines Konfigurationsanbieters zuerst einen Ordner.",
 	"edit.configurations.open.first": "Zum Bearbeiten von Konfigurationen zuerst einen Ordner öffnen",
+	"code.action.aborted": "Der Codeanalysepatch konnte nicht angewendet werden, da sich das Dokument geändert hat.",
 	"add.includepath.open.first": "Zuerst einen Ordner öffnen, der \"{0}\" hinzugefügt werden soll"
 }

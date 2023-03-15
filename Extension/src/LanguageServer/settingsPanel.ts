@@ -10,6 +10,7 @@ import * as vscode from 'vscode';
 import * as util from '../common';
 import * as config from './configurations';
 import * as telemetry from '../telemetry';
+import { getLocalizedHtmlPath } from './localization';
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
@@ -39,6 +40,7 @@ const elementId: { [key: string]: string } = {
     windowsSdkVersion: "windowsSdkVersion",
     macFrameworkPath: "macFrameworkPath",
     compileCommands: "compileCommands",
+    dotConfig: "dotConfig",
     mergeConfigurations: "mergeConfigurations",
     configurationProvider: "configurationProvider",
     forcedInclude: "forcedInclude",
@@ -326,6 +328,9 @@ export class SettingsPanel {
             case elementId.compileCommands:
                 this.configValues.compileCommands = message.value;
                 break;
+            case elementId.dotConfig:
+                this.configValues.dotConfig = message.value;
+                break;
             case elementId.mergeConfigurations:
                 this.configValues.mergeConfigurations = message.value;
                 break;
@@ -369,7 +374,7 @@ export class SettingsPanel {
     private getHtml(): string {
         let content: string | undefined;
 
-        content = fs.readFileSync(util.getLocalizedHtmlPath("ui/settings.html")).toString();
+        content = fs.readFileSync(getLocalizedHtmlPath("ui/settings.html")).toString();
 
         if (this.panel && this.panel.webview) {
             const cppImageUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'LanguageCCPP_color_128x.png')));

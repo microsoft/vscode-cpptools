@@ -3,31 +3,28 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope } from '../client';
-import * as util from '../../common';
-import { processDelayedDidOpen } from '../extension';
+import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope, Client, GetDocumentSymbolResult } from '../client';
+import { clients, processDelayedDidOpen } from '../extension';
+import { makeVscodeRange } from '../utils';
+import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
-    private client: DefaultClient;
-    constructor(client: DefaultClient) {
-        this.client = client;
-    }
     private getChildrenSymbols(symbols: LocalizeDocumentSymbol[]): vscode.DocumentSymbol[] {
         const documentSymbols: vscode.DocumentSymbol[] = [];
         if (symbols) {
             symbols.forEach((symbol) => {
-                let detail: string = util.getLocalizedString(symbol.detail);
+                let detail: string = getLocalizedString(symbol.detail);
                 if (symbol.scope === SymbolScope.Private) {
                     if (detail.length === 0) {
                         detail = "private";
                     } else {
-                        detail = util.getLocalizedSymbolScope("private", detail);
+                        detail = getLocalizedSymbolScope("private", detail);
                     }
                 } else if (symbol.scope === SymbolScope.Protected) {
                     if (detail.length === 0) {
                         detail = "protected";
                     } else {
-                        detail = util.getLocalizedSymbolScope("protected", detail);
+                        detail = getLocalizedSymbolScope("protected", detail);
                     }
                 }
 
@@ -39,13 +36,16 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
                     }
                     const offset_scope: number = symbol.name.lastIndexOf("::", offset_paren - 2);
                     if (offset_scope > 0) {
-                        detail = symbol.name.substr(0, offset_scope);
-                        symbol.name = symbol.name.substr(offset_scope + 2);
+                        detail = symbol.name.substring(0, offset_scope);
+                        symbol.name = symbol.name.substring(offset_scope + 2);
                     }
                 }
 
-                const r: vscode.Range = new vscode.Range(symbol.range.start.line, symbol.range.start.character, symbol.range.end.line, symbol.range.end.character);
-                const sr: vscode.Range = new vscode.Range(symbol.selectionRange.start.line, symbol.selectionRange.start.character, symbol.selectionRange.end.line, symbol.selectionRange.end.character);
+                let r: vscode.Range = makeVscodeRange(symbol.range);
+                const sr: vscode.Range = makeVscodeRange(symbol.selectionRange);
+                if (!r.contains(sr)) {
+                    r = sr;
+                }
                 const vscodeSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(symbol.name, detail, symbol.kind, r, sr);
                 vscodeSymbol.children = this.getChildrenSymbols(symbol.children);
                 documentSymbols.push(vscodeSymbol);
@@ -53,17 +53,21 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         }
         return documentSymbols;
     }
-    public async provideDocumentSymbols(document: vscode.TextDocument): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
-        if (!this.client.TrackedDocuments.has(document)) {
-            processDelayedDidOpen(document);
-        }
-        return this.client.requestWhenReady(async () => {
+    public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
+        const client: Client = clients.getClientFor(document.uri);
+        if (client instanceof DefaultClient) {
+            const defaultClient: DefaultClient = <DefaultClient>client;
+            await client.requestWhenReady(() => processDelayedDidOpen(document));
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
-            const symbols: LocalizeDocumentSymbol[] = await this.client.languageClient.sendRequest(GetDocumentSymbolRequest, params);
-            const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(symbols);
+            const response: GetDocumentSymbolResult = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+            if (token.isCancellationRequested || response.symbols === undefined) {
+                throw new vscode.CancellationError();
+            };
+            const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(response.symbols);
             return resultSymbols;
-        });
+        }
+        return [];
     }
 }

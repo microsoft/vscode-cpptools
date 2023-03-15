@@ -4,29 +4,24 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
+import * as which from 'which';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import * as Telemetry from './telemetry';
-import HttpsProxyAgent = require('https-proxy-agent');
-import * as url from 'url';
 import { PlatformInformation } from './platform';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import * as assert from 'assert';
-import * as https from 'https';
 import * as tmp from 'tmp';
-import { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { lookupString } from './nativeStrings';
 import * as nls from 'vscode-nls';
-import { Readable } from 'stream';
-import { PackageManager, IPackage } from './packageManager';
 import * as jsonc from 'comment-json';
+import { TargetPopulation } from 'vscode-tas-client';
+import { DocumentFilter } from 'vscode-languageclient';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const failedToParseJson: string = localize("failed.to.parse.json", "Failed to parse json file, possibly due to comments or trailing commas.");
-export let supportCuda: boolean = false;
 
 export type Mutable<T> = {
     // eslint-disable-next-line @typescript-eslint/array-type
@@ -65,15 +60,19 @@ export function setCachedClangTidyPath(path: string | null): void {
 // Use this package.json to read values
 export const packageJson: any = vscode.extensions.getExtension("ms-vscode.cpptools")?.packageJSON;
 
-// Use getRawPackageJson to read and write back to package.json
-// This prevents obtaining any of VSCode's expanded variables.
-let rawPackageJson: any = null;
-export function getRawPackageJson(): any {
-    if (rawPackageJson === null || rawPackageJson === undefined) {
-        const fileContents: Buffer = fs.readFileSync(getPackageJsonPath());
-        rawPackageJson = JSON.parse(fileContents.toString());
+// Use getRawSetting to get subcategorized settings from package.json.
+// This prevents having to iterate every time we search.
+let flattenedPackageJson: Map<string, any>;
+export function getRawSetting(key: string): any {
+    if (flattenedPackageJson === undefined) {
+        flattenedPackageJson = new Map();
+        for (const subheading of packageJson.contributes.configuration) {
+            for (const setting in subheading.properties) {
+                flattenedPackageJson.set(setting, subheading.properties[setting]);
+            }
+        }
     }
-    return rawPackageJson;
+    return flattenedPackageJson.get(key);
 }
 
 export async function getRawJson(path: string | undefined): Promise<any> {
@@ -88,27 +87,11 @@ export async function getRawJson(path: string | undefined): Promise<any> {
     const fileContents: string = await readFileText(path);
     let rawElement: any = {};
     try {
-        rawElement = jsonc.parse(fileContents);
+        rawElement = jsonc.parse(fileContents, undefined, true);
     } catch (error) {
         throw new Error(failedToParseJson);
     }
     return rawElement;
-}
-
-export function fileIsCOrCppSource(file?: string): boolean {
-    if (file === undefined) {
-        return false;
-    }
-    const fileExtLower: string = path.extname(file).toLowerCase();
-    return [".cu", ".c", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".tcc", ".mm", ".ino", ".ipp", ".inl"].some(ext => fileExtLower === ext);
-}
-
-export function isEditorFileCpp(file: string): boolean {
-    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
-    if (!editor) {
-        return false;
-    }
-    return editor.document.languageId === "cpp";
 }
 
 // This function is used to stringify the rawPackageJson.
@@ -126,12 +109,12 @@ export function getPackageJsonPath(): string {
     return getExtensionFilePath("package.json");
 }
 
-export function getJsonPath(jsonFilaName: string): string | undefined {
+export function getJsonPath(jsonFilaName: string, workspaceFolder?: vscode.WorkspaceFolder): string | undefined {
     const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!editor) {
         return undefined;
     }
-    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    const folder: vscode.WorkspaceFolder | undefined = workspaceFolder ? workspaceFolder : vscode.workspace.getWorkspaceFolder(editor.document.uri);
     if (!folder) {
         return undefined;
     }
@@ -172,16 +155,42 @@ export function getVcpkgRoot(): string {
  * For the purposes of this function, a header file has no extension, or an extension that begins with the letter 'h'.
  * @param document The document to check.
  */
-export function isHeader(uri: vscode.Uri): boolean {
-    const ext: string = path.extname(uri.fsPath);
-    return !ext || ext.startsWith(".h") || ext.startsWith(".H");
+export function isHeaderFile(uri: vscode.Uri): boolean {
+    const fileExt: string = path.extname(uri.fsPath);
+    const fileExtLower: string = fileExt.toLowerCase();
+    return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
 }
 
-// Extension is ready if install.lock exists and debugAdapters folder exist.
-export async function isExtensionReady(): Promise<boolean> {
-    const doesInstallLockFileExist: boolean = await checkInstallLockFile();
+export function isCppFile (uri: vscode.Uri): boolean {
+    const fileExt: string = path.extname(uri.fsPath);
+    const fileExtLower: string = fileExt.toLowerCase();
+    return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
+}
 
-    return doesInstallLockFileExist;
+export function isCFile (uri: vscode.Uri): boolean {
+    const fileExt: string = path.extname(uri.fsPath);
+    const fileExtLower: string = fileExt.toLowerCase();
+    return (fileExt === ".C") || fileExtLower === ".c";
+}
+
+export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
+    if (!uri) {
+        return false;
+    }
+    return isCppFile(uri) || isCFile(uri);
+}
+
+export function isFolderOpen(uri: vscode.Uri): boolean {
+    const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
+    return folder ? true : false;
+}
+
+export function isEditorFileCpp(file: string): boolean {
+    const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === file);
+    if (!editor) {
+        return false;
+    }
+    return editor.document.languageId === "cpp";
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -312,13 +321,40 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string {
+export function isWindows(): boolean {
+    return os.platform() === 'win32';
+}
+
+export function defaultExePath(): string {
+    const exePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
+    return isWindows() ? exePath + '.exe' : exePath;
+}
+
+export function findExePathInArgs(args: string[]): string | undefined {
+    const exePath: string | undefined = args.find((arg: string, index: number) => (arg.includes(".exe") || (index > 0 && args[index - 1] === "-o")));
+    if (exePath?.startsWith("/Fe")) {
+        return exePath.substring(3);
+    }
+    return exePath;
+}
+
+// Pass in 'arrayResults' if a string[] result is possible and a delimited string result is undesirable.
+// The string[] result will be copied into 'arrayResults'.
+export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
     if (!input) {
         return "";
     }
 
+    // jsonc parser may assign a non-string object to a string.
+    // TODO: https://github.com/microsoft/vscode-cpptools/issues/9414
+    if (!isString(input)) {
+        const inputAny: any = input;
+        input = inputAny.toString();
+        return input ?? "";
+    }
+
     // Replace environment and configuration variables.
-    let regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
+    const regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
     const cycleCache: Set<string> = new Set();
     while (!cycleCache.has(ret)) {
@@ -337,7 +373,13 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                         if (isString(v)) {
                             newValue = v;
                         } else if (input === match && isArrayOfString(v)) {
-                            newValue = v.join(envDelimiter);
+                            if (arrayResults !== undefined) {
+                                arrayResults.push(...v);
+                                newValue = "";
+                                break;
+                            } else {
+                                newValue = v.join(envDelimiter);
+                            }
                         }
                     }
                     if (newValue === undefined) {
@@ -370,11 +412,24 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
         });
     }
 
-    // Resolve '~' at the start of the path.
-    regexp = () => /^\~/g;
-    ret = ret.replace(regexp(), (match: string, name: string) => os.homedir());
+    return resolveHome(ret);
+}
 
-    return ret;
+export function resolveVariablesArray(variables: string[] | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string[] {
+    let result: string[] = [];
+    if (variables) {
+        variables.forEach(variable => {
+            const variablesResolved: string[] = [];
+            const variableResolved: string = resolveVariables(variable, additionalEnvironment, variablesResolved);
+            result = result.concat(variablesResolved.length === 0 ? variableResolved : variablesResolved);
+        });
+    }
+    return result;
+}
+
+// Resolve '~' at the start of the path.
+export function resolveHome(filePath: string): string {
+    return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
 }
 
 export function asFolder(uri: vscode.Uri): string {
@@ -402,88 +457,96 @@ export function getDebugAdaptersPath(file: string): string {
     return path.resolve(getExtensionFilePath("debugAdapters"), file);
 }
 
-export function getHttpsProxyAgent(): HttpsProxyAgent | undefined {
-    let proxy: string | undefined = vscode.workspace.getConfiguration().get<string>('http.proxy');
-    if (!proxy) {
-        proxy = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
-        if (!proxy) {
-            return undefined; // No proxy
-        }
-    }
-
-    // Basic sanity checking on proxy url
-    const proxyUrl: any = url.parse(proxy);
-    if (proxyUrl.protocol !== "https:" && proxyUrl.protocol !== "http:") {
+export async function fsStat(filePath: fs.PathLike): Promise<fs.Stats | undefined> {
+    let stats: fs.Stats | undefined;
+    try {
+        stats = await fs.promises.stat(filePath);
+    } catch (e) {
+        // File doesn't exist
         return undefined;
     }
-
-    const strictProxy: any = vscode.workspace.getConfiguration().get("http.proxyStrictSSL", true);
-    const proxyOptions: any = {
-        host: proxyUrl.hostname,
-        port: parseInt(proxyUrl.port, 10),
-        auth: proxyUrl.auth,
-        rejectUnauthorized: strictProxy
-    };
-
-    return new HttpsProxyAgent(proxyOptions);
+    return stats;
 }
 
-export interface InstallLockContents {
-    platform: string;
-    architecture: string;
-};
-
-export function touchInstallLockFile(info: PlatformInformation): Promise<void> {
-    const installLockObject: InstallLockContents = {
-        platform: info.platform,
-        architecture: info.architecture
-    };
-    const content: string = JSON.stringify(installLockObject);
-    return writeFileText(getInstallLockPath(), content);
-}
-
-export function touchExtensionFolder(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        fs.utimes(path.resolve(extensionPath, ".."), new Date(Date.now()), new Date(Date.now()), (err) => {
-            if (err) {
-                reject(err);
-            }
-
-            resolve();
-        });
-    });
+export async function checkPathExists(filePath: string): Promise<boolean> {
+    return !!(await fsStat(filePath));
 }
 
 /** Test whether a file exists */
-export function checkFileExists(filePath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(filePath, (err, stats) => {
-            if (stats && stats.isFile()) {
-                resolve(true);
-            } else {
-                resolve(false);
+export async function checkFileExists(filePath: string): Promise<boolean> {
+    const stats: fs.Stats | undefined = await fsStat(filePath);
+    return !!stats && stats.isFile();
+}
+
+/** Test whether a file exists */
+export async function checkExecutableWithoutExtensionExists(filePath: string): Promise<boolean> {
+    if (await checkFileExists(filePath)) {
+        return true;
+    }
+    if (os.platform() === 'win32') {
+        if (filePath.length > 4) {
+            const possibleExtension: string = filePath.substring(filePath.length - 4).toLowerCase();
+            if (possibleExtension === ".exe" || possibleExtension === ".cmd" || possibleExtension === ".bat") {
+                return false;
             }
-        });
-    });
+        }
+        if (await checkFileExists(filePath + ".exe")) {
+            return true;
+        }
+        if (await checkFileExists(filePath + ".cmd")) {
+            return true;
+        }
+        if (await checkFileExists(filePath + ".bat")) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /** Test whether a directory exists */
-export function checkDirectoryExists(dirPath: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        fs.stat(dirPath, (err, stats) => {
-            if (stats && stats.isDirectory()) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    });
+export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
+    const stats: fs.Stats | undefined = await fsStat(dirPath);
+    return !!stats && stats.isDirectory();
+}
+
+export function createDirIfNotExistsSync(filePath: string | undefined): void {
+    if (!filePath) {
+        return;
+    }
+    const dirPath: string = path.dirname(filePath);
+    if (!checkDirectoryExistsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
 }
 
 export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
     } catch (e) {
+    }
+    return false;
+}
+
+export function checkExecutableWithoutExtensionExistsSync(filePath: string): boolean {
+    if (checkFileExistsSync(filePath)) {
+        return true;
+    }
+    if (os.platform() === 'win32') {
+        if (filePath.length > 4) {
+            const possibleExtension: string = filePath.substring(filePath.length - 4).toLowerCase();
+            if (possibleExtension === ".exe" || possibleExtension === ".cmd" || possibleExtension === ".bat") {
+                return false;
+            }
+        }
+        if (checkFileExistsSync(filePath + ".exe")) {
+            return true;
+        }
+        if (checkFileExistsSync(filePath + ".cmd")) {
+            return true;
+        }
+        if (checkFileExistsSync(filePath + ".bat")) {
+            return true;
+        }
     }
     return false;
 }
@@ -498,9 +561,9 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
 }
 
 /** Test whether a relative path exists */
-export function checkPathExistsSync(path: string, relativePath: string, isWindows: boolean, isWSL: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
+export function checkPathExistsSync(path: string, relativePath: string, _isWindows: boolean, isCompilerPath: boolean): { pathExists: boolean; path: string } {
     let pathExists: boolean = true;
-    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && isWindows && !isWSL && fs.existsSync(path + ".exe");
+    const existsWithExeAdded: (path: string) => boolean = (path: string) => isCompilerPath && _isWindows && fs.existsSync(path + ".exe");
     if (!fs.existsSync(path)) {
         if (existsWithExeAdded(path)) {
             path += ".exe";
@@ -530,84 +593,6 @@ export function readDir(dirPath: string): Promise<string[]> {
             resolve(list);
         });
     });
-}
-
-/** Test whether the lock file exists.*/
-export function checkInstallLockFile(): Promise<boolean> {
-    return checkFileExists(getInstallLockPath());
-}
-
-/** Check if the core binaries exists in extension's installation folder */
-export async function checkInstallBinariesExist(): Promise<boolean> {
-    if (!checkInstallLockFile()) {
-        return false;
-    }
-    let installBinariesExist: boolean = true;
-    const info: PlatformInformation = await PlatformInformation.GetPlatformInformation();
-    const packageManager: PackageManager = new PackageManager(info);
-    const packages: Promise<IPackage[]> = packageManager.GetPackages();
-    for (const pkg of await packages) {
-        if (pkg.binaries) {
-            await Promise.all(pkg.binaries.map(async (file: string) => {
-                if (!await checkFileExists(file)) {
-                    installBinariesExist = false;
-                    const fileBase: string = path.basename(file);
-                    console.log(`Extension file ${fileBase} is missing.`);
-                    Telemetry.logLanguageServerEvent("missingBinary", { "source": `${fileBase}` });
-                }
-            }));
-        }
-    }
-    return installBinariesExist;
-}
-
-/** Check if the core Json files exists in extension's installation folder */
-export async function checkInstallJsonsExist(): Promise<boolean> {
-    let installJsonsExist: boolean = true;
-    const jsonFiles: string[] = [
-        "bin/common.json",
-        "bin/linux.clang.arm.json",
-        "bin/linux.clang.arm64.json",
-        "bin/linux.clang.x64.json",
-        "bin/linux.clang.x86.json",
-        "bin/linux.gcc.arm.json",
-        "bin/linux.gcc.arm64.json",
-        "bin/linux.gcc.x64.json",
-        "bin/linux.gcc.x86.json",
-        "bin/macos.clang.arm.json",
-        "bin/macos.clang.arm64.json",
-        "bin/macos.clang.x64.json",
-        "bin/macos.clang.x86.json",
-        "bin/macos.gcc.arm.json",
-        "bin/macos.gcc.arm64.json",
-        "bin/macos.gcc.x64.json",
-        "bin/macos.gcc.x86.json",
-        "bin/windows.clang.arm.json",
-        "bin/windows.clang.arm64.json",
-        "bin/windows.clang.x64.json",
-        "bin/windows.clang.x86.json",
-        "bin/windows.gcc.arm.json",
-        "bin/windows.gcc.arm64.json",
-        "bin/windows.gcc.x64.json",
-        "bin/windows.gcc.x86.json",
-        "bin/windows.msvc.arm.json",
-        "bin/windows.msvc.arm64.json",
-        "bin/windows.msvc.x64.json",
-        "bin/windows.msvc.x86.json",
-        "debugAdapters/bin/cppdbg.ad7Engine.json"
-    ];
-    await Promise.all(jsonFiles.map(async (file) => {
-        if (!await checkFileExists(path.join(extensionPath, file))) {
-            installJsonsExist = false;
-            console.log(`Extension file ${file} is missing.`);
-            Telemetry.logLanguageServerEvent("missingJson", { "source": `${file}` });
-        }
-    }));
-    return installJsonsExist;
-}
-
-export async function removeInstallLockFile(): Promise<void> {
-    await unlinkAsync(path.join(extensionPath, "install.lock"));
 }
 
 /** Reads the content of a text file */
@@ -664,11 +649,6 @@ export function deleteFile(filePath: string): Promise<void> {
     });
 }
 
-// Get the path of the lock file. This is used to indicate that the platform-specific dependencies have been downloaded.
-export function getInstallLockPath(): string {
-    return getExtensionFilePath("install.lock");
-}
-
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
     const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
@@ -686,7 +666,7 @@ export function execChildProcess(process: string, workingDirectory?: string, cha
         child_process.exec(process, { cwd: workingDirectory, maxBuffer: 500 * 1024 }, (error: Error | null, stdout: string, stderr: string) => {
             if (channel) {
                 let message: string = "";
-                let err: Boolean = false;
+                let err: boolean = false;
                 if (stdout && stdout.length > 0) {
                     message += stdout;
                 }
@@ -722,46 +702,107 @@ export function execChildProcess(process: string, workingDirectory?: string, cha
     });
 }
 
-export function spawnChildProcess(process: string, args: string[], workingDirectory: string,
-    dataCallback: (stdout: string) => void, errorCallback: (stderr: string) => void): Promise<void> {
+export interface ProcessReturnType {
+    succeeded: boolean;
+    exitCode?: number | NodeJS.Signals;
+    output: string;
+}
 
-    return new Promise<void>(function (resolve, reject): void {
-        const child: child_process.ChildProcess = child_process.spawn(process, args, { cwd: workingDirectory });
+export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+    // Do not use CppSettings to avoid circular require()
+    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    if (loggingLevel === "Information" || loggingLevel === "Debug") {
+        getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
+    }
+    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
+    const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
+    if (programOutput.exitCode) {
+        return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
+    } else {
+        let stdout: string;
+        if (programOutput.stdout.length) {
+            // Type system doesn't work very well here, so we need call toString
+            stdout = programOutput.stdout;
+        } else {
+            stdout = localize('process.succeeded', 'Process executed successfully.');
+        }
+        return { succeeded: true, exitCode, output: stdout };
+    }
+}
 
-        const stdout: Readable | null = child.stdout;
-        if (stdout) {
-            stdout.on('data', (data) => {
-                dataCallback(`${data}`);
-            });
+interface ProcessOutput {
+    exitCode?: number | NodeJS.Signals;
+    stdout: string;
+    stderr: string;
+}
+
+async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
+    return new Promise(async (resolve, reject) => {
+        // Do not use CppSettings to avoid circular require()
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+
+        let proc: child_process.ChildProcess;
+        if (await isExecutable(program)) {
+            proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
+        } else {
+            proc = child_process.spawn(program, args, { shell: true });
         }
 
-        const stderr: Readable | null = child.stderr;
-        if (stderr) {
-            stderr.on('data', (data) => {
-                errorCallback(`${data}`);
-            });
-        }
+        const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
+            getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
+            proc.kill();
+        });
 
-        child.on('exit', (code: number) => {
-            if (code !== 0) {
-                reject(new Error(localize("process.exited.with.code", "{0} exited with error code {1}", process, code)));
-            } else {
-                resolve();
+        const clean = () => {
+            proc.removeAllListeners();
+            if (cancellationTokenListener) {
+                cancellationTokenListener.dispose();
             }
+        };
+
+        let stdout: string = '';
+        let stderr: string = '';
+        if (proc.stdout) {
+            proc.stdout.on('data', data => {
+                const str: string = data.toString();
+                if (loggingLevel !== "None") {
+                    getOutputChannelLogger().append(str);
+                }
+                stdout += str;
+                if (continueOn) {
+                    const continueOnReg: string = escapeStringForRegex(continueOn);
+                    if (stdout.search(continueOnReg)) {
+                        resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+                    }
+                }
+            });
+        }
+        if (proc.stderr) {
+            proc.stderr.on('data', data => stderr += data.toString());
+        }
+        proc.on('close', (code, signal) => {
+            clean();
+            resolve({ exitCode: code || signal, stdout: stdout.trim(), stderr: stderr.trim() });
+        });
+        proc.on('error', error => {
+            clean();
+            reject(error);
         });
     });
 }
 
+/**
+ * @param permission fs file access constants: https://nodejs.org/api/fs.html#file-access-constants
+ */
+export function pathAccessible(filePath: string, permission: number = fs.constants.F_OK): Promise<boolean> {
+    if (!filePath) { return Promise.resolve(false); }
+    return new Promise(resolve => fs.access(filePath, permission, err => resolve(!err)));
+}
+
 export function isExecutable(file: string): Promise<boolean> {
-    return new Promise((resolve) => {
-        fs.access(file, fs.constants.X_OK, (err) => {
-            if (err) {
-                resolve(false);
-            } else {
-                resolve(true);
-            }
-        });
-    });
+    return pathAccessible(file, fs.constants.X_OK);
 }
 
 export async function allowExecution(file: string): Promise<void> {
@@ -833,17 +874,25 @@ export async function renameAsync(oldName: string, newName: string): Promise<voi
     });
 }
 
-export function promptForReloadWindowDueToSettingsChange(): void {
-    promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
+export async function promptForReloadWindowDueToSettingsChange(): Promise<void> {
+    await promptReloadWindow(localize("reload.workspace.for.changes", "Reload the workspace for the settings change to take effect."));
 }
 
-export function promptReloadWindow(message: string): void {
+export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
-    vscode.window.showInformationMessage(message, reload).then((value?: string) => {
-        if (value === reload) {
-            vscode.commands.executeCommand("workbench.action.reloadWindow");
-        }
-    });
+    const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
+    if (value === reload) {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
+}
+
+export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
+    // Detect duplicate paths or invalid paths.
+    if (compilers.includes(path) || path === null || path === undefined) {
+        return compilers;
+    }
+    compilers.push(path);
+    return compilers;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
@@ -857,88 +906,14 @@ export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResu
     });
 }
 
-export function downloadFileToDestination(urlStr: string, destinationPath: string, headers?: OutgoingHttpHeaders): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        const parsedUrl: url.Url = url.parse(urlStr);
-        const request: ClientRequest = https.request({
-            host: parsedUrl.host,
-            path: parsedUrl.path,
-            agent: getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
-            headers: headers
-        }, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
-                // Download from new location
-                let redirectUrl: string;
-                if (typeof response.headers.location === 'string') {
-                    redirectUrl = response.headers.location;
-                } else {
-                    if (!response.headers.location) {
-                        return reject(new Error(localize("invalid.download.location.received", 'Invalid download location received')));
-                    }
-                    redirectUrl = response.headers.location[0];
-                }
-                return resolve(downloadFileToDestination(redirectUrl, destinationPath, headers));
-            }
-            if (response.statusCode !== 200) { // If request is not successful
-                return reject();
-            }
-            // Write file using downloaded data
-            const createdFile: fs.WriteStream = fs.createWriteStream(destinationPath);
-            createdFile.on('finish', () => { resolve(); });
-            response.on('error', (error) => { reject(error); });
-            response.pipe(createdFile);
-        });
-        request.on('error', (error) => { reject(error); });
-        request.end();
+function resolveWindowsEnvironmentVariables(str: string): string {
+    return str.replace(/%([^%]+)%/g, (withPercents, withoutPercents) => {
+        const found: string | undefined = process.env[withoutPercents];
+        return found || withPercents;
     });
 }
 
-export function downloadFileToStr(urlStr: string, headers?: OutgoingHttpHeaders): Promise<any> {
-    return new Promise<string>((resolve, reject) => {
-        const parsedUrl: url.Url = url.parse(urlStr);
-        const request: ClientRequest = https.request({
-            host: parsedUrl.host,
-            path: parsedUrl.path,
-            agent: getHttpsProxyAgent(),
-            rejectUnauthorized: vscode.workspace.getConfiguration().get('http.proxyStrictSSL', true),
-            headers: headers
-        }, (response) => {
-            if (response.statusCode === 301 || response.statusCode === 302) { // If redirected
-                // Download from new location
-                let redirectUrl: string;
-                if (typeof response.headers.location === 'string') {
-                    redirectUrl = response.headers.location;
-                } else {
-                    if (!response.headers.location) {
-                        return reject(new Error(localize("invalid.download.location.received", 'Invalid download location received')));
-                    }
-                    redirectUrl = response.headers.location[0];
-                }
-                return resolve(downloadFileToStr(redirectUrl, headers));
-            }
-            if (response.statusCode !== 200) { // If request is not successful
-                return reject();
-            }
-            let downloadedData: string = '';
-            response.on('data', (data) => { downloadedData += data; });
-            response.on('error', (error) => { reject(error); });
-            response.on('end', () => { resolve(downloadedData); });
-        });
-        request.on('error', (error) => { reject(error); });
-        request.end();
-    });
-}
-
-/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
-export interface CompilerPathAndArgs {
-    compilerPath?: string;
-    compilerName: string;
-    additionalArgs: string[];
-}
-
-function extractArgs(argsString: string): string[] {
-    const isWindows: boolean = os.platform() === 'win32';
+function legacyExtractArgs(argsString: string): string[] {
     const result: string[] = [];
     let currentArg: string = "";
     let isWithinDoubleQuote: boolean = false;
@@ -962,7 +937,7 @@ function extractArgs(argsString: string): string[] {
             }
         } else if (c === '\'') {
             // On Windows, a single quote string is not allowed to join multiple args into a single arg
-            if (!isWindows) {
+            if (!isWindows()) {
                 if (!isWithinDoubleQuote) {
                     isWithinSingleQuote = !isWithinSingleQuote;
                 }
@@ -984,68 +959,179 @@ function extractArgs(argsString: string): string[] {
     return result;
 }
 
-export function extractCompilerPathAndArgs(inputCompilerPath?: string, inputCompilerArgs?: string[]): CompilerPathAndArgs {
-    let compilerPath: string | undefined = inputCompilerPath;
-    const compilerPathLowercase: string | undefined = inputCompilerPath?.toLowerCase();
-    let compilerName: string = "";
-    let additionalArgs: string[] = [];
-
-    if (compilerPath) {
-        if (compilerPathLowercase?.endsWith("\\cl.exe") || compilerPathLowercase?.endsWith("/cl.exe") || (compilerPathLowercase === "cl.exe")
-            || compilerPathLowercase?.endsWith("\\cl") || compilerPathLowercase?.endsWith("/cl") || (compilerPathLowercase === "cl")) {
-            compilerName = path.basename(compilerPath);
-        } else if (compilerPath.startsWith("\"")) {
-            // Input has quotes around compiler path
-            const endQuote: number = compilerPath.substr(1).search("\"") + 1;
-            if (endQuote !== -1) {
-                additionalArgs = extractArgs(compilerPath.substr(endQuote + 1));
-                compilerPath = compilerPath.substr(1, endQuote - 1);
-                compilerName = path.basename(compilerPath);
+function extractArgs(argsString: string): string[] {
+    argsString = argsString.trim();
+    if (os.platform() === 'win32') {
+        argsString = resolveWindowsEnvironmentVariables(argsString);
+        const result: string[] = [];
+        let currentArg: string = "";
+        let isInQuote: boolean = false;
+        let wasInQuote: boolean = false;
+        let i: number = 0;
+        while (i < argsString.length) {
+            let c: string = argsString[i];
+            if (c === '\"') {
+                if (!isInQuote) {
+                    isInQuote = true;
+                    wasInQuote = true;
+                    ++i;
+                    continue;
+                }
+                // Need to peek at next character.
+                if (++i === argsString.length) {
+                    break;
+                }
+                c = argsString[i];
+                if (c !== '\"') {
+                    isInQuote = false;
+                }
+                // Fall through. If c was a quote character, it will be added as a literal.
             }
-        } else {
-            // Input has no quotes around compiler path
-            let spaceStart: number = compilerPath.lastIndexOf(" ");
-            if (checkFileExistsSync(compilerPath)) {
-                // Get compiler name if there are no args but path is valid.
-                compilerName = path.basename(compilerPath);
-            } else if (spaceStart !== -1 && !checkFileExistsSync(compilerPath)) {
-                // Get compiler name if compiler path has spaces and args.
-                // Go from right to left checking if a valid path is to the left of a space.
-                let potentialCompilerPath: string = compilerPath.substr(0, spaceStart);
-                while (!checkFileExistsSync(potentialCompilerPath)) {
-                    spaceStart = potentialCompilerPath.lastIndexOf(" ");
-                    if (spaceStart === -1) {
-                        // Reached the start without finding a valid path. Use the original value.
-                        potentialCompilerPath = compilerPath;
+            if (c === '\\') {
+                let backslashCount: number = 1;
+                let reachedEnd: boolean = true;
+                while (++i !== argsString.length) {
+                    c = argsString[i];
+                    if (c !== '\\') {
+                        reachedEnd = false;
                         break;
                     }
-                    potentialCompilerPath = potentialCompilerPath.substr(0, spaceStart);
+                    ++backslashCount;
                 }
-                if (compilerPath !== potentialCompilerPath) {
-                    // Found a valid compilerPath and args.
-                    additionalArgs = extractArgs(compilerPath.substr(spaceStart + 1));
-                    compilerPath = potentialCompilerPath;
-                    compilerName = path.basename(potentialCompilerPath);
+                const still_escaping: boolean = (backslashCount % 2) !== 0;
+                if (!reachedEnd && c === '\"') {
+                    backslashCount = Math.floor(backslashCount / 2);
+                }
+                while (backslashCount--) {
+                    currentArg += '\\';
+                }
+                if (reachedEnd) {
+                    break;
+                }
+                // If not still escaping and a quote was found, it needs to be handled above.
+                if (!still_escaping && c === '\"') {
+                    continue;
+                }
+                // Otherwise, fall through to handle c as a literal.
+            }
+            if (c === ' ' || c === '\t' || c === '\r' || c === '\n') {
+                if (!isInQuote) {
+                    if (currentArg !== "" || wasInQuote) {
+                        wasInQuote = false;
+                        result.push(currentArg);
+                        currentArg = "";
+                    }
+                    i++;
+                    continue;
+                }
+            }
+            currentArg += c;
+            i++;
+        }
+        if (currentArg !== "" || wasInQuote) {
+            result.push(currentArg);
+        }
+        return result;
+    } else {
+        try {
+            const wordexpResult: any = child_process.execFileSync(getExtensionFilePath("bin/cpptools-wordexp"), [argsString], { shell: false });
+            if (wordexpResult === undefined) {
+                return [];
+            }
+            const jsonText: string = wordexpResult.toString();
+            return jsonc.parse(jsonText, undefined, true);
+        } catch {
+            return [];
+        }
+    }
+}
+
+export function isCl(compilerPath: string): boolean {
+    const compilerPathLowercase: string = compilerPath.toLowerCase();
+    return compilerPathLowercase === "cl" || compilerPathLowercase === "cl.exe"
+        || compilerPathLowercase.endsWith("\\cl.exe") || compilerPathLowercase.endsWith("/cl.exe")
+        || compilerPathLowercase.endsWith("\\cl") || compilerPathLowercase.endsWith("/cl");
+}
+
+/** CompilerPathAndArgs retains original casing of text input for compiler path and args */
+export interface CompilerPathAndArgs {
+    compilerPath?: string;
+    compilerName: string;
+    compilerArgs?: string[];
+    compilerArgsFromCommandLineInPath: string[];
+    allCompilerArgs: string[];
+}
+
+export function extractCompilerPathAndArgs(useLegacyBehavior: boolean, inputCompilerPath?: string, compilerArgs?: string[]): CompilerPathAndArgs {
+    let compilerPath: string | undefined = inputCompilerPath;
+    let compilerName: string = "";
+    let compilerArgsFromCommandLineInPath: string[] = [];
+    if (compilerPath) {
+        compilerPath = compilerPath.trim();
+        if (isCl(compilerPath) || checkExecutableWithoutExtensionExistsSync(compilerPath)) {
+            // If the path ends with cl, or if a file is found at that path, accept it without further validation.
+            compilerName = path.basename(compilerPath);
+        } else if ((compilerPath.startsWith("\"") || (os.platform() !== 'win32' && compilerPath.startsWith("'")))) {
+            // If the string starts with a quote, treat it as a command line.
+            // Otherwise, a path with a leading quote would not be valid.
+            if (useLegacyBehavior) {
+                compilerArgsFromCommandLineInPath = legacyExtractArgs(compilerPath);
+                if (compilerArgsFromCommandLineInPath.length > 0) {
+                    compilerPath = compilerArgsFromCommandLineInPath.shift();
+                    if (compilerPath) {
+                        // Try to trim quotes from compiler path.
+                        const tempCompilerPath: string[] | undefined = extractArgs(compilerPath);
+                        if (tempCompilerPath && compilerPath.length > 0) {
+                            compilerPath = tempCompilerPath[0];
+                        }
+                        compilerName = path.basename(compilerPath);
+                    }
+                }
+            } else {
+                compilerArgsFromCommandLineInPath = extractArgs(compilerPath);
+                if (compilerArgsFromCommandLineInPath.length > 0) {
+                    compilerPath = compilerArgsFromCommandLineInPath.shift();
+                    if (compilerPath) {
+                        compilerName = path.basename(compilerPath);
+                    }
+                }
+            }
+        } else {
+            const spaceStart: number = compilerPath.lastIndexOf(" ");
+            if (spaceStart !== -1) {
+                // There is no leading quote, but a space suggests it might be a command line.
+                // Try processing it as a command line, and validate that by checking for the executable.
+                const potentialArgs: string[] = useLegacyBehavior ? legacyExtractArgs(compilerPath) : extractArgs(compilerPath);
+                let potentialCompilerPath: string | undefined = potentialArgs.shift();
+                if (useLegacyBehavior) {
+                    if (potentialCompilerPath) {
+                        const tempCompilerPath: string[] | undefined = extractArgs(potentialCompilerPath);
+                        if (tempCompilerPath && compilerPath.length > 0) {
+                            potentialCompilerPath = tempCompilerPath[0];
+                        }
+                    }
+                }
+                if (potentialCompilerPath) {
+                    if (isCl(potentialCompilerPath) || checkExecutableWithoutExtensionExistsSync(potentialCompilerPath)) {
+                        compilerArgsFromCommandLineInPath = potentialArgs;
+                        compilerPath = potentialCompilerPath;
+                        compilerName = path.basename(compilerPath);
+                    }
                 }
             }
         }
     }
-    // Combine args from inputCompilerPath and inputCompilerArgs and remove duplicates
-    if (inputCompilerArgs && inputCompilerArgs.length) {
-        additionalArgs = inputCompilerArgs.concat(additionalArgs.filter(
-            function (item: string): boolean {
-                return inputCompilerArgs.indexOf(item) < 0;
-            }));
-    }
-    return { compilerPath, compilerName, additionalArgs };
+    let allCompilerArgs: string[] = !compilerArgs ? [] : compilerArgs;
+    allCompilerArgs = allCompilerArgs.concat(compilerArgsFromCommandLineInPath);
+    return { compilerPath, compilerName, compilerArgs, compilerArgsFromCommandLineInPath, allCompilerArgs };
 }
 
 export function escapeForSquiggles(s: string): string {
     // Replace all \<escape character> with \\<character>, except for \"
     // Otherwise, the JSON.parse result will have the \<escape character> missing.
     let newResults: string = "";
-    let lastWasBackslash: Boolean = false;
-    let lastBackslashWasEscaped: Boolean = false;
+    let lastWasBackslash: boolean = false;
+    let lastBackslashWasEscaped: boolean = false;
     for (let i: number = 0; i < s.length; i++) {
         if (s[i] === '\\') {
             if (lastWasBackslash) {
@@ -1100,65 +1186,6 @@ export class BlockingTask<T> {
     public getPromise(): Thenable<T> {
         return this.promise;
     }
-}
-
-interface VSCodeNlsConfig {
-    locale: string;
-    availableLanguages: {
-        [pack: string]: string;
-    };
-}
-
-export function getLocaleId(): string {
-    // This replicates the language detection used by initializeSettings() in vscode-nls
-    if (isString(process.env.VSCODE_NLS_CONFIG)) {
-        const vscodeOptions: VSCodeNlsConfig = JSON.parse(process.env.VSCODE_NLS_CONFIG) as VSCodeNlsConfig;
-        if (vscodeOptions.availableLanguages) {
-            const value: any = vscodeOptions.availableLanguages['*'];
-            if (isString(value)) {
-                return value;
-            }
-        }
-        if (isString(vscodeOptions.locale)) {
-            return vscodeOptions.locale.toLowerCase();
-        }
-    }
-    return "en";
-}
-
-export function getLocalizedHtmlPath(originalPath: string): string {
-    const locale: string = getLocaleId();
-    const localizedFilePath: string = getExtensionFilePath(path.join("dist/html/", locale, originalPath));
-    if (!fs.existsSync(localizedFilePath)) {
-        return getExtensionFilePath(originalPath);
-    }
-    return localizedFilePath;
-}
-
-export interface LocalizeStringParams {
-    text: string;
-    stringId: number;
-    stringArgs: string[];
-    indentSpaces: number;
-}
-
-export function getLocalizedString(params: LocalizeStringParams): string {
-    let indent: string = "";
-    if (params.indentSpaces) {
-        indent = " ".repeat(params.indentSpaces);
-    }
-    let text: string = params.text;
-    if (params.stringId !== 0) {
-        text = lookupString(params.stringId, params.stringArgs);
-    }
-    return indent + text;
-}
-
-export function getLocalizedSymbolScope(scope: string, detail: string): string {
-    return localize({
-        key: "c.cpp.symbolscope.separator", comment:
-            ["{0} is an untranslated C++ keyword (e.g. \"private\") and {1} is either another keyword (e.g. \"typedef\") or a localized property (e.g. a localized version of \"declaration\""]
-    }, "{0}, {1}", scope, detail);
 }
 
 function decodeUCS16(input: string): number[] {
@@ -1303,11 +1330,6 @@ export function isCodespaces(): boolean {
     return !!process.env["CODESPACES"];
 }
 
-export async function checkCuda(): Promise<void> {
-    const langs: string[] = await vscode.languages.getLanguages();
-    supportCuda = langs.findIndex((s) => s === "cuda-cpp") !== -1;
-}
-
 // Sequentially Resolve Promises.
 export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Promise<void>): Promise<void> {
     return items.reduce(async (previousPromise, nextItem) => {
@@ -1317,7 +1339,7 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 }
 
 export function normalizeArg(arg: string): string {
-    arg = arg.trimLeft().trimRight();
+    arg = arg.trim();
     // Check if the arg is enclosed in backtick,
     // or includes unescaped double-quotes (or single-quotes on windows),
     // or includes unescaped single-quotes on mac and linux.
@@ -1359,3 +1381,90 @@ export function findPowerShell(): string | undefined {
         }
     }
 }
+
+export function getCppToolsTargetPopulation(): TargetPopulation {
+    // If insiders.flag is present, consider this an insiders build.
+    // If release.flag is present, consider this a release build.
+    // Otherwise, consider this an internal build.
+    if (checkFileExistsSync(getExtensionFilePath("insiders.flag"))) {
+        return TargetPopulation.Insiders;
+    } else if (checkFileExistsSync(getExtensionFilePath("release.flag"))) {
+        return TargetPopulation.Public;
+    }
+    return TargetPopulation.Internal;
+}
+
+export function isVsCodeInsiders(): boolean {
+    return extensionPath.includes(".vscode-insiders") ||
+        extensionPath.includes(".vscode-server-insiders") ||
+        extensionPath.includes(".vscode-exploration") ||
+        extensionPath.includes(".vscode-server-exploration");
+}
+
+export function stripEscapeSequences(str: string): string {
+    return str
+        .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
+        .replace(/\u0008/g, '')
+        .replace(/\r/g, '');
+}
+
+export function splitLines(data: string): string[] {
+    return data.split(/\r?\n/g);
+}
+
+export function escapeStringForRegex(str: string): string {
+    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+}
+
+export function replaceAll(str: string, searchValue: string, replaceValue: string): string {
+    const pattern: string = escapeStringForRegex(searchValue);
+    const re: RegExp = new RegExp(pattern, 'g');
+    return str.replace(re, replaceValue);
+}
+
+export interface ISshHostInfo {
+    hostName: string;
+    user?: string;
+    port?: number | string;
+}
+
+export interface ISshConfigHostInfo extends ISshHostInfo {
+    file: string;
+}
+
+/** user@host */
+export function getFullHostAddressNoPort(host: ISshHostInfo): string {
+    return host.user ? `${host.user}@${host.hostName}` : `${host.hostName}`;
+}
+
+export function getFullHostAddress(host: ISshHostInfo): string {
+    const fullHostName: string = getFullHostAddressNoPort(host);
+    return host.port ? `${fullHostName}:${host.port}` : fullHostName;
+}
+
+export interface ISshLocalForwardInfo {
+    bindAddress?: string;
+    port?: number | string;
+    host?: string;
+    hostPort?: number | string;
+    localSocket?: string;
+    remoteSocket?: string;
+}
+
+export function whichAsync(name: string): Promise<string | undefined> {
+    return new Promise<string | undefined>(resolve => {
+        which(name, (err, resolved) => {
+            if (err) {
+                resolve(undefined);
+            } else {
+                resolve(resolved);
+            }
+        });
+    });
+}
+
+export const documentSelector: DocumentFilter[] = [
+    { scheme: 'file', language: 'c' },
+    { scheme: 'file', language: 'cpp' },
+    { scheme: 'file', language: 'cuda-cpp' }
+];

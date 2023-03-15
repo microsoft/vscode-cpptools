@@ -14,7 +14,6 @@ type FilterFunction = (key: string, val: string, settings: vscode.WorkspaceConfi
 type KeyValuePair = { key: string; value: string };
 
 const maxSettingLengthForTelemetry: number = 50;
-let cache: SettingsTracker;
 
 export class SettingsTracker {
     private previousCppSettings: { [key: string]: any } = {};
@@ -42,7 +41,7 @@ export class SettingsTracker {
             (!rawSetting || rawSetting.scope === "resource" || rawSetting.scope === "machine-overridable") ? settingsResourceScope : settingsNonScoped;
         const result: { [key: string]: string } = {};
         for (const key in settingsResourceScope) {
-            const rawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+            const rawSetting: any = util.getRawSetting("C_Cpp." + key);
             const correctlyScopedSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(rawSetting);
             const val: any = this.getSetting(correctlyScopedSettings, key);
             if (val === undefined) {
@@ -57,7 +56,7 @@ export class SettingsTracker {
                 }
                 for (const subKey in val) {
                     const newKey: string = key + "." + subKey;
-                    const newRawSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + newKey];
+                    const newRawSetting: any = util.getRawSetting("C_Cpp." + newKey);
                     const correctlyScopedSubSettings: vscode.WorkspaceConfiguration = selectCorrectlyScopedSettings(newRawSetting);
                     const subVal: any = this.getSetting(correctlyScopedSubSettings, newKey);
                     if (subVal === undefined) {
@@ -96,7 +95,7 @@ export class SettingsTracker {
             }
 
             // Only return values that match the setting's type and enum (if applicable).
-            const curSetting: any = util.packageJson.contributes.configuration.properties["C_Cpp." + key];
+            const curSetting: any = util.getRawSetting("C_Cpp." + key);
             if (curSetting) {
                 const type: string | undefined = this.typeMatch(val, curSetting["type"]);
                 if (type) {
@@ -193,7 +192,7 @@ export class SettingsTracker {
                 }
             }
             if (value && value.length > maxSettingLengthForTelemetry) {
-                value = value.substr(0, maxSettingLengthForTelemetry) + "...";
+                value = value.substring(0, maxSettingLengthForTelemetry) + "...";
             }
             return {key: key, value: value};
         }
@@ -206,11 +205,4 @@ export class SettingsTracker {
         }
         return value1 === value2;
     }
-}
-
-export function getTracker(resource: vscode.Uri | undefined): SettingsTracker {
-    if (!cache) {
-        cache = new SettingsTracker(resource);
-    }
-    return cache;
 }
