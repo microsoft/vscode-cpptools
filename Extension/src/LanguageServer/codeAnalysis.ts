@@ -349,7 +349,9 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 if (primaryCode === "clang-tidy-nolint") {
                     docPage = "index.html#suppressing-undesired-diagnostics";
                 } else {
-                    const dashIndex: number = primaryCode.indexOf("-");
+                    const clangAnalyzerString: string = "clang-analyzer";
+                    const clangAnalyzerIndex: number = primaryCode.indexOf(clangAnalyzerString);
+                    const dashIndex: number = clangAnalyzerIndex === 0 ? clangAnalyzerString.length : primaryCode.indexOf("-");
                     const checksGroup: string = dashIndex > 0 ? `/${primaryCode.substring(0, dashIndex)}` : "";
                     const checksPage: string = dashIndex > 0 ? primaryCode.substring(dashIndex + 1) : primaryCode;
                     docPage = `checks${checksGroup}/${checksPage}.html`;
