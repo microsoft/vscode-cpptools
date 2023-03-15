@@ -5954,7 +5954,7 @@
     "vscode-debugprotocol": "^1.35.0",
     "vscode-dts": "^0.3.2",
     "vscode-nls-dev": "^4.0.0-next.1",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "webpack-cli": "^5.0.1",
     "xml2js": "^0.4.19"
   },
