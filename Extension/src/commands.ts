@@ -36,7 +36,7 @@ class TemporaryCommandRegistrar {
         "C_Cpp.GenerateEditorConfig",
         "C_Cpp.VcpkgClipboardInstallSuggested",
         "C_Cpp.VcpkgOnlineHelpSuggested",
-        "C_Cpp.CheckForCompiler",
+        "C_Cpp.OpenCompilerQuickpick",
         "C_Cpp.RunCodeAnalysisOnActiveFile",
         "C_Cpp.RunCodeAnalysisOnOpenFiles",
         "C_Cpp.RunCodeAnalysisOnAllFiles",

@@ -824,7 +824,7 @@ export function registerCommands(): void {
     disposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', onGenerateEditorConfig));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', onGoToNextDirectiveInGroup));
     disposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', onGoToPrevDirectiveInGroup));
-    disposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', onCheckForCompiler));
+    disposables.push(vscode.commands.registerCommand('C_Cpp.OpenCompilerQuickpick', onOpenCompilerQuickpick));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', onRunCodeAnalysisOnActiveFile));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', onRunCodeAnalysisOnOpenFiles));
     disposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', onRunCodeAnalysisOnAllFiles));
@@ -990,7 +990,8 @@ function onGoToPrevDirectiveInGroup(): void {
     client.handleGoToDirectiveInGroup(false);
 }
 
-function onCheckForCompiler(): void {
+function onOpenCompilerQuickpick(): void {
+    // TODO: This needs to invoke the quickpick rather than just looking for compilers on their machine using handleCheckForCompiler. 
     onActivationEvent();
     const client: Client = getActiveClient();
     client.handleCheckForCompiler();

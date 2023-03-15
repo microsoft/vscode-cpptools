@@ -59,7 +59,7 @@
           {
             "id": "verify.compiler.mac",
             "title": "Check for a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
             "when": "workspacePlatform == mac",
             "media": {
               "markdown": "walkthrough/installcompiler/install-clang-macos.md"
@@ -68,7 +68,7 @@
           {
             "id": "verify.compiler.linux",
             "title": "Check for a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
             "when": "workspacePlatform == linux",
             "media": {
               "markdown": "walkthrough/installcompiler/install-gcc-linux.md"
@@ -77,7 +77,7 @@
           {
             "id": "verify.compiler.windows",
             "title": "Check for a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.CheckForCompiler)",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
             "when": "workspacePlatform == windows",
             "media": {
               "markdown": "walkthrough/installcompiler/install-compiler-windows.md"
