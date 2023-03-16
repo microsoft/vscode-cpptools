@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "구성 공급자 변경...",
 	"c_cpp.command.configurationEditJSON.title": "구성 편집(JSON)",
 	"c_cpp.command.configurationEditUI.title": "구성 편집(UI)",
+	"c_cpp.command.selectDefaultCompiler.title": "기본 컴파일러 선택",
 	"c_cpp.command.switchHeaderSource.title": "헤더/소스 전환",
 	"c_cpp.command.enableErrorSquiggles.title": "오류 표시선 사용",
 	"c_cpp.command.disableErrorSquiggles.title": "오류 표시선 사용 안 함",
@@ -173,7 +174,7 @@
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription": "모든 `C_Cpp.vcFormat.newLine.*` 설정의 값에 관계없이 여는 중괄호와 닫는 중괄호가 입력된 모든 코드가 한 줄에 유지됩니다.",
 	"c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription": "코드 블록은 항상 `C_Cpp.vcFormat.newLine.*` 설정의 값에 따라 서식이 지정됩니다.",
 	"c_cpp.configuration.clang_format_path.markdownDescription": "`clang-format` 실행 파일의 전체 경로입니다. 지정하지 않은 경우 `clang-format`을 환경 경로에서 사용할 수 있으면 해당 실행 파일이 사용됩니다. 환경 경로에 없는 경우에는 확장과 함께 제공된 `clang-format`이 사용됩니다.",
-	"c_cpp.configuration.clang_format_style.markdownDescription": "코딩 스타일은 현재 `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`를 지원합니다. `file`을 사용하여 현재 또는 상위 디렉터리의 `.clang-format` 파일에서 스타일을 로드하거나 `file:<path>/.clang-format`을 사용하여 특정 경로를 참조하세요. `{key: value, ...}`를 사용하여 특정 매개 변수를 설정합니다. 예를 들어 `Visual Studio` 스타일은 `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`와 유사합니다.",
+	"c_cpp.configuration.clang_format_style.markdownDescription": "코딩 스타일은 현재 `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`을 지원합니다. `file`을 사용하여 현재 또는 상위 디렉터리의 `.clang-format` 파일에서 스타일을 로드하거나 `file:<경로>/.clang-format`을 사용하여 특정 경로를 참조하세요. `{키: 값, ...}`을 사용하여 특정 매개 변수를 설정합니다. 예를 들어 `Visual Studio` 스타일은 `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`와 유사합니다.",
 	"c_cpp.configuration.clang_format_fallbackStyle.markdownDescription": "`clang-format`이 `file` 스타일을 사용하여 호출되지만 `clang-format` 파일을 찾을 수 없는 경우 대체로 사용되는 미리 정의된 스타일의 이름입니다. 가능한 값은 `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`, `none`이거나 `{key: value, ...}`를 사용하여 특정 매개 변수를 설정합니다. 예를 들어 `Visual Studio` 스타일은 `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`와 유사합니다.",
 	"c_cpp.configuration.clang_format_sortIncludes.markdownDescription": "설정되는 경우 `SortIncludes` 매개 변수로 결정된 포함 정렬 동작을 재정의합니다.",
 	"c_cpp.configuration.intelliSenseEngine.description": "IntelliSense 공급자를 제어합니다.",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "C++ 사용자 정의 리터럴 문자열의 스타일입니다.",
 	"c_cpp.semanticTokenModifiers.global.description": "전체인 기호에 사용할 스타일입니다.",
 	"c_cpp.semanticTokenModifiers.local.description": "로컬인 기호에 사용할 스타일입니다.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "진단 natvis 메시지를 디버그 콘솔에 기록할지 여부를 결정하는 선택적 플래그입니다. 기본값은 None입니다.",
+	"c_cpp.debuggers.logging.category.verbose.description": "개발 중 대화형 조사에 사용되는 로그입니다. 이러한 로그에는 주로 디버깅에 유용한 정보가 포함되어야 하며 장기적인 가치는 없습니다.",
+	"c_cpp.debuggers.logging.category.warning.description": "애플리케이션 흐름에서 비정상적이거나 예기치 않은 이벤트를 강조 표시하지만 그렇지 않으면 애플리케이션 실행이 중지되지 않는 로그입니다.",
+	"c_cpp.debuggers.logging.category.error.description": "오류로 인해 현재 실행 흐름이 중지될 때 강조 표시되는 로그입니다. 애플리케이션 전체의 실패가 아니라 현재 활동의 실패를 나타내야 합니다.",
+	"c_cpp.debuggers.logging.category.none.description": "로그 메시지 작성에 사용되지 않습니다. 로깅 범주가 메시지를 작성하지 않도록 지정합니다."
 }

@@ -37,7 +37,7 @@ import { UI, getUI } from './ui';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
-import { updateLanguageConfigurations, CppSourceStr, clients } from './extension';
+import { updateLanguageConfigurations, CppSourceStr, configPrefix, clients } from './extension';
 import { SettingsTracker } from './settingsTracker';
 import { getTestHook, TestHook } from '../testHook';
 import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
@@ -122,7 +122,7 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
 
 function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsParams): void {
     if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(CppSourceStr);
+        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(configPrefix + "IntelliSense");
     }
 
     // Convert from our Diagnostic objects to vscode Diagnostic objects
@@ -150,7 +150,7 @@ function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsPa
 
 function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
     if (!diagnosticsCollectionRefactor) {
-        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(CppSourceStr);
+        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(configPrefix + "Refactor");
     }
 
     const newDiagnostics: vscode.Diagnostic[] = [];
@@ -791,6 +791,7 @@ export interface Client {
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
+    isInitialized(): boolean;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -848,6 +849,7 @@ export class DefaultClient implements Client {
     public get ReferencesCommandModeChanged(): vscode.Event<refs.ReferencesCommandMode> { return this.model.referencesCommandMode.ValueChanged; }
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
+    public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -908,6 +910,10 @@ export class DefaultClient implements Client {
         clients.forEach(client => {
             if (client instanceof DefaultClient) {
                 const defaultClient: DefaultClient = <DefaultClient>client;
+                if (!client.isInitialized()) {
+                    // This can randomly get hit when adding/removing workspace folders.
+                    return;
+                }
                 defaultClient.configuration.CompilerDefaults = compilerDefaults;
                 defaultClient.configuration.handleConfigurationChange();
             }
@@ -947,7 +953,7 @@ export class DefaultClient implements Client {
     }
 
     public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
-        const settings: OtherSettings = new OtherSettings();
+        const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const paths: string[] = [];
         if (compilerDefaults.knownCompilers !== undefined) {
@@ -971,63 +977,59 @@ export class DefaultClient implements Client {
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
         const index: number = await this.showSelectDefaultCompiler(paths);
-        let action: string;
-        switch (index) {
-            case -1:
-                action = 'escaped';
-                break;
-            case paths.length - 1:
-                action = 'disable';
-                break;
-            case paths.length - 2:
-                action = 'help';
-                break;
-            case paths.length - 3:
-                action = 'browse';
-                break;
-            default:
-                action = 'select compiler';
-                break;
-        }
-        telemetry.logLanguageServerEvent('compilerSelection', { action });
-        if (index === -1) {
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 1) {
-            settings.defaultCompiler = "";
-            if (showSecondPrompt) {
-                this.showPrompt(selectCompiler, true);
-            }
-            return;
-        }
-        if (index === paths.length - 2) {
-            switch (os.platform()) {
-                case 'win32':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
-                    return;
-                case 'darwin':
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
-                    return;
-                default: // Linux
-                    vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
-                    return;
-            }
-        }
-        if (index === paths.length - 3) {
-            const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
-            if (result === undefined || result.length === 0) {
+        let action: string = "";
+        try {
+            if (index === -1) {
+                action = "escaped";
+                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
+                    this.showPrompt(selectCompiler, true);
+                }
                 return;
             }
-            settings.defaultCompiler = result[0].fsPath;
-        } else {
-            settings.defaultCompiler = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            if (index === paths.length - 1) {
+                action = "disable";
+                settings.defaultCompilerPath = "";
+                if (showSecondPrompt) {
+                    this.showPrompt(selectCompiler, true);
+                }
+                return;
+            }
+            if (index === paths.length - 2) {
+                action = "help";
+                switch (os.platform()) {
+                    case 'win32':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                        return;
+                    case 'darwin':
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                        return;
+                    default: // Linux
+                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                        return;
+                }
+            }
+            if (index === paths.length - 3) {
+                const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
+                if (result === undefined || result.length === 0) {
+                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
+                        this.showPrompt(selectCompiler, true);
+                    }
+                    action = "browse dismissed";
+                    return;
+                }
+                action = "compiler browsed";
+                settings.defaultCompilerPath = result[0].fsPath;
+            } else {
+                action = "select compiler";
+                settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+            }
+
+            util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
+            compilerDefaults = await this.requestCompiler(compilerPaths);
+            DefaultClient.updateClientConfigurations();
+        } finally {
+            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount: paths.length });
         }
-        util.addTrustedCompiler(compilerPaths, settings.defaultCompiler);
-        compilerDefaults = await this.requestCompiler(compilerPaths);
-        DefaultClient.updateClientConfigurations();
     }
 
     async promptSelectCompiler(isCommand: boolean): Promise<void> {
@@ -1037,20 +1039,25 @@ export class DefaultClient implements Client {
         }
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
-        const settings: OtherSettings = new OtherSettings();
+        let action: string;
+        const settings: CppSettings = new CppSettings();
         if (isCommand || compilerDefaults.compilerPath !== "") {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
-                    settings.defaultCompiler = compilerDefaults.compilerPath;
+                    settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
+                    action = "confirm compiler";
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
+                    action = "show quickpick";
                 } else {
                     this.showPrompt(selectCompiler, true);
+                    action = "dismissed";
                 }
+                telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
@@ -1894,8 +1901,8 @@ export class DefaultClient implements Client {
                     return null;
                 }
             };
-            const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             try {
+                const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
                 if (configs && configs.length > 0) {
                     this.sendCustomConfigurations(configs, provider.version);
                 }
@@ -3550,4 +3557,5 @@ class NullClient implements Client {
     }
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
+    isInitialized(): boolean { return true; }
 }

@@ -58,6 +58,7 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
+    rawCompilerPath?: string;
     compilerPath?: string;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
@@ -837,6 +838,7 @@ export class CppProperties {
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
+            configuration.rawCompilerPath = configuration.compilerPath;
 
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below
@@ -951,8 +953,6 @@ export class CppProperties {
                 // and there is only 1 registered custom config provider, default to using that provider.
                 const providers: CustomConfigurationProviderCollection = getCustomConfigProviders();
                 const hasEmptyConfiguration: boolean = !this.propertiesFile
-                    && !settings.defaultCompilerPath
-                    && settings.defaultCompilerPath !== ""
                     && !settings.defaultIncludePath
                     && !settings.defaultDefines
                     && !settings.defaultMacFrameworkPath
@@ -2134,6 +2134,16 @@ export class CppProperties {
     }
 
     dispose(): void {
+        if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
+            const config: Configuration | undefined = this.CurrentConfiguration;
+            if (config !== undefined && config.configurationProvider !== this.lastCustomBrowseConfigurationProviderId.Value) {
+                this.lastCustomBrowseConfigurationProviderId.Value = undefined;
+                if (this.lastCustomBrowseConfiguration !== undefined) {
+                    this.lastCustomBrowseConfiguration.Value = undefined;
+                }
+            }
+        }
+
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
 

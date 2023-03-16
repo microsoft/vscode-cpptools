@@ -67,9 +67,12 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             throw new vscode.CancellationError();
         }
 
+        let hasSelectDefaultCompiler: boolean = false;
+        let hasConfigurationCompilerPath: boolean = false;
+
         // Convert to vscode.CodeAction array
         response.commands.forEach((command) => {
-            const title: string = getLocalizedString(command.localizeStringParams);
+            let title: string = getLocalizedString(command.localizeStringParams);
             let wsEdit: vscode.WorkspaceEdit | undefined;
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
             if (command.edit) {
@@ -168,6 +171,20 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 resultCodeActions.push(...disableCodeActions);
                 resultCodeActions.push(...docCodeActions);
                 return;
+            } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
+                command.arguments = ['codeAction']; // We report the sender of the command
+            } else if (command.command === "C_Cpp.SelectDefaultCompiler") {
+                hasSelectDefaultCompiler = true;
+                if (this.client.configuration.CurrentConfiguration?.rawCompilerPath !== undefined) {
+                    hasConfigurationCompilerPath = true;
+                    return;
+                }
+            } else if (command.command === "C_Cpp.ConfigurationEdit" && hasSelectDefaultCompiler) {
+                if (hasConfigurationCompilerPath) {
+                    title = title.replace("includePath", "compilerPath");
+                } else {
+                    return;
+                }
             }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,

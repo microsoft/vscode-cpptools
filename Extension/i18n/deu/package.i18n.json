@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Konfigurationsanbieter ändern...",
 	"c_cpp.command.configurationEditJSON.title": "Konfigurationen bearbeiten (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Konfigurationen bearbeiten (Benutzeroberfläche)",
+	"c_cpp.command.selectDefaultCompiler.title": "Standardcompiler auswählen",
 	"c_cpp.command.switchHeaderSource.title": "Header/Quelle umschalten",
 	"c_cpp.command.enableErrorSquiggles.title": "Fehlerwellenlinien aktivieren",
 	"c_cpp.command.disableErrorSquiggles.title": "Fehlerwellenlinien deaktivieren",
@@ -400,9 +401,9 @@
 	"c_cpp.semanticTokenTypes.stringLiteral.description": "Stil für benutzerdefinierte C++-Literalzeichenfolgen.",
 	"c_cpp.semanticTokenModifiers.global.description": "Stil für globale Symbole.",
 	"c_cpp.semanticTokenModifiers.local.description": "Stil für lokale Symbole.",
-	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optional flag to determine whether diagnostic natvis messages should be logged to the Debug Console. Defaults to None.",
-	"c_cpp.debuggers.logging.category.verbose.description": "Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.",
-	"c_cpp.debuggers.logging.category.warning.description": "Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.",
-	"c_cpp.debuggers.logging.category.error.description": "Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.",
-	"c_cpp.debuggers.logging.category.none.description": "Not used for writing log messages. Specifies that a logging category should not write any messages."
+	"c_cpp.debuggers.logging.natvisDiagnostics.description": "Optionales Flag zum Festlegen, ob NATVIS-Diagnosemeldungen in der Debugging-Konsole protokolliert werden sollen. Der Standardwert ist „Keine“.",
+	"c_cpp.debuggers.logging.category.verbose.description": "Protokolle, die während der Entwicklung zur interaktiven Untersuchung verwendet werden. Diese Protokolle sollten in erster Linie Informationen enthalten, die für das Debuggen nützlich sind, und keinen langfristigen Wert aufweisen.",
+	"c_cpp.debuggers.logging.category.warning.description": "Protokolle, die ein ungewöhnliches oder unerwartetes Ereignis im Anwendungsfluss hervorheben, aber ansonsten nicht dazu führen, dass die Ausführung der Anwendung beendet wird.",
+	"c_cpp.debuggers.logging.category.error.description": "Protokolle, die hervorheben, wenn der aktuelle Ausführungsfluss aufgrund eines Fehlers beendet wird. Diese sollten auf einen Fehler in der aktuellen Aktivität und nicht auf einen anwendungsweiten Fehler hinweisen.",
+	"c_cpp.debuggers.logging.category.none.description": "Wird nicht zum Schreiben von Protokollmeldungen verwendet. Gibt an, dass eine Protokollierungskategorie keine Meldungen schreiben soll."
 }

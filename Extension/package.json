@@ -2,7 +2,7 @@
   "name": "cpptools",
   "displayName": "C/C++",
   "description": "C/C++ IntelliSense, debugging, and code browsing.",
-  "version": "1.14.2-main",
+  "version": "1.15.0-main",
   "publisher": "ms-vscode",
   "icon": "LanguageCCPP_color_128x.png",
   "readme": "README.md",
@@ -53,35 +53,7 @@
     "onLanguage:cuda-cpp",
     "onCommand:extension.pickNativeProcess",
     "onCommand:extension.pickRemoteNativeProcess",
-    "onCommand:C_Cpp.RestartIntelliSenseForFile",
-    "onCommand:C_Cpp.ConfigurationEditJSON",
-    "onCommand:C_Cpp.ConfigurationEditUI",
-    "onCommand:C_Cpp.selectDefaultCompiler",
-    "onCommand:C_Cpp.ConfigurationSelect",
-    "onCommand:C_Cpp.ConfigurationProviderSelect",
-    "onCommand:C_Cpp.CreateDeclarationOrDefinition",
-    "onCommand:C_Cpp.SwitchHeaderSource",
-    "onCommand:C_Cpp.EnableErrorSquiggles",
-    "onCommand:C_Cpp.DisableErrorSquiggles",
-    "onCommand:C_Cpp.ToggleIncludeFallback",
-    "onCommand:C_Cpp.ToggleDimInactiveRegions",
-    "onCommand:C_Cpp.ResetDatabase",
-    "onCommand:C_Cpp.TakeSurvey",
-    "onCommand:C_Cpp.LogDiagnostics",
-    "onCommand:C_Cpp.RescanWorkspace",
-    "onCommand:C_Cpp.VcpkgClipboardInstallSuggested",
-    "onCommand:C_Cpp.VcpkgOnlineHelpSuggested",
-    "onCommand:C_Cpp.GenerateEditorConfig",
-    "onCommand:C_Cpp.GoToNextDirectiveInGroup",
-    "onCommand:C_Cpp.GoToPrevDirectiveInGroup",
     "onCommand:C_Cpp.CheckForCompiler",
-    "onCommand:C_Cpp.RunCodeAnalysisOnActiveFile",
-    "onCommand:C_Cpp.RunCodeAnalysisOnOpenFiles",
-    "onCommand:C_Cpp.RunCodeAnalysisOnAllFiles",
-    "onCommand:C_Cpp.RemoveAllCodeAnalysisProblems",
-    "onCommand:C_Cpp.selectActiveSshTarget",
-    "onCommand:C_Cpp.selectSshTarget",
-    "onCommand:C_Cpp.activeSshTarget",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -600,10 +572,12 @@
               "c99",
               "c11",
               "c17",
+              "c23",
               "gnu89",
               "gnu99",
               "gnu11",
-              "gnu17"
+              "gnu17",
+              "gnu23"
             ],
             "markdownDescription": "%c_cpp.configuration.default.cStandard.markdownDescription%",
             "scope": "resource"
@@ -1650,6 +1624,7 @@
                 "bugprone-*",
                 "bugprone-argument-comment",
                 "bugprone-assert-side-effect",
+                "bugprone-assignment-in-if-condition",
                 "bugprone-bad-signal-to-kill-thread",
                 "bugprone-bool-pointer-implicit-conversion",
                 "bugprone-branch-clone",
@@ -1972,7 +1947,7 @@
                 "hicpp-use-nullptr",
                 "hicpp-use-override",
                 "hicpp-vararg",
-                "linuxkernel-must-check-errs",
+                "linuxkernel-must-use-errs",
                 "llvm-*",
                 "llvm-else-after-return",
                 "llvm-header-guard",
@@ -2205,6 +2180,7 @@
                 "bugprone-*",
                 "bugprone-argument-comment",
                 "bugprone-assert-side-effect",
+                "bugprone-assignment-in-if-condition",
                 "bugprone-bad-signal-to-kill-thread",
                 "bugprone-bool-pointer-implicit-conversion",
                 "bugprone-branch-clone",
@@ -2527,7 +2503,7 @@
                 "hicpp-use-nullptr",
                 "hicpp-use-override",
                 "hicpp-vararg",
-                "linuxkernel-must-check-errs",
+                "linuxkernel-must-use-errs",
                 "llvm-*",
                 "llvm-else-after-return",
                 "llvm-header-guard",
@@ -2943,7 +2919,7 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.selectDefaultCompiler",
+        "command": "C_Cpp.SelectDefaultCompiler",
         "title": "%c_cpp.command.selectDefaultCompiler.title%",
         "category": "C/C++"
       },
@@ -3281,9 +3257,20 @@
                 "default": "exec-run"
               },
               "visualizerFile": {
-                "type": "string",
-                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%",
-                "default": ""
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "default": ""
+                  },
+                  {
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "description": "%c_cpp.debuggers.cppdbg.visualizerFile.description%"
               },
               "svdPath": {
                 "type": "string",
@@ -5967,7 +5954,7 @@
     "vscode-debugprotocol": "^1.35.0",
     "vscode-dts": "^0.3.2",
     "vscode-nls-dev": "^4.0.0-next.1",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "webpack-cli": "^5.0.1",
     "xml2js": "^0.4.19"
   },
