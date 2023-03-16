@@ -66,7 +66,7 @@ let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let pendingTask: util.BlockingTask<any> | undefined;
-export let compilerDefaults: configs.CompilerDefaults;
+let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 let displayedSelectCompiler: boolean = false;
