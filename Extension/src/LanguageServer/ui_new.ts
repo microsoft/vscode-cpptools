@@ -113,8 +113,8 @@ export class NewUI implements UI {
         };
         this.ShowReferencesIcon = false;
 
-        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.references.statusbar`, vscode.StatusBarAlignment.Right, 901);
-        this.compilerStatusItem.name = localize("c.cpp.references.statusbar", "Intellisense Status");
+        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.compilerStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.compilerStatusItem.name = localize("c.cpp.compilerStatus.statusbar", "Configure IntelliSense");
         this.compilerStatusItem.text = `$(warning) Configure Intellisense`;
         this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         this.compilerStatusItem.command = {
