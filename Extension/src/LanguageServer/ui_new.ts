@@ -49,6 +49,7 @@ export class NewUI implements UI {
     private configStatusItem: vscode.LanguageStatusItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
+    private compilerStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private codeAnalysisStatusItem: vscode.LanguageStatusItem;
     private configDocumentSelector: vscode.DocumentFilter[] = [
@@ -111,6 +112,17 @@ export class NewUI implements UI {
             arguments: commandArguments
         };
         this.ShowReferencesIcon = false;
+
+        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.references.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.compilerStatusItem.name = localize("c.cpp.references.statusbar", "Intellisense Status");
+        this.compilerStatusItem.text = `$(warning) Configure Intellisense`;
+        this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.compilerStatusItem.command = {
+            command: "C_Cpp.SelectDefaultCompiler",
+            title: this.compilerStatusItem.name,
+            arguments: commandArguments
+        };
+        this.ShowCompilerStatusIcon(false);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -400,6 +412,14 @@ export class NewUI implements UI {
             this.referencesStatusBarItem.show();
         } else {
             this.referencesStatusBarItem.hide();
+        }
+    }
+
+    public ShowCompilerStatusIcon(show: boolean): void {
+        if (show) {
+            this.compilerStatusItem.show();
+        } else {
+            this.compilerStatusItem.hide();
         }
     }
 

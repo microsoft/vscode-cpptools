@@ -25,6 +25,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
+    ShowCompilerStatusIcon(show: boolean): void;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -62,6 +63,7 @@ export class OldUI implements UI {
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
+    private compilerStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private curConfigurationStatus?: Promise<ConfigurationStatus>;
     private isParsingWorkspace: boolean = false;
@@ -103,6 +105,17 @@ export class OldUI implements UI {
             arguments: commandArguments
         };
         this.ShowReferencesIcon = false;
+
+        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.references.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.compilerStatusItem.name = localize("c.cpp.references.statusbar", "Intellisense Status");
+        this.compilerStatusItem.text = `$(warning) Configure Intellisense`;
+        this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.compilerStatusItem.command = {
+            command: "C_Cpp.SelectDefaultCompiler",
+            title: this.compilerStatusItem.name,
+            arguments: commandArguments
+        };
+        this.ShowCompilerStatusIcon(false);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -293,6 +306,14 @@ export class OldUI implements UI {
             this.configStatusBarItem.show();
         } else {
             this.configStatusBarItem.hide();
+        }
+    }
+
+    public ShowCompilerStatusIcon(show: boolean): void {
+        if (show) {
+            this.compilerStatusItem.show();
+        } else {
+            this.compilerStatusItem.hide();
         }
     }
 
