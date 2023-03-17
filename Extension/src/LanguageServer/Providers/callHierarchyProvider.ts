@@ -5,65 +5,178 @@
 import * as vscode from 'vscode';
 import { DefaultClient } from '../client';
 import { processDelayedDidOpen } from '../extension';
+import { Position, Range, RequestType } from 'vscode-languageclient';
+import { makeVscodeRange } from '../utils';
+
+interface CallHierarchyItem {
+    /**
+     * The name of this item or symbol.
+     */
+    name: string;
+
+    /**
+     * The kind of this item.
+     */
+    kind: vscode.SymbolKind;
+
+    /**
+     * More detail for this item, e.g. the scope or class of a function.
+     */
+    detail: string;
+
+    /**
+     * The resource identifier of this item.
+     */
+    uri: string;
+
+    /**
+     * The range enclosing this symbol not including leading/trailing whitespace but everything else, e.g. comments and code.
+     */
+    range: Range;
+
+    /**
+     * The range that should be selected and revealed when this symbol is being picked, e.g. the name of a function.
+     * Must be contained by the `CallHierarchyItem.range`.
+     */
+    selectionRange: Range;
+}
+
+interface CallHierarchyItemParams {
+    uri: string;
+    position: Position;
+}
+
+interface CallHierarchyItemResult {
+    item: CallHierarchyItem;
+}
+
+interface CallHierarchyCallsItem {
+    /**
+     * For CallHierarchyIncomingCall or calls to, this is the item that makes the call.
+     * For CallHierarchyOutgoingCall or calls from, this is the item that is called.
+     */
+    item: CallHierarchyItem;
+
+    /**
+     * For CallHierarchyIncomingCall or calls to, this is the range at which the call appears.
+     * For CallHierarchyOutgoingCall or calls from, this is the range at which this item is called.
+     */
+    fromRanges: Range[];
+}
+
+interface CallHierarchyCallsItemResult {
+    calls: CallHierarchyCallsItem[];
+}
+
+const CallHierarchyItemRequest: RequestType<CallHierarchyItemParams, CallHierarchyItemResult, void> =
+    new RequestType<CallHierarchyItemParams, CallHierarchyItemResult, void>('cpptools/prepareCallHierarchy');
+
+// Send notification. Then get results with callback. (see find all references for example)
+// const  CallHierarchyCallsToRequest: RequestType<CallHierarchyCallsToParams, CallHierarchyCallsResult, void> =
+// new RequestType<CallHierarchyCallsToParams, CallHierarchyCallsResult, void>('cpptools/callHierarchyCallsTo');
+
+const  CallHierarchyCallsFromRequest: RequestType<CallHierarchyItemParams, CallHierarchyCallsItemResult, void> =
+    new RequestType<CallHierarchyItemParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsFrom');
 
 export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     private client: DefaultClient;
-
     constructor(client: DefaultClient) {
         this.client = client;
     }
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyItem | vscode.CallHierarchyItem[] | undefined> {
+    Promise<vscode.CallHierarchyItem | undefined> {
         const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
         if (range === undefined) {
             return undefined;
         }
-
-        const symbol: string = document.getText(range);
         await this.client.requestWhenReady(() => processDelayedDidOpen(document));
 
-        // Get call items denoted by given document and position
-        // items = await this.client.languageClient.sendRequest(PrepareCallHierarchyRequest, params, token);
+        const params: CallHierarchyItemParams = {
+            uri: document.uri.toString(),
+            position: Position.create(position.line, position.character)
+        };
+        const response: CallHierarchyItemResult = await this.client.languageClient.sendRequest(CallHierarchyItemRequest, params, token);
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        } else if (response.item === undefined) {
+            return undefined;
+        }
 
-        // create a vscode.CallHierarchyItem for each returned call item.
-        const callItemsResult: vscode.CallHierarchyItem[] = [];
-        callItemsResult.push(new vscode.CallHierarchyItem(vscode.SymbolKind.Function, symbol, 'scope name of item', document.uri, range, range));
-
-        return callItemsResult;
+        return this.makeVscodeCallHierarchyItem(response.item);
     }
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyIncomingCall[]> {
-        //await this.client.awaitUntilLanguageClientReady();
-        const incomingCallItemsResult: vscode.CallHierarchyIncomingCall[] = [];
+    Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+        // verify item is not null
+        if (item === undefined) {
+            return undefined;
+        }
 
-        // Get "call to" items from language server
-        // items = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
+        // await this.client.awaitUntilLanguageClientReady();
+        // const params: CallHierarchyCallsToParams = {
+        //     position: Position.create(item.range.start.line, item.range.start.character),
+        //     uri: item.uri.toString()
+        // };
+        // const response: CallHierarchyCallsResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
+        // if (token.isCancellationRequested) {
+        //     throw new vscode.CancellationError();
+        // } else if (response.calls === undefined || response.calls.size === 0) {
+        //      return undefined;
+        // }
 
-        // create a vscode.CallHierarchyIncomingCall for each returned call item.
-        const callItem: vscode.CallHierarchyItem = new vscode.CallHierarchyItem(
-            vscode.SymbolKind.Function, item.name, 'scope name of item', item.uri, item.range, item.selectionRange);
-        const incomingCall: vscode.CallHierarchyIncomingCall = new vscode.CallHierarchyIncomingCall(callItem, []);
-        incomingCallItemsResult.push(incomingCall);
-
-        return incomingCallItemsResult;
+        const incomingCallsResult: vscode.CallHierarchyIncomingCall[] = []; // this.createIncomingCalls(response);
+        return incomingCallsResult;
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyOutgoingCall[]> {
-        //await this.client.awaitUntilLanguageClientReady();
-        const outgoingCallItemsResult: vscode.CallHierarchyOutgoingCall[] = [];
+    Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+        if (item === undefined) {
+            return undefined;
+        }
 
-        // Get "call from" items from language server
-        // items = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
+        const params: CallHierarchyItemParams = {
+            uri: item.uri.toString(),
+            position: Position.create(item.range.start.line, item.range.start.character)
+        };
+        const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
+        if (token.isCancellationRequested) {
+            throw new vscode.CancellationError();
+        } else if (response.calls === undefined || response.calls.length === 0) {
+            return undefined;
+        }
 
-        // create a vscode.CallHierarchyOutgoingCall for each returned call item.
-        const callItem: vscode.CallHierarchyItem = new vscode.CallHierarchyItem(
-            vscode.SymbolKind.Function, item.name, 'scope name of item', item.uri, item.range, item.selectionRange);
-        const outgoingCall: vscode.CallHierarchyOutgoingCall = new vscode.CallHierarchyOutgoingCall(callItem, []);
-        outgoingCallItemsResult.push(outgoingCall);
+        return this.createOutgoingCalls(response.calls);
+    }
 
-        return outgoingCallItemsResult;
+    private makeVscodeCallHierarchyItem(item: CallHierarchyItem): vscode.CallHierarchyItem {
+        return new vscode.CallHierarchyItem(
+            item.kind, item.name, item.detail,
+            vscode.Uri.file(item.uri),
+            makeVscodeRange(item.range),
+            makeVscodeRange(item.selectionRange));
+    }
+
+    // private createIncomingCalls(calls: CallHierarchyCallsItem[]): vscode.CallHierarchyIncomingCall[] {
+    //     const result: vscode.CallHierarchyIncomingCall[] = [];
+    //     return result;
+    // }
+
+    private createOutgoingCalls(calls: CallHierarchyCallsItem[]): vscode.CallHierarchyOutgoingCall[] {
+        const result: vscode.CallHierarchyOutgoingCall[] = [];
+
+        for (const call of calls) {
+            const callHierarchyItem: vscode.CallHierarchyItem = this.makeVscodeCallHierarchyItem(call.item);
+            const fromRanges: vscode.Range[] = [];
+            for (const r of call.fromRanges) {
+                fromRanges.push(makeVscodeRange(r));
+            }
+
+            const outgoingCall: vscode.CallHierarchyOutgoingCall =
+                new vscode.CallHierarchyOutgoingCall(callHierarchyItem, fromRanges);
+            result.push(outgoingCall);
+        }
+
+        return result;
     }
 }
