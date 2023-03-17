@@ -19,7 +19,7 @@ import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
-import { CallHierarchyProvider } from './Providers/CallHierarchyProvider';
+import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
 // End provider imports
 
 import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
