@@ -180,6 +180,10 @@ export function isCppOrCFile(uri: vscode.Uri | undefined): boolean {
     return isCppFile(uri) || isCFile(uri);
 }
 
+export function isCppToolsFile(document: vscode.TextDocument): boolean {
+    return [ "c", "cpp", "cuda-cpp" ].includes(document.languageId);
+}
+
 export function isFolderOpen(uri: vscode.Uri): boolean {
     const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(uri);
     return folder ? true : false;
