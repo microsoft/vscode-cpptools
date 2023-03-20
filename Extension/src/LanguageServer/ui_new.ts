@@ -120,7 +120,7 @@ export class NewUI implements UI {
         this.compilerStatusItem.command = {
             command: "C_Cpp.SelectDefaultCompiler",
             title: this.compilerStatusItem.name,
-            arguments: commandArguments
+            arguments: ['StatusBar']
         };
         this.showCompilerStatusIcon(false);
 
