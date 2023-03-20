@@ -113,7 +113,7 @@ export class OldUI implements UI {
         this.compilerStatusItem.command = {
             command: "C_Cpp.SelectDefaultCompiler",
             title: this.compilerStatusItem.name,
-            arguments: commandArguments
+            arguments: ['statusBar']
         };
         this.showCompilerStatusIcon(false);
 
@@ -314,7 +314,7 @@ export class OldUI implements UI {
         if (this.compilerTimout) {
             clearTimeout(this.compilerTimout);
         }
-        const action: string = "";
+        let action: string = "";
         if (show) {
             this.compilerTimout = setTimeout(() => { this.compilerStatusItem.show(); }, 15000);
             telemetry.logLanguageServerEvent('compilerStatusBar', { 'compiler status bar shown' : action });

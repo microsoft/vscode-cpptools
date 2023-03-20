@@ -760,7 +760,7 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
-    promptSelectCompiler(command: boolean): Promise<void>;
+    promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -1035,7 +1035,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    async promptSelectCompiler(isCommand: boolean): Promise<void> {
+    async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
@@ -1061,7 +1061,7 @@ export class DefaultClient implements Client {
                     this.showPrompt(selectCompiler, true);
                     action = "dismissed";
                 }
-                telemetry.logLanguageServerEvent('compilerNotification', { action });
+                telemetry.logLanguageServerEvent('compilerNotification', { action }, { sender });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
@@ -3528,7 +3528,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(command: boolean): Promise<void> { return Promise.resolve(); }
+    promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }

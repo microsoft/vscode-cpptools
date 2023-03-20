@@ -541,7 +541,8 @@ function onResetDatabase(): void {
     clients.ActiveClient.resetDatabase();
 }
 
-function selectDefaultCompiler(): void {
+function selectDefaultCompiler(sender?: any): void {
+    logForUIExperiment("CompilerSelect", sender);
     clients.ActiveClient.promptSelectCompiler(true);
 }
 
