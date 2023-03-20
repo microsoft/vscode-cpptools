@@ -543,7 +543,7 @@ function onResetDatabase(): void {
 
 function selectDefaultCompiler(sender?: any): void {
     logForUIExperiment("CompilerSelect", sender);
-    clients.ActiveClient.promptSelectCompiler(true);
+    clients.ActiveClient.promptSelectCompiler(true,sender);
 }
 
 function onSelectConfiguration(sender?: any): void {
