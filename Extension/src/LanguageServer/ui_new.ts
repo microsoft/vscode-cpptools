@@ -122,7 +122,7 @@ export class NewUI implements UI {
             title: this.compilerStatusItem.name,
             arguments: commandArguments
         };
-        this.ShowCompilerStatusIcon(false);
+        this.showCompilerStatusIcon(false);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -415,9 +415,13 @@ export class NewUI implements UI {
         }
     }
 
-    public ShowCompilerStatusIcon(show: boolean): void {
+    private compilerTimout?: NodeJS.Timeout;
+    public async showCompilerStatusIcon(show: boolean): Promise<void> {
+        if (this.compilerTimout) {
+            clearTimeout(this.compilerTimout);
+        }
         if (show) {
-            this.compilerStatusItem.show();
+            this.compilerTimout = setTimeout(() => { this.compilerStatusItem.show(); }, 15000);
         } else {
             this.compilerStatusItem.hide();
         }

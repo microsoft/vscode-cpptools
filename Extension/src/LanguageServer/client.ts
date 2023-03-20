@@ -992,7 +992,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true);
                 }
-                ui.ShowCompilerStatusIcon(false);
+                ui.showCompilerStatusIcon(false);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1020,11 +1020,11 @@ export class DefaultClient implements Client {
                 }
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                ui.ShowCompilerStatusIcon(false);
+                ui.showCompilerStatusIcon(false);
             } else {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                ui.ShowCompilerStatusIcon(false);
+                ui.showCompilerStatusIcon(false);
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
@@ -1052,7 +1052,7 @@ export class DefaultClient implements Client {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
-                    ui.ShowCompilerStatusIcon(false);
+                    ui.showCompilerStatusIcon(false);
                     action = "confirm compiler";
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true);
@@ -1189,8 +1189,9 @@ export class DefaultClient implements Client {
                         // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
+                        compilerDefaults.trustedCompilerFound = false;
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
-                            ui.ShowCompilerStatusIcon(true);
+                            await ui.showCompilerStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             this.promptSelectCompiler(false);
                             displayedSelectCompiler = true;

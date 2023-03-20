@@ -25,7 +25,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
-    ShowCompilerStatusIcon(show: boolean): void;
+    showCompilerStatusIcon(show: boolean): Promise<void>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -115,7 +115,7 @@ export class OldUI implements UI {
             title: this.compilerStatusItem.name,
             arguments: commandArguments
         };
-        this.ShowCompilerStatusIcon(false);
+        this.showCompilerStatusIcon(false);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -309,11 +309,18 @@ export class OldUI implements UI {
         }
     }
 
-    public ShowCompilerStatusIcon(show: boolean): void {
+    private compilerTimout?: NodeJS.Timeout;
+    public async showCompilerStatusIcon(show: boolean): Promise<void> {
+        if (this.compilerTimout) {
+            clearTimeout(this.compilerTimout);
+        }
+        const action: string = "";
         if (show) {
-            this.compilerStatusItem.show();
+            this.compilerTimout = setTimeout(() => { this.compilerStatusItem.show(); }, 15000);
+            telemetry.logLanguageServerEvent('compilerStatusBar', { 'compiler status bar shown' : action });
         } else {
             this.compilerStatusItem.hide();
+            telemetry.logLanguageServerEvent('compilerStatusBar', { 'compiler status bar resolved' : action });
         }
     }
 
