@@ -1192,7 +1192,7 @@ export class DefaultClient implements Client {
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
                             await ui.showCompilerStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            this.promptSelectCompiler(false,'initialization');
+                            this.promptSelectCompiler(false, 'initialization');
                             displayedSelectCompiler = true;
                         }
                     }

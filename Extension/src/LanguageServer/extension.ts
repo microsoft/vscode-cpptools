@@ -541,7 +541,7 @@ function onResetDatabase(): void {
 
 function selectDefaultCompiler(sender?: any): void {
     logForCompilerExperiment("CompilerSelect", sender);
-    clients.ActiveClient.promptSelectCompiler(true,sender);
+    clients.ActiveClient.promptSelectCompiler(true, sender);
 }
 
 function onSelectConfiguration(sender?: any): void {
@@ -689,7 +689,7 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
 
 async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
     const properties: { [key: string]: string } = {
-        sender: getSenderType(sender)
+        sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     getActiveClient().handleCreateDeclarationOrDefinition();
