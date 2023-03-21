@@ -489,14 +489,8 @@ export async function getUI(): Promise<UI> {
 
 async function _getUI(): Promise<UI> {
     if (!ui) {
-        const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
-        if (experimentationService !== undefined) {
-            const settings: CppSettings = new CppSettings();
-            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
-            ui = useNewUI || settings.experimentalFeatures ? new NewUI() : new OldUI();
-        } else {
-            ui = new NewUI();
-        }
+        const useNewUI: boolean = await telemetry.showLanguageStatusExperiment();
+        ui = useNewUI ? new NewUI() : new OldUI();
     }
     return ui;
 }
