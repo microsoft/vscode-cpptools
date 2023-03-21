@@ -7,6 +7,7 @@
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
+import { CppSettings } from './LanguageServer/settings';
 
 interface IPackageInfo {
     name: string;
@@ -127,6 +128,15 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
         }
     }
     sendTelemetry();
+}
+
+export async function showStatusBarIntellisenseIndicator(): Promise<boolean> {
+    if (new CppSettings().experimentalFeatures) {
+        return true;
+    }
+    const experimentationService: IExperimentationService | undefined = await getExperimentationService();
+    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "showStatusBarIntellisenseIndicator");
+    return useNewUI ?? false;
 }
 
 function getPackageInfo(): IPackageInfo {

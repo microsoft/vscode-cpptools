@@ -439,13 +439,6 @@ function logForUIExperiment(command: string, sender?: any): void {
     telemetry.logLanguageServerEvent(`experiment${command}`, properties);
 }
 
-function logForCompilerExperiment(command: string, sender?: any): void {
-    const properties: {[key: string]: string} = {
-        sender: util.getSenderType(sender)
-    };
-    telemetry.logLanguageServerEvent(`experiment${command}`, properties);
-}
-
 function onDisabledCommand(): void {
     const message: string = localize(
         {
@@ -540,7 +533,6 @@ function onResetDatabase(): void {
 }
 
 function selectDefaultCompiler(sender?: any): void {
-    logForCompilerExperiment("CompilerSelect", sender);
     clients.ActiveClient.promptSelectCompiler(true, sender);
 }
 
