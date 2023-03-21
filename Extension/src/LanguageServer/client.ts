@@ -1061,7 +1061,7 @@ export class DefaultClient implements Client {
                     this.showPrompt(selectCompiler, true);
                     action = "dismissed";
                 }
-                telemetry.logLanguageServerEvent('compilerNotification', { action }, { sender });
+                telemetry.logLanguageServerEvent('compilerNotification', { action, sender: util.getSenderType(sender) });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false);
             } else {
@@ -1192,7 +1192,7 @@ export class DefaultClient implements Client {
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
                             await ui.showCompilerStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            this.promptSelectCompiler(false);
+                            this.promptSelectCompiler(false,'initialization');
                             displayedSelectCompiler = true;
                         }
                     }

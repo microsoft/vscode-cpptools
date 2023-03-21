@@ -434,18 +434,16 @@ function logForUIExperiment(command: string, sender?: any): void {
     const properties: {[key: string]: string} = {
         newUI: ui.isNewUI.toString(),
         uiOverride: (settings.experimentalFeatures ?? false).toString(),
-        sender: getSenderType(sender)
+        sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent(`experiment${command}`, properties);
 }
 
-function getSenderType(sender?: any): string {
-    if (util.isString(sender)) {
-        return sender;
-    } else if (util.isUri(sender)) {
-        return 'contextMenu';
-    }
-    return 'commandPalette';
+function logForCompilerExperiment(command: string, sender?: any): void {
+    const properties: {[key: string]: string} = {
+        sender: util.getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent(`experiment${command}`, properties);
 }
 
 function onDisabledCommand(): void {
@@ -542,7 +540,7 @@ function onResetDatabase(): void {
 }
 
 function selectDefaultCompiler(sender?: any): void {
-    logForUIExperiment("CompilerSelect", sender);
+    logForCompilerExperiment("CompilerSelect", sender);
     clients.ActiveClient.promptSelectCompiler(true,sender);
 }
 

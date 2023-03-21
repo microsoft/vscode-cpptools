@@ -314,13 +314,14 @@ export class OldUI implements UI {
         if (this.compilerTimout) {
             clearTimeout(this.compilerTimout);
         }
-        const action: string = "";
         if (show) {
-            this.compilerTimout = setTimeout(() => { this.compilerStatusItem.show(); }, 15000);
-            telemetry.logLanguageServerEvent('compilerStatusBar', { 'compiler status bar shown' : action });
+            this.compilerTimout = setTimeout(() => {
+                this.compilerStatusItem.show();
+                telemetry.logLanguageServerEvent('compilerStatusBar');
+            }, 15000);  
         } else {
             this.compilerStatusItem.hide();
-            telemetry.logLanguageServerEvent('compilerStatusBar', { 'compiler status bar resolved' : action });
+            telemetry.logLanguageServerEvent('compilerStatusBar');
         }
     }
 

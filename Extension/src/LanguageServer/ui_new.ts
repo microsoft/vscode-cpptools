@@ -13,6 +13,8 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import { CppSettings } from './settings';
 import { UI } from './ui';
+import * as telemetry from '../telemetry';
+
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -421,9 +423,13 @@ export class NewUI implements UI {
             clearTimeout(this.compilerTimout);
         }
         if (show) {
-            this.compilerTimout = setTimeout(() => { this.compilerStatusItem.show(); }, 15000);
+            this.compilerTimout = setTimeout(() => {
+                this.compilerStatusItem.show();
+                telemetry.logLanguageServerEvent('compilerStatusBar');
+            }, 15000);  
         } else {
             this.compilerStatusItem.hide();
+            telemetry.logLanguageServerEvent('compilerStatusBar');
         }
     }
 

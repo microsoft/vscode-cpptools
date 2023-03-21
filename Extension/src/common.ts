@@ -1188,6 +1188,15 @@ export class BlockingTask<T> {
     }
 }
 
+export function getSenderType(sender?: any): string {
+    if (isString(sender)) {
+        return sender;
+    } else if (isUri(sender)) {
+        return 'contextMenu';
+    }
+    return 'commandPalette';
+}
+
 function decodeUCS16(input: string): number[] {
     const output: number[] = [];
     let counter: number = 0;
