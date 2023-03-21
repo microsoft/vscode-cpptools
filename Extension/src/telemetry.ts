@@ -78,10 +78,12 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
 }
 
 export async function showLanguageStatusExperiment(): Promise<boolean> {
+    if (new CppSettings().experimentalFeatures) {
+        return true;
+    }
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();
     const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
-    const settings: CppSettings = new CppSettings();
-    return useNewUI || settings.experimentalFeatures || false;
+    return useNewUI ?? false;
 }
 
 export async function deactivate(): Promise<void> {
