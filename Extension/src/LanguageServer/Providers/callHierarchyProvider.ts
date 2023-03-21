@@ -47,7 +47,7 @@ interface CallHierarchyItemParams {
 }
 
 interface CallHierarchyItemResult {
-    item: CallHierarchyItem;
+    item?: CallHierarchyItem;
 }
 
 interface CallHierarchyCallsItem {
@@ -121,7 +121,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         // const response: CallHierarchyCallsResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
         // if (token.isCancellationRequested) {
         //     throw new vscode.CancellationError();
-        // } else if (response.calls === undefined || response.calls.size === 0) {
+        // } else if (response.calls === undefined || response.calls.length === 0) {
         //      return undefined;
         // }
 
@@ -168,8 +168,8 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         for (const call of calls) {
             const callHierarchyItem: vscode.CallHierarchyItem = this.makeVscodeCallHierarchyItem(call.item);
             const fromRanges: vscode.Range[] = [];
-            for (const r of call.fromRanges) {
-                fromRanges.push(makeVscodeRange(r));
+            for (const range of call.fromRanges) {
+                fromRanges.push(makeVscodeRange(range));
             }
 
             const outgoingCall: vscode.CallHierarchyOutgoingCall =
