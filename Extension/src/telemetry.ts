@@ -8,7 +8,6 @@ import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import { CppSettings } from './LanguageServer/settings';
 import * as util from './common';
-import { CppSettings } from './LanguageServer/settings';
 
 interface IPackageInfo {
     name: string;
