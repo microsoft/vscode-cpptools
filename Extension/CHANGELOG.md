@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.14.5: March 22, 2023
+### Bug Fix
+* Fix a deadlock with a multiroot workspace. [#10719](https://github.com/microsoft/vscode-cpptools/issues/10719)
+
 ## Version 1.14.4: February 28, 2023
 ### Enhancements
 * Add `c23` and `c2x` support for clang and gcc modes. [#7471](https://github.com/microsoft/vscode-cpptools/issues/7471)
