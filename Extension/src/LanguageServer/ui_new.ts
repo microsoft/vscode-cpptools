@@ -418,7 +418,7 @@ export class NewUI implements UI {
 
     private compilerTimout?: NodeJS.Timeout;
     public async showCompilerStatusIcon(show: boolean): Promise<void> {
-        if (!telemetry.showStatusBarIntellisenseIndicator()) {
+        if (!telemetry.showStatusBarIntelliSenseIndicator()) {
             return;
         }
         if (this.compilerTimout) {
@@ -426,7 +426,9 @@ export class NewUI implements UI {
         }
         if (show) {
             this.compilerTimout = setTimeout(() => {
-                this.compilerStatusItem.show();
+                if (show) {
+                    this.compilerStatusItem.show();
+                }
                 telemetry.logLanguageServerEvent('compilerStatusBar');
             }, 15000);
         } else {

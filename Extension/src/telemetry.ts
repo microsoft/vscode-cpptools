@@ -139,12 +139,12 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
     sendTelemetry();
 }
 
-export async function showStatusBarIntellisenseIndicator(): Promise<boolean> {
+export async function showStatusBarIntelliSenseIndicator(): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
     }
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();
-    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "showStatusBarIntellisenseIndicator");
+    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "showStatusBarIntelliSenseIndicator");
     return useNewUI ?? false;
 }
 

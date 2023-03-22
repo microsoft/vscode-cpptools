@@ -309,7 +309,7 @@ export class OldUI implements UI {
 
     private compilerTimout?: NodeJS.Timeout;
     public async showCompilerStatusIcon(show: boolean): Promise<void> {
-        if (!telemetry.showStatusBarIntellisenseIndicator()) {
+        if (!telemetry.showStatusBarIntelliSenseIndicator()) {
             return;
         }
         if (this.compilerTimout) {
