@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.15.1: March 22, 2023
+### Bug Fixes
+* Fix crashes with a multiroot workspace. [#10636](https://github.com/microsoft/vscode-cpptools/issues/10636)
+* Fix a deadlock with a multiroot workspace. [#10719](https://github.com/microsoft/vscode-cpptools/issues/10719)
+
 ## Version 1.15.0: March 15, 2023
 ### Enhancements
 * Support multiple natvis files in `visualizerFile`. [#925](https://github.com/microsoft/vscode-cpptools/issues/925)

@@ -11,8 +11,6 @@ import { NewUI } from './ui_new';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as telemetry from '../telemetry';
-import { IExperimentationService } from 'tas-client';
-import { CppSettings } from './settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -489,14 +487,8 @@ export async function getUI(): Promise<UI> {
 
 async function _getUI(): Promise<UI> {
     if (!ui) {
-        const experimentationService: IExperimentationService | undefined = await telemetry.getExperimentationService();
-        if (experimentationService !== undefined) {
-            const settings: CppSettings = new CppSettings();
-            const useNewUI: boolean | undefined = experimentationService.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
-            ui = useNewUI || settings.experimentalFeatures ? new NewUI() : new OldUI();
-        } else {
-            ui = new NewUI();
-        }
+        const useNewUI: boolean = await telemetry.showLanguageStatusExperiment();
+        ui = useNewUI ? new NewUI() : new OldUI();
     }
     return ui;
 }
