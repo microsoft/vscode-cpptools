@@ -12,7 +12,7 @@ async function main() {
         // Passed to --extensionTestsPath
         const extensionTestsPath = path.resolve(__dirname, './index');
 
-        // Note, when running tests locally, replace testWorkspace with local path to "~/Vcls-vscode-test/test.code-workspace"
+        // Note, when running tests locally, replace TESTS_WORKSPACE with local path to "~/Vcls-vscode-test/MultirootDeadlockTest/test.code-workspace"
         // in the Launch.json file.
         let testWorkspace: string | undefined = process.env.TESTS_WORKSPACE;
         if (!testWorkspace) {

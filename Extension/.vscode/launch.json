@@ -108,7 +108,7 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"C:/git/Vcls-vscode-test/test.code-workspace",
+				"C:/git/Vcls-vscode-test/MultirootDeadlockTest/test.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/IntelliSenseFeatures/index"
 			],
