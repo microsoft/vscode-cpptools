@@ -80,7 +80,7 @@
                         }
                     },
                     "macFrameworkPath": {
-                        "description": "A list of paths for the Intellisense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.",
+                        "description": "A list of paths for the IntelliSense engine to use while searching for included headers from Mac frameworks. Only supported on Mac configuration.",
                         "type": "array",
                         "items": {
                             "type": "string"
