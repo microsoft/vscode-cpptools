@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Windows SDK 버전",
 	"windows.sdk.version.description": "Windows에서 사용할 Windows SDK 포함 경로의 버전입니다(예: {0}).",
 	"mac.framework.path": "Mac 프레임워크 경로",
-	"mac.framework.path.description": "Mac 프레임워크에서 포함된 헤더를 검색하는 동안 사용할 Intellisense 엔진의 경로 목록입니다. macOS 구성에서만 지원됩니다.",
+	"mac.framework.path.description": "Mac 프레임워크에서 포함된 헤더를 검색하는 동안 사용할 IntelliSense 엔진의 경로 목록입니다. macOS 구성에서만 지원됩니다.",
 	"one.path.per.line": "줄당 하나의 경로입니다.",
 	"forced.include": "강제 포함",
 	"forced.include.description": "소스 파일의 다른 문자를 처리하기 전에 포함해야 하는 파일의 목록입니다. 파일은 나열된 순서대로 포함됩니다.",

@@ -2997,7 +2997,7 @@
   "<error de emisión de diagnóstico>",
   "Hay demasiados errores como para que el motor de IntelliSense funcione correctamente. Puede que algunos no se vean en el editor.",
   "la asignación al anacronismo \"this\" no es compatible con el modo C++11",
-  "error desconocido. No se generó un archivo Intellisense PCH.",
+  "error desconocido. No se generó un archivo IntelliSense PCH.",
   "No se pueden asignar una o varias rutas remotas a las rutas locales actuales. La experiencia con IntelliSense puede degradarse.",
   null,
   null,
