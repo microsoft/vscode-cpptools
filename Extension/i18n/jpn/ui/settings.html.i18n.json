@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Windows SDK バージョン",
 	"windows.sdk.version.description": "Windows で使用する Windows SDK インクルード パスのバージョン。例: {0}。",
 	"mac.framework.path": "Mac フレームワーク パス",
-	"mac.framework.path.description": "Mac フレームワークからインクルードされたヘッダーを検索する際に Intellisense エンジンが使用するパスの一覧です。macOS の構成でのみサポートされます。",
+	"mac.framework.path.description": "Mac フレームワークからインクルードされたヘッダーを検索する際に IntelliSense エンジンが使用するパスの一覧です。macOS の構成でのみサポートされます。",
 	"one.path.per.line": "1 行につき 1 つのパスです。",
 	"forced.include": "強制インクルード",
 	"forced.include.description": "ソース ファイルの他の文字が処理される前に含める必要があるファイルの一覧です。ファイルは、リストされている順序で含められます。",

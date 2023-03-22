@@ -11,7 +11,7 @@
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "用於 IntelliSense 的 C++ 語言標準版本。注意: GNU 標準僅會用於查詢設定編譯器以取得 GNU 定義，而 IntelliSense 將會模擬相同的 C++ 標準版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "工作區 `compile_commands.json` 檔案的完整路徑。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.includePath": "IntelliSense 引擎在搜尋包含的標頭時使用的路徑清單。在這些路徑上的搜尋不會遞迴。請指定 `**` 以表示遞迴搜尋。例如 `${workspaceFolder}/**` 會搜尋所有子目錄，而 `${workspaceFolder}` 不會。此路徑通常不應包含系統 include; 請改為設定 `C_Cpp.default.compilerPath`。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "供 Intellisense 引擎在 Mac 架構中搜尋包含的標頭時使用的路徑清單。僅支援用於 Mac 組態。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.macFrameworkPath": "供 IntelliSense 引擎在 Mac 架構中搜尋包含的標頭時使用的路徑清單。僅支援用於 Mac 組態。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.windowsSdkVersion": "要在 Windows 上使用的 Windows SDK 包含路徑版本，例如 `10.0.17134.0`。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.dotConfig": "Kconfig 系統所建立之 .config 檔案的路徑。Kconfig 系統會產生具有建置專案之所有定義的檔案。使用 Kconfig 系統的專案範例為 Linux 核心與 NuttX RTOS。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.defines": "剖析檔案時，IntelliSense 引擎要使用的前置處理器定義清單。您可使用 `=` 來設定值，例如 `VERSION=1`。",

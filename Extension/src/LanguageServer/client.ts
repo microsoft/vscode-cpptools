@@ -2138,7 +2138,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
-        this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
+        this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
@@ -2466,7 +2466,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    public logIntellisenseSetupTime(notification: IntelliSenseSetup): void {
+    public logIntelliSenseSetupTime(notification: IntelliSenseSetup): void {
         clients.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 

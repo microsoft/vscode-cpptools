@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Windows SDK 版本",
 	"windows.sdk.version.description": "要在 Windows 上使用的 Windows SDK 包含路径版本，例如 {0}。",
 	"mac.framework.path": "Mac 框架路径",
-	"mac.framework.path.description": "Intellisense 引擎在 Mac 框架中搜索包含的标头时要使用的路径的列表。仅在 macOS 的配置中受支持。",
+	"mac.framework.path.description": "IntelliSense 引擎在 Mac 框架中搜索包含的标头时要使用的路径的列表。仅在 macOS 的配置中受支持。",
 	"one.path.per.line": "每行一个路径。",
 	"forced.include": "强制包含",
 	"forced.include.description": "在处理源文件中的任何其他字符之前应包含的文件的列表。按列出的顺序包含文件。",

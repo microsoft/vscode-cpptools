@@ -292,7 +292,7 @@ export class NewUI implements UI {
     private setIsUpdatingIntelliSense(val: boolean): void {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
 
-        // TODO: Integrate with Tarik's feature to determine if compiler/bare-intellisense is configured
+        // TODO: Integrate with Tarik's feature to determine if compiler/bare-IntelliSense is configured
         if (settings.intelliSenseEngine === "disabled") {
             this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusItem.command = {
