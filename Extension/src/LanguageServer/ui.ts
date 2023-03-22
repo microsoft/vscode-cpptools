@@ -320,10 +320,10 @@ export class OldUI implements UI {
             this.compilerTimout = setTimeout(() => {
                 this.compilerStatusItem.show();
                 telemetry.logLanguageServerEvent('compilerStatusBar');
+                this.compilerTimout = undefined;
             }, 15000);
         } else {
             this.compilerStatusItem.hide();
-            this.compilerTimout = undefined;
         }
     }
 
