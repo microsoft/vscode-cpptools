@@ -116,7 +116,7 @@ export class NewUI implements UI {
 
         this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.compilerStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
         this.compilerStatusItem.name = localize("c.cpp.compilerStatus.statusbar", "Configure IntelliSense");
-        this.compilerStatusItem.text = `$(warning) Configure Intellisense`;
+        this.compilerStatusItem.text = `$(warning) ${this.compilerStatusItem.name}`;
         this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         this.compilerStatusItem.command = {
             command: "C_Cpp.SelectDefaultCompiler",
@@ -431,7 +431,6 @@ export class NewUI implements UI {
             }, 15000);
         } else {
             this.compilerStatusItem.hide();
-            telemetry.logLanguageServerEvent('compilerStatusBar');
         }
     }
 
