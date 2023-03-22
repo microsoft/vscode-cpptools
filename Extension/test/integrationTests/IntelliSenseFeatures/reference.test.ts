@@ -11,7 +11,7 @@ import * as apit from 'vscode-cpptools/out/testApi';
 suite(`[Reference test]`, function(): void {
     let cpptools: apit.CppToolsTestApi;
     const disposables: vscode.Disposable[] = [];
-    const path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/references.cpp";
+    const path: string = vscode.workspace.workspaceFolders[1].uri.fsPath + "/references.cpp";
     const fileUri: vscode.Uri = vscode.Uri.file(path);
     let testHook: apit.CppToolsTestHook;
     let getIntelliSenseStatus: any;
