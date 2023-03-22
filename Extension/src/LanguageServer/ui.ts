@@ -316,8 +316,13 @@ export class OldUI implements UI {
             clearTimeout(this.compilerTimout);
         }
         if (show) {
+            let showVariable = (b: boolean) => b = show;
             this.compilerTimout = setTimeout(() => {
-                this.compilerStatusItem.show();
+                let isShowTrue = false;
+                isShowTrue = showVariable(isShowTrue);
+                if (isShowTrue) {
+                    this.compilerStatusItem.show();
+                }
                 telemetry.logLanguageServerEvent('compilerStatusBar');
             }, 15000);
         } else {

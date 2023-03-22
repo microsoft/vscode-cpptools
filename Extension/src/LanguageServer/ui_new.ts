@@ -416,6 +416,7 @@ export class NewUI implements UI {
         }
     }
 
+    returnShowBoolean() { }
     private compilerTimout?: NodeJS.Timeout;
     public async showCompilerStatusIcon(show: boolean): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseIndicator()) {
@@ -425,8 +426,11 @@ export class NewUI implements UI {
             clearTimeout(this.compilerTimout);
         }
         if (show) {
+            let showVariable = (b: boolean) => b = show;
             this.compilerTimout = setTimeout(() => {
-                if (show) {
+                let isShowTrue = false;
+                isShowTrue = showVariable(isShowTrue);
+                if (isShowTrue) {
                     this.compilerStatusItem.show();
                 }
                 telemetry.logLanguageServerEvent('compilerStatusBar');
