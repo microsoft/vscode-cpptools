@@ -19,9 +19,8 @@ import * as jsonc from 'comment-json';
 import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
-import { Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOutputChannelLogger } from '../logger';
-import { compilerPaths } from './client';
+import { compilerPaths, DefaultClient } from './client';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -122,6 +121,7 @@ export interface CompilerDefaults {
 }
 
 export class CppProperties {
+    private client: DefaultClient;
     private rootUri: vscode.Uri | undefined;
     private propertiesFile: vscode.Uri | undefined | null = undefined; // undefined and null values are handled differently
     private readonly configFolder: string;
@@ -153,9 +153,6 @@ export class CppProperties {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private prevSquiggleMetrics: Map<string, { [key: string]: number }> = new Map<string, { [key: string]: number }>();
     private settingsPanel?: SettingsPanel;
-    private lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
-    private lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
-    private lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
     private isWin32: boolean = os.platform() === "win32";
 
     // Any time the default settings are parsed and assigned to `this.configurationJson`,
@@ -163,14 +160,12 @@ export class CppProperties {
     private configurationIncomplete: boolean = true;
     trustedCompilerFound: boolean = false;
 
-    constructor(rootUri?: vscode.Uri, workspaceFolder?: vscode.WorkspaceFolder) {
+    constructor(client: DefaultClient, rootUri?: vscode.Uri, workspaceFolder?: vscode.WorkspaceFolder) {
+        this.client = client;
         this.rootUri = rootUri;
         const rootPath: string = rootUri ? rootUri.fsPath : "";
         if (workspaceFolder) {
             this.currentConfigurationIndex = new PersistentFolderState<number>("CppProperties.currentConfigurationIndex", -1, workspaceFolder);
-            this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
-            this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
-            this.lastCustomBrowseConfigurationProviderVersion = new PersistentFolderState<Version>("CPP.lastCustomBrowseConfigurationProviderVersion", Version.v5, workspaceFolder);
         }
         this.configFolder = path.join(rootPath, ".vscode");
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection(rootPath);
@@ -189,10 +184,6 @@ export class CppProperties {
     public get CurrentConfigurationIndex(): number { return this.currentConfigurationIndex === undefined ? 0 : this.currentConfigurationIndex.Value; }
     public get CurrentConfiguration(): Configuration | undefined { return this.Configurations ? this.Configurations[this.CurrentConfigurationIndex] : undefined; }
     public get KnownCompiler(): KnownCompiler[] | undefined { return this.knownCompilers; }
-
-    public get LastCustomBrowseConfiguration(): PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined { return this.lastCustomBrowseConfiguration; }
-    public get LastCustomBrowseConfigurationProviderId(): PersistentFolderState<string | undefined> | undefined { return this.lastCustomBrowseConfigurationProviderId; }
-    public get LastCustomBrowseConfigurationProviderVersion(): PersistentFolderState<Version> | undefined { return this.lastCustomBrowseConfigurationProviderVersion; }
 
     public get CurrentConfigurationProvider(): string | undefined {
         if (this.CurrentConfiguration?.configurationProvider) {
@@ -971,19 +962,19 @@ export class CppProperties {
                 if (hasEmptyConfiguration) {
                     if (providers.size === 1) {
                         providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
-                        if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
-                            keepCachedBrowseConfig = configuration.configurationProvider === this.lastCustomBrowseConfigurationProviderId.Value;
+                        if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
+                            keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                         }
-                    } else if (this.lastCustomBrowseConfigurationProviderId !== undefined
-                        && !!this.lastCustomBrowseConfigurationProviderId.Value) {
+                    } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined
+                        && !!this.client.lastCustomBrowseConfigurationProviderId.Value) {
                         // Use the last configuration provider we received a browse config from as the provider ID.
-                        configuration.configurationProvider = this.lastCustomBrowseConfigurationProviderId.Value;
+                        configuration.configurationProvider = this.client.lastCustomBrowseConfigurationProviderId.Value;
                     }
-                } else if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
-                    keepCachedBrowseConfig = configuration.configurationProvider === this.lastCustomBrowseConfigurationProviderId.Value;
+                } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
+                    keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                 }
-                if (!keepCachedBrowseConfig && this.lastCustomBrowseConfiguration !== undefined) {
-                    this.lastCustomBrowseConfiguration.Value = undefined;
+                if (!keepCachedBrowseConfig && this.client.lastCustomBrowseConfiguration !== undefined) {
+                    this.client.lastCustomBrowseConfiguration.Value = undefined;
                 }
             }
 
@@ -2134,16 +2125,6 @@ export class CppProperties {
     }
 
     dispose(): void {
-        if (this.lastCustomBrowseConfigurationProviderId !== undefined) {
-            const config: Configuration | undefined = this.CurrentConfiguration;
-            if (config !== undefined && config.configurationProvider !== this.lastCustomBrowseConfigurationProviderId.Value) {
-                this.lastCustomBrowseConfigurationProviderId.Value = undefined;
-                if (this.lastCustomBrowseConfiguration !== undefined) {
-                    this.lastCustomBrowseConfiguration.Value = undefined;
-                }
-            }
-        }
-
         this.disposables.forEach((d) => d.dispose());
         this.disposables = [];
 
