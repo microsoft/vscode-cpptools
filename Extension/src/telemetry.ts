@@ -139,6 +139,15 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
     sendTelemetry();
 }
 
+export async function showStatusBarIntelliSenseIndicator(): Promise<boolean> {
+    if (new CppSettings().experimentalFeatures) {
+        return true;
+    }
+    const experimentationService: IExperimentationService | undefined = await getExperimentationService();
+    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "showStatusBarIntelliSenseIndicator");
+    return useNewUI ?? false;
+}
+
 function getPackageInfo(): IPackageInfo {
     return {
         name: util.packageJson.publisher + "." + util.packageJson.name,

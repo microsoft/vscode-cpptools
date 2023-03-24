@@ -23,6 +23,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
+    showCompilerStatusIcon(show: boolean): Promise<void>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -60,6 +61,7 @@ export class OldUI implements UI {
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
+    private compilerStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private curConfigurationStatus?: Promise<ConfigurationStatus>;
     private isParsingWorkspace: boolean = false;
@@ -101,6 +103,17 @@ export class OldUI implements UI {
             arguments: commandArguments
         };
         this.ShowReferencesIcon = false;
+
+        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.compilerStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.compilerStatusItem.name = localize("c.cpp.compilerStatus.statusbar", "Configure IntelliSense");
+        this.compilerStatusItem.text = `$(warning) ${this.compilerStatusItem.name}`;
+        this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.compilerStatusItem.command = {
+            command: "C_Cpp.SelectDefaultCompiler",
+            title: this.compilerStatusItem.name,
+            arguments: ['statusBar']
+        };
+        this.showCompilerStatusIcon(false);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -291,6 +304,26 @@ export class OldUI implements UI {
             this.configStatusBarItem.show();
         } else {
             this.configStatusBarItem.hide();
+        }
+    }
+
+    private compilerTimout?: NodeJS.Timeout;
+    public async showCompilerStatusIcon(show: boolean): Promise<void> {
+        if (!telemetry.showStatusBarIntelliSenseIndicator()) {
+            return;
+        }
+        if (this.compilerTimout) {
+            clearTimeout(this.compilerTimout);
+            this.compilerTimout = undefined;
+        }
+        if (show) {
+            this.compilerTimout = setTimeout(() => {
+                this.compilerStatusItem.show();
+                telemetry.logLanguageServerEvent('compilerStatusBar');
+                this.compilerTimout = undefined;
+            }, 15000);
+        } else {
+            this.compilerStatusItem.hide();
         }
     }
 
