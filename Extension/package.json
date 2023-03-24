@@ -66,7 +66,7 @@
         "id": "cppWelcome",
         "title": "Get Started with C++ Development",
         "description": "Dive into VS Code's rich C++ development experience.",
-        "when": "false",
+        "when": "true",
         "steps": [
           {
             "id": "verify.compiler.mac",
@@ -74,7 +74,7 @@
             "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
             "when": "workspacePlatform == mac",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-clang-macos.md"
+              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
@@ -83,7 +83,7 @@
             "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
             "when": "workspacePlatform == linux",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-gcc-linux.md"
+              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
@@ -92,7 +92,7 @@
             "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
             "when": "workspacePlatform == windows",
             "media": {
-              "markdown": "walkthrough/installcompiler/install-compiler-windows.md"
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
@@ -100,10 +100,19 @@
             "title": "Create a C++ file",
             "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file. Be sure to save it as \".cpp\".\n[Create C++ File](command:toSide:welcome.showNewFileEntries)",
             "media": {
-              "svg": "walkthrough/images/openFolder.svg",
+              "svg": "dist/walkthrough/images/openFolder.svg",
               "altText": "Open a C++ file or a folder with a C++ project."
             },
             "when": ""
+          },
+          {
+            "id": "setup.intellisense",
+            "title": "Configure C++ IntelliSense",
+            "description": "Customize your project's IntelliSense configuration to use your C++ compiler. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
+            "media": {
+              "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
+              "svg": "dist/walkthrough/images/configuration.svg"
+            }
           },
           {
             "id": "run.project.mac",
@@ -112,7 +121,7 @@
             "when": "workspacePlatform == mac",
             "media": {
               "altText": "Image showing a breakpoint in a C++ file and the F5 button",
-              "svg": "walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
@@ -122,7 +131,7 @@
             "when": "workspacePlatform == linux",
             "media": {
               "altText": "Image showing a breakpoint in a C++ file and the F5 button",
-              "svg": "walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
@@ -132,7 +141,7 @@
             "when": "workspacePlatform == windows",
             "media": {
               "altText": "Image showing a breakpoint in a C++ file and the F5 button",
-              "svg": "walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
@@ -142,7 +151,7 @@
             "description": "Sometimes you need to customize your debug configuration (like if you need to pass args to your program at runtime). To customize debugging, select \"Add Debug Configuration\" from the play button dropdown. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
             "media": {
               "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
-              "svg": ""
+              "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
@@ -152,7 +161,7 @@
             "description": "Sometimes you need to customize your debug configuration (like if you need to pass args to your program at runtime). To customize debugging, select \"Add Debug Configuration\" from the play button dropdown. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
             "media": {
               "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
-              "svg": ""
+              "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
@@ -162,16 +171,7 @@
             "description": "Sometimes you need to customize your debug configuration (like if you need to pass args to your program at runtime). To customize debugging, select \"Add Debug Configuration\" from the play button dropdown. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
             "media": {
               "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
-              "svg": ""
-            }
-          },
-          {
-            "id": "setup.intellisense",
-            "title": "Configure C++ IntelliSense",
-            "description": "Customize your project's IntelliSense configuration to use your C++ compiler. \n[Open IntelliSense Configuration](command:C_Cpp.ConfigurationEditUI?-2)",
-            "media": {
-              "altText": "A screenshot that shows the IntelliSense Configurations UI with important settings highlighted.",
-              "svg": "walkthrough/images/configuration.svg"
+              "svg": "dist/walkthrough/images/rundebug.svg"
             }
           }
         ]
@@ -5891,15 +5891,16 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls",
-    "compile-dev": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development",
-    "compile-watch": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls --watch --progress",
-    "compile-dev-watch": "node ./tools/prepublish.js && gulp generate-native-strings && webpack --mode development --watch --progress",
+    "compile": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls",
+    "compile-dev": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && webpack --mode development",
+    "compile-watch": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls --watch --progress",
+    "compile-dev-watch": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && webpack --mode development --watch --progress",
     "generateOptionsSchema": "node ./tools/prepublish.js && node ./out/tools/generateOptionsSchema.js",
     "generate-native-strings": "node ./tools/prepublish.js && gulp generate-native-strings",
     "translations-export": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-export",
     "translations-generate": "node ./tools/prepublish.js && gulp translations-generate",
     "translations-import": "node ./tools/prepublish.js && gulp translations-import",
+    "copy-walkthrough-media": "node ./tools/prepublish.js && gulp copy-walkthrough-media",
     "prepublishjs": "node ./tools/prepublish.js",
     "pretest": "tsc -p test.tsconfig.json",
     "lint": "gulp lint",
