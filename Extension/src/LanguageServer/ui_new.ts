@@ -296,7 +296,7 @@ export class NewUI implements UI {
         if (settings.intelliSenseEngine === "disabled") {
             this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusItem.command = {
-                command: "C_Cpp.OpenCompilerQuickpick",
+                command: "C_Cpp.SelectDefaultCompiler",
                 title: localize("intellisense.select.text", "Select a Compiler"),
                 arguments: commandArguments
             };

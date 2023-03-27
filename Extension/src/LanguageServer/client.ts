@@ -778,7 +778,6 @@ export interface Client {
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void>;
-    handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
     handleRunCodeAnalysisOnAllFiles(): Promise<void>;
@@ -1004,13 +1003,22 @@ export class DefaultClient implements Client {
                 action = "help";
                 switch (os.platform()) {
                     case 'win32':
-                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
+                        vscode.commands.executeCommand(
+                            "workbench.action.openWalkthrough",
+                            { category: 'ms-vscode.cpptools#cppWelcome', step: 'ms-vscode.cpptools#verify.compiler.windows' },
+                            true);
                         return;
                     case 'darwin':
-                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
+                        vscode.commands.executeCommand(
+                            "workbench.action.openWalkthrough",
+                            { category: 'ms-vscode.cpptools#cppWelcome', step: 'ms-vscode.cpptools#verify.compiler.mac' },
+                            true);
                         return;
                     default: // Linux
-                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
+                        vscode.commands.executeCommand(
+                            "workbench.action.openWalkthrough",
+                            { category: 'ms-vscode.cpptools#cppWelcome', step: 'ms-vscode.cpptools#verify.compiler.linux' },
+                            true);
                         return;
                 }
             }
@@ -3156,35 +3164,6 @@ export class DefaultClient implements Client {
             const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
             editor.selection = newSelection;
         }
-
-    }
-
-    public async handleCheckForCompiler(): Promise<void> {
-        await this.awaitUntilLanguageClientReady();
-        const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
-        if (!compilers || compilers.length === 0) {
-            const compilerName: string = process.platform === "win32" ? "MSVC" : (process.platform === "darwin" ? "Clang" : "GCC");
-            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.", compilerName), { modal: true });
-        } else {
-            const header: string = localize("compilers.found", "We found the following C++ compilers on your system. Choose a compiler in your project's IntelliSense Configuration.");
-            let message: string = "";
-            const settings: CppSettings = new CppSettings(this.RootUri);
-            const pathSeparator: string | undefined = settings.preferredPathSeparator;
-            let isFirstLine: boolean = true;
-            compilers.forEach(compiler => {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                } else {
-                    message += "\n";
-                }
-                if (pathSeparator !== "Forward Slash") {
-                    message += compiler.path.replace(/\//g, '\\');
-                } else {
-                    message += compiler.path.replace(/\\/g, '/');
-                }
-            });
-            vscode.window.showInformationMessage(header, { modal: true, detail: message });
-        }
     }
 
     public async handleRunCodeAnalysisOnActiveFile(): Promise<void> {
@@ -3571,7 +3550,6 @@ class NullClient implements Client {
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> { return Promise.resolve(); }
-    handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }

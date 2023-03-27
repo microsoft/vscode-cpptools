@@ -53,7 +53,6 @@
     "onLanguage:cuda-cpp",
     "onCommand:extension.pickNativeProcess",
     "onCommand:extension.pickRemoteNativeProcess",
-    "onCommand:C_Cpp.OpenCompilerQuickpick",
     "onDebugResolve:cppdbg",
     "onDebugResolve:cppvsdbg",
     "workspaceContains:/.vscode/c_cpp_properties.json",
@@ -71,7 +70,7 @@
           {
             "id": "verify.compiler.mac",
             "title": "Check for a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.SelectDefaultCompiler)",
             "when": "workspacePlatform == mac",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
@@ -80,7 +79,7 @@
           {
             "id": "verify.compiler.linux",
             "title": "Check for a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.SelectDefaultCompiler)",
             "when": "workspacePlatform == linux",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
@@ -89,7 +88,7 @@
           {
             "id": "verify.compiler.windows",
             "title": "Check for a C++ compiler",
-            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.OpenCompilerQuickpick)",
+            "description": "The C++ extension requires a C++ compiler to be installed. If you don't have one, you can install one using the instructions to the right. \n[Check for C++ compilers](command:C_Cpp.SelectDefaultCompiler)",
             "when": "workspacePlatform == windows",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"

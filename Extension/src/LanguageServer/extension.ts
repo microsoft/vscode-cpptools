@@ -410,7 +410,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', enabled ? onGenerateEditorConfig : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', enabled ? onGoToNextDirectiveInGroup : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', enabled ? onGoToPrevDirectiveInGroup : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.OpenCompilerQuickpick', enabled ? onOpenCompilerQuickpick : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', enabled ? onRunCodeAnalysisOnActiveFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', enabled ? onRunCodeAnalysisOnOpenFiles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', enabled ? onRunCodeAnalysisOnAllFiles : onDisabledCommand));
@@ -529,11 +528,15 @@ async function selectClient(): Promise<Client> {
 }
 
 function onResetDatabase(): void {
-    clients.ActiveClient.resetDatabase();
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.resetDatabase();
+    });
 }
 
 function selectDefaultCompiler(sender?: any): void {
-    clients.ActiveClient.promptSelectCompiler(true, sender);
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.promptSelectCompiler(true, sender);
+    });
 }
 
 function onSelectConfiguration(sender?: any): void {
@@ -601,13 +604,6 @@ function onGoToNextDirectiveInGroup(): void {
 function onGoToPrevDirectiveInGroup(): void {
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(false);
-}
-
-function onOpenCompilerQuickpick(sender?: any): void {
-    // TODO: This needs to invoke the quickpick rather than just looking for compilers on their machine using handleCheckForCompiler.
-    logForUIExperiment("OpenCompilerQuickpick", sender);
-    const client: Client = getActiveClient();
-    client.handleCheckForCompiler();
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
