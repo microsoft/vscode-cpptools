@@ -760,7 +760,7 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
-    promptSelectCompiler(command: boolean): Promise<void>;
+    promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -824,6 +824,11 @@ export class DefaultClient implements Client {
     private settingsTracker: SettingsTracker;
     private loggingLevel: string | undefined;
     private configurationProvider?: string;
+
+    public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
+    public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
+    public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
+    private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -942,17 +947,17 @@ export class DefaultClient implements Client {
         return (selection) ? selection.index : -1;
     }
 
-    public async showPrompt(buttonMessage: string, showSecondPrompt: boolean): Promise<void> {
+    public async showPrompt(buttonMessage: string, showSecondPrompt: boolean, sender?: any): Promise<void> {
         if (secondPromptCounter < 1) {
             const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
             secondPromptCounter++;
             if (value === buttonMessage) {
-                this.handleCompilerQuickPick(showSecondPrompt);
+                this.handleCompilerQuickPick(showSecondPrompt, sender);
             }
         }
     }
 
-    public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
+    public async handleCompilerQuickPick(showSecondPrompt: boolean, sender?: any): Promise<void> {
         const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const paths: string[] = [];
@@ -982,7 +987,7 @@ export class DefaultClient implements Client {
             if (index === -1) {
                 action = "escaped";
                 if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
-                    this.showPrompt(selectCompiler, true);
+                    this.showPrompt(selectCompiler, true, sender);
                 }
                 return;
             }
@@ -990,8 +995,9 @@ export class DefaultClient implements Client {
                 action = "disable";
                 settings.defaultCompilerPath = "";
                 if (showSecondPrompt) {
-                    this.showPrompt(selectCompiler, true);
+                    this.showPrompt(selectCompiler, true, sender);
                 }
+                ui.showCompilerStatusIcon(false);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1012,27 +1018,29 @@ export class DefaultClient implements Client {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
-                        this.showPrompt(selectCompiler, true);
+                        this.showPrompt(selectCompiler, true, sender);
                     }
                     action = "browse dismissed";
                     return;
                 }
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                ui.showCompilerStatusIcon(false);
             } else {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                ui.showCompilerStatusIcon(false);
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
-            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount: paths.length });
+            telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender)}, { compilerCount: paths.length });
         }
     }
 
-    async promptSelectCompiler(isCommand: boolean): Promise<void> {
+    async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
@@ -1049,19 +1057,20 @@ export class DefaultClient implements Client {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
+                    ui.showCompilerStatusIcon(false);
                     action = "confirm compiler";
                 } else if (value === selectCompiler) {
-                    this.handleCompilerQuickPick(true);
+                    this.handleCompilerQuickPick(true, sender);
                     action = "show quickpick";
                 } else {
-                    this.showPrompt(selectCompiler, true);
+                    this.showPrompt(selectCompiler, true, sender);
                     action = "dismissed";
                 }
                 telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                this.showPrompt(selectCompiler, false);
+                this.showPrompt(selectCompiler, false, sender);
             } else {
-                this.handleCompilerQuickPick(isCommand);
+                this.handleCompilerQuickPick(isCommand, sender);
             }
         }
     }
@@ -1075,6 +1084,20 @@ export class DefaultClient implements Client {
      */
 
     constructor(workspaceFolder?: vscode.WorkspaceFolder, initializeNow?: boolean) {
+        if (workspaceFolder !== undefined) {
+            this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
+            this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
+            this.lastCustomBrowseConfigurationProviderVersion = new PersistentFolderState<Version>("CPP.lastCustomBrowseConfigurationProviderVersion", Version.v5, workspaceFolder);
+            this.registeredProviders = new PersistentFolderState<string[]>("CPP.registeredProviders", [], workspaceFolder);
+            // If this provider did the register in the last session, clear out the cached browse config.
+            if (!this.isProviderRegistered(this.lastCustomBrowseConfigurationProviderId.Value)) {
+                this.lastCustomBrowseConfigurationProviderId.Value = undefined;
+                if (this.lastCustomBrowseConfiguration !== undefined) {
+                    this.lastCustomBrowseConfiguration.Value = undefined;
+                }
+            }
+            this.registeredProviders.Value = [];
+        }
         if (!semanticTokensLegend) {
             // Semantic token types are identified by indexes in this list of types, in the legend.
             const tokenTypesLegend: string[] = [];
@@ -1134,7 +1157,7 @@ export class DefaultClient implements Client {
                 await firstClientStarted;
                 try {
                     const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
-                    this.innerConfiguration = new configs.CppProperties(rootUri, workspaceFolder);
+                    this.innerConfiguration = new configs.CppProperties(this, rootUri, workspaceFolder);
                     this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
                     this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
                     this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
@@ -1186,8 +1209,9 @@ export class DefaultClient implements Client {
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
+                            await ui.showCompilerStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            this.promptSelectCompiler(false);
+                            this.promptSelectCompiler(false, 'initialization');
                             displayedSelectCompiler = true;
                         }
                     }
@@ -1586,7 +1610,13 @@ export class DefaultClient implements Client {
         openFileVersions.delete(uri);
     }
 
-    private registeredProviders: CustomConfigurationProvider1[] = [];
+    public isProviderRegistered(extensionId: string | undefined): boolean {
+        if (extensionId === undefined || this.registeredProviders === undefined) {
+            return false;
+        }
+        return this.registeredProviders.Value.indexOf(extensionId) > -1;
+    }
+
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
         const onRegistered: () => void = () => {
             // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
@@ -1596,10 +1626,12 @@ export class DefaultClient implements Client {
             }
         };
         return this.notifyWhenLanguageClientReady(() => {
-            if (this.registeredProviders.includes(provider)) {
-                return; // Prevent duplicate processing.
+            if (this.registeredProviders === undefined // Shouldn't happen.
+                // Prevent duplicate processing.
+                || this.registeredProviders.Value.includes(provider.extensionId)) {
+                return;
             }
-            this.registeredProviders.push(provider);
+            this.registeredProviders.Value.push(provider.extensionId);
             const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
             if (!rootFolder) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
@@ -2133,7 +2165,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
-        this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntellisenseSetupTime(e));
+        this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
@@ -2461,7 +2493,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    public logIntellisenseSetupTime(notification: IntelliSenseSetup): void {
+    public logIntelliSenseSetupTime(notification: IntelliSenseSetup): void {
         clients.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 
@@ -2704,16 +2736,13 @@ export class DefaultClient implements Client {
         });
 
         await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
-        const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined = cppProperties.LastCustomBrowseConfigurationProviderId;
-        const lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined = cppProperties.LastCustomBrowseConfigurationProviderVersion;
-        const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined = cppProperties.LastCustomBrowseConfiguration;
-        if (!!lastCustomBrowseConfigurationProviderId && !!lastCustomBrowseConfiguration && !!lastCustomBrowseConfigurationProviderVersion) {
+        if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
                 // This ensures we don't start tag parsing without it, and undo'ing work we have to re-do when the (likely same) browse config arrives
                 // Should only execute on launch, for the initial delivery of configurations
-                if (lastCustomBrowseConfiguration.Value) {
-                    this.sendCustomBrowseConfiguration(lastCustomBrowseConfiguration.Value, lastCustomBrowseConfigurationProviderId.Value, lastCustomBrowseConfigurationProviderVersion.Value);
+                if (this.lastCustomBrowseConfiguration.Value) {
+                    this.sendCustomBrowseConfiguration(this.lastCustomBrowseConfiguration.Value, this.lastCustomBrowseConfigurationProviderId.Value, this.lastCustomBrowseConfigurationProviderVersion.Value);
                     params.isReady = false;
                 }
                 this.doneInitialCustomBrowseConfigurationCheck = true;
@@ -2855,11 +2884,12 @@ export class DefaultClient implements Client {
 
     private sendCustomBrowseConfiguration(config: any, providerId: string | undefined, providerVersion: Version, timeoutOccured?: boolean): void {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
-        if (!rootFolder) {
+        if (!rootFolder
+            || !this.lastCustomBrowseConfiguration
+            || !this.lastCustomBrowseConfigurationProviderId) {
             return;
         }
-        const lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, rootFolder);
-        const lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, rootFolder);
+
         let sanitized: util.Mutable<InternalWorkspaceBrowseConfiguration>;
 
         this.browseConfigurationLogging = "";
@@ -2871,7 +2901,7 @@ export class DefaultClient implements Client {
                 if (!timeoutOccured) {
                     console.log("Received an invalid browse configuration from configuration provider.");
                 }
-                const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
+                const configValue: WorkspaceBrowseConfiguration | undefined = this.lastCustomBrowseConfiguration.Value;
                 if (configValue) {
                     sanitized = configValue;
                     console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
@@ -2884,7 +2914,7 @@ export class DefaultClient implements Client {
             sanitized = { ...<InternalWorkspaceBrowseConfiguration>config };
             if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
                 console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
-                const configValue: WorkspaceBrowseConfiguration | undefined = lastCustomBrowseConfiguration.Value;
+                const configValue: WorkspaceBrowseConfiguration | undefined = this.lastCustomBrowseConfiguration.Value;
                 if (configValue) {
                     sanitized = configValue;
                     console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
@@ -2917,11 +2947,11 @@ export class DefaultClient implements Client {
                 }
             }
 
-            lastCustomBrowseConfiguration.Value = sanitized;
+            this.lastCustomBrowseConfiguration.Value = sanitized;
             if (!providerId) {
-                lastCustomBrowseConfigurationProviderId.setDefault();
+                this.lastCustomBrowseConfigurationProviderId.setDefault();
             } else {
-                lastCustomBrowseConfigurationProviderId.Value = providerId;
+                this.lastCustomBrowseConfigurationProviderId.Value = providerId;
             }
             break;
         }
@@ -3522,7 +3552,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(command: boolean): Promise<void> { return Promise.resolve(); }
+    promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }
