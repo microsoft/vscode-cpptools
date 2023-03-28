@@ -1058,6 +1058,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
+                    ui.showCompilerStatusIcon(false);
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true, sender);
                     action = "show quickpick";
