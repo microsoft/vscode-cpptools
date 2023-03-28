@@ -350,7 +350,7 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
-                if (configuration.compilerPath !== undefined) { 
+                if (configuration.compilerPath !== undefined || configuration.compileCommands !== undefined) { 
                     ui.showCompilerStatusIcon(false);
                 }
                 this.applyDefaultConfigurationValues(configuration);

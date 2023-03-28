@@ -1559,6 +1559,9 @@ export class DefaultClient implements Client {
                 if (changedSettings["default.compilerPath"]) { 
                     ui.showCompilerStatusIcon(false);
                 }
+                if (changedSettings["default.compileCommands"]) { 
+                    ui.showCompilerStatusIcon(false);
+                }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
             }
