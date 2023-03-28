@@ -989,7 +989,6 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
-                ui.showCompilerStatusIcon(false);
                 return;
             }
             if (index === paths.length - 1) {
@@ -998,6 +997,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
+                ui.showCompilerStatusIcon(false);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1030,7 +1030,6 @@ export class DefaultClient implements Client {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
                 ui.showCompilerStatusIcon(false);
-
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
