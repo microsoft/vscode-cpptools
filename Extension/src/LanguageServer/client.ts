@@ -1553,6 +1553,12 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
+                if (changedSettings["legacyCompilerArgsBehavior"]) {
+                    this.configuration.handleConfigurationChange();
+                }
+                if (changedSettings["default.compilerPath"]) { 
+                    ui.showCompilerStatusIcon(false);
+                }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
             }

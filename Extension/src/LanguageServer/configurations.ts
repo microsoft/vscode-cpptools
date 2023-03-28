@@ -21,10 +21,12 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
 import { compilerPaths, DefaultClient } from './client';
+import { UI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const configVersion: number = 4;
+let ui: UI;
 
 type Environment = { [key: string]: string | string[] };
 
@@ -348,6 +350,9 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
+                if (configuration.compilerPath !== undefined) { 
+                    ui.showCompilerStatusIcon(false);
+                }
                 this.applyDefaultConfigurationValues(configuration);
                 this.configurationIncomplete = false;
             }
