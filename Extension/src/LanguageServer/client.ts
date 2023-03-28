@@ -989,6 +989,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
+                ui.showCompilerStatusIcon(false);
                 return;
             }
             if (index === paths.length - 1) {
@@ -1024,16 +1025,19 @@ export class DefaultClient implements Client {
                 }
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                ui.showCompilerStatusIcon(false);
             } else {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                ui.showCompilerStatusIcon(false);
+
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
-            telemetry.logLanguageServerEvent('compilerSelection', { action , sender: util.getSenderType(sender) }, { compilerCount: paths.length });
+            telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender)}, { compilerCount: paths.length });
         }
     }
 
