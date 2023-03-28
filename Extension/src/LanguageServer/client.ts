@@ -947,17 +947,17 @@ export class DefaultClient implements Client {
         return (selection) ? selection.index : -1;
     }
 
-    public async showPrompt(buttonMessage: string, showSecondPrompt: boolean): Promise<void> {
+    public async showPrompt(buttonMessage: string, showSecondPrompt: boolean, sender?: any): Promise<void> {
         if (secondPromptCounter < 1) {
             const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
             secondPromptCounter++;
             if (value === buttonMessage) {
-                this.handleCompilerQuickPick(showSecondPrompt);
+                this.handleCompilerQuickPick(showSecondPrompt, sender);
             }
         }
     }
 
-    public async handleCompilerQuickPick(showSecondPrompt: boolean): Promise<void> {
+    public async handleCompilerQuickPick(showSecondPrompt: boolean, sender?: any): Promise<void> {
         const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
         const paths: string[] = [];
@@ -987,7 +987,7 @@ export class DefaultClient implements Client {
             if (index === -1) {
                 action = "escaped";
                 if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
-                    this.showPrompt(selectCompiler, true);
+                    this.showPrompt(selectCompiler, true, sender);
                 }
                 return;
             }
@@ -995,7 +995,7 @@ export class DefaultClient implements Client {
                 action = "disable";
                 settings.defaultCompilerPath = "";
                 if (showSecondPrompt) {
-                    this.showPrompt(selectCompiler, true);
+                    this.showPrompt(selectCompiler, true, sender);
                 }
                 return;
             }
@@ -1017,7 +1017,7 @@ export class DefaultClient implements Client {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
-                        this.showPrompt(selectCompiler, true);
+                        this.showPrompt(selectCompiler, true, sender);
                     }
                     action = "browse dismissed";
                     return;
@@ -1033,11 +1033,11 @@ export class DefaultClient implements Client {
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
-            telemetry.logLanguageServerEvent('compilerSelection', { action }, { compilerCount: paths.length });
+            telemetry.logLanguageServerEvent('compilerSelection', { action , sender: util.getSenderType(sender) }, { compilerCount: paths.length });
         }
     }
 
-    async promptSelectCompiler(isCommand: boolean): Promise<void> {
+    async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
@@ -1056,17 +1056,17 @@ export class DefaultClient implements Client {
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                 } else if (value === selectCompiler) {
-                    this.handleCompilerQuickPick(true);
+                    this.handleCompilerQuickPick(true, sender);
                     action = "show quickpick";
                 } else {
-                    this.showPrompt(selectCompiler, true);
+                    this.showPrompt(selectCompiler, true, sender);
                     action = "dismissed";
                 }
                 telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                this.showPrompt(selectCompiler, false);
+                this.showPrompt(selectCompiler, false, sender);
             } else {
-                this.handleCompilerQuickPick(isCommand);
+                this.handleCompilerQuickPick(isCommand, sender);
             }
         }
     }
@@ -3550,7 +3550,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(command: boolean): Promise<void> { return Promise.resolve(); }
+    promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }
