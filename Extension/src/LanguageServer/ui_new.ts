@@ -13,6 +13,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import { CppSettings } from './settings';
 import { UI } from './ui';
+import * as telemetry from '../telemetry';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -49,6 +50,7 @@ export class NewUI implements UI {
     private configStatusItem: vscode.LanguageStatusItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
+    private compilerStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private codeAnalysisStatusItem: vscode.LanguageStatusItem;
     private configDocumentSelector: vscode.DocumentFilter[] = [
@@ -111,6 +113,17 @@ export class NewUI implements UI {
             arguments: commandArguments
         };
         this.ShowReferencesIcon = false;
+
+        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.compilerStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.compilerStatusItem.name = localize("c.cpp.compilerStatus.statusbar", "Configure IntelliSense");
+        this.compilerStatusItem.text = `$(warning) ${this.compilerStatusItem.name}`;
+        this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.compilerStatusItem.command = {
+            command: "C_Cpp.SelectDefaultCompiler",
+            title: this.compilerStatusItem.name,
+            arguments: ['statusBar']
+        };
+        this.showCompilerStatusIcon(false);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -400,6 +413,26 @@ export class NewUI implements UI {
             this.referencesStatusBarItem.show();
         } else {
             this.referencesStatusBarItem.hide();
+        }
+    }
+
+    private compilerTimout?: NodeJS.Timeout;
+    public async showCompilerStatusIcon(show: boolean): Promise<void> {
+        if (!telemetry.showStatusBarIntelliSenseIndicator()) {
+            return;
+        }
+        if (this.compilerTimout) {
+            clearTimeout(this.compilerTimout);
+            this.compilerTimout = undefined;
+        }
+        if (show) {
+            this.compilerTimout = setTimeout(() => {
+                this.compilerStatusItem.show();
+                telemetry.logLanguageServerEvent('compilerStatusBar');
+                this.compilerTimout = undefined;
+            }, 15000);
+        } else {
+            this.compilerStatusItem.hide();
         }
     }
 
