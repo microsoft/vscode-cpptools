@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import { DefaultClient } from '../client';
 import { processDelayedDidOpen } from '../extension';
-import { Position, Range, RequestType } from 'vscode-languageclient';
+import { Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { makeVscodeRange } from '../utils';
 
 interface CallHierarchyItem {
@@ -41,8 +41,8 @@ interface CallHierarchyItem {
     selectionRange: Range;
 }
 
-interface CallHierarchyItemParams {
-    uri: string;
+interface CallHierarchyParams {
+    textDocument: TextDocumentIdentifier;
     position: Position;
 }
 
@@ -68,15 +68,15 @@ interface CallHierarchyCallsItemResult {
     calls: CallHierarchyCallsItem[];
 }
 
-const CallHierarchyItemRequest: RequestType<CallHierarchyItemParams, CallHierarchyItemResult, void> =
-    new RequestType<CallHierarchyItemParams, CallHierarchyItemResult, void>('cpptools/prepareCallHierarchy');
+const CallHierarchyItemRequest: RequestType<CallHierarchyParams, CallHierarchyItemResult, void> =
+    new RequestType<CallHierarchyParams, CallHierarchyItemResult, void>('cpptools/prepareCallHierarchy');
 
 // Send notification. Then get results with callback. (see find all references for example)
-// const  CallHierarchyCallsToRequest: RequestType<CallHierarchyCallsToParams, CallHierarchyCallsResult, void> =
-// new RequestType<CallHierarchyCallsToParams, CallHierarchyCallsResult, void>('cpptools/callHierarchyCallsTo');
+// const  CallHierarchyCallsToRequest: RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void> =
+// new RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsTo');
 
-const  CallHierarchyCallsFromRequest: RequestType<CallHierarchyItemParams, CallHierarchyCallsItemResult, void> =
-    new RequestType<CallHierarchyItemParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsFrom');
+const  CallHierarchyCallsFromRequest: RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void> =
+    new RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsFrom');
 
 export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     private client: DefaultClient;
@@ -92,8 +92,8 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         }
         await this.client.requestWhenReady(() => processDelayedDidOpen(document));
 
-        const params: CallHierarchyItemParams = {
-            uri: document.uri.toString(),
+        const params: CallHierarchyParams = {
+            textDocument: { uri: document.uri.toString() },
             position: Position.create(position.line, position.character)
         };
         const response: CallHierarchyItemResult = await this.client.languageClient.sendRequest(CallHierarchyItemRequest, params, token);
@@ -114,9 +114,9 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         }
 
         // await this.client.awaitUntilLanguageClientReady();
-        // const params: CallHierarchyCallsToParams = {
-        //     position: Position.create(item.range.start.line, item.range.start.character),
-        //     uri: item.uri.toString()
+        // const params: CallHierarchyParams = {
+        //     textDocument: { uri: item.uri.toString() },
+        //     position: Position.create(item.range.start.line, item.range.start.character)
         // };
         // const response: CallHierarchyCallsResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
         // if (token.isCancellationRequested) {
@@ -135,8 +135,9 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             return undefined;
         }
 
-        const params: CallHierarchyItemParams = {
-            uri: item.uri.toString(),
+        await this.client.awaitUntilLanguageClientReady();
+        const params: CallHierarchyParams = {
+            textDocument: { uri: item.uri.toString() },
             position: Position.create(item.range.start.line, item.range.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
