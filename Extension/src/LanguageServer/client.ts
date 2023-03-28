@@ -1202,8 +1202,7 @@ export class DefaultClient implements Client {
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
-                        let timer: NodeJS.Timer;
-                        timer = global.setTimeout(async () => {
+                        const timer: NodeJS.Timeout = global.setTimeout(async () => {
                             clearTimeout(timer);
                             compilerDefaults = await this.requestCompiler(compilerPaths);
                             DefaultClient.updateClientConfigurations();
