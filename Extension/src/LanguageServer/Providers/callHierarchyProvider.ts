@@ -105,6 +105,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         if (token.isCancellationRequested || response.succeeded === undefined) {
             throw new vscode.CancellationError();
         } else if (response.item === undefined) {
+            // TODO: add a message if item is not a function
             return undefined;
         }
 
@@ -146,7 +147,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             position: Position.create(item.range.start.line, item.range.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
-        if (token.isCancellationRequested || response.calls === undefined ) {
+        if (token.isCancellationRequested || response.calls === undefined) {
             throw new vscode.CancellationError();
         } else if (response.calls.length === 0) {
             return undefined;
