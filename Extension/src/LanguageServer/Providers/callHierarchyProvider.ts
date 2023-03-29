@@ -48,6 +48,11 @@ interface CallHierarchyParams {
 
 interface CallHierarchyItemResult {
     item?: CallHierarchyItem;
+
+    /**
+     * If a request is cancelled, `succeeded` will be undefined.
+     */
+    succeeded: boolean;
 }
 
 interface CallHierarchyCallsItem {
@@ -97,7 +102,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             position: Position.create(position.line, position.character)
         };
         const response: CallHierarchyItemResult = await this.client.languageClient.sendRequest(CallHierarchyItemRequest, params, token);
-        if (token.isCancellationRequested) {
+        if (token.isCancellationRequested || response.succeeded === undefined) {
             throw new vscode.CancellationError();
         } else if (response.item === undefined) {
             return undefined;
@@ -119,9 +124,9 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         //     position: Position.create(item.range.start.line, item.range.start.character)
         // };
         // const response: CallHierarchyCallsResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
-        // if (token.isCancellationRequested) {
+        // if (token.isCancellationRequested || response.calls === undefined) {
         //     throw new vscode.CancellationError();
-        // } else if (response.calls === undefined || response.calls.length === 0) {
+        // } else if (response.calls.length === 0) {
         //      return undefined;
         // }
 
@@ -141,9 +146,9 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             position: Position.create(item.range.start.line, item.range.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
-        if (token.isCancellationRequested) {
+        if (token.isCancellationRequested || response.calls === undefined ) {
             throw new vscode.CancellationError();
-        } else if (response.calls === undefined || response.calls.length === 0) {
+        } else if (response.calls.length === 0) {
             return undefined;
         }
 
