@@ -21,6 +21,7 @@
 	"select.command": "Vyberte příkaz...",
 	"cpptools.status.configuration": "Vyberte konfiguraci",
 	"c.cpp.references.statusbar": "Stav odkazů jazyka C/C++",
+	"c.cpp.compilerStatus.statusbar": "Konfigurovat IntelliSense",
 	"cpptools.status.intellisense": "C/C++ IntelliSense Status",
 	"cpptools.status.tagparser": "Stav analyzátoru značky jazyka C/C++",
 	"cpptools.detail.tagparser": "Probíhá inicializace...",

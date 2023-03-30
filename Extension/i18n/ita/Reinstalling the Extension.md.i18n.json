@@ -10,12 +10,12 @@
 	"bug.report.link.title": "segnalare il problema",
 	"reinstalling.extension.heading": "Reinstallazione dell'estensione C/C++",
 	"reinstall.extension.text1": "Quando si reinstalla una versione equivalente di un'estensione, VS Code può riutilizzare la directory dell'estensione esistente. Per evitare che ciò si verifichi durante la reinstallazione dell'estensione C/C++, potrebbe essere necessario eliminare prima la directory dell'estensione esistente.",
-	"reinstall.extension.text2": "Le directory delle estensioni installate si trovano in uno dei percorsi seguenti nella directory utente ('%USERPROFILE%' in Windows o '$HOME' in Linux e macOS)",
+	"reinstall.extension.text2": "Le directory delle estensioni installate si trovano in uno dei percorsi seguenti nella directory utente (`%USERPROFILE%` in Windows o `$HOME` in Linux e macOS)",
 	"reinstall.extension.text3": "In una connessione remota:",
 	"reinstall.extension.text4": "Percorsi di esempio per le directory dell'estensione C/C++ installate:",
 	"reinstall.extension.text5": "In Windows:",
 	"reinstall.extension.text6": "In Linux:",
 	"reinstall.extension.text7": "Reinstallare quindi tramite l'interfaccia utente del marketplace in VS Code.",
-	"reinstall.extension.text8": "Se la versione corretta dell'estensione non viene distribuita da VS Code, è possibile {0} e installare il file VSIX corretto per il sistema usando l'opzione 'Installa da VSIX...' nel menu '...' nell'interfaccia utente del marketplace in VS Code.",
+	"reinstall.extension.text8": "Se la versione corretta dell'estensione non viene distribuita da VS Code, è possibile {0} e installare il file VSIX corretto per il sistema usando l'opzione `Installa da VSIX...` nel menu ...' nell'interfaccia utente del marketplace in VS Code.",
 	"download.vsix.link.title": "scaricato dal sito Web del marketplace VS Code"
 }

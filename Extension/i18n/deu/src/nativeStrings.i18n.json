@@ -168,6 +168,7 @@
 	"specialization": "+1 Spezialisierung",
 	"specializations": "+%d Spezialisierungen",
 	"compiler": "Hinweis: IntelliSense ist nicht vollständig konfiguriert. Verwenden Sie den Befehl \"Standardcompiler auswählen\", um die Konfiguration abzuschließen.",
+	"select_compiler": "Wählen Sie einen Compiler aus, um System-Header zu suchen",
 	"expands_to": "Wird erweitert auf:",
 	"attention_label": "Achtung:",
 	"author_label": "Autor:",
@@ -292,5 +293,6 @@
 	"refactor_file_not_in_project": "Datei '%s' nicht gefunden",
 	"refactor_not_class_namespace": "Klasse oder Namespace '%s' wurde nicht gefunden.",
 	"refactor_operation_unsupported": "Der Vorgang wird für '%s' nicht unterstützt.",
-	"unknown_error": "Unbekannter Fehler."
+	"unknown_error": "Unbekannter Fehler.",
+	"run_select_compiler": "Führen Sie den Befehl „Select Default Compiler“ aus, um Ihre System-Header zu suchen."
 }
