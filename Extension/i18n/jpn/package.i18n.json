@@ -74,7 +74,7 @@
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description": "[すべてクリア] コード アクション (複数の問題の種類がある場合) と [すべての<type>をクリアする] コード アクションを表示する (または、<type>に問題が 1 つだけある場合は [これをクリア] を表示する)",
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description": "[すべてクリア] (複数の問題の種類がある場合)、[すべての<type>のクリア] (<type>に複数の問題がある場合)、'これをクリア' コード アクションを表示する",
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription": "`true` の場合、'修正' コード アクションによって変更された行に対して書式設定が実行されます。",
-	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "`true` の場合、`clang-padding` を使用したコード分析が有効になり、`#C_Cpp.codeAnalysis.runAutomatically#` が `true` (既定値) の場合、ファイルを開いたり保存したりした後に実行されます。",
+	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "`true` の場合、`clang-tidy` を使用したコード分析が有効になり、`#C_Cpp.codeAnalysis.runAutomatically#` が `true` (既定値) の場合、ファイルを開いたり保存したりした後に実行されます。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": "`clang-tidy` の実行可能ファイルの完全なパスです。指定されておらず、`clang-tidy` が環境パスに置かれている場合は、それが使用されます。環境パスに見つからない場合は、拡張機能にバンドルされている `clang-tidy` が使用されます。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription": "YAML/JSON 形式の `clang-tidy` 構成を指定します: `{Checks: '-*,clang-analyzer-*',CheckOptions: [{キー: x, 値: y}]}`。値が空の場合、`clang-tidy` は親ディレクトリ内の各ソース ファイルの `.clang-tidy` という名前のファイルの検索を試みます。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription": "`#C_Cpp.codeAnalysis.clangTidy.config#` が設定されておらず、`clang-tidy` ファイルが見つからない場合に、フォールバックとして使用する YAML/JSON 形式の `clang-tidy` 構成を指定します: `{Checks: '-*,clang-analyzer-*',CheckOptions: [{キー: x, 値: y}]}`。",

@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "Windows에서:",
 	"reinstall.extension.text6": "Linux에서:",
 	"reinstall.extension.text7": "그런 다음 VS Code의 마켓플레이스 UI를 통해 다시 설치합니다.",
-	"reinstall.extension.text8": "확장 프로그램의 올바른 버전이 VS Code에 의해 배포되지 않으면 시스템에 올바른 VSIX가 {0}일 수 있고 VS Code의 마켓플레이스 UI의 '...' 메뉴 아래 `VSIX에서 설치...` 옵션을 사용하여 설치할 수 있습니다.",
+	"reinstall.extension.text8": "확장 프로그램의 올바른 버전이 VS Code에 의해 배포되지 않으면 시스템에 올바른 VSIX가 {0}일 수 있고 VS Code의 마켓플레이스 UI의 '...' 메뉴 아래 'VSIX에서 설치...' 옵션을 사용하여 설치할 수 있습니다.",
 	"download.vsix.link.title": "VS Code 마켓플레이스 웹 사이트에서 다운로드"
 }

@@ -294,5 +294,5 @@
 	"refactor_not_class_namespace": "找不到類別或命名空間 '%s'。",
 	"refactor_operation_unsupported": "'%s' 不支援此作業。",
 	"unknown_error": "未知的錯誤。",
-	"run_select_compiler": "請執行 'Select Default Compiler' 命令以尋找您的系統標頭。"
+	"run_select_compiler": "請執行 '选择默认编译器' 命令以尋找您的系統標頭。"
 }

@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "Ve Windows:",
 	"reinstall.extension.text6": "V Linuxu:",
 	"reinstall.extension.text7": "Pak ji znovu nainstalujte přes uživatelské rozhraní Marketplace ve VS Code.",
-	"reinstall.extension.text8": "Pokud VS Code nenasadí správnou verzi rozšíření, můžete správný soubor VSIX pro váš systém {0} a nainstalovat pomocí možnosti `Instalovat z VSIX...`. v uživatelském rozhraní Marketplace ve VS Code.",
+	"reinstall.extension.text8": "Pokud VS Code nenasadí správnou verzi rozšíření, můžete správný soubor VSIX pro váš systém {0} a nainstalovat pomocí možnosti 'Instalovat z VSIX...'. v uživatelském rozhraní Marketplace ve VS Code.",
 	"download.vsix.link.title": "staženo z webu VS Code Marketplace"
 }

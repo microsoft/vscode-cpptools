@@ -294,5 +294,5 @@
 	"refactor_not_class_namespace": "Klasse oder Namespace '%s' wurde nicht gefunden.",
 	"refactor_operation_unsupported": "Der Vorgang wird für '%s' nicht unterstützt.",
 	"unknown_error": "Unbekannter Fehler.",
-	"run_select_compiler": "Führen Sie den Befehl „Select Default Compiler“ aus, um Ihre System-Header zu suchen."
+	"run_select_compiler": "Führen Sie den Befehl „Standardcompiler auswählen“ aus, um Ihre System-Header zu suchen."
 }

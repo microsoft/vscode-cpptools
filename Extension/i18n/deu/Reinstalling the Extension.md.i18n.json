@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "Unter Windows:",
 	"reinstall.extension.text6": "Unter Linux:",
 	"reinstall.extension.text7": "Installieren Sie dann über die Marketplace-Benutzeroberfläche in VS Code neu.",
-	"reinstall.extension.text8": "Wenn die richtige Version der Erweiterung nicht von VS Code bereitgestellt werden kann, kann das richtige VSIX für Ihr System {0} und mithilfe der Option `Von VSIX installieren...` unter dem Menü `...` in der Marketplace-Benutzeroberfläche in VS Code installiert werden.",
+	"reinstall.extension.text8": "Wenn die richtige Version der Erweiterung nicht von VS Code bereitgestellt werden kann, kann das richtige VSIX für Ihr System {0} und mithilfe der Option 'Von VSIX installieren...' unter dem Menü '...' in der Marketplace-Benutzeroberfläche in VS Code installiert werden.",
 	"download.vsix.link.title": "von der Website „VS Code Marketplace“ heruntergeladen"
 }
