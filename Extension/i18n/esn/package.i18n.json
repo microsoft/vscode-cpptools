@@ -243,7 +243,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "Controla si se pueden usar las características \"experimentales\".",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Si se establece en `true`, el servidor de lenguaje proporciona los fragmentos de código.",
 	"c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": "Si se establece en `default`, el sistema de archivos del área de trabajo no distingue mayúsculas de minúsculas en Windows y distingue mayúsculas de minúsculas en macOS o Linux. Si se establece en `enabled`, el sistema de archivos del área de trabajo distingue mayúsculas de minúsculas en Windows.",
-	"c_cpp.configuration.enhancedColorization.markdownDescription": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración solo se aplica si `#C_Cpp.intelliSenseEngine#` se establece en `Default`.",
+	"c_cpp.configuration.enhancedColorization.markdownDescription": "Si se habilita esta opción, el código se colorea de acuerdo con IntelliSense. Esta configuración solo se aplica si `#C_Cpp.intelliSenseEngine#` se establece en `default`.",
 	"c_cpp.configuration.codeFolding.description": "Si está habilitada, el servidor de lenguaje proporciona intervalos de plegado de código.",
 	"c_cpp.configuration.hover.description": "Si se deshabilita, el servidor de lenguaje ya no proporciona detalles al mantener el puntero.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Habilita los servicios de integración para el [administrador de dependencias de vcpkgs](https://aka.ms/vcpkg/).",

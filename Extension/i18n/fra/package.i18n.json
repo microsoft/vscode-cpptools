@@ -243,7 +243,7 @@
 	"c_cpp.configuration.experimentalFeatures.description": "Contrôle si les fonctionnalités \"expérimentales\" sont utilisables.",
 	"c_cpp.configuration.suggestSnippets.markdownDescription": "Si la valeur est `true`, les extraits de code sont fournis par le serveur de langage.",
 	"c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": "Si la valeur est définie sur `default`, le système de fichiers de l’espace de travail est supposé ne pas respecter la casse sur Windows et respecter la casse sur macOS ou Linux. Si la valeur est `enabled`, le système de fichiers de l’espace de travail est supposé respecter la casse sur Windows.",
-	"c_cpp.configuration.enhancedColorization.markdownDescription": "Si cette option est activée, le code est colorisé en fonction d'IntelliSense. Ce paramètre s'applique uniquement si `#C_Cpp.intelliSenseEngine#` est défini sur `Default`.",
+	"c_cpp.configuration.enhancedColorization.markdownDescription": "Si cette option est activée, le code est colorisé en fonction d'IntelliSense. Ce paramètre s'applique uniquement si `#C_Cpp.intelliSenseEngine#` est défini sur `default`.",
 	"c_cpp.configuration.codeFolding.description": "Si cette fonctionnalité est activée, les plages de pliage de code sont fournies par le serveur de langage.",
 	"c_cpp.configuration.hover.description": "Si cette option est désactivée, les détails du pointage ne sont plus fournis par le serveur de langage.",
 	"c_cpp.configuration.vcpkg.enabled.markdownDescription": "Activez les services d'intégration pour le [gestionnaire de dépendances vcpkg](https://aka.ms/vcpkg/).",
