@@ -21,6 +21,7 @@
 	"select.command": "Komut seçin...",
 	"cpptools.status.configuration": "Yapılandırma seçin",
 	"c.cpp.references.statusbar": "C/C++ Başvuruları Durumu",
+	"c.cpp.compilerStatus.statusbar": "IntelliSense'i Yapılandır",
 	"cpptools.status.intellisense": "C/C++ IntelliSense Durumu",
 	"cpptools.status.tagparser": "C/C++ Etiket Ayrıştırıcısı Durumu",
 	"cpptools.detail.tagparser": "Başlatılıyor...",

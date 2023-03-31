@@ -21,6 +21,7 @@
 	"select.command": "Выбор команды...",
 	"cpptools.status.configuration": "Выбор конфигурации",
 	"c.cpp.references.statusbar": "Состояние ссылок C/C++",
+	"c.cpp.compilerStatus.statusbar": "Настройка IntelliSense",
 	"cpptools.status.intellisense": "Состояние IntelliSense C/C++",
 	"cpptools.status.tagparser": "Состояние анализатора тегов C/C++",
 	"cpptools.detail.tagparser": "Выполняется инициализация…",

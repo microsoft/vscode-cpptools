@@ -168,6 +168,7 @@
 	"specialization": "还有 1 个专业化",
 	"specializations": "还有 %d 个专业化",
 	"compiler": "注意: 未完全配置 IntelliSense。使用“选择默认编译器”命令完成配置。",
+	"select_compiler": "选择编译器以定位系统标头",
 	"expands_to": "扩展到:",
 	"attention_label": "注意:",
 	"author_label": "作者:",
@@ -292,5 +293,6 @@
 	"refactor_file_not_in_project": "找不到文件“%s”。",
 	"refactor_not_class_namespace": "找不到类或命名空间'%s'。",
 	"refactor_operation_unsupported": "此操作不支持“%s”。",
-	"unknown_error": "未知错误。"
+	"unknown_error": "未知错误。",
+	"run_select_compiler": "请运行“选择默认编译器”命令以定位系统标头。"
 }

@@ -21,6 +21,7 @@
 	"select.command": "コマンドを選択する...",
 	"cpptools.status.configuration": "構成の選択",
 	"c.cpp.references.statusbar": "C/C + + リファレンスの状態",
+	"c.cpp.compilerStatus.statusbar": "IntelliSense の構成",
 	"cpptools.status.intellisense": "C/C++ IntelliSense の状態",
 	"cpptools.status.tagparser": "C/C + + タグ パーサーの状態",
 	"cpptools.detail.tagparser": "初期化しています...",
