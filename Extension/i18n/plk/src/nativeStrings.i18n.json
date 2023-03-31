@@ -168,6 +168,7 @@
 	"specialization": "+1 specjalizacja",
 	"specializations": "Specjalizacje: +%d",
 	"compiler": "Uwaga: funkcja IntelliSense nie jest w pełni skonfigurowana. Użyj polecenia „Wybierz domyślny kompilator”, aby zakończyć konfigurację.",
+	"select_compiler": "Wybierz kompilator, aby zlokalizować nagłówki systemowe",
 	"expands_to": "Jest rozwijane do:",
 	"attention_label": "Uwaga:",
 	"author_label": "Autor:",
@@ -292,5 +293,6 @@
 	"refactor_file_not_in_project": "Plik '%s' nie odnaleziony.",
 	"refactor_not_class_namespace": "Nie można znaleźć klasy lub obszaru nazw „%s”.",
 	"refactor_operation_unsupported": "Operacja elementu „%s” nie jest obsługiwana.",
-	"unknown_error": "Nieznany błąd."
+	"unknown_error": "Nieznany błąd.",
+	"run_select_compiler": "Uruchom polecenie „Wybierz domyślny kompilator”, aby zlokalizować nagłówki systemu."
 }

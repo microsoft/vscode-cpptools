@@ -10,6 +10,7 @@
 	"select.command": "Komut seç...",
 	"c.cpp.configuration.tooltip": "C/C++ Yapılandırması",
 	"c.cpp.references.statusbar": "C/C++ Başvuruları Durumu",
+	"c.cpp.compilerStatus.statusbar": "IntelliSense'i Yapılandır",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense Durumu",
 	"c.cpp.tagparser.statusbar": "C/C++ Etiket Ayrıştırıcısı Durumu",
 	"discovering.files.tooltip": "Dosyalar bulunuyor",

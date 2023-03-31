@@ -10,12 +10,12 @@
 	"bug.report.link.title": "relate o problema",
 	"reinstalling.extension.heading": "Reinstalando a Extensão C/C++",
 	"reinstall.extension.text1": "Ao reinstalar uma versão equivalente de uma extensão, VS Code pode reutilizar o diretório de extensão existente. Para evitar que isso ocorra ao reinstalar a extensão C/C++, talvez seja necessário excluir primeiro o diretório de extensão existente.",
-	"reinstall.extension.text2": "Os diretórios de extensão instalados podem ser encontrados em um dos seguintes caminhos em seu diretório de usuário ('%USERPROFILE%' no Windows ou `$HOME` no Linux e macOS)",
+	"reinstall.extension.text2": "Os diretórios de extensão instalados podem ser encontrados em um dos seguintes caminhos em seu diretório de usuário (`%USERPROFILE%` no Windows ou `$HOME` no Linux e macOS)",
 	"reinstall.extension.text3": "Em uma conexão remota:",
 	"reinstall.extension.text4": "Caminhos de exemplo para os diretórios de extensão C/C++ instalados:",
 	"reinstall.extension.text5": "No Windows:",
 	"reinstall.extension.text6": "No Linux:",
 	"reinstall.extension.text7": "Em seguida, reinstale por meio da Interface do Usuário do marketplace VS Code.",
-	"reinstall.extension.text8": "Se a versão correta da extensão não for implantada pelo VS Code, o VSIX correto para o sistema poderá ser {0} e instalado usando a opção 'Instalar do VSIX...' em '...' na Interface do Usuário do marketplace VS Code.",
+	"reinstall.extension.text8": "Se a versão correta da extensão não for implantada pelo VS Code, o VSIX correto para o sistema poderá ser {0} e instalado usando a opção `Instalar do VSIX...` em '...' na Interface do Usuário do marketplace VS Code.",
 	"download.vsix.link.title": "baixado do site VS Code marketplace"
 }

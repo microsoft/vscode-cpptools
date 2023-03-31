@@ -168,6 +168,7 @@
 	"specialization": "Mais 1 especialização",
 	"specializations": "Mais %d especializações",
 	"compiler": "Observação: o IntelliSense não está totalmente configurado. Use o comando 'Selecionar Compilador Padrão' para concluir a configuração.",
+	"select_compiler": "Selecione um compilador para localizar os cabeçalhos do sistema",
 	"expands_to": "Expande para:",
 	"attention_label": "Atenção:",
 	"author_label": "Autor:",
@@ -292,5 +293,6 @@
 	"refactor_file_not_in_project": "O arquivo %s não foi encontrado.",
 	"refactor_not_class_namespace": "Não foi possível localizar a classe ou o namespace '%s'.",
 	"refactor_operation_unsupported": "Operação sem suporte para \"%s\".",
-	"unknown_error": "Erro desconhecido."
+	"unknown_error": "Erro desconhecido.",
+	"run_select_compiler": "Execute o comando 'Selecionar Compilador Padrão' para localizar os cabeçalhos do sistema."
 }
