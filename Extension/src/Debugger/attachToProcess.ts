@@ -112,6 +112,7 @@ export class RemoteAttachPicker {
         let parameterBegin: string = `$(`;
         let parameterEnd: string = `)`;
         let escapedQuote: string = `\\\"`;
+        let shPrefix: string = ``;
 
         const settings: CppSettings = new CppSettings();
         if (settings.useBacktickCommandSubstitution) {
@@ -126,8 +127,12 @@ export class RemoteAttachPicker {
             innerQuote = `"`;
             outerQuote = `'`;
         }
+        // Also use a full path on Linux, so that we can use transports that need a full path such as 'machinectl' to connect to nspawn containers.
+        if (os.platform() === "linux") {
+            shPrefix = `/bin/`;
+        }
 
-        return `${outerQuote}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
+        return `${outerQuote}${shPrefix}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
             `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
             `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
