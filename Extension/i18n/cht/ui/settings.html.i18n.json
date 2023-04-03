@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Windows SDK 版本",
 	"windows.sdk.version.description": "要在 Windows 上使用的 Windows SDK 包含路徑版本，例如 {0}。",
 	"mac.framework.path": "Mac 架構路徑",
-	"mac.framework.path.description": "供 IntelliSense 引擎在 Mac 架構中搜尋包含的標頭時使用的路徑清單。僅在 macOS 的組態上支援。",
+	"mac.framework.path.description": "供 IntelliSense 引擎在 Mac 架構中搜尋包含的標頭時使用的路徑清單。僅支援 macOS 設定。",
 	"one.path.per.line": "每行一個路徑。",
 	"forced.include": "強制包含",
 	"forced.include.description": "處理來源檔案中的任何其他字元前，應包含的檔案清單。檔案會包含在列出的清單中。",

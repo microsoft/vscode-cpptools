@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Windows SDK-Version",
 	"windows.sdk.version.description": "Die Version des Windows SDK-Includepfads zur Verwendung unter Windows, z. B. \"{0}\".",
 	"mac.framework.path": "Pfad für Mac-Framework",
-	"mac.framework.path.description": "Eine Liste der Pfade für die IntelliSense-Engine, die beim Suchen nach eingeschlossenen Headern aus Mac-Frameworks verwendet werden sollen. Wird nur in Konfigurationen für macOS unterstützt.",
+	"mac.framework.path.description": "Eine Liste von Pfaden für die IntelliSense-Engine, die bei der Suche nach eingeschlossenen Headern aus Mac-Frameworks verwendet werden sollen. Wird nur für Konfigurationen für macOS unterstützt.",
 	"one.path.per.line": "Ein Pfad pro Zeile.",
 	"forced.include": "Erzwungene Include-Anweisung",
 	"forced.include.description": "Eine Liste der Dateien, die eingefügt werden sollen, bevor andere Zeichen in der Quelldatei verarbeitet werden. Die Dateien sind in der aufgelisteten Reihenfolge enthalten.",

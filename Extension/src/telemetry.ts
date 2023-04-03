@@ -78,12 +78,20 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
 }
 
 export async function showLanguageStatusExperiment(): Promise<boolean> {
+    return isExperimentEnabled("ShowLangStatBar");
+}
+
+export async function showStatusBarIntelliSenseIndicator(): Promise<boolean> {
+    return isExperimentEnabled("showStatusBarIntelliSenseIndicator");
+}
+
+async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
     }
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();
-    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
-    return useNewUI ?? false;
+    const isEnabled: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", experimentName);
+    return isEnabled ?? false;
 }
 
 export async function deactivate(): Promise<void> {
@@ -137,15 +145,6 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
         }
     }
     sendTelemetry();
-}
-
-export async function showStatusBarIntelliSenseIndicator(): Promise<boolean> {
-    if (new CppSettings().experimentalFeatures) {
-        return true;
-    }
-    const experimentationService: IExperimentationService | undefined = await getExperimentationService();
-    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "showStatusBarIntelliSenseIndicator");
-    return useNewUI ?? false;
 }
 
 function getPackageInfo(): IPackageInfo {

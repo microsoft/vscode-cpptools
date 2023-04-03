@@ -10,6 +10,7 @@
 	"select.command": "Vyberte příkaz…",
 	"c.cpp.configuration.tooltip": "Konfigurace C/C++",
 	"c.cpp.references.statusbar": "Stav odkazů jazyka C/C++",
+	"c.cpp.compilerStatus.statusbar": "Konfigurovat IntelliSense",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense Status",
 	"c.cpp.tagparser.statusbar": "Stav analyzátoru značky jazyka C/C++",
 	"discovering.files.tooltip": "Zjišťují se soubory.",

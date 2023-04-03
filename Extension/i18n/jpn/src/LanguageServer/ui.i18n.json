@@ -10,6 +10,7 @@
 	"select.command": "コマンドを選択する...",
 	"c.cpp.configuration.tooltip": "C/C++ 構成",
 	"c.cpp.references.statusbar": "C/C + + リファレンスの状態",
+	"c.cpp.compilerStatus.statusbar": "IntelliSense の構成",
 	"c.cpp.intellisense.statusbar": "C/c + + IntelliSense の状態",
 	"c.cpp.tagparser.statusbar": "C/C + + タグ パーサーの状態",
 	"discovering.files.tooltip": "ファイルを検出しています",
