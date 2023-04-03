@@ -1206,16 +1206,14 @@ export class DefaultClient implements Client {
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
-                        const timer: NodeJS.Timeout = global.setTimeout(async () => {
-                            clearTimeout(timer);
-                            compilerDefaults = await this.requestCompiler(compilerPaths);
-                            DefaultClient.updateClientConfigurations();
-                            if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
-                                // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                                this.promptSelectCompiler(false);
-                                displayedSelectCompiler = true;
-                            }
-                        }, 10000);
+                        compilerDefaults = await this.requestCompiler(compilerPaths);
+                        DefaultClient.updateClientConfigurations();
+                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
+                            // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
+                            ui.showCompilerStatusIcon(true);
+                            this.promptSelectCompiler(false);
+                            displayedSelectCompiler = true;
+                        }
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -1553,10 +1551,7 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
-                if (changedSettings["legacyCompilerArgsBehavior"]) {
-                    this.configuration.handleConfigurationChange();
-                }
-                if (changedSettings["default.compilerPath"]) {
+                if (changedSettings["default.compilerPath"] || changedSettings["default.configurationProvider"]) {
                     ui.showCompilerStatusIcon(false);
                 }
                 if (changedSettings["default.compileCommands"]) {
