@@ -611,7 +611,7 @@ export class NewUI implements UI {
     }
 
     public dispose(): void {
-        this.configStatusItem.dispose();
+        this.configStatusBarItem.dispose();
         this.browseEngineStatusItem.dispose();
         this.intelliSenseStatusItem.dispose();
         this.referencesStatusBarItem.dispose();
