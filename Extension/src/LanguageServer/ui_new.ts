@@ -144,7 +144,6 @@ export class NewUI implements UI {
 
     }
 
-
     private set TagParseStatus(label: string) {
         this.workspaceParsingProgress = label;
         if (this.browseEngineStatusItem.command) {
