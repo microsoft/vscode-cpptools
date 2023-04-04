@@ -21,6 +21,7 @@
 	"select.command": "Selecionar um comando...",
 	"cpptools.status.configuration": "Selecionar Configuração",
 	"c.cpp.references.statusbar": "Status de Referências do C/C++",
+	"c.cpp.compilerStatus.statusbar": "Configurar o IntelliSense",
 	"cpptools.status.intellisense": "Status do IntelliSense do C/C++",
 	"cpptools.status.tagparser": "Status do Analisador de Marcas do C/C++",
 	"cpptools.detail.tagparser": "Inicializando...",

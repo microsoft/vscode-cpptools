@@ -21,6 +21,7 @@
 	"select.command": "选择命令...",
 	"cpptools.status.configuration": "选择配置",
 	"c.cpp.references.statusbar": "C/C++ 引用状态",
+	"c.cpp.compilerStatus.statusbar": "配置 IntelliSense",
 	"cpptools.status.intellisense": "C/C++ IntelliSense 状态",
 	"cpptools.status.tagparser": "C/C++ 标记分析器状态",
 	"cpptools.detail.tagparser": "正在初始化...",

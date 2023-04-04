@@ -10,6 +10,7 @@
 	"select.command": "选择命令...",
 	"c.cpp.configuration.tooltip": "C/C++ 配置",
 	"c.cpp.references.statusbar": "C/C++ 引用状态",
+	"c.cpp.compilerStatus.statusbar": "配置 IntelliSense",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense 状态",
 	"c.cpp.tagparser.statusbar": "C/C++ 标记分析器状态",
 	"discovering.files.tooltip": "正在发现文件",

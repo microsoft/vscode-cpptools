@@ -168,6 +168,7 @@
 	"specialization": "+1 spécialisation",
 	"specializations": "+%d spécialisations",
 	"compiler": "Note : IntelliSense n’est pas entièrement configuré. Utilisez la commande « Sélectionner le compilateur par défaut » pour terminer la configuration.",
+	"select_compiler": "Sélectionner un compilateur pour localiser les en-têtes système",
 	"expands_to": "Se développe sur :",
 	"attention_label": "Attention :",
 	"author_label": "Auteur :",
@@ -292,5 +293,6 @@
 	"refactor_file_not_in_project": "Le fichier '%s' est introuvable.",
 	"refactor_not_class_namespace": "La classe ou l'espace de noms '%s' est introuvable.",
 	"refactor_operation_unsupported": "L'opération n'est pas prise en charge pour '%s'.",
-	"unknown_error": "Erreur inconnue."
+	"unknown_error": "Erreur inconnue.",
+	"run_select_compiler": "Veuillez exécutez la commande « Sélectionner le compilateur par défaut » pour localiser vos en-têtes système."
 }

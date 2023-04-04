@@ -21,6 +21,7 @@
 	"select.command": "Wybierz polecenie...",
 	"cpptools.status.configuration": "Wybierz konfigurację",
 	"c.cpp.references.statusbar": "Stan odwołań języka C/C++",
+	"c.cpp.compilerStatus.statusbar": "Konfigurowanie funkcji IntelliSense",
 	"cpptools.status.intellisense": "Stan funkcji IntelliSense języka C/C++",
 	"cpptools.status.tagparser": "Stan parsera tagów języka C/C++",
 	"cpptools.detail.tagparser": "Trwa inicjowanie...",
