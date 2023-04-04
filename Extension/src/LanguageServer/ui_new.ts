@@ -459,7 +459,7 @@ export class NewUI implements UI {
                 activeEditor.document.fileName.endsWith(".code-workspace");
         }
     }
-    
+
     public bind(client: Client): void {
         client.InitializingWorkspaceChanged(value => { this.setIsInitializingWorkspace(value); });
         client.IndexingWorkspaceChanged(value => { this.setIsIndexingWorkspace(value); });
