@@ -1551,10 +1551,7 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
-                if (changedSettings["default.compilerPath"] || changedSettings["default.configurationProvider"]) {
-                    ui.showCompilerStatusIcon(false);
-                }
-                if (changedSettings["default.compileCommands"]) {
+                if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
                     ui.showCompilerStatusIcon(false);
                 }
                 this.configuration.onDidChangeSettings();
