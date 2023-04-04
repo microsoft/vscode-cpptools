@@ -436,7 +436,11 @@ export class NewUI implements UI {
 
     public activeDocumentChanged(): void {
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (activeEditor) {
+        if (!activeEditor) {
+            this.ShowConfiguration = false;
+        } else {
+            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
+
             let isCppPropertiesJson: boolean = false;
             if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
                 isCppPropertiesJson = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
@@ -444,9 +448,18 @@ export class NewUI implements UI {
                     vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
                 }
             }
+
+            // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
+            // TODO: Check some "AlwaysShow" setting here.
+            this.ShowConfiguration = isCpp || isCppPropertiesJson ||
+                activeEditor.document.uri.scheme === "output" ||
+                activeEditor.document.fileName.endsWith("settings.json") ||
+                activeEditor.document.fileName.endsWith("tasks.json") ||
+                activeEditor.document.fileName.endsWith("launch.json") ||
+                activeEditor.document.fileName.endsWith(".code-workspace");
         }
     }
-
+    
     public bind(client: Client): void {
         client.InitializingWorkspaceChanged(value => { this.setIsInitializingWorkspace(value); });
         client.IndexingWorkspaceChanged(value => { this.setIsIndexingWorkspace(value); });
