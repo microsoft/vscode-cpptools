@@ -1057,8 +1057,8 @@ export class DefaultClient implements Client {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
-                    ui.showCompilerStatusIcon(false);
                     action = "confirm compiler";
+                    ui.showCompilerStatusIcon(false);
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true, sender);
                     action = "show quickpick";
@@ -1209,9 +1209,9 @@ export class DefaultClient implements Client {
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
-                            await ui.showCompilerStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            this.promptSelectCompiler(false, 'initialization');
+                            ui.showCompilerStatusIcon(true);
+                            this.promptSelectCompiler(false);
                             displayedSelectCompiler = true;
                         }
                     }
@@ -1550,6 +1550,9 @@ export class DefaultClient implements Client {
                 }
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
+                }
+                if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
+                    ui.showCompilerStatusIcon(false);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
