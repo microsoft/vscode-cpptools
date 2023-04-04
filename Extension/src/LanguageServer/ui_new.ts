@@ -47,20 +47,12 @@ enum LanguageStatusPriority {
 const commandArguments: string[] = ['newUI']; // We report the sender of the command
 
 export class NewUI implements UI {
-    private configStatusItem: vscode.LanguageStatusItem;
+    private configStatusItem: vscode.StatusBarItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
     private compilerStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private codeAnalysisStatusItem: vscode.LanguageStatusItem;
-    private configDocumentSelector: vscode.DocumentFilter[] = [
-        { scheme: 'file', language: 'c' },
-        { scheme: 'file', language: 'cpp' },
-        { scheme: 'file', language: 'cuda-cpp' },
-        { scheme: 'file', language: 'jsonc', pattern: '**/.vscode/*.json'},
-        { scheme: 'file', language: 'jsonc', pattern: '**/*.code-workspace'},
-        { scheme: 'output'}
-    ];
     /** **************************************************** */
     private curConfigurationStatus?: Promise<ConfigurationStatus>;
     private isParsingWorkspace: boolean = false;
@@ -94,7 +86,7 @@ export class NewUI implements UI {
     get isNewUI(): boolean { return true; };
 
     constructor() {
-        this.configStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.First}.configuration`, this.configDocumentSelector);
+        this.configStatusItem = vscode.window.createStatusBarItem(`cpptools.status.${LanguageStatusPriority.First}.configuration`, vscode.StatusBarAlignment.Right, 901);
         this.configStatusItem.name = localize("cpptools.status.configuration", "Select Configuration");
         this.configStatusItem.text = "Loading configuration...";
         this.configStatusItem.command = {
@@ -151,12 +143,6 @@ export class NewUI implements UI {
 
     }
 
-    private set ActiveConfig(label: string) {
-        this.configStatusItem.text = label ?? localize("configuration.notselected.text", "Configuration: Not selected");
-        if (this.configStatusItem.command) {
-            this.configStatusItem.command.title = localize("configuration.selected.text", "Select Configuration");
-        }
-    }
 
     private set TagParseStatus(label: string) {
         this.workspaceParsingProgress = label;
@@ -463,7 +449,6 @@ export class NewUI implements UI {
         client.CodeAnalysisTotalChanged(value => { this.setCodeAnalysisTotal(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
-        client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
     }
 
     public async showConfigurations(configurationNames: string[]): Promise<number> {
