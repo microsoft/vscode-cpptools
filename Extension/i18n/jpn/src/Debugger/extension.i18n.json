@@ -8,7 +8,7 @@
 	"cannot.modify.config.file": "解析エラー \"{0}\" のため、SSH 構成ファイルを変更できません。",
 	"no.valid.ssh.config.file": "有効な SSH 構成ファイルが見つかりません。",
 	"enter.ssh.target.name": "SSH ターゲット名を入力してください",
-	"ssh.target.name.place.holder": "例: 'mySSHTarget'",
+	"ssh.target.name.place.holder": "例: `mySSHTarget`",
 	"enter.ssh.connection.command": "SSH 接続コマンドを入力する",
 	"ssh.connection.command.place.holder": "例: `ssh hello@microsoft.com -A`",
 	"select.ssh.config.file": "SSH 構成ファイルの選択",

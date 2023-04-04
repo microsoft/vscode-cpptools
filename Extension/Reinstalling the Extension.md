@@ -29,4 +29,4 @@
 
 <p data-loc-id="reinstall.extension.text7">Then reinstall via the marketplace UI in VS Code.</p>
 
-<p data-loc-id="reinstall.extension.text8">If the correct version of the extension fails to be deployed by VS Code, the correct VSIX for your system can be <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools" data-loc-id="download.vsix.link.title">downloaded from the VS Code marketplace web site</a> and installed using the `Install from VSIX...` option under the '...' menu in the marketplace UI in VS Code.</p>
+<p data-loc-id="reinstall.extension.text8">If the correct version of the extension fails to be deployed by VS Code, the correct VSIX for your system can be <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools" data-loc-id="download.vsix.link.title">downloaded from the VS Code marketplace web site</a> and installed using the 'Install from VSIX...' option under the '...' menu in the marketplace UI in VS Code.</p>

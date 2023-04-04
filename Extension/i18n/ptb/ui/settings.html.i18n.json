@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Versão do SDK do Windows",
 	"windows.sdk.version.description": "A versão do caminho de inclusão SDK do Windows a ser usada no Windows, por exemplo, {0}.",
 	"mac.framework.path": "Caminho da estrutura do Mac",
-	"mac.framework.path.description": "Uma lista de caminhos para o mecanismo IntelliSense usar durante a pesquisa de cabeçalhos incluídos por meio das estruturas Mac. Compatível somente com configurações do macOS.",
+	"mac.framework.path.description": "Uma lista de caminhos para o mecanismo IntelliSense usar durante a pesquisa de cabeçalhos incluídos nas estruturas do Mac. Suportado apenas em configurações para macOS.",
 	"one.path.per.line": "Um caminho por linha.",
 	"forced.include": "Inclusão forçada",
 	"forced.include.description": "Uma lista de arquivos que devem ser incluídos antes que quaisquer outros caracteres no arquivo de origem sejam processados. Os arquivos são incluídos na ordem listada.",
