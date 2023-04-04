@@ -47,7 +47,7 @@ enum LanguageStatusPriority {
 const commandArguments: string[] = ['newUI']; // We report the sender of the command
 
 export class NewUI implements UI {
-    private configStatusItem: vscode.StatusBarItem;
+    private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
     private compilerStatusItem: vscode.StatusBarItem;
@@ -86,15 +86,16 @@ export class NewUI implements UI {
     get isNewUI(): boolean { return true; };
 
     constructor() {
-        this.configStatusItem = vscode.window.createStatusBarItem(`cpptools.status.${LanguageStatusPriority.First}.configuration`, vscode.StatusBarAlignment.Right, 901);
-        this.configStatusItem.name = localize("cpptools.status.configuration", "Select Configuration");
-        this.configStatusItem.text = "Loading configuration...";
-        this.configStatusItem.command = {
+        const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
+        this.configStatusBarItem = vscode.window.createStatusBarItem("c.cpp.configuration.tooltip", vscode.StatusBarAlignment.Right, 0);
+        this.configStatusBarItem.name = configTooltip;
+        this.configStatusBarItem.command = {
             command: "C_Cpp.ConfigurationSelect",
-            title: this.configStatusItem.name,
-            tooltip: this.configStatusItem.name,
+            title: configTooltip,
             arguments: commandArguments
         };
+        this.configStatusBarItem.tooltip = configTooltip;
+        this.ShowConfiguration = true;
 
         this.referencesStatusBarItem = vscode.window.createStatusBarItem(`c.cpp.references.statusbar`, vscode.StatusBarAlignment.Right, 901);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
@@ -167,6 +168,10 @@ export class NewUI implements UI {
         }
     }
 
+    private set ActiveConfig(label: string) {
+        this.configStatusBarItem.text = label;
+    }
+
     private dbTimeout?: NodeJS.Timeout;
     private setIsParsingWorkspace(val: boolean): void {
         this.isParsingWorkspace = val;
@@ -235,6 +240,14 @@ export class NewUI implements UI {
             title: localize("tagparser.pause.text", "Pause"),
             arguments: commandArguments
         };
+    }
+
+    private set ShowConfiguration(show: boolean) {
+        if (show) {
+            this.configStatusBarItem.show();
+        } else {
+            this.configStatusBarItem.hide();
+        }
     }
 
     private setIsCodeAnalysisPaused(val: boolean): void {
@@ -449,6 +462,7 @@ export class NewUI implements UI {
         client.CodeAnalysisTotalChanged(value => { this.setCodeAnalysisTotal(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
+        client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
     }
 
     public async showConfigurations(configurationNames: string[]): Promise<number> {
