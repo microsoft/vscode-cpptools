@@ -1266,6 +1266,7 @@ export class CppProperties {
 
     private parsePropertiesFile(): boolean {
         if (!this.propertiesFile) {
+            this.configurationJson = getDefaultCppProperties();
             return false;
         }
         let success: boolean = true;
