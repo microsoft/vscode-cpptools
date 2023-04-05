@@ -1061,8 +1061,8 @@ export class DefaultClient implements Client {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
-                    ui.showConfigureIntelliSenseStatusIcon(false);
                     action = "confirm compiler";
+                    ui.showConfigureIntelliSenseStatusIcon(false);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1216,7 +1216,7 @@ export class DefaultClient implements Client {
                             const showingConfigureIntelliSenseStatusIcon: boolean = await ui.showConfigureIntelliSenseStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             if (!showingConfigureIntelliSenseStatusIcon) {
-                                this.promptSelectIntelliSenseConfiguration(false, 'initialization');
+                                this.promptSelectIntelliSenseConfiguration(false);
                             }
                             displayedSelectCompiler = true;
                         }
@@ -1556,6 +1556,9 @@ export class DefaultClient implements Client {
                 }
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
+                }
+                if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
+                    ui.showConfigureIntelliSenseStatusIcon(false);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
