@@ -828,11 +828,12 @@ export class CppProperties {
         if (!this.configurationJson) {
             return;
         }
+        this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         const settings: CppSettings = new CppSettings(this.rootUri);
         const userSettings: CppSettings = new CppSettings();
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            const configuration: Configuration = { ...this.configurationJson.configurations[i] };
+            const configuration: Configuration = this.configurationJson.configurations[i];
             configuration.rawCompilerPath = configuration.compilerPath;
 
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
