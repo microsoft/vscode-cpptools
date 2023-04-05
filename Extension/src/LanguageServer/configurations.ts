@@ -828,7 +828,6 @@ export class CppProperties {
         if (!this.configurationJson) {
             return;
         }
-        this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         const settings: CppSettings = new CppSettings(this.rootUri);
         const userSettings: CppSettings = new CppSettings();
         const env: Environment = this.ExtendedEnvironment;
@@ -1196,10 +1195,7 @@ export class CppProperties {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
         this.configFileWatcherFallbackTime = new Date();
-        if (this.propertiesFile) {
-            this.parsePropertiesFile();
-            // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
-            // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
+        if (this.parsePropertiesFile()) {
             if (this.configurationJson) {
                 if (this.CurrentConfigurationIndex < 0 ||
                     this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
