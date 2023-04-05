@@ -21,12 +21,11 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
 import { compilerPaths, DefaultClient } from './client';
-import { UI } from './ui';
+import { UI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 const configVersion: number = 4;
-let ui: UI;
 
 type Environment = { [key: string]: string | string[] };
 
@@ -351,7 +350,7 @@ export class CppProperties {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 if (configuration.compilerPath !== undefined || configuration.compileCommands !== undefined || configuration.configurationProvider !== undefined) {
-                    ui.showCompilerStatusIcon(false);
+                    getUI().then((ui: UI) => ui.showCompilerStatusIcon(false));
                 }
                 this.applyDefaultConfigurationValues(configuration);
                 this.configurationIncomplete = false;
@@ -833,7 +832,7 @@ export class CppProperties {
         const userSettings: CppSettings = new CppSettings();
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
-            const configuration: Configuration = this.configurationJson.configurations[i];
+            const configuration: Configuration = { ...this.configurationJson.configurations[i] };
             configuration.rawCompilerPath = configuration.compilerPath;
 
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
@@ -970,10 +969,6 @@ export class CppProperties {
                         if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                             keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                         }
-                    } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined
-                        && !!this.client.lastCustomBrowseConfigurationProviderId.Value) {
-                        // Use the last configuration provider we received a browse config from as the provider ID.
-                        configuration.configurationProvider = this.client.lastCustomBrowseConfigurationProviderId.Value;
                     }
                 } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                     keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
