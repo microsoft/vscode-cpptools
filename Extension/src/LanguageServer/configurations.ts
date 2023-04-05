@@ -1278,6 +1278,7 @@ export class CppProperties {
 
     private parsePropertiesFile(): boolean {
         if (!this.propertiesFile) {
+            this.configurationJson = undefined;
             return false;
         }
         let success: boolean = true;
