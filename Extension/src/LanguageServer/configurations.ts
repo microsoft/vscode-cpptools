@@ -969,10 +969,6 @@ export class CppProperties {
                         if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                             keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                         }
-                    } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined
-                        && !!this.client.lastCustomBrowseConfigurationProviderId.Value) {
-                        // Use the last configuration provider we received a browse config from as the provider ID.
-                        configuration.configurationProvider = this.client.lastCustomBrowseConfigurationProviderId.Value;
                     }
                 } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                     keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
@@ -1199,10 +1195,7 @@ export class CppProperties {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
         this.configFileWatcherFallbackTime = new Date();
-        if (this.propertiesFile) {
-            this.parsePropertiesFile();
-            // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
-            // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
+        if (this.parsePropertiesFile()) {
             if (this.configurationJson) {
                 if (this.CurrentConfigurationIndex < 0 ||
                     this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
@@ -1269,6 +1262,7 @@ export class CppProperties {
 
     private parsePropertiesFile(): boolean {
         if (!this.propertiesFile) {
+            this.configurationJson = undefined;
             return false;
         }
         let success: boolean = true;
