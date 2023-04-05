@@ -16,7 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Changer le fournisseur de configuration...",
 	"c_cpp.command.configurationEditJSON.title": "Modifier les configurations (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Modifier les configurations (IU)",
-	"c_cpp.command.selectDefaultCompiler.title": "Sélectionner un compilateur par défaut",
+	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Basculer l'en-tête/la source",
 	"c_cpp.command.enableErrorSquiggles.title": "Activer les tildes d'erreur",
 	"c_cpp.command.disableErrorSquiggles.title": "Désactiver les tildes d'erreur",

@@ -167,8 +167,8 @@
 	"overloads": "+%d surcharges",
 	"specialization": "+1 spécialisation",
 	"specializations": "+%d spécialisations",
-	"compiler": "Note : IntelliSense n’est pas entièrement configuré. Utilisez la commande « Sélectionner le compilateur par défaut » pour terminer la configuration.",
-	"select_compiler": "Sélectionner un compilateur pour localiser les en-têtes système",
+	"intellisense_configuration": "Note: IntelliSense is not fully configured. Use the 'Select IntelliSense Configuration' command to finish configuration.",
+	"select_intellisense_configuration": "Select an IntelliSense configuration to locate system headers",
 	"expands_to": "Se développe sur :",
 	"attention_label": "Attention :",
 	"author_label": "Auteur :",
@@ -294,5 +294,5 @@
 	"refactor_not_class_namespace": "La classe ou l'espace de noms '%s' est introuvable.",
 	"refactor_operation_unsupported": "L'opération n'est pas prise en charge pour '%s'.",
 	"unknown_error": "Erreur inconnue.",
-	"run_select_compiler": "Veuillez exécutez la commande « Sélectionner le compilateur par défaut » pour localiser vos en-têtes système."
+	"run_select_intellisense_configuration": "Select an IntelliSense configuration to locate system headers"
 }

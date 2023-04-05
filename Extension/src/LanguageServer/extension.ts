@@ -379,7 +379,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', enabled ? onSelectConfigurationProvider : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', enabled ? onEditConfigurationJSON : onDisabledCommand));
@@ -532,8 +532,8 @@ function onResetDatabase(): void {
     clients.ActiveClient.resetDatabase();
 }
 
-function selectDefaultCompiler(sender?: any): void {
-    clients.ActiveClient.promptSelectCompiler(true, sender);
+function selectIntelliSenseConfiguration(sender?: any): void {
+    clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
 }
 
 function onSelectConfiguration(sender?: any): void {

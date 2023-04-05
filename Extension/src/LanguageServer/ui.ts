@@ -23,7 +23,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
-    showCompilerStatusIcon(show: boolean): Promise<void>;
+    showConfigureIntelliSenseStatusIcon(show: boolean): Promise<boolean>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -61,7 +61,7 @@ export class OldUI implements UI {
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
-    private compilerStatusItem: vscode.StatusBarItem;
+    private configureIntelliSenseStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private curConfigurationStatus?: Promise<ConfigurationStatus>;
     private isParsingWorkspace: boolean = false;
@@ -104,16 +104,16 @@ export class OldUI implements UI {
         };
         this.ShowReferencesIcon = false;
 
-        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.compilerStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
-        this.compilerStatusItem.name = localize("c.cpp.compilerStatus.statusbar", "Configure IntelliSense");
-        this.compilerStatusItem.text = `$(warning) ${this.compilerStatusItem.name}`;
-        this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
-        this.compilerStatusItem.command = {
-            command: "C_Cpp.SelectDefaultCompiler",
-            title: this.compilerStatusItem.name,
+        this.configureIntelliSenseStatusItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.statusbar", "Configure IntelliSense");
+        this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseStatusItem.name}`;
+        this.configureIntelliSenseStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.configureIntelliSenseStatusItem.command = {
+            command: "C_Cpp.SelectIntelliSenseConfiguration",
+            title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showCompilerStatusIcon(false);
+        this.showConfigureIntelliSenseStatusIcon(false);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -307,24 +307,17 @@ export class OldUI implements UI {
         }
     }
 
-    private compilerTimout?: NodeJS.Timeout;
-    public async showCompilerStatusIcon(show: boolean): Promise<void> {
+    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<boolean> {
         if (!telemetry.showStatusBarIntelliSenseIndicator()) {
-            return;
-        }
-        if (this.compilerTimout) {
-            clearTimeout(this.compilerTimout);
-            this.compilerTimout = undefined;
+            return false;
         }
         if (show) {
-            this.compilerTimout = setTimeout(() => {
-                this.compilerStatusItem.show();
-                telemetry.logLanguageServerEvent('compilerStatusBar');
-                this.compilerTimout = undefined;
-            }, 15000);
+            this.configureIntelliSenseStatusItem.show();
+            telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
         } else {
-            this.compilerStatusItem.hide();
+            this.configureIntelliSenseStatusItem.hide();
         }
+        return true;
     }
 
     public activeDocumentChanged(): void {

@@ -50,7 +50,7 @@ export class NewUI implements UI {
     private configStatusItem: vscode.LanguageStatusItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
-    private compilerStatusItem: vscode.StatusBarItem;
+    private configureIntelliSenseStatusItem: vscode.StatusBarItem;
     private referencesStatusBarItem: vscode.StatusBarItem;
     private codeAnalysisStatusItem: vscode.LanguageStatusItem;
     private configDocumentSelector: vscode.DocumentFilter[] = [
@@ -114,16 +114,16 @@ export class NewUI implements UI {
         };
         this.ShowReferencesIcon = false;
 
-        this.compilerStatusItem = vscode.window.createStatusBarItem(`c.cpp.compilerStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
-        this.compilerStatusItem.name = localize("c.cpp.compilerStatus.statusbar", "Configure IntelliSense");
-        this.compilerStatusItem.text = `$(warning) ${this.compilerStatusItem.name}`;
-        this.compilerStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
-        this.compilerStatusItem.command = {
-            command: "C_Cpp.SelectDefaultCompiler",
-            title: this.compilerStatusItem.name,
+        this.configureIntelliSenseStatusItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
+        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.statusbar", "Configure IntelliSense");
+        this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseStatusItem.name}`;
+        this.configureIntelliSenseStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+        this.configureIntelliSenseStatusItem.command = {
+            command: "C_Cpp.SelectIntelliSenseConfiguration",
+            title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showCompilerStatusIcon(false);
+        this.showConfigureIntelliSenseStatusIcon(false);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -416,24 +416,17 @@ export class NewUI implements UI {
         }
     }
 
-    private compilerTimout?: NodeJS.Timeout;
-    public async showCompilerStatusIcon(show: boolean): Promise<void> {
+    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<boolean> {
         if (!telemetry.showStatusBarIntelliSenseIndicator()) {
-            return;
-        }
-        if (this.compilerTimout) {
-            clearTimeout(this.compilerTimout);
-            this.compilerTimout = undefined;
+            return false;
         }
         if (show) {
-            this.compilerTimout = setTimeout(() => {
-                this.compilerStatusItem.show();
-                telemetry.logLanguageServerEvent('compilerStatusBar');
-                this.compilerTimout = undefined;
-            }, 15000);
+            this.configureIntelliSenseStatusItem.show();
+            telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
         } else {
-            this.compilerStatusItem.hide();
+            this.configureIntelliSenseStatusItem.hide();
         }
+        return true;
     }
 
     public activeDocumentChanged(): void {

@@ -67,7 +67,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             throw new vscode.CancellationError();
         }
 
-        let hasSelectDefaultCompiler: boolean = false;
+        let hasSelectIntelliSenseConfiguration: boolean = false;
         let hasConfigurationCompilerPath: boolean = false;
 
         // Convert to vscode.CodeAction array
@@ -173,14 +173,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 return;
             } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
                 command.arguments = ['codeAction']; // We report the sender of the command
-            } else if (command.command === "C_Cpp.SelectDefaultCompiler") {
+            } else if (command.command === "C_Cpp.SelectIntelliSenseConfiguration") {
                 command.arguments = ['codeAction'];
-                hasSelectDefaultCompiler = true;
+                hasSelectIntelliSenseConfiguration = true;
                 if (this.client.configuration.CurrentConfiguration?.rawCompilerPath !== undefined) {
                     hasConfigurationCompilerPath = true;
                     return;
                 }
-            } else if (command.command === "C_Cpp.ConfigurationEdit" && hasSelectDefaultCompiler) {
+            } else if (command.command === "C_Cpp.ConfigurationEdit" && hasSelectIntelliSenseConfiguration) {
                 if (hasConfigurationCompilerPath) {
                     title = title.replace("includePath", "compilerPath");
                 } else {

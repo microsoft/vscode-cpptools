@@ -16,7 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Zmień dostawcę konfiguracji...",
 	"c_cpp.command.configurationEditJSON.title": "Edytowanie konfiguracji (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Edytowanie konfiguracji (interfejs użytkownika)",
-	"c_cpp.command.selectDefaultCompiler.title": "Wybierz domyślny kompilator",
+	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Przełączanie nagłówka/źródła",
 	"c_cpp.command.enableErrorSquiggles.title": "Włączanie zygzaków sygnalizujących błędy",
 	"c_cpp.command.disableErrorSquiggles.title": "Wyłączanie zygzaków sygnalizujących błędy",

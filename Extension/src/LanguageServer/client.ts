@@ -760,7 +760,7 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
-    promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
+    promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -925,9 +925,9 @@ export class DefaultClient implements Client {
         });
     }
 
-    public async showSelectDefaultCompiler(paths: string[]): Promise<number> {
+    public async showSelectIntelliSenseConfiguration(paths: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.compile.commands", "Select a compiler to configure for IntelliSense");
+        options.placeHolder = localize("select.compile.commands", "How would you like to configure IntelliSense for this workspace?");
 
         const items: IndexableQuickPickItem[] = [];
         for (let i: number = 0; i < paths.length; i++) {
@@ -937,7 +937,10 @@ export class DefaultClient implements Client {
             if (isCompiler) {
                 const path: string | undefined = paths[i].replace(compilerName, "");
                 const description: string = localize("found.string", "Found at {0}", path);
-                items.push({ label: compilerName, description: description, index: i });
+                const label: string = localize("use.compiler", "Use the configuration from querying {0}", compilerName);
+                items.push({ label: label, description: description, index: i });
+            } else if (paths[i] === "compilers") {
+                items.push({ label: localize("compilers", "compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else {
                 items.push({ label: paths[i], index: i });
             }
@@ -952,15 +955,16 @@ export class DefaultClient implements Client {
             const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
             secondPromptCounter++;
             if (value === buttonMessage) {
-                this.handleCompilerQuickPick(showSecondPrompt, sender);
+                this.handleIntelliSenseConfigurationQuickPick(showSecondPrompt, sender);
             }
         }
     }
 
-    public async handleCompilerQuickPick(showSecondPrompt: boolean, sender?: any): Promise<void> {
+    public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any): Promise<void> {
         const settings: CppSettings = new CppSettings();
-        const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
+        const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration");
         const paths: string[] = [];
+        paths.push("compilers");
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
             let clFound: boolean = false;
@@ -978,10 +982,10 @@ export class DefaultClient implements Client {
                 }
             }
         }
-        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
+        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine to query"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
-        paths.push(localize("noConfig.string", "Do not configure a compiler (not recommended)"));
-        const index: number = await this.showSelectDefaultCompiler(paths);
+        paths.push(localize("noConfig.string", "Do not configure a compiler to query (not recommended)"));
+        const index: number = await this.showSelectIntelliSenseConfiguration(paths);
         let action: string = "";
         try {
             if (index === -1) {
@@ -997,7 +1001,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
-                ui.showCompilerStatusIcon(false);
+                ui.showConfigureIntelliSenseStatusIcon(false);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1025,11 +1029,11 @@ export class DefaultClient implements Client {
                 }
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                ui.showCompilerStatusIcon(false);
+                ui.showConfigureIntelliSenseStatusIcon(false);
             } else {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                ui.showCompilerStatusIcon(false);
+                ui.showConfigureIntelliSenseStatusIcon(false);
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
@@ -1040,12 +1044,12 @@ export class DefaultClient implements Client {
         }
     }
 
-    async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
+    async promptSelectIntelliSenseConfiguration(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
         }
-        const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
+        const selectCompiler: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
         let action: string;
         const settings: CppSettings = new CppSettings();
@@ -1057,10 +1061,10 @@ export class DefaultClient implements Client {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
-                    ui.showCompilerStatusIcon(false);
+                    ui.showConfigureIntelliSenseStatusIcon(false);
                     action = "confirm compiler";
                 } else if (value === selectCompiler) {
-                    this.handleCompilerQuickPick(true, sender);
+                    this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
                 } else {
                     this.showPrompt(selectCompiler, true, sender);
@@ -1070,7 +1074,7 @@ export class DefaultClient implements Client {
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
                 this.showPrompt(selectCompiler, false, sender);
             } else {
-                this.handleCompilerQuickPick(isCommand, sender);
+                this.handleIntelliSenseConfigurationQuickPick(isCommand, sender);
             }
         }
     }
@@ -1209,9 +1213,11 @@ export class DefaultClient implements Client {
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
-                            await ui.showCompilerStatusIcon(true);
+                            const showingConfigureIntelliSenseStatusIcon: boolean = await ui.showConfigureIntelliSenseStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            this.promptSelectCompiler(false, 'initialization');
+                            if (!showingConfigureIntelliSenseStatusIcon) {
+                                this.promptSelectIntelliSenseConfiguration(false, 'initialization');
+                            }
                             displayedSelectCompiler = true;
                         }
                     }
@@ -3552,7 +3558,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
+    promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }

@@ -16,7 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "구성 공급자 변경...",
 	"c_cpp.command.configurationEditJSON.title": "구성 편집(JSON)",
 	"c_cpp.command.configurationEditUI.title": "구성 편집(UI)",
-	"c_cpp.command.selectDefaultCompiler.title": "기본 컴파일러 선택",
+	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "헤더/소스 전환",
 	"c_cpp.command.enableErrorSquiggles.title": "오류 표시선 사용",
 	"c_cpp.command.disableErrorSquiggles.title": "오류 표시선 사용 안 함",
