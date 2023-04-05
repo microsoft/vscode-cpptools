@@ -539,6 +539,11 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
+interface ConfigurationProviderInfo {
+    name: string;
+    id: string;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
@@ -828,7 +833,7 @@ export class DefaultClient implements Client {
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
-    private registeredProviders: PersistentFolderState<string[]> | undefined;
+    private registeredProviders: PersistentFolderState<ConfigurationProviderInfo[]> | undefined;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -939,6 +944,10 @@ export class DefaultClient implements Client {
                 const description: string = localize("found.string", "Found at {0}", path);
                 const label: string = localize("use.compiler", "Use the configuration from querying {0}", compilerName);
                 items.push({ label: label, description: description, index: i });
+            } else if (paths[i] === "configuration providers") {
+                items.push({ label: localize("configuration.providers", "configuration providers"), index: i, kind: vscode.QuickPickItemKind.Separator });
+            } else if (paths[i] === "compile commands") {
+                items.push({ label: localize("compile.commands", "compile commands"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else if (paths[i] === "compilers") {
                 items.push({ label: localize("compilers", "compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else {
@@ -964,6 +973,13 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration");
         const paths: string[] = [];
+        const registeredProviders: ConfigurationProviderInfo[] | undefined = this.registeredProviders?.Value;
+        if (registeredProviders && registeredProviders.length > 0) {
+            paths.push("configuration providers");
+            for (const provider of registeredProviders) {
+                paths.push(localize("use.provider", "Use the configuration provided by {0}", provider.name));
+            }
+        }
         paths.push("compilers");
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
@@ -1092,7 +1108,7 @@ export class DefaultClient implements Client {
             this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
             this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
             this.lastCustomBrowseConfigurationProviderVersion = new PersistentFolderState<Version>("CPP.lastCustomBrowseConfigurationProviderVersion", Version.v5, workspaceFolder);
-            this.registeredProviders = new PersistentFolderState<string[]>("CPP.registeredProviders", [], workspaceFolder);
+            this.registeredProviders = new PersistentFolderState<ConfigurationProviderInfo[]>("CPP.registeredProviders", [], workspaceFolder);
             // If this provider did the register in the last session, clear out the cached browse config.
             if (!this.isProviderRegistered(this.lastCustomBrowseConfigurationProviderId.Value)) {
                 this.lastCustomBrowseConfigurationProviderId.Value = undefined;
@@ -1212,7 +1228,7 @@ export class DefaultClient implements Client {
                         // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
-                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
+                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "") && !this.configurationProvider && !this.lastCustomBrowseConfigurationProviderId) {
                             const showingConfigureIntelliSenseStatusIcon: boolean = await ui.showConfigureIntelliSenseStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
                             if (!showingConfigureIntelliSenseStatusIcon) {
@@ -1623,7 +1639,12 @@ export class DefaultClient implements Client {
         if (extensionId === undefined || this.registeredProviders === undefined) {
             return false;
         }
-        return this.registeredProviders.Value.indexOf(extensionId) > -1;
+        for (const provider of this.registeredProviders.Value) {
+            if (provider.id === extensionId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
@@ -1637,10 +1658,10 @@ export class DefaultClient implements Client {
         return this.notifyWhenLanguageClientReady(() => {
             if (this.registeredProviders === undefined // Shouldn't happen.
                 // Prevent duplicate processing.
-                || this.registeredProviders.Value.includes(provider.extensionId)) {
+                || this.registeredProviders.Value.includes({ name: provider.name, id: provider.extensionId })) {
                 return;
             }
-            this.registeredProviders.Value.push(provider.extensionId);
+            this.registeredProviders.Value.push({ name: provider.name, id: provider.extensionId });
             const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
             if (!rootFolder) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
