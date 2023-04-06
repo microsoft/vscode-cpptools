@@ -47,6 +47,7 @@ enum LanguageStatusPriority {
 const commandArguments: string[] = ['newUI']; // We report the sender of the command
 
 export class NewUI implements UI {
+    private currentClient: Client | undefined;
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
@@ -116,7 +117,7 @@ export class NewUI implements UI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showConfigureIntelliSenseStatusIcon(false);
+        this.showConfigureIntelliSenseStatusIcon(false, this.currentClient);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -414,8 +415,8 @@ export class NewUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<void> {
-        if (!telemetry.showStatusBarIntelliSenseIndicator()) {
+    public async showConfigureIntelliSenseStatusIcon(show: boolean, client?: Client): Promise<void> {
+        if (!telemetry.showStatusBarIntelliSenseIndicator() || client !== this.currentClient) {
             return;
         }
         if (show) {
@@ -431,7 +432,7 @@ export class NewUI implements UI {
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!activeEditor) {
             this.ShowConfiguration = false;
-            this.showConfigureIntelliSenseStatusIcon(false);
+            this.showConfigureIntelliSenseStatusIcon(false, this.currentClient);
         } else {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
 
@@ -470,7 +471,8 @@ export class NewUI implements UI {
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
-            this.showConfigureIntelliSenseStatusIcon(client.ShowConfigureIntelliSenseStatus());
+            this.currentClient = client;
+            this.showConfigureIntelliSenseStatusIcon(client.ShowConfigureIntelliSenseStatus(), client);
         });
     }
 

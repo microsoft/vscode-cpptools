@@ -1037,7 +1037,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
-                ui.showConfigureIntelliSenseStatusIcon(false);
+                ui.showConfigureIntelliSenseStatusIcon(false, this);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1065,11 +1065,11 @@ export class DefaultClient implements Client {
                 }
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                ui.showConfigureIntelliSenseStatusIcon(false);
+                ui.showConfigureIntelliSenseStatusIcon(false, this);
             } else {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                ui.showConfigureIntelliSenseStatusIcon(false);
+                ui.showConfigureIntelliSenseStatusIcon(false, this);
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
@@ -1098,7 +1098,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseStatusIcon(false);
+                    ui.showConfigureIntelliSenseStatusIcon(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1133,7 +1133,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseStatusIcon(false);
+                    ui.showConfigureIntelliSenseStatusIcon(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1174,10 +1174,6 @@ export class DefaultClient implements Client {
             if (this.lastCustomBrowseConfigurationProviderId.Value) {
                 this.configStateReceived.configProviders = []; // avoid waiting for the timeout if it's cached
             }
-            global.setTimeout(() => {
-                this.configStateReceived.timeout = true;
-                this.handleConfigStatusOrPrompt();
-            }, 15000);
             this.registeredProviders.Value = [];
         } else {
             this.configStateReceived.configProviders = [];
@@ -1291,6 +1287,10 @@ export class DefaultClient implements Client {
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
+                        global.setTimeout(() => {
+                            this.configStateReceived.timeout = true;
+                            this.handleConfigStatusOrPrompt();
+                        }, 15000);
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
                         clients.forEach(client => {
@@ -1637,7 +1637,7 @@ export class DefaultClient implements Client {
                     this.configuration.handleConfigurationChange();
                 }
                 if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.showConfigureIntelliSenseStatusIcon(false);
+                    ui.showConfigureIntelliSenseStatusIcon(false, this);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2698,6 +2698,7 @@ export class DefaultClient implements Client {
             } else {
                 this.showConfigureIntelliSenseStatus = false;
             }
+            ui.showConfigureIntelliSenseStatusIcon(this.showConfigureIntelliSenseStatus, this);
         } else if (!displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;

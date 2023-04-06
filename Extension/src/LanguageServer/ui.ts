@@ -23,7 +23,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
-    showConfigureIntelliSenseStatusIcon(show: boolean): Promise<void>;
+    showConfigureIntelliSenseStatusIcon(show: boolean, client?: Client): Promise<void>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -58,6 +58,7 @@ interface ConfigurationStatus {
 const commandArguments: string[] = ['oldUI']; // We report the sender of the command
 
 export class OldUI implements UI {
+    private currentClient: Client | undefined;
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusBarItem: vscode.StatusBarItem;
     private intelliSenseStatusBarItem: vscode.StatusBarItem;
@@ -113,7 +114,7 @@ export class OldUI implements UI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showConfigureIntelliSenseStatusIcon(false);
+        this.showConfigureIntelliSenseStatusIcon(false, this.currentClient);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -307,8 +308,8 @@ export class OldUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<void> {
-        if (!telemetry.showStatusBarIntelliSenseIndicator()) {
+    public async showConfigureIntelliSenseStatusIcon(show: boolean, client?: Client): Promise<void> {
+        if (!telemetry.showStatusBarIntelliSenseIndicator() || client !== this.currentClient) {
             return;
         }
         if (show) {
@@ -360,7 +361,8 @@ export class OldUI implements UI {
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
-            this.showConfigureIntelliSenseStatusIcon(client.ShowConfigureIntelliSenseStatus());
+            this.currentClient = client;
+            this.showConfigureIntelliSenseStatusIcon(client.ShowConfigureIntelliSenseStatus(), client);
         });
     }
 
