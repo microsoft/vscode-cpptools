@@ -23,7 +23,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
-    showConfigureIntelliSenseStatusIcon(show: boolean): Promise<boolean>;
+    showConfigureIntelliSenseStatusIcon(show: boolean): Promise<void>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -307,9 +307,9 @@ export class OldUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<boolean> {
+    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseIndicator()) {
-            return false;
+            return;
         }
         if (show) {
             this.configureIntelliSenseStatusItem.show();
@@ -317,7 +317,7 @@ export class OldUI implements UI {
         } else {
             this.configureIntelliSenseStatusItem.hide();
         }
-        return true;
+        return;
     }
 
     public activeDocumentChanged(): void {
@@ -358,7 +358,10 @@ export class OldUI implements UI {
         client.CodeAnalysisTotalChanged(value => { this.setCodeAnalysisTotal(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
-        client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
+        client.ActiveConfigChanged(value => {
+            this.ActiveConfig = value;
+            this.showConfigureIntelliSenseStatusIcon(client.ShowConfigureIntelliSenseStatus());
+        });
     }
 
     public async showConfigurations(configurationNames: string[]): Promise<number> {

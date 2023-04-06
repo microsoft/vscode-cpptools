@@ -8,7 +8,6 @@ import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import { CppSettings } from './LanguageServer/settings';
 import * as util from './common';
-import * as vscode from 'vscode';
 
 interface IPackageInfo {
     name: string;
@@ -69,7 +68,6 @@ export function activate(): void {
                 initializationPromise = getExperimentationServiceAsync(packageInfo.name, packageInfo.version, targetPopulation, experimentationTelemetry, util.extensionContext.globalState);
             }
         }
-        showStatusBarIntelliSenseIndicator();
     } catch (e) {
         // Handle error with a try/catch, but do nothing for errors.
     }
@@ -85,8 +83,6 @@ export async function showLanguageStatusExperiment(): Promise<boolean> {
 
 export async function showStatusBarIntelliSenseIndicator(): Promise<boolean> {
     const result: boolean = await isExperimentEnabled("showStatusBarIntelliSenseIndicator");
-    vscode.commands.executeCommand('setContext', 'cppSelect:defaultCompiler', !result);
-    vscode.commands.executeCommand('setContext', 'cppSelect:intelliSenseConfiguration', result);
     return result;
 }
 

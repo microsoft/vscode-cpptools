@@ -69,6 +69,14 @@ let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
+
+interface ConfigStateReceived {
+    compilers: boolean;
+    compileCommands: boolean;
+    configProviders: boolean;
+    timeout: boolean;
+}
+
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
 
@@ -797,6 +805,7 @@ export interface Client {
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
     isInitialized(): boolean;
+    ShowConfigureIntelliSenseStatus(): boolean;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -835,6 +844,9 @@ export class DefaultClient implements Client {
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
     private registeredProviders: PersistentFolderState<ConfigurationProviderInfo[]> | undefined;
 
+    private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: false, timeout: false };
+    private showConfigureIntelliSenseStatus: boolean = false;
+
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
     public static referencesPendingCancellations: ReferencesCancellationState[] = [];
@@ -860,6 +872,7 @@ export class DefaultClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
     public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
+    public ShowConfigureIntelliSenseStatus(): boolean { return this.showConfigureIntelliSenseStatus; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -946,8 +959,8 @@ export class DefaultClient implements Client {
                 items.push({ label: label, description: description, index: i });
             } else if (paths[i] === "configuration providers") {
                 items.push({ label: localize("configuration.providers", "configuration providers"), index: i, kind: vscode.QuickPickItemKind.Separator });
-            } else if (paths[i] === "compile commands") {
-                items.push({ label: localize("compile.commands", "compile commands"), index: i, kind: vscode.QuickPickItemKind.Separator });
+            } else if (paths[i] === "compile_commands.json") {
+                items.push({ label: paths[i], index: i, kind: vscode.QuickPickItemKind.Separator });
             } else if (paths[i] === "compilers") {
                 items.push({ label: localize("compilers", "compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else {
@@ -1116,7 +1129,17 @@ export class DefaultClient implements Client {
                     this.lastCustomBrowseConfiguration.Value = undefined;
                 }
             }
+            if (this.lastCustomBrowseConfigurationProviderId.Value) {
+                this.configStateReceived.configProviders = true; // avoid waiting for the timeout if it's cached
+            }
+            global.setTimeout(() => {
+                this.configStateReceived.timeout = true;
+                this.handleConfigStatusOrPrompt();
+            }, 15000);
             this.registeredProviders.Value = [];
+        } else {
+            this.configStateReceived.configProviders = true;
+            this.configStateReceived.compileCommands = true;
         }
         if (!semanticTokensLegend) {
             // Semantic token types are identified by indexes in this list of types, in the legend.
@@ -1228,14 +1251,12 @@ export class DefaultClient implements Client {
                         // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
-                        if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "") && !this.configurationProvider && !this.lastCustomBrowseConfigurationProviderId) {
-                            const showingConfigureIntelliSenseStatusIcon: boolean = await ui.showConfigureIntelliSenseStatusIcon(true);
-                            // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            if (!showingConfigureIntelliSenseStatusIcon) {
-                                this.promptSelectIntelliSenseConfiguration(false);
+                        clients.forEach(client => {
+                            if (client instanceof DefaultClient) {
+                                client.configStateReceived.compilers = true;
                             }
-                            displayedSelectCompiler = true;
-                        }
+                        });
+                        this.handleConfigStatusOrPrompt();
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -1647,14 +1668,15 @@ export class DefaultClient implements Client {
         return false;
     }
 
+    private onCustomConfigurationProviderRegistered(provider: CustomConfigurationProvider1): void {
+        // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
+        // the provider has sent the correct browse.path value.
+        if (provider.version >= Version.v2) {
+            this.pauseParsing();
+        }
+    }
+
     public onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> {
-        const onRegistered: () => void = () => {
-            // version 2 providers control the browse.path. Avoid thrashing the tag parser database by pausing parsing until
-            // the provider has sent the correct browse.path value.
-            if (provider.version >= Version.v2) {
-                this.pauseParsing();
-            }
-        };
         return this.notifyWhenLanguageClientReady(() => {
             if (this.registeredProviders === undefined // Shouldn't happen.
                 // Prevent duplicate processing.
@@ -1669,45 +1691,13 @@ export class DefaultClient implements Client {
             this.configuration.handleConfigurationChange();
             const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
-                const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
-                // If c_cpp_properties.json and settings.json are both missing, reset our prompt
-                if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
-                    ask.Value = true;
-                }
-                if (ask.Value) {
-                    ui.showConfigureCustomProviderMessage(async () => {
-                        const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
-                            ? localize("provider.configure.folder", "{0} would like to configure IntelliSense for the '{1}' folder.", provider.name, this.Name)
-                            : localize("provider.configure.this.folder", "{0} would like to configure IntelliSense for this folder.", provider.name);
-                        const allow: string = localize("allow.button", "Allow");
-                        const dontAllow: string = localize("dont.allow.button", "Don't Allow");
-                        const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-                        return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(async result => {
-                            switch (result) {
-                                case allow: {
-                                    await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
-                                    onRegistered();
-                                    ask.Value = false;
-                                    telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                                    return true;
-                                }
-                                case dontAllow: {
-                                    ask.Value = false;
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
-                            }
-                            return false;
-                        });
-                    }, () => ask.Value = false);
-                }
+                this.configStateReceived.configProviders = true;
+                this.handleConfigStatusOrPrompt("configProviders");
             } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
-                onRegistered();
+                this.onCustomConfigurationProviderRegistered(provider);
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
-                onRegistered();
+                this.onCustomConfigurationProviderRegistered(provider);
                 this.configuration.updateCustomConfigurationProvider(provider.extensionId); // v0 -> v1 upgrade. Update the configurationProvider in c_cpp_properties.json
             }
         });
@@ -2527,6 +2517,7 @@ export class DefaultClient implements Client {
         clients.timeTelemetryCollector.setSetupTime(vscode.Uri.parse(notification.uri));
     }
 
+    private compileCommandsPaths: string[] = [];
     private promptCompileCommands(params: CompileCommandsPaths): void {
         if (!params.workspaceFolderUri) {
             return;
@@ -2536,6 +2527,11 @@ export class DefaultClient implements Client {
             return;
         }
         const client: DefaultClient = <DefaultClient>potentialClient;
+        if (this !== client) {
+            return;
+        }
+
+        /*
         if (client.configuration.CurrentConfiguration?.compileCommands || client.configuration.CurrentConfiguration?.configurationProvider) {
             return;
         }
@@ -2543,45 +2539,117 @@ export class DefaultClient implements Client {
         if (!rootFolder) {
             return;
         }
+        */
 
-        const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
-        if (!ask.Value) {
-            return;
+        this.compileCommandsPaths = params.paths;
+        this.configStateReceived.compileCommands = true;
+        this.handleConfigStatusOrPrompt("compileCommands");
+    }
+
+    public async handleConfigStatusOrPrompt(sender?: string): Promise<void> {
+        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseIndicator();
+        if (statusBarIndicatorEnabled && !this.configStateReceived.timeout
+            && (!this.configStateReceived.compilers || !this.configStateReceived.compileCommands || !this.configStateReceived.configProviders)) {
+            return; // Wait till the config state is recevied or timed out.
         }
 
-        const aCompileCommandsFile: string = localize("a.compile.commands.file", "a compile_commands.json file");
-        const compileCommandStr: string = params.paths.length > 1 ? aCompileCommandsFile : params.paths[0];
-        const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
-            ? localize("auto-configure.intellisense.folder", "Would you like to use {0} to auto-configure IntelliSense for the '{1}' folder?", compileCommandStr, client.Name)
-            : localize("auto-configure.intellisense.this.folder", "Would you like to use {0} to auto-configure IntelliSense for this folder?", compileCommandStr);
+        const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
 
-        ui.showConfigureCompileCommandsMessage(async () => {
-            const yes: string = localize("yes.button", "Yes");
-            const no: string = localize("no.button", "No");
-            const askLater: string = localize("ask.me.later.button", "Ask Me Later");
-            return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
-                switch (value) {
-                    case yes:
-                        if (params.paths.length > 1) {
-                            const index: number = await ui.showCompileCommands(params.paths);
-                            if (index < 0) {
-                                return false;
+        if (rootFolder && (statusBarIndicatorEnabled || sender === "configProviders")) {
+            const askConfigProvider: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
+            // If c_cpp_properties.json and settings.json are both missing, reset our prompt
+            if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
+                askConfigProvider.Value = true;
+            }
+
+            if (askConfigProvider.Value) {
+                ui.showConfigureCustomProviderMessage(async () => {
+                    const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
+                        ? localize("provider.configure.folder", "{0} would like to configure IntelliSense for the '{1}' folder.", provider.name, this.Name)
+                        : localize("provider.configure.this.folder", "{0} would like to configure IntelliSense for this folder.", provider.name);
+                    const allow: string = localize("allow.button", "Allow");
+                    const dontAllow: string = localize("dont.allow.button", "Don't Allow");
+                    const askLater: string = localize("ask.me.later.button", "Ask Me Later");
+                    return vscode.window.showInformationMessage(message, allow, dontAllow, askLater).then(async result => {
+                        switch (result) {
+                            case allow: {
+                                await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
+                                this.onCustomConfigurationProviderRegistered(provider);
+                                askConfigProvider.Value = false;
+                                telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                                return true;
                             }
-                            this.configuration.setCompileCommands(params.paths[index]);
-                        } else {
-                            this.configuration.setCompileCommands(params.paths[0]);
+                            case dontAllow: {
+                                askConfigProvider.Value = false;
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
                         }
-                        return true;
-                    case askLater:
-                        break;
-                    case no:
-                        ask.Value = false;
-                        break;
-                }
-                return false;
-            });
-        },
-        () => ask.Value = false);
+                        return false;
+                    });
+                }, () => askConfigProvider.Value = false);
+            }
+        }
+
+        const compilerPathNotUsed: boolean = !compilerDefaults.trustedCompilerFound && (compilerPaths.length !== 1 || compilerPaths[0] !== "");
+        const registeredProviders: ConfigurationProviderInfo[] | undefined = this.registeredProviders?.Value;
+        const configProviderNotUsed: boolean = !!registeredProviders && registeredProviders.length > 0;
+        const compileCommandsNotUsed: boolean = this.compileCommandsPaths.length > 0;
+
+        if (statusBarIndicatorEnabled) {
+            if (compilerPathNotUsed || configProviderNotUsed || compileCommandsNotUsed) {
+                this.showConfigureIntelliSenseStatus = true;
+                // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
+            } else {
+                this.showConfigureIntelliSenseStatus = false;
+            }
+        }
+
+        if (rootFolder) {
+            const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
+            if (ask.Value) {
+                const aCompileCommandsFile: string = localize("a.compile.commands.file", "a compile_commands.json file");
+                const compileCommandStr: string = params.paths.length > 1 ? aCompileCommandsFile : params.paths[0];
+                const message: string = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1)
+                    ? localize("auto-configure.intellisense.folder", "Would you like to use {0} to auto-configure IntelliSense for the '{1}' folder?", compileCommandStr, client.Name)
+                    : localize("auto-configure.intellisense.this.folder", "Would you like to use {0} to auto-configure IntelliSense for this folder?", compileCommandStr);
+
+                ui.showConfigureCompileCommandsMessage(async () => {
+                    const yes: string = localize("yes.button", "Yes");
+                    const no: string = localize("no.button", "No");
+                    const askLater: string = localize("ask.me.later.button", "Ask Me Later");
+                    return vscode.window.showInformationMessage(message, yes, no, askLater).then(async (value) => {
+                        switch (value) {
+                            case yes:
+                                if (params.paths.length > 1) {
+                                    const index: number = await ui.showCompileCommands(params.paths);
+                                    if (index < 0) {
+                                        return false;
+                                    }
+                                    this.configuration.setCompileCommands(params.paths[index]);
+                                } else {
+                                    this.configuration.setCompileCommands(params.paths[0]);
+                                }
+                                return true;
+                            case askLater:
+                                break;
+                            case no:
+                                ask.Value = false;
+                                break;
+                        }
+                        return false;
+                    });
+                },
+                () => ask.Value = false);
+            }
+        }
+
+        if (!displayedSelectCompiler) {
+            this.promptSelectIntelliSenseConfiguration(false);
+            displayedSelectCompiler = true;
+        }
     }
 
     /**
@@ -3618,4 +3686,5 @@ class NullClient implements Client {
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
     isInitialized(): boolean { return true; }
+    ShowConfigureIntelliSenseStatus(): boolean { return false; }
 }

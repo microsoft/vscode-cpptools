@@ -414,9 +414,9 @@ export class NewUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<boolean> {
+    public async showConfigureIntelliSenseStatusIcon(show: boolean): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseIndicator()) {
-            return false;
+            return;
         }
         if (show) {
             this.configureIntelliSenseStatusItem.show();
@@ -424,13 +424,14 @@ export class NewUI implements UI {
         } else {
             this.configureIntelliSenseStatusItem.hide();
         }
-        return true;
+        return;
     }
 
     public activeDocumentChanged(): void {
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!activeEditor) {
             this.ShowConfiguration = false;
+            this.showConfigureIntelliSenseStatusIcon(false);
         } else {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
 
@@ -467,7 +468,10 @@ export class NewUI implements UI {
         client.CodeAnalysisTotalChanged(value => { this.setCodeAnalysisTotal(value); });
         client.ReferencesCommandModeChanged(value => { this.ReferencesCommand = value; });
         client.TagParserStatusChanged(value => { this.TagParseStatus = value; });
-        client.ActiveConfigChanged(value => { this.ActiveConfig = value; });
+        client.ActiveConfigChanged(value => {
+            this.ActiveConfig = value;
+            this.showConfigureIntelliSenseStatusIcon(client.ShowConfigureIntelliSenseStatus());
+        });
     }
 
     public async showConfigurations(configurationNames: string[]): Promise<number> {
