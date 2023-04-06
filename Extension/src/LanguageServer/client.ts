@@ -987,11 +987,17 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration");
         const paths: string[] = [];
-        const registeredProviders: ConfigurationProviderInfo[] | undefined = this.registeredProviders?.Value;
+        const registeredProviders: ConfigurationProviderInfo[] | undefined = compilersOnly ? undefined : this.registeredProviders?.Value;
         if (registeredProviders && registeredProviders.length > 0) {
             paths.push("configuration providers");
             for (const provider of registeredProviders) {
                 paths.push(localize("use.provider", "Use the configuration provided by {0}", provider.name));
+            }
+        }
+        if (!compilersOnly && this.compileCommandsPaths.length > 0) {
+            paths.push("compile_commands.json");
+            for (const compileCommandsPath of this.compileCommandsPaths) {
+                paths.push("Use the configuration provided by {0}", compileCommandsPath);
             }
         }
         paths.push("compilers");
@@ -2684,7 +2690,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        showConfigStatus = showConfigStatus || (!compilerDefaults.trustedCompilerFound && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
+        showConfigStatus = showConfigStatus || (!compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
@@ -2692,9 +2698,7 @@ export class DefaultClient implements Client {
             } else {
                 this.showConfigureIntelliSenseStatus = false;
             }
-        }
-
-        if (!displayedSelectCompiler) {
+        } else if (!displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;
         }
