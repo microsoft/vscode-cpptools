@@ -2578,16 +2578,6 @@ export class DefaultClient implements Client {
             return;
         }
 
-        /*
-        if (client.configuration.CurrentConfiguration?.compileCommands || client.configuration.CurrentConfiguration?.configurationProvider) {
-            return;
-        }
-        const rootFolder: vscode.WorkspaceFolder | undefined = client.RootFolder;
-        if (!rootFolder) {
-            return;
-        }
-        */
-
         this.compileCommandsPaths = params.paths;
         this.configStateReceived.compileCommands = true;
         this.handleConfigStatusOrPrompt("compileCommands");
