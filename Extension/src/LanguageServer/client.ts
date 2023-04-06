@@ -949,9 +949,10 @@ export class DefaultClient implements Client {
         options.placeHolder = localize("select.compile.commands", "How would you like to configure IntelliSense for this workspace?");
 
         const items: IndexableQuickPickItem[] = [];
+        let isCompilerSection: boolean = false;
         for (let i: number = 0; i < paths.length; i++) {
             const compilerName: string = path.basename(paths[i]);
-            const isCompiler: boolean = compilerName !== paths[i];
+            const isCompiler: boolean = isCompilerSection && compilerName !== paths[i];
 
             if (isCompiler) {
                 const path: string | undefined = paths[i].replace(compilerName, "");
@@ -963,6 +964,7 @@ export class DefaultClient implements Client {
             } else if (paths[i] === "compile_commands.json") {
                 items.push({ label: paths[i], index: i, kind: vscode.QuickPickItemKind.Separator });
             } else if (paths[i] === "compilers") {
+                isCompilerSection = true;
                 items.push({ label: localize("compilers", "compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else {
                 items.push({ label: paths[i], index: i });
@@ -997,7 +999,7 @@ export class DefaultClient implements Client {
         if (!compilersOnly && this.compileCommandsPaths.length > 0) {
             paths.push("compile_commands.json");
             for (const compileCommandsPath of this.compileCommandsPaths) {
-                paths.push("Use the configuration provided by {0}", compileCommandsPath);
+                paths.push(localize("use.compileCommands", "Use the configuration provided by {0}", compileCommandsPath));
             }
         }
         paths.push("compilers");
