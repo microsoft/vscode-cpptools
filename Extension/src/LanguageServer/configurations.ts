@@ -615,8 +615,10 @@ export class CppProperties {
                 }
                 config.includePath.splice(config.includePath.length, 0, path);
                 this.writeToJson();
-                this.handleConfigurationChange();
             }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
         }, () => {});
     }
 
@@ -633,8 +635,10 @@ export class CppProperties {
                             delete config.configurationProvider;
                         }
                         this.writeToJson();
-                        this.handleConfigurationChange();
                     }
+                    // Any time parsePropertiesFile is called, configurationJson gets
+                    // reverted to an unprocessed state and needs to be reprocessed.
+                    this.handleConfigurationChange();
                     resolve();
                 }, () => {});
             } else {
@@ -660,8 +664,10 @@ export class CppProperties {
             if (config) {
                 config.compileCommands = path;
                 this.writeToJson();
-                this.handleConfigurationChange();
             }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
         }, () => {});
     }
 
@@ -1123,6 +1129,9 @@ export class CppProperties {
                     showDocument(document, viewColumn);
                 }
             }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
         }
     }
 
@@ -1146,6 +1155,9 @@ export class CppProperties {
                         vscode.workspace.openTextDocument(this.propertiesFile);
                     }
                 }
+                // Any time parsePropertiesFile is called, configurationJson gets
+                // reverted to an unprocessed state and needs to be reprocessed.
+                this.handleConfigurationChange();
             }
         }
     }
@@ -1158,6 +1170,9 @@ export class CppProperties {
             this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
             this.writeToJson();
         }
+        // Any time parsePropertiesFile is called, configurationJson gets
+        // reverted to an unprocessed state and needs to be reprocessed.
+        this.handleConfigurationChange();
     }
 
     private onConfigSelectionChanged(): void {
@@ -1188,6 +1203,9 @@ export class CppProperties {
             // Save new config to file
             this.writeToJson();
         }
+        // Any time parsePropertiesFile is called, configurationJson gets
+        // reverted to an unprocessed state and needs to be reprocessed.
+        this.handleConfigurationChange();
     }
 
     public handleConfigurationChange(): void {
@@ -1195,18 +1213,16 @@ export class CppProperties {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
         this.configFileWatcherFallbackTime = new Date();
-        if (this.parsePropertiesFile()) {
-            if (this.configurationJson) {
-                if (this.CurrentConfigurationIndex < 0 ||
-                    this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
-                    // If the index is out of bounds (during initialization or due to removal of configs), fix it.
-                    const index: number | undefined = this.getConfigIndexForPlatform(this.configurationJson);
-                    if (this.currentConfigurationIndex !== undefined) {
-                        if (!index) {
-                            this.currentConfigurationIndex.setDefault();
-                        } else {
-                            this.currentConfigurationIndex.Value = index;
-                        }
+        if (this.parsePropertiesFile() && this.configurationJson) {
+            if (this.CurrentConfigurationIndex < 0 ||
+                this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
+                // If the index is out of bounds (during initialization or due to removal of configs), fix it.
+                const index: number | undefined = this.getConfigIndexForPlatform(this.configurationJson);
+                if (this.currentConfigurationIndex !== undefined) {
+                    if (!index) {
+                        this.currentConfigurationIndex.setDefault();
+                    } else {
+                        this.currentConfigurationIndex.Value = index;
                     }
                 }
             }
