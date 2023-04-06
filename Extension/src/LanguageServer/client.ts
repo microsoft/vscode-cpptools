@@ -957,7 +957,7 @@ export class DefaultClient implements Client {
             if (isCompiler) {
                 const path: string | undefined = paths[i].replace(compilerName, "");
                 const description: string = localize("found.string", "Found at {0}", path);
-                const label: string = localize("use.compiler", "Use the configuration from querying {0}", compilerName);
+                const label: string = localize("use.compiler", "Use {0}", compilerName);
                 items.push({ label: label, description: description, index: i });
             } else if (paths[i] === "configuration providers") {
                 items.push({ label: localize("configuration.providers", "configuration providers"), index: i, kind: vscode.QuickPickItemKind.Separator });
@@ -993,13 +993,13 @@ export class DefaultClient implements Client {
         if (registeredProviders && registeredProviders.length > 0) {
             paths.push("configuration providers");
             for (const provider of registeredProviders) {
-                paths.push(localize("use.provider", "Use the configuration provided by {0}", provider.name));
+                paths.push(localize("use.provider", "Use {0}", provider.name));
             }
         }
         if (!compilersOnly && this.compileCommandsPaths.length > 0) {
             paths.push("compile_commands.json");
             for (const compileCommandsPath of this.compileCommandsPaths) {
-                paths.push(localize("use.compileCommands", "Use the configuration provided by {0}", compileCommandsPath));
+                paths.push(localize("use.compileCommands", "Use {0}", compileCommandsPath));
             }
         }
         paths.push("compilers");
@@ -3047,6 +3047,9 @@ export class DefaultClient implements Client {
                 const configValue: WorkspaceBrowseConfiguration | undefined = this.lastCustomBrowseConfiguration.Value;
                 if (configValue) {
                     sanitized = configValue;
+                    if (sanitized.browsePath.length === 0) {
+                        sanitized.browsePath = ["${workspaceFolder}/**"];
+                    }
                     console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
@@ -3055,11 +3058,14 @@ export class DefaultClient implements Client {
             }
 
             sanitized = { ...<InternalWorkspaceBrowseConfiguration>config };
-            if (!this.isWorkspaceBrowseConfiguration(sanitized)) {
+            if (!this.isWorkspaceBrowseConfiguration(sanitized) || sanitized.browsePath.length === 0) {
                 console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
                 const configValue: WorkspaceBrowseConfiguration | undefined = this.lastCustomBrowseConfiguration.Value;
                 if (configValue) {
                     sanitized = configValue;
+                    if (sanitized.browsePath.length === 0) {
+                        sanitized.browsePath = ["${workspaceFolder}/**"];
+                    }
                     console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
