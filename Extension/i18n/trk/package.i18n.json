@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Yapılandırma Sağlayıcısını Değiştir...",
 	"c_cpp.command.configurationEditJSON.title": "Yapılandırmaları Düzenle (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Yapılandırmaları Düzenle (UI)",
+	"c_cpp.command.selectDefaultCompiler.title": "Varsayılan Derleyiciyi Seç",
 	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Üst Bilgiyi/Kaynağı Değiştir",
 	"c_cpp.command.enableErrorSquiggles.title": "Hata İlişkilendirmelerini Etkinleştir",

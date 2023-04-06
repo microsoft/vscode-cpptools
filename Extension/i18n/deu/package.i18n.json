@@ -16,6 +16,7 @@
 	"c_cpp.command.configurationProviderSelect.title": "Konfigurationsanbieter ändern...",
 	"c_cpp.command.configurationEditJSON.title": "Konfigurationen bearbeiten (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Konfigurationen bearbeiten (Benutzeroberfläche)",
+	"c_cpp.command.selectDefaultCompiler.title": "Standardcompiler auswählen",
 	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Header/Quelle umschalten",
 	"c_cpp.command.enableErrorSquiggles.title": "Fehlerwellenlinien aktivieren",
