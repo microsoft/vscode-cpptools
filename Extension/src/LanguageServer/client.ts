@@ -1028,10 +1028,11 @@ export class DefaultClient implements Client {
         const index: number = await this.showSelectIntelliSenseConfiguration(paths);
         let action: string = "";
         let configurationSelected: boolean = false;
+        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseIndicator();
         try {
             if (index === -1) {
                 action = "escaped";
-                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
+                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !statusBarIndicatorEnabled) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
                 return;
@@ -1063,7 +1064,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
-                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound) {
+                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !statusBarIndicatorEnabled) {
                         this.showPrompt(selectCompiler, true, sender);
                     }
                     action = "browse dismissed";
