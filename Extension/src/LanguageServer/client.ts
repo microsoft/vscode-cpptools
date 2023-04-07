@@ -71,6 +71,7 @@ let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
+let scanForCompilersDone: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -1002,26 +1003,33 @@ export class DefaultClient implements Client {
             }
             if (index === paths.length - 2) {
                 action = "help";
+                // Because we need to conditionally enable/disable steps to alter their contents,
+                // we need to determine which step is actually visible. If the steps change, this
+                // logic will need to change to reflect them.
+                let step: string = "ms-vscode.cpptools#";
+                if (!scanForCompilersDone) {
+                    step = step + "awaiting.activation.";
+                } else if (compilerDefaults.knownCompilers === undefined || !compilerDefaults.knownCompilers.length) {
+                    step = step + "no.compilers.found.";
+                } else {
+                    step = step + "verify.compiler.";
+                }
                 switch (os.platform()) {
                     case 'win32':
-                        vscode.commands.executeCommand(
-                            "workbench.action.openWalkthrough",
-                            { category: 'ms-vscode.cpptools#cppWelcome', step: 'ms-vscode.cpptools#verify.compiler.windows' },
-                            true);
-                        return;
+                        step = step + "windows";
+                        break;
                     case 'darwin':
-                        vscode.commands.executeCommand(
-                            "workbench.action.openWalkthrough",
-                            { category: 'ms-vscode.cpptools#cppWelcome', step: 'ms-vscode.cpptools#verify.compiler.mac' },
-                            true);
-                        return;
+                        step = step + "mac";
+                        break;
                     default: // Linux
-                        vscode.commands.executeCommand(
-                            "workbench.action.openWalkthrough",
-                            { category: 'ms-vscode.cpptools#cppWelcome', step: 'ms-vscode.cpptools#verify.compiler.linux' },
-                            true);
-                        return;
+                        step = step + "linux";
+                        break;
                 }
+                vscode.commands.executeCommand(
+                    "workbench.action.openWalkthrough",
+                    { category: 'ms-vscode.cpptools#cppWelcome', step },
+                    true);
+                return;
             }
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
@@ -2589,6 +2597,7 @@ export class DefaultClient implements Client {
             trustedCompilerPaths: compilerPath
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
+        scanForCompilersDone = true;
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
         vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);

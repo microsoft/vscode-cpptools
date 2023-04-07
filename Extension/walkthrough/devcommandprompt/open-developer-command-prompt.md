@@ -3,5 +3,5 @@
 <ol>
 <li><p data-loc-id="walkthrough.open.command.prompt">Open the Developer Command Prompt for VS by typing "developer" in the Windows Start menu. Select the Developer Command Prompt for VS, which will automatically navigate to your current open folder.</p>
 </li>
-<li><p data-loc-id="walkthrough.windows.press.f5">Type "code" into the command prompt and hit enter. This should relaunch VSCode and take you back to this walkthrough. </p>
+<li><p data-loc-id="walkthrough.windows.press.f5">Type "code" into the command prompt and hit enter. This should relaunch VS Code and take you back to this walkthrough. </p>
 </li>
