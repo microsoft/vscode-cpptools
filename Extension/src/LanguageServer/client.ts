@@ -944,9 +944,11 @@ export class DefaultClient implements Client {
         });
     }
 
-    public async showSelectIntelliSenseConfiguration(paths: string[]): Promise<number> {
+    public async showSelectIntelliSenseConfiguration(paths: string[], compilersOnly?: boolean): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("configure.intelliSense", "How would you like to configure IntelliSense?");
+        options.placeHolder = compilersOnly ?
+            localize("select.compiler", "Select a compiler to configure for IntelliSense") :
+            localize("configure.intelliSense", "How would you like to configure IntelliSense?");
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -1025,7 +1027,7 @@ export class DefaultClient implements Client {
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine to query"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure a compiler to query (not recommended)"));
-        const index: number = await this.showSelectIntelliSenseConfiguration(paths);
+        const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
         const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseIndicator();
@@ -2733,7 +2735,7 @@ export class DefaultClient implements Client {
                 this.showConfigureIntelliSenseStatus = false;
             }
             ui.showConfigureIntelliSenseStatusIcon(this.showConfigureIntelliSenseStatus, this);
-        } else if (!displayedSelectCompiler) {
+        } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;
         }
