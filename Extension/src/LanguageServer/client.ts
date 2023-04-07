@@ -1070,7 +1070,6 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                ui.showConfigureIntelliSenseStatusIcon(false, this);
             } else {
                 configurationSelected = true;
                 if (index < configProvidersIndex && configProviders) {
@@ -1089,10 +1088,10 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                    ui.showConfigureIntelliSenseStatusIcon(false, this);
                 }
             }
 
+            ui.showConfigureIntelliSenseStatusIcon(false, this);
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
@@ -2713,9 +2712,14 @@ export class DefaultClient implements Client {
             }
         }
 
+        const settings: CppSettings = new CppSettings(this.RootUri);
+        const defaultsNotSet: boolean = settings.defaultCompilerPath === undefined
+            && !settings.defaultCompileCommands && !settings.defaultConfigurationProvider;
+
         showConfigStatus = showConfigStatus ||
             (!this.configuration.CurrentConfiguration?.configurationProvider && !this.configuration.CurrentConfiguration?.compileCommands &&
-            !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
+            !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== "") &&
+            defaultsNotSet);
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
