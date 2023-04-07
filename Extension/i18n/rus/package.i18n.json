@@ -17,7 +17,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Изменить конфигурации (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Изменить конфигурации (пользовательский интерфейс)",
 	"c_cpp.command.selectDefaultCompiler.title": "Выбрать компилятор по умолчанию",
-	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Переключить заголовок/источник",
 	"c_cpp.command.enableErrorSquiggles.title": "Включить волнистые линии для ошибок",
 	"c_cpp.command.disableErrorSquiggles.title": "Отключить волнистые линии для ошибок",

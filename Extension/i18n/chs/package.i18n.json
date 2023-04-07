@@ -17,7 +17,6 @@
 	"c_cpp.command.configurationEditJSON.title": "编辑配置(JSON)",
 	"c_cpp.command.configurationEditUI.title": "编辑配置(UI)",
 	"c_cpp.command.selectDefaultCompiler.title": "选择默认编译器",
-	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "切换标头/源",
 	"c_cpp.command.enableErrorSquiggles.title": "启用错误波形曲线",
 	"c_cpp.command.disableErrorSquiggles.title": "禁用错误波形曲线",

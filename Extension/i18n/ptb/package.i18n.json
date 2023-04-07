@@ -17,7 +17,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Editar Configurações (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Editar Configurações (IU)",
 	"c_cpp.command.selectDefaultCompiler.title": "Selecionar Compilador Padrão",
-	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Alternar Cabeçalho/Origem",
 	"c_cpp.command.enableErrorSquiggles.title": "Habilitar Rabiscos de Erro",
 	"c_cpp.command.disableErrorSquiggles.title": "Desabilitar Rabiscos de Erro",

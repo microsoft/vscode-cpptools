@@ -17,7 +17,6 @@
 	"c_cpp.command.configurationEditJSON.title": "構成の編集 (JSON)",
 	"c_cpp.command.configurationEditUI.title": "構成の編集 (UI)",
 	"c_cpp.command.selectDefaultCompiler.title": "既定のコンパイラの選択",
-	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "ヘッダー/ソースの切り替え",
 	"c_cpp.command.enableErrorSquiggles.title": "エラーの波線を有効にする",
 	"c_cpp.command.disableErrorSquiggles.title": "エラーの波線を無効にする",

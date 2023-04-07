@@ -17,7 +17,6 @@
 	"c_cpp.command.configurationEditJSON.title": "Modifica configurazioni (JSON)",
 	"c_cpp.command.configurationEditUI.title": "Modifica configurazioni (interfaccia utente)",
 	"c_cpp.command.selectDefaultCompiler.title": "Seleziona compilatore predefinito",
-	"c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration",
 	"c_cpp.command.switchHeaderSource.title": "Scambia intestazione/origine",
 	"c_cpp.command.enableErrorSquiggles.title": "Abilita i segni di revisione per gli errori",
 	"c_cpp.command.disableErrorSquiggles.title": "Disabilita i segni di revisione per gli errori",
