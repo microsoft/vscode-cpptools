@@ -1477,3 +1477,29 @@ export const documentSelector: DocumentFilter[] = [
     { scheme: 'file', language: 'cpp' },
     { scheme: 'file', language: 'cuda-cpp' }
 ];
+
+export function hasMsvcEnvironment(): boolean {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'NETFXSDKDir',
+        'UCRTVersion',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+}

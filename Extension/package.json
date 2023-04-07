@@ -173,7 +173,10 @@
             "when": "workspacePlatform == windows",
             "media": {
               "markdown": "dist/walkthrough/devcommandprompt/open-developer-command-prompt.md"
-            }
+            },
+            "completionEvents": [
+              "onContext:cpptools.msvcEnvironmentFound"
+            ]
           },
           {
             "id": "run.project.mac",
