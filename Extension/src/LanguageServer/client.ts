@@ -1739,7 +1739,7 @@ export class DefaultClient implements Client {
             return false;
         }
         for (const provider of this.registeredProviders.Value) {
-            if (provider.id === extensionId) {
+            if (provider === extensionId) {
                 return true;
             }
         }
@@ -1758,10 +1758,10 @@ export class DefaultClient implements Client {
         return this.notifyWhenLanguageClientReady(() => {
             if (this.registeredProviders === undefined // Shouldn't happen.
                 // Prevent duplicate processing.
-                || this.registeredProviders.Value.includes({ name: provider.name, id: provider.extensionId })) {
+                || this.registeredProviders.Value.includes(provider.extensionId)) {
                 return;
             }
-            this.registeredProviders.Value.push({ name: provider.name, id: provider.extensionId });
+            this.registeredProviders.Value.push(provider.extensionId);
             const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
             if (!rootFolder) {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
