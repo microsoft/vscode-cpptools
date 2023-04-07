@@ -1021,7 +1021,7 @@ export class DefaultClient implements Client {
         }
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
-        paths.push(localize("noConfig.string", "Do not use a compiler (not recommended)"));
+        paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
@@ -1103,14 +1103,11 @@ export class DefaultClient implements Client {
             if (configurationSelected) {
                 const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
                 if (rootFolder) {
-                    if (configProvidersIndex > 0) {
-                        const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
-                        ask.Value = false;
-                    }
-                    if (compileCommandsIndex - configProvidersIndex > 0) {
-                        const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
-                        ask.Value = false;
-                    }
+                    // TODO: Add some way to change this state to true.
+                    let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
+                    ask.Value = false;
+                    ask = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
+                    ask.Value = false;
                 }
             }
         }
@@ -2635,10 +2632,6 @@ export class DefaultClient implements Client {
         let showConfigStatus: boolean = false;
         if (rootFolder && !this.configuration.CurrentConfiguration?.configurationProvider && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
-            // If c_cpp_properties.json and settings.json are both missing, reset our prompt
-            if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
-                ask.Value = true;
-            }
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
                     showConfigStatus = true;
@@ -2678,9 +2671,6 @@ export class DefaultClient implements Client {
         // Handle compile commands
         if (rootFolder && !this.configuration.CurrentConfiguration?.compileCommands && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
-            if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
-                ask.Value = true;
-            }
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
                     showConfigStatus = true;
