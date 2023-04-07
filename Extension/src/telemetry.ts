@@ -81,7 +81,7 @@ export async function showLanguageStatusExperiment(): Promise<boolean> {
     return isExperimentEnabled("ShowLangStatBar");
 }
 
-export async function showStatusBarIntelliSenseIndicator(): Promise<boolean> {
+export async function showStatusBarIntelliSenseButton(): Promise<boolean> {
     const result: boolean = await isExperimentEnabled("showStatusBarIntelliSenseIndicator");
     return result;
 }

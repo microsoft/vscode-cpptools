@@ -73,7 +73,7 @@ let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 interface ConfigStateReceived {
     compilers: boolean;
     compileCommands: boolean;
-    configProviders: CustomConfigurationProvider1[] | undefined;
+    configProviders?: CustomConfigurationProvider1[];
     timeout: boolean;
 }
 
@@ -840,7 +840,7 @@ export class DefaultClient implements Client {
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
     private registeredProviders: PersistentFolderState<string[]> | undefined;
 
-    private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: [], timeout: false };
+    private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseStatus: boolean = false;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
@@ -982,7 +982,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any, compilersOnly?: boolean | undefined): Promise<void> {
+    public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any, compilersOnly?: boolean): Promise<void> {
         const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration...");
         const paths: string[] = [];
@@ -1025,7 +1025,7 @@ export class DefaultClient implements Client {
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
-        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseIndicator();
+        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseButton();
         try {
             if (index === -1) {
                 action = "escaped";
@@ -1041,7 +1041,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
-                ui.showConfigureIntelliSenseStatusIcon(false, this);
+                ui.showConfigureIntelliSenseStatusButton(false, this);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1078,12 +1078,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    ui.showConfigureIntelliSenseStatusButton(false, this);
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    ui.showConfigureIntelliSenseStatusButton(false, this);
                     return;
                 } else {
                     action = "select compiler";
@@ -1091,7 +1091,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.showConfigureIntelliSenseStatusIcon(false, this);
+            ui.showConfigureIntelliSenseStatusButton(false, this);
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
@@ -1130,7 +1130,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    ui.showConfigureIntelliSenseStatusButton(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1165,7 +1165,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    ui.showConfigureIntelliSenseStatusButton(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1671,7 +1671,7 @@ export class DefaultClient implements Client {
                     this.configuration.handleConfigurationChange();
                 }
                 if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    ui.showConfigureIntelliSenseStatusButton(false, this);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2499,7 +2499,7 @@ export class DefaultClient implements Client {
                         const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
                         showIntelliSenseFallbackMessage.Value = true;
                         if (showIntelliSenseFallbackMessage.Value
-                            && !await telemetry.showStatusBarIntelliSenseIndicator()) {
+                            && !await telemetry.showStatusBarIntelliSenseButton()) {
                             ui.showConfigureIncludePathMessage(async () => {
                                 const configJSON: string = localize("configure.json.button", "Configure (JSON)");
                                 const configUI: string = localize("configure.ui.button", "Configure (UI)");
@@ -2618,7 +2618,7 @@ export class DefaultClient implements Client {
     }
 
     public async handleConfigStatusOrPrompt(sender?: string): Promise<void> {
-        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseIndicator();
+        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseButton();
         if (statusBarIndicatorEnabled && !this.configStateReceived.timeout
             && (!this.configStateReceived.compilers || !this.configStateReceived.compileCommands || !this.configStateReceived.configProviders)) {
             return; // Wait till the config state is recevied or timed out.
@@ -2627,7 +2627,8 @@ export class DefaultClient implements Client {
 
         // Handle config providers
         const provider: CustomConfigurationProvider1 | undefined =
-            this.configStateReceived.configProviders?.[0];
+            !this.configStateReceived.configProviders ? undefined :
+                (this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0]);
         let showConfigStatus: boolean = false;
         if (rootFolder && !this.configuration.CurrentConfiguration?.configurationProvider && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
@@ -2727,7 +2728,7 @@ export class DefaultClient implements Client {
             } else {
                 this.showConfigureIntelliSenseStatus = false;
             }
-            ui.showConfigureIntelliSenseStatusIcon(this.showConfigureIntelliSenseStatus, this);
+            ui.showConfigureIntelliSenseStatusButton(this.showConfigureIntelliSenseStatus, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;
