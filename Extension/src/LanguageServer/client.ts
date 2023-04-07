@@ -2675,8 +2675,11 @@ export class DefaultClient implements Client {
         }
 
         // Handle compile commands
-        if (rootFolder && !this.configuration.CurrentConfiguration?.compileCommands && this.compileCommandsPaths.length > 1 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
+        if (rootFolder && !this.configuration.CurrentConfiguration?.compileCommands && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
+            if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
+                ask.Value = true;
+            }
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
                     showConfigStatus = true;
