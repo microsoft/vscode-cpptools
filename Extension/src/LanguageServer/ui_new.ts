@@ -432,7 +432,6 @@ export class NewUI implements UI {
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!activeEditor) {
             this.ShowConfiguration = false;
-            this.showConfigureIntelliSenseStatusIcon(false, this.currentClient);
         } else {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
 

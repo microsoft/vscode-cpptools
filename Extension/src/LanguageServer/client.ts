@@ -946,7 +946,7 @@ export class DefaultClient implements Client {
 
     public async showSelectIntelliSenseConfiguration(paths: string[]): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.compile.commands", "How would you like to configure IntelliSense for this workspace?");
+        options.placeHolder = localize("configure.intelliSense", "How would you like to configure IntelliSense?");
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -989,19 +989,21 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings();
         const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration");
         const paths: string[] = [];
-        const registeredProviders: ConfigurationProviderInfo[] | undefined = compilersOnly ? undefined : this.registeredProviders?.Value;
-        if (registeredProviders && registeredProviders.length > 0) {
+        const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
+        if (configProviders && configProviders.length > 0) {
             paths.push("configuration providers");
-            for (const provider of registeredProviders) {
+            for (const provider of configProviders) {
                 paths.push(localize("use.provider", "Use {0}", provider.name));
             }
         }
+        const configProvidersIndex: number = paths.length;
         if (!compilersOnly && this.compileCommandsPaths.length > 0) {
             paths.push("compile_commands.json");
             for (const compileCommandsPath of this.compileCommandsPaths) {
                 paths.push(localize("use.compileCommands", "Use {0}", compileCommandsPath));
             }
         }
+        const compileCommandsIndex: number = paths.length;
         paths.push("compilers");
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
@@ -1025,6 +1027,7 @@ export class DefaultClient implements Client {
         paths.push(localize("noConfig.string", "Do not configure a compiler to query (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths);
         let action: string = "";
+        let configurationSelected: boolean = false;
         try {
             if (index === -1) {
                 action = "escaped";
@@ -1036,6 +1039,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 1) {
                 action = "disable";
                 settings.defaultCompilerPath = "";
+                configurationSelected = true;
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
@@ -1065,13 +1069,30 @@ export class DefaultClient implements Client {
                     action = "browse dismissed";
                     return;
                 }
+                configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
                 ui.showConfigureIntelliSenseStatusIcon(false, this);
             } else {
-                action = "select compiler";
-                settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                ui.showConfigureIntelliSenseStatusIcon(false, this);
+                configurationSelected = true;
+                if (index < configProvidersIndex && configProviders) {
+                    action = "select config provider";
+                    const provider: CustomConfigurationProvider1 = configProviders[index - 1];
+                    await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
+                    this.onCustomConfigurationProviderRegistered(provider);
+                    telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
+                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    return;
+                } else if (index < compileCommandsIndex) {
+                    action = "select compile commands";
+                    this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
+                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                    return;
+                } else {
+                    action = "select compiler";
+                    settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    ui.showConfigureIntelliSenseStatusIcon(false, this);
+                }
             }
 
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
@@ -1079,6 +1100,21 @@ export class DefaultClient implements Client {
             DefaultClient.updateClientConfigurations();
         } finally {
             telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender)}, { compilerCount: paths.length });
+
+            // Clear the prompt state.
+            if (configurationSelected) {
+                const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
+                if (rootFolder) {
+                    if (configProvidersIndex > 0) {
+                        const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
+                        ask.Value = false;
+                    }
+                    if (compileCommandsIndex - configProvidersIndex > 0) {
+                        const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
+                        ask.Value = false;
+                    }
+                }
+            }
         }
     }
 
@@ -1733,12 +1769,12 @@ export class DefaultClient implements Client {
                 return; // There is no c_cpp_properties.json to edit because there is no folder open.
             }
             this.configuration.handleConfigurationChange();
+            if (this.configStateReceived.configProviders === undefined) {
+                this.configStateReceived.configProviders = [];
+            }
+            this.configStateReceived.configProviders.push(provider);
             const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
             if (!selectedProvider) {
-                if (this.configStateReceived.configProviders === undefined) {
-                    this.configStateReceived.configProviders = [];
-                }
-                this.configStateReceived.configProviders.push(provider);
                 this.handleConfigStatusOrPrompt("configProviders");
             } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 this.onCustomConfigurationProviderRegistered(provider);
@@ -2574,13 +2610,13 @@ export class DefaultClient implements Client {
             return;
         }
         const client: DefaultClient = <DefaultClient>potentialClient;
-        if (this !== client) {
+        if (!client) {
             return;
         }
 
-        this.compileCommandsPaths = params.paths;
-        this.configStateReceived.compileCommands = true;
-        this.handleConfigStatusOrPrompt("compileCommands");
+        client.compileCommandsPaths = params.paths;
+        client.configStateReceived.compileCommands = true;
+        client.handleConfigStatusOrPrompt("compileCommands");
     }
 
     public async handleConfigStatusOrPrompt(sender?: string): Promise<void> {
@@ -2595,7 +2631,7 @@ export class DefaultClient implements Client {
         const provider: CustomConfigurationProvider1 | undefined =
             this.configStateReceived.configProviders?.[0];
         let showConfigStatus: boolean = false;
-        if (rootFolder && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
+        if (rootFolder && !this.configuration.CurrentConfiguration?.configurationProvider && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
             // If c_cpp_properties.json and settings.json are both missing, reset our prompt
             if (!fs.existsSync(`${this.RootPath}/.vscode/c_cpp_properties.json`) && !fs.existsSync(`${this.RootPath}/.vscode/settings.json`)) {
@@ -2638,7 +2674,7 @@ export class DefaultClient implements Client {
         }
 
         // Handle compile commands
-        if (rootFolder && this.compileCommandsPaths.length > 1 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
+        if (rootFolder && !this.configuration.CurrentConfiguration?.compileCommands && this.compileCommandsPaths.length > 1 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
@@ -2682,7 +2718,9 @@ export class DefaultClient implements Client {
             }
         }
 
-        showConfigStatus = showConfigStatus || (!compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
+        showConfigStatus = showConfigStatus ||
+            (!this.configuration.CurrentConfiguration?.configurationProvider && !this.configuration.CurrentConfiguration?.compileCommands &&
+            !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
