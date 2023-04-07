@@ -1321,12 +1321,14 @@ export class DefaultClient implements Client {
                     initializedClientCount++;
                     // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
-                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                        // The event handlers must be set before this happens.
+                        // Timeout waiting for compile_commands.json and config providers.
+                        // The quick pick options will update if they're added later on.
                         global.setTimeout(() => {
                             this.configStateReceived.timeout = true;
                             this.handleConfigStatusOrPrompt();
                         }, 15000);
+                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                        // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
                         clients.forEach(client => {
