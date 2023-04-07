@@ -547,11 +547,6 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
-interface ConfigurationProviderInfo {
-    name: string;
-    id: string;
-}
-
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
@@ -843,7 +838,7 @@ export class DefaultClient implements Client {
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderId: PersistentFolderState<string | undefined> | undefined;
     public lastCustomBrowseConfigurationProviderVersion: PersistentFolderState<Version> | undefined;
-    private registeredProviders: PersistentFolderState<ConfigurationProviderInfo[]> | undefined;
+    private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: [], timeout: false };
     private showConfigureIntelliSenseStatus: boolean = false;
@@ -1204,7 +1199,7 @@ export class DefaultClient implements Client {
             this.lastCustomBrowseConfiguration = new PersistentFolderState<WorkspaceBrowseConfiguration | undefined>("CPP.lastCustomBrowseConfiguration", undefined, workspaceFolder);
             this.lastCustomBrowseConfigurationProviderId = new PersistentFolderState<string | undefined>("CPP.lastCustomBrowseConfigurationProviderId", undefined, workspaceFolder);
             this.lastCustomBrowseConfigurationProviderVersion = new PersistentFolderState<Version>("CPP.lastCustomBrowseConfigurationProviderVersion", Version.v5, workspaceFolder);
-            this.registeredProviders = new PersistentFolderState<ConfigurationProviderInfo[]>("CPP.registeredProviders", [], workspaceFolder);
+            this.registeredProviders = new PersistentFolderState<string[]>("CPP.registeredProviders", [], workspaceFolder);
             // If this provider did the register in the last session, clear out the cached browse config.
             if (!this.isProviderRegistered(this.lastCustomBrowseConfigurationProviderId.Value)) {
                 this.lastCustomBrowseConfigurationProviderId.Value = undefined;
