@@ -27,7 +27,7 @@ export class FindAllRefsView {
         if (this.referencesModel) {
             hasResults = this.referencesModel.hasResults();
         }
-        vscode.commands.executeCommand('setContext', 'cppReferenceTypes:hasResults', hasResults);
+        vscode.commands.executeCommand('setContext', 'cpptools.hasReferencesResults', hasResults);
     }
 
     setData(results: ReferencesResult, isCanceled: boolean, groupByFile: boolean): void {
