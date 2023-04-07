@@ -146,7 +146,7 @@ async function enableSshTargetsView(): Promise<void> {
     if (sshTargetsViewEnabled || sshTargetsViewSetting === 'disabled') {
         return;
     }
-    await vscode.commands.executeCommand('setContext', 'enableCppSshTargetsView', true);
+    await vscode.commands.executeCommand('setContext', 'cpptools.enableSshTargetsView', true);
     sshConfigWatcher = chokidar.watch(getSshConfigurationFiles(), { ignoreInitial: true })
         .on('add', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
         .on('change', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
@@ -155,7 +155,7 @@ async function enableSshTargetsView(): Promise<void> {
 }
 
 async function disableSshTargetsView(): Promise<void> {
-    await vscode.commands.executeCommand('setContext', 'enableCppSshTargetsView', false);
+    await vscode.commands.executeCommand('setContext', 'cpptools.enableSshTargetsView', false);
     if (sshConfigWatcher) {
         sshConfigWatcher.close();
         sshConfigWatcher = undefined;

@@ -1595,10 +1595,10 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isFolderOpen', util.isFolderOpen(document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.BuildAndDebug.isFolderOpen', util.isFolderOpen(document.uri));
         } else {
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
+            vscode.commands.executeCommand('setContext', 'cpptools.BuildAndDebug.isSourceFile', false);
         }
     }
 
@@ -2581,8 +2581,8 @@ export class DefaultClient implements Client {
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.BuildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.BuildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2604,7 +2604,7 @@ export class DefaultClient implements Client {
                 }
             }
         } else {
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
+            vscode.commands.executeCommand('setContext', 'cpptools.BuildAndDebug.isSourceFile', false);
         }
     }
 
