@@ -2247,7 +2247,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => util.addTrustedCompiler(compilerPaths, e.compilerPath));
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
-        this.languageClient.onNotification(ReportStatusNotification, (e) => this.updateStatus(e));
+        this.languageClient.onNotification(ReportStatusNotification, async (e) => this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
@@ -2431,7 +2431,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private updateStatus(notificationBody: ReportStatusNotificationBody): void {
+    private async updateStatus(notificationBody: ReportStatusNotificationBody): Promise<void> {
         const message: string = notificationBody.status;
         util.setProgress(util.getProgressExecutableSuccess());
         const testHook: TestHook = getTestHook();
@@ -2501,7 +2501,9 @@ export class DefaultClient implements Client {
                     const defaultClient: DefaultClient = <DefaultClient>client;
                     if (!defaultClient.configuration.CurrentConfiguration?.configurationProvider) {
                         const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
-                        if (showIntelliSenseFallbackMessage.Value) {
+                        showIntelliSenseFallbackMessage.Value = true;
+                        if (showIntelliSenseFallbackMessage.Value
+                            && !await telemetry.showStatusBarIntelliSenseIndicator()) {
                             ui.showConfigureIncludePathMessage(async () => {
                                 const configJSON: string = localize("configure.json.button", "Configure (JSON)");
                                 const configUI: string = localize("configure.ui.button", "Configure (UI)");
