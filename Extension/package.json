@@ -127,8 +127,7 @@
             "description": "%c_cpp.walkthrough.compilers.found.description%",
             "when": "workspacePlatform == mac && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
             "media": {
-              "svg": "dist/walkthrough/images/set-up-cpp-environment.svg",
-              "altText": "%c_cpp.walkthrough.compilers.found.altText%"
+              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"
@@ -140,8 +139,7 @@
             "description": "%c_cpp.walkthrough.compilers.found.description%",
             "when": "workspacePlatform == linux && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
             "media": {
-              "svg": "dist/walkthrough/images/set-up-cpp-environment.svg",
-              "altText": "%c_cpp.walkthrough.compilers.found.altText%"
+              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"
@@ -153,8 +151,7 @@
             "description": "%c_cpp.walkthrough.compilers.found.description%",
             "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
             "media": {
-              "svg": "dist/walkthrough/images/set-up-cpp-environment.svg",
-              "altText": "%c_cpp.walkthrough.compilers.found.altText%"
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"
