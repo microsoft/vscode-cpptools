@@ -127,7 +127,8 @@
             "description": "%c_cpp.walkthrough.compilers.found.description%",
             "when": "workspacePlatform == mac && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
             "media": {
-              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
+              "svg": "dist/walkthrough/images/set-up-cpp-environment.svg",
+              "altText": "%c_cpp.walkthrough.compilers.found.altText%"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"
@@ -139,7 +140,8 @@
             "description": "%c_cpp.walkthrough.compilers.found.description%",
             "when": "workspacePlatform == linux && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
             "media": {
-              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
+              "svg": "dist/walkthrough/images/set-up-cpp-environment.svg",
+              "altText": "%c_cpp.walkthrough.compilers.found.altText%"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"
@@ -151,7 +153,8 @@
             "description": "%c_cpp.walkthrough.compilers.found.description%",
             "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
             "media": {
-              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
+              "svg": "dist/walkthrough/images/set-up-cpp-environment.svg",
+              "altText": "%c_cpp.walkthrough.compilers.found.altText%"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"
@@ -162,7 +165,7 @@
             "title": "%c_cpp.walkthrough.create.cpp.file.title%",
             "description": "%c_cpp.walkthrough.create.cpp.file.description%",
             "media": {
-              "svg": "dist/walkthrough/images/openFolder.svg",
+              "svg": "dist/walkthrough/images/create-a-file.svg",
               "altText": "%c_cpp.walkthrough.create.cpp.file.altText%"
             }
           },
@@ -182,7 +185,7 @@
             "when": "workspacePlatform == mac",
             "media": {
               "altText": "%c_cpp.walkthrough.run.debug.windows.altText%",
-              "svg": "dist/walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/run-and-debug.svg"
             }
           },
           {
@@ -192,7 +195,7 @@
             "when": "workspacePlatform == linux",
             "media": {
               "altText": "%c_cpp.walkthrough.run.debug.windows.altText%",
-              "svg": "dist/walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/run-and-debug.svg"
             }
           },
           {
@@ -202,7 +205,7 @@
             "when": "workspacePlatform == windows",
             "media": {
               "altText": "%c_cpp.walkthrough.run.debug.windows.altText%",
-              "svg": "dist/walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/run-and-debug.svg"
             }
           },
           {
@@ -212,7 +215,7 @@
             "description": "%c_cpp.walkthrough.customize.debugging.mac.description%",
             "media": {
               "altText": "%c_cpp.walkthrough.customize.debugging.altText%",
-              "svg": "dist/walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/customize-debugging.svg"
             }
           },
           {
@@ -222,7 +225,7 @@
             "description": "%c_cpp.walkthrough.customize.debugging.linux.description%",
             "media": {
               "altText": "%c_cpp.walkthrough.customize.debugging.altText%",
-              "svg": "dist/walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/customize-debugging.svg"
             }
           },
           {
@@ -232,7 +235,7 @@
             "description": "%c_cpp.walkthrough.customize.debugging.windows.description%",
             "media": {
               "altText": "%c_cpp.walkthrough.customize.debugging.altText%",
-              "svg": "dist/walkthrough/images/rundebug.svg"
+              "svg": "dist/walkthrough/images/customize-debugging.svg"
             }
           }
         ]

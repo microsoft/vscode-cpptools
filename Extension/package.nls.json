@@ -407,6 +407,7 @@
     "c_cpp.walkthrough.activating.description": "Activating the C++ Extension to determine whether your C++ Environment has been set up.\nActivating Extension...",
     "c_cpp.walkthrough.no.compilers.description": "We could not find a C++ compiler on your machine, which is required to use the C++ Extension. Follow the instructions on the right to install one, then click “Find my new compiler” below.\n[Find my new compiler](command:C_Cpp.RescanCompilers)",
     "c_cpp.walkthrough.compilers.found.description": "The C++ extension requires a compiler to be installed. Select one from those already on your machine by clicking the button below.\n[Select my Default Compiler](command:C_Cpp.SelectDefaultCompiler)",
+    "c_cpp.walkthrough.compilers.found.altText": "Image showing the select a default compiler quickpick and the list of compilers found on the users machine, one of which is selected.",
     "c_cpp.walkthrough.create.cpp.file.title": "Create a C++ file",
     "c_cpp.walkthrough.create.cpp.file.description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, like \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
     "c_cpp.walkthrough.create.cpp.file.altText": "Open a C++ file or a folder with a C++ project.",
