@@ -1034,10 +1034,12 @@ export class DefaultClient implements Client {
                 }
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
                 ui.showCompilerStatusIcon(false);
             } else {
                 action = "select compiler";
                 settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
                 ui.showCompilerStatusIcon(false);
             }
 
