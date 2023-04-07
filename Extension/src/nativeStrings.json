@@ -178,7 +178,7 @@
         "hint": "Refers to C++ template specializations. This is part of a description indicating there are N additional specializations of a function.  %d is replaced with that number."
     },
     "intellisense_configuration": {
-        "text": "Note: IntelliSense is not fully configured. Use the 'Select IntelliSense Configuration' command to finish configuration."
+        "text": "Note: IntelliSense is not fully configured. Use the 'Select IntelliSense Configuration...' command to finish configuration."
     },
     "select_intellisense_configuration": {
         "text": "Select an IntelliSense configuration to locate system headers"
@@ -442,6 +442,6 @@
     },
     "unknown_error": "Unknown error.",
     "run_select_intellisense_configuration": {
-        "text": "Please run the 'Select IntelliSense Configuration' command to locate your system headers."
+        "text": "Please run the 'Select IntelliSense Configuration...' command to locate your system headers."
     }
 }

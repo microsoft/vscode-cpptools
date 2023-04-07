@@ -984,7 +984,7 @@ export class DefaultClient implements Client {
 
     public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any, compilersOnly?: boolean | undefined): Promise<void> {
         const settings: CppSettings = new CppSettings();
-        const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration");
+        const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration...");
         const paths: string[] = [];
         const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
         if (configProviders && configProviders.length > 0) {
@@ -1019,9 +1019,9 @@ export class DefaultClient implements Client {
                 }
             }
         }
-        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
+        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
-        paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
+        paths.push(localize("noConfig.string", "Do not use a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
@@ -1156,7 +1156,7 @@ export class DefaultClient implements Client {
         if (compilerDefaults === undefined) {
             return;
         }
-        const selectCompiler: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration");
+        const selectCompiler: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
         const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
         let action: string;
         const settings: CppSettings = new CppSettings();
