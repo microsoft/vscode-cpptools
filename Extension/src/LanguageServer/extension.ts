@@ -538,7 +538,9 @@ function selectDefaultCompiler(sender?: any): void {
 }
 
 function selectIntelliSenseConfiguration(sender?: any): void {
-    clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
+    });
 }
 
 function onSelectConfiguration(sender?: any): void {
