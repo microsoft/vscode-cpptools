@@ -761,7 +761,7 @@ export interface Client {
     resetDatabase(): void;
     deactivate(): void;
     promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
-    rescanCompilers(): Promise<void>;
+    rescanCompilers(sender?: any): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -1051,9 +1051,12 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async rescanCompilers(): Promise<void> {
+    public async rescanCompilers(sender?: any): Promise<void> {
         compilerDefaults = await this.requestCompiler(compilerPaths);
         DefaultClient.updateClientConfigurations();
+        if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
+            await this.promptSelectCompiler(true, sender);
+        }
     };
 
     public async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
@@ -3544,7 +3547,7 @@ class NullClient implements Client {
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
     promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
-    rescanCompilers(): Promise<void> { return Promise.resolve(); }
+    rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }

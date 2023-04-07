@@ -542,7 +542,7 @@ function selectDefaultCompiler(sender?: any): void {
 
 function onRescanCompilers(sender?: any): void {
     clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        clients.ActiveClient.rescanCompilers();
+        clients.ActiveClient.rescanCompilers(sender);
     });
 }
 
