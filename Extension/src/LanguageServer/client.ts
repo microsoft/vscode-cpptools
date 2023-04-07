@@ -761,6 +761,7 @@ export interface Client {
     resetDatabase(): void;
     deactivate(): void;
     promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
+    rescanCompilers(): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -1048,7 +1049,12 @@ export class DefaultClient implements Client {
         }
     }
 
-    async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
+    public async rescanCompilers(): Promise<void> {
+        compilerDefaults = await this.requestCompiler(compilerPaths);
+        DefaultClient.updateClientConfigurations();
+    };
+
+    public async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
@@ -2573,11 +2579,15 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
-    public requestCompiler(compilerPath: string[]): Thenable<configs.CompilerDefaults> {
+    public async requestCompiler(compilerPath: string[]): Promise<configs.CompilerDefaults> {
         const params: QueryDefaultCompilerParams = {
             trustedCompilerPaths: compilerPath
         };
-        return this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
+        const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
+        vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
+        vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
+        vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);
+        return results;
     }
 
     private updateActiveDocumentTextOptions(): void {
@@ -3532,6 +3542,7 @@ class NullClient implements Client {
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
     promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
+    rescanCompilers(): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }

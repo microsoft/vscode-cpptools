@@ -63,51 +63,113 @@
     "walkthroughs": [
       {
         "id": "cppWelcome",
-        "title": "Get Started with C++ Development",
-        "description": "Dive into VS Code's rich C++ development experience.",
+        "title": "%c_cpp.walkthrough.title%",
+        "description": "%c_cpp.walkthrough.description%",
         "when": "true",
         "steps": [
           {
-            "id": "verify.compiler.mac",
-            "title": "Set up your C++ Environment",
-            "description": "The C++ extension requires you to use a C++ compiler. Click the button below to select one from those already installed on your machine. \n[Select your default Compiler](command:C_Cpp.SelectDefaultCompiler)",
-            "when": "workspacePlatform == mac",
+            "id": "awaiting.activation.mac",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.activating.description%",
+            "when": "workspacePlatform == mac && cpptools.scanForCompilersDone == false",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
             }
           },
           {
-            "id": "verify.compiler.linux",
-            "title": "Set up your C++ Environment",
-            "description": "The C++ extension requires you to use a C++ compiler. Click the button below to select one from those already installed on your machine. \n[Select your default Compiler](command:C_Cpp.SelectDefaultCompiler)",
-            "when": "workspacePlatform == linux",
+            "id": "awaiting.activation.linux",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.activating.description%",
+            "when": "workspacePlatform == linux && cpptools.scanForCompilersDone == false",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
             }
           },
           {
-            "id": "verify.compiler.windows",
-            "title": "Set up your C++ Environment",
-            "description": "The C++ extension requires you to use a C++ compiler. Click the button below to select one from those already installed on your machine. \n[Select your default Compiler](command:C_Cpp.SelectDefaultCompiler)",
-            "when": "workspacePlatform == windows",
+            "id": "awaiting.activation.windows",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.activating.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == false",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
             }
           },
           {
+            "id": "no.compilers.found.mac",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.no.compilers.description%",
+            "when": "workspacePlatform == mac && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == true",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
+            }
+          },
+          {
+            "id": "no.compilers.found.linux",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.no.compilers.description%",
+            "when": "workspacePlatform == linux && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == true",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
+            }
+          },
+          {
+            "id": "no.compilers.found.windows",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.no.compilers.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == true",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
+            }
+          },
+          {
+            "id": "verify.compiler.mac",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.compilers.found.description%",
+            "when": "workspacePlatform == mac && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-clang-macos.md"
+            },
+            "completionEvents": [
+              "onContext:cpptools.trustedCompilerFound"
+            ]
+          },
+          {
+            "id": "verify.compiler.linux",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.compilers.found.description%",
+            "when": "workspacePlatform == linux && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-gcc-linux.md"
+            },
+            "completionEvents": [
+              "onContext:cpptools.trustedCompilerFound"
+            ]
+          },
+          {
+            "id": "verify.compiler.windows",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.compilers.found.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
+            },
+            "completionEvents": [
+              "onContext:cpptools.trustedCompilerFound"
+            ]
+          },
+          {
             "id": "create.cpp.file",
-            "title": "Create a C++ file",
-            "description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:welcome.showNewFileEntries) a C++ file. Be sure to save it with the \".cpp\" extension, like \"helloworld.cpp\". \n[Create a C++ File](command:toSide:welcome.showNewFileEntries)",
+            "title": "%c_cpp.walkthrough.create.cpp.file.title%",
+            "description": "%c_cpp.walkthrough.create.cpp.file.description%",
             "media": {
               "svg": "dist/walkthrough/images/openFolder.svg",
-              "altText": "Open a C++ file or a folder with a C++ project."
-            },
-            "when": ""
+              "altText": "%c_cpp.walkthrough.create.cpp.file.altText%"
+            }
           },
           {
             "id": "relaunch.developer.command.prompt.windows",
-            "title": "Launch from the developer command prompt",
-            "description": "When using the Microsoft Visual Studio C++ Compiler, the C++ Extension requires you to launch vscode from the developer command prompt. Follow the instructions on the right to relaunch.\n[Can we have button here that says relaunch?]",
+            "title": "%c_cpp.walkthrough.command.prompt.title%",
+            "description": "%c_cpp.walkthrough.command.prompt.description%",
             "when": "workspacePlatform == windows",
             "media": {
               "markdown": "dist/walkthrough/devcommandprompt/open-developer-command-prompt.md"
@@ -115,61 +177,61 @@
           },
           {
             "id": "run.project.mac",
-            "title": "Run and debug your C++ file",
-            "description": "Open your C++ file and click on the play button in the top right corner of the editor, or press F5 when on the file. Select \"clang++ - Build and debug active file\".",
+            "title": "%c_cpp.walkthrough.run.debug.title%",
+            "description": "%c_cpp.walkthrough.run.debug.mac.description%",
             "when": "workspacePlatform == mac",
             "media": {
-              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "altText": "%c_cpp.walkthrough.run.debug.windows.altText%",
               "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
             "id": "run.project.linux",
-            "title": "Run and debug your C++ file",
-            "description": "Open your C++ file and click on the play button in the top right corner of the editor, or press F5 when on the file. Select \"g++ - Build and debug active file\".",
+            "title": "%c_cpp.walkthrough.run.debug.title%",
+            "description": "%c_cpp.walkthrough.run.debug.linux.description%",
             "when": "workspacePlatform == linux",
             "media": {
-              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "altText": "%c_cpp.walkthrough.run.debug.windows.altText%",
               "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
             "id": "run.project.windows",
-            "title": "Run and debug your C++ file",
-            "description": "Open your C++ file and click on the play button in the top right corner of the editor, or press F5 when on the file. Select \"cl.exe - Build and debug active file\" to run with the debugger.",
+            "title": "%c_cpp.walkthrough.run.debug.title%",
+            "description": "%c_cpp.walkthrough.run.debug.windows.description%",
             "when": "workspacePlatform == windows",
             "media": {
-              "altText": "Image showing a breakpoint in a C++ file and the F5 button",
+              "altText": "%c_cpp.walkthrough.run.debug.windows.altText%",
               "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
             "id": "customize.debugging.linux",
-            "title": "Customize debugging",
+            "title": "%c_cpp.walkthrough.customize.debugging.title%",
             "when": "workspacePlatform == linux",
-            "description": "You can customize your debug configuration (eg. to pass arguments to your program at run time) by selecting \"Add Debug Configuration\" to the right of the play button. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "description": "%c_cpp.walkthrough.customize.debugging.mac.description%",
             "media": {
-              "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
+              "altText": "%c_cpp.walkthrough.customize.debugging.altText%",
               "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
             "id": "customize.debugging.windows",
-            "title": "Customize debugging",
+            "title": "%c_cpp.walkthrough.customize.debugging.title%",
             "when": "workspacePlatform == windows",
-            "description": "You can customize your debug configuration (eg. to pass arguments to your program at run time) by selecting \"Add Debug Configuration\" to the right of the play button. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "description": "%c_cpp.walkthrough.customize.debugging.linux.description%",
             "media": {
-              "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
+              "altText": "%c_cpp.walkthrough.customize.debugging.altText%",
               "svg": "dist/walkthrough/images/rundebug.svg"
             }
           },
           {
             "id": "customize.debugging.mac",
-            "title": "Customize debugging",
+            "title": "%c_cpp.walkthrough.customize.debugging.title%",
             "when": "workspacePlatform == mac",
-            "description": "You can customize your debug configuration (eg. to pass arguments to your program at run time) by selecting \"Add Debug Configuration\" to the right of the play button. The custom debug configuration is saved in your project's launch.json file. \n[Learn more](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
+            "description": "%c_cpp.walkthrough.customize.debugging.windows.description%",
             "media": {
-              "altText": "Image that shows Add Debug Configuration in the drop-down and launch.json",
+              "altText": "%c_cpp.walkthrough.customize.debugging.altText%",
               "svg": "dist/walkthrough/images/rundebug.svg"
             }
           }

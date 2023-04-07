@@ -426,6 +426,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
 function logForUIExperiment(command: string, sender?: any): void {
@@ -536,6 +537,12 @@ function onResetDatabase(): void {
 function selectDefaultCompiler(sender?: any): void {
     clients.ActiveClient.notifyWhenLanguageClientReady(() => {
         clients.ActiveClient.promptSelectCompiler(true, sender);
+    });
+}
+
+function onRescanCompilers(sender?: any): void {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.rescanCompilers();
     });
 }
 
