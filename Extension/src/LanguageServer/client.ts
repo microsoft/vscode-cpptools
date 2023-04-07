@@ -1019,9 +1019,9 @@ export class DefaultClient implements Client {
                 }
             }
         }
-        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine to query"));
+        paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine"));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
-        paths.push(localize("noConfig.string", "Do not configure a compiler to query (not recommended)"));
+        paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
