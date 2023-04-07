@@ -362,7 +362,7 @@ export class OldUI implements UI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.showConfigureIntelliSenseStatusButton(client.ShowConfigureIntelliSenseStatus(), client);
+            this.showConfigureIntelliSenseStatusButton(client.ShowConfigureIntelliSenseStatusButton(), client);
         });
     }
 

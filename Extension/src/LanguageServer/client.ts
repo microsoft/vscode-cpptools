@@ -801,7 +801,7 @@ export interface Client {
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
     isInitialized(): boolean;
-    ShowConfigureIntelliSenseStatus(): boolean;
+    ShowConfigureIntelliSenseStatusButton(): boolean;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -841,7 +841,7 @@ export class DefaultClient implements Client {
     private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
-    private showConfigureIntelliSenseStatus: boolean = false;
+    private showConfigureIntelliSenseStatusButton: boolean = false;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -868,7 +868,7 @@ export class DefaultClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
     public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
-    public ShowConfigureIntelliSenseStatus(): boolean { return this.showConfigureIntelliSenseStatus; }
+    public ShowConfigureIntelliSenseStatusButton(): boolean { return this.showConfigureIntelliSenseStatusButton; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -2724,11 +2724,11 @@ export class DefaultClient implements Client {
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
-                this.showConfigureIntelliSenseStatus = true;
+                this.showConfigureIntelliSenseStatusButton = true;
             } else {
-                this.showConfigureIntelliSenseStatus = false;
+                this.showConfigureIntelliSenseStatusButton = false;
             }
-            ui.showConfigureIntelliSenseStatusButton(this.showConfigureIntelliSenseStatus, this);
+            ui.showConfigureIntelliSenseStatusButton(this.showConfigureIntelliSenseStatusButton, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;
@@ -3776,5 +3776,5 @@ class NullClient implements Client {
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
     isInitialized(): boolean { return true; }
-    ShowConfigureIntelliSenseStatus(): boolean { return false; }
+    ShowConfigureIntelliSenseStatusButton(): boolean { return false; }
 }
