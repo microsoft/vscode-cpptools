@@ -167,8 +167,8 @@
 	"overloads": "и другие перегрузки (%d)",
 	"specialization": "и еще одна специализация",
 	"specializations": "и другие специализации (%d)",
-	"intellisense_configuration": "Note: IntelliSense is not fully configured. Use the 'Select IntelliSense Configuration' command to finish configuration.",
-	"select_intellisense_configuration": "Select an IntelliSense configuration to locate system headers",
+	"compiler": "Примечание. IntelliSense настроен не полностью. Чтобы завершить настройку, используйте команду \"Выбрать компилятор по умолчанию\".",
+	"select_compiler": "Выберите компилятор для поиска системных заголовков",
 	"expands_to": "Расширяется в:",
 	"attention_label": "Внимание!",
 	"author_label": "Автор:",
@@ -294,5 +294,5 @@
 	"refactor_not_class_namespace": "Не удалось найти класс или пространство имен \"%s\".",
 	"refactor_operation_unsupported": "Операция не поддерживается для \"%s\".",
 	"unknown_error": "Неизвестная ошибка.",
-	"run_select_intellisense_configuration": "Select an IntelliSense configuration to locate system headers"
+	"run_select_compiler": "Выполните команду \"Выбрать компилятор по умолчанию\", чтобы найти системные заголовки."
 }
