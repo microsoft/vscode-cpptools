@@ -21,6 +21,7 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
 import { compilerPaths, DefaultClient } from './client';
+import { UI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -348,6 +349,9 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
+                if (configuration.compilerPath !== undefined || configuration.compileCommands !== undefined || configuration.configurationProvider !== undefined) {
+                    getUI().then((ui: UI) => ui.showCompilerStatusIcon(false));
+                }
                 this.applyDefaultConfigurationValues(configuration);
                 this.configurationIncomplete = false;
             }
@@ -611,8 +615,10 @@ export class CppProperties {
                 }
                 config.includePath.splice(config.includePath.length, 0, path);
                 this.writeToJson();
-                this.handleConfigurationChange();
             }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
         }, () => {});
     }
 
@@ -629,8 +635,10 @@ export class CppProperties {
                             delete config.configurationProvider;
                         }
                         this.writeToJson();
-                        this.handleConfigurationChange();
                     }
+                    // Any time parsePropertiesFile is called, configurationJson gets
+                    // reverted to an unprocessed state and needs to be reprocessed.
+                    this.handleConfigurationChange();
                     resolve();
                 }, () => {});
             } else {
@@ -656,8 +664,10 @@ export class CppProperties {
             if (config) {
                 config.compileCommands = path;
                 this.writeToJson();
-                this.handleConfigurationChange();
             }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
         }, () => {});
     }
 
@@ -965,10 +975,6 @@ export class CppProperties {
                         if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                             keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                         }
-                    } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined
-                        && !!this.client.lastCustomBrowseConfigurationProviderId.Value) {
-                        // Use the last configuration provider we received a browse config from as the provider ID.
-                        configuration.configurationProvider = this.client.lastCustomBrowseConfigurationProviderId.Value;
                     }
                 } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                     keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
@@ -1123,6 +1129,9 @@ export class CppProperties {
                     showDocument(document, viewColumn);
                 }
             }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
         }
     }
 
@@ -1146,6 +1155,9 @@ export class CppProperties {
                         vscode.workspace.openTextDocument(this.propertiesFile);
                     }
                 }
+                // Any time parsePropertiesFile is called, configurationJson gets
+                // reverted to an unprocessed state and needs to be reprocessed.
+                this.handleConfigurationChange();
             }
         }
     }
@@ -1158,6 +1170,9 @@ export class CppProperties {
             this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
             this.writeToJson();
         }
+        // Any time parsePropertiesFile is called, configurationJson gets
+        // reverted to an unprocessed state and needs to be reprocessed.
+        this.handleConfigurationChange();
     }
 
     private onConfigSelectionChanged(): void {
@@ -1188,6 +1203,9 @@ export class CppProperties {
             // Save new config to file
             this.writeToJson();
         }
+        // Any time parsePropertiesFile is called, configurationJson gets
+        // reverted to an unprocessed state and needs to be reprocessed.
+        this.handleConfigurationChange();
     }
 
     public handleConfigurationChange(): void {
@@ -1195,21 +1213,16 @@ export class CppProperties {
             return; // Occurs when propertiesFile hasn't been checked yet.
         }
         this.configFileWatcherFallbackTime = new Date();
-        if (this.propertiesFile) {
-            this.parsePropertiesFile();
-            // parsePropertiesFile can fail, but it won't overwrite an existing configurationJson in the event of failure.
-            // this.configurationJson should only be undefined here if we have never successfully parsed the propertiesFile.
-            if (this.configurationJson) {
-                if (this.CurrentConfigurationIndex < 0 ||
-                    this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
-                    // If the index is out of bounds (during initialization or due to removal of configs), fix it.
-                    const index: number | undefined = this.getConfigIndexForPlatform(this.configurationJson);
-                    if (this.currentConfigurationIndex !== undefined) {
-                        if (!index) {
-                            this.currentConfigurationIndex.setDefault();
-                        } else {
-                            this.currentConfigurationIndex.Value = index;
-                        }
+        if (this.parsePropertiesFile() && this.configurationJson) {
+            if (this.CurrentConfigurationIndex < 0 ||
+                this.CurrentConfigurationIndex >= this.configurationJson.configurations.length) {
+                // If the index is out of bounds (during initialization or due to removal of configs), fix it.
+                const index: number | undefined = this.getConfigIndexForPlatform(this.configurationJson);
+                if (this.currentConfigurationIndex !== undefined) {
+                    if (!index) {
+                        this.currentConfigurationIndex.setDefault();
+                    } else {
+                        this.currentConfigurationIndex.Value = index;
                     }
                 }
             }
@@ -1265,6 +1278,7 @@ export class CppProperties {
 
     private parsePropertiesFile(): boolean {
         if (!this.propertiesFile) {
+            this.configurationJson = undefined;
             return false;
         }
         let success: boolean = true;
