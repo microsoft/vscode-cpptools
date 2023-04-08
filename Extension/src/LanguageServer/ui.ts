@@ -23,7 +23,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
-    showConfigureIntelliSenseStatusButton(show: boolean, client?: Client): Promise<void>;
+    showConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -114,7 +114,7 @@ export class OldUI implements UI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showConfigureIntelliSenseStatusButton(false, this.currentClient);
+        this.showConfigureIntelliSenseButton(false, this.currentClient);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -308,7 +308,7 @@ export class OldUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseStatusButton(show: boolean, client?: Client): Promise<void> {
+    public async showConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
@@ -362,7 +362,7 @@ export class OldUI implements UI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.showConfigureIntelliSenseStatusButton(client.ShowConfigureIntelliSenseStatusButton(), client);
+            this.showConfigureIntelliSenseButton(client.ShowConfigureIntelliSenseButton(), client);
         });
     }
 

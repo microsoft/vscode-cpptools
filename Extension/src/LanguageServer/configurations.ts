@@ -350,7 +350,7 @@ export class CppProperties {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 if (configuration.compilerPath !== undefined || configuration.compileCommands !== undefined || configuration.configurationProvider !== undefined) {
-                    getUI().then((ui: UI) => ui.showConfigureIntelliSenseStatusButton(false, this.client));
+                    getUI().then((ui: UI) => ui.showConfigureIntelliSenseButton(false, this.client));
                 }
                 this.applyDefaultConfigurationValues(configuration);
                 this.configurationIncomplete = false;

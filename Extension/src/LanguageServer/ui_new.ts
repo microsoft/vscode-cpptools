@@ -117,7 +117,7 @@ export class NewUI implements UI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showConfigureIntelliSenseStatusButton(false, this.currentClient);
+        this.showConfigureIntelliSenseButton(false, this.currentClient);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -415,7 +415,7 @@ export class NewUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseStatusButton(show: boolean, client?: Client): Promise<void> {
+    public async showConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
@@ -471,7 +471,7 @@ export class NewUI implements UI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.showConfigureIntelliSenseStatusButton(client.ShowConfigureIntelliSenseStatusButton(), client);
+            this.showConfigureIntelliSenseButton(client.ShowConfigureIntelliSenseButton(), client);
         });
     }
 

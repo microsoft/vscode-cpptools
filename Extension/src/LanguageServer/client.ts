@@ -801,7 +801,7 @@ export interface Client {
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
     isInitialized(): boolean;
-    ShowConfigureIntelliSenseStatusButton(): boolean;
+    ShowConfigureIntelliSenseButton(): boolean;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -841,7 +841,7 @@ export class DefaultClient implements Client {
     private registeredProviders: PersistentFolderState<string[]> | undefined;
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
-    private showConfigureIntelliSenseStatusButton: boolean = false;
+    private showConfigureIntelliSenseButton: boolean = false;
 
     public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
     public static referencesRequestPending: boolean = false;
@@ -868,7 +868,7 @@ export class DefaultClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
     public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
-    public ShowConfigureIntelliSenseStatusButton(): boolean { return this.showConfigureIntelliSenseStatusButton; }
+    public ShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -1041,7 +1041,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
-                ui.showConfigureIntelliSenseStatusButton(false, this);
+                ui.showConfigureIntelliSenseButton(false, this);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1078,12 +1078,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.showConfigureIntelliSenseStatusButton(false, this);
+                    ui.showConfigureIntelliSenseButton(false, this);
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.showConfigureIntelliSenseStatusButton(false, this);
+                    ui.showConfigureIntelliSenseButton(false, this);
                     return;
                 } else {
                     action = "select compiler";
@@ -1091,7 +1091,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.showConfigureIntelliSenseStatusButton(false, this);
+            ui.showConfigureIntelliSenseButton(false, this);
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
@@ -1130,7 +1130,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseStatusButton(false, this);
+                    ui.showConfigureIntelliSenseButton(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1165,7 +1165,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseStatusButton(false, this);
+                    ui.showConfigureIntelliSenseButton(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1671,7 +1671,7 @@ export class DefaultClient implements Client {
                     this.configuration.handleConfigurationChange();
                 }
                 if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.showConfigureIntelliSenseStatusButton(false, this);
+                    ui.showConfigureIntelliSenseButton(false, this);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2724,11 +2724,11 @@ export class DefaultClient implements Client {
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
-                this.showConfigureIntelliSenseStatusButton = true;
+                this.showConfigureIntelliSenseButton = true;
             } else {
-                this.showConfigureIntelliSenseStatusButton = false;
+                this.showConfigureIntelliSenseButton = false;
             }
-            ui.showConfigureIntelliSenseStatusButton(this.showConfigureIntelliSenseStatusButton, this);
+            ui.showConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;
@@ -3776,5 +3776,5 @@ class NullClient implements Client {
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
     isInitialized(): boolean { return true; }
-    ShowConfigureIntelliSenseStatusButton(): boolean { return false; }
+    ShowConfigureIntelliSenseButton(): boolean { return false; }
 }
