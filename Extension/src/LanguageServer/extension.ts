@@ -253,6 +253,8 @@ export async function activate(): Promise<void> {
         }
     });
 
+    await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
+
     // Log cold start.
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (activeEditor) {
@@ -411,7 +413,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', enabled ? onGenerateEditorConfig : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', enabled ? onGoToNextDirectiveInGroup : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', enabled ? onGoToPrevDirectiveInGroup : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', enabled ? onCheckForCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', enabled ? onRunCodeAnalysisOnActiveFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', enabled ? onRunCodeAnalysisOnOpenFiles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', enabled ? onRunCodeAnalysisOnAllFiles : onDisabledCommand));
@@ -428,6 +429,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
 function logForUIExperiment(command: string, sender?: any): void {
@@ -530,11 +532,21 @@ async function selectClient(): Promise<Client> {
 }
 
 function onResetDatabase(): void {
-    clients.ActiveClient.resetDatabase();
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.resetDatabase();
+    });
 }
 
 function selectDefaultCompiler(sender?: any): void {
-    clients.ActiveClient.promptSelectCompiler(true, sender);
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.promptSelectCompiler(true, sender);
+    });
+}
+
+function onRescanCompilers(sender?: any): void {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.rescanCompilers(sender);
+    });
 }
 
 function selectIntelliSenseConfiguration(sender?: any): void {
@@ -608,12 +620,6 @@ function onGoToNextDirectiveInGroup(): void {
 function onGoToPrevDirectiveInGroup(): void {
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(false);
-}
-
-function onCheckForCompiler(sender?: any): void {
-    logForUIExperiment("CheckForCompiler", sender);
-    const client: Client = getActiveClient();
-    client.handleCheckForCompiler();
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {

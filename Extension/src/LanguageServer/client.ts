@@ -79,6 +79,7 @@ interface ConfigStateReceived {
 
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
+let scanForCompilersDone: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -770,6 +771,7 @@ export interface Client {
     deactivate(): void;
     promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
     promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void>;
+    rescanCompilers(sender?: any): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
     PauseCodeAnalysis(): void;
@@ -787,7 +789,6 @@ export interface Client {
     handleAddToIncludePathCommand(path: string): void;
     handleGoToDirectiveInGroup(next: boolean): Promise<void>;
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void>;
-    handleCheckForCompiler(): Promise<void>;
     handleRunCodeAnalysisOnActiveFile(): Promise<void>;
     handleRunCodeAnalysisOnOpenFiles(): Promise<void>;
     handleRunCodeAnalysisOnAllFiles(): Promise<void>;
@@ -1046,17 +1047,33 @@ export class DefaultClient implements Client {
             }
             if (index === paths.length - 2) {
                 action = "help";
+                // Because we need to conditionally enable/disable steps to alter their contents,
+                // we need to determine which step is actually visible. If the steps change, this
+                // logic will need to change to reflect them.
+                let step: string = "ms-vscode.cpptools#";
+                if (!scanForCompilersDone) {
+                    step = step + "awaiting.activation.";
+                } else if (compilerDefaults.knownCompilers === undefined || !compilerDefaults.knownCompilers.length) {
+                    step = step + "no.compilers.found.";
+                } else {
+                    step = step + "verify.compiler.";
+                }
                 switch (os.platform()) {
                     case 'win32':
-                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
-                        return;
+                        step = step + "windows";
+                        break;
                     case 'darwin':
-                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
-                        return;
+                        step = step + "mac";
+                        break;
                     default: // Linux
-                        vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
-                        return;
+                        step = step + "linux";
+                        break;
                 }
+                vscode.commands.executeCommand(
+                    "workbench.action.openWalkthrough",
+                    { category: 'ms-vscode.cpptools#cppWelcome', step },
+                    true);
+                return;
             }
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
@@ -1070,6 +1087,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
             } else {
                 configurationSelected = true;
                 if (index < configProvidersIndex && configProviders) {
@@ -1088,6 +1106,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
                 }
             }
 
@@ -1112,7 +1131,15 @@ export class DefaultClient implements Client {
         }
     }
 
-    async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
+    public async rescanCompilers(sender?: any): Promise<void> {
+        compilerDefaults = await this.requestCompiler(compilerPaths);
+        DefaultClient.updateClientConfigurations();
+        if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
+            await this.promptSelectCompiler(true, sender);
+        }
+    };
+
+    public async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
         if (compilerDefaults === undefined) {
             return;
@@ -1385,7 +1412,7 @@ export class DefaultClient implements Client {
             defaultSystemIncludePath: settings.defaultSystemIncludePath,
             cppFilesExclude: settings.filesExclude,
             clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-            clangFormatStyle: settings.clangFormatStyle,
+            clangFormatStyle: util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment),
             clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
             clangFormatSortIncludes: settings.clangFormatSortIncludes,
             codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
@@ -2746,11 +2773,16 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
-    public requestCompiler(compilerPath: string[]): Thenable<configs.CompilerDefaults> {
+    public async requestCompiler(compilerPath: string[]): Promise<configs.CompilerDefaults> {
         const params: QueryDefaultCompilerParams = {
             trustedCompilerPaths: compilerPath
         };
-        return this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
+        const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
+        scanForCompilersDone = true;
+        vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
+        vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
+        vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);
+        return results;
     }
 
     private updateActiveDocumentTextOptions(): void {
@@ -3343,35 +3375,6 @@ export class DefaultClient implements Client {
             const newSelection: vscode.Selection = new vscode.Selection(newPosition, newPosition);
             editor.selection = newSelection;
         }
-
-    }
-
-    public async handleCheckForCompiler(): Promise<void> {
-        await this.awaitUntilLanguageClientReady();
-        const compilers: configs.KnownCompiler[] | undefined = await this.getKnownCompilers();
-        if (!compilers || compilers.length === 0) {
-            const compilerName: string = process.platform === "win32" ? "MSVC" : (process.platform === "darwin" ? "Clang" : "GCC");
-            vscode.window.showInformationMessage(localize("no.compilers.found", "No C++ compilers were found on your system. For your platform, we recommend installing {0} using the instructions in the editor.", compilerName), { modal: true });
-        } else {
-            const header: string = localize("compilers.found", "We found the following C++ compilers on your system. Choose a compiler in your project's IntelliSense Configuration.");
-            let message: string = "";
-            const settings: CppSettings = new CppSettings(this.RootUri);
-            const pathSeparator: string | undefined = settings.preferredPathSeparator;
-            let isFirstLine: boolean = true;
-            compilers.forEach(compiler => {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                } else {
-                    message += "\n";
-                }
-                if (pathSeparator !== "Forward Slash") {
-                    message += compiler.path.replace(/\//g, '\\');
-                } else {
-                    message += compiler.path.replace(/\\/g, '/');
-                }
-            });
-            vscode.window.showInformationMessage(header, { modal: true, detail: message });
-        }
     }
 
     public async handleRunCodeAnalysisOnActiveFile(): Promise<void> {
@@ -3741,6 +3744,7 @@ class NullClient implements Client {
     resetDatabase(): void { }
     promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
     promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
+    rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }
     resumeParsing(): void { }
@@ -3759,7 +3763,6 @@ class NullClient implements Client {
     handleAddToIncludePathCommand(path: string): void { }
     handleGoToDirectiveInGroup(next: boolean): Promise<void> { return Promise.resolve(); }
     handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> { return Promise.resolve(); }
-    handleCheckForCompiler(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnActiveFile(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnOpenFiles(): Promise<void> { return Promise.resolve(); }
     handleRunCodeAnalysisOnAllFiles(): Promise<void> { return Promise.resolve(); }
