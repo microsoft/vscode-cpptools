@@ -168,6 +168,7 @@
 	"specialization": "1 especialización más",
 	"specializations": "%d especializaciones más",
 	"compiler": "Nota: IntelliSense no está configurado del todo. Usa el comando \"Seleccionar compilador predeterminado\" para terminar la configuración.",
+	"select_compiler": "Seleccione un compilador para buscar encabezados del sistema",
 	"expands_to": "Se expande a:",
 	"attention_label": "Atención:",
 	"author_label": "Autor:",
@@ -292,5 +293,6 @@
 	"refactor_file_not_in_project": "No se encontró el archivo '%s'.",
 	"refactor_not_class_namespace": "No se encuentra la clase o el espacio de nombres '%s'.",
 	"refactor_operation_unsupported": "La operación no se admite para '%s'.",
-	"unknown_error": "Error desconocido."
+	"unknown_error": "Error desconocido.",
+	"run_select_compiler": "Ejecute el comando \"Seleccionar compilador predeterminado\" para buscar los encabezados del sistema."
 }

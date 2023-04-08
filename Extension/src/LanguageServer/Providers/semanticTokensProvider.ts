@@ -18,6 +18,14 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     }
 
     public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+        const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
+        if (!editor) {
+            // Don't provide document semantic tokens for files that aren't visible,
+            // which prevents launching a lot of IntelliSense processes from a find/replace.
+            const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder();
+            const tokens: vscode.SemanticTokens = builder.build();
+            return tokens;
+        }
         await this.client.requestWhenReady(() => processDelayedDidOpen(document));
         const uriString: string = document.uri.toString();
         // First check the semantic token cache to see if we already have results for that file and version

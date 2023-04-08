@@ -6,7 +6,7 @@
 {
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.name": "配置标识符。 `Mac`、`Linux` 和 `Win32` 是将在这些平台上自动选择的配置的特殊标识符，但标识符可以为任何内容。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerPath": "正在使用的编译器的完整路径(例如 `/usr/bin/gcc`)，以启用更准确的 IntelliSense。",
-	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "用于修改所使用的包含或定义的编译器参数，例如 `-nostdinc++`、`-m32` 等。采用其他空格分隔参数的参数应在数组中作为单独的参数输入，例如，对于`--sysroot <arg>`使用`\"--sysroot\", \"<arg>\"`。",
+	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compilerArgs": "用于修改所使用的包含或定义的编译器参数，例如 `-nostdinc++`、`-m32` 等。采用其他空格分隔参数的参数应在数组中作为单独的参数输入，例如，对于 `--sysroot <arg>` 使用 `\"--sysroot\", \"<arg>\"`。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cStandard": "用于 IntelliSense 的 C 语言标准的版本。注意: GNU 标准仅用于查询设置编译器以获取 GNU 定义，并且 IntelliSense 将模拟等效的 C 标准版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.cppStandard": "用于 IntelliSense 的 C++ 语言标准的版本。注意: GNU 标准仅用于查询设置用来获取 GNU 定义的编译器，并且 IntelliSense 将模拟等效的 C++ 标准版本。",
 	"c_cpp_properties.schema.json.definitions.configurations.items.properties.compileCommands": "工作区的 `compile_commands.json` 文件的完整路径。",

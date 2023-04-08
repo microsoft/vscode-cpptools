@@ -74,7 +74,7 @@
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description": "如果存在多个问题类型，显示“全部清除”代码操作和“清除所有 <type>”代码操作(或如果<type>只有一个问题，显示“清除此项”)",
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description": "如果有多个问题类型，显示“全部清除”，如果有多个 <type> 问题，显示“清除所有 <type>”以及显示“清除此项”代码操作",
 	"c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription": "如果为 `true`，则在“修复”代码操作更改的行上运行格式设置。",
-	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "如果为 `true`，则在 `#C_Cpp.codeAnalysis.runAutomatically#` 为 `true` (默认值)时，将启用并自动运行使用 `clang-tidy` 的代码分析。",
+	"c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": "如果为 `true`，则在 `#C_Cpp.codeAnalysis.runAutomatically#` 为 `true` (默认值)时，将启用使用 `clang-tidy` 的代码分析，并在文件打开或保存后运行它。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": "`clang-tidy` 可执行文件的完整路径。如果未指定，并且 `clang-tidy` 在环境路径中可用，则使用该路径。如果在环境路径中找不到，则将使用与扩展捆绑的 `clang-tidy`。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription": "指定 YAML/JSON 格式的 `clang-tidy` 配置: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{键: x, 值: y}]}`。当值为空时，`clang-tidy` 将尝试为其父目录中的每个源文件查找名为 `.clang-tidy` 的文件。",
 	"c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription": "指定 YAML/JSON 格式的 `clang-tidy` 配置，以在未设置 `#C_Cpp.codeAnalysis.clangTidy.config#`，并且未找到 `.clang-tidy` 文件: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{键: x, 值: y}]}` 时将其用作回退。",

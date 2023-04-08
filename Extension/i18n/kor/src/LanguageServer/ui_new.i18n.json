@@ -21,6 +21,7 @@
 	"select.command": "명령 선택...",
 	"cpptools.status.configuration": "구성 선택",
 	"c.cpp.references.statusbar": "C/C++ 참조 상태",
+	"c.cpp.compilerStatus.statusbar": "IntelliSense 구성",
 	"cpptools.status.intellisense": "C/C++ IntelliSense 상태",
 	"cpptools.status.tagparser": "C/C++ 태그 파서 상태",
 	"cpptools.detail.tagparser": "초기화하는 중...",

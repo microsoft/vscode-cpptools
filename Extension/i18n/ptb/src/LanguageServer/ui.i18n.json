@@ -10,6 +10,7 @@
 	"select.command": "Selecionar um comando...",
 	"c.cpp.configuration.tooltip": "Configuração de C/C++",
 	"c.cpp.references.statusbar": "Status de Referências do C/C++",
+	"c.cpp.compilerStatus.statusbar": "Configurar o IntelliSense",
 	"c.cpp.intellisense.statusbar": "Status do IntelliSense do C/C++",
 	"c.cpp.tagparser.statusbar": "Status do Analisador de Marcas do C/C++",
 	"discovering.files.tooltip": "Descobrindo arquivos",

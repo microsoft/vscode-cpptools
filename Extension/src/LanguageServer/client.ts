@@ -1084,8 +1084,8 @@ export class DefaultClient implements Client {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
-                    ui.showCompilerStatusIcon(false);
                     action = "confirm compiler";
+                    ui.showCompilerStatusIcon(false);
                 } else if (value === selectCompiler) {
                     this.handleCompilerQuickPick(true, sender);
                     action = "show quickpick";
@@ -1236,9 +1236,9 @@ export class DefaultClient implements Client {
                         compilerDefaults = await this.requestCompiler(compilerPaths);
                         DefaultClient.updateClientConfigurations();
                         if (!compilerDefaults.trustedCompilerFound && !displayedSelectCompiler && (compilerPaths.length !== 1 || compilerPaths[0] !== "")) {
-                            await ui.showCompilerStatusIcon(true);
                             // if there is no compilerPath in c_cpp_properties.json, prompt user to configure a compiler
-                            this.promptSelectCompiler(false, 'initialization');
+                            ui.showCompilerStatusIcon(true);
+                            this.promptSelectCompiler(false);
                             displayedSelectCompiler = true;
                         }
                     }
@@ -1293,7 +1293,7 @@ export class DefaultClient implements Client {
             defaultSystemIncludePath: settings.defaultSystemIncludePath,
             cppFilesExclude: settings.filesExclude,
             clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-            clangFormatStyle: settings.clangFormatStyle,
+            clangFormatStyle: util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment),
             clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
             clangFormatSortIncludes: settings.clangFormatSortIncludes,
             codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
@@ -1578,6 +1578,9 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
+                if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
+                    ui.showCompilerStatusIcon(false);
+                }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
             }
@@ -1619,10 +1622,10 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isFolderOpen', util.isFolderOpen(document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(document.uri));
         } else {
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
+            vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', false);
         }
     }
 
@@ -2610,8 +2613,8 @@ export class DefaultClient implements Client {
             && (editor.document.languageId === "c"
                 || editor.document.languageId === "cpp"
                 || editor.document.languageId === "cuda-cpp")) {
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
+            vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2633,7 +2636,7 @@ export class DefaultClient implements Client {
                 }
             }
         } else {
-            vscode.commands.executeCommand('setContext', 'BuildAndDebug.isSourceFile', false);
+            vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', false);
         }
     }
 
