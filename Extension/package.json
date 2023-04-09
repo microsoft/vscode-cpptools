@@ -3188,6 +3188,11 @@
         "category": "C/C++",
         "title": "%c_cpp.command.sshTerminal.title%",
         "icon": "$(terminal)"
+      },
+      {
+        "command": "C_Cpp.AddIncludeHeader",
+        "category": "C/C++",
+        "title": "%c_cpp.command.addIncludeHeader.title%"
       }
     ],
     "keybindings": [

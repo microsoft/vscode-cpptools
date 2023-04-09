@@ -199,6 +199,20 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             };
             resultCodeActions.push(vscodeCodeAction);
         });
+
+        const includeHeaderCodeAction: vscode.CodeAction = {
+            title: "Add include header",
+            command: {
+                title: "Add include header for symbol",
+                command: "C_Cpp.AddIncludeHeader",
+                arguments: [params.uri, range, token]
+            },
+            edit: undefined,
+            kind: vscode.CodeActionKind.QuickFix
+        };
+
+        resultCodeActions.push(includeHeaderCodeAction);
+
         return resultCodeActions;
     }
 }

@@ -740,6 +740,7 @@ export interface Client {
     provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
+    getWorkspaceSymbol(filePath: string, range: vscode.Range, token: vscode.CancellationToken): Promise<void>;
     toggleReferenceResultsView(): void;
     setCurrentConfigName(configurationName: string): Thenable<void>;
     getCurrentConfigName(): Thenable<string | undefined>;
@@ -1859,6 +1860,26 @@ export class DefaultClient implements Client {
 
     public async rescanFolder(): Promise<void> {
         await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(RescanFolderNotification));
+    }
+
+    public async getWorkspaceSymbol(filePath: string, range: vscode.Range, token: vscode.CancellationToken): Promise<void> {
+        const uri: vscode.Uri = vscode.Uri.parse(filePath);
+        const document: vscode.TextDocument = await vscode.workspace.openTextDocument(uri.fsPath);
+        const symbol_range: vscode.Range | undefined = document.getWordRangeAtPosition(range.start);
+
+        if (symbol_range === undefined) {
+            vscode.window.showErrorMessage("Could find symbol name");
+            return;
+        }
+
+        const symbol: string = document.getText(symbol_range);
+        const params: WorkspaceSymbolParams = {
+            query: symbol
+        };
+
+        const symbols: LocalizeSymbolInformation[] = await this.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
+
+        vscode.window.showInformationMessage(symbols.toString());
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
@@ -3538,6 +3559,7 @@ class NullClient implements Client {
     provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
+    getWorkspaceSymbol(filePath: string, range: vscode.Range, token: vscode.CancellationToken): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }
     setCurrentConfigName(configurationName: string): Thenable<void> { return Promise.resolve(); }
     getCurrentConfigName(): Thenable<string> { return Promise.resolve(""); }
