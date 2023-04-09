@@ -431,7 +431,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddIncludeHeader', enabled ? getWorkspaceSymbol : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddIncludeHeader', enabled ? addIncludeHeader : onDisabledCommand));
 }
 
 function logForUIExperiment(command: string, sender?: any): void {
@@ -870,8 +870,8 @@ function onRescanWorkspace(sender?: string): void {
     clients.ActiveClient.rescanFolder();
 }
 
-function getWorkspaceSymbol(filePath: string, range: vscode.Range, token: vscode.CancellationToken): void {
-    clients.ActiveClient.getWorkspaceSymbol(filePath, range, token);
+function addIncludeHeader(filePath: string, range: vscode.Range, token: vscode.CancellationToken): void {
+    clients.ActiveClient.addIncludeHeader(filePath, range, token);
 }
 
 function onShowRefCommand(arg?: TreeNode): void {
