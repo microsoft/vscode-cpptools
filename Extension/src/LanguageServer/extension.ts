@@ -436,7 +436,7 @@ export function registerCommands(enabled: boolean): void {
 
 function logForUIExperiment(command: string, sender?: any): void {
     const settings: CppSettings = new CppSettings();
-    const properties: { [key: string]: string } = {
+    const properties: {[key: string]: string} = {
         newUI: ui.isNewUI.toString(),
         uiOverride: (settings.experimentalFeatures ?? false).toString(),
         sender: util.getSenderType(sender)
@@ -566,7 +566,7 @@ function onSelectConfigurationProvider(): void {
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider.'));
     } else {
-        selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => { });
+        selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
     }
 }
 
@@ -575,7 +575,7 @@ function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColu
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditJSONCommand(viewColumn), rejected => { });
+        selectClient().then(client => client.handleConfigurationEditJSONCommand(viewColumn), rejected => {});
     }
 }
 
@@ -584,7 +584,7 @@ function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditUICommand(viewColumn), rejected => { });
+        selectClient().then(client => client.handleConfigurationEditUICommand(viewColumn), rejected => {});
     }
 }
 
@@ -592,7 +592,7 @@ function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.A
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(viewColumn), rejected => { });
+        selectClient().then(client => client.handleConfigurationEditCommand(viewColumn), rejected => {});
     }
 }
 
@@ -1005,7 +1005,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools",
         // Since only crash logs that start with "cpptools" are reported, the cases below would only occur
         // if the crash were to happen before the new process had fully started and renamed itself.
-        "clang-tidy", "clang-format", "clang", "gcc"];
+        "clang-tidy", "clang-format", "clang", "gcc" ];
     let processNameFound: boolean = false;
     for (const processName of processNames) {
         if (data.includes(processName)) {
@@ -1107,5 +1107,4 @@ export function UpdateInsidersAccess(): void {
     if (installPrerelease) {
         vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
     }
-
 }
