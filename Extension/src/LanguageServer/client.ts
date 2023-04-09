@@ -51,6 +51,7 @@ import {
     removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams
 } from './codeAnalysis';
 import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
+import { isHeaderFile } from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -1865,21 +1866,76 @@ export class DefaultClient implements Client {
     public async getWorkspaceSymbol(filePath: string, range: vscode.Range, token: vscode.CancellationToken): Promise<void> {
         const uri: vscode.Uri = vscode.Uri.parse(filePath);
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(uri.fsPath);
-        const symbol_range: vscode.Range | undefined = document.getWordRangeAtPosition(range.start);
+        const symbolRange: vscode.Range | undefined = document.getWordRangeAtPosition(range.start);
 
-        if (symbol_range === undefined) {
-            vscode.window.showErrorMessage("Could find symbol name");
+        if (symbolRange === undefined) {
+            vscode.window.showErrorMessage("Could not find symbol name");
             return;
         }
 
-        const symbol: string = document.getText(symbol_range);
+        const symbolName: string = document.getText(symbolRange);
         const params: WorkspaceSymbolParams = {
-            query: symbol
+            query: symbolName
         };
 
         const symbols: LocalizeSymbolInformation[] = await this.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
+        const headerSet: Set<string> = new Set();
 
-        vscode.window.showInformationMessage(symbols.toString());
+        symbols.forEach((symbol) => {
+            const tmpUri: vscode.Uri = vscode.Uri.parse(symbol.location.uri);
+            if (isHeaderFile(tmpUri) && this.isFileInWorkspaceRoot(tmpUri.fsPath)) {
+                headerSet.add(tmpUri.fsPath);
+            }
+        });
+
+        if (headerSet.size === 0) {
+            vscode.window.showWarningMessage("Could not find symbol " + symbolName);
+        } else if (headerSet.size === 1) {
+            await this.addHeaderToSource(document, headerSet.values().next().value);
+        } else {
+            const menuItems: vscode.QuickPickItem[] = Array.from(headerSet, header => ({ label: symbolName, description: header }));
+
+            vscode.window.showQuickPick(menuItems, { canPickMany: false, placeHolder: "Select header to include" }).then(async selection => {
+                if (selection) {
+                    await this.addHeaderToSource(document, selection.description === undefined ? "" : selection.description);
+                }
+            });
+        }
+    }
+
+    private isFileInWorkspaceRoot(filePath: string): boolean {
+        const workspaceFolders: readonly vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
+
+        if (!workspaceFolders) {
+            return false;
+        }
+
+        for (const folder of workspaceFolders) {
+            if (filePath.startsWith(folder.uri.fsPath)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async addHeaderToSource(document: vscode.TextDocument, headerFile: string): Promise<void> {
+        let includeHeaderAt: number = 0;
+        for (let i: number = 0; i < document.lineCount; i++) {
+            const line: vscode.TextLine = document.lineAt(i);
+            if (line.text.trim().startsWith('#include')) {
+                includeHeaderAt = line.range.end.line + 1;
+            }
+        }
+
+        const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        const pos: vscode.Position = new vscode.Position(includeHeaderAt, 0);
+
+        const relativePath: string = path.relative(vscode.workspace.workspaceFolders === undefined ? "" : vscode.workspace.workspaceFolders[0].uri.fsPath, headerFile);
+
+        edit.insert(document.uri, pos, "#include \"" + relativePath + "\"\n");
+
+        await vscode.workspace.applyEdit(edit);
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
@@ -2602,7 +2658,7 @@ export class DefaultClient implements Client {
                 return false;
             });
         },
-        () => ask.Value = false);
+            () => ask.Value = false);
     }
 
     /**
