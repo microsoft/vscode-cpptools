@@ -1042,7 +1042,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
-                ui.showConfigureIntelliSenseButton(false, this);
+                ui.ShowConfigureIntelliSenseButton(false, this);
                 return;
             }
             if (index === paths.length - 2) {
@@ -1096,12 +1096,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.showConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this);
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.showConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this);
                     return;
                 } else {
                     action = "select compiler";
@@ -1110,7 +1110,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.showConfigureIntelliSenseButton(false, this);
+            ui.ShowConfigureIntelliSenseButton(false, this);
             util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
@@ -1157,7 +1157,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1192,7 +1192,7 @@ export class DefaultClient implements Client {
                     compilerDefaults = await this.requestCompiler(compilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.showConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this);
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1698,7 +1698,7 @@ export class DefaultClient implements Client {
                     this.configuration.handleConfigurationChange();
                 }
                 if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.showConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2755,7 +2755,7 @@ export class DefaultClient implements Client {
             } else {
                 this.showConfigureIntelliSenseButton = false;
             }
-            ui.showConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this);
+            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false);
             displayedSelectCompiler = true;

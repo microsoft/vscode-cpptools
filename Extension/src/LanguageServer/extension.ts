@@ -291,6 +291,32 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
+function isHandledDocument(editor: vscode.TextEditor): boolean {
+    // Unhandled cases.
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        return false;
+    }
+    if (activeEditor.document.uri.scheme !== "file") {
+        return false;
+    }
+
+    // Handled cases
+    if (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp") {
+        return true;
+    }
+    if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
+        if (activeEditor.document.fileName.endsWith("c_cpp_properties.json") ||
+            activeEditor.document.fileName.endsWith("settings.json") ||
+            activeEditor.document.fileName.endsWith(".code-workspace")) {
+            return true;
+        }
+    }
+
+    // Otherwise, unhandled.
+    return false;
+}
+
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -298,13 +324,12 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
-        activeDocument = "";
-    } else {
+    if (editor && isHandledDocument(editor)) {
         activeDocument = editor.document.uri.toString();
         clients.activeDocumentChanged(editor.document);
         clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+    } else {
+        activeDocument = "";
     }
     ui.activeDocumentChanged();
 }

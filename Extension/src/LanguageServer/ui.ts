@@ -23,7 +23,7 @@ export interface UI {
     activeDocumentChanged(): void;
     bind(client: Client): void;
     showConfigurations(configurationNames: string[]): Promise<number>;
-    showConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void>;
+    ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void>;
     showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
     showCompileCommands(paths: string[]): Promise<number>;
     showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
@@ -114,7 +114,7 @@ export class OldUI implements UI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.showConfigureIntelliSenseButton(false, this.currentClient);
+        this.ShowConfigureIntelliSenseButton(false, this.currentClient);
 
         this.intelliSenseStatusBarItem = vscode.window.createStatusBarItem("c.cpp.intellisense.statusbar", vscode.StatusBarAlignment.Right, 903);
         this.intelliSenseStatusBarItem.name = localize("c.cpp.intellisense.statusbar", "C/C++ IntelliSense Status");
@@ -308,23 +308,28 @@ export class OldUI implements UI {
         }
     }
 
-    public async showConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
+    private showConfigureIntelliSenseButton: boolean = false;
+    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
         if (show) {
+            this.showConfigureIntelliSenseButton = true;
             this.configureIntelliSenseStatusItem.show();
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
         } else {
+            this.showConfigureIntelliSenseButton = false;
             this.configureIntelliSenseStatusItem.hide();
         }
-        return;
     }
 
     public activeDocumentChanged(): void {
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!activeEditor) {
             this.ShowConfiguration = false;
+            if (this.showConfigureIntelliSenseButton) {
+                this.configureIntelliSenseStatusItem.hide();
+            }
         } else {
             const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
 
@@ -338,12 +343,21 @@ export class OldUI implements UI {
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            this.ShowConfiguration = isCpp || isCppPropertiesJson ||
-                activeEditor.document.uri.scheme === "output" ||
+            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson ||
                 activeEditor.document.fileName.endsWith("settings.json") ||
-                activeEditor.document.fileName.endsWith("tasks.json") ||
-                activeEditor.document.fileName.endsWith("launch.json") ||
                 activeEditor.document.fileName.endsWith(".code-workspace");
+            this.ShowConfiguration = showConfigureIntelliSenseButton ||
+                activeEditor.document.uri.scheme === "output" ||
+                activeEditor.document.fileName.endsWith("tasks.json") ||
+                activeEditor.document.fileName.endsWith("launch.json");
+
+            if (this.showConfigureIntelliSenseButton) {
+                if (showConfigureIntelliSenseButton) {
+                    this.configureIntelliSenseStatusItem.show();
+                } else {
+                    this.configureIntelliSenseStatusItem.hide();
+                }
+            }
         }
     }
 
@@ -362,7 +376,7 @@ export class OldUI implements UI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.showConfigureIntelliSenseButton(client.ShowConfigureIntelliSenseButton(), client);
+            this.ShowConfigureIntelliSenseButton(client.ShowConfigureIntelliSenseButton(), client);
         });
     }
 
