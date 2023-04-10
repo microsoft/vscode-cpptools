@@ -9,6 +9,6 @@
 </code></pre>
 </li>
 <li><p data-loc-id="walkthrough.linux.text4">Verify GCC is installed by running the following command. You should see a copyright message and information about the version of GCC you&#39;re using.</p>
-<pre><code class="lang-bash"> gcc --version</code></pre>
+<pre><code class="lang-bash">gcc --version</code></pre>
 </li>
 </ol>
