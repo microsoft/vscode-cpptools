@@ -1119,8 +1119,13 @@ export class DefaultClient implements Client {
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
-            telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender) },
-                (compilersOnly ? { compilerCount } : { configProviderCount, compileCommandsCount, compilerCount }));
+            if (compilersOnly) {
+                telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender) },
+                    { compilerCount: compilerCount + 3 }); // + 3 is to match what was being incorrectly sent previously
+            } else {
+                telemetry.logLanguageServerEvent('configurationSelection', { action, sender: util.getSenderType(sender) },
+                    { configProviderCount, compileCommandsCount, compilerCount });
+            }
 
             // Clear the prompt state.
             if (configurationSelected) {
