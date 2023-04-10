@@ -6040,7 +6040,7 @@
     "vscode-nls-dev": "^4.0.0-next.1",
     "webpack": "^5.76.0",
     "webpack-cli": "^5.0.1",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.5.0"
   },
   "dependencies": {
     "@vscode/extension-telemetry": "^0.6.2",
