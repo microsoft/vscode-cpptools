@@ -940,6 +940,10 @@ export class DefaultClient implements Client {
         });
     }
 
+    private readonly configurationProvidersLabel: string = "configuration providers";
+    private readonly compileCommandsLabel: string = "compile_commands.json";
+    private readonly compilersLabel: string = "compilers";
+
     public async showSelectIntelliSenseConfiguration(paths: string[], compilersOnly?: boolean): Promise<number> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = compilersOnly ?
@@ -957,11 +961,11 @@ export class DefaultClient implements Client {
                 const description: string = localize("found.string", "Found at {0}", path);
                 const label: string = localize("use.compiler", "Use {0}", compilerName);
                 items.push({ label: label, description: description, index: i });
-            } else if (paths[i] === "configuration providers") {
+            } else if (paths[i] === this.configurationProvidersLabel) {
                 items.push({ label: localize("configuration.providers", "configuration providers"), index: i, kind: vscode.QuickPickItemKind.Separator });
-            } else if (paths[i] === "compile_commands.json") {
+            } else if (paths[i] === this.compileCommandsLabel) {
                 items.push({ label: paths[i], index: i, kind: vscode.QuickPickItemKind.Separator });
-            } else if (paths[i] === "compilers") {
+            } else if (paths[i] === this.compilersLabel) {
                 isCompilerSection = true;
                 items.push({ label: localize("compilers", "compilers"), index: i, kind: vscode.QuickPickItemKind.Separator });
             } else {
@@ -989,7 +993,7 @@ export class DefaultClient implements Client {
         const paths: string[] = [];
         const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
         if (configProviders && configProviders.length > 0) {
-            paths.push("configuration providers");
+            paths.push(this.configurationProvidersLabel);
             for (const provider of configProviders) {
                 paths.push(localize("use.provider", "Use {0}", provider.name));
             }
@@ -997,14 +1001,14 @@ export class DefaultClient implements Client {
         const configProvidersIndex: number = paths.length;
         const configProviderCount: number = configProvidersIndex === 0 ? 0 : configProvidersIndex - 1;
         if (!compilersOnly && this.compileCommandsPaths.length > 0) {
-            paths.push("compile_commands.json");
+            paths.push(this.compileCommandsLabel);
             for (const compileCommandsPath of this.compileCommandsPaths) {
                 paths.push(localize("use.compileCommands", "Use {0}", compileCommandsPath));
             }
         }
         const compileCommandsIndex: number = paths.length;
         const compileCommandsCount: number = compileCommandsIndex === configProvidersIndex ? 0 : compileCommandsIndex - configProvidersIndex - 1;
-        paths.push("compilers");
+        paths.push(this.compilersLabel);
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
             let clFound: boolean = false;
