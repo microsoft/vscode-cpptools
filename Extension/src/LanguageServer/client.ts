@@ -995,6 +995,7 @@ export class DefaultClient implements Client {
             }
         }
         const configProvidersIndex: number = paths.length;
+        const configProviderCount: number = configProvidersIndex === 0 ? 0 : configProvidersIndex - 1;
         if (!compilersOnly && this.compileCommandsPaths.length > 0) {
             paths.push("compile_commands.json");
             for (const compileCommandsPath of this.compileCommandsPaths) {
@@ -1002,6 +1003,7 @@ export class DefaultClient implements Client {
             }
         }
         const compileCommandsIndex: number = paths.length;
+        const compileCommandsCount: number = compileCommandsIndex === configProvidersIndex ? 0 : compileCommandsIndex - configProvidersIndex - 1;
         paths.push("compilers");
         if (compilerDefaults.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
@@ -1020,17 +1022,19 @@ export class DefaultClient implements Client {
                 }
             }
         }
+        const compilersIndex: number = paths.length;
+        const compilerCount: number = compilersIndex === compileCommandsIndex ? 0 : compilersIndex - compileCommandsIndex - 1;
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
-        const statusBarIndicatorEnabled: boolean = await telemetry.showStatusBarIntelliSenseButton();
+        const fromStatusBarButton: boolean = !compilersOnly && await telemetry.showStatusBarIntelliSenseButton();
         try {
             if (index === -1) {
                 action = "escaped";
-                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !statusBarIndicatorEnabled) {
+                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
                 return;
@@ -1078,7 +1082,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
-                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !statusBarIndicatorEnabled) {
+                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
                         this.showPrompt(selectCompiler, true, sender);
                     }
                     action = "browse dismissed";
@@ -1115,7 +1119,8 @@ export class DefaultClient implements Client {
             compilerDefaults = await this.requestCompiler(compilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
-            telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender)}, { compilerCount: paths.length });
+            telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender) },
+                (compilersOnly ? { compilerCount } : { configProviderCount, compileCommandsCount, compilerCount }));
 
             // Clear the prompt state.
             if (configurationSelected) {
