@@ -58,7 +58,7 @@ export interface ConfigurationJson {
 
 export interface Configuration {
     name: string;
-    rawCompilerPath?: string;
+    compilerPathInCppPropertiesJson?: string;
     compilerPath?: string;
     compilerPathIsExplicit?: boolean;
     compilerArgs?: string[];
@@ -74,8 +74,10 @@ export interface Configuration {
     defines?: string[];
     intelliSenseMode?: string;
     intelliSenseModeIsExplicit?: boolean;
+    compileCommandsInCppPropertiesJson?: string;
     compileCommands?: string;
     forcedInclude?: string[];
+    configurationProviderInCppPropertiesJson?: string;
     configurationProvider?: string;
     mergeConfigurations?: boolean;
     browse?: Browse;
@@ -839,7 +841,9 @@ export class CppProperties {
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
-            configuration.rawCompilerPath = configuration.compilerPath;
+            configuration.compilerPathInCppPropertiesJson = configuration.compilerPath;
+            configuration.compileCommandsInCppPropertiesJson = configuration.compileCommands;
+            configuration.configurationProviderInCppPropertiesJson = configuration.configurationProvider;
 
             configuration.includePath = this.updateConfigurationPathsArray(configuration.includePath, settings.defaultIncludePath, env);
             // in case includePath is reset below

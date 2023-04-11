@@ -2755,13 +2755,14 @@ export class DefaultClient implements Client {
         }
 
         const settings: CppSettings = new CppSettings(this.RootUri);
-        const defaultsNotSet: boolean = settings.defaultCompilerPath === undefined
-            && !settings.defaultCompileCommands && !settings.defaultConfigurationProvider;
+        const configurationNotSet: boolean = settings.defaultCompilerPath === undefined &&
+            !settings.defaultCompileCommands && !settings.defaultConfigurationProvider &&
+            this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined &&
+            this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson === undefined &&
+            this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson === undefined;
 
-        showConfigStatus = showConfigStatus ||
-            (!this.configuration.CurrentConfiguration?.configurationProvider && !this.configuration.CurrentConfiguration?.compileCommands &&
-            !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== "") &&
-            defaultsNotSet);
+        showConfigStatus = showConfigStatus || (configurationNotSet &&
+            !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {

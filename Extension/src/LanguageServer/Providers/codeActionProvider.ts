@@ -68,7 +68,12 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
         }
 
         let hasSelectIntelliSenseConfiguration: boolean = false;
-        let hasConfigurationCompilerPath: boolean = false;
+        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const hasConfigurationSet: boolean = settings.defaultCompilerPath !== undefined ||
+            !!settings.defaultCompileCommands || !!settings.defaultConfigurationProvider ||
+            this.client.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson !== undefined ||
+            this.client.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson !== undefined ||
+            this.client.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson !== undefined;
 
         // Convert to vscode.CodeAction array
         response.commands.forEach((command) => {
@@ -176,12 +181,11 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             } else if (command.command === "C_Cpp.SelectIntelliSenseConfiguration") {
                 command.arguments = ['codeAction'];
                 hasSelectIntelliSenseConfiguration = true;
-                if (this.client.configuration.CurrentConfiguration?.rawCompilerPath !== undefined) {
-                    hasConfigurationCompilerPath = true;
+                if (hasConfigurationSet) {
                     return;
                 }
             } else if (command.command === "C_Cpp.ConfigurationEdit" && hasSelectIntelliSenseConfiguration) {
-                if (hasConfigurationCompilerPath) {
+                if (hasConfigurationSet) {
                     title = title.replace("includePath", "compilerPath");
                 } else {
                     return;

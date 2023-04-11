@@ -297,9 +297,6 @@ function isActiveDocumentHandled(): boolean {
     if (!activeEditor) {
         return false;
     }
-    if (activeEditor.document.uri.scheme === "output") {
-        return activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools");
-    }
     if (activeEditor.document.uri.scheme !== "file") {
         return false;
     }
