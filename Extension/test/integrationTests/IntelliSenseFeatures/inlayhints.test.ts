@@ -28,7 +28,7 @@ suite("[Inlay hints test]", function(): void {
     let referenceOperatorEnabledValue: any;
     let referenceOperatorShowSpaceValue: any;
     // Test setup
-    const rootUri: vscode.Uri = vscode.workspace.workspaceFolders[0].uri;
+    const rootUri: vscode.Uri = vscode.workspace.workspaceFolders[1].uri;
     const filePath: string | undefined = rootUri.fsPath + "/inlay_hints.cpp";
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     const disposables: vscode.Disposable[] = [];

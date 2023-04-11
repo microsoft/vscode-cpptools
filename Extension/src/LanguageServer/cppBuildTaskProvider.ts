@@ -393,6 +393,16 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
         if (this.options.cwd) {
             this.options.cwd = util.resolveVariables(this.options.cwd);
+        } else {
+            const editor: TextEditor | undefined = window.activeTextEditor;
+            let folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
+            if (!folder && workspace.workspaceFolders) {
+                // TODO: Use the workspace folder for the tasks.json?
+                folder = workspace.workspaceFolders[0];
+            }
+            if (folder) {
+                this.options.cwd = folder.uri.fsPath;
+            }
         }
 
         const splitWriteEmitter = (lines: string | Buffer) => {
