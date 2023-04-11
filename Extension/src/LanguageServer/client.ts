@@ -51,7 +51,9 @@ import {
     removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams
 } from './codeAnalysis';
 import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
+import _ = require('lodash');
 
+const deepCopy = (obj: any) => _.cloneDeep(obj);
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -2952,7 +2954,7 @@ export class DefaultClient implements Client {
         // Clone each entry, as we make modifications before sending it, and don't
         // want to add those modifications to the original objects.
         configurations.forEach((c) => {
-            const modifiedConfig: configs.Configuration = { ...c };
+            const modifiedConfig: configs.Configuration = deepCopy(c);
             // Separate compiler path and args before sending to language client
             const compilerPathAndArgs: util.CompilerPathAndArgs =
                 util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
@@ -3065,7 +3067,7 @@ export class DefaultClient implements Client {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
                 // Separate compiler path and args before sending to language client
-                const itemConfig: util.Mutable<InternalSourceFileConfiguration> = { ...item.configuration };
+                const itemConfig: util.Mutable<InternalSourceFileConfiguration> = deepCopy(item.configuration);
                 if (util.isString(itemConfig.compilerPath)) {
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
                         providerVersion < Version.v6,
@@ -3146,7 +3148,8 @@ export class DefaultClient implements Client {
                 return;
             }
 
-            sanitized = { ...<InternalWorkspaceBrowseConfiguration>config };
+            const browseConfig: InternalWorkspaceBrowseConfiguration = <InternalWorkspaceBrowseConfiguration>config;
+            sanitized = deepCopy(browseConfig);
             if (!this.isWorkspaceBrowseConfiguration(sanitized) || sanitized.browsePath.length === 0) {
                 console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
                 const configValue: WorkspaceBrowseConfiguration | undefined = this.lastCustomBrowseConfiguration.Value;
