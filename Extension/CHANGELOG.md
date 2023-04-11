@@ -1,5 +1,25 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.15.2: March 12, 2023
+### Enhancements
+* Add a "Configure IntelliSense" status bar warning. [#10685](https://github.com/microsoft/vscode-cpptools/issues/10685)
+* Update to clang-format/tidy 16. [#10725](https://github.com/microsoft/vscode-cpptools/issues/10725)
+* Move the configuration status bar item out of the language status UI. [#10755](https://github.com/microsoft/vscode-cpptools/issues/10755)
+* Change `Select Default Compiler` to `Select IntelliSense Configuration` with configuration providers and compile commands added. [#10756](https://github.com/microsoft/vscode-cpptools/issues/10756)
+
+### Bug Fixes
+* Support use of `ccache` in `compilerPath` and `compile_commands.json` command lines. [#7616](https://github.com/microsoft/vscode-cpptools/issues/7616)
+* Fix two vcFormat settings being inverted. [#10262](https://github.com/microsoft/vscode-cpptools/issues/10262), [#10263](https://github.com/microsoft/vscode-cpptools/issues/10263)
+* Fix the browse configuration provider cache not getting cleared. [#10692](https://github.com/microsoft/vscode-cpptools/issues/10692)
+* Fix a crash with recursive environment variables on Windows. [#10704](https://github.com/microsoft/vscode-cpptools/issues/10704)
+* Fix `#import` of `.tlb` files failing due to `/Fo` arguments to `cl.exe` not being processed. [#10710](https://github.com/microsoft/vscode-cpptools/issues/10710)
+* Fix `cppbuild` tasks not using the workspace folder as the `cwd` by default. [#10742](https://github.com/microsoft/vscode-cpptools/issues/10742)
+* Fix lots of IntelliSense processes getting launched after a Find/Replace operation (potentially freezing the OS). [#10743](https://github.com/microsoft/vscode-cpptools/issues/10743)
+* Fix workspace folder variable resolution with `clang_format_style`. [#10752](https://github.com/microsoft/vscode-cpptools/issues/10752)
+* For remote attach, use an absolute `/bin/sh` path on Linux. [PR #10765](https://github.com/microsoft/vscode-cpptools/pull/10765)
+* Fix the first registered configuration provider still being automatically used after a second registers. [PR #10772](https://github.com/microsoft/vscode-cpptools/pull/10772)
+* Fix `C_Cpp.default.compilerPath` in the settings UI showing a string editor when it shouldn't. [#10795](https://github.com/microsoft/vscode-cpptools/issues/10795)
+
 ## Version 1.15.1: March 22, 2023
 ### Bug Fixes
 * Fix crashes with a multiroot workspace. [#10636](https://github.com/microsoft/vscode-cpptools/issues/10636)
