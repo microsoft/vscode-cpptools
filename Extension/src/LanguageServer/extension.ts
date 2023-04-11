@@ -291,17 +291,18 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-function isHandledDocument(editor: vscode.TextEditor): boolean {
-    // Unhandled cases.
+// Includes C/C++ and related files.
+function isActiveDocumentHandled(): boolean {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor) {
         return false;
     }
+    if (activeEditor.document.uri.scheme === "output") {
+        return activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools");
+    }
     if (activeEditor.document.uri.scheme !== "file") {
         return false;
     }
-
-    // Handled cases
     if (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp") {
         return true;
     }
@@ -312,8 +313,6 @@ function isHandledDocument(editor: vscode.TextEditor): boolean {
             return true;
         }
     }
-
-    // Otherwise, unhandled.
     return false;
 }
 
@@ -324,10 +323,16 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    if (editor && isHandledDocument(editor)) {
-        activeDocument = editor.document.uri.toString();
+    if (editor && isActiveDocumentHandled()) {
+        // This is required for the UI to update correctly.
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+        if (editor.document.uri.scheme === "file" &&
+            (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+            activeDocument = editor.document.uri.toString();
+            clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+        } else {
+            activeDocument = "";
+        }
     } else {
         activeDocument = "";
     }

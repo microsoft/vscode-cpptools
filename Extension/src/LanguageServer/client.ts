@@ -2837,6 +2837,10 @@ export class DefaultClient implements Client {
      */
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
         this.updateActiveDocumentTextOptions();
+        if (document.uri.scheme !== "file" ||
+            !(document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp")) {
+            return;
+        }
         await this.awaitUntilLanguageClientReady();
         this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document));
     }

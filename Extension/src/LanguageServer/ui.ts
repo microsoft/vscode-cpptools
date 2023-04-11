@@ -340,14 +340,14 @@ export class OldUI implements UI {
                     vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
                 }
             }
+            const isCppOutput: boolean = activeEditor.document.uri.scheme === "output" && activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools");
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson ||
+            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson || isCppOutput ||
                 activeEditor.document.fileName.endsWith("settings.json") ||
                 activeEditor.document.fileName.endsWith(".code-workspace");
             this.ShowConfiguration = showConfigureIntelliSenseButton ||
-                activeEditor.document.uri.scheme === "output" ||
                 activeEditor.document.fileName.endsWith("tasks.json") ||
                 activeEditor.document.fileName.endsWith("launch.json");
 
