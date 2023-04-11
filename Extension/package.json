@@ -65,7 +65,7 @@
         "id": "cppWelcome",
         "title": "%c_cpp.walkthrough.title%",
         "description": "%c_cpp.walkthrough.description%",
-        "when": "true",
+        "when": "false",
         "steps": [
           {
             "id": "awaiting.activation.mac",
