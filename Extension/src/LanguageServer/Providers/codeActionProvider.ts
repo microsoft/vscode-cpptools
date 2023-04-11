@@ -71,9 +71,12 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
         const settings: CppSettings = new CppSettings(this.client.RootUri);
         const hasConfigurationSet: boolean = settings.defaultCompilerPath !== undefined ||
             !!settings.defaultCompileCommands || !!settings.defaultConfigurationProvider ||
+            this.client.configuration.CurrentConfiguration?.compilerPath !== undefined ||
+            !this.client.configuration.CurrentConfiguration?.compileCommands ||
+            !this.client.configuration.CurrentConfiguration?.configurationProvider ||
             this.client.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson !== undefined ||
-            this.client.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson !== undefined ||
-            this.client.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson !== undefined;
+            !!this.client.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson ||
+            !!this.client.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
 
         // Convert to vscode.CodeAction array
         response.commands.forEach((command) => {
