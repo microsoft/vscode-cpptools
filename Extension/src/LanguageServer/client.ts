@@ -1134,13 +1134,15 @@ export class DefaultClient implements Client {
             }
 
             // Clear the prompt state.
-            if (configurationSelected) {
-                const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
-                if (rootFolder) {
-                    // TODO: Add some way to change this state to true.
-                    let ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
+            // TODO: Add some way to change this state to true.
+            const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
+            if (rootFolder) {
+                if (configurationSelected || configProviderCount > 0) {
+                    const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
                     ask.Value = false;
-                    ask = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
+                }
+                if (configurationSelected || compileCommandsCount > 0) {
+                    const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
                     ask.Value = false;
                 }
             }
@@ -2667,13 +2669,16 @@ export class DefaultClient implements Client {
             return; // Wait till the config state is recevied or timed out.
         }
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
+        const settings: CppSettings = new CppSettings(this.RootUri);
+        const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider && !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
+        const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
         // Handle config providers
         const provider: CustomConfigurationProvider1 | undefined =
             !this.configStateReceived.configProviders ? undefined :
                 (this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0]);
         let showConfigStatus: boolean = false;
-        if (rootFolder && !this.configuration.CurrentConfiguration?.configurationProvider && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
+        if (rootFolder && configProviderNotSet && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
@@ -2712,7 +2717,7 @@ export class DefaultClient implements Client {
         }
 
         // Handle compile commands
-        if (rootFolder && !this.configuration.CurrentConfiguration?.compileCommands && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
+        if (rootFolder && configProviderNotSet && compileCommandsNotSet && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
@@ -2756,12 +2761,8 @@ export class DefaultClient implements Client {
             }
         }
 
-        const settings: CppSettings = new CppSettings(this.RootUri);
-        const configurationNotSet: boolean = settings.defaultCompilerPath === undefined &&
-            !settings.defaultCompileCommands && !settings.defaultConfigurationProvider &&
-            this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined &&
-            this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson === undefined &&
-            this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson === undefined;
+        const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
+        const configurationNotSet: boolean = configProviderNotSet && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
             !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
