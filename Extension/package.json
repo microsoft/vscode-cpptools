@@ -3007,6 +3007,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.RescanCompilers",
+        "title": "%c_cpp.command.rescanCompilers.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.SwitchHeaderSource",
         "title": "%c_cpp.command.switchHeaderSource.title%",
         "category": "C/C++"
@@ -5495,6 +5500,10 @@
         {
           "command": "C_Cpp.referencesViewUngroupByType",
           "when": "cpptools.hasReferencesResults"
+        },
+        {
+          "command": "C_Cpp.RescanCompilers",
+          "when": "never"
         },
         {
           "command": "C_Cpp.addSshTarget",
