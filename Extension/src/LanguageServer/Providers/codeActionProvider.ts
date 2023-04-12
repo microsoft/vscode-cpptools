@@ -72,8 +72,8 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
         const hasConfigurationSet: boolean = settings.defaultCompilerPath !== undefined ||
             !!settings.defaultCompileCommands || !!settings.defaultConfigurationProvider ||
             this.client.configuration.CurrentConfiguration?.compilerPath !== undefined ||
-            !this.client.configuration.CurrentConfiguration?.compileCommands ||
-            !this.client.configuration.CurrentConfiguration?.configurationProvider ||
+            !!this.client.configuration.CurrentConfiguration?.compileCommands ||
+            !!this.client.configuration.CurrentConfiguration?.configurationProvider ||
             this.client.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson !== undefined ||
             !!this.client.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson ||
             !!this.client.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
