@@ -76,11 +76,10 @@ interface CallHierarchyCallsItemResult {
 const CallHierarchyItemRequest: RequestType<CallHierarchyParams, CallHierarchyItemResult, void> =
     new RequestType<CallHierarchyParams, CallHierarchyItemResult, void>('cpptools/prepareCallHierarchy');
 
-// Send notification. Then get results with callback. (see find all references for example)
-// const  CallHierarchyCallsToRequest: RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void> =
-// new RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsTo');
+const CallHierarchyCallsToRequest: RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void> =
+new RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsTo');
 
-const  CallHierarchyCallsFromRequest: RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void> =
+const CallHierarchyCallsFromRequest: RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void> =
     new RequestType<CallHierarchyParams, CallHierarchyCallsItemResult, void>('cpptools/callHierarchyCallsFrom');
 
 export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
@@ -95,6 +94,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         if (range === undefined) {
             return undefined;
         }
+
         await this.client.requestWhenReady(() => processDelayedDidOpen(document));
 
         const params: CallHierarchyParams = {
@@ -105,7 +105,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         if (token.isCancellationRequested || response.succeeded === undefined) {
             throw new vscode.CancellationError();
         } else if (response.item === undefined) {
-            // TODO: add a message if item is not a function
             return undefined;
         }
 
@@ -114,25 +113,23 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
     Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
-        // verify item is not null
         if (item === undefined) {
             return undefined;
         }
 
-        // await this.client.awaitUntilLanguageClientReady();
-        // const params: CallHierarchyParams = {
-        //     textDocument: { uri: item.uri.toString() },
-        //     position: Position.create(item.range.start.line, item.range.start.character)
-        // };
-        // const response: CallHierarchyCallsResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
-        // if (token.isCancellationRequested || response.calls === undefined) {
-        //     throw new vscode.CancellationError();
-        // } else if (response.calls.length === 0) {
-        //      return undefined;
-        // }
+        await this.client.awaitUntilLanguageClientReady();
+        const params: CallHierarchyParams = {
+            textDocument: { uri: item.uri.toString() },
+            position: Position.create(item.range.start.line, item.range.start.character)
+        };
+        const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, token);
+        if (token.isCancellationRequested || response.calls === undefined) {
+            throw new vscode.CancellationError();
+        } else if (response.calls.length === 0) {
+            return undefined;
+        }
 
-        const incomingCallsResult: vscode.CallHierarchyIncomingCall[] = []; // this.createIncomingCalls(response);
-        return incomingCallsResult;
+        return this.createIncomingCalls(response.calls);
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
@@ -164,23 +161,36 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             makeVscodeRange(item.selectionRange));
     }
 
-    // private createIncomingCalls(calls: CallHierarchyCallsItem[]): vscode.CallHierarchyIncomingCall[] {
-    //     const result: vscode.CallHierarchyIncomingCall[] = [];
-    //     return result;
-    // }
+    private createIncomingCalls(calls: CallHierarchyCallsItem[]): vscode.CallHierarchyIncomingCall[] {
+        const result: vscode.CallHierarchyIncomingCall[] = [];
+
+        for (const call of calls) {
+            const item: vscode.CallHierarchyItem = this.makeVscodeCallHierarchyItem(call.item);
+            const ranges: vscode.Range[] = [];
+            call.fromRanges.forEach(r => {
+                ranges.push(makeVscodeRange(r));
+            });
+
+            const incomingCall: vscode.CallHierarchyIncomingCall =
+                new vscode.CallHierarchyIncomingCall(item, ranges);
+            result.push(incomingCall);
+        }
+
+        return result;
+    }
 
     private createOutgoingCalls(calls: CallHierarchyCallsItem[]): vscode.CallHierarchyOutgoingCall[] {
         const result: vscode.CallHierarchyOutgoingCall[] = [];
 
         for (const call of calls) {
-            const callHierarchyItem: vscode.CallHierarchyItem = this.makeVscodeCallHierarchyItem(call.item);
-            const fromRanges: vscode.Range[] = [];
-            for (const range of call.fromRanges) {
-                fromRanges.push(makeVscodeRange(range));
-            }
+            const item: vscode.CallHierarchyItem = this.makeVscodeCallHierarchyItem(call.item);
+            const ranges: vscode.Range[] = [];
+            call.fromRanges.forEach(r => {
+                ranges.push(makeVscodeRange(r));
+            });
 
             const outgoingCall: vscode.CallHierarchyOutgoingCall =
-                new vscode.CallHierarchyOutgoingCall(callHierarchyItem, fromRanges);
+                new vscode.CallHierarchyOutgoingCall(item, ranges);
             result.push(outgoingCall);
         }
 
