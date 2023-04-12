@@ -78,12 +78,21 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
 }
 
 export async function showLanguageStatusExperiment(): Promise<boolean> {
+    return isExperimentEnabled("ShowLangStatBar");
+}
+
+export async function showStatusBarIntelliSenseButton(): Promise<boolean> {
+    const result: boolean = await isExperimentEnabled("showStatusBarIntelliSenseIndicator");
+    return result;
+}
+
+async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
     }
     const experimentationService: IExperimentationService | undefined = await getExperimentationService();
-    const useNewUI: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", "ShowLangStatBar");
-    return useNewUI ?? false;
+    const isEnabled: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", experimentName);
+    return isEnabled ?? false;
 }
 
 export async function deactivate(): Promise<void> {

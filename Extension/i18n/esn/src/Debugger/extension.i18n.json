@@ -10,7 +10,7 @@
 	"enter.ssh.target.name": "Escriba el nombre de destino SSH",
 	"ssh.target.name.place.holder": "Ejemplo: `mySSHTarget`",
 	"enter.ssh.connection.command": "Escriba el comando de conexión SSH",
-	"ssh.connection.command.place.holder": "Ejemplo: \"ssh hello@microsoft.com -A\"",
+	"ssh.connection.command.place.holder": "Ejemplo: `ssh hello@microsoft.com -A`",
 	"select.ssh.config.file": "Selección de un archivo de configuración SSH",
 	"yes": "Sí",
 	"no": "No",

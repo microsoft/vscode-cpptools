@@ -47,7 +47,7 @@
 	"windows.sdk.version": "Version du SDK Windows",
 	"windows.sdk.version.description": "Version du chemin d'inclusion du SDK Windows à utiliser sur Windows, par ex., {0}.",
 	"mac.framework.path": "Chemin du framework Mac",
-	"mac.framework.path.description": "Liste de chemins que le moteur IntelliSense doit utiliser pour la recherche des en-têtes inclus dans les frameworks Mac. Prise en charge uniquement sur les configurations pour macOS.",
+	"mac.framework.path.description": "Liste des chemins d’accès à utiliser par le moteur IntelliSense lors de la recherche d’en-têtes inclus à partir des infrastructures Mac. Uniquement pris en charge sur les configurations pour macOS.",
 	"one.path.per.line": "Un chemin par ligne.",
 	"forced.include": "Inclusion forcée",
 	"forced.include.description": "Liste des fichiers qui doivent être inclus avant le traitement de tous les autres caractères du fichier source. Les fichiers sont inclus dans l'ordre indiqué.",

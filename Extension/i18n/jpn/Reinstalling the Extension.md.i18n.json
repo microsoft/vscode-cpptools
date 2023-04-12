@@ -10,12 +10,12 @@
 	"bug.report.link.title": "問題を報告してください",
 	"reinstalling.extension.heading": "C/C++ 拡張機能の再インストール",
 	"reinstall.extension.text1": "同等のバージョンの拡張機能を再インストールする場合、VS Code は既存の拡張機能ディレクトリを再利用できます。C/C++ 拡張機能を再インストールするときにこの問題が発生しないようにするには、最初に既存の拡張ディレクトリを削除する必要がある場合があります。",
-	"reinstall.extension.text2": "インストールされている拡張ディレクトリは、ユーザー ディレクトリ (Windows の場合は '%USERPROFILE%'、Linux および macOS では '$HOME') の下にある次のいずれかのパスにあります",
+	"reinstall.extension.text2": "インストールされている拡張ディレクトリは、ユーザー ディレクトリ (Windows の場合は `%USERPROFILE%`、Linux および macOS では `$HOME`) の下にある次のいずれかのパスにあります",
 	"reinstall.extension.text3": "リモート接続の場合:",
 	"reinstall.extension.text4": "インストールされている C/C++ 拡張ディレクトリへのパスの例:",
 	"reinstall.extension.text5": "Windows の場合:",
 	"reinstall.extension.text6": "Linux の場合:",
 	"reinstall.extension.text7": "次に、VS Code のマーケットプレース UI を使用して再インストールします。",
-	"reinstall.extension.text8": "拡張機能の正しいバージョンを VS Code で展開できない場合は、。VS Codeのマーケットプレース UI のメニューにある '...' の下の [VSIX からインストールする...] オプションを使用して、システムの正しい VSIX を {0} し、インストールできます。",
+	"reinstall.extension.text8": "拡張機能の正しいバージョンを VS Code で展開できない場合は、。VS Codeのマーケットプレース UI のメニューにある '...' の下の 'VSIX からインストールする...' オプションを使用して、システムの正しい VSIX を {0} し、インストールできます。",
 	"download.vsix.link.title": "VS Code マーケットプレイス Web サイトからダウンロードされました"
 }

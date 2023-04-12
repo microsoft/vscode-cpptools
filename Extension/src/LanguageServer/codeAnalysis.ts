@@ -356,7 +356,8 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     const checksPage: string = dashIndex > 0 ? primaryCode.substring(dashIndex + 1) : primaryCode;
                     docPage = `checks${checksGroup}/${checksPage}.html`;
                 }
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/15.0.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
+                // TODO: This should be checking the clang-tidy version used to better support usage of older versions.
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/16.0.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {

@@ -10,6 +10,7 @@
 	"select.command": "명령 선택...",
 	"c.cpp.configuration.tooltip": "C/C++ 구성",
 	"c.cpp.references.statusbar": "C/C++ 참조 상태",
+	"c.cpp.compilerStatus.statusbar": "IntelliSense 구성",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense 상태",
 	"c.cpp.tagparser.statusbar": "C/C++ 태그 파서 상태",
 	"discovering.files.tooltip": "파일을 검색하는 중",
