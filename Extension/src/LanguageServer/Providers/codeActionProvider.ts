@@ -67,8 +67,16 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             throw new vscode.CancellationError();
         }
 
-        let hasSelectDefaultCompiler: boolean = false;
-        let hasConfigurationCompilerPath: boolean = false;
+        let hasSelectIntelliSenseConfiguration: boolean = false;
+        const settings: CppSettings = new CppSettings(this.client.RootUri);
+        const hasConfigurationSet: boolean = settings.defaultCompilerPath !== undefined ||
+            !!settings.defaultCompileCommands || !!settings.defaultConfigurationProvider ||
+            this.client.configuration.CurrentConfiguration?.compilerPath !== undefined ||
+            !!this.client.configuration.CurrentConfiguration?.compileCommands ||
+            !!this.client.configuration.CurrentConfiguration?.configurationProvider ||
+            this.client.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson !== undefined ||
+            !!this.client.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson ||
+            !!this.client.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
 
         // Convert to vscode.CodeAction array
         response.commands.forEach((command) => {
@@ -173,15 +181,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 return;
             } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
                 command.arguments = ['codeAction']; // We report the sender of the command
-            } else if (command.command === "C_Cpp.SelectDefaultCompiler") {
+            } else if (command.command === "C_Cpp.SelectIntelliSenseConfiguration") {
                 command.arguments = ['codeAction'];
-                hasSelectDefaultCompiler = true;
-                if (this.client.configuration.CurrentConfiguration?.rawCompilerPath !== undefined) {
-                    hasConfigurationCompilerPath = true;
+                hasSelectIntelliSenseConfiguration = true;
+                if (hasConfigurationSet) {
                     return;
                 }
-            } else if (command.command === "C_Cpp.ConfigurationEdit" && hasSelectDefaultCompiler) {
-                if (hasConfigurationCompilerPath) {
+            } else if (command.command === "C_Cpp.ConfigurationEdit" && hasSelectIntelliSenseConfiguration) {
+                if (hasConfigurationSet) {
                     title = title.replace("includePath", "compilerPath");
                 } else {
                     return;

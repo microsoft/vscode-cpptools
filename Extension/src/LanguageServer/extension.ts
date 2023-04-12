@@ -291,6 +291,28 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
+// Includes C/C++ and related files.
+function isActiveDocumentHandled(): boolean {
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        return false;
+    }
+    if (activeEditor.document.uri.scheme !== "file") {
+        return false;
+    }
+    if (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp") {
+        return true;
+    }
+    if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
+        if (activeEditor.document.fileName.endsWith("c_cpp_properties.json") ||
+            activeEditor.document.fileName.endsWith("settings.json") ||
+            activeEditor.document.fileName.endsWith(".code-workspace")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -298,13 +320,18 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
-        activeDocument = "";
-    } else {
-        activeDocument = editor.document.uri.toString();
+    if (editor && isActiveDocumentHandled()) {
+        // This is required for the UI to update correctly.
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+        if (editor.document.uri.scheme === "file" &&
+            (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+            activeDocument = editor.document.uri.toString();
+            clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+        } else {
+            activeDocument = "";
+        }
+    } else {
+        activeDocument = "";
     }
     ui.activeDocumentChanged();
 }
@@ -382,6 +409,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', enabled ? onSelectConfigurationProvider : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', enabled ? onEditConfigurationJSON : onDisabledCommand));
@@ -545,6 +573,12 @@ function selectDefaultCompiler(sender?: any): void {
 function onRescanCompilers(sender?: any): void {
     clients.ActiveClient.notifyWhenLanguageClientReady(() => {
         clients.ActiveClient.rescanCompilers(sender);
+    });
+}
+
+function selectIntelliSenseConfiguration(sender?: any): void {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
     });
 }
 
