@@ -81,7 +81,6 @@ interface ConfigStateReceived {
 
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
-let scanForCompilersDone: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -2780,7 +2779,6 @@ export class DefaultClient implements Client {
             trustedCompilerPaths: compilerPath
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
-        scanForCompilersDone = true;
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
         vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);
