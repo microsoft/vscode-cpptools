@@ -379,6 +379,17 @@ export class CppSettings extends Settings {
     public get defaultForcedInclude(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | undefined { return super.Section.get<string | null>("default.compilerPath") ?? undefined; }
+    public set defaultCompilerPath(value: string | undefined) {
+        const defaultCompilerPathStr: string = "default.compilerPath";
+        const compilerPathInfo: any = this.Section.inspect(defaultCompilerPathStr);
+        let target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global;
+        if (this.resource !== undefined || compilerPathInfo.workspaceFolderValue !== undefined) {
+            target = vscode.ConfigurationTarget.WorkspaceFolder;
+        } else if (compilerPathInfo.workspaceValue !== undefined) {
+            target = vscode.ConfigurationTarget.Workspace;
+        }
+        this.Section.update(defaultCompilerPathStr, value, target);
+    }
     public get defaultCompilerArgs(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
@@ -963,9 +974,6 @@ export class OtherSettings {
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }
     public set filesAssociations(value: any) {
         vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
-    }
-    public set defaultCompiler(value: string) {
-        vscode.workspace.getConfiguration("C_Cpp.default").update("compilerPath", value, vscode.ConfigurationTarget.Global);
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }

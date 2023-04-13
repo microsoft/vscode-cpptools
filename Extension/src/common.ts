@@ -1188,6 +1188,15 @@ export class BlockingTask<T> {
     }
 }
 
+export function getSenderType(sender?: any): string {
+    if (isString(sender)) {
+        return sender;
+    } else if (isUri(sender)) {
+        return 'contextMenu';
+    }
+    return 'commandPalette';
+}
+
 function decodeUCS16(input: string): number[] {
     const output: number[] = [];
     let counter: number = 0;
@@ -1468,3 +1477,29 @@ export const documentSelector: DocumentFilter[] = [
     { scheme: 'file', language: 'cpp' },
     { scheme: 'file', language: 'cuda-cpp' }
 ];
+
+export function hasMsvcEnvironment(): boolean {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'NETFXSDKDir',
+        'UCRTVersion',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+}
