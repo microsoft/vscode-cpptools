@@ -177,8 +177,11 @@
         "text": "+%d specializations",
         "hint": "Refers to C++ template specializations. This is part of a description indicating there are N additional specializations of a function.  %d is replaced with that number."
     },
-    "compiler": {
-        "text": "Note: IntelliSense is not fully configured. Use the 'Select Default Compiler' command to finish configuration."
+    "intellisense_configuration": {
+        "text": "Note: IntelliSense is not fully configured. Use the 'Select IntelliSense Configuration...' command to finish configuration."
+    },
+    "select_intellisense_configuration": {
+        "text": "Select an IntelliSense configuration to locate system headers"
     },
     "expands_to": "Expands to:",
     "attention_label": "Attention:",
@@ -437,5 +440,8 @@
         "text": "The operation is not supported for '%s'.",
         "hint": "%s is the function that is not supported for an operation that involves automatically generating code."
     },
-    "unknown_error": "Unknown error."
+    "unknown_error": "Unknown error.",
+    "run_select_intellisense_configuration": {
+        "text": "Please run the 'Select IntelliSense Configuration...' command to locate your system headers."
+    }
 }

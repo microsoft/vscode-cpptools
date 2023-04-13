@@ -11,6 +11,9 @@ import * as util from '../common';
 import * as config from './configurations';
 import * as telemetry from '../telemetry';
 import { getLocalizedHtmlPath } from './localization';
+import _ = require('lodash');
+
+const deepCopy = (obj: any) => _.cloneDeep(obj);
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
@@ -220,7 +223,7 @@ export class SettingsPanel {
     }
 
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
-        this.configValues = {...configuration}; // Copy configuration values
+        this.configValues = deepCopy(configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel && this.initialized) {
             this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });

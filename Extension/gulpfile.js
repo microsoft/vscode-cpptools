@@ -72,6 +72,10 @@ gulp.task('lint', function () {
         .pipe(eslint.failAfterError());
 });
 
+gulp.task('copy-walkthrough-media', function () {
+    return gulp.src('walkthrough/images/**/*')
+        .pipe(gulp.dest('dist/walkthrough/images'));
+});
 
 // ****************************
 // Command: translations-export

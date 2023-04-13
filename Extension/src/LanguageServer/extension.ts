@@ -253,6 +253,8 @@ export async function activate(): Promise<void> {
         }
     });
 
+    await vscode.commands.executeCommand('setContext', 'cpptools.msvcEnvironmentFound', util.hasMsvcEnvironment());
+
     // Log cold start.
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (activeEditor) {
@@ -289,6 +291,28 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
+// Includes C/C++ and related files.
+function isActiveDocumentHandled(): boolean {
+    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        return false;
+    }
+    if (activeEditor.document.uri.scheme !== "file") {
+        return false;
+    }
+    if (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp") {
+        return true;
+    }
+    if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
+        if (activeEditor.document.fileName.endsWith("c_cpp_properties.json") ||
+            activeEditor.document.fileName.endsWith("settings.json") ||
+            activeEditor.document.fileName.endsWith(".code-workspace")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -296,13 +320,18 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!editor || !activeEditor || activeEditor.document.uri.scheme !== "file" || (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
-        activeDocument = "";
-    } else {
-        activeDocument = editor.document.uri.toString();
+    if (editor && isActiveDocumentHandled()) {
+        // This is required for the UI to update correctly.
         clients.activeDocumentChanged(editor.document);
-        clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+        if (editor.document.uri.scheme === "file" &&
+            (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+            activeDocument = editor.document.uri.toString();
+            clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+        } else {
+            activeDocument = "";
+        }
+    } else {
+        activeDocument = "";
     }
     ui.activeDocumentChanged();
 }
@@ -332,6 +361,10 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
+                if (!client.isInitialized()) {
+                    // This can randomly get hit when adding/removing workspace folders.
+                    await client.awaitUntilLanguageClientReady();
+                }
                 client.TrackedDocuments.add(document);
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
@@ -375,7 +408,8 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.selectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', enabled ? onSelectConfigurationProvider : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', enabled ? onEditConfigurationJSON : onDisabledCommand));
@@ -406,7 +440,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateEditorConfig', enabled ? onGenerateEditorConfig : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToNextDirectiveInGroup', enabled ? onGoToNextDirectiveInGroup : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GoToPrevDirectiveInGroup', enabled ? onGoToPrevDirectiveInGroup : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CheckForCompiler', enabled ? onCheckForCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnActiveFile', enabled ? onRunCodeAnalysisOnActiveFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnOpenFiles', enabled ? onRunCodeAnalysisOnOpenFiles : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RunCodeAnalysisOnAllFiles', enabled ? onRunCodeAnalysisOnAllFiles : onDisabledCommand));
@@ -423,25 +456,17 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
 function logForUIExperiment(command: string, sender?: any): void {
-    const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+    const settings: CppSettings = new CppSettings();
     const properties: {[key: string]: string} = {
         newUI: ui.isNewUI.toString(),
         uiOverride: (settings.experimentalFeatures ?? false).toString(),
-        sender: getSenderType(sender)
+        sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent(`experiment${command}`, properties);
-}
-
-function getSenderType(sender?: any): string {
-    if (util.isString(sender)) {
-        return sender;
-    } else if (util.isUri(sender)) {
-        return 'contextMenu';
-    }
-    return 'commandPalette';
 }
 
 function onDisabledCommand(): void {
@@ -534,11 +559,27 @@ async function selectClient(): Promise<Client> {
 }
 
 function onResetDatabase(): void {
-    clients.ActiveClient.resetDatabase();
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.resetDatabase();
+    });
 }
 
-function selectDefaultCompiler(): void {
-    clients.ActiveClient.promptSelectCompiler(true);
+function selectDefaultCompiler(sender?: any): void {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.promptSelectCompiler(true, sender);
+    });
+}
+
+function onRescanCompilers(sender?: any): void {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.rescanCompilers(sender);
+    });
+}
+
+function selectIntelliSenseConfiguration(sender?: any): void {
+    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
+        clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
+    });
 }
 
 function onSelectConfiguration(sender?: any): void {
@@ -606,12 +647,6 @@ function onGoToNextDirectiveInGroup(): void {
 function onGoToPrevDirectiveInGroup(): void {
     const client: Client = getActiveClient();
     client.handleGoToDirectiveInGroup(false);
-}
-
-function onCheckForCompiler(sender?: any): void {
-    logForUIExperiment("CheckForCompiler", sender);
-    const client: Client = getActiveClient();
-    client.handleCheckForCompiler();
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
@@ -686,7 +721,7 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
 
 async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
     const properties: { [key: string]: string } = {
-        sender: getSenderType(sender)
+        sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     getActiveClient().handleCreateDeclarationOrDefinition();

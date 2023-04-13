@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "在 Windows 上:",
 	"reinstall.extension.text6": "在 Linux 上:",
 	"reinstall.extension.text7": "然后通过 VS Code 中的市场 UI 重新安装。",
-	"reinstall.extension.text8": "如果 VS Code 无法部署扩展的正确版本，则可以 {0} 并使用 VS Code 中市场 UI 内 “...” 菜单下的 `从 VSIX... 安装` 选项安装系统的正确 VSIX。",
+	"reinstall.extension.text8": "如果 VS Code 无法部署扩展的正确版本，则可以 {0} 并使用 VS Code 中市场 UI 内 “...” 菜单下的 '从 VSIX... 安装' 选项安装系统的正确 VSIX。",
 	"download.vsix.link.title": "已从 VS Code 市场网站下载"
 }
