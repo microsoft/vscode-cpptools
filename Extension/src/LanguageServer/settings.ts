@@ -383,9 +383,7 @@ export class CppSettings extends Settings {
         const defaultCompilerPathStr: string = "default.compilerPath";
         const compilerPathInfo: any = this.Section.inspect(defaultCompilerPathStr);
         let target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global;
-        if (this.resource !== undefined) {
-            target = vscode.ConfigurationTarget.WorkspaceFolder;
-        } else if (compilerPathInfo.workspaceFolderValue !== undefined) {
+        if (this.resource !== undefined || compilerPathInfo.workspaceFolderValue !== undefined) {
             target = vscode.ConfigurationTarget.WorkspaceFolder;
         } else if (compilerPathInfo.workspaceValue !== undefined) {
             target = vscode.ConfigurationTarget.Workspace;
