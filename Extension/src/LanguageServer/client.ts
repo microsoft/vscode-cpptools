@@ -989,7 +989,7 @@ export class DefaultClient implements Client {
     }
 
     public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any, compilersOnly?: boolean): Promise<void> {
-        const settings: CppSettings = new CppSettings();
+        const settings: CppSettings = new CppSettings(compilersOnly ? undefined : this.RootUri);
         const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration...");
         const paths: string[] = [];
         const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
