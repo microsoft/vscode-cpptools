@@ -109,8 +109,9 @@ export class NewUI implements UI {
         this.ShowReferencesIcon = false;
 
         this.configureIntelliSenseStatusItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
-        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.statusbar", "Configure IntelliSense");
-        this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseStatusItem.name}`;
+        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
+        const configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
+        this.configureIntelliSenseStatusItem.text = `$(warning) ${configureIntelliSenseText}`;
         this.configureIntelliSenseStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         this.configureIntelliSenseStatusItem.command = {
             command: "C_Cpp.SelectIntelliSenseConfiguration",
@@ -422,8 +423,14 @@ export class NewUI implements UI {
         }
         if (show) {
             this.showConfigureIntelliSenseButton = true;
-            this.configureIntelliSenseStatusItem.show();
+            const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
+            if (activeEditor &&
+                ((activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp")) ||
+                ((activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") && activeEditor.document.fileName.endsWith("c_cpp_properties.json")) ||
+                (activeEditor.document.uri.scheme === "output" && activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")))) {
+                this.configureIntelliSenseStatusItem.show();
+            }
         } else {
             this.showConfigureIntelliSenseButton = false;
             this.configureIntelliSenseStatusItem.hide();
@@ -451,12 +458,12 @@ export class NewUI implements UI {
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson || isCppOutput ||
-                activeEditor.document.fileName.endsWith("settings.json") ||
-                activeEditor.document.fileName.endsWith(".code-workspace");
+            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson || isCppOutput;
             this.ShowConfiguration = showConfigureIntelliSenseButton ||
                 activeEditor.document.fileName.endsWith("tasks.json") ||
-                activeEditor.document.fileName.endsWith("launch.json");
+                activeEditor.document.fileName.endsWith("launch.json") ||
+                activeEditor.document.fileName.endsWith("settings.json") ||
+                activeEditor.document.fileName.endsWith(".code-workspace");
 
             if (this.showConfigureIntelliSenseButton) {
                 if (showConfigureIntelliSenseButton) {
