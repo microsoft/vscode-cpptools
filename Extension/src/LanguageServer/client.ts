@@ -68,7 +68,7 @@ let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let pendingTask: util.BlockingTask<any> | undefined;
-let compilerDefaults: configs.CompilerDefaults;
+let compilerDefaults: configs.CompilerDefaults | undefined;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
 
@@ -931,7 +931,7 @@ export class DefaultClient implements Client {
         clients.forEach(client => {
             if (client instanceof DefaultClient) {
                 const defaultClient: DefaultClient = <DefaultClient>client;
-                if (!client.isInitialized()) {
+                if (!client.isInitialized() || !compilerDefaults) {
                     // This can randomly get hit when adding/removing workspace folders.
                     return;
                 }
@@ -1010,7 +1010,7 @@ export class DefaultClient implements Client {
         const compileCommandsIndex: number = paths.length;
         const compileCommandsCount: number = compileCommandsIndex === configProvidersIndex ? 0 : compileCommandsIndex - configProvidersIndex - 1;
         paths.push(DefaultClient.compilersLabel);
-        if (compilerDefaults.knownCompilers !== undefined) {
+        if (compilerDefaults?.knownCompilers !== undefined) {
             const tempPaths: string[] = compilerDefaults.knownCompilers.map(function (a: configs.KnownCompiler): string { return a.path; });
             let clFound: boolean = false;
             // Remove all but the first cl path.
@@ -1039,7 +1039,7 @@ export class DefaultClient implements Client {
         try {
             if (index === -1) {
                 action = "escaped";
-                if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
+                if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
                     this.showPrompt(selectCompiler, true, sender);
                 }
                 return;
@@ -1071,7 +1071,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
-                    if (showSecondPrompt && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
+                    if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
                         this.showPrompt(selectCompiler, true, sender);
                     }
                     action = "browse dismissed";
@@ -2748,7 +2748,7 @@ export class DefaultClient implements Client {
         const configurationNotSet: boolean = configProviderNotSet && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
-            !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
+            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
