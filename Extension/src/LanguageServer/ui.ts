@@ -310,6 +310,8 @@ export class OldUI implements UI {
     }
 
     private showConfigureIntelliSenseButton: boolean = false;
+    private cppHasBeenActive: boolean = false;
+
     public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
@@ -318,11 +320,16 @@ export class OldUI implements UI {
             this.showConfigureIntelliSenseButton = true;
             const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
-            if (activeEditor &&
-                ((activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp")) ||
-                ((activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") && activeEditor.document.fileName.endsWith("c_cpp_properties.json")) ||
-                (activeEditor.document.uri.scheme === "output" && activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")))) {
-                this.configureIntelliSenseStatusItem.show();
+            if (activeEditor) {
+                const isCpp: boolean = activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp");
+                const isCppPropertiesJson: boolean = (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") && activeEditor.document.fileName.endsWith("c_cpp_properties.json");
+                if (isCppPropertiesJson || isCpp) {
+                    this.cppHasBeenActive = true;
+                }
+                if ((isCpp || isCppPropertiesJson ||
+                    (activeEditor.document.uri.scheme === "output" && activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")))) {
+                    this.configureIntelliSenseStatusItem.show();
+                }
             }
         } else {
             this.showConfigureIntelliSenseButton = false;
@@ -338,8 +345,6 @@ export class OldUI implements UI {
                 this.configureIntelliSenseStatusItem.hide();
             }
         } else {
-            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
-
             let isCppPropertiesJson: boolean = false;
             if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
                 isCppPropertiesJson = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
@@ -347,16 +352,23 @@ export class OldUI implements UI {
                     vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
                 }
             }
+            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
+            if (isCppPropertiesJson || isCpp) {
+                this.cppHasBeenActive = true;
+            }
+
             const isCppOutput: boolean = activeEditor.document.uri.scheme === "output" && activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools");
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson || isCppOutput;
+            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson || isCppOutput ||
+                (this.cppHasBeenActive &&
+                    (activeEditor.document.fileName.endsWith("settings.json") ||
+                    activeEditor.document.fileName.endsWith(".code-workspace")));
             this.ShowConfiguration = showConfigureIntelliSenseButton ||
-                activeEditor.document.fileName.endsWith("tasks.json") ||
-                activeEditor.document.fileName.endsWith("launch.json") ||
-                activeEditor.document.fileName.endsWith("settings.json") ||
-                activeEditor.document.fileName.endsWith(".code-workspace");
+                (this.cppHasBeenActive &&
+                    (activeEditor.document.fileName.endsWith("tasks.json") ||
+                    activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
                 if (showConfigureIntelliSenseButton) {
