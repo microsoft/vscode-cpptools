@@ -2700,7 +2700,8 @@ export class DefaultClient implements Client {
         }
 
         // Handle compile commands
-        if (rootFolder && configProviderNotSet && compileCommandsNotSet && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
+        if (rootFolder && configProviderNotSet && !this.configStateReceived.configProviders &&
+            compileCommandsNotSet && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
