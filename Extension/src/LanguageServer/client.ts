@@ -1119,7 +1119,7 @@ export class DefaultClient implements Client {
             // Clear the prompt state.
             // TODO: Add some way to change this state to true.
             const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
-            if (rootFolder) {
+            if (rootFolder && fromStatusBarButton) {
                 if (configurationSelected || configProviderCount > 0) {
                     const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
                     ask.Value = false;
@@ -1127,6 +1127,9 @@ export class DefaultClient implements Client {
                 if (configurationSelected || compileCommandsCount > 0) {
                     const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
                     ask.Value = false;
+                }
+                if (!configurationSelected) {
+                    this.handleConfigStatusOrPrompt();
                 }
             }
         }
