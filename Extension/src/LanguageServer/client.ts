@@ -950,7 +950,7 @@ export class DefaultClient implements Client {
         options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
             (vscode.workspace.workspaceFolders.length > 1 ?
-                localize("configure.intelliSense.forFolder", `How would you like to configure IntelliSense for the ${this.RootFolder.name} folder?`) :
+                localize("configure.intelliSense.forFolder", "How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
                 localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense this folder?"));
 
         const items: IndexableQuickPickItem[] = [];
