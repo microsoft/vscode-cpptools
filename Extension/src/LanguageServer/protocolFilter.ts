@@ -8,6 +8,7 @@ import { Middleware } from 'vscode-languageclient';
 import { Client } from './client';
 import * as vscode from 'vscode';
 import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
+import * as util from '../common';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
@@ -18,6 +19,9 @@ export function createProtocolFilter(): Middleware {
 
     return {
         didOpen: async (document, sendMessage) => {
+            if (util.isCpp(document)) {
+                util.setWorkspaceIsCpp();
+            }
             const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
             if (editor) {
                 // If the file was visible editor when we were activated, we will not get a call to

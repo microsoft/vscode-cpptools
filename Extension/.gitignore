@@ -1,7 +1,7 @@
 # ignore dependency packages
 node_modules
 
-# ignore compliled typescript
+# ignore compiled typescript
 out
 dist
 
