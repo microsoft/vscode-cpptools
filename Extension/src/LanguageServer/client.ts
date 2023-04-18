@@ -3336,12 +3336,12 @@ export class DefaultClient implements Client {
                 const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
                 // If the command was invoked via the copy command, copy the declaration or definition to clipboard.
                 if (copy) {
-                    vscode.env.clipboard.writeText(edit.newText)  .then(() => {
+                    vscode.env.clipboard.writeText(edit.newText).then(() => {
                         // Writing was successful
-                    }), () => {
+                    }, () => {
                         // Writing was unsuccessful
                         util.promptCDDFailed(true);
-                      };
+                    });
                     return;
                 }
                 workspaceEdits.insert(uri, position, edit.newText);
