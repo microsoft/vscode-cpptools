@@ -316,8 +316,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
     /* need to notify the affected client(s) */
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
-        event.textEditor.document.uri.scheme !== "file" ||
-        (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
+        !util.isCpp(event.textEditor.document)) {
         return;
     }
 
@@ -461,8 +460,7 @@ function onDisabledCommand(): void {
 function onRestartIntelliSenseForFile(sender?: any): void {
     logForUIExperiment("RestartIntelliSenseForFile", sender);
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
-        (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
+    if (!activeEditor || !util.isCpp(activeEditor.document)) {
         return;
     }
     clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
