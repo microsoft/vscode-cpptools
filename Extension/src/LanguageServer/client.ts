@@ -786,7 +786,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
-    handleCreateDeclarationOrDefinition(): Promise<void>;
+    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3263,7 +3263,7 @@ export class DefaultClient implements Client {
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public async handleCreateDeclarationOrDefinition(): Promise<void> {
+    public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
         // range is based on the cursor position.
@@ -3300,6 +3300,7 @@ export class DefaultClient implements Client {
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // TODO: return specific errors info in result.
         if (result.changes === undefined) {
+            util.promptCDDFailed();
             return;
         }
 
@@ -3333,12 +3334,23 @@ export class DefaultClient implements Client {
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
                 const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
+                // If the command was invoked via the copy command, copy the declaration or definition to clipboard.
+                if (copy) {
+                    vscode.env.clipboard.writeText(edit.newText)  .then(() => {
+                        // Writing was successful
+                    }), () => {
+                        // Writing was unsuccessful
+                        util.promptCDDFailed(true);
+                      };
+                    return;
+                }
                 workspaceEdits.insert(uri, position, edit.newText);
             }
             modifiedDocument = uri;
         };
 
         if (modifiedDocument === undefined || lastEdit === undefined) {
+            util.promptCDDFailed();
             return;
         }
 
@@ -3373,6 +3385,7 @@ export class DefaultClient implements Client {
         };
         const versionBeforeFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
         if (versionBeforeFormatting === undefined) {
+            util.promptCDDFailed();
             return;
         }
         const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
@@ -3380,12 +3393,14 @@ export class DefaultClient implements Client {
             formatEdits.set(modifiedDocument, formatTextEdits);
         }
         if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
+            util.promptCDDFailed();
             return;
         }
         // Only apply formatting if the document version hasn't changed to prevent
         // stale formatting results from being applied.
         const versionAfterFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
         if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
+            util.promptCDDFailed();
             return;
         }
         await vscode.workspace.applyEdit(formatEdits);
@@ -3582,7 +3597,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
-    handleCreateDeclarationOrDefinition(): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

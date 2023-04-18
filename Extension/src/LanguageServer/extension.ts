@@ -427,6 +427,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
 }
 
 function logForUIExperiment(command: string, sender?: any): void {
@@ -677,6 +678,14 @@ async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vsco
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
+}
+
+async function onCopyDeclarationOrDefinition(sender?: any): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: util.getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
+    getActiveClient().handleCreateDeclarationOrDefinition(true);
 }
 
 async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {

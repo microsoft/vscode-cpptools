@@ -886,6 +886,17 @@ export async function promptReloadWindow(message: string): Promise<void> {
     }
 }
 
+export async function promptCDDFailed(copy?: boolean): Promise<void> {
+    const copy_message: string = "Failed to copy declaration or definition to clipboard.";
+    const create_message: string = "Failed to create declaration or definition.";
+
+    if (copy) {
+        await vscode.window.showInformationMessage(copy_message);
+    } else {
+        await vscode.window.showInformationMessage(create_message);
+    }
+}
+
 export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
     // Detect duplicate paths or invalid paths.
     if (compilers.includes(path) || path === null || path === undefined) {
