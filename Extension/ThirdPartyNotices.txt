@@ -606,7 +606,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-minimatch 3.0.4 - ISC
+minimatch 3.1.2 - ISC
 https://github.com/isaacs/minimatch#readme
 
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -738,7 +738,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-semver 7.3.5 - ISC
+semver 7.3.7 - ISC
 https://github.com/npm/node-semver#readme
 
 Copyright Isaac Z. Schlueter
@@ -1078,6 +1078,25 @@ Copyright 2006 Google Inc. https://code.google.com/p/google-diff-match-patch
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@types/lodash 4.14.192 - MIT
+https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/lodash
+
+Copyright (c) Microsoft Corporation
+
+MIT License
+
+Copyright (c) <year> <copyright holders>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
@@ -1888,11 +1907,9 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-json5 2.2.0 - MIT
+json5 1.0.2 - MIT
 http://json5.org/
 
-(c) 2019 Denis Pushkarev
-copyright (c) 2019 Denis Pushkarev
 Copyright (c) 2012-2018 Aseem Kishore, and others
 
 MIT License
@@ -1924,7 +1941,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-loader-utils 2.0.0 - MIT
+loader-utils 2.0.4 - MIT
 https://github.com/webpack/loader-utils#readme
 
 Copyright JS Foundation and other contributors
@@ -1955,8 +1972,68 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-minimist 1.2.6 - MIT
-https://github.com/substack/minimist
+lodash 4.17.21 - MIT
+https://lodash.com/
+
+Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
+
+Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+
+Based on Underscore.js, copyright Jeremy Ashkenas,
+DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
+
+This software consists of voluntary contributions made by many
+individuals. For exact contribution history, see the revision history
+available at https://github.com/lodash/lodash
+
+The following license applies to all parts of this software except as
+documented below:
+
+====
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+====
+
+Copyright and related rights for sample code are waived via CC0. Sample
+code is defined as all source code displayed within the prose of the
+documentation.
+
+CC0: http://creativecommons.org/publicdomain/zero/1.0/
+
+====
+
+Files located in the node_modules and vendor directories are externally
+maintained libraries used by this software which have their own
+licenses; we recommend you read them, as their terms may differ from the
+terms above.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+minimist 1.2.7 - MIT
+https://github.com/minimistjs/minimist
 
 
 This software is released under the MIT license:
@@ -2465,7 +2542,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-jsonrpc 8.0.1 - MIT
+vscode-jsonrpc 8.1.0-next.5 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2487,13 +2564,10 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageclient 8.0.1 - MIT
+vscode-languageclient 8.1.0-next.4 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
-Copyright (c) TypeFox and others
 Copyright (c) Microsoft Corporation
-Copyright (c) Isaac Z. Schlueter and Contributors
-Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
 
 Copyright (c) Microsoft Corporation
 
@@ -2512,7 +2586,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageserver-protocol 3.17.1 - MIT
+vscode-languageserver-protocol 3.17.3-next.4 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2535,7 +2609,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageserver-types 3.17.1 - MIT
+vscode-languageserver-types 3.17.3-next.1 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2647,10 +2721,6 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-
-
-
-
 -------------------------------------------------------------------
 
 Additional Third Party Notices
@@ -2669,7 +2739,6 @@ The notices below are from non-npm sources.
 - LLVM (http://llvm.org/)
 - MI Debug Engine (https://github.com/Microsoft/MIEngine)
 - Mono (https://github.com/mono/mono)
-- pevents (https://github.com/neosmart/pevents)
 - SQLite (https://www.sqlite.org/)
 		Includes:functions (from fossil) (https://fossil-scm.org)
 
@@ -2875,7 +2944,7 @@ The LLVM Project is under the Apache License v2.0 with LLVM Exceptions:
     END OF TERMS AND CONDITIONS
 
 
-    
+
 
 ---- LLVM Exceptions to the Apache 2.0 License ----
 
@@ -3114,7 +3183,7 @@ END OF gcc-9/libgcc NOTICES AND INFORMATION
 %% Guidelines Support Library NOTICES AND INFORMATION BEGIN HERE
 =========================================
 Copyright (c) 2015 Microsoft Corporation. All rights reserved.  
-  
+
 This code is licensed under the MIT License (MIT).  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy  
@@ -3123,10 +3192,10 @@ in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies  
 of the Software, and to permit persons to whom the Software is furnished to do  
 so, subject to the following conditions:  
- 
+
 The above copyright notice and this permission notice shall be included in all  
 copies or substantial portions of the Software.   
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
@@ -3295,10 +3364,10 @@ in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies  
 of the Software, and to permit persons to whom the Software is furnished to do  
 so, subject to the following conditions:  
- 
+
 The above copyright notice and this permission notice shall be included in all  
 copies or substantial portions of the Software.   
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
@@ -3324,10 +3393,10 @@ in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies  
 of the Software, and to permit persons to whom the Software is furnished to do  
 so, subject to the following conditions:  
- 
+
 The above copyright notice and this permission notice shall be included in all  
 copies or substantial portions of the Software.   
- 
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
@@ -3543,30 +3612,6 @@ The externally maintained libraries used by libuv are:
     n° 289016). Three clause BSD license.
 =========================================
 END OF libuv NOTICES AND INFORMATION
-
-%% pevents NOTICES AND INFORMATION BEGIN HERE
-=========================================
-Copyright (C) 2011 - 2015 by NeoSmart Technologies <http://neosmart.net/>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-=========================================
-END OF pevents NOTICES AND INFORMATION
 
 %% SQLite NOTICES AND INFORMATION BEGIN HERE
 =========================================

@@ -382,10 +382,13 @@ export class CppSettings extends Settings {
     public set defaultCompilerPath(value: string | undefined) {
         const defaultCompilerPathStr: string = "default.compilerPath";
         const compilerPathInfo: any = this.Section.inspect(defaultCompilerPathStr);
-        this.Section.update(defaultCompilerPathStr, value,
-            compilerPathInfo.workspaceFolderValue !== undefined ? vscode.ConfigurationTarget.WorkspaceFolder :
-                (compilerPathInfo.workspaceValue !== undefined ? vscode.ConfigurationTarget.Workspace :
-                    vscode.ConfigurationTarget.Global));
+        let target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global;
+        if (this.resource !== undefined || compilerPathInfo.workspaceFolderValue !== undefined) {
+            target = vscode.ConfigurationTarget.WorkspaceFolder;
+        } else if (compilerPathInfo.workspaceValue !== undefined) {
+            target = vscode.ConfigurationTarget.Workspace;
+        }
+        this.Section.update(defaultCompilerPathStr, value, target);
     }
     public get defaultCompilerArgs(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }

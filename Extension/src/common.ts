@@ -193,6 +193,30 @@ export function isEditorFileCpp(file: string): boolean {
     return editor.document.languageId === "cpp";
 }
 
+// If it's C, C++, or Cuda.
+export function isCpp(document: vscode.TextDocument): boolean {
+    return document.uri.scheme === "file" &&
+        (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp");
+}
+export function isCppPropertiesJson(document: vscode.TextDocument): boolean {
+    return document.uri.scheme === "file" && (document.languageId === "json" || document.languageId === "jsonc") &&
+        (document.fileName.endsWith("c_cpp_properties.json"));
+}
+let isWorkspaceCpp: boolean = false;
+export function setWorkspaceIsCpp(): void {
+    if (!isWorkspaceCpp) {
+        isWorkspaceCpp = true;
+    }
+}
+export function getWorkspaceIsCpp(): boolean {
+    return isWorkspaceCpp;
+}
+export function isCppOrRelated(document: vscode.TextDocument): boolean {
+    return isCpp(document) || isCppPropertiesJson(document) || (document.uri.scheme === "output" && document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")) ||
+        (isWorkspaceCpp && document.uri.scheme === "file" && (document.languageId === "json" || document.languageId === "jsonc") &&
+        (document.fileName.endsWith("settings.json") || document.fileName.endsWith(".code-workspace")));
+}
+
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
@@ -1488,3 +1512,29 @@ export const documentSelector: DocumentFilter[] = [
     { scheme: 'file', language: 'cpp' },
     { scheme: 'file', language: 'cuda-cpp' }
 ];
+
+export function hasMsvcEnvironment(): boolean {
+    const msvcEnvVars: string[] = [
+        'DevEnvDir',
+        'Framework40Version',
+        'FrameworkDir',
+        'FrameworkVersion',
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'NETFXSDKDir',
+        'UCRTVersion',
+        'UniversalCRTSdkDir',
+        'VCIDEInstallDir',
+        'VCINSTALLDIR',
+        'VCToolsRedistDir',
+        'VisualStudioVersion',
+        'VSINSTALLDIR',
+        'WindowsLibPath',
+        'WindowsSdkBinPath',
+        'WindowsSdkDir',
+        'WindowsSDKLibVersion',
+        'WindowsSDKVersion'
+    ];
+    return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+}
