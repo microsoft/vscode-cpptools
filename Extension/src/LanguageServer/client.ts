@@ -1119,7 +1119,7 @@ export class DefaultClient implements Client {
             // Clear the prompt state.
             // TODO: Add some way to change this state to true.
             const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
-            if (rootFolder) {
+            if (rootFolder && fromStatusBarButton) {
                 if (configurationSelected || configProviderCount > 0) {
                     const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
                     ask.Value = false;
@@ -1127,6 +1127,9 @@ export class DefaultClient implements Client {
                 if (configurationSelected || compileCommandsCount > 0) {
                     const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
                     ask.Value = false;
+                }
+                if (!configurationSelected) {
+                    this.handleConfigStatusOrPrompt();
                 }
             }
         }
@@ -1720,20 +1723,16 @@ export class DefaultClient implements Client {
     }
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
-        if (textDocumentChangeEvent.document.uri.scheme === "file") {
-            if (textDocumentChangeEvent.document.languageId === "c"
-                || textDocumentChangeEvent.document.languageId === "cpp"
-                || textDocumentChangeEvent.document.languageId === "cuda-cpp") {
-                // If any file has changed, we need to abort the current rename operation
-                if (DefaultClient.renamePending) {
-                    this.cancelReferences();
-                }
+        if (util.isCpp(textDocumentChangeEvent.document)) {
+            // If any file has changed, we need to abort the current rename operation
+            if (DefaultClient.renamePending) {
+                this.cancelReferences();
+            }
 
-                const oldVersion: number | undefined = openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
-                const newVersion: number = textDocumentChangeEvent.document.version;
-                if (oldVersion === undefined || newVersion > oldVersion) {
-                    openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
-                }
+            const oldVersion: number | undefined = openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
+            const newVersion: number = textDocumentChangeEvent.document.version;
+            if (oldVersion === undefined || newVersion > oldVersion) {
+                openFileVersions.set(textDocumentChangeEvent.document.uri.toString(), newVersion);
             }
         }
     }
@@ -2788,10 +2787,7 @@ export class DefaultClient implements Client {
 
     private updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (editor?.document?.uri.scheme === "file"
-            && (editor.document.languageId === "c"
-                || editor.document.languageId === "cpp"
-                || editor.document.languageId === "cuda-cpp")) {
+        if (editor && util.isCpp(editor.document)) {
             vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
             vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
@@ -2824,8 +2820,7 @@ export class DefaultClient implements Client {
      */
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
         this.updateActiveDocumentTextOptions();
-        if (document.uri.scheme !== "file" ||
-            !(document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp")) {
+        if (!util.isCpp(document)) {
             return;
         }
         await this.awaitUntilLanguageClientReady();
@@ -3314,15 +3309,7 @@ export class DefaultClient implements Client {
 
     public async handleGenerateDoxygenComment(args: DoxygenCodeActionCommandArguments | vscode.Uri | undefined): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (!editor) {
-            return;
-        }
-
-        if (editor.document.uri.scheme !== "file") {
-            return;
-        }
-
-        if (!(editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+        if (!editor || !util.isCpp(editor.document)) {
             return;
         }
 

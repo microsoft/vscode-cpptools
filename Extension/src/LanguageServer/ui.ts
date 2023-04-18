@@ -11,6 +11,7 @@ import { NewUI } from './ui_new';
 import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
 import * as telemetry from '../telemetry';
+import * as util from '../common';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -95,7 +96,7 @@ export class OldUI implements UI {
         this.configStatusBarItem.tooltip = configTooltip;
         this.ShowConfiguration = true;
 
-        this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 901);
+        this.referencesStatusBarItem = vscode.window.createStatusBarItem("c.cpp.references.statusbar", vscode.StatusBarAlignment.Right, 0);
         this.referencesStatusBarItem.name = localize("c.cpp.references.statusbar", "C/C++ References Status");
         this.referencesStatusBarItem.tooltip = "";
         this.referencesStatusBarItem.command = {
@@ -106,8 +107,9 @@ export class OldUI implements UI {
         this.ShowReferencesIcon = false;
 
         this.configureIntelliSenseStatusItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
-        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.statusbar", "Configure IntelliSense");
-        this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseStatusItem.name}`;
+        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
+        const configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
+        this.configureIntelliSenseStatusItem.text = `$(warning) ${configureIntelliSenseText}`;
         this.configureIntelliSenseStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         this.configureIntelliSenseStatusItem.command = {
             command: "C_Cpp.SelectIntelliSenseConfiguration",
@@ -309,14 +311,18 @@ export class OldUI implements UI {
     }
 
     private showConfigureIntelliSenseButton: boolean = false;
+
     public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
         if (show) {
             this.showConfigureIntelliSenseButton = true;
-            this.configureIntelliSenseStatusItem.show();
+            const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
+            if (activeEditor && util.isCppOrRelated(activeEditor.document)) {
+                this.configureIntelliSenseStatusItem.show();
+            }
         } else {
             this.showConfigureIntelliSenseButton = false;
             this.configureIntelliSenseStatusItem.hide();
@@ -331,25 +337,18 @@ export class OldUI implements UI {
                 this.configureIntelliSenseStatusItem.hide();
             }
         } else {
-            const isCpp: boolean = (activeEditor.document.uri.scheme === "file" && (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp"));
-
-            let isCppPropertiesJson: boolean = false;
-            if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
-                isCppPropertiesJson = activeEditor.document.fileName.endsWith("c_cpp_properties.json");
-                if (isCppPropertiesJson) {
-                    vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
-                }
+            const isCppPropertiesJson: boolean = util.isCppPropertiesJson(activeEditor.document);
+            if (isCppPropertiesJson) {
+                vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
             }
-            const isCppOutput: boolean = activeEditor.document.uri.scheme === "output" && activeEditor.document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools");
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            const showConfigureIntelliSenseButton: boolean = isCpp || isCppPropertiesJson || isCppOutput ||
-                activeEditor.document.fileName.endsWith("settings.json") ||
-                activeEditor.document.fileName.endsWith(".code-workspace");
+            const showConfigureIntelliSenseButton: boolean = isCppPropertiesJson || util.isCppOrRelated(activeEditor.document);
             this.ShowConfiguration = showConfigureIntelliSenseButton ||
-                activeEditor.document.fileName.endsWith("tasks.json") ||
-                activeEditor.document.fileName.endsWith("launch.json");
+                (util.getWorkspaceIsCpp() &&
+                    (activeEditor.document.fileName.endsWith("tasks.json") ||
+                    activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
                 if (showConfigureIntelliSenseButton) {
