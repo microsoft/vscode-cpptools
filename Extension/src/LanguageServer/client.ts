@@ -947,9 +947,11 @@ export class DefaultClient implements Client {
 
     public async showSelectIntelliSenseConfiguration(paths: string[], compilersOnly?: boolean): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = compilersOnly ?
+        options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
-            localize("configure.intelliSense", "How would you like to configure IntelliSense?");
+            (vscode.workspace.workspaceFolders.length > 1 ?
+                localize("configure.intelliSense", `How would you like to configure IntelliSense for folder ${this.RootFolder.name}?`) :
+                localize("configure.intelliSense", "How would you like to configure IntelliSense this folder?"));
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -1350,10 +1352,14 @@ export class DefaultClient implements Client {
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // Timeout waiting for compile_commands.json and config providers.
                         // The quick pick options will update if they're added later on.
-                        global.setTimeout(() => {
-                            this.configStateReceived.timeout = true;
-                            this.handleConfigStatusOrPrompt();
-                        }, 15000);
+                        clients.forEach(client => {
+                            if (client instanceof DefaultClient) {
+                                global.setTimeout(() => {
+                                    client.configStateReceived.timeout = true;
+                                    client.handleConfigStatusOrPrompt();
+                                }, 15000);
+                            }
+                        });
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
                         compilerDefaults = await this.requestCompiler(compilerPaths);
@@ -1361,9 +1367,9 @@ export class DefaultClient implements Client {
                         clients.forEach(client => {
                             if (client instanceof DefaultClient) {
                                 client.configStateReceived.compilers = true;
+                                client.handleConfigStatusOrPrompt();
                             }
                         });
-                        this.handleConfigStatusOrPrompt();
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -2631,11 +2637,11 @@ export class DefaultClient implements Client {
             return;
         }
         const potentialClient: Client = clients.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
-        if (!(potentialClient instanceof DefaultClient)) {
-            return;
-        }
         const client: DefaultClient = <DefaultClient>potentialClient;
         if (!client) {
+            return;
+        }
+        if (client.configStateReceived.compileCommands) {
             return;
         }
 
