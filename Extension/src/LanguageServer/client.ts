@@ -803,7 +803,8 @@ export interface Client {
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
     isInitialized(): boolean;
-    ShowConfigureIntelliSenseButton(): boolean;
+    getShowConfigureIntelliSenseButton(): boolean;
+    setShowConfigureIntelliSenseButton(show: boolean): void;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -870,7 +871,8 @@ export class DefaultClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
     public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
-    public ShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
+    public getShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
+    public setShowConfigureIntelliSenseButton(show: boolean): void { this.showConfigureIntelliSenseButton = show; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -3778,5 +3780,6 @@ class NullClient implements Client {
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
     isInitialized(): boolean { return true; }
-    ShowConfigureIntelliSenseButton(): boolean { return false; }
+    getShowConfigureIntelliSenseButton(): boolean { return false; }
+    setShowConfigureIntelliSenseButton(show: boolean): void { }
 }
