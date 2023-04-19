@@ -319,7 +319,9 @@ export class OldUI implements UI {
             return;
         }
         this.showConfigureIntelliSenseButton = show;
-        client?.setShowConfigureIntelliSenseButton(show);
+        if (client) {
+            client.setShowConfigureIntelliSenseButton(show);
+        }
         if (show) {
             const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
