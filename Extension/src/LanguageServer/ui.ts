@@ -83,6 +83,7 @@ export class OldUI implements UI {
     private runningCodeAnalysisTooltip: string = "";
     private codeAnalysisPausedTooltip: string = "";
     get isNewUI(): boolean { return false; };
+    private readonly configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
@@ -108,8 +109,7 @@ export class OldUI implements UI {
 
         this.configureIntelliSenseStatusItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 901);
         this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
-        const configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
-        this.configureIntelliSenseStatusItem.text = `$(warning) ${configureIntelliSenseText}`;
+        this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseText}`;
         this.configureIntelliSenseStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         this.configureIntelliSenseStatusItem.command = {
             command: "C_Cpp.SelectIntelliSenseConfiguration",
@@ -312,20 +312,32 @@ export class OldUI implements UI {
 
     private showConfigureIntelliSenseButton: boolean = false;
 
+    private configureIntelliSenseTimeout?: NodeJS.Timeout;
+
     public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
         if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
+        this.showConfigureIntelliSenseButton = show;
+        client?.setShowConfigureIntelliSenseButton(show);
         if (show) {
-            this.showConfigureIntelliSenseButton = true;
             const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
             if (activeEditor && util.isCppOrRelated(activeEditor.document)) {
                 this.configureIntelliSenseStatusItem.show();
+                if (!this.configureIntelliSenseTimeout) {
+                    this.configureIntelliSenseTimeout = setTimeout(() => {
+                        this.configureIntelliSenseStatusItem.text = "$(warning)";
+                    }, 15000);
+                }
             }
         } else {
-            this.showConfigureIntelliSenseButton = false;
             this.configureIntelliSenseStatusItem.hide();
+            if (this.configureIntelliSenseTimeout) {
+                clearTimeout(this.configureIntelliSenseTimeout);
+                this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseText}`;
+                this.configureIntelliSenseTimeout = undefined;
+            }
         }
     }
 
@@ -344,15 +356,21 @@ export class OldUI implements UI {
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            const showConfigureIntelliSenseButton: boolean = isCppPropertiesJson || util.isCppOrRelated(activeEditor.document);
-            this.ShowConfiguration = showConfigureIntelliSenseButton ||
+            const showConfigureIntelliSenseButtonForActiveFile: boolean = (isCppPropertiesJson || util.isCppOrRelated(activeEditor.document))
+                && !!this.currentClient && this.currentClient.getShowConfigureIntelliSenseButton();
+            this.ShowConfiguration = showConfigureIntelliSenseButtonForActiveFile ||
                 (util.getWorkspaceIsCpp() &&
                     (activeEditor.document.fileName.endsWith("tasks.json") ||
                     activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
-                if (showConfigureIntelliSenseButton) {
+                if (showConfigureIntelliSenseButtonForActiveFile) {
                     this.configureIntelliSenseStatusItem.show();
+                    if (!this.configureIntelliSenseTimeout) {
+                        this.configureIntelliSenseTimeout = setTimeout(() => {
+                            this.configureIntelliSenseStatusItem.text = "$(warning)";
+                        }, 15000);
+                    }
                 } else {
                     this.configureIntelliSenseStatusItem.hide();
                 }
@@ -375,7 +393,7 @@ export class OldUI implements UI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.ShowConfigureIntelliSenseButton(client.ShowConfigureIntelliSenseButton(), client);
+            this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), client);
         });
     }
 
