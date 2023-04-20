@@ -20,7 +20,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
-import { compilerPaths, DefaultClient } from './client';
+import { addTrustedCompiler, DefaultClient } from './client';
 import { UI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -908,7 +908,7 @@ export class CppProperties {
                 } else {
                     // add compiler to list of trusted compilers
                     if (i === this.CurrentConfigurationIndex) {
-                        util.addTrustedCompiler(compilerPaths, configuration.compilerPath);
+                        addTrustedCompiler(configuration.compilerPath);
                     }
                 }
             } else {

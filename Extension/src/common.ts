@@ -910,15 +910,6 @@ export async function promptReloadWindow(message: string): Promise<void> {
     }
 }
 
-export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
-    // Detect duplicate paths or invalid paths.
-    if (compilers.includes(path) || path === null || path === undefined) {
-        return compilers;
-    }
-    compilers.push(path);
-    return compilers;
-}
-
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
     return new Promise<tmp.FileResult>((resolve, reject) => {
         tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {

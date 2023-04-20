@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.15.3: March 20, 2023
+### Bug Fix
+* Fix handling of sccache and clcache. [#7616](https://github.com/microsoft/vscode-cpptools/issues/7616)
+* Fix an undefined reference regression. [PR #10824](https://github.com/microsoft/vscode-cpptools/pull/10824)
+* Fix bugs with the "Configure IntelliSense" button. [#10810](https://github.com/microsoft/vscode-cpptools/issues/10810), [#10822](https://github.com/microsoft/vscode-cpptools/issues/10822), [#10827](https://github.com/microsoft/vscode-cpptools/issues/10827)
+
 ## Version 1.15.2: March 12, 2023
 ### Enhancements
 * Add a "Configure IntelliSense" status bar warning. [#10685](https://github.com/microsoft/vscode-cpptools/issues/10685)
