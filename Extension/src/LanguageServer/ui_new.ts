@@ -420,7 +420,7 @@ export class NewUI implements UI {
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
     public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
-        if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
+        if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
         this.showConfigureIntelliSenseButton = show;
