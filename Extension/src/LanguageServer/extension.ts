@@ -179,7 +179,7 @@ export async function activate(): Promise<void> {
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
     clients.forEach(client => {
-        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+        getCustomConfigProviders().forEach(provider => void client.onRegisterCustomConfigurationProvider(provider));
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
@@ -362,6 +362,7 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
 
 function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     editors.forEach(async (editor) => {
         if (util.isCpp(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
