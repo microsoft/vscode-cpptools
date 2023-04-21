@@ -1064,7 +1064,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): void {
+    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: ((document: vscode.TextDocument, column?: vscode.ViewColumn) => Thenable<vscode.TextEditor>) | (() => void), viewColumn?: vscode.ViewColumn): void {
         const otherSettings: OtherSettings = new OtherSettings(this.rootUri);
         if (otherSettings.workbenchSettingsEditor  === "ui") {
             this.handleConfigurationEditUICommand(onBeforeOpen, showDocument, viewColumn);
@@ -1074,7 +1074,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): Promise<void> {
+    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: ((document: vscode.TextDocument, column?: vscode.ViewColumn) => Thenable<vscode.TextEditor>) | (() => void), viewColumn?: vscode.ViewColumn): Promise<void> {
         await this.ensurePropertiesFile();
         console.assert(this.propertiesFile);
         if (onBeforeOpen) {
@@ -1107,7 +1107,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): Promise<void> {
+    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: ((document: vscode.TextDocument, column?: vscode.ViewColumn) => Thenable<vscode.TextEditor>) | (() => void), viewColumn?: vscode.ViewColumn): Promise<void> {
         await this.ensurePropertiesFile();
         if (this.propertiesFile) {
             if (onBeforeOpen) {

@@ -16,7 +16,7 @@ import * as util from '../common';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-let uiPromise: Promise<UI>;
+let uiPromise: Promise<UI> | undefined;
 let ui: UI;
 
 export interface UI {

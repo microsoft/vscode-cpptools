@@ -1917,7 +1917,7 @@ export class DefaultClient implements Client {
             });
 
             // Set up a timeout to use previously received configuration and resume parsing if the provider times out
-            global.setTimeout(async () => {
+            global.setTimeout(() => {
                 if (!hasCompleted) {
                     hasCompleted = true;
                     this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
@@ -2289,10 +2289,10 @@ export class DefaultClient implements Client {
     private registerNotifications(): void {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-        this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
+        this.languageClient.onNotification(ReloadWindowNotification, () => void util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => addTrustedCompiler(e.compilerPath));
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
-        this.languageClient.onNotification(ReportStatusNotification, async (e) => this.updateStatus(e));
+        this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
@@ -2314,10 +2314,10 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
-        this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
+        this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => void this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
-        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
+        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
