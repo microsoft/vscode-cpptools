@@ -86,6 +86,7 @@ export class NewUI implements UI {
     private readonly iconDelayTime: number = 1000;
     get isNewUI(): boolean { return true; };
     private readonly configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
+    private readonly cppConfigureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
 
     constructor() {
         const configTooltip: string = localize("c.cpp.configuration.tooltip", "C/C++ Configuration");
@@ -110,7 +111,8 @@ export class NewUI implements UI {
         this.ShowReferencesIcon = false;
 
         this.configureIntelliSenseStatusItem = vscode.window.createStatusBarItem(`c.cpp.configureIntelliSenseStatus.statusbar`, vscode.StatusBarAlignment.Right, 0);
-        this.configureIntelliSenseStatusItem.name = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
+        this.configureIntelliSenseStatusItem.name = this.cppConfigureIntelliSenseText;
+        this.configureIntelliSenseStatusItem.tooltip = this.cppConfigureIntelliSenseText;
         this.configureIntelliSenseStatusItem.text = `$(warning) ${this.configureIntelliSenseText}`;
         this.configureIntelliSenseStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         this.configureIntelliSenseStatusItem.command = {
