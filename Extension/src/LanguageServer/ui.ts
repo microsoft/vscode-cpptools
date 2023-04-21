@@ -16,7 +16,7 @@ import * as util from '../common';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-let uiPromise: Promise<UI>;
+let uiPromise: Promise<UI> | undefined;
 let ui: UI;
 
 export interface UI {
@@ -315,7 +315,7 @@ export class OldUI implements UI {
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
     public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
-        if (!telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
+        if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
         this.showConfigureIntelliSenseButton = show;

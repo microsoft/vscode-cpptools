@@ -762,6 +762,7 @@ interface ProcessOutput {
 }
 
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return new Promise(async (resolve, reject) => {
         // Do not use CppSettings to avoid circular require()
         const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
@@ -908,15 +909,6 @@ export async function promptReloadWindow(message: string): Promise<void> {
     if (value === reload) {
         vscode.commands.executeCommand("workbench.action.reloadWindow");
     }
-}
-
-export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
-    // Detect duplicate paths or invalid paths.
-    if (compilers.includes(path) || path === null || path === undefined) {
-        return compilers;
-    }
-    compilers.push(path);
-    return compilers;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
