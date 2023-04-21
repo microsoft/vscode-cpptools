@@ -179,7 +179,7 @@ export async function activate(): Promise<void> {
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
     clients.forEach(client => {
-        getCustomConfigProviders().forEach(provider => client.onRegisterCustomConfigurationProvider(provider));
+        getCustomConfigProviders().forEach(provider => void client.onRegisterCustomConfigurationProvider(provider));
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
@@ -291,28 +291,6 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
-// Includes C/C++ and related files.
-function isActiveDocumentHandled(): boolean {
-    const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor) {
-        return false;
-    }
-    if (activeEditor.document.uri.scheme !== "file") {
-        return false;
-    }
-    if (activeEditor.document.languageId === "c" || activeEditor.document.languageId === "cpp" || activeEditor.document.languageId === "cuda-cpp") {
-        return true;
-    }
-    if (activeEditor.document.languageId === "json" || activeEditor.document.languageId === "jsonc") {
-        if (activeEditor.document.fileName.endsWith("c_cpp_properties.json") ||
-            activeEditor.document.fileName.endsWith("settings.json") ||
-            activeEditor.document.fileName.endsWith(".code-workspace")) {
-            return true;
-        }
-    }
-    return false;
-}
-
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -320,11 +298,10 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    if (editor && isActiveDocumentHandled()) {
+    if (editor && util.isCppOrRelated(editor.document)) {
         // This is required for the UI to update correctly.
         clients.activeDocumentChanged(editor.document);
-        if (editor.document.uri.scheme === "file" &&
-            (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+        if (util.isCpp(editor.document)) {
             activeDocument = editor.document.uri.toString();
             clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
         } else {
@@ -339,8 +316,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
     /* need to notify the affected client(s) */
     if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
-        event.textEditor.document.uri.scheme !== "file" ||
-        (event.textEditor.document.languageId !== "cpp" && event.textEditor.document.languageId !== "c")) {
+        !util.isCpp(event.textEditor.document)) {
         return;
     }
 
@@ -386,8 +362,9 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
 
 function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     editors.forEach(async (editor) => {
-        if ((editor.document.uri.scheme === "file") && (editor.document.languageId === "c" || editor.document.languageId === "cpp" || editor.document.languageId === "cuda-cpp")) {
+        if (util.isCpp(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
             await client.requestWhenReady(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
@@ -484,8 +461,7 @@ function onDisabledCommand(): void {
 function onRestartIntelliSenseForFile(sender?: any): void {
     logForUIExperiment("RestartIntelliSenseForFile", sender);
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || !activeEditor.document || activeEditor.document.uri.scheme !== "file" ||
-        (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp")) {
+    if (!activeEditor || !util.isCpp(activeEditor.document)) {
         return;
     }
     clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
@@ -493,11 +469,7 @@ function onRestartIntelliSenseForFile(sender?: any): void {
 
 async function onSwitchHeaderSource(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-    if (!activeEditor || !activeEditor.document) {
-        return;
-    }
-
-    if (activeEditor.document.languageId !== "c" && activeEditor.document.languageId !== "cpp" && activeEditor.document.languageId !== "cuda-cpp") {
+    if (!activeEditor || !util.isCpp(activeEditor.document)) {
         return;
     }
 

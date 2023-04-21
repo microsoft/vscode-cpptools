@@ -241,7 +241,7 @@ export class ClientCollection {
         }
         const key: string = folder ? util.asFolder(folder.uri) : defaultClientKey;
         this.languageClients.set(key, newClient);
-        getCustomConfigProviders().forEach(provider => newClient.onRegisterCustomConfigurationProvider(provider));
+        getCustomConfigProviders().forEach(provider => void newClient.onRegisterCustomConfigurationProvider(provider));
         return newClient;
     }
 

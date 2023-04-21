@@ -13,10 +13,11 @@ import { execSync } from 'child_process';
 import * as semver from 'semver';
 import * as fs from 'fs';
 import * as path from 'path';
-import { cachedEditorConfigLookups, cachedEditorConfigSettings } from './client';
+import { cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths, DefaultClient } from './client';
 import * as editorConfig from 'editorconfig';
 import { PersistentState } from './persistentState';
 import * as nls from 'vscode-nls';
+import { clients } from './extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -389,6 +390,15 @@ export class CppSettings extends Settings {
             target = vscode.ConfigurationTarget.Workspace;
         }
         this.Section.update(defaultCompilerPathStr, value, target);
+        if (this.resource !== undefined && !hasTrustedCompilerPaths()) {
+            // Also set the user/remote compiler path if no other path has been trusted yet.
+            this.Section.update(defaultCompilerPathStr, value, vscode.ConfigurationTarget.Global);
+            clients.forEach(client => {
+                if (client instanceof DefaultClient) {
+                    client.setShowConfigureIntelliSenseButton(false);
+                }
+            });
+        }
     }
     public get defaultCompilerArgs(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }

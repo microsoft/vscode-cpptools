@@ -65,7 +65,7 @@ export class CppTools implements CppToolsTestApi {
                     getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
                 }
                 this.providers.push(added);
-                LanguageServer.getClients().forEach(client => client.onRegisterCustomConfigurationProvider(added));
+                LanguageServer.getClients().forEach(client => void client.onRegisterCustomConfigurationProvider(added));
                 this.addNotifyReadyTimer(added);
             }
         } else {
@@ -99,7 +99,7 @@ export class CppTools implements CppToolsTestApi {
             if (!p.isReady) {
                 console.warn("didChangeCustomConfiguration was invoked before notifyReady");
             }
-            LanguageServer.getClients().forEach(client => client.updateCustomConfigurations(p));
+            LanguageServer.getClients().forEach(client => void client.updateCustomConfigurations(p));
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered, 'didChangeCustomConfiguration' ignored");
         } else {
@@ -112,7 +112,7 @@ export class CppTools implements CppToolsTestApi {
         const p: CustomConfigurationProvider1 | undefined = providers.get(provider);
 
         if (p) {
-            LanguageServer.getClients().forEach(client => client.updateCustomBrowseConfiguration(p));
+            LanguageServer.getClients().forEach(client => void client.updateCustomBrowseConfiguration(p));
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered, 'didChangeCustomBrowseConfiguration' ignored");
         } else {

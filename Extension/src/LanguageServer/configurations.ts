@@ -20,7 +20,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
-import { compilerPaths, DefaultClient } from './client';
+import { addTrustedCompiler, DefaultClient } from './client';
 import { UI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -908,7 +908,7 @@ export class CppProperties {
                 } else {
                     // add compiler to list of trusted compilers
                     if (i === this.CurrentConfigurationIndex) {
-                        util.addTrustedCompiler(compilerPaths, configuration.compilerPath);
+                        addTrustedCompiler(configuration.compilerPath);
                     }
                 }
             } else {
@@ -1064,7 +1064,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): void {
+    public handleConfigurationEditCommand(onBeforeOpen: (() => void) | undefined, showDocument: ((document: vscode.TextDocument, column?: vscode.ViewColumn) => Thenable<vscode.TextEditor>) | (() => void), viewColumn?: vscode.ViewColumn): void {
         const otherSettings: OtherSettings = new OtherSettings(this.rootUri);
         if (otherSettings.workbenchSettingsEditor  === "ui") {
             this.handleConfigurationEditUICommand(onBeforeOpen, showDocument, viewColumn);
@@ -1074,7 +1074,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): Promise<void> {
+    public async handleConfigurationEditJSONCommand(onBeforeOpen: (() => void) | undefined, showDocument: ((document: vscode.TextDocument, column?: vscode.ViewColumn) => Thenable<vscode.TextEditor>) | (() => void), viewColumn?: vscode.ViewColumn): Promise<void> {
         await this.ensurePropertiesFile();
         console.assert(this.propertiesFile);
         if (onBeforeOpen) {
@@ -1107,7 +1107,7 @@ export class CppProperties {
     }
 
     // onBeforeOpen will be called after c_cpp_properties.json have been created (if it did not exist), but before the document is opened.
-    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: (document: vscode.TextDocument, column?: vscode.ViewColumn) => void, viewColumn?: vscode.ViewColumn): Promise<void> {
+    public async handleConfigurationEditUICommand(onBeforeOpen: (() => void) | undefined, showDocument: ((document: vscode.TextDocument, column?: vscode.ViewColumn) => Thenable<vscode.TextEditor>) | (() => void), viewColumn?: vscode.ViewColumn): Promise<void> {
         await this.ensurePropertiesFile();
         if (this.propertiesFile) {
             if (onBeforeOpen) {
