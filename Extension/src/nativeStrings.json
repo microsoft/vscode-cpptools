@@ -271,14 +271,6 @@
     "compiler_default_language_standard_version_old" : "Compiler returned default language standard version: {0}. Since this version is old, will try to use newer version {1} as default.",
     "unexpected_output_from_clang_tidy": "Unexpected output from clang-tidy: {0}. Expected: {1}.",
     "generate_doxygen_comment": "Generate Doxygen comment",
-    "offer_copy_declaration": {
-        "text": "Copy declaration of '{0}' to clipboard",
-        "hint": "{0} is the name of a C/C++ function."
-    },
-    "offer_copy_definition": {
-        "text": "Copy definition of '{0}' to clipboard",
-        "hint": "{0} is the name of a C/C++ function."
-    },
     "offer_create_declaration": {
         "text": "Create declaration of '{0}' in {1}",
         "hint": "{0} is the name of a C/C++ function, {1} is a file name."
@@ -451,5 +443,12 @@
     "unknown_error": "Unknown error.",
     "run_select_intellisense_configuration": {
         "text": "Please run the 'Select IntelliSense Configuration...' command to locate your system headers."
+    },"offer_copy_declaration": {
+        "text": "Copy declaration of '{0}' to clipboard",
+        "hint": "{0} is the name of a C/C++ function."
+    },
+    "offer_copy_definition": {
+        "text": "Copy definition of '{0}' to clipboard",
+        "hint": "{0} is the name of a C/C++ function."
     }
 }

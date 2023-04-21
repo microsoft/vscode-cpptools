@@ -313,10 +313,13 @@ interface PublishRefactorDiagnosticsParams {
 export interface CreateDeclarationOrDefinitionParams {
     uri: string;
     range: Range;
+    copyToClipboard: boolean;
 }
 
 export interface CreateDeclarationOrDefinitionResult {
     changes: { [key: string]: any[] };
+    clipboardText: string;
+    // add result for clipboard_text
 }
 
 interface ShowMessageWindowParams {
@@ -3474,13 +3477,18 @@ export class DefaultClient implements Client {
                     character: range.end.character,
                     line: range.end.line
                 }
-            }
+            },
+            copyToClipboard: false
         };
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // TODO: return specific errors info in result.
-        if (result.changes === undefined) {
-            util.promptCDDFailed();
+        if (result.changes === undefined && result.clipboardText) {
+            if (!params.copyToClipboard) {
+                util.promptCDDFailed();
+            } else { 
+
+            }
             return;
         }
 
