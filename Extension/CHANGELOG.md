@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.15.3: March 20, 2023
+## Version 1.15.3: March 24, 2023
 ### Bug Fix
 * Fix handling of sccache and clcache. [#7616](https://github.com/microsoft/vscode-cpptools/issues/7616)
 * Fix an undefined reference regression. [PR #10824](https://github.com/microsoft/vscode-cpptools/pull/10824)
