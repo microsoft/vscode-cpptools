@@ -355,18 +355,16 @@ export class OldUI implements UI {
             if (isCppPropertiesJson) {
                 vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
             }
+            const isCppOrRelated: boolean = isCppPropertiesJson || util.isCppOrRelated(activeEditor.document);
 
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
-            const showConfigureIntelliSenseButtonForActiveFile: boolean = (isCppPropertiesJson || util.isCppOrRelated(activeEditor.document))
-                && !!this.currentClient && this.currentClient.getShowConfigureIntelliSenseButton();
-            this.ShowConfiguration = showConfigureIntelliSenseButtonForActiveFile ||
-                (util.getWorkspaceIsCpp() &&
+            this.ShowConfiguration = isCppOrRelated || (util.getWorkspaceIsCpp() &&
                     (activeEditor.document.fileName.endsWith("tasks.json") ||
                     activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
-                if (showConfigureIntelliSenseButtonForActiveFile) {
+                if (isCppOrRelated && !!this.currentClient && this.currentClient.getShowConfigureIntelliSenseButton()) {
                     this.configureIntelliSenseStatusItem.show();
                     if (!this.configureIntelliSenseTimeout) {
                         this.configureIntelliSenseTimeout = setTimeout(() => {
