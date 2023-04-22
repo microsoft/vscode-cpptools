@@ -1373,7 +1373,7 @@ export class DefaultClient implements Client {
                                 global.setTimeout(() => {
                                     client.configStateReceived.timeout = true;
                                     client.handleConfigStatusOrPrompt();
-                                }, 5000);
+                                }, 15000);
                             }
                         });
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
