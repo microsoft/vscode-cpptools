@@ -1819,9 +1819,13 @@ export class DefaultClient implements Client {
             }
             this.configStateReceived.configProviders.push(provider);
             const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
-            if (!selectedProvider) {
+            if (!selectedProvider || this.showConfigureIntelliSenseButton) {
                 this.handleConfigStatusOrPrompt("configProviders");
-            } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
+                if (!selectedProvider) {
+                    return;
+                }
+            }
+            if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 this.onCustomConfigurationProviderRegistered(provider);
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
@@ -2674,7 +2678,9 @@ export class DefaultClient implements Client {
         }
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         const settings: CppSettings = new CppSettings(this.RootUri);
-        const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider && !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
+        const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
+            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson &&
+            (this.lastCustomBrowseConfigurationProviderId === undefined || this.lastCustomBrowseConfigurationProviderId.Value === undefined);
         const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
         // Handle config providers
