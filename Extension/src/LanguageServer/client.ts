@@ -2679,8 +2679,8 @@ export class DefaultClient implements Client {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         const settings: CppSettings = new CppSettings(this.RootUri);
         const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
-            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;// &&
-            //(this.lastCustomBrowseConfigurationProviderId === undefined || this.lastCustomBrowseConfigurationProviderId.Value === undefined);
+            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson &&
+            (this.lastCustomBrowseConfigurationProviderId === undefined || this.lastCustomBrowseConfigurationProviderId.Value === undefined);
         const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
         // Handle config providers
