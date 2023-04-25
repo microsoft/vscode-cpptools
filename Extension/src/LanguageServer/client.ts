@@ -317,7 +317,7 @@ export interface CreateDeclarationOrDefinitionParams {
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    changes: { [key: string]: any[] };
+    changes: any;
     clipboardText: string;
     // add result for clipboard_text
 }
@@ -3481,13 +3481,22 @@ export class DefaultClient implements Client {
             copyToClipboard: false
         };
 
+        if (copy) {
+            params.copyToClipboard = true;
+        }
+
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // TODO: return specific errors info in result.
-        if (result.changes === undefined && result.clipboardText) {
+        if (result.changes.changes.length === undefined && result.clipboardText) {
             if (!params.copyToClipboard) {
                 util.promptCDDFailed();
-            } else { 
-
+            } else {
+                vscode.env.clipboard.writeText(result.clipboardText).then(() => {
+                    // Writing was successful
+                }, () => {
+                    // Writing was unsuccessful
+                    util.promptCDDFailed(true);
+                });
             }
             return;
         }
@@ -3497,12 +3506,12 @@ export class DefaultClient implements Client {
         let lastEdit: vscode.TextEdit | undefined;
         let editPositionAdjustment: number = 0;
         let selectionPositionAdjustment: number = 0;
-        for (const file in result.changes) {
+        for (const file in result.changes.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
             // At most, there will only be two text edits:
             // 1.) an edit for: #include header file
             // 2.) an edit for: definition or declaration
-            for (const edit of result.changes[file]) {
+            for (const edit of result.changes.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
                 if (lastEdit && lastEdit.newText.includes("#include")) {
@@ -3522,16 +3531,6 @@ export class DefaultClient implements Client {
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
                 const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
-                // If the command was invoked via the copy command, copy the declaration or definition to clipboard.
-                if (copy) {
-                    vscode.env.clipboard.writeText(edit.newText).then(() => {
-                        // Writing was successful
-                    }, () => {
-                        // Writing was unsuccessful
-                        util.promptCDDFailed(true);
-                    });
-                    return;
-                }
                 workspaceEdits.insert(uri, position, edit.newText);
             }
             modifiedDocument = uri;
@@ -3573,7 +3572,6 @@ export class DefaultClient implements Client {
         };
         const versionBeforeFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
         if (versionBeforeFormatting === undefined) {
-            util.promptCDDFailed();
             return;
         }
         const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
@@ -3581,14 +3579,12 @@ export class DefaultClient implements Client {
             formatEdits.set(modifiedDocument, formatTextEdits);
         }
         if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
-            util.promptCDDFailed();
             return;
         }
         // Only apply formatting if the document version hasn't changed to prevent
         // stale formatting results from being applied.
         const versionAfterFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
         if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
-            util.promptCDDFailed();
             return;
         }
         await vscode.workspace.applyEdit(formatEdits);
