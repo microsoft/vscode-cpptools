@@ -342,6 +342,7 @@ export class NewUI implements UI {
         if (this.isRunningCodeAnalysis && !val) {
             this.codeAnalysisTotal = 0;
             this.codeAnalysisProcessed = 0;
+            this.isCodeAnalysisPaused = false;
         }
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusItem.busy = val;
