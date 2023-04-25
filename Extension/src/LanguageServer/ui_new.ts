@@ -333,8 +333,8 @@ export class NewUI implements UI {
     private codeAnalysisCurrentMode(): string {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
         const state: string = (settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled)
-            ? localize("mode.codeanalysis.status", "Automatic")
-            : localize("mode.codeanalysis.status", "Manual");
+            ? localize("mode.codeanalysis.status.automatic", "Automatic")
+            : localize("mode.codeanalysis.status.manual", "Manual");
         return state;
     }
 
