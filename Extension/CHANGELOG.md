@@ -338,7 +338,7 @@
 * Fix Go to Definition with C for identifiers that are C++ keywords. [#9081](https://github.com/microsoft/vscode-cpptools/issues/9081)
 * Fix the new Run/Debug Code button not working with a modified program location. [#9082](https://github.com/microsoft/vscode-cpptools/issues/9082)
 * Fix `__GNUC__` system defines causing clang-tidy to undefine `_Float32`. [#9091](https://github.com/microsoft/vscode-cpptools/issues/9091)
-* Fix 'breakpoints set before launch in shared objects cannot be disabled/deleted' [#9095]([https://github.com/microsoft/vscode-cpptools/issues/9095)
+* Fix 'breakpoints set before launch in shared objects cannot be disabled/deleted' [#9095](https://github.com/microsoft/vscode-cpptools/issues/9095)
 * Fix compiler querying failing for compilers that don't output system includes. [#9099](https://github.com/microsoft/vscode-cpptools/issues/9099)
 * Fix completion occurring (when it shouldn't) after the comma in a definition list. [#9101](https://github.com/microsoft/vscode-cpptools/issues/9101)
 * Fix `;` incorrectly matching for `break;` and `continue;` completion. [#9115](https://github.com/microsoft/vscode-cpptools/issues/9115)
