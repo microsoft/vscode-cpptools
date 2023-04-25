@@ -331,7 +331,7 @@ export interface CreateDeclarationOrDefinitionParams {
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    changes: any;
+    edit: any;
     clipboardText: string;
     // add result for clipboard_text
 }
@@ -3515,7 +3515,7 @@ export class DefaultClient implements Client {
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // TODO: return specific errors info in result.
-        if (result.changes.changes.length === undefined && result.clipboardText) {
+        if (result.edit.changes.length === undefined && result.clipboardText) {
             if (!params.copyToClipboard) {
                 util.promptCDDFailed();
             } else {
@@ -3534,12 +3534,12 @@ export class DefaultClient implements Client {
         let lastEdit: vscode.TextEdit | undefined;
         let editPositionAdjustment: number = 0;
         let selectionPositionAdjustment: number = 0;
-        for (const file in result.changes.changes) {
+        for (const file in result.edit.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
             // At most, there will only be two text edits:
             // 1.) an edit for: #include header file
             // 2.) an edit for: definition or declaration
-            for (const edit of result.changes.changes[file]) {
+            for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
                 if (lastEdit && lastEdit.newText.includes("#include")) {
