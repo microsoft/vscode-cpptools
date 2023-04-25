@@ -214,7 +214,7 @@ export function getWorkspaceIsCpp(): boolean {
 export function isCppOrRelated(document: vscode.TextDocument): boolean {
     return isCpp(document) || isCppPropertiesJson(document) || (document.uri.scheme === "output" && document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")) ||
         (isWorkspaceCpp && (document.languageId === "json" || document.languageId === "jsonc") &&
-        ((document.uri.scheme !== "vscode-userdata" && document.fileName.endsWith("settings.json")) ||
+        ((document.uri.scheme === "vscode-userdata" && document.fileName.endsWith("settings.json")) ||
             (document.uri.scheme === "file" && document.fileName.endsWith(".code-workspace"))));
 }
 
