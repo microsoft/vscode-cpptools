@@ -911,13 +911,13 @@ export async function promptReloadWindow(message: string): Promise<void> {
 }
 
 export async function promptCDDFailed(copy?: boolean): Promise<void> {
-    const copy_message: string = "Failed to copy declaration or definition to clipboard.";
-    const create_message: string = "Failed to create declaration or definition.";
+    const copyMessage: string = localize("cdd.copyMessage", "Failed to copy declaration or definition to clipboard.");
+    const createMessage: string = localize("cdd.createMessage", "Failed to create declaration or definition.");
 
     if (copy) {
-        await vscode.window.showInformationMessage(copy_message);
+        await vscode.window.showInformationMessage(copyMessage);
     } else {
-        await vscode.window.showInformationMessage(create_message);
+        await vscode.window.showInformationMessage(createMessage);
     }
 }
 
