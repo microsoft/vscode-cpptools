@@ -1008,7 +1008,7 @@ export class DefaultClient implements Client {
 
     public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any, compilersOnly?: boolean): Promise<void> {
         const settings: CppSettings = new CppSettings(compilersOnly ? undefined : this.RootUri);
-        const selectCompiler: string = localize("selectCompiler.string", "Select IntelliSense Configuration...");
+        const selectIntelliSenseConfig: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
         const paths: string[] = [];
         const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
         if (configProviders && configProviders.length > 0) {
@@ -1058,7 +1058,7 @@ export class DefaultClient implements Client {
             if (index === -1) {
                 action = "escaped";
                 if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
-                    this.showPrompt(selectCompiler, true, sender);
+                    this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
                 return;
             }
@@ -1067,7 +1067,7 @@ export class DefaultClient implements Client {
                 settings.defaultCompilerPath = "";
                 configurationSelected = true;
                 if (showSecondPrompt) {
-                    this.showPrompt(selectCompiler, true, sender);
+                    this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
                 ui.ShowConfigureIntelliSenseButton(false, this);
                 return;
@@ -1090,7 +1090,7 @@ export class DefaultClient implements Client {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
-                        this.showPrompt(selectCompiler, true, sender);
+                        this.showPrompt(selectIntelliSenseConfig, true, sender);
                     }
                     action = "browse dismissed";
                     return;
