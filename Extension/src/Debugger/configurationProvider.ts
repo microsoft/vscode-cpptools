@@ -448,6 +448,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const isCl: boolean = compilerName === "cl.exe";
                 newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 return new Promise<CppDebugConfiguration | undefined>(async resolve => {
                     if (platformInfo.platform === "darwin") {
                         return resolve(newConfig);

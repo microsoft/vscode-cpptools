@@ -61,7 +61,21 @@ let ui: UI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 let initializedClientCount: number = 0;
-export let compilerPaths: string[] = [];
+
+// Compiler paths that are known to be acceptable to execute.
+const trustedCompilerPaths: string[] = [];
+export function hasTrustedCompilerPaths(): boolean {
+    return trustedCompilerPaths.length !== 0;
+}
+
+export function addTrustedCompiler(path: string): void {
+    // Detect duplicate paths or invalid paths.
+    if (trustedCompilerPaths.includes(path) || path === null || path === undefined) {
+        return;
+    }
+    trustedCompilerPaths.push(path);
+}
+
 // Data shared by all clients.
 let languageClient: LanguageClient;
 let firstClientStarted: Promise<void>;
@@ -806,7 +820,8 @@ export interface Client {
     addFileAssociations(fileAssociations: string, languageId: string): void;
     sendDidChangeSettings(): void;
     isInitialized(): boolean;
-    ShowConfigureIntelliSenseButton(): boolean;
+    getShowConfigureIntelliSenseButton(): boolean;
+    setShowConfigureIntelliSenseButton(show: boolean): void;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -873,7 +888,8 @@ export class DefaultClient implements Client {
     public get TagParserStatusChanged(): vscode.Event<string> { return this.model.parsingWorkspaceStatus.ValueChanged; }
     public get ActiveConfigChanged(): vscode.Event<string> { return this.model.activeConfigName.ValueChanged; }
     public isInitialized(): boolean { return this.innerLanguageClient !== undefined; }
-    public ShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
+    public getShowConfigureIntelliSenseButton(): boolean { return this.showConfigureIntelliSenseButton; }
+    public setShowConfigureIntelliSenseButton(show: boolean): void { this.showConfigureIntelliSenseButton = show; }
 
     /**
      * don't use this.rootFolder directly since it can be undefined
@@ -950,9 +966,11 @@ export class DefaultClient implements Client {
 
     public async showSelectIntelliSenseConfiguration(paths: string[], compilersOnly?: boolean): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = compilersOnly ?
+        options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
-            localize("configure.intelliSense", "How would you like to configure IntelliSense?");
+            (vscode.workspace.workspaceFolders.length > 1 ?
+                localize("configure.intelliSense.forFolder", "How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
+                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense this folder?"));
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -1107,8 +1125,8 @@ export class DefaultClient implements Client {
             }
 
             ui.ShowConfigureIntelliSenseButton(false, this);
-            util.addTrustedCompiler(compilerPaths, settings.defaultCompilerPath);
-            compilerDefaults = await this.requestCompiler(compilerPaths);
+            addTrustedCompiler(settings.defaultCompilerPath);
+            compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
             DefaultClient.updateClientConfigurations();
         } finally {
             if (compilersOnly) {
@@ -1139,7 +1157,7 @@ export class DefaultClient implements Client {
     }
 
     public async rescanCompilers(sender?: any): Promise<void> {
-        compilerDefaults = await this.requestCompiler(compilerPaths);
+        compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
         DefaultClient.updateClientConfigurations();
         if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
             await this.promptSelectCompiler(true, sender);
@@ -1159,9 +1177,9 @@ export class DefaultClient implements Client {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
-                    compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
+                    addTrustedCompiler(compilerDefaults.compilerPath);
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    compilerDefaults = await this.requestCompiler(compilerPaths);
+                    compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                     ui.ShowConfigureIntelliSenseButton(false, this);
@@ -1194,9 +1212,9 @@ export class DefaultClient implements Client {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
-                    compilerPaths = await util.addTrustedCompiler(compilerPaths, compilerDefaults.compilerPath);
+                    addTrustedCompiler(compilerDefaults.compilerPath);
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    compilerDefaults = await this.requestCompiler(compilerPaths);
+                    compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                     ui.ShowConfigureIntelliSenseButton(false, this);
@@ -1353,20 +1371,24 @@ export class DefaultClient implements Client {
                     if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
                         // Timeout waiting for compile_commands.json and config providers.
                         // The quick pick options will update if they're added later on.
-                        global.setTimeout(() => {
-                            this.configStateReceived.timeout = true;
-                            this.handleConfigStatusOrPrompt();
-                        }, 15000);
+                        clients.forEach(client => {
+                            if (client instanceof DefaultClient) {
+                                global.setTimeout(() => {
+                                    client.configStateReceived.timeout = true;
+                                    client.handleConfigStatusOrPrompt();
+                                }, 15000);
+                            }
+                        });
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
-                        compilerDefaults = await this.requestCompiler(compilerPaths);
+                        compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
                         DefaultClient.updateClientConfigurations();
                         clients.forEach(client => {
                             if (client instanceof DefaultClient) {
                                 client.configStateReceived.compilers = true;
+                                client.handleConfigStatusOrPrompt();
                             }
                         });
-                        this.handleConfigStatusOrPrompt();
                     }
                 } catch (err) {
                     this.isSupported = false;   // Running on an OS we don't support yet.
@@ -1800,9 +1822,13 @@ export class DefaultClient implements Client {
             }
             this.configStateReceived.configProviders.push(provider);
             const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
-            if (!selectedProvider) {
+            if (!selectedProvider || this.showConfigureIntelliSenseButton) {
                 this.handleConfigStatusOrPrompt("configProviders");
-            } else if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
+                if (!selectedProvider) {
+                    return;
+                }
+            }
+            if (isSameProviderExtensionId(selectedProvider, provider.extensionId)) {
                 this.onCustomConfigurationProviderRegistered(provider);
                 telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
             } else if (selectedProvider === provider.name) {
@@ -1898,7 +1924,7 @@ export class DefaultClient implements Client {
             });
 
             // Set up a timeout to use previously received configuration and resume parsing if the provider times out
-            global.setTimeout(async () => {
+            global.setTimeout(() => {
                 if (!hasCompleted) {
                     hasCompleted = true;
                     this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
@@ -2270,10 +2296,10 @@ export class DefaultClient implements Client {
     private registerNotifications(): void {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
-        this.languageClient.onNotification(ReloadWindowNotification, () => util.promptForReloadWindowDueToSettingsChange());
-        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => util.addTrustedCompiler(compilerPaths, e.compilerPath));
+        this.languageClient.onNotification(ReloadWindowNotification, () => void util.promptForReloadWindowDueToSettingsChange());
+        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => addTrustedCompiler(e.compilerPath));
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
-        this.languageClient.onNotification(ReportStatusNotification, async (e) => this.updateStatus(e));
+        this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
@@ -2295,10 +2321,10 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
-        this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => this.setTemporaryTextDocumentLanguage(e));
+        this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => void this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
-        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => this.insertDoxygenComment(e));
+        this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
@@ -2634,11 +2660,11 @@ export class DefaultClient implements Client {
             return;
         }
         const potentialClient: Client = clients.getClientFor(vscode.Uri.file(params.workspaceFolderUri));
-        if (!(potentialClient instanceof DefaultClient)) {
-            return;
-        }
         const client: DefaultClient = <DefaultClient>potentialClient;
         if (!client) {
+            return;
+        }
+        if (client.configStateReceived.compileCommands) {
             return;
         }
 
@@ -2655,7 +2681,9 @@ export class DefaultClient implements Client {
         }
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         const settings: CppSettings = new CppSettings(this.RootUri);
-        const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider && !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
+        const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
+            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson &&
+            (this.lastCustomBrowseConfigurationProviderId === undefined || this.lastCustomBrowseConfigurationProviderId.Value === undefined);
         const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
         // Handle config providers
@@ -2751,7 +2779,7 @@ export class DefaultClient implements Client {
         const configurationNotSet: boolean = configProviderNotSet && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
-            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && compilerPaths && (compilerPaths.length !== 1 || compilerPaths[0] !== ""));
+            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
 
         if (statusBarIndicatorEnabled) {
             if (showConfigStatus) {
@@ -3057,7 +3085,7 @@ export class DefaultClient implements Client {
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
                     if (itemConfig.compilerPath !== undefined) {
-                        util.addTrustedCompiler(compilerPaths, itemConfig.compilerPath);
+                        addTrustedCompiler(itemConfig.compilerPath);
                     }
                     if (providerVersion < Version.v6) {
                         itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
@@ -3160,7 +3188,7 @@ export class DefaultClient implements Client {
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;
                 if (sanitized.compilerPath !== undefined) {
-                    util.addTrustedCompiler(compilerPaths, sanitized.compilerPath);
+                    addTrustedCompiler(sanitized.compilerPath);
                 }
                 if (providerVersion < Version.v6) {
                     sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
@@ -3791,5 +3819,6 @@ class NullClient implements Client {
     addFileAssociations(fileAssociations: string, languageId: string): void { }
     sendDidChangeSettings(): void { }
     isInitialized(): boolean { return true; }
-    ShowConfigureIntelliSenseButton(): boolean { return false; }
+    getShowConfigureIntelliSenseButton(): boolean { return false; }
+    setShowConfigureIntelliSenseButton(show: boolean): void { }
 }
