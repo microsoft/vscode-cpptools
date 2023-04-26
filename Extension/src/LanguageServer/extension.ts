@@ -300,6 +300,11 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
+    if (noActiveEditorTimeout) {
+        clearTimeout(noActiveEditorTimeout);
+        noActiveEditorTimeout = undefined;
+    }
+
     if (!editor) {
         // When switching between documents, VS Code is setting the active editor to undefined
         // temporarily, so this prevents the C++-related status bar items from flickering off/on.
@@ -309,11 +314,6 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
             noActiveEditorTimeout = undefined;
         }, 100);
         return;
-    }
-
-    if (noActiveEditorTimeout) {
-        clearTimeout(noActiveEditorTimeout);
-        noActiveEditorTimeout = undefined;
     }
 
     if (util.isCppOrRelated(editor.document)) {
