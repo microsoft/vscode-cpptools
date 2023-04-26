@@ -985,6 +985,9 @@ export class CppProperties {
                 }
                 if (!keepCachedBrowseConfig && this.client.lastCustomBrowseConfiguration !== undefined) {
                     this.client.lastCustomBrowseConfiguration.Value = undefined;
+                    if (this.client.lastCustomBrowseConfigurationProviderId) {
+                        this.client.lastCustomBrowseConfigurationProviderId.Value = undefined;
+                    }
                 }
             }
 
