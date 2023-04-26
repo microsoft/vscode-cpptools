@@ -189,6 +189,7 @@ export class NewUI implements UI {
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
+                this.dbTimeout = undefined;
             }
         } else {
             this.dbTimeout = setTimeout(() => {
@@ -276,6 +277,7 @@ export class NewUI implements UI {
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
+                this.dbTimeout = undefined;
             }
         } else {
             this.dbTimeout = setTimeout(() => {
@@ -314,6 +316,7 @@ export class NewUI implements UI {
         if (val) {
             this.intelliSenseStatusItem.text = "$(flame)";
             this.intelliSenseStatusItem.detail = this.updatingIntelliSenseText;
+            this.flameTimeout = undefined;
         } else {
             this.flameTimeout = setTimeout(() => {
                 if (this.intelliSenseStatusItem) {
