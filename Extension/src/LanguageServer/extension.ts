@@ -291,6 +291,8 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
+let noActiveEditorTimeout: NodeJS.Timeout | undefined;
+
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -298,7 +300,23 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    if (editor && util.isCppOrRelated(editor.document)) {
+    if (!editor) {
+        // When switching between 2 documents, VS Code is setting the active editor to undefined
+        // temporarily, so this prevents the status bar from flickering.
+        noActiveEditorTimeout = setTimeout(() => {
+            activeDocument = "";
+            ui.activeDocumentChanged();
+            noActiveEditorTimeout = undefined;
+        }, 100);
+        return;
+    }
+
+    if (noActiveEditorTimeout) {
+        clearTimeout(noActiveEditorTimeout);
+        noActiveEditorTimeout = undefined;
+    }
+
+    if (util.isCppOrRelated(editor.document)) {
         // This is required for the UI to update correctly.
         clients.activeDocumentChanged(editor.document);
         if (util.isCpp(editor.document)) {
