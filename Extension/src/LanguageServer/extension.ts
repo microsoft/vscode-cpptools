@@ -301,8 +301,8 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     }
 
     if (!editor) {
-        // When switching between 2 documents, VS Code is setting the active editor to undefined
-        // temporarily, so this prevents the status bar from flickering.
+        // When switching between documents, VS Code is setting the active editor to undefined
+        // temporarily, so this prevents the C++-related status bar items from flickering off/on.
         noActiveEditorTimeout = setTimeout(() => {
             activeDocument = "";
             ui.activeDocumentChanged();
