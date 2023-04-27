@@ -115,6 +115,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
             if (await util.checkFileExists(config)) {
                 const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
                 vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                util.setWorkspaceIsCpp();
             }
         }
     }
