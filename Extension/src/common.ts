@@ -193,6 +193,31 @@ export function isEditorFileCpp(file: string): boolean {
     return editor.document.languageId === "cpp";
 }
 
+// If it's C, C++, or Cuda.
+export function isCpp(document: vscode.TextDocument): boolean {
+    return document.uri.scheme === "file" &&
+        (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp");
+}
+export function isCppPropertiesJson(document: vscode.TextDocument): boolean {
+    return document.uri.scheme === "file" && (document.languageId === "json" || document.languageId === "jsonc") &&
+        (document.fileName.endsWith("c_cpp_properties.json"));
+}
+let isWorkspaceCpp: boolean = false;
+export function setWorkspaceIsCpp(): void {
+    if (!isWorkspaceCpp) {
+        isWorkspaceCpp = true;
+    }
+}
+export function getWorkspaceIsCpp(): boolean {
+    return isWorkspaceCpp;
+}
+export function isCppOrRelated(document: vscode.TextDocument): boolean {
+    return isCpp(document) || isCppPropertiesJson(document) || (document.uri.scheme === "output" && document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")) ||
+        (isWorkspaceCpp && (document.languageId === "json" || document.languageId === "jsonc") &&
+        ((document.fileName.endsWith("settings.json") && (document.uri.scheme === "file" || document.uri.scheme === "vscode-userdata")) ||
+            (document.uri.scheme === "file" && document.fileName.endsWith(".code-workspace"))));
+}
+
 let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
@@ -738,6 +763,7 @@ interface ProcessOutput {
 }
 
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return new Promise(async (resolve, reject) => {
         // Do not use CppSettings to avoid circular require()
         const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
@@ -884,15 +910,6 @@ export async function promptReloadWindow(message: string): Promise<void> {
     if (value === reload) {
         vscode.commands.executeCommand("workbench.action.reloadWindow");
     }
-}
-
-export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
-    // Detect duplicate paths or invalid paths.
-    if (compilers.includes(path) || path === null || path === undefined) {
-        return compilers;
-    }
-    compilers.push(path);
-    return compilers;
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {

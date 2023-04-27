@@ -53,8 +53,11 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
 
     // Register DebugConfigurationProviders for "Run and Debug" play button.
     const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.AddDebugConfiguration", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
@@ -148,9 +151,9 @@ async function enableSshTargetsView(): Promise<void> {
     }
     await vscode.commands.executeCommand('setContext', 'cpptools.enableSshTargetsView', true);
     sshConfigWatcher = chokidar.watch(getSshConfigurationFiles(), { ignoreInitial: true })
-        .on('add', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
-        .on('change', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
-        .on('unlink', () => vscode.commands.executeCommand(refreshCppSshTargetsViewCmd));
+        .on('add', () => void vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
+        .on('change', () => void vscode.commands.executeCommand(refreshCppSshTargetsViewCmd))
+        .on('unlink', () => void vscode.commands.executeCommand(refreshCppSshTargetsViewCmd));
     sshTargetsViewEnabled = true;
 }
 
