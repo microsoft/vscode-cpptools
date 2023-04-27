@@ -2786,7 +2786,7 @@ export class DefaultClient implements Client {
             }
             ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
-            this.promptSelectIntelliSenseConfiguration(false, "prompt");
+            this.promptSelectIntelliSenseConfiguration(false, "notification");
             displayedSelectCompiler = true;
         }
     }
