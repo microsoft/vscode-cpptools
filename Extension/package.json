@@ -3115,11 +3115,6 @@
         "category": "C/C++"
       },
       {
-        "command": "C_Cpp.CopyDeclarationOrDefinition",
-        "title": "%c_cpp.command.CopyDeclarationOrDefinition.title%",
-        "category": "C/C++"
-      },
-      {
         "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
         "title": "%c_cpp.command.RunCodeAnalysisOnActiveFile.title%",
         "category": "C/C++"
