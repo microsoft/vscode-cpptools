@@ -1,23 +1,40 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.15.3: March 24, 2023
-### Bug Fix
-* Fix handling of sccache and clcache. [#7616](https://github.com/microsoft/vscode-cpptools/issues/7616)
-* Fix an undefined reference regression. [PR #10824](https://github.com/microsoft/vscode-cpptools/pull/10824)
-* Fix bugs with the "Configure IntelliSense" button. [#10810](https://github.com/microsoft/vscode-cpptools/issues/10810), [#10822](https://github.com/microsoft/vscode-cpptools/issues/10822), [#10827](https://github.com/microsoft/vscode-cpptools/issues/10827)
-* Fix a deadlock with Find All References. [#10855](https://github.com/microsoft/vscode-cpptools/issues/10855)
-
-## Version 1.15.2: March 12, 2023
+## Version 1.15.4: May 1, 2023
 ### Enhancements
-* Add a "Configure IntelliSense" status bar warning. [#10685](https://github.com/microsoft/vscode-cpptools/issues/10685)
+* Support multiple natvis files in `visualizerFile`. [#925](https://github.com/microsoft/vscode-cpptools/issues/925)
+* Enable error squiggles for single file mode if includes resolve. [#10062](https://github.com/microsoft/vscode-cpptools/issues/10062)
+* Improve the description of the `C_Cpp.codeAnalysis.clangTidy.enabled` setting. [#10454](https://github.com/microsoft/vscode-cpptools/issues/10454)
+* Add a 'Select an IntelliSense configuration' code action and error message for standard headers which can't be found. [#10531](https://github.com/microsoft/vscode-cpptools/issues/10531)
+* Change the 'Edit "includePath" setting' code action to reference "compilerPath" for missing system includes. [#10675](https://github.com/microsoft/vscode-cpptools/issues/10675)
+* Add a "Configure IntelliSense" status bar warning (currently controlled by an experiment). [#10685](https://github.com/microsoft/vscode-cpptools/issues/10685)
+* Re-enable an updated C/C++ walkthrough (currently only available for some users). [PR #10707](https://github.com/microsoft/vscode-cpptools/pull/10707)
 * Update to clang-format/tidy 16. [#10725](https://github.com/microsoft/vscode-cpptools/issues/10725)
 * Move the configuration status bar item out of the language status UI. [#10755](https://github.com/microsoft/vscode-cpptools/issues/10755)
 * Change `Select Default Compiler` to `Select IntelliSense Configuration` with configuration providers and compile commands added. [#10756](https://github.com/microsoft/vscode-cpptools/issues/10756)
 
 ### Bug Fixes
-* Support use of `ccache` in `compilerPath` and `compile_commands.json` command lines. [#7616](https://github.com/microsoft/vscode-cpptools/issues/7616)
+* Support use of `ccache`, 'sccache', and 'clcache' in `compilerPath` and `compile_commands.json` command lines. [#7616](https://github.com/microsoft/vscode-cpptools/issues/7616)
+* Enable `-fms-extensions` by default for Cygwin and MinGW. [#8353](https://github.com/microsoft/vscode-cpptools/issues/8353)
+* Fix incorrect, excessive logging with compile commands. [#9865](https://github.com/microsoft/vscode-cpptools/issues/9865)
+* Fix IntelliSense errors with C++ 20 range and span. [#10024](https://github.com/microsoft/vscode-cpptools/issues/10024), [#10252](https://github.com/microsoft/vscode-cpptools/issues/10252)
 * Fix two vcFormat settings being inverted. [#10262](https://github.com/microsoft/vscode-cpptools/issues/10262), [#10263](https://github.com/microsoft/vscode-cpptools/issues/10263)
-* Fix the browse configuration provider cache not getting cleared. [#10692](https://github.com/microsoft/vscode-cpptools/issues/10692)
+* Fix 'Create Declaration / Definition' making modifications to files outside the workspace folder. [#10402](https://github.com/microsoft/vscode-cpptools/issues/10402)
+* Fix code analysis when `--use-color=true` is used. [#10407](https://github.com/microsoft/vscode-cpptools/issues/10407)
+* Fix IntelliSense errors with CUDA. [#10455](https://github.com/microsoft/vscode-cpptools/issues/10455)
+* Fix random save failures while code analysis is running on the saved file. [#10482](https://github.com/microsoft/vscode-cpptools/issues/10482)
+* Fix the compile commands prompt setting `compileCommands` to a `compile_commands.json` in a different workspace folder. [#10588](https://github.com/microsoft/vscode-cpptools/issues/10588)
+* Fix code analysis with `_Float16`. [#10610](https://github.com/microsoft/vscode-cpptools/issues/10610)
+* Fix code analysis with c23/gnu23. [#10615](https://github.com/microsoft/vscode-cpptools/issues/10615)
+* Fix 'Reset IntelliSense Database' being delayed until parsing is finished. [#10616](https://github.com/microsoft/vscode-cpptools/issues/10616)
+* Fix uncaught exception with some configuration providers. [#10634](https://github.com/microsoft/vscode-cpptools/issues/10634)
+* Fix crashes with a multi-root workspace. [#10636](https://github.com/microsoft/vscode-cpptools/issues/10636)
+* Fix bugs with the "You do not have IntelliSense configured" prompt. [#10658](https://github.com/microsoft/vscode-cpptools/issues/10658), [#10659](https://github.com/microsoft/vscode-cpptools/issues/10659)
+* Fix random failures when adding or removing workspace folders. [PR #10665](https://github.com/microsoft/vscode-cpptools/pull/10665)
+* Fix missing clang-tidy checks setting values. [#10667](https://github.com/microsoft/vscode-cpptools/issues/10667)
+* Fix 'Select IntelliSense configuration' so that it works if it's already set in the workspace or workspace folder settings. [#10674](https://github.com/microsoft/vscode-cpptools/issues/10674)
+* Fix clang-tidy 'clang-analyzer-' documentation links not working. [#10678](https://github.com/microsoft/vscode-cpptools/issues/10678)
+* Fix the browse configuration provider cache not getting cleared. [#10692](https://github.com/microsoft/vscode-cpptools/issues/10692), [#10877](https://github.com/microsoft/vscode-cpptools/issues/10877)
 * Fix a crash with recursive environment variables on Windows. [#10704](https://github.com/microsoft/vscode-cpptools/issues/10704)
 * Fix `#import` of `.tlb` files failing due to `/Fo` arguments to `cl.exe` not being processed. [#10710](https://github.com/microsoft/vscode-cpptools/issues/10710)
 * Fix `cppbuild` tasks not using the workspace folder as the `cwd` by default. [#10742](https://github.com/microsoft/vscode-cpptools/issues/10742)
@@ -27,42 +44,18 @@
 * Fix the first registered configuration provider still being automatically used after a second registers. [PR #10772](https://github.com/microsoft/vscode-cpptools/pull/10772)
 * Fix `C_Cpp.default.compilerPath` in the settings UI showing a string editor when it shouldn't. [#10795](https://github.com/microsoft/vscode-cpptools/issues/10795)
 * Fix some issues due to usage of the spread operator not doing a deep copy. [PR #10803](https://github.com/microsoft/vscode-cpptools/pull/10803)
-
-## Version 1.15.1: March 22, 2023
-### Bug Fixes
-* Fix crashes with a multiroot workspace. [#10636](https://github.com/microsoft/vscode-cpptools/issues/10636)
-* Fix a deadlock with a multiroot workspace. [#10719](https://github.com/microsoft/vscode-cpptools/issues/10719)
-
-## Version 1.15.0: March 15, 2023
-### Enhancements
-* Support multiple natvis files in `visualizerFile`. [#925](https://github.com/microsoft/vscode-cpptools/issues/925)
-* Enable error squiggles for single file mode if includes resolve. [#10062](https://github.com/microsoft/vscode-cpptools/issues/10062)
-* Improve the description of the `C_Cpp.codeAnalysis.clangTidy.enabled` setting. [#10454](https://github.com/microsoft/vscode-cpptools/issues/10454)
-* Add a 'Select Default Compiler' code action and error message for standard headers which can't be found. [#10531](https://github.com/microsoft/vscode-cpptools/issues/10531)
-* Change the 'Edit "includePath" setting' code action to reference "compilerPath" for missing system includes. [#10675](https://github.com/microsoft/vscode-cpptools/issues/10675)
-
-### Bug Fixes
-* Enable `-fms-extensions` by default for Cygwin and MinGW. [#8353](https://github.com/microsoft/vscode-cpptools/issues/8353)
-* Fix incorrect, excessive logging with compile commands. [#9865](https://github.com/microsoft/vscode-cpptools/issues/9865)
-* Fix IntelliSense errors with C++ 20 range and span. [#10024](https://github.com/microsoft/vscode-cpptools/issues/10024)
-* Fix 'Create Declaration / Definition' making modifications to files outside the workspace folder. [#10402](https://github.com/microsoft/vscode-cpptools/issues/10402)
-* Fix code analysis when `--use-color=true` is used. [#10407](https://github.com/microsoft/vscode-cpptools/issues/10407)
-* Fix IntelliSense errors with CUDA. [#10455](https://github.com/microsoft/vscode-cpptools/issues/10455)
-* Fix random save failures while code analysis is running on the saved file. [#10482](https://github.com/microsoft/vscode-cpptools/issues/10482)
-* Fix the compile commands prompt setting `compileCommands` to a `compile_commands.json` in a different workspace folder. [#10588](https://github.com/microsoft/vscode-cpptools/issues/10588)
-* Fix code analysis with `_Float16`. [#10610](https://github.com/microsoft/vscode-cpptools/issues/10610)
-* Fix code analysis with c23/gnu23. [#10615](https://github.com/microsoft/vscode-cpptools/issues/10615)
-* Fix 'Reset IntelliSense Database' being delayed until parsing is finished. [#10616](https://github.com/microsoft/vscode-cpptools/issues/10616)
-* Fix uncaught exception with some configuration providers. [PR #10629](https://github.com/microsoft/vscode-cpptools/pull/10629)
-* Fix bugs with the "You do not have IntelliSense configured" prompt. [#10658](https://github.com/microsoft/vscode-cpptools/issues/10658), [#10659](https://github.com/microsoft/vscode-cpptools/issues/10659)
-* Fix random failures when adding or removing workspace folders. [PR #10665](https://github.com/microsoft/vscode-cpptools/pull/10665)
-* Fix missing clang-tidy checks setting values. [#10667](https://github.com/microsoft/vscode-cpptools/issues/10667)
-* Fix 'Select Default Compiler' so that it works if it's already set in the workspace or workspace folder settings. [#10674](https://github.com/microsoft/vscode-cpptools/issues/10674)
-* Fix clang-tidy 'clang-analyzer-' documentation links not working. [#10678](https://github.com/microsoft/vscode-cpptools/issues/10678)
+* Fix a deadlock with Find All References. [#10855](https://github.com/microsoft/vscode-cpptools/issues/10855)
+* Fix the Code Analysis Options dropdown showing 'Resume' instead of 'Pause' after a cancel is done in a paused state. [#10879](https://github.com/microsoft/vscode-cpptools/issues/10879)
+* Fix "Code Analysis Mode" not being localized when initially shown. [#10881](https://github.com/microsoft/vscode-cpptools/issues/10881)
+* Fix the C/C++-related status bar items flickering off/on when switching documents. [PR #10888](https://github.com/microsoft/vscode-cpptools/pull/10888)
 * Fix `__GXX_RTTI` incorrectly being defined by IntelliSense with clang and `-fms-compatibility`.
 * Reduce the likelihood of an `onWillSaveWaitUntil` timeout.
 * Fix an IntelliSense crash with C++20 concepts.
 * Stop querying clang-cl.exe as C.
+
+## Version 1.14.5: March 22, 2023
+### Bug Fix
+* Fix a deadlock with a multi-root workspace. [#10719](https://github.com/microsoft/vscode-cpptools/issues/10719)
 
 ## Version 1.14.4: February 28, 2023
 ### Enhancements
@@ -121,7 +114,7 @@
 * Fix the process id picker only showing part of the process on a remote machine. [#10379](https://github.com/microsoft/vscode-cpptools/issues/10379)
 * Fix temp files generating at the incorrect path. [#10386](https://github.com/microsoft/vscode-cpptools/issues/10386)
 * Fix a crash in extractArgs. [PR #10394](https://github.com/microsoft/vscode-cpptools/pull/10394)
-* Fix a bug with settings changes not being handled correctly for multiroot. [PR #10458](https://github.com/microsoft/vscode-cpptools/pull/10458)
+* Fix a bug with settings changes not being handled correctly for multi-root. [PR #10458](https://github.com/microsoft/vscode-cpptools/pull/10458)
 
 ## Version 1.13.9: January 4, 2023
 ### Bug Fix
@@ -391,7 +384,7 @@
 * Fix a crash when visualizing local variables for Microsoft Edge (msedge.exe) [#8738](https://github.com/microsoft/vscode-cpptools/issues/8738)
 * Fix some system defines being incorrectly removed when running code analysis. [#8740](https://github.com/microsoft/vscode-cpptools/issues/8740)
 * Prevent an error from being logged due to custom configuration processing prior to the provider being ready. [#8752](https://github.com/microsoft/vscode-cpptools/issues/8752)
-* Fix incorrect crash recovery with multiroot. [#8762](https://github.com/microsoft/vscode-cpptools/issues/8762)
+* Fix incorrect crash recovery with multi-root. [#8762](https://github.com/microsoft/vscode-cpptools/issues/8762)
 * Fix random compiler query, clang-tidy, or clang-format failure on Windows. [#8764](https://github.com/microsoft/vscode-cpptools/issues/8764)
 * Fix invoking commands before cpptools is activated. [#8785](https://github.com/microsoft/vscode-cpptools/issues/8785)
 * Fix a bug on Windows with semantic tokens updating. [#8799](https://github.com/microsoft/vscode-cpptools/issues/8799)
@@ -706,7 +699,7 @@
 * Fix integrity hash checking of downloaded packages for the extension. [PR #7300](https://github.com/microsoft/vscode-cpptools/pull/7300)
 * Fix a bug preventing successful validation and receipt of browse configurations from custom configuration providers. [PR# 7131](https://github.com/microsoft/vscode-cpptools/pull/7313)
 * Fix a potential crash when editing at the end of a document.
-* Fix "Configure Task" selection to show root folder names for multiroot workspace [PR #7315](https://github.com/microsoft/vscode-cpptools/pull/7315)
+* Fix "Configure Task" selection to show root folder names for multi-root workspace [PR #7315](https://github.com/microsoft/vscode-cpptools/pull/7315)
 
 ## Version 1.2.2: February 25, 2021
 ### Bug Fixes
@@ -876,7 +869,7 @@
 * Fix `Build and Debug Active File` race condition with EngineLogs. [#6304](https://github.com/microsoft/vscode-cpptools/pull/6304)
 * Fix changes to some `c_cpp_properties.json` properties not taking effect (until a reload) if `compileCommands` is set. [#6332](https://github.com/microsoft/vscode-cpptools/issues/6332)
 * Fix issue with compiler querying not handling various clang command line options correctly. [#6356](https://github.com/microsoft/vscode-cpptools/issues/6356),  [#6359](https://github.com/microsoft/vscode-cpptools/issues/6359)
-* Fix multiroot workspace tag parsing when `compileCommands` is set. [#6383](https://github.com/microsoft/vscode-cpptools/issues/6383)
+* Fix multi-root workspace tag parsing when `compileCommands` is set. [#6383](https://github.com/microsoft/vscode-cpptools/issues/6383)
 * Fix mingw32 compilers not being detected. [#6394](https://github.com/microsoft/vscode-cpptools/issues/6394)
 * Various bug fixes for vcFormat. [PR #6408](https://github.com/microsoft/vscode-cpptools/pull/6408)
 * Fix issue causing zh-cn and zh-tw language files not to be used. [PR #6418](https://github.com/microsoft/vscode-cpptools/pull/6418)
@@ -931,7 +924,7 @@
 * Get the default target of the compiler. If the default target is ARM/ARM64, do not use the generic "--target" option to determine bitness. [#5772](https://github.com/microsoft/vscode-cpptools/issues/5772)
 * Fix `compilerArgs` not being used if no `compilerPath` is set. [#5776](https://github.com/microsoft/vscode-cpptools/issues/5776)
 * Fix an incorrect IntelliSense error squiggle. [#5783](https://github.com/microsoft/vscode-cpptools/issues/5783)
-* Fix semantic colorization and inactive regions for multiroot workspaces. [#5812](https://github.com/microsoft/vscode-cpptools/issues/5812), [#5828](https://github.com/microsoft/vscode-cpptools/issues/5828)
+* Fix semantic colorization and inactive regions for multi-root workspaces. [#5812](https://github.com/microsoft/vscode-cpptools/issues/5812), [#5828](https://github.com/microsoft/vscode-cpptools/issues/5828)
 * Fix bug with cl.exe flags /FU and /FI not being processed. [#5819](https://github.com/microsoft/vscode-cpptools/issues/5819)
 * Fix `cStandard` being set to `c11` instead of `gnu18` with gcc. [#5834](https://github.com/microsoft/vscode-cpptools/issues/5834)
 * Fix Doxygen parameterHint comment to display for a parameter name that is followed by colon. [#5836](https://github.com/microsoft/vscode-cpptools/issues/5836)
@@ -1052,7 +1045,7 @@
 * Fix the "Unable to load schema" error for `c_cpp_properties.json`. [#4841](https://github.com/microsoft/vscode-cpptools/issues/4841)
 * Change "Visual Studio" `clang_format_fallback_style` setting to use NamespaceIndentation All. [#5124](https://github.com/microsoft/vscode-cpptools/issues/5124)
 * Fix "C++98" and "C++0x" modes. [#5157](https://github.com/microsoft/vscode-cpptools/issues/5157), [#5225](https://github.com/microsoft/vscode-cpptools/issues/5225)
-* Improve the error message for multiroot projects using `compile_commands.json`. [#5160](https://github.com/microsoft/vscode-cpptools/issues/5160)
+* Improve the error message for multi-root projects using `compile_commands.json`. [#5160](https://github.com/microsoft/vscode-cpptools/issues/5160)
 * Fix some cpptools process crashes. [#5280](https://github.com/microsoft/vscode-cpptools/issues/5280)
 * Avoid `<…>` truncation on hover. [#5291](https://github.com/microsoft/vscode-cpptools/issues/5291)
 * Fix incorrect translations. [PR #5300](https://github.com/microsoft/vscode-cpptools/pull/5300)
@@ -1070,7 +1063,7 @@
 
 ## Version 0.27.0: March 30, 2020
 ### Enhancements
-* Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multiroot%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
+* Improved multi-root implementation with a single language server process and database for the entire workspace (shared between workspace folders). Fixes most [multi-root bugs](https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aopen+is%3Aissue+label%3A%22Feature%3A+Multi-root%22+label%3A%22fixed+%28release+pending%29%22+milestone%3A0.27.0).
 * Update to clang-format 9.0.1 (and without shared library dependencies). [#2887](https://github.com/microsoft/vscode-cpptools/issues/2887), [#3174](https://github.com/microsoft/vscode-cpptools/issues/3174)
 * Add new setting `C_Cpp.debugger.useBacktickCommandSubstitution` to fix debugging when CShell is the remote default shell. [#4015](https://github.com/microsoft/vscode-cpptools/issues/4015)
   * @Helloimbob [PR #5053](https://github.com/microsoft/vscode-cpptools/pull/5053)
