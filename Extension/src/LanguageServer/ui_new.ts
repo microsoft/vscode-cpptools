@@ -139,7 +139,7 @@ export class NewUI implements UI {
 
         this.codeAnalysisStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Low}.codeanalysis`, util.documentSelector);
         this.codeAnalysisStatusItem.name = localize("cpptools.status.codeanalysis", "C/C++ Code Analysis Status");
-        this.codeAnalysisStatusItem.text = `Code Analysis Mode: ${this.codeAnalysisCurrentMode()}`;
+        this.codeAnalysisStatusItem.text = this.codeAnalysisModePrefix + this.codeAnalysisCurrentMode();
         this.codeAnalysisStatusItem.command = {
             command: "C_Cpp.ShowIdleCodeAnalysisCommands",
             title: localize("c.cpp.codeanalysis.statusbar.runNow", "Run Now"),
@@ -189,6 +189,7 @@ export class NewUI implements UI {
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
+                this.dbTimeout = undefined;
             }
         } else {
             this.dbTimeout = setTimeout(() => {
@@ -276,6 +277,7 @@ export class NewUI implements UI {
 
             if (this.dbTimeout) {
                 clearTimeout(this.dbTimeout);
+                this.dbTimeout = undefined;
             }
         } else {
             this.dbTimeout = setTimeout(() => {
@@ -314,6 +316,7 @@ export class NewUI implements UI {
         if (val) {
             this.intelliSenseStatusItem.text = "$(flame)";
             this.intelliSenseStatusItem.detail = this.updatingIntelliSenseText;
+            this.flameTimeout = undefined;
         } else {
             this.flameTimeout = setTimeout(() => {
                 if (this.intelliSenseStatusItem) {
@@ -333,8 +336,8 @@ export class NewUI implements UI {
     private codeAnalysisCurrentMode(): string {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
         const state: string = (settings.codeAnalysisRunAutomatically && settings.clangTidyEnabled)
-            ? localize("mode.codeanalysis.status", "Automatic")
-            : localize("mode.codeanalysis.status", "Manual");
+            ? localize("mode.codeanalysis.status.automatic", "Automatic")
+            : localize("mode.codeanalysis.status.manual", "Manual");
         return state;
     }
 
@@ -342,6 +345,7 @@ export class NewUI implements UI {
         if (this.isRunningCodeAnalysis && !val) {
             this.codeAnalysisTotal = 0;
             this.codeAnalysisProcessed = 0;
+            this.isCodeAnalysisPaused = false;
         }
         this.isRunningCodeAnalysis = val;
         this.codeAnalysisStatusItem.busy = val;
