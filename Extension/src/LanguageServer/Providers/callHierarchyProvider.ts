@@ -50,7 +50,8 @@ interface CallHierarchyItemResult {
     item?: CallHierarchyItem;
 
     /**
-     * If a request is cancelled, `succeeded` will be undefined.
+     * If a request is cancelled, `succeeded` will be undefined to indicate no result was returned.
+     * Therfore, object is not defined as optional on the language server.
      */
     succeeded: boolean;
 }
