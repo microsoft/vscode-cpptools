@@ -79,7 +79,6 @@ export class OldUI implements UI {
     private readonly parsingFilesTooltip: string = localize("c.cpp.parsing.open.files.tooltip", "Parsing open files");
     private readonly referencesPreviewTooltip: string = ` (${localize("click.to.preview", "click to preview results")})`;
     private readonly updatingIntelliSenseTooltip: string = localize("updating.intellisense.tooltip", "Updating IntelliSense");
-    private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private runningCodeAnalysisTooltip: string = "";
     private codeAnalysisPausedTooltip: string = "";
     get isNewUI(): boolean { return false; };
@@ -132,9 +131,9 @@ export class OldUI implements UI {
 
         this.codeAnalysisProgram = "clang-tidy";
         this.runningCodeAnalysisTooltip = localize(
-            { key: "running.analysis.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}", this.codeAnalysisProgram);
+            { key: "running.analysis.tooltip", comment: ["{0} is a program name, such as clang-tidy"] }, "Running {0}", this.codeAnalysisProgram);
         this.codeAnalysisPausedTooltip = localize(
-            { key: "code.analysis.paused.tooltip", comment: [this.codeAnalysisTranslationHint] }, "{0} paused", this.codeAnalysisProgram);
+            { key: "code.analysis.paused.tooltip", comment: ["{0} is a program name, such as clang-tidy"] }, "{0} paused", this.codeAnalysisProgram);
     }
 
     private set ActiveConfig(label: string) {
@@ -228,7 +227,7 @@ export class OldUI implements UI {
     }
 
     private updateCodeAnalysisTooltip(): void {
-        this.runningCodeAnalysisTooltip = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
+        this.runningCodeAnalysisTooltip = localize({ key: "running.analysis.processed.tooltip", comment: ["{0} is a program name, such as clang-tidy"] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
             this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
         this.setIsRunningCodeAnalysis(true);
     }
@@ -479,12 +478,12 @@ export class OldUI implements UI {
         options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint] }, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
+        items.push({ label: localize({ key: "cancel.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
 
         if (this.isCodeAnalysisPaused) {
-            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint] }, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
+            items.push({ label: localize({ key: "resume.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
         } else {
-            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint] }, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
+            items.push({ label: localize({ key: "pause.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
         }
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;

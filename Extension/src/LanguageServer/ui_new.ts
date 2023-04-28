@@ -77,7 +77,6 @@ export class NewUI implements UI {
     private readonly updatingIntelliSenseText: string = localize("updating.intellisense.text", "IntelliSense: Updating");
     private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
     private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
-    private readonly codeAnalysisTranslationHint: string = "{0} is a program name, such as clang-tidy";
     private readonly codeAnalysisRunningText: string = localize("running.analysis.text", "Code Analysis: Running");
     private readonly codeAnalysisPausedText: string = localize("paused.analysis.text", "Code Analysis: Paused");
     private readonly codeAnalysisModePrefix: string = localize("mode.analysis.prefix", "Code Analysis Mode: ");
@@ -366,7 +365,7 @@ export class NewUI implements UI {
     }
 
     private updateCodeAnalysisTooltip(): void {
-        this.codeAnalysProgress = localize({ key: "running.analysis.processed.tooltip", comment: [this.codeAnalysisTranslationHint] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
+        this.codeAnalysProgress = localize({ key: "running.analysis.processed.tooltip", comment: ["{0} is a program name, such as clang-tidy"] }, "Running {0}: {1} / {2} ({3}%)", this.codeAnalysisProgram,
             this.codeAnalysisProcessed, Math.max(this.codeAnalysisTotal, 1), Math.floor(100 * this.codeAnalysisProcessed / Math.max(this.codeAnalysisTotal, 1)));
 
         if (this.codeAnalysisStatusItem.command) {
@@ -589,14 +588,14 @@ export class NewUI implements UI {
         options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize({ key: "cancel.analysis", comment: [this.codeAnalysisTranslationHint] }, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
+        items.push({ label: localize({ key: "cancel.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
 
         if (this.isCodeAnalysisPaused) {
-            items.push({ label: localize({ key: "resume.analysis", comment: [this.codeAnalysisTranslationHint] }, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
+            items.push({ label: localize({ key: "resume.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
         } else {
-            items.push({ label: localize({ key: "pause.analysis", comment: [this.codeAnalysisTranslationHint] }, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
+            items.push({ label: localize({ key: "pause.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
         }
-        items.push({ label: localize({ key: "another.analysis", comment: [this.codeAnalysisTranslationHint] }, "Start Another {0}...", this.codeAnalysisProgram), description: "", index: 3 });
+        items.push({ label: localize({ key: "another.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Start Another {0}...", this.codeAnalysisProgram), description: "", index: 3 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
     }
@@ -606,9 +605,9 @@ export class NewUI implements UI {
         options.placeHolder = this.selectACommandString;
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize({ key: "active.analysis", comment: [this.codeAnalysisTranslationHint] }, "Run Code Analysis on Active File", this.codeAnalysisProgram), description: "", index: 0 });
-        items.push({ label: localize({ key: "all.analysis", comment: [this.codeAnalysisTranslationHint] }, "Run Code Analysis on All Files", this.codeAnalysisProgram), description: "", index: 1 });
-        items.push({ label: localize({ key: "open.analysis", comment: [this.codeAnalysisTranslationHint] }, "Run Code Analysis on Open Files", this.codeAnalysisProgram), description: "", index: 2 });
+        items.push({ label: localize({ key: "active.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Run Code Analysis on Active File", this.codeAnalysisProgram), description: "", index: 0 });
+        items.push({ label: localize({ key: "all.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Run Code Analysis on All Files", this.codeAnalysisProgram), description: "", index: 1 });
+        items.push({ label: localize({ key: "open.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Run Code Analysis on Open Files", this.codeAnalysisProgram), description: "", index: 2 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
     }
