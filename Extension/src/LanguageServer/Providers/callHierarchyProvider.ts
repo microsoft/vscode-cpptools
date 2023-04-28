@@ -90,7 +90,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyItem | undefined> {
+        Promise<vscode.CallHierarchyItem | undefined> {
         const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
         if (range === undefined) {
             return undefined;
@@ -113,7 +113,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+        Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
         if (item === undefined) {
             return undefined;
         }
@@ -134,7 +134,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-    Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+        Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
         if (item === undefined) {
             return undefined;
         }
