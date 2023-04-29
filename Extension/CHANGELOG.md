@@ -44,7 +44,6 @@
 * Fix the first registered configuration provider still being automatically used after a second registers. [PR #10772](https://github.com/microsoft/vscode-cpptools/pull/10772)
 * Fix `C_Cpp.default.compilerPath` in the settings UI showing a string editor when it shouldn't. [#10795](https://github.com/microsoft/vscode-cpptools/issues/10795)
 * Fix some issues due to usage of the spread operator not doing a deep copy. [PR #10803](https://github.com/microsoft/vscode-cpptools/pull/10803)
-* Fix a deadlock with Find All References. [#10855](https://github.com/microsoft/vscode-cpptools/issues/10855)
 * Fix the Code Analysis Options dropdown showing 'Resume' instead of 'Pause' after a cancel is done in a paused state. [#10879](https://github.com/microsoft/vscode-cpptools/issues/10879)
 * Fix "Code Analysis Mode" not being localized when initially shown. [#10881](https://github.com/microsoft/vscode-cpptools/issues/10881)
 * Fix the C/C++-related status bar items flickering off/on when switching documents. [PR #10888](https://github.com/microsoft/vscode-cpptools/pull/10888)
