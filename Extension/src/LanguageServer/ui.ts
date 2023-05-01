@@ -458,6 +458,7 @@ export class OldUI implements UI {
     }
 
     private readonly selectACommandString: string = localize("select.command", "Select a command...");
+    private readonly selectACodeAnalysisCommandString: string = localize("select.code.analysis.command", "Select a code analysis command...");
 
     public async showParsingCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
@@ -475,16 +476,17 @@ export class OldUI implements UI {
 
     public async showActiveCodeAnalysisCommands(): Promise<number> {
         const options: vscode.QuickPickOptions = {};
-        options.placeHolder = this.selectACommandString;
+        options.placeHolder = this.selectACodeAnalysisCommandString;
 
         const items: IndexableQuickPickItem[] = [];
-        items.push({ label: localize({ key: "cancel.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Cancel {0}", this.codeAnalysisProgram), description: "", index: 0 });
+        items.push({ label: localize("cancel.analysis", "Cancel"), description: "", index: 0 });
 
         if (this.isCodeAnalysisPaused) {
-            items.push({ label: localize({ key: "resume.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Resume {0}", this.codeAnalysisProgram), description: "", index: 2 });
+            items.push({ label: localize("resume.analysis", "Resume"), description: "", index: 2 });
         } else {
-            items.push({ label: localize({ key: "pause.analysis", comment: ["{0} is a program name, such as clang-tidy"] }, "Pause {0}", this.codeAnalysisProgram), description: "", index: 1 });
+            items.push({ label: localize("pause.analysis", "Pause"), description: "", index: 1 });
         }
+        items.push({ label: localize("another.analysis", "Start Another..."), description: "", index: 3 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return (selection) ? selection.index : -1;
     }
