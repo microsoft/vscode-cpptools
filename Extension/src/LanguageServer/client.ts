@@ -333,7 +333,6 @@ export interface CreateDeclarationOrDefinitionParams {
 export interface CreateDeclarationOrDefinitionResult {
     edit: any;
     clipboardText: string;
-    // add result for clipboard_text
 }
 
 interface ShowMessageWindowParams {

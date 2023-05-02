@@ -913,23 +913,10 @@ export async function promptReloadWindow(message: string): Promise<void> {
 }
 
 export async function promptCDDFailed(copy?: boolean): Promise<void> {
-    const copyMessage: string = localize("cdd.copyMessage", "Failed to copy declaration or definition to clipboard.");
-    const createMessage: string = localize("cdd.createMessage", "Failed to create declaration or definition.");
+    const message: string = (copy ? localize("cdd.copyMessage", "Failed to copy declaration or definition to the clipboard.") :
+        localize("cdd.createMessage", "Failed to create declaration or definition."));
 
-    if (copy) {
-        await vscode.window.showInformationMessage(copyMessage);
-    } else {
-        await vscode.window.showInformationMessage(createMessage);
-    }
-}
-
-export async function addTrustedCompiler(compilers: string[], path: string): Promise<string[]> {
-    // Detect duplicate paths or invalid paths.
-    if (compilers.includes(path) || path === null || path === undefined) {
-        return compilers;
-    }
-    compilers.push(path);
-    return compilers;
+    await vscode.window.showInformationMessage(message);
 }
 
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
