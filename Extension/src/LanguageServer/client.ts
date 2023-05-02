@@ -19,6 +19,7 @@ import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
+import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
 // End provider imports
 
 import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
@@ -1343,6 +1344,7 @@ export class DefaultClient implements Client {
                         this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
                         this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, new DocumentSymbolProvider(), undefined));
                         this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, new CodeActionProvider(this), undefined));
+                        this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, new CallHierarchyProvider(this)));
                         // Because formatting and codeFolding can vary per folder, we need to register these providers once
                         // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
                         // within the providers themselves.
@@ -2766,7 +2768,7 @@ export class DefaultClient implements Client {
                             return false;
                         });
                     },
-                    () => ask.Value = false);
+                        () => ask.Value = false);
                     return;
                 }
             }
@@ -2786,7 +2788,7 @@ export class DefaultClient implements Client {
             }
             ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
-            this.promptSelectIntelliSenseConfiguration(false);
+            this.promptSelectIntelliSenseConfiguration(false, "notification");
             displayedSelectCompiler = true;
         }
     }
@@ -3374,7 +3376,7 @@ export class DefaultClient implements Client {
             // If the cursor is on the signature line or is inside the boby, the comment will be inserted on the same line of the signature and it shouldn't replace the content of the signature line.
             if (cursorOnEmptyLineAboveSignature) {
                 if (codeActionArguments !== undefined) {
-                    // The reson why we cannot use finalInsertionLine is because the line number sent from the result is not correct.
+                    // The reason why we cannot use finalInsertionLine is because the line number sent from the result is not correct.
                     // In most cases, the finalInsertionLine is the line of the signature line.
                     newRange = new vscode.Range(initCursorPosition.line, 0, initCursorPosition.line, maxColumn);
                 } else {
