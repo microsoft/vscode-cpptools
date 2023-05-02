@@ -26,7 +26,7 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
-import { Location, TextEdit } from './commonTypes';
+import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -324,14 +324,12 @@ interface PublishRefactorDiagnosticsParams {
     diagnostics: RefactorDiagnostic[];
 }
 
-export interface CreateDeclarationOrDefinitionParams {
-    uri: string;
-    range: Range;
+export interface CreateDeclarationOrDefinitionParams extends Location {
     copyToClipboard: boolean;
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    edit: any;
+    edit: WorkspaceEdit;
     clipboardText: string;
 }
 
@@ -3515,15 +3513,16 @@ export class DefaultClient implements Client {
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // TODO: return specific errors info in result.
         if (result.edit.changes.length === undefined && result.clipboardText) {
+
             if (!params.copyToClipboard) {
                 util.promptCDDFailed();
             } else {
-                vscode.env.clipboard.writeText(result.clipboardText).then(() => {
-                    // Writing was successful
-                }, () => {
-                    // Writing was unsuccessful
+                try {
+                    await vscode.env.clipboard.writeText(result.clipboardText);
+                } catch {
+                    // handle failure
                     util.promptCDDFailed(true);
-                });
+                }
             }
             return;
         }
