@@ -326,7 +326,7 @@ interface PublishRefactorDiagnosticsParams {
 }
 
 export interface CreateDeclarationOrDefinitionParams extends Location {
-    copyToClipboard: boolean;
+    copyToClipboard: boolean | undefined;
 }
 
 export interface CreateDeclarationOrDefinitionResult {
@@ -3476,6 +3476,8 @@ export class DefaultClient implements Client {
     public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
+        let copyToClipboard: boolean | undefined;
+
         // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
@@ -3489,7 +3491,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (uri === undefined || range === undefined) {
+        if (uri === undefined || range === undefined || copyToClipboard === undefined) {
             return;
         }
 
@@ -3505,7 +3507,7 @@ export class DefaultClient implements Client {
                     line: range.end.line
                 }
             },
-            copyToClipboard: false
+            copyToClipboard: copy
         };
 
         if (copy) {
@@ -3513,6 +3515,10 @@ export class DefaultClient implements Client {
         }
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
+
+        if (result.edit === undefined) {
+            return;
+        }
         // TODO: return specific errors info in result.
         if (result.edit.changes.length === undefined && result.clipboardText) {
 
