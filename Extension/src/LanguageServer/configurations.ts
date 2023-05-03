@@ -937,9 +937,7 @@ export class CppProperties {
             if (!configuration.browse.path) {
                 if (settings.defaultBrowsePath) {
                     configuration.browse.path = settings.defaultBrowsePath;
-                } else if (configuration.includePath === undefined) {
-                    configuration.browse.path = [ "${workspaceFolder}" ];
-                } else if (configuration.includePath.length > 0) {
+                } else if (configuration.includePath) {
                     // If the user doesn't set browse.path, copy the includePath over. Make sure ${workspaceFolder} is in there though...
                     configuration.browse.path = configuration.includePath.slice(0);
                     if (configuration.includePath.findIndex((value: string, index: number) =>
@@ -947,6 +945,8 @@ export class CppProperties {
                     ) {
                         configuration.browse.path.push("${workspaceFolder}");
                     }
+                } else {
+                    configuration.browse.path = [ "${workspaceFolder}" ];
                 }
             } else {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
