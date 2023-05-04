@@ -27,7 +27,7 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
-import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
+import { Location, TextEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -325,12 +325,14 @@ interface PublishRefactorDiagnosticsParams {
     diagnostics: RefactorDiagnostic[];
 }
 
-export interface CreateDeclarationOrDefinitionParams extends Location {
-    copyToClipboard: boolean | undefined;
+export interface CreateDeclarationOrDefinitionParams {
+    uri: string;
+    range: Range;
+    copyToClipboard: boolean;
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    edit: WorkspaceEdit;
+    edit: any;
     clipboardText: string;
 }
 
@@ -3476,7 +3478,6 @@ export class DefaultClient implements Client {
     public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
-        let copyToClipboard: boolean | undefined;
 
         // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
@@ -3491,7 +3492,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (uri === undefined || range === undefined || copyToClipboard === undefined) {
+        if (uri === undefined || range === undefined) {
             return;
         }
 
@@ -3507,7 +3508,7 @@ export class DefaultClient implements Client {
                     line: range.end.line
                 }
             },
-            copyToClipboard: copy
+            copyToClipboard: false
         };
 
         if (copy) {
