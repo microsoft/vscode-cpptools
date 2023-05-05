@@ -3508,21 +3508,15 @@ export class DefaultClient implements Client {
                     line: range.end.line
                 }
             },
-            copyToClipboard: false
+            copyToClipboard: copy ?? false
         };
-
-        if (copy) {
-            params.copyToClipboard = true;
-        }
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
 
         if (result.edit === undefined) {
             return;
         }
-        // TODO: return specific errors info in result.
         if (result.edit.changes.length === undefined && result.clipboardText) {
-
             if (!params.copyToClipboard) {
                 util.promptCDDFailed();
             } else {
