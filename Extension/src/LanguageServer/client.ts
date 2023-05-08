@@ -639,6 +639,7 @@ const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporar
 const ReportCodeAnalysisProcessedNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisProcessed');
 const ReportCodeAnalysisTotalNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisTotal');
 const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult> = new NotificationType<GenerateDoxygenCommentResult>('cpptools/insertDoxygenComment');
+const CanceledReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/canceledReferences');
 
 let failureMessageShown: boolean = false;
 
@@ -2324,6 +2325,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
+        this.languageClient.onNotification(CanceledReferencesNotification, this.cancelReferences);
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
