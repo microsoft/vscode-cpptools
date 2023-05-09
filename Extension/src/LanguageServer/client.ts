@@ -3519,7 +3519,19 @@ export class DefaultClient implements Client {
             return;
         }
 
-        // If the user has specifided copy to clipboard, make the copy to clipboard system call. If the user has not specificed copy to clipboard, but CDD returned clipboard text, make copy to clipboard system call and report fallback error.
+        // Handle CDD error messaging
+        if (result.errorText) {
+            try {
+                await vscode.env.clipboard.writeText(result.clipboardText);
+                await vscode.window.showInformationMessage(result.errorText + " Declaration/definition was copied to clipboard."); // CDD failed but fallback to clipboard was succesful
+
+            } catch {
+                // handle failure
+                await vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
+            }
+        }
+
+        // Handle copy to clipboard.
         if (params.copyToClipboard) {
             if (result.clipboardText) {
                 try {
@@ -3528,15 +3540,6 @@ export class DefaultClient implements Client {
                     // handle failure
                     await vscode.window.showInformationMessage(localize("cdd.copyMessage", "Copying Declaration/Definition to clipboard failed.")); // Copy to clipboard system call failed.
                 }
-            }
-        } else if (!params.copyToClipboard && result.clipboardText) {
-            try {
-                await vscode.env.clipboard.writeText(result.clipboardText);
-                await vscode.window.showInformationMessage(result.errorText + " Declaration/definition was copied to clipboard."); // CDD failed but fallback to clipboard was succesful
-
-            } catch {
-                // handle failure
-                await vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
             }
         }
 
