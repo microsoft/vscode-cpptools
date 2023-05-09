@@ -3529,6 +3529,7 @@ export class DefaultClient implements Client {
                 // handle failure
                 await vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
             }
+            return;
         }
 
         // Handle copy to clipboard.
@@ -3541,6 +3542,7 @@ export class DefaultClient implements Client {
                     await vscode.window.showInformationMessage(localize("cdd.copyMessage", "Copying Declaration/Definition to clipboard failed.")); // Copy to clipboard system call failed.
                 }
             }
+            return;
         }
 
         const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
