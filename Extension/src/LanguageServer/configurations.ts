@@ -945,6 +945,8 @@ export class CppProperties {
                     ) {
                         configuration.browse.path.push("${workspaceFolder}");
                     }
+                } else {
+                    configuration.browse.path = [ "${workspaceFolder}" ];
                 }
             } else {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
