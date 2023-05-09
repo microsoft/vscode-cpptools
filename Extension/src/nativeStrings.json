@@ -445,8 +445,8 @@
         "text": "Copy definition of '{0}' to the clipboard",
         "hint": "{0} is the name of a C/C++ function."
     },
-    "refactor_fallback_copy_declaration_definition_failed": {
-        "text": "Copy Declaration / Definition fallback failed: %s",
-        "hint": "The operation 'Create Declaration / Definition' on a function was not successful and was not able to fallback to the clipboard. %s is the error info that has a period at the end of the string."
+    "refactor_copy_declaration_definition_failed": {
+        "text": "Copying Declaration / Definition to clipboard failed: %s",
+        "hint": "The operation 'Copy Declaration / Definition' on a function was not successful. %s is the error info that has a period at the end of the string."
     }
 }

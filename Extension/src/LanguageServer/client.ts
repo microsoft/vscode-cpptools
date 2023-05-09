@@ -334,6 +334,7 @@ export interface CreateDeclarationOrDefinitionParams {
 export interface CreateDeclarationOrDefinitionResult {
     edit: any;
     clipboardText: string;
+    errorText: string;
 }
 
 interface ShowMessageWindowParams {
@@ -3512,22 +3513,31 @@ export class DefaultClient implements Client {
         };
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
-
+        // Create/Copy returned no result.
         if (result.edit === undefined) {
+            await vscode.window.showInformationMessage(result.errorText); // Copy/Create Declaration/Definition was completely unsuccessful due to api failure.
             return;
         }
-        if (result.edit.changes.length === undefined && result.clipboardText) {
-            if (!params.copyToClipboard) {
-                util.promptCDDFailed();
-            } else {
+
+        // If the user has specifided copy to clipboard, make the copy to clipboard system call. If the user has not specificed copy to clipboard, but CDD returned clipboard text, make copy to clipboard system call and report fallback error.
+        if (params.copyToClipboard) {
+            if (result.clipboardText) {
                 try {
                     await vscode.env.clipboard.writeText(result.clipboardText);
                 } catch {
                     // handle failure
-                    util.promptCDDFailed(true);
+                    await vscode.window.showInformationMessage(localize("cdd.copyMessage", "Copying Declaration/Definition to clipboard failed.")); // Copy to clipboard system call failed.
                 }
             }
-            return;
+        } else if (!params.copyToClipboard && result.clipboardText) {
+            try {
+                await vscode.env.clipboard.writeText(result.clipboardText);
+                await vscode.window.showInformationMessage(result.errorText + " Declaration/definition was copied to clipboard."); // CDD failed but fallback to clipboard was succesful
+
+            } catch {
+                // handle failure
+                await vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
+            }
         }
 
         const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -3566,7 +3576,6 @@ export class DefaultClient implements Client {
         };
 
         if (modifiedDocument === undefined || lastEdit === undefined) {
-            util.promptCDDFailed();
             return;
         }
 

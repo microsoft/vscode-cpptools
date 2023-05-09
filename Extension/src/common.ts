@@ -912,13 +912,6 @@ export async function promptReloadWindow(message: string): Promise<void> {
     }
 }
 
-export async function promptCDDFailed(copy?: boolean): Promise<void> {
-    const message: string = (copy ? localize("cdd.copyMessage", "Failed to copy declaration or definition to the clipboard.") :
-        localize("cdd.createMessage", "Failed to create declaration or definition."));
-
-    await vscode.window.showInformationMessage(message);
-}
-
 export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResult> {
     return new Promise<tmp.FileResult>((resolve, reject) => {
         tmp.file({ postfix: postfix }, (err, path, fd, cleanupCallback) => {
