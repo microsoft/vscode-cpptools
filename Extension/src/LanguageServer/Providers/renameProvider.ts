@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, workspaceReferences, ReferencesCancellationState, RenameParams, CancelReferencesNotification } from '../client';
+import { DefaultClient, workspaceReferences, RenameParams, CancelReferencesNotification } from '../client';
 import * as refs from '../references';
 import { CppSettings } from '../settings';
 import { Position } from 'vscode-languageclient';
@@ -60,14 +60,7 @@ export class RenameProvider implements vscode.RenameProvider {
                     const workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                     const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
                     if (cancelling) {
-                        while (DefaultClient.referencesPendingCancellations.length > 1) {
-                            const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                            DefaultClient.referencesPendingCancellations.pop();
-                            pendingCancel.reject();
-                        }
-                        const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                        DefaultClient.referencesPendingCancellations.pop();
-                        pendingCancel.callback();
+                        this.client.clearPendingReferencesCancellations();
                     } else {
                         if (DefaultClient.renameRequestsPending === 0) {
                             DefaultClient.renamePending = false;
