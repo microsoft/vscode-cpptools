@@ -2069,6 +2069,9 @@ export class CppProperties {
         const savedCStandardIsExplicit: boolean[] = [];
         const savedCppStandardIsExplicit: boolean[] = [];
         const savedIntelliSenseModeIsExplicit: boolean[] = [];
+        const savedCompilerPathInCppPropertiesJson: string[] = [];
+        const savedCompileCommandsInCppPropertiesJson: string[] = [];
+        const savedconfigurationProviderInCppPropertiesJson: string[] = [];
 
         if (this.configurationJson) {
             this.configurationJson.configurations.forEach(e => {
@@ -2088,6 +2091,18 @@ export class CppProperties {
                 if (e.intelliSenseModeIsExplicit !== undefined) {
                     delete e.intelliSenseModeIsExplicit;
                 }
+                if (e.compilerPathInCppPropertiesJson !== undefined) {
+                    savedCompilerPathInCppPropertiesJson.push(e.compilerPathInCppPropertiesJson);
+                    delete e.compilerPathInCppPropertiesJson;
+                }
+                if (e.compileCommandsInCppPropertiesJson !== undefined) {
+                    savedCompileCommandsInCppPropertiesJson.push(e.compileCommandsInCppPropertiesJson);
+                    delete e.compileCommandsInCppPropertiesJson;
+                }
+                if (e.configurationProviderInCppPropertiesJson !== undefined) {
+                    savedconfigurationProviderInCppPropertiesJson.push(e.configurationProviderInCppPropertiesJson);
+                    delete e.configurationProviderInCppPropertiesJson;
+                }
             });
         }
 
@@ -2102,6 +2117,9 @@ export class CppProperties {
                 this.configurationJson.configurations[i].cStandardIsExplicit = savedCStandardIsExplicit[i];
                 this.configurationJson.configurations[i].cppStandardIsExplicit = savedCppStandardIsExplicit[i];
                 this.configurationJson.configurations[i].intelliSenseModeIsExplicit = savedIntelliSenseModeIsExplicit[i];
+                this.configurationJson.configurations[i].compilerPathInCppPropertiesJson = savedCompilerPathInCppPropertiesJson[i];
+                this.configurationJson.configurations[i].compileCommandsInCppPropertiesJson = savedCompileCommandsInCppPropertiesJson[i];
+                this.configurationJson.configurations[i].configurationProviderInCppPropertiesJson = savedconfigurationProviderInCppPropertiesJson[i];
             }
         }
     }
