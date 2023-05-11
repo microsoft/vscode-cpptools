@@ -438,11 +438,11 @@
         "text": "Please run the 'Select IntelliSense Configuration...' command to locate your system headers."
     },
     "offer_copy_declaration": {
-        "text": "Copy declaration of '{0}' to the clipboard",
+        "text": "Copy declaration of '{0}'",
         "hint": "{0} is the name of a C/C++ function."
     },
     "offer_copy_definition": {
-        "text": "Copy definition of '{0}' to the clipboard",
+        "text": "Copy definition of '{0}'",
         "hint": "{0} is the name of a C/C++ function."
     },
     "refactor_copy_declaration_definition_failed": {

@@ -27,7 +27,7 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
-import { Location, TextEdit } from './commonTypes';
+import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -332,7 +332,7 @@ export interface CreateDeclarationOrDefinitionParams {
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    edit: any;
+    edit: WorkspaceEdit;
     clipboardText: string;
     errorText: string;
 }
@@ -3523,11 +3523,10 @@ export class DefaultClient implements Client {
         if (result.errorText) {
             try {
                 await vscode.env.clipboard.writeText(result.clipboardText);
-                await vscode.window.showInformationMessage(result.errorText + " Declaration/definition was copied to clipboard."); // CDD failed but fallback to clipboard was succesful
-
+                vscode.window.showInformationMessage(result.errorText + " Declaration/definition was copied."); // CDD failed but fallback to clipboard was successful.
             } catch {
                 // handle failure
-                await vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
+                vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
             }
             return;
         }
@@ -3539,7 +3538,7 @@ export class DefaultClient implements Client {
                     await vscode.env.clipboard.writeText(result.clipboardText);
                 } catch {
                     // handle failure
-                    await vscode.window.showInformationMessage(localize("cdd.copyMessage", "Copying Declaration/Definition to clipboard failed.")); // Copy to clipboard system call failed.
+                    vscode.window.showInformationMessage(localize("cdd.copyMessage", "Copying Declaration/Definition to clipboard failed.")); // Copy to clipboard system call failed.
                 }
             }
             return;
