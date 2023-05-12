@@ -19,7 +19,7 @@ import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
-import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
+import { CallHierarchyCallsItemResult, CallHierarchyParams, CallHierarchyProvider } from './Providers/callHierarchyProvider';
 // End provider imports
 
 import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
@@ -376,7 +376,7 @@ export interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
-export interface RenameParams {
+export interface ReferenceParams {
     newName: string;
     position: Position;
     textDocument: TextDocumentIdentifier;
@@ -604,7 +604,8 @@ export const RequestReferencesNotification: NotificationType<void> = new Notific
 export const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
-const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
+const CallHierarchyCallsToNotification: NotificationType<CallHierarchyParams> = new NotificationType<CallHierarchyParams>('cpptools/callHierarchyCallsTo');
+const RenameNotification: NotificationType<ReferenceParams> = new NotificationType<ReferenceParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
@@ -625,6 +626,7 @@ const DebugLogNotification: NotificationType<LocalizeStringParams> = new Notific
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
+const CallHierarchyNotification: NotificationType<CallHierarchyCallsItemResult> = new NotificationType<CallHierarchyCallsItemResult>('cpptools/callHierarchyCallsToResult');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
 const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
@@ -643,7 +645,7 @@ const CanceledReferencesNotification: NotificationType<void> = new NotificationT
 
 let failureMessageShown: boolean = false;
 
-export interface ReferencesCancellationState {
+interface ReferencesCancellationState {
     reject(): void;
     callback(): void;
 }
@@ -862,7 +864,7 @@ export class DefaultClient implements Client {
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
 
-    public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
+    public static referencesParams: ReferenceParams | FindAllReferencesParams | CallHierarchyParams |undefined;
     public static referencesRequestPending: boolean = false;
     public static referencesPendingCancellations: ReferencesCancellationState[] = [];
 
@@ -1414,11 +1416,15 @@ export class DefaultClient implements Client {
         }
     }
 
+    public sendCallHierarchyCallsToNotification(params: CallHierarchyParams): void {
+        this.languageClient.sendNotification(CallHierarchyCallsToNotification, params);
+    }
+
     public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
         this.languageClient.sendNotification(FindAllReferencesNotification, params);
     }
 
-    public sendRenameNotification(params: RenameParams): void {
+    public sendRenameNotification(params: ReferenceParams): void {
         this.languageClient.sendNotification(RenameNotification, params);
     }
 
@@ -2305,6 +2311,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
+        this.languageClient.onNotification(CallHierarchyNotification, (e) => this.processCallHierarchyResult(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
@@ -3671,6 +3678,19 @@ export class DefaultClient implements Client {
         });
     }
 
+    public clearPendingReferencesCancellations(): void {
+        if (DefaultClient.referencesPendingCancellations.length > 0) {
+            while (DefaultClient.referencesPendingCancellations.length > 1) {
+                const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
+                DefaultClient.referencesPendingCancellations.pop();
+                pendingCancel.reject();
+            }
+            const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
+            DefaultClient.referencesPendingCancellations.pop();
+            pendingCancel.callback();
+        }
+    }
+
     public cancelReferences(): void {
         DefaultClient.referencesParams = undefined;
         DefaultClient.renamePending = false;
@@ -3693,6 +3713,10 @@ export class DefaultClient implements Client {
 
     private processReferencesResult(referencesResult: refs.ReferencesResult): void {
         workspaceReferences.processResults(referencesResult);
+    }
+
+    private processCallHierarchyResult(callHierarchyResult: CallHierarchyCallsItemResult): void {
+        workspaceReferences.processCallHierarchyResults(callHierarchyResult);
     }
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
