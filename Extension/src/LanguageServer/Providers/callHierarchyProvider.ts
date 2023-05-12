@@ -112,7 +112,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
-        return new Promise<vscode.CallHierarchyIncomingCall[] | undefined>((resolve, reject) => {
+        const getIncomingCalls: any = new Promise<vscode.CallHierarchyIncomingCall[] | undefined>((resolve, reject) => {
             if (item === undefined) {
                 resolve(undefined);
                 return;
@@ -136,7 +136,9 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
                 // Register a single-fire handler for the reply.
                 const resultCallback: CallHierarchyResultCallback = (result: CallHierarchyCallsItemResult | null) => {
                     DefaultClient.referencesRequestPending = false;
-                    if (result === null || result?.calls === undefined || result?.calls.length === 0) {
+                    if (result === null || result?.calls === undefined) {
+                        reject(undefined);
+                    } else if (result?.calls.length === 0) {
                         resolve(undefined);
                     } else {
                         resolve(this.createIncomingCalls(result.calls));
@@ -171,6 +173,17 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
                 callback();
             }
         });
+
+        let incomingCalls: vscode.CallHierarchyIncomingCall[] | undefined;
+        await getIncomingCalls.then((result: any) => {
+            incomingCalls = result;
+        }).catch((reason: any) => {
+            // The operation was cancelled by user or language server,
+            // return a cancellation error.
+            throw new vscode.CancellationError();
+        });
+
+        return incomingCalls;
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
