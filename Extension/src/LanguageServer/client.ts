@@ -3523,26 +3523,18 @@ export class DefaultClient implements Client {
 
         // Handle CDD error messaging
         if (result.errorText) {
-            try {
+            let copiedToClipboard: boolean = false;
+            if (result.clipboardText && !params.copyToClipboard) {
                 await vscode.env.clipboard.writeText(result.clipboardText);
-                vscode.window.showInformationMessage(result.errorText + " Declaration/definition was copied."); // CDD failed but fallback to clipboard was successful.
-            } catch {
-                // handle failure
-                vscode.window.showInformationMessage(result.errorText); // CDD failed but fallback was unsuccessful.
+                copiedToClipboard = true;
             }
+            await vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
             return;
         }
 
         // Handle copy to clipboard.
-        if (params.copyToClipboard) {
-            if (result.clipboardText) {
-                try {
-                    await vscode.env.clipboard.writeText(result.clipboardText);
-                } catch {
-                    // handle failure
-                    vscode.window.showInformationMessage(localize("cdd.copyMessage", "Copying Declaration/Definition to clipboard failed.")); // Copy to clipboard system call failed.
-                }
-            }
+        if (result.clipboardText && params.copyToClipboard) {
+            await vscode.env.clipboard.writeText(result.clipboardText);
             return;
         }
 
