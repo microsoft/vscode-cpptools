@@ -111,8 +111,8 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-        Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
-        const getIncomingCalls: any = new Promise<vscode.CallHierarchyIncomingCall[] | undefined>((resolve, reject) => {
+        Promise<vscode.CallHierarchyIncomingCall[] | undefined | any> {
+        new Promise<vscode.CallHierarchyIncomingCall[] | undefined | any>((resolve, reject) => {
             if (item === undefined) {
                 resolve(undefined);
                 return;
@@ -137,7 +137,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
                 const resultCallback: CallHierarchyResultCallback = (result: CallHierarchyCallsItemResult | null) => {
                     DefaultClient.referencesRequestPending = false;
                     if (result === null || result?.calls === undefined) {
-                        reject(undefined);
+                        reject(new vscode.CancellationError());
                     } else if (result?.calls.length === 0) {
                         resolve(undefined);
                     } else {
@@ -173,17 +173,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
                 callback();
             }
         });
-
-        let incomingCalls: vscode.CallHierarchyIncomingCall[] | undefined;
-        await getIncomingCalls.then((result: any) => {
-            incomingCalls = result;
-        }).catch((reason: any) => {
-            // The operation was cancelled by user or language server,
-            // return a cancellation error.
-            throw new vscode.CancellationError();
-        });
-
-        return incomingCalls;
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
