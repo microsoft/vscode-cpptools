@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { DefaultClient, RenameParams, FindAllReferencesParams } from './client';
+import { DefaultClient, ReferenceParams, FindAllReferencesParams } from './client';
 import { FindAllRefsView } from './referencesView';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
@@ -412,7 +412,7 @@ export class ReferencesManager {
         }
     }
 
-    public startRename(params: RenameParams): void {
+    public startRename(params: ReferenceParams): void {
         this.startRequest();
         if (this.referencesCanceled) {
             this.referencesCanceled = false;

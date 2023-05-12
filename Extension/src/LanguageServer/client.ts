@@ -376,7 +376,7 @@ export interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
-export interface RenameParams {
+export interface ReferenceParams {
     newName: string;
     position: Position;
     textDocument: TextDocumentIdentifier;
@@ -605,7 +605,7 @@ export const CancelReferencesNotification: NotificationType<void> = new Notifica
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
 const CallHierarchyCallsToNotification: NotificationType<CallHierarchyParams> = new NotificationType<CallHierarchyParams>('cpptools/callHierarchyCallsTo');
-const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
+const RenameNotification: NotificationType<ReferenceParams> = new NotificationType<ReferenceParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
@@ -864,7 +864,7 @@ export class DefaultClient implements Client {
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
 
-    public static referencesParams: RenameParams | FindAllReferencesParams | CallHierarchyParams |undefined;
+    public static referencesParams: ReferenceParams | FindAllReferencesParams | CallHierarchyParams |undefined;
     public static referencesRequestPending: boolean = false;
     public static referencesPendingCancellations: ReferencesCancellationState[] = [];
 
@@ -1416,15 +1416,15 @@ export class DefaultClient implements Client {
         }
     }
 
-    public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
-        this.languageClient.sendNotification(FindAllReferencesNotification, params);
-    }
-
     public sendCallHierarchyCallsToNotification(params: CallHierarchyParams): void {
         this.languageClient.sendNotification(CallHierarchyCallsToNotification, params);
     }
 
-    public sendRenameNotification(params: RenameParams): void {
+    public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
+        this.languageClient.sendNotification(FindAllReferencesNotification, params);
+    }
+
+    public sendRenameNotification(params: ReferenceParams): void {
         this.languageClient.sendNotification(RenameNotification, params);
     }
 

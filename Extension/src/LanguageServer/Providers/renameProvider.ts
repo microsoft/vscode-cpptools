@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, workspaceReferences, RenameParams, CancelReferencesNotification } from '../client';
+import { DefaultClient, workspaceReferences, ReferenceParams, CancelReferencesNotification } from '../client';
 import * as refs from '../references';
 import { CppSettings } from '../settings';
 import { Position } from 'vscode-languageclient';
@@ -34,7 +34,7 @@ export class RenameProvider implements vscode.RenameProvider {
         ++DefaultClient.renameRequestsPending;
         return new Promise<vscode.WorkspaceEdit>((resolve, reject) => {
             const callback: () => Promise<void> = async () => {
-                const params: RenameParams = {
+                const params: ReferenceParams = {
                     newName: newName,
                     position: Position.create(position.line, position.character),
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
