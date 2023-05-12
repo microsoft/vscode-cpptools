@@ -27,7 +27,7 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
-import { Location, TextEdit } from './commonTypes';
+import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -328,10 +328,13 @@ interface PublishRefactorDiagnosticsParams {
 export interface CreateDeclarationOrDefinitionParams {
     uri: string;
     range: Range;
+    copyToClipboard: boolean;
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    changes: { [key: string]: any[] };
+    edit: WorkspaceEdit;
+    clipboardText: string;
+    errorText: string;
 }
 
 interface ShowMessageWindowParams {
@@ -815,7 +818,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
-    handleCreateDeclarationOrDefinition(): Promise<void>;
+    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3482,9 +3485,10 @@ export class DefaultClient implements Client {
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public async handleCreateDeclarationOrDefinition(): Promise<void> {
+    public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
+
         // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
@@ -3513,12 +3517,31 @@ export class DefaultClient implements Client {
                     character: range.end.character,
                     line: range.end.line
                 }
-            }
+            },
+            copyToClipboard: copy ?? false
         };
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
-        // TODO: return specific errors info in result.
-        if (result.changes === undefined) {
+        // Create/Copy returned no result.
+        if (result.edit === undefined) {
+            vscode.window.showInformationMessage(result.errorText); // Copy/Create Declaration/Definition was completely unsuccessful due to api failure.
+            return;
+        }
+
+        // Handle CDD error messaging
+        if (result.errorText) {
+            let copiedToClipboard: boolean = false;
+            if (result.clipboardText && !params.copyToClipboard) {
+                vscode.env.clipboard.writeText(result.clipboardText);
+                copiedToClipboard = true;
+            }
+            vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
+            return;
+        }
+
+        // Handle copy to clipboard.
+        if (result.clipboardText && params.copyToClipboard) {
+            vscode.env.clipboard.writeText(result.clipboardText);
             return;
         }
 
@@ -3527,12 +3550,12 @@ export class DefaultClient implements Client {
         let lastEdit: vscode.TextEdit | undefined;
         let editPositionAdjustment: number = 0;
         let selectionPositionAdjustment: number = 0;
-        for (const file in result.changes) {
+        for (const file in result.edit.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
             // At most, there will only be two text edits:
             // 1.) an edit for: #include header file
             // 2.) an edit for: definition or declaration
-            for (const edit of result.changes[file]) {
+            for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
                 if (lastEdit && lastEdit.newText.includes("#include")) {
@@ -3819,7 +3842,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
-    handleCreateDeclarationOrDefinition(): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
