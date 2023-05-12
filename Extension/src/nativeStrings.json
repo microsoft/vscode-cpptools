@@ -412,7 +412,6 @@
         "text": "Unable to create function '%s'. Creating defaulted or deleted functions is not supported.",
         "hint": "%s is the function that could not be created."
     },
-    "refactor_function_copied_to_clipboard": "The function signature was copied to the clipboard.",
     "refactor_function_not_created": {
         "text": "Unable to create function '%s'.",
         "hint": "%s is the function that could not be created."
