@@ -3517,7 +3517,7 @@ export class DefaultClient implements Client {
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // Create/Copy returned no result.
         if (result.edit === undefined) {
-            await vscode.window.showInformationMessage(result.errorText); // Copy/Create Declaration/Definition was completely unsuccessful due to api failure.
+            vscode.window.showInformationMessage(result.errorText); // Copy/Create Declaration/Definition was completely unsuccessful due to api failure.
             return;
         }
 
@@ -3528,7 +3528,7 @@ export class DefaultClient implements Client {
                 await vscode.env.clipboard.writeText(result.clipboardText);
                 copiedToClipboard = true;
             }
-            await vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
+            vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
             return;
         }
 
