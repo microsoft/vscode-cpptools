@@ -3525,7 +3525,7 @@ export class DefaultClient implements Client {
         if (result.errorText) {
             let copiedToClipboard: boolean = false;
             if (result.clipboardText && !params.copyToClipboard) {
-                await vscode.env.clipboard.writeText(result.clipboardText);
+                vscode.env.clipboard.writeText(result.clipboardText);
                 copiedToClipboard = true;
             }
             vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
@@ -3534,7 +3534,7 @@ export class DefaultClient implements Client {
 
         // Handle copy to clipboard.
         if (result.clipboardText && params.copyToClipboard) {
-            await vscode.env.clipboard.writeText(result.clipboardText);
+            vscode.env.clipboard.writeText(result.clipboardText);
             return;
         }
 
