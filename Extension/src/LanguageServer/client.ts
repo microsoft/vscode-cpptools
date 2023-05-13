@@ -19,7 +19,7 @@ import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
-import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
+import { CallHierarchyCallsItemResult, CallHierarchyParams, CallHierarchyProvider } from './Providers/callHierarchyProvider';
 // End provider imports
 
 import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
@@ -27,7 +27,7 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
 import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
-import { Location, TextEdit } from './commonTypes';
+import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
 import * as util from '../common';
 import * as configs from './configurations';
@@ -328,10 +328,13 @@ interface PublishRefactorDiagnosticsParams {
 export interface CreateDeclarationOrDefinitionParams {
     uri: string;
     range: Range;
+    copyToClipboard: boolean;
 }
 
 export interface CreateDeclarationOrDefinitionResult {
-    changes: { [key: string]: any[] };
+    edit: WorkspaceEdit;
+    clipboardText: string;
+    errorText: string;
 }
 
 interface ShowMessageWindowParams {
@@ -376,7 +379,7 @@ export interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
-export interface RenameParams {
+export interface ReferenceParams {
     newName: string;
     position: Position;
     textDocument: TextDocumentIdentifier;
@@ -604,7 +607,8 @@ export const RequestReferencesNotification: NotificationType<void> = new Notific
 export const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
-const RenameNotification: NotificationType<RenameParams> = new NotificationType<RenameParams>('cpptools/rename');
+const CallHierarchyCallsToNotification: NotificationType<CallHierarchyParams> = new NotificationType<CallHierarchyParams>('cpptools/callHierarchyCallsTo');
+const RenameNotification: NotificationType<ReferenceParams> = new NotificationType<ReferenceParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
@@ -625,6 +629,7 @@ const DebugLogNotification: NotificationType<LocalizeStringParams> = new Notific
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
+const CallHierarchyNotification: NotificationType<CallHierarchyCallsItemResult> = new NotificationType<CallHierarchyCallsItemResult>('cpptools/callHierarchyCallsToResult');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
 const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
@@ -643,7 +648,7 @@ const CanceledReferencesNotification: NotificationType<void> = new NotificationT
 
 let failureMessageShown: boolean = false;
 
-export interface ReferencesCancellationState {
+interface ReferencesCancellationState {
     reject(): void;
     callback(): void;
 }
@@ -813,7 +818,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
-    handleCreateDeclarationOrDefinition(): Promise<void>;
+    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -862,7 +867,7 @@ export class DefaultClient implements Client {
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
 
-    public static referencesParams: RenameParams | FindAllReferencesParams | undefined;
+    public static referencesParams: ReferenceParams | FindAllReferencesParams | CallHierarchyParams |undefined;
     public static referencesRequestPending: boolean = false;
     public static referencesPendingCancellations: ReferencesCancellationState[] = [];
 
@@ -1414,11 +1419,15 @@ export class DefaultClient implements Client {
         }
     }
 
+    public sendCallHierarchyCallsToNotification(params: CallHierarchyParams): void {
+        this.languageClient.sendNotification(CallHierarchyCallsToNotification, params);
+    }
+
     public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
         this.languageClient.sendNotification(FindAllReferencesNotification, params);
     }
 
-    public sendRenameNotification(params: RenameParams): void {
+    public sendRenameNotification(params: ReferenceParams): void {
         this.languageClient.sendNotification(RenameNotification, params);
     }
 
@@ -2305,6 +2314,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
+        this.languageClient.onNotification(CallHierarchyNotification, (e) => this.processCallHierarchyResult(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
@@ -3475,9 +3485,10 @@ export class DefaultClient implements Client {
         this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public async handleCreateDeclarationOrDefinition(): Promise<void> {
+    public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
+
         // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
@@ -3506,12 +3517,31 @@ export class DefaultClient implements Client {
                     character: range.end.character,
                     line: range.end.line
                 }
-            }
+            },
+            copyToClipboard: copy ?? false
         };
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
-        // TODO: return specific errors info in result.
-        if (result.changes === undefined) {
+        // Create/Copy returned no result.
+        if (result.edit === undefined) {
+            vscode.window.showInformationMessage(result.errorText); // Copy/Create Declaration/Definition was completely unsuccessful due to api failure.
+            return;
+        }
+
+        // Handle CDD error messaging
+        if (result.errorText) {
+            let copiedToClipboard: boolean = false;
+            if (result.clipboardText && !params.copyToClipboard) {
+                vscode.env.clipboard.writeText(result.clipboardText);
+                copiedToClipboard = true;
+            }
+            vscode.window.showInformationMessage(result.errorText + (copiedToClipboard ? localize("fallback.clipboard", " Declaration/definition was copied.") : ""));
+            return;
+        }
+
+        // Handle copy to clipboard.
+        if (result.clipboardText && params.copyToClipboard) {
+            vscode.env.clipboard.writeText(result.clipboardText);
             return;
         }
 
@@ -3520,12 +3550,12 @@ export class DefaultClient implements Client {
         let lastEdit: vscode.TextEdit | undefined;
         let editPositionAdjustment: number = 0;
         let selectionPositionAdjustment: number = 0;
-        for (const file in result.changes) {
+        for (const file in result.edit.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
             // At most, there will only be two text edits:
             // 1.) an edit for: #include header file
             // 2.) an edit for: definition or declaration
-            for (const edit of result.changes[file]) {
+            for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
                 if (lastEdit && lastEdit.newText.includes("#include")) {
@@ -3671,6 +3701,19 @@ export class DefaultClient implements Client {
         });
     }
 
+    public clearPendingReferencesCancellations(): void {
+        if (DefaultClient.referencesPendingCancellations.length > 0) {
+            while (DefaultClient.referencesPendingCancellations.length > 1) {
+                const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
+                DefaultClient.referencesPendingCancellations.pop();
+                pendingCancel.reject();
+            }
+            const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
+            DefaultClient.referencesPendingCancellations.pop();
+            pendingCancel.callback();
+        }
+    }
+
     public cancelReferences(): void {
         DefaultClient.referencesParams = undefined;
         DefaultClient.renamePending = false;
@@ -3693,6 +3736,10 @@ export class DefaultClient implements Client {
 
     private processReferencesResult(referencesResult: refs.ReferencesResult): void {
         workspaceReferences.processResults(referencesResult);
+    }
+
+    private processCallHierarchyResult(callHierarchyResult: CallHierarchyCallsItemResult): void {
+        workspaceReferences.processCallHierarchyResults(callHierarchyResult);
     }
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
@@ -3795,7 +3842,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
-    handleCreateDeclarationOrDefinition(): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, workspaceReferences, FindAllReferencesParams, ReferencesCancellationState, RequestReferencesNotification, CancelReferencesNotification } from '../client';
+import { DefaultClient, workspaceReferences, FindAllReferencesParams, RequestReferencesNotification, CancelReferencesNotification } from '../client';
 import { Position } from 'vscode-languageclient';
 import * as refs from '../references';
 
@@ -47,16 +47,8 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                     if (doResolve) {
                         resolve(locations);
                     }
-                    if (DefaultClient.referencesPendingCancellations.length > 0) {
-                        while (DefaultClient.referencesPendingCancellations.length > 1) {
-                            const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                            DefaultClient.referencesPendingCancellations.pop();
-                            pendingCancel.reject();
-                        }
-                        const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                        DefaultClient.referencesPendingCancellations.pop();
-                        pendingCancel.callback();
-                    }
+
+                    this.client.clearPendingReferencesCancellations();
                 };
                 if (!workspaceReferences.referencesRefreshPending) {
                     workspaceReferences.setResultsCallback(resultCallback);
