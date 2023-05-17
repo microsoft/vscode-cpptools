@@ -3526,7 +3526,7 @@ export class DefaultClient implements Client {
         if (result.edit === undefined) {
             // The only condition in which result.edit would be undefined is a
             // server-initiated cancellation, in which case the object is actually
-            // a ResponseError.
+            // a ResponseError. https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
             return;
         }
 
