@@ -69,14 +69,6 @@ export function hasTrustedCompilerPaths(): boolean {
     return trustedCompilerPaths.length !== 0;
 }
 
-export function addTrustedCompiler(path: string): void {
-    // Detect duplicate paths or invalid paths.
-    if (trustedCompilerPaths.includes(path) || path === null || path === undefined) {
-        return;
-    }
-    trustedCompilerPaths.push(path);
-}
-
 // Data shared by all clients.
 let languageClient: LanguageClient;
 let firstClientStarted: Promise<void>;
@@ -213,7 +205,7 @@ interface ReportStatusNotificationBody extends WorkspaceFolderParams {
 }
 
 interface QueryDefaultCompilerParams {
-    trustedCompilerPaths: string[];
+    newTrustedCompilerPath: string;
 }
 
 interface CppPropertiesParams extends WorkspaceFolderParams {
@@ -826,6 +818,7 @@ export interface Client {
     isInitialized(): boolean;
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
+    addTrustedCompiler(path: string): Promise<void>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -1129,8 +1122,7 @@ export class DefaultClient implements Client {
             }
 
             ui.ShowConfigureIntelliSenseButton(false, this);
-            addTrustedCompiler(settings.defaultCompilerPath);
-            compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
+            await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
             if (compilersOnly) {
@@ -1161,7 +1153,7 @@ export class DefaultClient implements Client {
     }
 
     public async rescanCompilers(sender?: any): Promise<void> {
-        compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
+        compilerDefaults = await this.requestCompiler();
         DefaultClient.updateClientConfigurations();
         if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
             await this.promptSelectCompiler(true, sender);
@@ -1181,9 +1173,8 @@ export class DefaultClient implements Client {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
-                    addTrustedCompiler(compilerDefaults.compilerPath);
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
+                    await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                     ui.ShowConfigureIntelliSenseButton(false, this);
@@ -1216,9 +1207,8 @@ export class DefaultClient implements Client {
             if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
-                    addTrustedCompiler(compilerDefaults.compilerPath);
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
+                    await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                     ui.ShowConfigureIntelliSenseButton(false, this);
@@ -1386,7 +1376,7 @@ export class DefaultClient implements Client {
                         });
                         // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
                         // The event handlers must be set before this happens.
-                        compilerDefaults = await this.requestCompiler(trustedCompilerPaths);
+                        compilerDefaults = await this.requestCompiler();
                         DefaultClient.updateClientConfigurations();
                         clients.forEach(client => {
                             if (client instanceof DefaultClient) {
@@ -2306,7 +2296,7 @@ export class DefaultClient implements Client {
         console.assert(this.languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
 
         this.languageClient.onNotification(ReloadWindowNotification, () => void util.promptForReloadWindowDueToSettingsChange());
-        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => addTrustedCompiler(e.compilerPath));
+        this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => { this.addTrustedCompiler(e.compilerPath); return; });
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
         this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
@@ -2816,9 +2806,9 @@ export class DefaultClient implements Client {
         return this.requestWhenReady(() => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
-    public async requestCompiler(compilerPath: string[]): Promise<configs.CompilerDefaults> {
+    public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
         const params: QueryDefaultCompilerParams = {
-            trustedCompilerPaths: compilerPath
+            newTrustedCompilerPath: newCompilerPath ?? ""
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
@@ -3096,7 +3086,7 @@ export class DefaultClient implements Client {
                         util.isArrayOfString(itemConfig.compilerArgs) ? itemConfig.compilerArgs : undefined);
                     itemConfig.compilerPath = compilerPathAndArgs.compilerPath;
                     if (itemConfig.compilerPath !== undefined) {
-                        addTrustedCompiler(itemConfig.compilerPath);
+                        this.addTrustedCompiler(itemConfig.compilerPath);
                     }
                     if (providerVersion < Version.v6) {
                         itemConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
@@ -3199,7 +3189,7 @@ export class DefaultClient implements Client {
                     util.isArrayOfString(sanitized.compilerArgs) ? sanitized.compilerArgs : undefined);
                 sanitized.compilerPath = compilerPathAndArgs.compilerPath;
                 if (sanitized.compilerPath !== undefined) {
-                    addTrustedCompiler(sanitized.compilerPath);
+                    this.addTrustedCompiler(sanitized.compilerPath);
                 }
                 if (providerVersion < Version.v6) {
                     sanitized.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
@@ -3745,6 +3735,17 @@ export class DefaultClient implements Client {
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
         this.model.referencesCommandMode.Value = mode;
     }
+
+    public addTrustedCompiler(path: string): Promise<void> {
+        // Detect duplicate paths or invalid paths.
+        if (trustedCompilerPaths.includes(path) || path === null || path === undefined) {
+            return Promise.resolve();
+        }
+        trustedCompilerPaths.push(path);
+        return this.requestCompiler(path).then((result) => {
+            compilerDefaults = result;
+        });
+    }
 }
 
 function getLanguageServerFileName(): string {
@@ -3853,4 +3854,5 @@ class NullClient implements Client {
     isInitialized(): boolean { return true; }
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
+    addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
 }
