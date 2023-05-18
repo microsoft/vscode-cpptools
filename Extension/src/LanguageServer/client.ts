@@ -325,8 +325,8 @@ export interface CreateDeclarationOrDefinitionParams {
 
 export interface CreateDeclarationOrDefinitionResult {
     edit: WorkspaceEdit;
-    clipboardText: string;
-    errorText: string;
+    clipboardText?: string;
+    errorText?: string;
 }
 
 interface ShowMessageWindowParams {
@@ -3514,7 +3514,9 @@ export class DefaultClient implements Client {
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // Create/Copy returned no result.
         if (result.edit === undefined) {
-            vscode.window.showInformationMessage(result.errorText); // Copy/Create Declaration/Definition was completely unsuccessful due to api failure.
+            // The only condition in which result.edit would be undefined is a
+            // server-initiated cancellation, in which case the object is actually
+            // a ResponseError. https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
             return;
         }
 
