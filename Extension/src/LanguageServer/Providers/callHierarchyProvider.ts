@@ -112,7 +112,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyIncomingCall[] | undefined | any> {
-        new Promise<vscode.CallHierarchyIncomingCall[] | undefined | any>((resolve, reject) => {
+        return new Promise<vscode.CallHierarchyIncomingCall[] | undefined | any>((resolve, reject) => {
             if (item === undefined) {
                 resolve(undefined);
                 return;
