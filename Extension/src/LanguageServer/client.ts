@@ -3736,15 +3736,13 @@ export class DefaultClient implements Client {
         this.model.referencesCommandMode.Value = mode;
     }
 
-    public addTrustedCompiler(path: string): Promise<void> {
+    public async addTrustedCompiler(path: string): Promise<void> {
         // Detect duplicate paths or invalid paths.
         if (trustedCompilerPaths.includes(path) || path === null || path === undefined) {
             return Promise.resolve();
         }
         trustedCompilerPaths.push(path);
-        return this.requestCompiler(path).then((result) => {
-            compilerDefaults = result;
-        });
+        compilerDefaults = await this.requestCompiler(path);
     }
 }
 
