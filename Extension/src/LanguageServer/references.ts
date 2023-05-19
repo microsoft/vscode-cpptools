@@ -41,7 +41,8 @@ export interface ReferencesResult {
 }
 
 export type ReferencesResultCallback = (result: ReferencesResult | null, doResolve: boolean) => void;
-export type CallHierarchyResultCallback = (result: CallHierarchyCallsItemResult | null) => void;
+export type CallHierarchyResultCallback =
+    (result: CallHierarchyCallsItemResult | null, canceledByUser: boolean, progressBarDuration?: number) => void;
 
 enum ReferencesProgress {
     Started,
@@ -183,6 +184,7 @@ export class ReferencesManager {
     public referencesRefreshPending: boolean = false;
     private referencesDelayProgress?: NodeJS.Timeout;
     private referencesProgressOptions?: vscode.ProgressOptions;
+    private referencesCaneledByUser: boolean = false;
     public referencesCanceled: boolean = false;
     public referencesCanceledWhilePreviewing?: boolean;
     private referencesStartedWhileTagParsing?: boolean;
@@ -190,6 +192,7 @@ export class ReferencesManager {
         message?: string;
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
+    private referencesProgressBarStartTime: number = 0;
     private referencesCurrentProgressUICounter: number = 0;
     private readonly referencesProgressUpdateInterval: number = 1000;
     private readonly referencesProgressDelayInterval: number = 2000;
@@ -338,6 +341,7 @@ export class ReferencesManager {
         this.currentUpdateProgressTimer = undefined;
         this.currentUpdateProgressResolve = undefined;
         let referencePreviousProgressUICounter: number = 0;
+        this.referencesProgressBarStartTime = Date.now();
         this.clearViews();
 
         this.referencesDelayProgress = setInterval(() => {
@@ -351,6 +355,7 @@ export class ReferencesManager {
                         if (token.isCancellationRequested && !this.referencesCanceled) {
                             this.client.cancelReferences();
                             this.referencesCanceled = true;
+                            this.referencesCaneledByUser = true;
                         }
                         if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                             if (this.currentUpdateProgressTimer) {
@@ -408,7 +413,8 @@ export class ReferencesManager {
             this.resultsCallback(null, true);
         }
         if (this.callHierarchyResultsCallback) {
-            this.callHierarchyResultsCallback(null);
+            this.callHierarchyResultsCallback(null, this.referencesCaneledByUser);
+            this.referencesCaneledByUser = false;
         }
     }
 
@@ -557,12 +563,20 @@ export class ReferencesManager {
 
     public processCallHierarchyResults(callHierarchyResult: CallHierarchyCallsItemResult): void {
         const referencesCanceled: boolean = this.referencesCanceled;
+        const referenceCanceledByUser: boolean = this.referencesCaneledByUser;
+        let referencesProgressBarDuration: number | undefined;
 
         // Need to reset these before we call the callback, as the callback my trigger another request
         // and we need to ensure these values are already reset before that happens.
+        this.referencesCaneledByUser = false;
         this.referencesCanceled = false;
         this.referencesRequestPending = false;
         this.symbolSearchInProgress = false;
+
+        if (this.referencesProgressBarStartTime !== 0) {
+            referencesProgressBarDuration = Date.now() - this.referencesProgressBarStartTime;
+            this.referencesProgressBarStartTime = 0;
+        }
         if (this.referencesDelayProgress) {
             clearInterval(this.referencesDelayProgress);
         }
@@ -580,7 +594,8 @@ export class ReferencesManager {
 
         // Execute the callback.
         if (this.callHierarchyResultsCallback) {
-            this.callHierarchyResultsCallback(referencesCanceled ? null : callHierarchyResult);
+            this.callHierarchyResultsCallback(referencesCanceled ? null : callHierarchyResult,
+                referenceCanceledByUser, referencesProgressBarDuration);
         }
     }
 
