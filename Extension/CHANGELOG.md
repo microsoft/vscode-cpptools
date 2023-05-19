@@ -20,6 +20,8 @@
 * Revert -fms-extensions being added for mingw compilers by default (due to bugs). [#10940](https://github.com/microsoft/vscode-cpptools/issues/10940)
 * Fix the "known compilers" list not getting updated with "user compilers". [#10943](https://github.com/microsoft/vscode-cpptools/issues/10943)
 * Fix cancelation of Find All References while confirming references. [#10947](https://github.com/microsoft/vscode-cpptools/issues/10947)
+* Fix a bug with workspace parsing status. [PR #10974](https://github.com/microsoft/vscode-cpptools/pull/10974)
+* Fix a bug that could cause incomplete reading of stdout/stderr of child processes on Windows.
 * Fix incorrect "declaration is incompatible" IntelliSense errors.
 * Fix some potential crashes.
 
