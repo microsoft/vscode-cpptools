@@ -1,5 +1,30 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.16.0: May 22, 2023
+### New Features
+* Add Call Hierarchy. [#16](https://github.com/microsoft/vscode-cpptools/issues/16)
+* Add "Copy Definition" and "Copy Declaration" code actions (for when the default Create placement isn't desired). [#10238](https://github.com/microsoft/vscode-cpptools/issues/10238), [#10942](https://github.com/microsoft/vscode-cpptools/issues/10942)
+
+### Enhancements
+* Add support for other glob pattern syntax, such as `[]` and `^`. [#8960](https://github.com/microsoft/vscode-cpptools/issues/8960)
+* Add support for C++23 z/Z and zu/ZU suffixes in clang/gcc modes. [#10190](https://github.com/microsoft/vscode-cpptools/issues/10190)
+
+### Bug Fixes
+* Fix an IntelliSense parsing bug with C++20 ranges. [#8039](https://github.com/microsoft/vscode-cpptools/issues/8039)
+* Fix an IntelliSense bug with user-defined floating-point literals. [#10837](https://github.com/microsoft/vscode-cpptools/issues/10837)
+* Fix deadlock with Find All References. [#10855](https://github.com/microsoft/vscode-cpptools/issues/10855)
+* Fix performance issues on machines with > 32 threads. [#10874](https://github.com/microsoft/vscode-cpptools/issues/10874)
+* Fix localization of "C/C++ Configurations". [#10907](https://github.com/microsoft/vscode-cpptools/issues/10907)
+* Fix the workspace folder not getting added to the browse.path in some cases. [#10914](https://github.com/microsoft/vscode-cpptools/issues/10914)
+* Fix incorrect Apple clang to LLVM clang version mappings. [#10920](https://github.com/microsoft/vscode-cpptools/issues/10920)
+* Revert -fms-extensions being added for mingw compilers by default (due to bugs). [#10940](https://github.com/microsoft/vscode-cpptools/issues/10940)
+* Fix the "known compilers" list not getting updated with "user compilers". [#10943](https://github.com/microsoft/vscode-cpptools/issues/10943)
+* Fix cancelation of Find All References while confirming references. [#10947](https://github.com/microsoft/vscode-cpptools/issues/10947)
+* Fix a bug with workspace parsing status. [PR #10974](https://github.com/microsoft/vscode-cpptools/pull/10974)
+* Fix a bug that could cause incomplete reading of stdout/stderr of child processes on Windows.
+* Fix incorrect "declaration is incompatible" IntelliSense errors.
+* Fix some potential crashes.
+
 ## Version 1.15.4: May 1, 2023
 ### Enhancements
 * Support multiple natvis files in `visualizerFile`. [#925](https://github.com/microsoft/vscode-cpptools/issues/925)
