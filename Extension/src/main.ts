@@ -153,7 +153,7 @@ export async function deactivate(): Promise<void> {
     Telemetry.deactivate();
     disposables.forEach(d => d.dispose());
     if (languageServiceDisabled) {
-        return Promise.resolve();
+        return;
     }
     await LanguageServer.deactivate();
     disposeOutputChannels();
