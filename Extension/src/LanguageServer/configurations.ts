@@ -20,7 +20,7 @@ import * as nls from 'vscode-nls';
 import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
-import { addTrustedCompiler, DefaultClient } from './client';
+import { DefaultClient } from './client';
 import { UI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -908,7 +908,7 @@ export class CppProperties {
                 } else {
                     // add compiler to list of trusted compilers
                     if (i === this.CurrentConfigurationIndex) {
-                        addTrustedCompiler(configuration.compilerPath);
+                        this.client.addTrustedCompiler(configuration.compilerPath);
                     }
                 }
             } else {
@@ -945,6 +945,8 @@ export class CppProperties {
                     ) {
                         configuration.browse.path.push("${workspaceFolder}");
                     }
+                } else {
+                    configuration.browse.path = [ "${workspaceFolder}" ];
                 }
             } else {
                 configuration.browse.path = this.updateConfigurationPathsArray(configuration.browse.path, settings.defaultBrowsePath, env);
@@ -985,6 +987,9 @@ export class CppProperties {
                 }
                 if (!keepCachedBrowseConfig && this.client.lastCustomBrowseConfiguration !== undefined) {
                     this.client.lastCustomBrowseConfiguration.Value = undefined;
+                    if (this.client.lastCustomBrowseConfigurationProviderId) {
+                        this.client.lastCustomBrowseConfigurationProviderId.Value = undefined;
+                    }
                 }
             }
 

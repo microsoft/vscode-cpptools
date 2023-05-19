@@ -167,8 +167,8 @@
 	"overloads": "+%d přetížení",
 	"specialization": "+1 specializace",
 	"specializations": "+tento počet specializací: %d",
-	"compiler": "Poznámka: IntelliSense není plně nakonfigurováno. Konfiguraci dokončete pomocí příkazu Vybrat výchozí kompilátor.",
-	"select_compiler": "Výběrem kompilátoru vyhledejte systémové hlavičky.",
+	"intellisense_configuration": "Poznámka: IntelliSense není plně nakonfigurované. K dokončení konfigurace použijte možnost Vybrat konfiguraci IntelliSense.",
+	"select_intellisense_configuration": "Vyberte konfiguraci IntelliSense pro vyhledání systémových hlaviček.",
 	"expands_to": "Rozšiřuje se na:",
 	"attention_label": "Upozornění:",
 	"author_label": "Autor:",
@@ -294,5 +294,5 @@
 	"refactor_not_class_namespace": "Nenašla se třída nebo obor názvů %s.",
 	"refactor_operation_unsupported": "Operace není pro: %s podporovaná.",
 	"unknown_error": "Neznámá chyba.",
-	"run_select_compiler": "Spuštěním příkazu Vybrat výchozí kompilátor vyhledejte systémové hlavičky."
+	"run_select_intellisense_configuration": "Spusťte prosím příkaz Vybrat konfiguraci IntelliSense, abyste vyhledali systémové hlavičky."
 }

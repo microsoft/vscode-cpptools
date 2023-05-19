@@ -291,6 +291,8 @@ function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
     }
 }
 
+let noActiveEditorTimeout: NodeJS.Timeout | undefined;
+
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -298,7 +300,23 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
-    if (editor && util.isCppOrRelated(editor.document)) {
+    if (noActiveEditorTimeout) {
+        clearTimeout(noActiveEditorTimeout);
+        noActiveEditorTimeout = undefined;
+    }
+
+    if (!editor) {
+        // When switching between documents, VS Code is setting the active editor to undefined
+        // temporarily, so this prevents the C++-related status bar items from flickering off/on.
+        noActiveEditorTimeout = setTimeout(() => {
+            activeDocument = "";
+            ui.activeDocumentChanged();
+            noActiveEditorTimeout = undefined;
+        }, 100);
+        return;
+    }
+
+    if (util.isCppOrRelated(editor.document)) {
         // This is required for the UI to update correctly.
         clients.activeDocumentChanged(editor.document);
         if (util.isCpp(editor.document)) {
@@ -433,6 +451,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
@@ -689,6 +708,14 @@ async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vsco
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
+}
+
+async function onCopyDeclarationOrDefinition(sender?: any): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: util.getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
+    getActiveClient().handleCreateDeclarationOrDefinition(true);
 }
 
 async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
