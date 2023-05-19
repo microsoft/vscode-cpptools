@@ -53,6 +53,7 @@ import {
 } from './codeAnalysis';
 import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
 import _ = require('lodash');
+import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 
 const deepCopy = (obj: any) => _.cloneDeep(obj);
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -3739,12 +3740,16 @@ export class DefaultClient implements Client {
     }
 
     public async addTrustedCompiler(path: string): Promise<void> {
-        // Detect duplicate paths or invalid paths.
-        if (trustedCompilerPaths.includes(path) || path === null || path === undefined) {
+        if (path === null || path === undefined) {
+            return;
+        }
+        if (trustedCompilerPaths.includes(path)) {
+            DebugConfigurationProvider.ClearDetectedBuildTasks();
             return;
         }
         trustedCompilerPaths.push(path);
         compilerDefaults = await this.requestCompiler(path);
+        DebugConfigurationProvider.ClearDetectedBuildTasks();
     }
 }
 
