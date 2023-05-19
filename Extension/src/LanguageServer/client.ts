@@ -3741,7 +3741,7 @@ export class DefaultClient implements Client {
     public async addTrustedCompiler(path: string): Promise<void> {
         // Detect duplicate paths or invalid paths.
         if (trustedCompilerPaths.includes(path) || path === null || path === undefined) {
-            return Promise.resolve();
+            return;
         }
         trustedCompilerPaths.push(path);
         compilerDefaults = await this.requestCompiler(path);
