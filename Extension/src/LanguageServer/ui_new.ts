@@ -175,6 +175,10 @@ export class NewUI implements UI {
 
     private dbTimeout?: NodeJS.Timeout;
     private setIsParsingWorkspace(val: boolean): void {
+        if (!val && this.isParsingWorkspacePaused) {
+            // Unpause before handling the no longer parsing state.
+            this.setIsParsingWorkspacePaused(false);
+        }
         this.isParsingWorkspace = val;
         const showIcon: boolean = val || this.isParsingFiles;
 
