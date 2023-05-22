@@ -14,15 +14,15 @@
 	"configuration.providers": "設定提供者",
 	"compilers": "編譯器",
 	"setCompiler.message": "您尚未設定 IntelliSense。除非您自行加以設定，否則 IntelliSense 可能無法運作。",
-	"selectCompiler.string": "選取 IntelliSense 設定...",
+	"selectIntelliSenseConfiguration.string": "選取 IntelliSense 設定...",
 	"use.provider": "使用 {0}",
 	"use.compileCommands": "使用 {0}",
 	"selectAnotherCompiler.string": "在我的機器上選取另一個編譯器...",
 	"installCompiler.string": "協助我安裝編譯器",
 	"noConfig.string": "不要設定編譯器 (不建議)",
+	"selectCompiler.string": "選取編譯器",
 	"confirmCompiler.string": "是",
 	"selectCompiler.message": "找到編譯器 {0}。您要使用此編譯器來設定 IntelliSense 嗎?",
-	"selectIntelliSenseConfiguration.string": "選取 IntelliSense 設定...",
 	"server.crashed.restart": "語言伺服器當機。正在重新啟動...",
 	"server.crashed2": "語言伺服器在過去 3 分鐘內發生 5 次故障。將不會重新啟動。",
 	"loggingLevel.changed": "{0} 已變更為: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "是",
 	"no.button": "否",
 	"configurations.received": "收到的自訂組態:",
-	"browse.configuration.received": "收到的自訂瀏覽組態: {0}"
+	"browse.configuration.received": "收到的自訂瀏覽組態: {0}",
+	"fallback.clipboard": "已複製宣告/定義。"
 }

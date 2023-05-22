@@ -7,6 +7,7 @@
 	"find.all.references": "Localizar Todas as Referências",
 	"peek.references": "Espiar Referências",
 	"rename": "Renomear",
+	"call.hierarchy": "Hierarquia de Chamadas",
 	"confirmed.reference.upper": "REFERÊNCIA CONFIRMADA",
 	"confirmation.in.progress.upper": "CONFIRMAÇÃO EM ANDAMENTO",
 	"comment.reference.upper": "REFERÊNCIA DE COMENTÁRIO",

@@ -7,6 +7,7 @@
 	"find.all.references": "すべての参照を検索",
 	"peek.references": "参照のクイック表示",
 	"rename": "名前の変更",
+	"call.hierarchy": "呼び出し階層",
 	"confirmed.reference.upper": "参照が確認されました",
 	"confirmation.in.progress.upper": "確認が進行中です",
 	"comment.reference.upper": "コメント参照",

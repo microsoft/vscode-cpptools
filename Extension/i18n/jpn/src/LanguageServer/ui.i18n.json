@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "IntelliSense の構成",
 	"c.cpp.configureIntelliSenseStatus.cppText": "C/C++ IntelliSense の構成",
 	"select.command": "コマンドを選択する...",
+	"select.code.analysis.command": "コード分析コマンドを選択...",
 	"c.cpp.configuration.tooltip": "C/C++ 構成",
 	"c.cpp.references.statusbar": "C/C + + リファレンスの状態",
 	"c.cpp.intellisense.statusbar": "C/c + + IntelliSense の状態",
@@ -29,7 +30,8 @@
 	"select.workspace": "ワークスペース フォルダーを選択します...",
 	"resume.parsing": "ワークスペースの解析の再開",
 	"pause.parsing": "ワークスペースの解析の一時停止",
-	"cancel.analysis": "{0} の取り消し",
-	"resume.analysis": "{0} の再開",
-	"pause.analysis": "{0}の一時停止"
+	"cancel.analysis": "キャンセル",
+	"resume.analysis": "再開",
+	"pause.analysis": "一時停止",
+	"another.analysis": "別のファイルを開始..."
 }

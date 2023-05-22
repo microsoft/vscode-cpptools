@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "Настройка IntelliSense",
 	"c.cpp.configureIntelliSenseStatus.cppText": "Настройка IntelliSense C/C++",
 	"select.command": "Выберите команду...",
+	"select.code.analysis.command": "Выберите команду анализа кода...",
 	"c.cpp.configuration.tooltip": "Конфигурация C/C++",
 	"c.cpp.references.statusbar": "Состояние ссылок C/C++",
 	"c.cpp.intellisense.statusbar": "Состояние IntelliSense C/C++",
@@ -29,7 +30,8 @@
 	"select.workspace": "Выберите папку рабочей области…",
 	"resume.parsing": "Возобновить анализ рабочей области",
 	"pause.parsing": "Приостановить анализ рабочей области",
-	"cancel.analysis": "Отмена {0}",
-	"resume.analysis": "Возобновление работы {0}",
-	"pause.analysis": "Приостановка {0}"
+	"cancel.analysis": "Отмена",
+	"resume.analysis": "Возобновить",
+	"pause.analysis": "Приостановить",
+	"another.analysis": "Запустить другой..."
 }

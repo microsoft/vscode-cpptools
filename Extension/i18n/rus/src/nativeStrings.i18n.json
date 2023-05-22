@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "Не удалось найти файл \"%s\".",
 	"refactor_create_declaration_definition_failed": "Сбой создания объявления или определения: %s",
 	"refactor_create_default_delete": "Не удалось создать функцию \"%s\". Создание стандартных или удаленных функций не поддерживается.",
-	"refactor_function_copied_to_clipboard": "Сигнатура функции скопирована в буфер обмена.",
 	"refactor_function_not_created": "Не удалось создать функцию \"%s\".",
 	"refactor_ambiguous_locations": "Не удается найти однозначное расположение для функции \"%s\".",
 	"refactor_file_not_in_project": "Не удалось найти файл \"%s\".",
 	"refactor_not_class_namespace": "Не удалось найти класс или пространство имен \"%s\".",
 	"refactor_operation_unsupported": "Операция не поддерживается для \"%s\".",
 	"unknown_error": "Неизвестная ошибка.",
-	"run_select_intellisense_configuration": "Выполните команду \"Выбрать конфигурацию IntelliSense…\", чтобы найти системные заголовки."
+	"run_select_intellisense_configuration": "Выполните команду \"Выбрать конфигурацию IntelliSense…\", чтобы найти системные заголовки.",
+	"offer_copy_declaration": "Копировать объявление \"{0}\"",
+	"offer_copy_definition": "Копировать определение \"{0}\"",
+	"refactor_copy_declaration_definition_failed": "Не удалось скопировать объявление/определение в буфер обмена: %s"
 }

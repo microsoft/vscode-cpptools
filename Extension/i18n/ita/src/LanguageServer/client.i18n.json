@@ -14,15 +14,15 @@
 	"configuration.providers": "Provider di configurazione",
 	"compilers": "compilatori",
 	"setCompiler.message": "Compilatore IntelliSense non configurato. A meno che non si impostino configurazioni personalizzate, IntelliSense potrebbe non funzionare.",
-	"selectCompiler.string": "Seleziona configurazione IntelliSense...",
+	"selectIntelliSenseConfiguration.string": "Seleziona configurazione IntelliSense...",
 	"use.provider": "Usa {0}",
 	"use.compileCommands": "Usa {0}",
 	"selectAnotherCompiler.string": "Seleziona un altro compilatore nel computer...",
 	"installCompiler.string": "Aiutami a installare un compilatore",
 	"noConfig.string": "Non configurare un compilatore (scelta non consigliata)",
+	"selectCompiler.string": "Seleziona compilatore",
 	"confirmCompiler.string": "Sì",
 	"selectCompiler.message": "È stato trovato il {0} del compilatore. Configurare IntelliSense con questo compilatore?",
-	"selectIntelliSenseConfiguration.string": "Seleziona configurazione IntelliSense...",
 	"server.crashed.restart": "Si è verificato un arresto anomalo del server di linguaggio. Riavvio...",
 	"server.crashed2": "Si sono verificati cinque arresti anomali del server di linguaggio negli ultimi tre minuti. Non verrà riavviato.",
 	"loggingLevel.changed": "{0} è stato modificato in: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Sì",
 	"no.button": "No",
 	"configurations.received": "Configurazioni personalizzate ricevute:",
-	"browse.configuration.received": "La configurazione di esplorazione personalizzata è stata ricevuta: {0}"
+	"browse.configuration.received": "La configurazione di esplorazione personalizzata è stata ricevuta: {0}",
+	"fallback.clipboard": " Dichiarazione/definizione copiata."
 }
