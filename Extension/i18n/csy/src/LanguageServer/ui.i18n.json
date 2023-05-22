@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "Konfigurovat IntelliSense",
 	"c.cpp.configureIntelliSenseStatus.cppText": "Konfigurovat IntelliSense v C/C++",
 	"select.command": "Vyberte příkaz…",
+	"select.code.analysis.command": "Vyberte příkaz pro analýzu kódu…",
 	"c.cpp.configuration.tooltip": "Konfigurace C/C++",
 	"c.cpp.references.statusbar": "Stav odkazů jazyka C/C++",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense Status",
@@ -29,7 +30,8 @@
 	"select.workspace": "Vyberte složku pracovního prostoru...",
 	"resume.parsing": "Pokračovat v analýze pracovního prostoru",
 	"pause.parsing": "Pozastavit analýzu pracovního prostoru",
-	"cancel.analysis": "Zrušit {0}",
-	"resume.analysis": "Obnovit {0}",
-	"pause.analysis": "Pozastavit {0}"
+	"cancel.analysis": "Zrušit",
+	"resume.analysis": "Pokračovat",
+	"pause.analysis": "Pozastavit",
+	"another.analysis": "Spustit další…"
 }

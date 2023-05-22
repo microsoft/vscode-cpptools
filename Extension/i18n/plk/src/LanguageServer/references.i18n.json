@@ -7,6 +7,7 @@
 	"find.all.references": "Znajdowanie wszystkich odwołań",
 	"peek.references": "Wgląd w odwołania",
 	"rename": "Zmień nazwę",
+	"call.hierarchy": "Wywołaj hierarchię",
 	"confirmed.reference.upper": "ODWOŁANIE POTWIERDZONE",
 	"confirmation.in.progress.upper": "POTWIERDZENIE W TOKU",
 	"comment.reference.upper": "ODWOŁANIE DO KOMENTARZA",

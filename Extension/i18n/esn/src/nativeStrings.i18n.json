@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "No se encontró el archivo '%s'.",
 	"refactor_create_declaration_definition_failed": "Error al crear la declaración o definición: %s",
 	"refactor_create_default_delete": "No se puede crear la función \"%s\". No se admite la creación de funciones predeterminadas o eliminadas.",
-	"refactor_function_copied_to_clipboard": "La signatura de función se copió en el Portapapeles.",
 	"refactor_function_not_created": "No se pudo crear la función '%s'.",
 	"refactor_ambiguous_locations": "No se encuentra una ubicación ambigua para la función '%s'.",
 	"refactor_file_not_in_project": "No se encontró el archivo '%s'.",
 	"refactor_not_class_namespace": "No se encuentra la clase o el espacio de nombres '%s'.",
 	"refactor_operation_unsupported": "La operación no se admite para '%s'.",
 	"unknown_error": "Error desconocido.",
-	"run_select_intellisense_configuration": "Ejecute la opción \"Seleccionar configuración de IntelliSense...\". para buscar los encabezados del sistema."
+	"run_select_intellisense_configuration": "Ejecute la opción \"Seleccionar configuración de IntelliSense...\". para buscar los encabezados del sistema.",
+	"offer_copy_declaration": "Copiar la declaración de “{0}”",
+	"offer_copy_definition": "Copiar la definición de “{0}”",
+	"refactor_copy_declaration_definition_failed": "Error al copiar la declaración o definición en el Portapapeles: %s"
 }
