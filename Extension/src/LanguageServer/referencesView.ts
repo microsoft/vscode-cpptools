@@ -36,6 +36,7 @@ export class FindAllRefsView {
     }
 
     clearData(): void {
+        this.referencesModel = undefined;
         this.referenceViewProvider.clear();
     }
 

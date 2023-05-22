@@ -100,6 +100,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyItem | undefined> {
+        workspaceReferences.clearViews();
         const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
         if (range === undefined) {
             return undefined;
