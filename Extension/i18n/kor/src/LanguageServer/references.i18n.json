@@ -7,6 +7,7 @@
 	"find.all.references": "모든 참조 찾기",
 	"peek.references": "참조 피킹(peeking)",
 	"rename": "이름 바꾸기",
+	"call.hierarchy": "호출 계층 구조",
 	"confirmed.reference.upper": "확인된 참조",
 	"confirmation.in.progress.upper": "확인 진행 중",
 	"comment.reference.upper": "주석 참조",

@@ -7,6 +7,7 @@
 	"find.all.references": "Najít všechny odkazy",
 	"peek.references": "Náhled na odkazy",
 	"rename": "Přejmenovat",
+	"call.hierarchy": "Hierarchie volání",
 	"confirmed.reference.upper": "POTVRZENÝ ODKAZ",
 	"confirmation.in.progress.upper": "PROBÍHÁ POTVRZOVÁNÍ",
 	"comment.reference.upper": "ODKAZ NA KOMENTÁŘ",
