@@ -7,6 +7,7 @@
 	"find.all.references": "Trova tutti i riferimenti",
 	"peek.references": "Visualizza in anteprima riferimenti",
 	"rename": "Rinomina",
+	"call.hierarchy": "Gerarchia delle chiamate",
 	"confirmed.reference.upper": "RIFERIMENTO CONFERMATO",
 	"confirmation.in.progress.upper": "CONFERMA IN CORSO",
 	"comment.reference.upper": "RIFERIMENTO A COMMENTO",

@@ -14,15 +14,15 @@
 	"configuration.providers": "yapılandırma sağlayıcıları",
 	"compilers": "derleyiciler",
 	"setCompiler.message": "Yapılandırılmış IntelliSense’niz yok. Kendi yapılandırmalarınızı ayarlamazsanız IntelliSense çalışmayabilir.",
-	"selectCompiler.string": "IntelliSense Yapılandırmasını Seç...",
+	"selectIntelliSenseConfiguration.string": "IntelliSense Yapılandırmasını Seç...",
 	"use.provider": "{0} kullan",
 	"use.compileCommands": "{0} kullan",
 	"selectAnotherCompiler.string": "Makinem üzerinde başka bir derleyici seç...",
 	"installCompiler.string": "Derleyici yüklememe yardım et",
 	"noConfig.string": "Derleyiciyle yapılandırma (önerilmez)",
+	"selectCompiler.string": "Derleyici Seç",
 	"confirmCompiler.string": "Evet",
 	"selectCompiler.message": "{0} derleyicisi bulundu. IntelliSense'i bu derleyiciyle yapılandırmak istiyor musunuz?",
-	"selectIntelliSenseConfiguration.string": "IntelliSense Yapılandırmasını Seç...",
 	"server.crashed.restart": "Dil sunucusu kilitlendi. Yeniden başlatılıyor...",
 	"server.crashed2": "Dil sunucusu son 3 dakikada 5 kez kilitlendi. Sunucu yeniden başlatılmayacak.",
 	"loggingLevel.changed": "{0} {1} olarak değiştirildi",
@@ -49,5 +49,6 @@
 	"yes.button": "Evet",
 	"no.button": "Hayır",
 	"configurations.received": "Alınan özel yapılandırmalar:",
-	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}"
+	"browse.configuration.received": "Özel gözatma yapılandırması alındı: {0}",
+	"fallback.clipboard": " Bildirim/tanım kopyalandı."
 }

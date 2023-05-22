@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "O arquivo %s não foi encontrado.",
 	"refactor_create_declaration_definition_failed": "Falha ao criar Declaração/Definição: %s",
 	"refactor_create_default_delete": "Não é possível criar a função '%s'. Não há suporte para a criação de funções padrão ou excluídas.",
-	"refactor_function_copied_to_clipboard": "A assinatura da função foi copiada para a área de transferência.",
 	"refactor_function_not_created": "Não é possível criar a função '%s'.",
 	"refactor_ambiguous_locations": "Não é possível encontrar uma localização inequívoca para a função '%s'.",
 	"refactor_file_not_in_project": "O arquivo %s não foi encontrado.",
 	"refactor_not_class_namespace": "Não foi possível localizar a classe ou o namespace '%s'.",
 	"refactor_operation_unsupported": "Operação sem suporte para \"%s\".",
 	"unknown_error": "Erro desconhecido.",
-	"run_select_intellisense_configuration": "Execute o comando 'Selecionar configuração do IntelliSense...' para localizar os cabeçalhos do sistema."
+	"run_select_intellisense_configuration": "Execute o comando 'Selecionar configuração do IntelliSense...' para localizar os cabeçalhos do sistema.",
+	"offer_copy_declaration": "Copiar declaração de '{0}'",
+	"offer_copy_definition": "Copiar definição de '{0}'",
+	"refactor_copy_declaration_definition_failed": "Falha ao copiar Declaração/Definição para a área de transferência: %s"
 }
