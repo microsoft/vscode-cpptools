@@ -455,16 +455,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
-function logForUIExperiment(command: string, sender?: any): void {
-    const settings: CppSettings = new CppSettings();
-    const properties: {[key: string]: string} = {
-        newUI: ui.isNewUI.toString(),
-        uiOverride: (settings.experimentalFeatures ?? false).toString(),
-        sender: util.getSenderType(sender)
-    };
-    telemetry.logLanguageServerEvent(`experiment${command}`, properties);
-}
-
 function onDisabledCommand(): void {
     const message: string = localize(
         {
@@ -478,7 +468,6 @@ function onDisabledCommand(): void {
 }
 
 function onRestartIntelliSenseForFile(sender?: any): void {
-    logForUIExperiment("RestartIntelliSenseForFile", sender);
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !util.isCpp(activeEditor.document)) {
         return;
@@ -574,7 +563,6 @@ function selectIntelliSenseConfiguration(sender?: any): void {
 }
 
 function onSelectConfiguration(sender?: any): void {
-    logForUIExperiment("ConfigurationSelect", sender);
     if (!isFolderOpen()) {
         vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
@@ -761,12 +749,10 @@ function onToggleDimInactiveRegions(): void {
 }
 
 function onPauseParsing(sender?: any): void {
-    logForUIExperiment("ParsingCommands", sender);
     clients.ActiveClient.pauseParsing();
 }
 
 function onResumeParsing(sender?: any): void {
-    logForUIExperiment("ParsingCommands", sender);
     clients.ActiveClient.resumeParsing();
 }
 
@@ -783,22 +769,18 @@ function onCancelCodeAnalysis(): void {
 }
 
 function onShowParsingCommands(sender?: any): void {
-    logForUIExperiment("ParsingCommands", sender);
     clients.ActiveClient.handleShowParsingCommands();
 }
 
 function onShowActiveCodeAnalysisCommands(sender?: any): void {
-    logForUIExperiment("ShowActiveCodeAnalysisCommands", sender);
     clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
 }
 
 function onShowIdleCodeAnalysisCommands(sender?: any): void {
-    logForUIExperiment("ShowIdleCodeAnalysisCommands", sender);
     clients.ActiveClient.handleShowIdleCodeAnalysisCommands();
 }
 
 function onShowReferencesProgress(sender?: any): void {
-    logForUIExperiment("ShowReferencesProgress", sender);
     clients.ActiveClient.handleReferencesIcon();
 }
 
@@ -896,7 +878,6 @@ function onLogDiagnostics(): void {
 }
 
 function onRescanWorkspace(sender?: string): void {
-    logForUIExperiment("RescanWorkspace", sender);
     clients.ActiveClient.rescanFolder();
 }
 
