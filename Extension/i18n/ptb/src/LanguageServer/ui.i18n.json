@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "Configurar o IntelliSense",
 	"c.cpp.configureIntelliSenseStatus.cppText": "C/C++ Configurar IntelliSense",
 	"select.command": "Selecionar um comando...",
+	"select.code.analysis.command": "Selecione um comando de análise de código...",
 	"c.cpp.configuration.tooltip": "Configuração de C/C++",
 	"c.cpp.references.statusbar": "Status de Referências do C/C++",
 	"c.cpp.intellisense.statusbar": "Status do IntelliSense do C/C++",
@@ -29,7 +30,8 @@
 	"select.workspace": "Selecionar uma pasta de workspace...",
 	"resume.parsing": "Retomar a Análise do Espaço de trabalho",
 	"pause.parsing": "Pausar a Análise do Espaço de trabalho",
-	"cancel.analysis": "Cancelar {0}.",
-	"resume.analysis": "Retomar {0}",
-	"pause.analysis": "Pausar {0}"
+	"cancel.analysis": "Cancelar",
+	"resume.analysis": "Retomar",
+	"pause.analysis": "Pausar",
+	"another.analysis": "Iniciar Outro..."
 }

@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "Plik '%s' nie odnaleziony.",
 	"refactor_create_declaration_definition_failed": "Tworzenie deklaracji / definicji nie powiodło się: %s",
 	"refactor_create_default_delete": "Nie można utworzyć funkcji „%s”. Tworzenie domyślnych lub usuniętych funkcji nie jest obsługiwane.",
-	"refactor_function_copied_to_clipboard": "Podpis funkcji został skopiowany do schowka.",
 	"refactor_function_not_created": "Nie można utworzyć funkcji „%s”.",
 	"refactor_ambiguous_locations": "Nie można znaleźć jednoznacznej lokalizacji funkcji „%s”.",
 	"refactor_file_not_in_project": "Plik '%s' nie odnaleziony.",
 	"refactor_not_class_namespace": "Nie można znaleźć klasy lub obszaru nazw „%s”.",
 	"refactor_operation_unsupported": "Operacja elementu „%s” nie jest obsługiwana.",
 	"unknown_error": "Nieznany błąd.",
-	"run_select_intellisense_configuration": "Uruchom polecenie „Wybierz konfigurację funkcji IntelliSense...”, aby zlokalizować nagłówki systemu."
+	"run_select_intellisense_configuration": "Uruchom polecenie „Wybierz konfigurację funkcji IntelliSense...”, aby zlokalizować nagłówki systemu.",
+	"offer_copy_declaration": "Kopiuj deklarację '{0}'",
+	"offer_copy_definition": "Kopiuj definicję '{0}'",
+	"refactor_copy_declaration_definition_failed": "Kopiowanie deklaracji/definicji do schowka nie powiodło się: %s"
 }

@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "配置 IntelliSense",
 	"c.cpp.configureIntelliSenseStatus.cppText": "C/C++ 配置 IntelliSense",
 	"select.command": "选择命令...",
+	"select.code.analysis.command": "选择代码分析命令...",
 	"c.cpp.configuration.tooltip": "C/C++ 配置",
 	"c.cpp.references.statusbar": "C/C++ 引用状态",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense 状态",
@@ -29,7 +30,8 @@
 	"select.workspace": "选择工作区文件夹…",
 	"resume.parsing": "恢复工作区分析",
 	"pause.parsing": "暂停工作区分析",
-	"cancel.analysis": "取消 {0}",
-	"resume.analysis": "恢复 {0}",
-	"pause.analysis": "暂停 {0}"
+	"cancel.analysis": "取消",
+	"resume.analysis": "继续",
+	"pause.analysis": "暂停",
+	"another.analysis": "启动另一个..."
 }

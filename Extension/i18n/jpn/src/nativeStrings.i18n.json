@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "ファイル '%s' が見つかりませんでした。",
 	"refactor_create_declaration_definition_failed": "宣言 / 定義の作成に失敗しました: %s",
 	"refactor_create_default_delete": "関数 '%s' を作成できません。既定の関数または削除された関数の作成はサポートされていません。",
-	"refactor_function_copied_to_clipboard": "関数シグネチャがクリップボードにコピーされました。",
 	"refactor_function_not_created": "関数 '%s' を作成できませんでした。",
 	"refactor_ambiguous_locations": "関数 '%s' の明確な場所が見つかりません。",
 	"refactor_file_not_in_project": "ファイル '%s' が見つかりませんでした。",
 	"refactor_not_class_namespace": "クラスまたは名前空間 '%s' が見つかりませんでした。",
 	"refactor_operation_unsupported": "この操作は '%s' でサポートされていません。",
 	"unknown_error": "不明なエラーです。",
-	"run_select_intellisense_configuration": "システム ヘッダーを見つけるには、'IntelliSense 構成の選択...' コマンドを実行してください。"
+	"run_select_intellisense_configuration": "システム ヘッダーを見つけるには、'IntelliSense 構成の選択...' コマンドを実行してください。",
+	"offer_copy_declaration": "'{0}' の宣言をコピーする",
+	"offer_copy_definition": "'{0}' の定義をコピーする",
+	"refactor_copy_declaration_definition_failed": "宣言/定義をクリップボードにコピーできませんでした: %s"
 }

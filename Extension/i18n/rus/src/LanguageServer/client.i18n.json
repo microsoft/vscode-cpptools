@@ -14,15 +14,15 @@
 	"configuration.providers": "поставщики конфигурации",
 	"compilers": "компиляторы",
 	"setCompiler.message": "Нет настроенных функций IntelliSense. Если не настроить собственные конфигурации, IntelliSense может не работать.",
-	"selectCompiler.string": "Выбрать конфигурацию IntelliSense…",
+	"selectIntelliSenseConfiguration.string": "Выбрать конфигурацию IntelliSense…",
 	"use.provider": "Использовать {0}",
 	"use.compileCommands": "Использовать {0}",
 	"selectAnotherCompiler.string": "Выбрать другой компилятор на моем компьютере…",
 	"installCompiler.string": "Помогите мне установить компилятор",
 	"noConfig.string": "Не настраивать компилятор (не рекомендуется)",
+	"selectCompiler.string": "Выбор компилятора",
 	"confirmCompiler.string": "Да",
 	"selectCompiler.message": "Обнаружен компилятор {0}. Настроить IntelliSense с этим компилятором?",
-	"selectIntelliSenseConfiguration.string": "Выбрать конфигурацию IntelliSense…",
 	"server.crashed.restart": "Сбой языкового сервера. Перезапуск…",
 	"server.crashed2": "Языковой сервер аварийно завершил работу 5 раз за последние 3 минуты. Он не будет перезапущен.",
 	"loggingLevel.changed": "{0} был изменен на: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Да",
 	"no.button": "Нет",
 	"configurations.received": "Получены пользовательские конфигурации:",
-	"browse.configuration.received": "Получена настраиваемая конфигурация просмотра: {0}"
+	"browse.configuration.received": "Получена настраиваемая конфигурация просмотра: {0}",
+	"fallback.clipboard": " Объявление/определение скопировано."
 }

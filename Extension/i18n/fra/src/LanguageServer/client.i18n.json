@@ -14,15 +14,15 @@
 	"configuration.providers": "fournisseurs de configuration",
 	"compilers": "compilateurs",
 	"setCompiler.message": "Vous n’avez aucun IntelliSense configuré. À moins que vous ne définissiez vos propres configurations, IntelliSense risque de ne pas être fonctionnel.",
-	"selectCompiler.string": "Sélectionner la configuration IntelliSense…",
+	"selectIntelliSenseConfiguration.string": "Sélectionner la configuration IntelliSense…",
 	"use.provider": "Utiliser {0}",
 	"use.compileCommands": "Utiliser {0}",
 	"selectAnotherCompiler.string": "Sélectionner un autre compilateur sur ma machine…",
 	"installCompiler.string": "M’aider à installer un compilateur",
 	"noConfig.string": "Ne pas configurer avec un compilateur (non recommandé)",
+	"selectCompiler.string": "Sélectionner un compilateur",
 	"confirmCompiler.string": "Oui",
 	"selectCompiler.message": "Le compilateur {0} a été trouvé. Voulez-vous configurer IntelliSense avec ce compilateur ?",
-	"selectIntelliSenseConfiguration.string": "Sélectionner la configuration IntelliSense…",
 	"server.crashed.restart": "Le serveur de langue s’est arrêté. Redémarrage...",
 	"server.crashed2": "Le serveur de langage s'est bloqué 5 fois au cours des 3 dernières minutes. Il n'est pas redémarré.",
 	"loggingLevel.changed": "{0} a été changé en : {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Oui",
 	"no.button": "Non",
 	"configurations.received": "Configurations personnalisées reçues :",
-	"browse.configuration.received": "Configuration de navigation personnalisée reçue : {0}"
+	"browse.configuration.received": "Configuration de navigation personnalisée reçue : {0}",
+	"fallback.clipboard": " La déclaration/définition a été copiée."
 }

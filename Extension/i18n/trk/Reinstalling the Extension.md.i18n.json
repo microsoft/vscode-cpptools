@@ -16,6 +16,6 @@
 	"reinstall.extension.text5": "Windows üzerinde:",
 	"reinstall.extension.text6": "Linux'ta:",
 	"reinstall.extension.text7": "Ardından, VS Code’daki pazar yeri kullanıcı arabirimi aracılığıyla yeniden yükleyin.",
-	"reinstall.extension.text8": "Uzantının doğru sürümü VS Code tarafından dağıtılamazsa, sisteminiz için doğru VSIX {0} olabilir ve VS Code’daki market kullanıcı arabirimindeki '...' menüsü altındaki 'VSIX'ten Yükle...' seçeneği kullanılarak yüklenebilir.",
+	"reinstall.extension.text8": "Uzantının doğru sürümü VS Code tarafından dağıtılamazsa, sisteminiz için doğru VSIX {0} olabilir ve VS Code’daki market kullanıcı arabirimindeki '...' menüsü altındaki `VSIX'ten Yükle...` seçeneği kullanılarak yüklenebilir.",
 	"download.vsix.link.title": "VS Code market web sitesinden indirildi"
 }
