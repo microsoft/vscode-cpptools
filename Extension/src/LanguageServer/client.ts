@@ -2499,18 +2499,9 @@ export class DefaultClient implements Client {
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
-            if (ui.isNewUI) {
-                this.model.isInitializingWorkspace.Value = true;
-            } else {
-                this.model.isParsingWorkspace.Value = true;
-            }
+            this.model.isInitializingWorkspace.Value = true;
         } else if (message.endsWith("Indexing")) {
-            if (ui.isNewUI) {
-                this.model.isIndexingWorkspace.Value = true;
-                this.model.isInitializingWorkspace.Value = false;
-            } else {
-                this.model.isParsingWorkspace.Value = true;
-            }
+            this.model.isIndexingWorkspace.Value = true;
         } else if (message.endsWith("files")) {
             this.model.isParsingFiles.Value = true;
         } else if (message.endsWith("IntelliSense")) {
