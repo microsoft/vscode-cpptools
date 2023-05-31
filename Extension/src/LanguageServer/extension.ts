@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { TreeNode, NodeType } from './referencesModel';
-import { UI, getUI } from './ui';
+import { LanguageStatusUI, getUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
     codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
@@ -35,7 +35,7 @@ export const configPrefix: string = "C/C++: ";
 let prevCrashFile: string;
 export let clients: ClientCollection;
 let activeDocument: string;
-let ui: UI;
+let ui: LanguageStatusUI;
 const disposables: vscode.Disposable[] = [];
 const commandDisposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];

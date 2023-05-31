@@ -16,26 +16,8 @@ import { CppSettings } from './settings';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-let uiPromise: Promise<UI> | undefined;
-let ui: UI;
-
-export interface UI {
-    isNewUI: boolean;
-    activeDocumentChanged(): void;
-    bind(client: Client): void;
-    showConfigurations(configurationNames: string[]): Promise<number>;
-    ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void>;
-    showConfigurationProviders(currentProvider?: string): Promise<string | undefined>;
-    showCompileCommands(paths: string[]): Promise<number>;
-    showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string>;
-    showParsingCommands(): Promise<number>;
-    showActiveCodeAnalysisCommands(): Promise<number>;
-    showIdleCodeAnalysisCommands(): Promise<number>;
-    showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): void;
-    showConfigureCompileCommandsMessage(prompt: () => Promise<boolean>, onSkip: () => void): void;
-    showConfigureCustomProviderMessage(prompt: () => Promise<boolean>, onSkip: () => void): void;
-    dispose(): void;
-}
+let uiPromise: Promise<LanguageStatusUI> | undefined;
+let ui: LanguageStatusUI;
 
 interface IndexableQuickPickItem extends vscode.QuickPickItem {
     index: number;
@@ -65,7 +47,7 @@ enum LanguageStatusPriority {
 
 const commandArguments: string[] = []; // We report the sender of the command
 
-export class CurrentUI implements UI {
+export class LanguageStatusUI {
     private currentClient: Client | undefined;
     private configStatusBarItem: vscode.StatusBarItem;
     private browseEngineStatusItem: vscode.LanguageStatusItem;
@@ -101,7 +83,6 @@ export class CurrentUI implements UI {
     private codeAnalysProgress: string = "";
     // Prevent icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
-    get isNewUI(): boolean { return true; };
     private readonly configureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.text", "Configure IntelliSense");
     private readonly cppConfigureIntelliSenseText: string = localize("c.cpp.configureIntelliSenseStatus.cppText", "C/C++ Configure IntelliSense");
 
@@ -317,7 +298,6 @@ export class CurrentUI implements UI {
     private setIsUpdatingIntelliSense(val: boolean): void {
         const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
 
-        // TODO: Integrate with Tarik's feature to determine if compiler/bare-IntelliSense is configured
         if (settings.intelliSenseEngine === "disabled") {
             this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
             this.intelliSenseStatusItem.command = {
@@ -687,14 +667,14 @@ export class CurrentUI implements UI {
     }
 }
 
-export async function getUI(): Promise<UI> {
+export async function getUI(): Promise<LanguageStatusUI> {
     if (!uiPromise) {
         uiPromise = _getUI();
     }
     return uiPromise;
 }
 
-async function _getUI(): Promise<UI> {
-    ui = new CurrentUI();
+async function _getUI(): Promise<LanguageStatusUI> {
+    ui = new LanguageStatusUI();
     return ui;
 }
