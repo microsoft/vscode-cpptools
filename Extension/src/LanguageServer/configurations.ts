@@ -963,14 +963,14 @@ export class CppProperties {
                     && !settings.defaultIncludePath
                     && !settings.defaultDefines
                     && !settings.defaultMacFrameworkPath
-                    && settings.defaultWindowsSdkVersion === ""
+                    && !settings.defaultWindowsSdkVersion
                     && !settings.defaultForcedInclude
-                    && settings.defaultCompileCommands === ""
+                    && !settings.defaultCompileCommands
                     && !settings.defaultCompilerArgs
                     && settings.defaultCStandard === ""
                     && settings.defaultCppStandard === ""
                     && settings.defaultIntelliSenseMode === ""
-                    && settings.defaultConfigurationProvider === "";
+                    && !settings.defaultConfigurationProvider;
 
                 // Only keep a cached custom browse config if there is an empty configuration,
                 // or if a specified provider ID has not changed.

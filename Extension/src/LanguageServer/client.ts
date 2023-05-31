@@ -1441,7 +1441,7 @@ export class DefaultClient implements Client {
             defaultSystemIncludePath: settings.defaultSystemIncludePath,
             cppFilesExclude: settings.filesExclude,
             clangFormatPath: util.resolveVariables(settings.clangFormatPath, this.AdditionalEnvironment),
-            clangFormatStyle: util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment),
+            clangFormatStyle: settings.clangFormatStyle ? util.resolveVariables(settings.clangFormatStyle, this.AdditionalEnvironment) : undefined,
             clangFormatFallbackStyle: settings.clangFormatFallbackStyle,
             clangFormatSortIncludes: settings.clangFormatSortIncludes,
             codeAnalysisRunAutomatically: settings.codeAnalysisRunAutomatically,
@@ -2608,18 +2608,10 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings(this.RootUri);
         const opacity: number | undefined = settings.inactiveRegionOpacity;
         if (opacity !== null && opacity !== undefined) {
-            let backgroundColor: string | undefined = settings.inactiveRegionBackgroundColor;
-            if (backgroundColor === "") {
-                backgroundColor = undefined;
-            }
-            let color: string | undefined = settings.inactiveRegionForegroundColor;
-            if (color === "") {
-                color = undefined;
-            }
             const decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
                 opacity: opacity.toString(),
-                backgroundColor: backgroundColor,
-                color: color,
+                backgroundColor: settings.inactiveRegionBackgroundColor,
+                color: settings.inactiveRegionForegroundColor,
                 rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
             });
             // We must convert to vscode.Ranges in order to make use of the API's
