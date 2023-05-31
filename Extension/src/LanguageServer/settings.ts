@@ -211,7 +211,8 @@ class Settings {
 }
 
 function changeBlankStringToUndefined(input: string | undefined): string | undefined {
-    return (input === undefined || input.trim() === "") ? undefined : input;
+    // Although null is not a valid type, user could enter a null anyway.
+    return (input === undefined || input === null || input.trim() === "") ? undefined : input;
 }
 
 export class CppSettings extends Settings {
