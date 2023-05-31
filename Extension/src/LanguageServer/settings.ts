@@ -413,7 +413,7 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
-    public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
+    public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
     public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
     public get hover(): string | undefined { return super.Section.get<string>("hover"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
@@ -913,14 +913,18 @@ export class CppSettings extends Settings {
                 const keys: string[] = Object.keys(editorConfigSettings);
                 for (let i: number = 0; i < keys.length; ++i) {
                     if (keys[i].startsWith("cpp_")) {
-                        foundEditorConfigWithVcFormatSettings = true;
-                        const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
-                        if (!didEditorConfigNotice.Value) {
-                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
-                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
-                            didEditorConfigNotice.Value = true;
+                        const cppCheck: string = keys[i].substring(4);
+                        if (cppCheck.startsWith("indent_") || cppCheck.startsWith("new_line_") ||
+                            cppCheck.startsWith("space_") || cppCheck.startsWith("wrap_")) {
+                            foundEditorConfigWithVcFormatSettings = true;
+                            const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
+                            if (!didEditorConfigNotice.Value) {
+                                vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
+                                    "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
+                                didEditorConfigNotice.Value = true;
+                            }
+                            return true;
                         }
-                        return true;
                     }
                 }
                 switch (typeof editorConfigSettings.root) {
@@ -990,7 +994,7 @@ export class OtherSettings {
     public get editorInlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
     public get editorParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor (): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+    public get workbenchSettingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
     public get colorTheme(): string | undefined { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
 
