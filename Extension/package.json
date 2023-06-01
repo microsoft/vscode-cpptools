@@ -733,7 +733,6 @@
           },
           "C_Cpp.default.dotConfig": {
             "type": "string",
-            "default": null,
             "markdownDescription": "%c_cpp.configuration.default.dotConfig.markdownDescription%",
             "scope": "resource"
           },
