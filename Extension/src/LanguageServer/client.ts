@@ -34,7 +34,7 @@ import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
-import { UI, getUI } from './ui';
+import { LanguageStatusUI, getUI } from './ui';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
@@ -59,7 +59,7 @@ const deepCopy = (obj: any) => _.cloneDeep(obj);
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-let ui: UI;
+let ui: LanguageStatusUI;
 let timeStamp: number = 0;
 const configProviderTimeout: number = 2000;
 let initializedClientCount: number = 0;
@@ -2499,18 +2499,10 @@ export class DefaultClient implements Client {
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
-            if (ui.isNewUI) {
-                this.model.isInitializingWorkspace.Value = true;
-            } else {
-                this.model.isParsingWorkspace.Value = true;
-            }
+            this.model.isInitializingWorkspace.Value = true;
         } else if (message.endsWith("Indexing")) {
-            if (ui.isNewUI) {
-                this.model.isIndexingWorkspace.Value = true;
-                this.model.isInitializingWorkspace.Value = false;
-            } else {
-                this.model.isParsingWorkspace.Value = true;
-            }
+            this.model.isIndexingWorkspace.Value = true;
+            this.model.isInitializingWorkspace.Value = false;
         } else if (message.endsWith("files")) {
             this.model.isParsingFiles.Value = true;
         } else if (message.endsWith("IntelliSense")) {

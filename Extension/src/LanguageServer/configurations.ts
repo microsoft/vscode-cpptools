@@ -21,7 +21,7 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
 import { DefaultClient } from './client';
-import { UI, getUI } from './ui';
+import { LanguageStatusUI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -352,7 +352,7 @@ export class CppProperties {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
                 if (configuration.compilerPath !== undefined || configuration.compileCommands !== undefined || configuration.configurationProvider !== undefined) {
-                    getUI().then((ui: UI) => ui.ShowConfigureIntelliSenseButton(false, this.client));
+                    getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client));
                 }
                 this.applyDefaultConfigurationValues(configuration);
                 this.configurationIncomplete = false;
