@@ -6008,7 +6008,7 @@
     "integrationTests": "tsc -p test.tsconfig.json && node ./out/test/integrationTests/languageServer/runTest.js",
     "intelliSenseFeaturesTests": "tsc -p test.tsconfig.json && node ./out/test/integrationTests/IntelliSenseFeatures/runTest.js",
     "import-edge-strings": "node ./import_edge_strings.js",
-    "postinstall": "npx vscode-dts dev"
+    "postinstall": "npx vscode-dts dev && npx vscode-dts master"
   },
   "devDependencies": {
     "@octokit/rest": "^18.12.0",
