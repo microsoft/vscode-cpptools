@@ -53,6 +53,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         }
         return documentSymbols;
     }
+
     public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {

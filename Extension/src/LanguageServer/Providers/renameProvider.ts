@@ -19,6 +19,7 @@ export class RenameProvider implements vscode.RenameProvider {
         this.client = client;
     }
     public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit> {
+        await this.client.awaitUntilLanguageClientReady();
         const settings: CppSettings = new CppSettings();
         if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
             vscode.window.showErrorMessage(localize("invalid.identifier.for.rename", "Invalid identifier provided for the Rename Symbol operation."));
@@ -40,7 +41,6 @@ export class RenameProvider implements vscode.RenameProvider {
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
                 DefaultClient.referencesParams = params;
-                await this.client.awaitUntilLanguageClientReady();
                 // The current request is represented by referencesParams.  If a request detects
                 // referencesParams does not match the object used when creating the request, abort it.
                 if (params !== DefaultClient.referencesParams) {

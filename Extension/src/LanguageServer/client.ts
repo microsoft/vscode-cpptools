@@ -1411,15 +1411,15 @@ export class DefaultClient implements Client {
     }
 
     public sendCallHierarchyCallsToNotification(params: CallHierarchyParams): void {
-        this.languageClient.sendNotification(CallHierarchyCallsToNotification, params);
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CallHierarchyCallsToNotification, params));
     }
 
     public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
-        this.languageClient.sendNotification(FindAllReferencesNotification, params);
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(FindAllReferencesNotification, params));
     }
 
     public sendRenameNotification(params: ReferenceParams): void {
-        this.languageClient.sendNotification(RenameNotification, params);
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(RenameNotification, params));
     }
 
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
@@ -1983,10 +1983,12 @@ export class DefaultClient implements Client {
     }
 
     public async rescanFolder(): Promise<void> {
-        await this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(RescanFolderNotification));
+        await this.awaitUntilLanguageClientReady();
+        await this.languageClient.sendNotification(RescanFolderNotification);
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
         const onFinished: () => void = () => {
             if (requestFile) {
                 this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
@@ -2201,6 +2203,7 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
+        await this.awaitUntilLanguageClientReady();
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
@@ -2380,6 +2383,7 @@ export class DefaultClient implements Client {
                     cachedEditorConfigLookups.clear();
                 }
 
+                await this.awaitUntilLanguageClientReady();
                 this.languageClient.sendNotification(FileCreatedNotification, { uri: uri.toString() });
             });
 
@@ -2413,13 +2417,14 @@ export class DefaultClient implements Client {
                         const mtime: Date = fs.statSync(uri.fsPath).mtime;
                         const duration: number = Date.now() - mtime.getTime();
                         if (duration < 10000) {
+                            await this.awaitUntilLanguageClientReady();
                             this.languageClient.sendNotification(FileChangedNotification, { uri: uri.toString() });
                         }
                     }
                 }
             });
 
-            this.rootPathFileWatcher.onDidDelete((uri) => {
+            this.rootPathFileWatcher.onDidDelete(async (uri) => {
                 if (uri.scheme !== 'file') {
                     return;
                 }
@@ -2431,7 +2436,8 @@ export class DefaultClient implements Client {
                 if (fileName === ".clang-format" || fileName === "_clang-format") {
                     cachedEditorConfigLookups.clear();
                 }
-                this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
+                await this.awaitUntilLanguageClientReady();
+                await this.languageClient.sendNotification(FileDeletedNotification, { uri: uri.toString() });
             });
 
             this.disposables.push(this.rootPathFileWatcher);
@@ -2795,6 +2801,7 @@ export class DefaultClient implements Client {
         const params: QueryDefaultCompilerParams = {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
+        await this.awaitUntilLanguageClientReady();
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
@@ -2965,7 +2972,7 @@ export class DefaultClient implements Client {
             params.configurations.push(modifiedConfig);
         });
 
-        await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
+        await this.requestWhenReady(() => this.languageClient.sendRequest(ChangeCppPropertiesRequest, params));
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
@@ -3098,7 +3105,7 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
-        this.languageClient.sendNotification(CustomConfigurationNotification, params);
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CustomConfigurationNotification, params));
     }
 
     private browseConfigurationLogging: string = "";
@@ -3200,7 +3207,7 @@ export class DefaultClient implements Client {
             workspaceFolderUri: this.RootUri?.toString()
         };
 
-        this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params);
+        this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(CustomBrowseConfigurationNotification, params));
     }
 
     private clearCustomConfigurations(): void {
@@ -3496,7 +3503,7 @@ export class DefaultClient implements Client {
             copyToClipboard: copy ?? false
         };
 
-        const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
+        const result: CreateDeclarationOrDefinitionResult = await this.requestWhenReady(() => this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params));
         // Create/Copy returned no result.
         if (result.edit === undefined) {
             // The only condition in which result.edit would be undefined is a
@@ -3617,7 +3624,7 @@ export class DefaultClient implements Client {
             const params: IntervalTimerParams = {
                 freeMemory: Math.floor(os.freemem() / 1048576)
             };
-            this.languageClient.sendNotification(IntervalTimerNotification, params);
+            this.notifyWhenLanguageClientReady(() => this.languageClient.sendNotification(IntervalTimerNotification, params));
             this.configuration.checkCppProperties();
             this.configuration.checkCompileCommands();
         }
@@ -3702,7 +3709,7 @@ export class DefaultClient implements Client {
             });
             if (!cancelling) {
                 workspaceReferences.referencesCanceled = true;
-                languageClient.sendNotification(CancelReferencesNotification);
+                this.notifyWhenLanguageClientReady(() => languageClient.sendNotification(CancelReferencesNotification));
             }
         }
     }

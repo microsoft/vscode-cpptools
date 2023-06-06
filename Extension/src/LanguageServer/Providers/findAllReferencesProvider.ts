@@ -12,7 +12,9 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     constructor(client: DefaultClient) {
         this.client = client;
     }
+
     public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+        await this.client.awaitUntilLanguageClientReady();
         return new Promise<vscode.Location[]>((resolve, reject) => {
             const callback: () => Promise<void> = async () => {
                 const params: FindAllReferencesParams = {
@@ -20,7 +22,6 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
                     textDocument: this.client.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)
                 };
                 DefaultClient.referencesParams = params;
-                await this.client.awaitUntilLanguageClientReady();
                 // The current request is represented by referencesParams.  If a request detects
                 // referencesParams does not match the object used when creating the request, abort it.
                 if (params !== DefaultClient.referencesParams) {

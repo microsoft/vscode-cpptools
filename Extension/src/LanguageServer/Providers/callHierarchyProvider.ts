@@ -125,6 +125,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyIncomingCall[] | undefined | any> {
+        await this.client.awaitUntilLanguageClientReady();
         return new Promise<vscode.CallHierarchyIncomingCall[] | undefined | any>((resolve, reject) => {
             const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
             if (item === undefined) {
@@ -134,7 +135,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             }
 
             const callback: () => Promise<void> = async () => {
-                await this.client.awaitUntilLanguageClientReady();
                 const params: CallHierarchyParams = {
                     textDocument: { uri: item.uri.toString() },
                     position: Position.create(item.range.start.line, item.range.start.character)
@@ -198,13 +198,12 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+        await this.client.awaitUntilLanguageClientReady();
         const CallHierarchyCallsFromEvent: string = "CallHierarchyCallsFrom";
         if (item === undefined) {
             this.logTelemetry(CallHierarchyCallsFromEvent, CallHierarchyRequestStatus.Failed);
             return undefined;
         }
-
-        await this.client.awaitUntilLanguageClientReady();
 
         let result: vscode.CallHierarchyOutgoingCall[] | undefined;
         const params: CallHierarchyParams = {
