@@ -1154,6 +1154,7 @@ export class DefaultClient implements Client {
     }
 
     public async rescanCompilers(sender?: any): Promise<void> {
+        await this.awaitUntilLanguageClientReady();
         compilerDefaults = await this.requestCompiler();
         DefaultClient.updateClientConfigurations();
         if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
@@ -2801,7 +2802,6 @@ export class DefaultClient implements Client {
         const params: QueryDefaultCompilerParams = {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
-        await this.awaitUntilLanguageClientReady();
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
         vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
@@ -3739,6 +3739,7 @@ export class DefaultClient implements Client {
             return;
         }
         trustedCompilerPaths.push(path);
+        await this.awaitUntilLanguageClientReady();
         compilerDefaults = await this.requestCompiler(path);
         DebugConfigurationProvider.ClearDetectedBuildTasks();
     }
