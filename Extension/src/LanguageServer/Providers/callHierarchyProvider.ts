@@ -5,9 +5,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as Telemetry from '../../telemetry';
-import { DefaultClient, CancelReferencesNotification, workspaceReferences } from '../client';
+import { DefaultClient, workspaceReferences } from '../client';
 import { processDelayedDidOpen } from '../extension';
-import { CallHierarchyResultCallback } from '../references';
+import { CallHierarchyResultCallback, CancellationSender } from '../references';
 import { Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { makeVscodeRange } from '../utils';
 
@@ -77,7 +77,7 @@ export interface CallHierarchyCallsItemResult {
     calls: CallHierarchyCallsItem[];
 }
 
-export enum CallHierarchyRequestStatus {
+enum CallHierarchyRequestStatus {
     Unknown,
     Succeeded,
     Canceled,
@@ -95,6 +95,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     // Indicates whether a request is from an entry root node (e.g. top function in the call tree).
     private isEntryRootNodeTelemetry: boolean = false;
     private client: DefaultClient;
+
     constructor(client: DefaultClient) {
         this.client = client;
     }
@@ -126,73 +127,60 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyIncomingCall[] | undefined | any> {
-        return new Promise<vscode.CallHierarchyIncomingCall[] | undefined | any>((resolve, reject) => {
-            const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
-            if (item === undefined) {
-                this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Failed);
-                resolve(undefined);
-                return;
-            }
+        await this.client.awaitUntilLanguageClientReady();
 
-            const callback: () => Promise<void> = async () => {
-                await this.client.awaitUntilLanguageClientReady();
+        // Cancel any current reference requests by firing a cancellation event to listeners.
+        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
+
+        const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
+        if (item === undefined) {
+            this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Failed);
+            return undefined;
+        }
+
+        // Listen to VS Code cancellation.
+        let requestCanceled: CancellationSender = CancellationSender.None;
+        token.onCancellationRequested(e => { requestCanceled = CancellationSender.ProviderToken; });
+
+        // Process the request.
+        return new Promise<vscode.CallHierarchyIncomingCall[] | undefined | any>((resolve, reject) => {
+            // Listen to cancellation from an incoming new request, user or language server.
+            workspaceReferences.onCancellationRequested(sender => { requestCanceled = sender; });
+
+            // Define the callback that will process results.
+            const resultCallback: CallHierarchyResultCallback = (result: CallHierarchyCallsItemResult | null, progressBarDuration?: number) => {
+                if (requestCanceled !== CancellationSender.None || result === null || result?.calls === undefined) {
+                    const requestStatus: CallHierarchyRequestStatus = requestCanceled === CancellationSender.User ?
+                        CallHierarchyRequestStatus.CaneledByUser : CallHierarchyRequestStatus.Canceled;
+                    this.logTelemetry(CallHierarchyCallsToEvent, requestStatus, progressBarDuration);
+
+                    reject(new vscode.CancellationError());
+                } else {
+                    this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Succeeded, progressBarDuration);
+
+                    if (result?.calls.length === 0) {
+                        resolve(undefined);
+                    } else {
+                        resolve(this.createIncomingCalls(result.calls));
+                    }
+                }
+                return;
+            };
+
+            if (requestCanceled === CancellationSender.None) {
+                workspaceReferences.setCallHierarchyResultsCallback(resultCallback);
+
+                // Send the request to language server.
                 const params: CallHierarchyParams = {
                     textDocument: { uri: item.uri.toString() },
                     position: Position.create(item.range.start.line, item.range.start.character)
                 };
-                DefaultClient.referencesParams = params;
-                // The current request is represented by referencesParams.  If a request detects
-                // referencesParams does not match the object used when creating the request, abort it.
-                if (params !== DefaultClient.referencesParams) {
-                    // Complete with nothing instead of rejecting, to avoid an error message from VS Code
-                    resolve(undefined);
-                }
-                DefaultClient.referencesRequestPending = true;
-
-                // Register a single-fire handler for the reply.
-                const resultCallback: CallHierarchyResultCallback =
-                    (result: CallHierarchyCallsItemResult | null, canceledByUser: boolean, progressBarDuration?: number) => {
-                    DefaultClient.referencesRequestPending = false;
-                    if (result === null || result?.calls === undefined) {
-                        const requestStatus: CallHierarchyRequestStatus = canceledByUser ? CallHierarchyRequestStatus.CaneledByUser : CallHierarchyRequestStatus.Canceled;
-                        this.logTelemetry(CallHierarchyCallsToEvent, requestStatus, progressBarDuration);
-                        reject(new vscode.CancellationError());
-                    } else {
-                        this.logTelemetry(CallHierarchyCallsToEvent, CallHierarchyRequestStatus.Succeeded, progressBarDuration);
-                        if (result?.calls.length === 0) {
-                            resolve(undefined);
-                        } else {
-                            resolve(this.createIncomingCalls(result.calls));
-                        }
-                    }
-
-                    this.client.clearPendingReferencesCancellations();
-                };
-
-                workspaceReferences.setCallHierarchyResultsCallback(resultCallback);
                 workspaceReferences.startCallHierarchyIncomingCalls(params);
-
-                token.onCancellationRequested(e => {
-                    if (params === DefaultClient.referencesParams) {
-                        this.client.cancelReferences();
-                    }
-                });
-            };
-
-            if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
-                const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
-                DefaultClient.referencesPendingCancellations.push({
-                    reject: () => {
-                        // Complete with nothing instead of rejecting, to avoid an error message from VS Code
-                        resolve(undefined);
-                    }, callback
-                });
-                if (!cancelling) {
-                    workspaceReferences.referencesCanceled = true;
-                    this.client.languageClient.sendNotification(CancelReferencesNotification);
-                }
             } else {
-                callback();
+                // Only complete the request at this point if the request to language server
+                // has not been sent. Otherwise, the cancellation is handled when language
+                // server has completed/canceled its processing and sends the results.
+                resultCallback(null, 0);
             }
         });
     }

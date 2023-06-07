@@ -15,7 +15,10 @@ export class ReferencesModel {
         this.originalSymbol = resultsInput.text;
         this.groupByFile = groupByFile;
 
-        const results: ReferenceInfo[] = resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed);
+        // Only filter out confirmed references when operation has finished or canceled.
+        // Otherwise, show all results in the "Other References" view while previewing.
+        const results: ReferenceInfo[] = (resultsInput.isFinished || isCanceled) ?
+            resultsInput.referenceInfos.filter(r => r.type !== ReferenceType.Confirmed) : resultsInput.referenceInfos;
 
         // Build a single flat list of all leaf nodes
         // Currently, the hierarchy is built each time referencesTreeDataProvider requests nodes.
