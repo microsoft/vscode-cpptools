@@ -243,7 +243,7 @@ export class ReferencesManager {
     public cancelCurrentReferenceRequest(sender: CancellationSender): void {
         // Notify the current listener its request was canceled.
         this.referenceRequestCanceled.fire(sender);
-        // Cancel the process in language server.
+        // Cancel the process in the language server.
         this.client.languageClient.sendNotification(CancelReferencesNotification);
     }
 
