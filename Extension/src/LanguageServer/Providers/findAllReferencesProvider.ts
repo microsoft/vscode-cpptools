@@ -4,13 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, workspaceReferences } from '../client';
-import { Position, TextDocumentIdentifier } from 'vscode-languageclient';
-import * as refs from '../references';
+import { Position, RequestType } from 'vscode-languageclient';
+import { ReferencesParams, ReferencesResult, ReferenceType, ReferenceInfo } from '../references';
 
-export interface FindAllReferencesParams {
-    position: Position;
-    textDocument: TextDocumentIdentifier;
-}
+const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, void> =
+    new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/findAllReferences');
 
 export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     private client: DefaultClient;
@@ -23,54 +21,34 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         Promise<vscode.Location[] | undefined> {
         await this.client.awaitUntilLanguageClientReady();
 
-        // Cancel any current reference requests by firing a cancellation event to listeners.
-        workspaceReferences.cancelCurrentReferenceRequest(refs.CancellationSender.NewRequest);
+        const locationsResult: vscode.Location[] = [];
+        const params: ReferencesParams = {
+            newName: "",
+            position: Position.create(position.line, position.character),
+            textDocument: { uri: document.uri.toString() }
+        };
+        const response: ReferencesResult = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, token);
 
-        // Listen to VS Code cancellation.
-        let requestCanceled: refs.CancellationSender = refs.CancellationSender.None;
-        token.onCancellationRequested(e => { requestCanceled = refs.CancellationSender.ProviderToken; });
+        workspaceReferences.resetProgressBar();
 
-        // Process the request.
-        return new Promise<vscode.Location[]>((resolve, reject) => {
-            // Listen to cancellation from an incoming new request, user or language server.
-            workspaceReferences.onCancellationRequested(sender => { requestCanceled = sender; });
-
-            // Define the callback that will process results.
-            const resultCallback: refs.ReferencesResultCallback = (result: refs.ReferencesResult | null) => {
-                if (result === null) {
-                    // Nothing to resolve.
-                    reject(new vscode.CancellationError());
-                } else {
-                    const locationsResult: vscode.Location[] = [];
-                    result.referenceInfos.forEach((referenceInfo: refs.ReferenceInfo) => {
-                        if (referenceInfo.type === refs.ReferenceType.Confirmed) {
-                            const uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
-                            const range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character,
-                                referenceInfo.position.line, referenceInfo.position.character + result.text.length);
-                            locationsResult.push(new vscode.Location(uri, range));
-                        }
-                    });
-
-                    resolve(locationsResult);
+        if (token.isCancellationRequested || response.referenceInfos === null) {
+            workspaceReferences.resetFindAllReferences();
+            throw new vscode.CancellationError();
+        } else if (response.referenceInfos.length !== 0) {
+            response.referenceInfos.forEach((referenceInfo: ReferenceInfo) => {
+                if (referenceInfo.type === ReferenceType.Confirmed) {
+                    const uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
+                    const range: vscode.Range = new vscode.Range(referenceInfo.position.line, referenceInfo.position.character,
+                        referenceInfo.position.line, referenceInfo.position.character + response.text.length);
+                    locationsResult.push(new vscode.Location(uri, range));
                 }
-                return;
-            };
+            });
 
-            if (requestCanceled === refs.CancellationSender.None) {
-                workspaceReferences.setReferencesResultsCallback(resultCallback);
+            // Display other reference types in panel or channel view.
+            workspaceReferences.showResultsInPanelView(response);
+        }
 
-                // Send the request to language server.
-                const params: FindAllReferencesParams = {
-                    position: Position.create(position.line, position.character),
-                    textDocument: { uri: document.uri.toString() }
-                };
-                workspaceReferences.startFindAllReferences(params);
-            } else {
-                // Only complete the request at this point if the request to language server
-                // has not been sent. Otherwise, the cancellation is handled when language
-                // server has completed/canceled its processing and sends the results.
-                resultCallback(null);
-            }
-        });
+        workspaceReferences.resetFindAllReferences();
+        return locationsResult;
     }
 }

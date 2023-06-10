@@ -11,11 +11,8 @@ import * as logger from '../logger';
 import { PersistentState } from './persistentState';
 import * as util from '../common';
 import { setInterval } from 'timers';
-import { NotificationType } from 'vscode-languageclient';
+import { NotificationType, Position, TextDocumentIdentifier } from 'vscode-languageclient';
 import { FindAllRefsView } from './referencesView';
-import { FindAllReferencesParams } from './Providers/findAllReferencesProvider';
-import { RenameReferencesParams } from './Providers/renameProvider';
-import { CallHierarchyParams, CallHierarchyCallsItemResult } from './Providers/callHierarchyProvider';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -37,6 +34,12 @@ export interface ReferenceInfo {
     type: ReferenceType;
 }
 
+export interface ReferencesParams {
+    newName: string;
+    position: Position;
+    textDocument: TextDocumentIdentifier;
+}
+
 export interface ReferencesResult {
     referenceInfos: ReferenceInfo[];
     text: string;
@@ -45,8 +48,6 @@ export interface ReferencesResult {
 }
 
 export type ReferencesResultCallback = (result: ReferencesResult | null) => void;
-export type CallHierarchyResultCallback =
-    (result: CallHierarchyCallsItemResult | null, progressBarDuration?: number) => void;
 
 enum ReferencesProgress {
     Started,
@@ -97,9 +98,6 @@ export enum CancellationSender {
 }
 
 const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
-const RenameNotification: NotificationType<RenameReferencesParams> = new NotificationType<RenameReferencesParams>('cpptools/rename');
-const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
-const CallHierarchyCallsToNotification: NotificationType<CallHierarchyParams> = new NotificationType<CallHierarchyParams>('cpptools/callHierarchyCallsTo');
 
 export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
     switch (referencesCommandMode) {
@@ -199,13 +197,8 @@ export class ReferencesManager {
     private findAllRefsView?: FindAllRefsView;
     private viewsInitialized: boolean = false;
 
-    public symbolSearchInProgress: boolean = false;
     public renamePending: boolean = false;
-
     private referenceRequestCanceled = new vscode.EventEmitter<CancellationSender>();
-
-    private referenceResultsCallback?: ReferencesResultCallback;
-    private callHierarchyResultsCallback?: CallHierarchyResultCallback;
 
     private referencesCurrentProgress?: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number = 0;
@@ -248,12 +241,10 @@ export class ReferencesManager {
     }
 
     public cancelCurrentReferenceRequest(sender: CancellationSender): void {
-        if (this.referenceResultsCallback || this.callHierarchyResultsCallback) {
-            // Notify the current listener its request was canceled.
-            this.referenceRequestCanceled.fire(sender);
-            // Cancel the process in language server.
-            this.client.languageClient.sendNotification(CancelReferencesNotification);
-        }
+        // Notify the current listener its request was canceled.
+        this.referenceRequestCanceled.fire(sender);
+        // Cancel the process in language server.
+        this.client.languageClient.sendNotification(CancelReferencesNotification);
     }
 
     public dispose(): void {
@@ -441,7 +432,7 @@ export class ReferencesManager {
         }
     }
 
-    private clearProgressTracker(): void {
+    public resetProgressBar(): void {
         if (this.referencesDelayProgress) {
             clearInterval(this.referencesDelayProgress);
         }
@@ -455,28 +446,25 @@ export class ReferencesManager {
             this.currentUpdateProgressResolve = undefined;
             this.currentUpdateProgressTimer = undefined;
         }
+        this.referencesProgressBarStartTime = 0;
     }
 
-    public startRename(params: RenameReferencesParams): void {
-        this.symbolSearchInProgress = true;
-        this.client.languageClient.sendNotification(RenameNotification, params);
+    public startRename(): void {
+        this.renamePending = true;
     }
 
-    public startFindAllReferences(params: FindAllReferencesParams): void {
-        this.symbolSearchInProgress = true;
-        this.client.languageClient.sendNotification(FindAllReferencesNotification, params);
+    public resetRename(): void {
+        this.renamePending = false;
+        this.initializeViews();
+        this.client.setReferencesCommandMode(ReferencesCommandMode.None);
     }
 
-    public startCallHierarchyIncomingCalls(params: CallHierarchyParams): void {
-        this.symbolSearchInProgress = true;
-        this.client.languageClient.sendNotification(CallHierarchyCallsToNotification, params);
+    public resetFindAllReferences(): void {
+        this.initializeViews();
+        this.client.setReferencesCommandMode(ReferencesCommandMode.None);
     }
 
-    public processResults(referencesResult: ReferencesResult): void {
-        if (!this.symbolSearchInProgress) {
-            return;
-        }
-
+    public showResultsInPanelView(referencesResult: ReferencesResult): void {
         this.initializeViews();
         this.clearViews();
 
@@ -502,27 +490,13 @@ export class ReferencesManager {
             }
         }
 
-        const currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
-
-        if (referencesResult.isFinished || referencesResult.isCanceled) {
-            this.symbolSearchInProgress = false;
-            this.clearProgressTracker();
-            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
-        }
-
-        if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
-            // Complete the request for rename.
-            if (this.referenceResultsCallback) {
-                this.referenceResultsCallback(referencesResult);
-                this.referenceResultsCallback = undefined;
-            }
-        } else {
+        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find || this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
             if (this.findAllRefsView) {
                 this.findAllRefsView.setData(referencesResult, this.groupByFile.Value);
             }
 
             // Display in "Other References" view or channel based on command mode: "peek references" OR "find all references"
-            if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
+            if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
                 const showConfirmedReferences: boolean = referencesResult.isCanceled;
                 if (this.findAllRefsView) {
                     const peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
@@ -533,47 +507,22 @@ export class ReferencesManager {
                         }
                     }
                 }
-            } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
+            } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 if (this.findAllRefsView) {
                     this.findAllRefsView.show(true);
-                }
-            }
-
-            if (referencesResult.isFinished || referencesResult.isCanceled) {
-                // Complete the request for find all references.
-                // If preview is done, the partial results is displayed in the "Other References" view or channel.
-                if (this.referenceResultsCallback) {
-                    this.referenceResultsCallback(referencesResult);
-                    this.referenceResultsCallback = undefined;
                 }
             }
         }
     }
 
-    public setReferencesResultsCallback(callback: ReferencesResultCallback): void {
-        this.referenceResultsCallback = callback;
-    }
-
-    public processCallHierarchyResults(callHierarchyResult: CallHierarchyCallsItemResult): void {
-        this.symbolSearchInProgress = false;
-        this.clearProgressTracker();
-        this.client.setReferencesCommandMode(ReferencesCommandMode.None);
+    public getCallHierarchyProgressBarDuration(): number | undefined {
         let referencesProgressBarDuration: number | undefined;
 
         if (this.referencesProgressBarStartTime !== 0) {
             referencesProgressBarDuration = Date.now() - this.referencesProgressBarStartTime;
             this.referencesProgressBarStartTime = 0;
         }
-
-        // Complete the request.
-        if (this.callHierarchyResultsCallback) {
-            this.callHierarchyResultsCallback(callHierarchyResult, referencesProgressBarDuration);
-            this.callHierarchyResultsCallback = undefined;
-        }
-    }
-
-    public setCallHierarchyResultsCallback(callback: CallHierarchyResultCallback): void {
-        this.callHierarchyResultsCallback = callback;
+        return referencesProgressBarDuration;
     }
 
     public clearViews(): void {

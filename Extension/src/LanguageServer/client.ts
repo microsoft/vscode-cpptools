@@ -17,7 +17,7 @@ import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
-import { CallHierarchyProvider, CallHierarchyCallsItemResult } from './Providers/callHierarchyProvider';
+import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
 // End provider imports
@@ -607,7 +607,6 @@ const DebugLogNotification: NotificationType<LocalizeStringParams> = new Notific
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
-const CallHierarchyNotification: NotificationType<CallHierarchyCallsItemResult> = new NotificationType<CallHierarchyCallsItemResult>('cpptools/callHierarchyCallsToResult');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
 const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
@@ -2264,9 +2263,8 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(CallHierarchyNotification, (e) => this.processCallHierarchyResult(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
@@ -3635,12 +3633,8 @@ export class DefaultClient implements Client {
         workspaceReferences.handleProgress(notificationBody);
     }
 
-    private processReferencesResult(referencesResult: refs.ReferencesResult): void {
-        workspaceReferences.processResults(referencesResult);
-    }
-
-    private processCallHierarchyResult(callHierarchyResult: CallHierarchyCallsItemResult): void {
-        workspaceReferences.processCallHierarchyResults(callHierarchyResult);
+    private processReferencesPreview(referencesResult: refs.ReferencesResult): void {
+        workspaceReferences.showResultsInPanelView(referencesResult);
     }
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
