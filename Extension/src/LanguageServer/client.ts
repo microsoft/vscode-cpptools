@@ -3616,7 +3616,7 @@ export class DefaultClient implements Client {
             workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
 
             // If the search is find all references, preview partial results.
-            // This will cause language server to send partial results to display
+            // This will cause the language server to send partial results to display
             // in the "Other References" view or channel. Doing a preview should not complete
             // an in-progress request until it is finished or canceled.
             if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
