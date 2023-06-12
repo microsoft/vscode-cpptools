@@ -2547,7 +2547,6 @@ export class DefaultClient implements Client {
                     const defaultClient: DefaultClient = <DefaultClient>client;
                     if (!defaultClient.configuration.CurrentConfiguration?.configurationProvider) {
                         const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
-                        showIntelliSenseFallbackMessage.Value = true;
                         if (showIntelliSenseFallbackMessage.Value
                             && !await telemetry.showStatusBarIntelliSenseButton()) {
                             ui.showConfigureIncludePathMessage(async () => {
