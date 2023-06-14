@@ -44,7 +44,6 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
-            workspaceReferences.resetFindAllReferences();
             throw new vscode.CancellationError();
         } else if (response.referenceInfos.length !== 0) {
             response.referenceInfos.forEach((referenceInfo: ReferenceInfo) => {
