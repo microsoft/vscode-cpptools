@@ -39,12 +39,8 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
         // Reset anything that can be cleared before procossing the result.
         workspaceReferences.resetProgressBar();
-        if (cancellationTokenListener) {
-            cancellationTokenListener.dispose();
-        }
-        if (requestCanceledListener) {
-            requestCanceledListener.dispose();
-        }
+        cancellationTokenListener.dispose();
+        requestCanceledListener.dispose();
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {

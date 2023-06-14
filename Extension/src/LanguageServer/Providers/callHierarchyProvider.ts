@@ -164,12 +164,8 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         // Reset anything that can be cleared before procossing the result.
         const progressBarDuration: number | undefined = workspaceReferences.getCallHierarchyProgressBarDuration();
         workspaceReferences.resetProgressBar();
-        if (cancellationTokenListener) {
-            cancellationTokenListener.dispose();
-        }
-        if (requestCanceledListener) {
-            requestCanceledListener.dispose();
-        }
+        cancellationTokenListener.dispose();
+        requestCanceledListener.dispose();
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.calls === undefined || requestCanceled !== undefined) {
