@@ -37,8 +37,8 @@ export class RenameProvider implements vscode.RenameProvider {
 
         // Listen to a cancellation for this request. When this request is cancelled,
         // use a local cancellation source to implicitly cancel a token.
+        // Don't listen to the token from the provider, as it will cancel when the cursor is moved to a different position.
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        this.disposables.push(token.onCancellationRequested(() => { cancelSource.cancel(); }));
         this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); }));
 
         // Send the request to the language server.
