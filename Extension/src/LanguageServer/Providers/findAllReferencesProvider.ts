@@ -12,6 +12,8 @@ const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, 
 
 export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     private client: DefaultClient;
+    private cancellationToken: vscode.CancellationTokenSource | undefined;
+    private disposables: vscode.Disposable[] = [];
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -21,17 +23,30 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         Promise<vscode.Location[] | undefined> {
         await this.client.awaitUntilLanguageClientReady();
 
+        // Cancel the previous request and listen to a next cancellation.
+        if (this.cancellationToken) {
+            this.cancellationToken.cancel();
+        }
+        this.cancellationToken = new vscode.CancellationTokenSource();
+        const cancelToken: vscode.CancellationTokenSource = this.cancellationToken;
+        this.disposables.push(token.onCancellationRequested(() => { cancelToken.cancel(); }));
+        this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelToken.cancel(); }));
+
+        // Send request to the language server.
         const locationsResult: vscode.Location[] = [];
         const params: ReferencesParams = {
             newName: "",
             position: Position.create(position.line, position.character),
             textDocument: { uri: document.uri.toString() }
         };
-        const response: ReferencesResult = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, token);
+        const response: ReferencesResult = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, cancelToken.token);
 
+        // Reset anything that can be cleared before procossing the result.
         workspaceReferences.resetProgressBar();
+        this.dispose();
 
-        if (token.isCancellationRequested || response.referenceInfos === null) {
+        // Process the result.
+        if (cancelToken.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
             workspaceReferences.resetFindAllReferences();
             throw new vscode.CancellationError();
         } else if (response.referenceInfos.length !== 0) {
@@ -50,5 +65,10 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
         workspaceReferences.resetFindAllReferences();
         return locationsResult;
+    }
+
+    private dispose(): void {
+        this.disposables.forEach((d) => d.dispose());
+        this.disposables = [];
     }
 }

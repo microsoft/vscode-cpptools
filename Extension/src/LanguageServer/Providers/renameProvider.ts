@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, workspaceReferences } from '../client';
-import { ReferencesParams, ReferencesResult, CancellationSender, ReferenceType, getReferenceTagString, getReferenceItemIconPath } from '../references';
+import { ReferencesParams, ReferencesResult, ReferenceType, getReferenceTagString, getReferenceItemIconPath } from '../references';
 import { CppSettings } from '../settings';
 import { Position, RequestType } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
@@ -18,6 +18,8 @@ const RenameRequest: RequestType<ReferencesParams, ReferencesResult, void> =
 
 export class RenameProvider implements vscode.RenameProvider {
     private client: DefaultClient;
+    private cancellationToken: vscode.CancellationTokenSource | undefined;
+    private disposables: vscode.Disposable[] = [];
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -33,9 +35,16 @@ export class RenameProvider implements vscode.RenameProvider {
             return undefined;
         }
 
-        let requestCanceled: CancellationSender | undefined;
-        workspaceReferences.onCancellationRequested(sender => { requestCanceled = sender; });
+        // Cancel the previous request and listen to a next cancellation.
+        if (this.cancellationToken) {
+            this.cancellationToken.cancel();
+        }
+        this.cancellationToken = new vscode.CancellationTokenSource();
+        const cancelToken: vscode.CancellationTokenSource = this.cancellationToken;
+        this.disposables.push(token.onCancellationRequested(() => { cancelToken.cancel(); }));
+        this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelToken.cancel(); }));
 
+        // Send request to the language server.
         workspaceReferences.startRename();
         const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         const params: ReferencesParams = {
@@ -43,14 +52,17 @@ export class RenameProvider implements vscode.RenameProvider {
             position: Position.create(position.line, position.character),
             textDocument: { uri: document.uri.toString() }
         };
-        const response: ReferencesResult = await this.client.languageClient.sendRequest(RenameRequest, params, token);
+        const response: ReferencesResult = await this.client.languageClient.sendRequest(RenameRequest, params, cancelToken.token);
 
+        // Reset anything that can be cleared before procossing the result.
         workspaceReferences.resetProgressBar();
         workspaceReferences.resetRename();
+        this.dispose();
 
-        if (token.isCancellationRequested || response.isCanceled || requestCanceled !== undefined) {
+        // Process the result.
+        if (token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
             throw new vscode.CancellationError();
-        } else if (response.referenceInfos === null || response.referenceInfos.length === 0) {
+        } else if (response.referenceInfos.length === 0) {
             vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
         } else {
             for (const reference of response.referenceInfos) {
@@ -67,5 +79,10 @@ export class RenameProvider implements vscode.RenameProvider {
         }
 
         return workspaceEditResult;
+    }
+
+    private dispose(): void {
+        this.disposables.forEach((d) => d.dispose());
+        this.disposables = [];
     }
 }

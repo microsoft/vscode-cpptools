@@ -11,7 +11,7 @@ import * as logger from '../logger';
 import { PersistentState } from './persistentState';
 import * as util from '../common';
 import { setInterval } from 'timers';
-import { NotificationType, Position, TextDocumentIdentifier } from 'vscode-languageclient';
+import { Position, TextDocumentIdentifier } from 'vscode-languageclient';
 import { FindAllRefsView } from './referencesView';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -87,17 +87,12 @@ export enum CancellationSender {
     /* Cancellation was from the provider cancellation token */
     ProviderToken,
 
-    /* Cancellation was from a new request */
-    NewRequest,
-
     /* Cancellation was from the language server */
     LanguageServer,
 
     /* Cancelaltion was from the user selecting the cancel button in the reference search progress bar */
     User
 }
-
-const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
 
 export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
     switch (referencesCommandMode) {
@@ -241,10 +236,8 @@ export class ReferencesManager {
     }
 
     public cancelCurrentReferenceRequest(sender: CancellationSender): void {
-        // Notify the current listener its request was canceled.
+        // Notify the current listener to cancel its request.
         this.referenceRequestCanceled.fire(sender);
-        // Cancel the process in the language server.
-        this.client.languageClient.sendNotification(CancelReferencesNotification);
     }
 
     public dispose(): void {
