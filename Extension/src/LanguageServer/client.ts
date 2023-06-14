@@ -3554,7 +3554,7 @@ export class DefaultClient implements Client {
                     }
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
-                const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment + 2, edit.range.start.character);
+                const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
                 workspaceEdits.insert(uri, position, edit.newText);
             }
             modifiedDocument = uri;
