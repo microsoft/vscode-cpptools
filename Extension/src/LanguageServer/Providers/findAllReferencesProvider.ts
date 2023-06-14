@@ -12,7 +12,6 @@ const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, 
 
 export class FindAllReferencesProvider implements vscode.ReferenceProvider {
     private client: DefaultClient;
-    private disposables: vscode.Disposable[] = [];
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -26,8 +25,8 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         // Listen to a cancellation for this request. When this request is cancelled,
         // use a local cancellation source to implicitly cancel a token.
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        this.disposables.push(token.onCancellationRequested(() => { cancelSource.cancel(); }));
-        this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); }));
+        const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => { cancelSource.cancel(); });
+        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); });
 
         // Send the request to the language server.
         const locationsResult: vscode.Location[] = [];
@@ -40,7 +39,12 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
         // Reset anything that can be cleared before procossing the result.
         workspaceReferences.resetProgressBar();
-        this.dispose();
+        if (cancellationTokenListener) {
+            cancellationTokenListener.dispose();
+        }
+        if (requestCanceledListener) {
+            requestCanceledListener.dispose();
+        }
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
@@ -61,10 +65,5 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
         workspaceReferences.resetFindAllReferences();
         return locationsResult;
-    }
-
-    private dispose(): void {
-        this.disposables.forEach((d) => d.dispose());
-        this.disposables = [];
     }
 }

@@ -18,7 +18,6 @@ const RenameRequest: RequestType<ReferencesParams, ReferencesResult, void> =
 
 export class RenameProvider implements vscode.RenameProvider {
     private client: DefaultClient;
-    private disposables: vscode.Disposable[] = [];
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -39,7 +38,7 @@ export class RenameProvider implements vscode.RenameProvider {
         // use a local cancellation source to implicitly cancel a token.
         // Don't listen to the token from the provider, as it will cancel when the cursor is moved to a different position.
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); }));
+        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); });
 
         // Send the request to the language server.
         workspaceReferences.startRename();
@@ -54,7 +53,9 @@ export class RenameProvider implements vscode.RenameProvider {
         // Reset anything that can be cleared before procossing the result.
         workspaceReferences.resetProgressBar();
         workspaceReferences.resetRename();
-        this.dispose();
+        if (requestCanceledListener) {
+            requestCanceledListener.dispose();
+        }
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
@@ -76,10 +77,5 @@ export class RenameProvider implements vscode.RenameProvider {
         }
 
         return workspaceEditResult;
-    }
-
-    private dispose(): void {
-        this.disposables.forEach((d) => d.dispose());
-        this.disposables = [];
     }
 }

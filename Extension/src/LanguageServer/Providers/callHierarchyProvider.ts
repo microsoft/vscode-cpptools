@@ -98,7 +98,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     // Indicates whether a request is from an entry root node (e.g. top function in the call tree).
     private isEntryRootNodeTelemetry: boolean = false;
     private client: DefaultClient;
-    private disposables: vscode.Disposable[] = [];
 
     constructor(client: DefaultClient) {
         this.client = client;
@@ -145,14 +144,14 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         // use a local cancellation source to implicitly cancel a token.
         let requestCanceled: CancellationSender | undefined;
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        this.disposables.push(token.onCancellationRequested(() => {
+        const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
             requestCanceled = CancellationSender.ProviderToken;
             cancelSource.cancel();
-        }));
-        this.disposables.push(workspaceReferences.onCancellationRequested(sender => {
+        });
+        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => {
             requestCanceled = sender;
             cancelSource.cancel();
-        }));
+        });
 
         // Send the request to the language server.
         let result: vscode.CallHierarchyIncomingCall[] | undefined;
@@ -165,7 +164,12 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         // Reset anything that can be cleared before procossing the result.
         const progressBarDuration: number | undefined = workspaceReferences.getCallHierarchyProgressBarDuration();
         workspaceReferences.resetProgressBar();
-        this.dispose();
+        if (cancellationTokenListener) {
+            cancellationTokenListener.dispose();
+        }
+        if (requestCanceledListener) {
+            requestCanceledListener.dispose();
+        }
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.calls === undefined || requestCanceled !== undefined) {
@@ -278,10 +282,5 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
         // Reset telemetry
         this.isEntryRootNodeTelemetry = false;
-    }
-
-    private dispose(): void {
-        this.disposables.forEach((d) => d.dispose());
-        this.disposables = [];
     }
 }
