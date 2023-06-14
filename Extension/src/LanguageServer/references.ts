@@ -84,6 +84,9 @@ export enum CancellationSender {
     /* No cancellations */
     None,
 
+    /* Cancellation was from a new request */
+    NewRequest,
+
     /* Cancellation was from the provider cancellation token */
     ProviderToken,
 

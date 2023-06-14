@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { DefaultClient, workspaceReferences } from '../client';
-import { ReferencesParams, ReferencesResult, ReferenceType, getReferenceTagString, getReferenceItemIconPath } from '../references';
+import { ReferencesParams, ReferencesResult, ReferenceType, getReferenceTagString, getReferenceItemIconPath, CancellationSender } from '../references';
 import { CppSettings } from '../settings';
 import { Position, RequestType } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
@@ -18,7 +18,6 @@ const RenameRequest: RequestType<ReferencesParams, ReferencesResult, void> =
 
 export class RenameProvider implements vscode.RenameProvider {
     private client: DefaultClient;
-    private cancellationToken: vscode.CancellationTokenSource | undefined;
     private disposables: vscode.Disposable[] = [];
 
     constructor(client: DefaultClient) {
@@ -28,6 +27,7 @@ export class RenameProvider implements vscode.RenameProvider {
     public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, token: vscode.CancellationToken):
         Promise<vscode.WorkspaceEdit | undefined> {
         await this.client.awaitUntilLanguageClientReady();
+        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         const settings: CppSettings = new CppSettings();
         if (settings.renameRequiresIdentifier && !util.isValidIdentifier(newName)) {
@@ -35,16 +35,13 @@ export class RenameProvider implements vscode.RenameProvider {
             return undefined;
         }
 
-        // Cancel the previous request and listen to a next cancellation.
-        if (this.cancellationToken) {
-            this.cancellationToken.cancel();
-        }
-        this.cancellationToken = new vscode.CancellationTokenSource();
-        const cancelToken: vscode.CancellationTokenSource = this.cancellationToken;
-        this.disposables.push(token.onCancellationRequested(() => { cancelToken.cancel(); }));
-        this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelToken.cancel(); }));
+        // Listen to a cancellation for this request. When this request is cancelled,
+        // use a local cancellation source to implicitly cancel a token.
+        const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+        this.disposables.push(token.onCancellationRequested(() => { cancelSource.cancel(); }));
+        this.disposables.push(workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); }));
 
-        // Send request to the language server.
+        // Send the request to the language server.
         workspaceReferences.startRename();
         const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         const params: ReferencesParams = {
@@ -52,7 +49,7 @@ export class RenameProvider implements vscode.RenameProvider {
             position: Position.create(position.line, position.character),
             textDocument: { uri: document.uri.toString() }
         };
-        const response: ReferencesResult = await this.client.languageClient.sendRequest(RenameRequest, params, cancelToken.token);
+        const response: ReferencesResult = await this.client.languageClient.sendRequest(RenameRequest, params, cancelSource.token);
 
         // Reset anything that can be cleared before procossing the result.
         workspaceReferences.resetProgressBar();
@@ -60,7 +57,7 @@ export class RenameProvider implements vscode.RenameProvider {
         this.dispose();
 
         // Process the result.
-        if (token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
+        if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
             throw new vscode.CancellationError();
         } else if (response.referenceInfos.length === 0) {
             vscode.window.showErrorMessage(localize("unable.to.locate.selected.symbol", "A definition for the selected symbol could not be located."));
