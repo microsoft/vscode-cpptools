@@ -45,6 +45,13 @@ enum LanguageStatusPriority {
     Low = 3
 }
 
+export enum ConfigurationType {
+    ConfigProvider = "configProvider",
+    CompileCommands = "compileCommands",
+    CompilerPath = "compilerPath",
+    NotConfigured = "notConfigured"
+}
+
 const commandArguments: string[] = []; // We report the sender of the command
 
 export class LanguageStatusUI {
@@ -118,7 +125,9 @@ export class LanguageStatusUI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.ShowConfigureIntelliSenseButton(false, this.currentClient);
+        if (this.currentClient !== undefined) {
+            this.ShowConfigureIntelliSenseButton(false, this.currentClient);
+        }
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, util.documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -426,14 +435,15 @@ export class LanguageStatusUI {
     private showConfigureIntelliSenseButton: boolean = false;
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
-    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
+    public async ShowConfigureIntelliSenseButton(show: boolean, client: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
+        if (configurationType !== undefined && sender !== undefined && this.showConfigureIntelliSenseButton && !show) { // Only log telemetry when the button is being hidden.
+            telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender });
+        }
         if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
             return;
         }
         this.showConfigureIntelliSenseButton = show;
-        if (client) {
-            client.setShowConfigureIntelliSenseButton(show);
-        }
+        client.setShowConfigureIntelliSenseButton(show);
         if (show) {
             const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');

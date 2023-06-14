@@ -21,7 +21,7 @@ import { setTimeout } from 'timers';
 import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
 import { DefaultClient } from './client';
-import { LanguageStatusUI, getUI } from './ui';
+import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -351,9 +351,6 @@ export class CppProperties {
         if (this.configurationIncomplete && this.defaultIncludes && this.defaultFrameworks && this.vcpkgPathReady) {
             const configuration: Configuration | undefined = this.CurrentConfiguration;
             if (configuration) {
-                if (configuration.compilerPath !== undefined || configuration.compileCommands !== undefined || configuration.configurationProvider !== undefined) {
-                    getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client));
-                }
                 this.applyDefaultConfigurationValues(configuration);
                 this.configurationIncomplete = false;
             }
@@ -1242,6 +1239,16 @@ export class CppProperties {
         }
 
         this.applyDefaultIncludePathsAndFrameworks();
+        const configuration: Configuration | undefined = this.CurrentConfiguration;
+        if (configuration) {
+            if (configuration.compilerPath !== undefined) {
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompilerPath, "baseConfiguration"));
+            } else if (configuration.compileCommands !== undefined) {
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, "baseConfiguration"));
+            } else if (configuration.configurationProvider !== undefined) {
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.ConfigProvider, "baseConfiguration"));
+            }
+        }
         this.updateServerOnFolderSettingsChange();
     }
 

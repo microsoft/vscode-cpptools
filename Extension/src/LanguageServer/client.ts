@@ -34,7 +34,7 @@ import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
-import { LanguageStatusUI, getUI } from './ui';
+import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
@@ -1070,7 +1070,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
-                ui.ShowConfigureIntelliSenseButton(false, this);
+                ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.NotConfigured, "disablePrompt");
                 return;
             }
             if (index === paths.length - 2) {
@@ -1108,12 +1108,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, "quickPick");
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, "quickPick");
                     return;
                 } else {
                     action = "select compiler";
@@ -1122,7 +1122,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.ShowConfigureIntelliSenseButton(false, this);
+            ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "quickPick");
             await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
@@ -1178,7 +1178,7 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1212,7 +1212,7 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1726,8 +1726,12 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
-                if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                if (changedSettings["default.compilerPath"] !== undefined) {
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "settingsChanged");
+                } else if (changedSettings["default.compileCommands"] !== undefined) {
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, "settingsChanged");
+                } else if (changedSettings["default.configurationProvider"] !== undefined) {
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, "settingsChanged");
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -3550,7 +3554,7 @@ export class DefaultClient implements Client {
                     }
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
-                const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
+                const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment + 2, edit.range.start.character);
                 workspaceEdits.insert(uri, position, edit.newText);
             }
             modifiedDocument = uri;
