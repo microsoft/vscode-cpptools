@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import * as path from 'path';
 import * as Telemetry from '../../telemetry';
 import { DefaultClient, CancelReferencesNotification, workspaceReferences } from '../client';
 import { processDelayedDidOpen } from '../extension';
@@ -225,8 +226,10 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     private makeVscodeCallHierarchyItem(item: CallHierarchyItem): vscode.CallHierarchyItem {
+        const containerDetail: string = (item.detail !== "") ? `${item.detail} - ` : "";
+        const fileDetail: string = `${path.basename(item.uri)} (${path.dirname(item.uri)})`;
         return new vscode.CallHierarchyItem(
-            item.kind, item.name, item.detail,
+            item.kind, item.name, containerDetail + fileDetail,
             vscode.Uri.file(item.uri),
             makeVscodeRange(item.range),
             makeVscodeRange(item.selectionRange));
