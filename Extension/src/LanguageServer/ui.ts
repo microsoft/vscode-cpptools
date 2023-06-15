@@ -12,6 +12,7 @@ import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSame
 import * as telemetry from '../telemetry';
 import * as util from '../common';
 import { CppSettings } from './settings';
+import { log } from 'console';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -126,7 +127,7 @@ export class LanguageStatusUI {
             arguments: ['statusBar']
         };
         if (this.currentClient !== undefined) {
-            this.ShowConfigureIntelliSenseButton(false);
+            this.ShowConfigureIntelliSenseButton(true, false);
         }
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, util.documentSelector);
@@ -435,8 +436,8 @@ export class LanguageStatusUI {
     private showConfigureIntelliSenseButton: boolean = false;
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
-    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
-        if (configurationType !== undefined && sender !== undefined && this.showConfigureIntelliSenseButton && !show) { // Only log telemetry when the button is being hidden.
+    public async ShowConfigureIntelliSenseButton(show: boolean, logTelemetry: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
+        if (configurationType !== undefined && sender !== undefined && this.showConfigureIntelliSenseButton && logTelemetry) {
             const showButton: string = show ? 'true' : 'false';
             telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
         }
@@ -520,7 +521,6 @@ export class LanguageStatusUI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), client, ConfigurationType.ConfigProvider, "configChange");
         });
     }
 
