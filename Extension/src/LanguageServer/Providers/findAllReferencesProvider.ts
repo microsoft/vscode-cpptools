@@ -23,7 +23,7 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         // Listen to a cancellation for this request. When this request is cancelled,
-        // use a local cancellation source to implicitly cancel a token.
+        // use a local cancellation source to explicitly cancel a token.
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
         const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => { cancelSource.cancel(); });
         const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); });
