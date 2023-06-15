@@ -105,21 +105,38 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
         Promise<vscode.CallHierarchyItem | undefined> {
+        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
+        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
         workspaceReferences.clearViews();
+
         const range: vscode.Range | undefined = document.getWordRangeAtPosition(position);
         if (range === undefined) {
             return undefined;
         }
 
-        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
+        // Listen to a cancellation for this request. When this request is cancelled,
+        // use a local cancellation source to explicitly cancel a token.
+        let requestCanceled: CancellationSender | undefined;
+        const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+        const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
+            requestCanceled = CancellationSender.ProviderToken;
+            cancelSource.cancel();
+        });
+        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => {
+            requestCanceled = sender;
+            cancelSource.cancel();
+        });
 
         const params: CallHierarchyParams = {
             textDocument: { uri: document.uri.toString() },
             position: Position.create(position.line, position.character)
         };
-        const response: CallHierarchyItemResult = await this.client.languageClient.sendRequest(CallHierarchyItemRequest, params, token);
+        const response: CallHierarchyItemResult = await this.client.languageClient.sendRequest(CallHierarchyItemRequest, params, cancelSource.token);
 
-        if (token.isCancellationRequested || response.succeeded === undefined) {
+        cancellationTokenListener.dispose();
+        requestCanceledListener.dispose();
+
+        if (cancelSource.token.isCancellationRequested || response.succeeded === undefined) {
             throw new vscode.CancellationError();
         } else if (response.item === undefined) {
             return undefined;
