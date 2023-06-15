@@ -436,7 +436,7 @@ export class LanguageStatusUI {
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
     public async ShowConfigureIntelliSenseButton(show: boolean, logTelemetry: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
-        if (configurationType !== undefined && sender !== undefined && this.showConfigureIntelliSenseButton && logTelemetry) {
+        if (configurationType !== undefined && sender !== undefined && logTelemetry) {
             const showButton: string = show ? 'true' : 'false';
             telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
         }
