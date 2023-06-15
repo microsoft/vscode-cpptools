@@ -4,6 +4,7 @@
 ### Enhancements
 * Add warning logging when the database is reset due to a version change. [#10984](https://github.com/microsoft/vscode-cpptools/issues/10984)
 * Move user compilers to the beginning of the "known compilers" lists. [#10985](https://github.com/microsoft/vscode-cpptools/issues/10985)
+* Add file path to the details of a call hierarchy result. [#10997](https://github.com/microsoft/vscode-cpptools/issues/10997)
 
 ### Bug Fixes
 * Fix the "Other References" pane not getting cleared when Call Hierarchy is used. [#10988](https://github.com/microsoft/vscode-cpptools/issues/10988)
