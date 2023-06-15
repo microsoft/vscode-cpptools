@@ -116,14 +116,11 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
         // Listen to a cancellation for this request. When this request is cancelled,
         // use a local cancellation source to explicitly cancel a token.
-        let requestCanceled: CancellationSender | undefined;
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
         const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => {
-            requestCanceled = CancellationSender.ProviderToken;
             cancelSource.cancel();
         });
         const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => {
-            requestCanceled = sender;
             cancelSource.cancel();
         });
 
