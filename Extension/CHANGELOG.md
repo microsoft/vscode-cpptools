@@ -1,10 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.16.1: June 15, 2023
+## Version 1.16.1: June 19, 2023
 ### Enhancements
 * Add warning logging when the database is reset due to a version change. [#10984](https://github.com/microsoft/vscode-cpptools/issues/10984)
 * Move user compilers to the beginning of the "known compilers" lists. [#10985](https://github.com/microsoft/vscode-cpptools/issues/10985)
 * Add file path to the details of a call hierarchy result. [#10997](https://github.com/microsoft/vscode-cpptools/issues/10997)
+* Add `miDebuggerArgs` to debugger attach option.
+  * Thank you for the contribution @Summon528  [PR #11066](https://github.com/microsoft/vscode-cpptools/pull/11066)
 
 ### Bug Fixes
 * Fix the "Other References" pane not getting cleared when Call Hierarchy is used. [#10988](https://github.com/microsoft/vscode-cpptools/issues/10988)
@@ -13,7 +15,9 @@
 * Fix two Doxygen comment generation bugs. [#10995](https://github.com/microsoft/vscode-cpptools/issues/10995), [#11016](https://github.com/microsoft/vscode-cpptools/issues/11016)
 * Fix the thread pool sometimes not increasing in size, which could lead to the cpptools process incorrectly being shut down. [#11003](https://github.com/microsoft/vscode-cpptools/issues/11003)
 * Stop using vcFormat if .editorconfig exists with only non-formatting cpp settings. [PR #11015](https://github.com/microsoft/vscode-cpptools/pull/11015)
-* Fix the configure your IntelliSense notification to not show again when "Don't Show Again" option is selected. [#11070](https://github.com/microsoft/vscode-cpptools/issues/11070)
+* Use integratedTerminal when user is running cl.exe for debugger. [#11032](https://github.com/microsoft/vscode-cpptools/issues/11032)
+  * Thank you for the contribution @caiohamamura [PR #11035](https://github.com/microsoft/vscode-cpptools/pull/11035)
+* Fix the configure your IntelliSense notification to not show again when the "Don't Show Again" option is selected. [#11070](https://github.com/microsoft/vscode-cpptools/issues/11070)
 
 ## Version 1.16.0: May 22, 2023
 ### New Features
