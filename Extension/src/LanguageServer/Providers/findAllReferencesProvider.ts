@@ -45,7 +45,9 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
 
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.referenceInfos === null || response.isCanceled) {
-            throw new vscode.CancellationError();
+            // Return undefined instead of vscode.CancellationError to avoid the following error message from VS Code:
+            // "Cannot destructure property 'range' of 'e.location' as it is undefined."
+            return undefined;
         } else if (response.referenceInfos.length !== 0) {
             response.referenceInfos.forEach((referenceInfo: ReferenceInfo) => {
                 if (referenceInfo.type === ReferenceType.Confirmed) {
