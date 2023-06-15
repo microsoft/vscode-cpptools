@@ -1070,7 +1070,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
-                ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.NotConfigured, "disablePrompt");
+                ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.NotConfigured, "disablePrompt");
                 return;
             }
             if (index === paths.length - 2) {
@@ -1108,12 +1108,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, "quickPick");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.ConfigProvider, "quickPick");
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, "quickPick");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.CompileCommands, "quickPick");
                     return;
                 } else {
                     action = "select compiler";
@@ -1122,7 +1122,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "quickPick");
+            ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.CompilerPath, "quickPick");
             await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
@@ -1178,7 +1178,7 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1212,7 +1212,7 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1727,11 +1727,11 @@ export class DefaultClient implements Client {
                     this.configuration.handleConfigurationChange();
                 }
                 if (changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, "settingsChanged");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.ConfigProvider, "settingsChanged");
                 } else if (changedSettings["default.compileCommands"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, "settingsChanged");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.CompileCommands, "settingsChanged");
                 } if (changedSettings["default.compilerPath"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "settingsChanged");
+                    ui.ShowConfigureIntelliSenseButton(false, true, this, ConfigurationType.CompilerPath, "settingsChanged");
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2777,11 +2777,13 @@ export class DefaultClient implements Client {
                 this.showConfigureIntelliSenseButton = false;
             }
             if (!configProviderNotSet) {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.ConfigProvider, "handleConfig");
+                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.ConfigProvider, "handleConfig");
             } else if (!compileCommandsNotSet) {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.CompileCommands, "handleConfig");
+                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.CompileCommands, "handleConfig");
             } else if (!compilerPathNotSet) {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.CompilerPath, "handleConfig");
+                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.CompilerPath, "handleConfig");
+            } else {
+                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.NotConfigured, "handleConfig");
             }
         } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false, "notification");

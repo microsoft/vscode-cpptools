@@ -12,7 +12,6 @@ import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSame
 import * as telemetry from '../telemetry';
 import * as util from '../common';
 import { CppSettings } from './settings';
-import { log } from 'console';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

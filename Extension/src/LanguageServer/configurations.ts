@@ -1238,17 +1238,18 @@ export class CppProperties {
             this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
         }
 
-        this.applyDefaultIncludePathsAndFrameworks();
         const configuration: Configuration | undefined = this.CurrentConfiguration;
         if (configuration) {
             if (configuration.configurationProvider !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.ConfigProvider, "baseConfiguration"));
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, true, this.client, ConfigurationType.ConfigProvider, "baseConfiguration"));
             } else if (configuration.compileCommands !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, "baseConfiguration"));
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, true, this.client, ConfigurationType.CompileCommands, "baseConfiguration"));
             } else if (configuration.compilerPath !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompilerPath, "baseConfiguration"));
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, true, this.client, ConfigurationType.CompilerPath, "baseConfiguration"));
             }
         }
+
+        this.applyDefaultIncludePathsAndFrameworks();
         this.updateServerOnFolderSettingsChange();
     }
 
