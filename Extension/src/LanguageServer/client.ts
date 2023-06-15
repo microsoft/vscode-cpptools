@@ -2769,23 +2769,22 @@ export class DefaultClient implements Client {
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
             !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
+        if (showConfigStatus) {
+            this.showConfigureIntelliSenseButton = true;
+        } else {
+            this.showConfigureIntelliSenseButton = false;
+        }
+        if (!configProviderNotSet) {
+            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.ConfigProvider, "handleConfig");
+        } else if (!compileCommandsNotSet) {
+            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.CompileCommands, "handleConfig");
+        } else if (!compilerPathNotSet) {
+            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.CompilerPath, "handleConfig");
+        } else {
+            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.NotConfigured, "handleConfig");
+        }
 
-        if (statusBarIndicatorEnabled) {
-            if (showConfigStatus) {
-                this.showConfigureIntelliSenseButton = true;
-            } else {
-                this.showConfigureIntelliSenseButton = false;
-            }
-            if (!configProviderNotSet) {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.ConfigProvider, "handleConfig");
-            } else if (!compileCommandsNotSet) {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.CompileCommands, "handleConfig");
-            } else if (!compilerPathNotSet) {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.CompilerPath, "handleConfig");
-            } else {
-                ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, true, this, ConfigurationType.NotConfigured, "handleConfig");
-            }
-        } else if (showConfigStatus && !displayedSelectCompiler) {
+        if (showConfigStatus && !displayedSelectCompiler && !statusBarIndicatorEnabled) {
             this.promptSelectIntelliSenseConfiguration(false, "notification");
             displayedSelectCompiler = true;
         }
