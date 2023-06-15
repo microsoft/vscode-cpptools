@@ -134,7 +134,11 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         requestCanceledListener.dispose();
 
         if (cancelSource.token.isCancellationRequested || response.succeeded === undefined) {
-            throw new vscode.CancellationError();
+            // Return undefined instead of vscode.CancellationError to avoid the following error message from VS Code:
+            // "MISSING provider."
+            // TODO: per issue https://github.com/microsoft/vscode/issues/169698 vscode.CancellationError is expected,
+            // so when VS Code fixes the error use vscode.CancellationError again.
+            return undefined;
         } else if (response.item === undefined) {
             return undefined;
         }
