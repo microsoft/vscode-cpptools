@@ -37,7 +37,7 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         };
         const response: ReferencesResult = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, cancelSource.token);
 
-        // Reset anything that can be cleared before procossing the result.
+        // Reset anything that can be cleared before processing the result.
         // Note: ReferencesManager.resetReferences is called in ReferencesManager.showResultsInPanelView
         workspaceReferences.resetProgressBar();
         cancellationTokenListener.dispose();

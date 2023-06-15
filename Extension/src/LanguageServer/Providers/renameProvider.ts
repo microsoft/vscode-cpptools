@@ -50,7 +50,7 @@ export class RenameProvider implements vscode.RenameProvider {
         };
         const response: ReferencesResult = await this.client.languageClient.sendRequest(RenameRequest, params, cancelSource.token);
 
-        // Reset anything that can be cleared before procossing the result.
+        // Reset anything that can be cleared before processing the result.
         workspaceReferences.resetProgressBar();
         workspaceReferences.resetReferences();
         requestCanceledListener.dispose();

@@ -93,7 +93,7 @@ export enum CancellationSender {
     /* Cancellation was from the language server */
     LanguageServer,
 
-    /* Cancelaltion was from the user selecting the cancel button in the reference search progress bar */
+    /* Cancellation was from the user selecting the cancel button in the reference search progress bar */
     User
 }
 

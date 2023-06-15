@@ -54,7 +54,7 @@ interface CallHierarchyItemResult {
 
     /**
      * If a request is cancelled, `succeeded` will be undefined to indicate no result was returned.
-     * Therfore, object is not defined as optional on the language server.
+     * Therefore, object is not defined as optional on the language server.
      */
     succeeded: boolean;
 }
@@ -81,7 +81,7 @@ enum CallHierarchyRequestStatus {
     Unknown,
     Succeeded,
     Canceled,
-    CaneledByUser,
+    CanceledByUser,
     Failed
 }
 
@@ -179,7 +179,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, cancelSource.token);
 
-        // Reset anything that can be cleared before procossing the result.
+        // Reset anything that can be cleared before processing the result.
         const progressBarDuration: number | undefined = workspaceReferences.getCallHierarchyProgressBarDuration();
         workspaceReferences.resetProgressBar();
         workspaceReferences.resetReferences();
@@ -189,7 +189,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         // Process the result.
         if (cancelSource.token.isCancellationRequested || response.calls === undefined || requestCanceled !== undefined) {
             const requestStatus: CallHierarchyRequestStatus = requestCanceled === CancellationSender.User ?
-                CallHierarchyRequestStatus.CaneledByUser : CallHierarchyRequestStatus.Canceled;
+                CallHierarchyRequestStatus.CanceledByUser : CallHierarchyRequestStatus.Canceled;
             this.logTelemetry(CallHierarchyCallsToEvent, requestStatus, progressBarDuration);
             throw new vscode.CancellationError();
         } else if (response.calls.length !== 0) {
@@ -283,7 +283,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
             case CallHierarchyRequestStatus.Unknown: status = "Unknown"; break;
             case CallHierarchyRequestStatus.Succeeded: status = "Succeeded"; break;
             case CallHierarchyRequestStatus.Canceled: status = "Canceled"; break;
-            case CallHierarchyRequestStatus.CaneledByUser: status = "CaneledByUser"; break;
+            case CallHierarchyRequestStatus.CanceledByUser: status = "CanceledByUser"; break;
             case CallHierarchyRequestStatus.Failed: status = "Failed"; break;
         }
 
