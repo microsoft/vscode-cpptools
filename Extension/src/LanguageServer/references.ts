@@ -449,13 +449,8 @@ export class ReferencesManager {
         this.renamePending = true;
     }
 
-    public resetRename(): void {
+    public resetReferences(): void {
         this.renamePending = false;
-        this.initializeViews();
-        this.client.setReferencesCommandMode(ReferencesCommandMode.None);
-    }
-
-    public resetFindAllReferences(): void {
         this.initializeViews();
         this.client.setReferencesCommandMode(ReferencesCommandMode.None);
     }
@@ -508,6 +503,11 @@ export class ReferencesManager {
                     this.findAllRefsView.show(true);
                 }
             }
+        }
+
+        // If this is the final result, reset after process results.
+        if (referencesResult.isFinished || referencesResult.isCanceled) {
+            this.resetReferences();
         }
     }
 
