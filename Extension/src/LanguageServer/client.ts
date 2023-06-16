@@ -17,9 +17,9 @@ import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
+import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
 import { CodeActionProvider } from './Providers/codeActionProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
-import { CallHierarchyCallsItemResult, CallHierarchyParams, CallHierarchyProvider } from './Providers/callHierarchyProvider';
 // End provider imports
 
 import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
@@ -372,17 +372,6 @@ export interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
-export interface ReferenceParams {
-    newName: string;
-    position: Position;
-    textDocument: TextDocumentIdentifier;
-}
-
-export interface FindAllReferencesParams {
-    position: Position;
-    textDocument: TextDocumentIdentifier;
-}
-
 export interface FormatParams {
     uri: string;
     range: Range;
@@ -595,13 +584,9 @@ const CustomConfigurationNotification: NotificationType<CustomConfigurationParam
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams> = new NotificationType<CustomBrowseConfigurationParams>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomConfigurations');
 const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomBrowseConfiguration');
+const PreviewReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/previewReferences');
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
-export const RequestReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/requestReferences');
-export const CancelReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/cancelReferences');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
-const FindAllReferencesNotification: NotificationType<FindAllReferencesParams> = new NotificationType<FindAllReferencesParams>('cpptools/findAllReferences');
-const CallHierarchyCallsToNotification: NotificationType<CallHierarchyParams> = new NotificationType<CallHierarchyParams>('cpptools/callHierarchyCallsTo');
-const RenameNotification: NotificationType<ReferenceParams> = new NotificationType<ReferenceParams>('cpptools/rename');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
@@ -622,7 +607,6 @@ const DebugLogNotification: NotificationType<LocalizeStringParams> = new Notific
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
-const CallHierarchyNotification: NotificationType<CallHierarchyCallsItemResult> = new NotificationType<CallHierarchyCallsItemResult>('cpptools/callHierarchyCallsToResult');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
 const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
@@ -640,11 +624,6 @@ const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenComme
 const CanceledReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/canceledReferences');
 
 let failureMessageShown: boolean = false;
-
-interface ReferencesCancellationState {
-    reject(): void;
-    callback(): void;
-}
 
 class ClientModel {
     public isInitializingWorkspace: DataBinding<boolean>;
@@ -860,13 +839,6 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
-
-    public static referencesParams: ReferenceParams | FindAllReferencesParams | CallHierarchyParams |undefined;
-    public static referencesRequestPending: boolean = false;
-    public static referencesPendingCancellations: ReferencesCancellationState[] = [];
-
-    public static renameRequestsPending: number = 0;
-    public static renamePending: boolean = false;
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -1410,18 +1382,6 @@ export class DefaultClient implements Client {
         }
     }
 
-    public sendCallHierarchyCallsToNotification(params: CallHierarchyParams): void {
-        this.languageClient.sendNotification(CallHierarchyCallsToNotification, params);
-    }
-
-    public sendFindAllReferencesNotification(params: FindAllReferencesParams): void {
-        this.languageClient.sendNotification(FindAllReferencesNotification, params);
-    }
-
-    public sendRenameNotification(params: ReferenceParams): void {
-        this.languageClient.sendNotification(RenameNotification, params);
-    }
-
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
         const result: WorkspaceFolderSettingsParams = {
             uri: workspaceFolderUri?.toString(),
@@ -1754,8 +1714,8 @@ export class DefaultClient implements Client {
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
         if (util.isCpp(textDocumentChangeEvent.document)) {
             // If any file has changed, we need to abort the current rename operation
-            if (DefaultClient.renamePending) {
-                this.cancelReferences();
+            if (workspaceReferences.renamePending) {
+                workspaceReferences.cancelCurrentReferenceRequest(refs.CancellationSender.User);
             }
 
             const oldVersion: number | undefined = openFileVersions.get(textDocumentChangeEvent.document.uri.toString());
@@ -2307,9 +2267,8 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => this.promptCompileCommands(e));
-        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesResult(e));
+        this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(CallHierarchyNotification, (e) => this.processCallHierarchyResult(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
@@ -2330,7 +2289,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
-        this.languageClient.onNotification(CanceledReferencesNotification, this.cancelReferences);
+        this.languageClient.onNotification(CanceledReferencesNotification, this.serverCanceledReferences);
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
@@ -3665,68 +3624,28 @@ export class DefaultClient implements Client {
 
     public handleReferencesIcon(): void {
         this.notifyWhenLanguageClientReady(() => {
-            const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
-            if (!cancelling) {
-                workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
-                if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
-                    if (!workspaceReferences.referencesRequestPending) {
-                        if (workspaceReferences.referencesRequestHasOccurred) {
-                            // References are not usable if a references request is pending,
-                            // So after the initial request, we don't send a 2nd references request until the next request occurs.
-                            if (!workspaceReferences.referencesRefreshPending) {
-                                workspaceReferences.referencesRefreshPending = true;
-                                vscode.commands.executeCommand("references-view.refresh");
-                            }
-                        } else {
-                            workspaceReferences.referencesRequestHasOccurred = true;
-                            workspaceReferences.referencesRequestPending = true;
-                            this.languageClient.sendNotification(RequestReferencesNotification);
-                        }
-                    }
-                }
+            workspaceReferences.UpdateProgressUICounter(this.model.referencesCommandMode.Value);
+
+            // If the search is find all references, preview partial results.
+            // This will cause the language server to send partial results to display
+            // in the "Other References" view or channel. Doing a preview should not complete
+            // an in-progress request until it is finished or canceled.
+            if (this.ReferencesCommandMode === refs.ReferencesCommandMode.Find) {
+                this.languageClient.sendNotification(PreviewReferencesNotification);
             }
         });
     }
 
-    public clearPendingReferencesCancellations(): void {
-        if (DefaultClient.referencesPendingCancellations.length > 0) {
-            while (DefaultClient.referencesPendingCancellations.length > 1) {
-                const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-                DefaultClient.referencesPendingCancellations.pop();
-                pendingCancel.reject();
-            }
-            const pendingCancel: ReferencesCancellationState = DefaultClient.referencesPendingCancellations[0];
-            DefaultClient.referencesPendingCancellations.pop();
-            pendingCancel.callback();
-        }
-    }
-
-    public cancelReferences(): void {
-        DefaultClient.referencesParams = undefined;
-        DefaultClient.renamePending = false;
-        if (DefaultClient.referencesRequestPending || workspaceReferences.symbolSearchInProgress) {
-            const cancelling: boolean = DefaultClient.referencesPendingCancellations.length > 0;
-            DefaultClient.referencesPendingCancellations.push({
-                reject: () => { },
-                callback: () => { }
-            });
-            if (!cancelling) {
-                workspaceReferences.referencesCanceled = true;
-                languageClient.sendNotification(CancelReferencesNotification);
-            }
-        }
+    private serverCanceledReferences(): void {
+        workspaceReferences.cancelCurrentReferenceRequest(refs.CancellationSender.LanguageServer);
     }
 
     private handleReferencesProgress(notificationBody: refs.ReportReferencesProgressNotification): void {
         workspaceReferences.handleProgress(notificationBody);
     }
 
-    private processReferencesResult(referencesResult: refs.ReferencesResult): void {
-        workspaceReferences.processResults(referencesResult);
-    }
-
-    private processCallHierarchyResult(callHierarchyResult: CallHierarchyCallsItemResult): void {
-        workspaceReferences.processCallHierarchyResults(callHierarchyResult);
+    private processReferencesPreview(referencesResult: refs.ReferencesResult): void {
+        workspaceReferences.showResultsInPanelView(referencesResult);
     }
 
     public setReferencesCommandMode(mode: refs.ReferencesCommandMode): void {
