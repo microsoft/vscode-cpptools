@@ -829,7 +829,10 @@ export class CppProperties {
         return [];
     }
 
+    private configProviderAutoSelected: boolean = false;
+
     private updateServerOnFolderSettingsChange(): void {
+        this.configProviderAutoSelected = false;
         if (!this.configurationJson) {
             return;
         }
@@ -975,6 +978,7 @@ export class CppProperties {
                 if (hasEmptyConfiguration) {
                     if (providers.size === 1) {
                         providers.forEach(provider => { configuration.configurationProvider = provider.extensionId; });
+                        this.configProviderAutoSelected = true;
                         if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                             keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                         }
@@ -1240,9 +1244,10 @@ export class CppProperties {
 
         const configuration: Configuration | undefined = this.CurrentConfiguration;
         if (configuration) {
-            const showButtonSender: string = "baseConfiguration";
+            const showButtonSender: string = "configChange";
             if (configuration.configurationProvider !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.ConfigProvider, showButtonSender));
+                const configType: ConfigurationType = this.configProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, configType, showButtonSender));
             } else if (configuration.compileCommands !== undefined) {
                 getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, showButtonSender));
             } else if (configuration.compilerPath !== undefined) {

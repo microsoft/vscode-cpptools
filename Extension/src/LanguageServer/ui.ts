@@ -46,6 +46,7 @@ enum LanguageStatusPriority {
 }
 
 export enum ConfigurationType {
+    AutoConfigProvider = "autoConfigProvider",
     ConfigProvider = "configProvider",
     CompileCommands = "compileCommands",
     CompilerPath = "compilerPath",
