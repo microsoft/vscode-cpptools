@@ -1,6 +1,6 @@
-Additional binary files may be downloaded at runtime after the initial
-installation; these are governed by the more restrictive proprietary license
-terms found at [RuntimeLicenses](RuntimeLicenses).
+Additional binary files are included in the official VSIX files built and
+distributed by Microsoft; these are governed by the more restrictive proprietary
+license terms found at [RuntimeLicenses](RuntimeLicenses).
 
 MIT License
 
