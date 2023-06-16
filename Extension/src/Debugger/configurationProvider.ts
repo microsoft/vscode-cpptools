@@ -434,7 +434,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 if (newConfig.type === DebuggerType.cppdbg) {
                     newConfig.externalConsole = false;
                 } else {
-                    newConfig.console = "externalTerminal";
+                    newConfig.console = "integratedTerminal";
                 }
                 const isWindows: boolean = platformInfo.platform === 'win32';
                 // Extract the .exe path from the defined task.
