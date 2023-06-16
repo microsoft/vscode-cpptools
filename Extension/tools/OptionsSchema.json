@@ -874,6 +874,11 @@
           "description": "%c_cpp.debuggers.miDebuggerPath.description%",
           "default": "/usr/bin/gdb"
         },
+        "miDebuggerArgs": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.miDebuggerArgs.description%",
+          "default": ""
+        },
         "miDebuggerServerAddress": {
           "type": "string",
           "description": "%c_cpp.debuggers.miDebuggerServerAddress.description%",
