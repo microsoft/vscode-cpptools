@@ -520,6 +520,7 @@ export class LanguageStatusUI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
+            this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), true, client);
         });
     }
 
