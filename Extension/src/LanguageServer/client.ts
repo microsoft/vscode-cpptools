@@ -1059,6 +1059,7 @@ export class DefaultClient implements Client {
                         return;
                 }
             }
+            const showButtonSender: string = "quickPick";
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
@@ -1080,12 +1081,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, "quickPick");
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, "quickPick");
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, showButtonSender);
                     return;
                 } else {
                     action = "select compiler";
@@ -1094,7 +1095,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "quickPick");
+            ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
             await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
@@ -1686,12 +1687,13 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
+                const showButtonSender: string = "settingsChanged";
                 if (changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, "settingsChanged");
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);
                 } else if (changedSettings["default.compileCommands"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, "settingsChanged");
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, showButtonSender);
                 } if (changedSettings["default.compilerPath"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "settingsChanged");
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);

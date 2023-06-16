@@ -1240,12 +1240,13 @@ export class CppProperties {
 
         const configuration: Configuration | undefined = this.CurrentConfiguration;
         if (configuration) {
+            const showButtonSender: string = "baseConfiguration";
             if (configuration.configurationProvider !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.ConfigProvider, "baseConfiguration"));
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.ConfigProvider, showButtonSender));
             } else if (configuration.compileCommands !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, "baseConfiguration"));
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, showButtonSender));
             } else if (configuration.compilerPath !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompilerPath, "baseConfiguration"));
+                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompilerPath, showButtonSender));
             }
         }
 
