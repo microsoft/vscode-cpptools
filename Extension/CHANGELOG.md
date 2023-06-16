@@ -6,7 +6,7 @@
 * Move user compilers to the beginning of the "known compilers" lists. [#10985](https://github.com/microsoft/vscode-cpptools/issues/10985)
 * Add file path to the details of a call hierarchy result. [#10997](https://github.com/microsoft/vscode-cpptools/issues/10997)
 * Add `miDebuggerArgs` to debugger attach option.
-  * Thank you for the contribution @Summon528  [PR #11066](https://github.com/microsoft/vscode-cpptools/pull/11066)
+  * Thank you for the contribution @Summon528 [PR #11066](https://github.com/microsoft/vscode-cpptools/pull/11066)
 
 ### Bug Fixes
 * Fix the "Other References" pane not getting cleared when Call Hierarchy is used. [#10988](https://github.com/microsoft/vscode-cpptools/issues/10988)
