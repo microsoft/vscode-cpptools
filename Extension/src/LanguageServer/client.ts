@@ -2733,15 +2733,13 @@ export class DefaultClient implements Client {
         } else {
             this.showConfigureIntelliSenseButton = false;
         }
-        if (!configProviderNotSet) {
-            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.ConfigProvider, "handleConfig");
-        } else if (!compileCommandsNotSet) {
-            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.CompileCommands, "handleConfig");
-        } else if (!compilerPathNotSet) {
-            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.CompilerPath, "handleConfig");
-        } else {
-            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, ConfigurationType.NotConfigured, "handleConfig");
-        }
+        const configType: ConfigurationType =
+            !configProviderNotSet ? ConfigurationType.ConfigProvider :
+            !compileCommandsNotSet ? ConfigurationType.CompileCommands :
+            !compilerPathNotSet ? ConfigurationType.CompilerPath :
+            ConfigurationType.NotConfigured;
+
+        ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, configType, "handleConfig");
 
         if (showConfigStatus && !displayedSelectCompiler && !statusBarIndicatorEnabled) {
             this.promptSelectIntelliSenseConfiguration(false, "notification");
