@@ -125,7 +125,7 @@ export class LanguageStatusUI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.ShowConfigureIntelliSenseButton(true, this.currentClient);
+        this.ShowConfigureIntelliSenseButton(false, this.currentClient);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, util.documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
