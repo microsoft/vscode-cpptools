@@ -126,7 +126,7 @@ export class LanguageStatusUI {
             arguments: ['statusBar']
         };
         if (this.currentClient !== undefined) {
-            this.ShowConfigureIntelliSenseButton(true, false);
+            this.ShowConfigureIntelliSenseButton(true);
         }
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, util.documentSelector);
@@ -435,8 +435,8 @@ export class LanguageStatusUI {
     private showConfigureIntelliSenseButton: boolean = false;
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
-    public async ShowConfigureIntelliSenseButton(show: boolean, logTelemetry: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
-        if (configurationType !== undefined && sender !== undefined && logTelemetry) {
+    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
+        if (configurationType !== undefined && sender !== undefined) {
             const showButton: string = show ? 'true' : 'false';
             telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
         }
@@ -520,7 +520,7 @@ export class LanguageStatusUI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), true, client);
+            this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), client);
         });
     }
 
