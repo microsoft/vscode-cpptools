@@ -434,17 +434,20 @@ export class LanguageStatusUI {
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
     public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
-        if (configurationType !== undefined && sender !== undefined) {
-            const showButton: string = show ? 'true' : 'false';
-            telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
-        }
-        if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
-            return;
-        }
         this.showConfigureIntelliSenseButton = show;
         if (client !== undefined) {
             client.setShowConfigureIntelliSenseButton(show);
         }
+
+        if (configurationType !== undefined && sender !== undefined) {
+            const showButton: string = show ? 'true' : 'false';
+            telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
+        }
+
+        if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
+            return;
+        }
+
         if (show) {
             const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
             telemetry.logLanguageServerEvent('configureIntelliSenseStatusBar');
