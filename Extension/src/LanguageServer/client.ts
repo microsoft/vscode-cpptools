@@ -1042,7 +1042,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
-                ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.NotConfigured, "disablePrompt");
+                ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
                 return;
             }
             if (index === paths.length - 2) {
