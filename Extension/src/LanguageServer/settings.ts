@@ -210,6 +210,11 @@ class Settings {
     }
 }
 
+function changeBlankStringToUndefined(input: string | undefined): string | undefined {
+    // Although null is not a valid type, user could enter a null anyway.
+    return (input === undefined || input === null || input.trim() === "") ? undefined : input;
+}
+
 export class CppSettings extends Settings {
     /**
      * Create the CppSettings object.
@@ -248,19 +253,20 @@ export class CppSettings extends Settings {
     }
 
     private getClangPath(isFormat: boolean): string | undefined {
-        let path: string | undefined | null = super.Section.get<string>(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path");
+        let path: string | undefined = changeBlankStringToUndefined(super.Section.get<string>(isFormat ? "clang_format_path" : "codeAnalysis.clangTidy.path"));
         if (!path) {
-            const cachedClangPath: string | null | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
+            const cachedClangPath: string | undefined = isFormat ? getCachedClangFormatPath() : getCachedClangTidyPath();
             if (cachedClangPath !== undefined) {
-                if (cachedClangPath === null) {
-                    return undefined;
-                }
                 return cachedClangPath;
             }
             const clangStr: string = isFormat ? this.clangFormatStr : this.clangTidyStr;
             const clangName: string = isFormat ? this.clangFormatName : this.clangTidyName;
-            const setCachedClangPath: (path: string | null) => void = isFormat ? setCachedClangFormatPath : setCachedClangTidyPath;
-            path = which.sync(clangName, { nothrow: true });
+            const setCachedClangPath: (path: string) => void = isFormat ? setCachedClangFormatPath : setCachedClangTidyPath;
+            const whichPath: string | null = which.sync(clangName, { nothrow: true });
+            if (whichPath === null) {
+                return undefined;
+            }
+            path = whichPath;
             setCachedClangPath(path);
             if (!path) {
                 return undefined;
@@ -316,8 +322,8 @@ export class CppSettings extends Settings {
     public get codeAnalysisRunAutomatically(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.runAutomatically"); }
     public get codeAnalysisRunOnBuild(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.runOnBuild"); }
     public get clangTidyEnabled(): boolean | undefined { return super.Section.get<boolean>("codeAnalysis.clangTidy.enabled"); }
-    public get clangTidyConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.config"); }
-    public get clangTidyFallbackConfig(): string | undefined { return super.Section.get<string>("codeAnalysis.clangTidy.fallbackConfig"); }
+    public get clangTidyConfig(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("codeAnalysis.clangTidy.config")); }
+    public get clangTidyFallbackConfig(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("codeAnalysis.clangTidy.fallbackConfig")); }
     public get clangTidyFixWarnings(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.warnings"); }
     public get clangTidyFixErrors(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.errors"); }
     public get clangTidyFixNotes(): boolean | undefined { return false; } // super.Section.get<boolean>("codeAnalysis.clangTidy.fix.notes"); }
@@ -338,21 +344,21 @@ export class CppSettings extends Settings {
         checks.push(value);
         super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
-    public get clangFormatStyle(): string | undefined { return super.Section.get<string>("clang_format_style"); }
-    public get clangFormatFallbackStyle(): string | undefined { return super.Section.get<string>("clang_format_fallbackStyle"); }
+    public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_style")); }
+    public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_fallbackStyle")); }
     public get clangFormatSortIncludes(): boolean | undefined | null { return super.Section.get<boolean | null>("clang_format_sortIncludes"); }
     public get experimentalFeatures(): boolean | undefined { return super.Section.get<string>("experimentalFeatures")?.toLowerCase() === "enabled"; }
     public get suggestSnippets(): boolean | undefined { return super.Section.get<boolean>("suggestSnippets"); }
     public get intelliSenseEngine(): string | undefined { return super.Section.get<string>("intelliSenseEngine")?.toLowerCase(); }
     public get intelliSenseEngineFallback(): boolean | undefined { return super.Section.get<string>("intelliSenseEngineFallback")?.toLowerCase() === "enabled"; }
-    public get intelliSenseCachePath(): string | undefined { return super.Section.get<string>("intelliSenseCachePath"); }
+    public get intelliSenseCachePath(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("intelliSenseCachePath")); }
     public get intelliSenseCacheSize(): number | undefined { return super.Section.get<number>("intelliSenseCacheSize"); }
     public get intelliSenseMemoryLimit(): number | undefined { return super.Section.get<number>("intelliSenseMemoryLimit"); }
     public get intelliSenseUpdateDelay(): number | undefined { return super.Section.get<number>("intelliSenseUpdateDelay"); }
     public get errorSquiggles(): string | undefined { return super.Section.get<string>("errorSquiggles")?.toLowerCase(); }
     public get inactiveRegionOpacity(): number | undefined { return super.Section.get<number>("inactiveRegionOpacity"); }
-    public get inactiveRegionForegroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionForegroundColor"); }
-    public get inactiveRegionBackgroundColor(): string | undefined { return super.Section.get<string>("inactiveRegionBackgroundColor"); }
+    public get inactiveRegionForegroundColor(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("inactiveRegionForegroundColor")); }
+    public get inactiveRegionBackgroundColor(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("inactiveRegionBackgroundColor")); }
     public get autocomplete(): string | undefined { return super.Section.get<string>("autocomplete"); }
     public get autocompleteAddParentheses(): boolean | undefined { return super.Section.get<boolean>("autocompleteAddParentheses"); }
     public get loggingLevel(): string | undefined { return super.Section.get<string>("loggingLevel"); }
@@ -373,10 +379,10 @@ export class CppSettings extends Settings {
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return super.Section.get<vscode.WorkspaceConfiguration>("files.exclude"); }
     public get defaultIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.includePath"); }
     public get defaultDefines(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.defines"); }
-    public get defaultDotconfig(): string | undefined { return super.Section.get<string>("default.dotConfig"); }
+    public get defaultDotconfig(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.dotConfig")); }
     public get defaultMacFrameworkPath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.macFrameworkPath"); }
-    public get defaultWindowsSdkVersion(): string | undefined { return super.Section.get<string>("default.windowsSdkVersion"); }
-    public get defaultCompileCommands(): string | undefined { return super.Section.get<string>("default.compileCommands"); }
+    public get defaultWindowsSdkVersion(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.windowsSdkVersion")); }
+    public get defaultCompileCommands(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.compileCommands")); }
     public get defaultForcedInclude(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.forcedInclude"); }
     public get defaultIntelliSenseMode(): string | undefined { return super.Section.get<string>("default.intelliSenseMode"); }
     public get defaultCompilerPath(): string | undefined { return super.Section.get<string | null>("default.compilerPath") ?? undefined; }
@@ -403,17 +409,17 @@ export class CppSettings extends Settings {
     public get defaultCompilerArgs(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.compilerArgs"); }
     public get defaultCStandard(): string | undefined { return super.Section.get<string>("default.cStandard"); }
     public get defaultCppStandard(): string | undefined { return super.Section.get<string>("default.cppStandard"); }
-    public get defaultConfigurationProvider(): string | undefined { return super.Section.get<string>("default.configurationProvider"); }
+    public get defaultConfigurationProvider(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.configurationProvider")); }
     public get defaultMergeConfigurations(): boolean | undefined { return super.Section.get<boolean>("default.mergeConfigurations"); }
     public get defaultBrowsePath(): string[] | undefined { return super.getWithUndefinedDefault<string[] | null>("default.browse.path") ?? undefined; }
-    public get defaultDatabaseFilename(): string | undefined { return super.Section.get<string>("default.browse.databaseFilename"); }
+    public get defaultDatabaseFilename(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("default.browse.databaseFilename")); }
     public get defaultLimitSymbolsToIncludedHeaders(): boolean | undefined { return super.Section.get<boolean>("default.browse.limitSymbolsToIncludedHeaders"); }
     public get defaultSystemIncludePath(): string[] | undefined { return super.getWithUndefinedDefault<string[]>("default.systemIncludePath"); }
     public get defaultEnableConfigurationSquiggles(): boolean | undefined { return super.Section.get<boolean>("default.enableConfigurationSquiggles"); }
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
-    public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled" ; }
+    public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
     public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
     public get hover(): string | undefined { return super.Section.get<string>("hover"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
@@ -897,7 +903,7 @@ export class CppSettings extends Settings {
         if (this.formattingEngine !== "default") {
             return this.formattingEngine === "vcformat";
         }
-        if (this.clangFormatStyle !== "file") {
+        if (this.clangFormatStyle && this.clangFormatStyle !== "file") {
             // If a clang-format style other than file is specified, don't try to switch to vcFormat.
             return false;
         }
@@ -913,14 +919,18 @@ export class CppSettings extends Settings {
                 const keys: string[] = Object.keys(editorConfigSettings);
                 for (let i: number = 0; i < keys.length; ++i) {
                     if (keys[i].startsWith("cpp_")) {
-                        foundEditorConfigWithVcFormatSettings = true;
-                        const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
-                        if (!didEditorConfigNotice.Value) {
-                            vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
-                                "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
-                            didEditorConfigNotice.Value = true;
+                        const cppCheck: string = keys[i].substring(4);
+                        if (cppCheck.startsWith("indent_") || cppCheck.startsWith("new_line_") ||
+                            cppCheck.startsWith("space_") || cppCheck.startsWith("wrap_")) {
+                            foundEditorConfigWithVcFormatSettings = true;
+                            const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
+                            if (!didEditorConfigNotice.Value) {
+                                vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
+                                    "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
+                                didEditorConfigNotice.Value = true;
+                            }
+                            return true;
                         }
-                        return true;
                     }
                 }
                 switch (typeof editorConfigSettings.root) {
@@ -990,7 +1000,7 @@ export class OtherSettings {
     public get editorInlayHintsEnabled(): boolean { return vscode.workspace.getConfiguration("editor.inlayHints").get<string>("enabled") !== "off"; }
     public get editorParameterHintsEnabled(): boolean | undefined { return vscode.workspace.getConfiguration("editor.parameterHints").get<boolean>("enabled"); }
     public get searchExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("search", this.resource).get("exclude"); }
-    public get workbenchSettingsEditor (): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
+    public get workbenchSettingsEditor(): string | undefined { return vscode.workspace.getConfiguration("workbench.settings").get<string>("editor"); }
 
     public get colorTheme(): string | undefined { return vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"); }
 
