@@ -34,7 +34,7 @@ import * as configs from './configurations';
 import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
 import * as telemetry from '../telemetry';
 import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
-import { LanguageStatusUI, getUI } from './ui';
+import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 import { createProtocolFilter } from './protocolFilter';
 import { DataBinding } from './dataBinding';
 import minimatch = require("minimatch");
@@ -1042,7 +1042,7 @@ export class DefaultClient implements Client {
                 if (showSecondPrompt) {
                     this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
-                ui.ShowConfigureIntelliSenseButton(false, this);
+                ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
                 return;
             }
             if (index === paths.length - 2) {
@@ -1059,6 +1059,7 @@ export class DefaultClient implements Client {
                         return;
                 }
             }
+            const showButtonSender: string = "quickPick";
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
@@ -1080,12 +1081,12 @@ export class DefaultClient implements Client {
                     await this.configuration.updateCustomConfigurationProvider(provider.extensionId);
                     this.onCustomConfigurationProviderRegistered(provider);
                     telemetry.logLanguageServerEvent("customConfigurationProvider", { "providerId": provider.extensionId });
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);
                     return;
                 } else if (index < compileCommandsIndex) {
                     action = "select compile commands";
                     this.configuration.setCompileCommands(this.compileCommandsPaths[index - configProvidersIndex - 1]);
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, showButtonSender);
                     return;
                 } else {
                     action = "select compiler";
@@ -1094,7 +1095,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            ui.ShowConfigureIntelliSenseButton(false, this);
+            ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
             await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
@@ -1150,7 +1151,7 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
@@ -1184,7 +1185,7 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
                 } else if (value === selectCompiler) {
                     this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
@@ -1686,8 +1687,13 @@ export class DefaultClient implements Client {
                 if (changedSettings["legacyCompilerArgsBehavior"]) {
                     this.configuration.handleConfigurationChange();
                 }
-                if (changedSettings["default.compilerPath"] !== undefined || changedSettings["default.compileCommands"] !== undefined || changedSettings["default.configurationProvider"] !== undefined) {
-                    ui.ShowConfigureIntelliSenseButton(false, this);
+                const showButtonSender: string = "settingsChanged";
+                if (changedSettings["default.configurationProvider"] !== undefined) {
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);
+                } else if (changedSettings["default.compileCommands"] !== undefined) {
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompileCommands, showButtonSender);
+                } if (changedSettings["default.compilerPath"] !== undefined) {
+                    ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
                 }
                 this.configuration.onDidChangeSettings();
                 telemetry.logLanguageServerEvent("CppSettingsChange", changedSettings, undefined);
@@ -2626,8 +2632,8 @@ export class DefaultClient implements Client {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         const settings: CppSettings = new CppSettings(this.RootUri);
         const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
-            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson &&
-            (this.lastCustomBrowseConfigurationProviderId === undefined || this.lastCustomBrowseConfigurationProviderId.Value === undefined);
+            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
+        const configProviderNotSetAndNoCache: boolean = configProviderNotSet && this.lastCustomBrowseConfigurationProviderId?.Value === undefined;
         const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
         // Handle config providers
@@ -2635,7 +2641,7 @@ export class DefaultClient implements Client {
             !this.configStateReceived.configProviders ? undefined :
                 (this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0]);
         let showConfigStatus: boolean = false;
-        if (rootFolder && configProviderNotSet && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
+        if (rootFolder && configProviderNotSetAndNoCache && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
@@ -2674,7 +2680,7 @@ export class DefaultClient implements Client {
         }
 
         // Handle compile commands
-        if (rootFolder && configProviderNotSet && !this.configStateReceived.configProviders &&
+        if (rootFolder && configProviderNotSetAndNoCache && !this.configStateReceived.configProviders &&
             compileCommandsNotSet && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
             if (ask.Value) {
@@ -2720,7 +2726,7 @@ export class DefaultClient implements Client {
         }
 
         const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
-        const configurationNotSet: boolean = configProviderNotSet && compileCommandsNotSet && compilerPathNotSet;
+        const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
             !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
@@ -2731,11 +2737,22 @@ export class DefaultClient implements Client {
             } else {
                 this.showConfigureIntelliSenseButton = false;
             }
-            ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this);
         } else if (showConfigStatus && !displayedSelectCompiler) {
             this.promptSelectIntelliSenseConfiguration(false, "notification");
             displayedSelectCompiler = true;
         }
+
+        const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
+        const compilerType: ConfigurationType = this.configuration.CurrentConfiguration?.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
+        const configType: ConfigurationType =
+            !configProviderNotSet ? configProviderType :
+            !compileCommandsNotSet ? ConfigurationType.CompileCommands :
+            !compilerPathNotSet ? compilerType :
+            ConfigurationType.NotConfigured;
+
+        // It's ok to call this method even when the experiment is not enabled because it checks the experiment state
+        // before enabling the button. This method logs configuration telemetry and we always want that.
+        ui.ShowConfigureIntelliSenseButton(showConfigStatus, this, configType, "handleConfig");
     }
 
     /**
