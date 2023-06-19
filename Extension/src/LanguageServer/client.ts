@@ -2730,11 +2730,18 @@ export class DefaultClient implements Client {
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
             !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
-        if (showConfigStatus) {
-            this.showConfigureIntelliSenseButton = true;
-        } else {
-            this.showConfigureIntelliSenseButton = false;
+
+        if (statusBarIndicatorEnabled) {
+            if (showConfigStatus) {
+                this.showConfigureIntelliSenseButton = true;
+            } else {
+                this.showConfigureIntelliSenseButton = false;
+            }
+        } else if (showConfigStatus && !displayedSelectCompiler) {
+                this.promptSelectIntelliSenseConfiguration(false, "notification");
+                displayedSelectCompiler = true;
         }
+
         const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
         const compilerType: ConfigurationType = this.configuration.CurrentConfiguration?.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
         const configType: ConfigurationType =
@@ -2743,12 +2750,9 @@ export class DefaultClient implements Client {
             !compilerPathNotSet ? compilerType :
             ConfigurationType.NotConfigured;
 
-        ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, configType, "handleConfig");
-
-        if (showConfigStatus && !displayedSelectCompiler && !statusBarIndicatorEnabled) {
-            this.promptSelectIntelliSenseConfiguration(false, "notification");
-            displayedSelectCompiler = true;
-        }
+        // It's ok to call this method even when the experiment is not enabled because it checks the experiment state
+        // before enabling the button. This method logs configuration telemetry and we always want that.
+        ui.ShowConfigureIntelliSenseButton(showConfigStatus, this, configType, "handleConfig");
     }
 
     /**
