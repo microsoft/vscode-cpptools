@@ -2632,8 +2632,8 @@ export class DefaultClient implements Client {
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         const settings: CppSettings = new CppSettings(this.RootUri);
         const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
-            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson &&
-            (this.lastCustomBrowseConfigurationProviderId === undefined || this.lastCustomBrowseConfigurationProviderId.Value === undefined);
+            !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
+        const configProviderNotSetAndNoCache: boolean = configProviderNotSet && this.lastCustomBrowseConfigurationProviderId?.Value === undefined;
         const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
         // Handle config providers
@@ -2641,7 +2641,7 @@ export class DefaultClient implements Client {
             !this.configStateReceived.configProviders ? undefined :
                 (this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0]);
         let showConfigStatus: boolean = false;
-        if (rootFolder && configProviderNotSet && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
+        if (rootFolder && configProviderNotSetAndNoCache && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
             if (ask.Value) {
                 if (statusBarIndicatorEnabled) {
@@ -2680,7 +2680,7 @@ export class DefaultClient implements Client {
         }
 
         // Handle compile commands
-        if (rootFolder && configProviderNotSet && !this.configStateReceived.configProviders &&
+        if (rootFolder && configProviderNotSetAndNoCache && !this.configStateReceived.configProviders &&
             compileCommandsNotSet && this.compileCommandsPaths.length > 0 && (statusBarIndicatorEnabled || sender === "compileCommands")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
             if (ask.Value) {
@@ -2726,7 +2726,7 @@ export class DefaultClient implements Client {
         }
 
         const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
-        const configurationNotSet: boolean = configProviderNotSet && compileCommandsNotSet && compilerPathNotSet;
+        const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
             !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
