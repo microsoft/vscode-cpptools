@@ -2738,8 +2738,8 @@ export class DefaultClient implements Client {
                 this.showConfigureIntelliSenseButton = false;
             }
         } else if (showConfigStatus && !displayedSelectCompiler) {
-                this.promptSelectIntelliSenseConfiguration(false, "notification");
-                displayedSelectCompiler = true;
+            this.promptSelectIntelliSenseConfiguration(false, "notification");
+            displayedSelectCompiler = true;
         }
 
         const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
