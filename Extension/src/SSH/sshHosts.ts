@@ -18,7 +18,7 @@ import {
 import { promisify } from 'util';
 import { ISshConfigHostInfo, resolveHome } from "../common";
 import { getSshChannel } from '../logger';
-import glob from 'glob';
+import * as glob from 'glob';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { isWindows } from '../constants';

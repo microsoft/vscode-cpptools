@@ -13,9 +13,7 @@
         "noUnusedLocals": true,
         "strictNullChecks": true,
         "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true
+        "forceConsistentCasingInFileNames": true
     },
     "include": [
         "src/**/*.ts",

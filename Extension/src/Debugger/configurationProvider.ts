@@ -25,7 +25,7 @@ import { CppSettings, OtherSettings } from '../LanguageServer/settings';
 import { configPrefix } from '../LanguageServer/extension';
 import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
 import { rsync, scp, ssh } from '../SSH/commands';
-import glob from 'glob';
+import * as glob from 'glob';
 import { promisify } from 'util';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { NativeAttachItemsProviderFactory } from './nativeAttach';

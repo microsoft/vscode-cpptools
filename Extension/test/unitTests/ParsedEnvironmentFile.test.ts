@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import assert from 'assert';
+import * as assert from 'assert';
 import { Environment, ParsedEnvironmentFile } from '../../src/Debugger/ParsedEnvironmentFile';
 
 // Because the environment variable is set as an array, the index does not matter.
@@ -67,8 +67,8 @@ MyName2=Value2
 
 `;
         const initialEnv: Environment[] = [];
-        initialEnv.push({name : "MyName1", value: "Value7"});
-        initialEnv.push({name : "ThisShouldNotChange", value : "StillHere"});
+        initialEnv.push({ name: "MyName1", value: "Value7" });
+        initialEnv.push({ name: "ThisShouldNotChange", value: "StillHere" });
 
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", initialEnv);
 

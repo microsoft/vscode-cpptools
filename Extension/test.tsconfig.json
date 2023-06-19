@@ -1,25 +1,23 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "ES2022",
-        "outDir": "out",
-        "lib": [
-            "ES2022",
-            "dom"
-        ],
-        "sourceMap": true,
-        "rootDir": ".",
-        "removeComments": true,
-        "forceConsistentCasingInFileNames": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true
-    },
-    "include": [
-        "test/**/*.ts",
-        "tools/**/*.ts",
-        "ui/**/*.ts",
-        "./vscode*.d.ts",
-        "src/types/*.d.ts",
-        "src/**/*.ts"
-    ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "outDir": "out",
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
+    "sourceMap": true,
+    "rootDir": ".",
+    "removeComments": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "test/**/*.ts",
+    "tools/**/*.ts",
+    "ui/**/*.ts",
+    "./vscode*.d.ts",
+    "src/types/*.d.ts",
+    "src/**/*.ts"
+  ]
 }

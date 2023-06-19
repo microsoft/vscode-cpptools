@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import which from "which";
+import * as which from "which";
 import * as fs from 'fs';
 import * as os from 'os';
 import * as child_process from 'child_process';
