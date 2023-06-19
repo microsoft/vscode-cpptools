@@ -1040,7 +1040,7 @@ export class DefaultClient implements Client {
                 settings.defaultCompilerPath = "";
                 configurationSelected = true;
                 if (showSecondPrompt) {
-                    await this.showPrompt(selectIntelliSenseConfig, true, sender);
+                    void this.showPrompt(selectIntelliSenseConfig, true, sender);
                 }
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
@@ -1094,6 +1094,7 @@ export class DefaultClient implements Client {
             }
 
             await ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, showButtonSender);
+
             await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
@@ -1154,14 +1155,14 @@ export class DefaultClient implements Client {
                     await this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
                 } else {
-                    await this.showPrompt(selectCompiler, true, sender);
+                    void this.showPrompt(selectCompiler, true, sender);
                     action = "dismissed";
                 }
                 telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                await this.showPrompt(selectCompiler, false, sender);
+                return this.showPrompt(selectCompiler, false, sender);
             } else {
-                await this.handleIntelliSenseConfigurationQuickPick(isCommand, sender, true);
+                return this.handleIntelliSenseConfigurationQuickPick(isCommand, sender, true);
             }
         }
     }

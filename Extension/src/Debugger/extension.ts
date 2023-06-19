@@ -111,7 +111,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // Active SSH Target initialized in initializeSshTargets()
     if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
         // Don't wait
-        await enableSshTargetsView();
+        void enableSshTargetsView();
     }
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
