@@ -830,6 +830,9 @@ export class CppProperties {
     }
 
     private configProviderAutoSelected: boolean = false;
+    public get ConfigProviderAutoSelected(): boolean {
+        return this.configProviderAutoSelected;
+    }
 
     private updateServerOnFolderSettingsChange(): void {
         this.configProviderAutoSelected = false;
@@ -982,6 +985,8 @@ export class CppProperties {
                         if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                             keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
                         }
+                    } else if (providers.size > 1) {
+                        keepCachedBrowseConfig = false;
                     }
                 } else if (this.client.lastCustomBrowseConfigurationProviderId !== undefined) {
                     keepCachedBrowseConfig = configuration.configurationProvider === this.client.lastCustomBrowseConfigurationProviderId.Value;
@@ -991,6 +996,17 @@ export class CppProperties {
                     if (this.client.lastCustomBrowseConfigurationProviderId) {
                         this.client.lastCustomBrowseConfigurationProviderId.Value = undefined;
                     }
+                }
+
+                const showButtonSender: string = "configChange";
+                if (configuration.configurationProvider !== undefined) {
+                    const configType: ConfigurationType = this.configProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
+                    getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, configType, showButtonSender));
+                } else if (configuration.compileCommands !== undefined) {
+                    getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, showButtonSender));
+                } else if (configuration.compilerPath !== undefined) {
+                    const configType: ConfigurationType = configuration.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
+                    getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, configType, showButtonSender));
                 }
             }
 
@@ -1240,19 +1256,6 @@ export class CppProperties {
 
         if (!this.configurationJson) {
             this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
-        }
-
-        const configuration: Configuration | undefined = this.CurrentConfiguration;
-        if (configuration) {
-            const showButtonSender: string = "configChange";
-            if (configuration.configurationProvider !== undefined) {
-                const configType: ConfigurationType = this.configProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, configType, showButtonSender));
-            } else if (configuration.compileCommands !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompileCommands, showButtonSender));
-            } else if (configuration.compilerPath !== undefined) {
-                getUI().then((ui: LanguageStatusUI) => ui.ShowConfigureIntelliSenseButton(false, this.client, ConfigurationType.CompilerPath, showButtonSender));
-            }
         }
 
         this.applyDefaultIncludePathsAndFrameworks();

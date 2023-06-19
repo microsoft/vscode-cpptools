@@ -49,6 +49,7 @@ export enum ConfigurationType {
     AutoConfigProvider = "autoConfigProvider",
     ConfigProvider = "configProvider",
     CompileCommands = "compileCommands",
+    AutoCompilerPath = "autoCompilerPath",
     CompilerPath = "compilerPath",
     NotConfigured = "notConfigured"
 }

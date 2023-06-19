@@ -2735,10 +2735,12 @@ export class DefaultClient implements Client {
         } else {
             this.showConfigureIntelliSenseButton = false;
         }
+        const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
+        const compilerType: ConfigurationType = this.configuration.CurrentConfiguration?.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
         const configType: ConfigurationType =
-            !configProviderNotSet ? ConfigurationType.ConfigProvider :
+            !configProviderNotSet ? configProviderType :
             !compileCommandsNotSet ? ConfigurationType.CompileCommands :
-            !compilerPathNotSet ? ConfigurationType.CompilerPath :
+            !compilerPathNotSet ? compilerType :
             ConfigurationType.NotConfigured;
 
         ui.ShowConfigureIntelliSenseButton(this.showConfigureIntelliSenseButton, this, configType, "handleConfig");
