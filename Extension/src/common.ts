@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import * as which from 'which';
+import which from "which";
 import * as fs from 'fs';
 import * as os from 'os';
 import * as child_process from 'child_process';
@@ -18,6 +18,7 @@ import * as nls from 'vscode-nls';
 import * as jsonc from 'comment-json';
 import { TargetPopulation } from 'vscode-tas-client';
 import { DocumentFilter } from 'vscode-languageclient';
+import { isWindows } from './constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -161,13 +162,13 @@ export function isHeaderFile(uri: vscode.Uri): boolean {
     return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
 }
 
-export function isCppFile (uri: vscode.Uri): boolean {
+export function isCppFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
     return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
 }
 
-export function isCFile (uri: vscode.Uri): boolean {
+export function isCFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
     return (fileExt === ".C") || fileExtLower === ".c";
@@ -214,8 +215,8 @@ export function getWorkspaceIsCpp(): boolean {
 export function isCppOrRelated(document: vscode.TextDocument): boolean {
     return isCpp(document) || isCppPropertiesJson(document) || (document.uri.scheme === "output" && document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")) ||
         (isWorkspaceCpp && (document.languageId === "json" || document.languageId === "jsonc") &&
-        ((document.fileName.endsWith("settings.json") && (document.uri.scheme === "file" || document.uri.scheme === "vscode-userdata")) ||
-            (document.uri.scheme === "file" && document.fileName.endsWith(".code-workspace"))));
+            ((document.fileName.endsWith("settings.json") && (document.uri.scheme === "file" || document.uri.scheme === "vscode-userdata")) ||
+                (document.uri.scheme === "file" && document.fileName.endsWith(".code-workspace"))));
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -259,7 +260,7 @@ export function getIntelliSenseProgress(): number {
 
 export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
-        extensionContext.globalState.update(installProgressStr, progress);
+        void extensionContext.globalState.update(installProgressStr, progress);
         const telemetryProperties: { [key: string]: string } = {};
         let progressName: string | undefined;
         switch (progress) {
@@ -278,7 +279,7 @@ export function setProgress(progress: number): void {
 
 export function setIntelliSenseProgress(progress: number): void {
     if (extensionContext && getIntelliSenseProgress() < progress) {
-        extensionContext.globalState.update(intelliSenseProgressStr, progress);
+        void extensionContext.globalState.update(intelliSenseProgressStr, progress);
         const telemetryProperties: { [key: string]: string } = {};
         let progressName: string | undefined;
         switch (progress) {
@@ -346,13 +347,9 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function isWindows(): boolean {
-    return os.platform() === 'win32';
-}
-
 export function defaultExePath(): string {
     const exePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-    return isWindows() ? exePath + '.exe' : exePath;
+    return isWindows ? exePath + '.exe' : exePath;
 }
 
 export function findExePathInArgs(args: string[]): string | undefined {
@@ -454,7 +451,7 @@ export function resolveVariablesArray(variables: string[] | undefined, additiona
 
 // Resolve '~' at the start of the path.
 export function resolveHome(filePath: string): string {
-    return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
+    return filePath.replace(/^\~/g, os.homedir());
 }
 
 export function asFolder(uri: vscode.Uri): string {
@@ -621,9 +618,9 @@ export function readDir(dirPath: string): Promise<string[]> {
 }
 
 /** Reads the content of a text file */
-export function readFileText(filePath: string, encoding: string = "utf8"): Promise<string> {
+export function readFileText(filePath: string, encoding: BufferEncoding = "utf8"): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        fs.readFile(filePath, encoding, (err, data) => {
+        fs.readFile(filePath, { encoding }, (err: any, data: any) => {
             if (err) {
                 reject(err);
             } else {
@@ -771,7 +768,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
 
         let proc: child_process.ChildProcess;
         if (await isExecutable(program)) {
-            proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
+            proc = child_process.spawn(`.${isWindows ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
         } else {
             proc = child_process.spawn(program, args, { shell: true });
         }
@@ -810,7 +807,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
         }
         proc.on('close', (code, signal) => {
             clean();
-            resolve({ exitCode: code || signal, stdout: stdout.trim(), stderr: stderr.trim() });
+            resolve({ exitCode: code || signal || undefined, stdout: stdout.trim(), stderr: stderr.trim() });
         });
         proc.on('error', error => {
             clean();
@@ -908,7 +905,7 @@ export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
     const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
     if (value === reload) {
-        vscode.commands.executeCommand("workbench.action.reloadWindow");
+        return vscode.commands.executeCommand("workbench.action.reloadWindow");
     }
 }
 
@@ -954,7 +951,7 @@ function legacyExtractArgs(argsString: string): string[] {
             }
         } else if (c === '\'') {
             // On Windows, a single quote string is not allowed to join multiple args into a single arg
-            if (!isWindows()) {
+            if (!isWindows) {
                 if (!isWithinDoubleQuote) {
                     isWithinSingleQuote = !isWithinSingleQuote;
                 }
@@ -1056,7 +1053,7 @@ function extractArgs(argsString: string): string[] {
                 return [];
             }
             const jsonText: string = wordexpResult.toString();
-            return jsonc.parse(jsonText, undefined, true);
+            return jsonc.parse(jsonText, undefined, true) as any;
         } catch {
             return [];
         }

@@ -54,14 +54,14 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // Register DebugConfigurationProviders for "Run and Debug" play button.
     const debugProvider: DebugConfigurationProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.all);
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndDebugFile", async (textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdit, ..._args: any[]) => { await debugProvider.buildAndDebug(textEditor); }));
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.BuildAndRunFile", async (textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdit, ..._args: any[]) => { await debugProvider.buildAndRun(textEditor); }));
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.AddDebugConfiguration", async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
+    disposables.push(vscode.commands.registerTextEditorCommand("C_Cpp.AddDebugConfiguration", async (textEditor: vscode.TextEditor, _edit: vscode.TextEditorEdit, ..._args: any[]) => {
         const folder: vscode.WorkspaceFolder | undefined = vscode.workspace.getWorkspaceFolder(textEditor.document.uri);
         if (!folder) {
-            vscode.window.showWarningMessage(localize("add.debug.configuration.not.available.for.single.file", "Add debug configuration is not available for single file."));
+            void vscode.window.showWarningMessage(localize("add.debug.configuration.not.available.for.single.file", "Add debug configuration is not available for single file."));
         }
         await debugProvider.addDebugConfiguration(textEditor);
     }));
@@ -78,7 +78,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(vscode.languages.registerCompletionItemProvider(launchJsonDocumentSelector, new ConfigurationSnippetProvider(assetProvider)));
 
     // Register Debug Adapters
-    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg , new CppvsdbgDebugAdapterDescriptorFactory(context)));
+    disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppvsdbg, new CppvsdbgDebugAdapterDescriptorFactory(context)));
     disposables.push(vscode.debug.registerDebugAdapterDescriptorFactory(DebuggerType.cppdbg, new CppdbgDebugAdapterDescriptorFactory(context)));
 
     // SSH Targets View
@@ -111,7 +111,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     // Active SSH Target initialized in initializeSshTargets()
     if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
         // Don't wait
-        enableSshTargetsView();
+        await enableSshTargetsView();
     }
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
@@ -128,7 +128,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
 
 export function dispose(): void {
     if (sshConfigWatcher) {
-        sshConfigWatcher.close();
+        void sshConfigWatcher.close();
         sshConfigWatcher = undefined;
     }
     disposables.forEach(d => d.dispose());
@@ -160,7 +160,7 @@ async function enableSshTargetsView(): Promise<void> {
 async function disableSshTargetsView(): Promise<void> {
     await vscode.commands.executeCommand('setContext', 'cpptools.enableSshTargetsView', false);
     if (sshConfigWatcher) {
-        sshConfigWatcher.close();
+        void sshConfigWatcher.close();
         sshConfigWatcher = undefined;
     }
     sshTargetsViewEnabled = false;

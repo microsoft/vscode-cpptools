@@ -18,7 +18,7 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
         if (settings.formattingEngine === "disabled") {
             return [];
         }
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.ready;
         const filePath: string = document.uri.fsPath;
         const onChanges: string | number | boolean = options.onChanges;
         if (onChanges) {

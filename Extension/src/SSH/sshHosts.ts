@@ -16,11 +16,12 @@ import {
     HostConfigurationDirective
 } from 'ssh-config';
 import { promisify } from 'util';
-import { ISshConfigHostInfo, isWindows, resolveHome } from "../common";
+import { ISshConfigHostInfo, resolveHome } from "../common";
 import { getSshChannel } from '../logger';
-import * as glob from 'glob';
+import glob from 'glob';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -30,7 +31,7 @@ const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promi
 const userSshConfigurationFile: string = path.resolve(os.homedir(), '.ssh/config');
 
 const ProgramData: string = process.env.ALLUSERSPROFILE || process.env.PROGRAMDATA || 'C:\\ProgramData';
-const systemSshConfigurationFile: string = isWindows() ? `${ProgramData}\\ssh\\ssh_config` : '/etc/ssh/ssh_config';
+const systemSshConfigurationFile: string = isWindows ? `${ProgramData}\\ssh\\ssh_config` : '/etc/ssh/ssh_config';
 
 // Stores if the SSH config files are parsed successfully.
 // Only store root config files' failure status since included files are not modified by our extension.
@@ -97,7 +98,7 @@ async function resolveConfigIncludes(config: Configuration, configPath: string):
     for (const entry of config) {
         if (isDirective(entry) && entry.param === 'Include') {
             let includePath: string = resolveHome(entry.value);
-            if (isWindows() && !!includePath.match(/^\/[a-z]:/i)) {
+            if (isWindows && !!includePath.match(/^\/[a-z]:/i)) {
                 includePath = includePath.substr(1);
             }
 

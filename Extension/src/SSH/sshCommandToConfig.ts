@@ -226,7 +226,7 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
  *  3. https://github.com/openssh/openssh-portable/blob/master///misc.c#L875-L877
  */
 function parseConnectionString(str: string): { hostname: string; port?: string; username?: string } {
-    let url: URL | void;
+    let url: URL | undefined;
     try {
         url = new URL(str);
     } catch {

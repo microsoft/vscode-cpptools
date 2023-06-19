@@ -30,7 +30,6 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
 }
 
 export class CppBuildTask extends Task {
-    detail?: string;
     existing?: boolean;
     isDefault?: boolean;
 }
@@ -76,7 +75,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks for header files.
-        const isHeader: boolean = util.isHeaderFile (editor.document.uri);
+        const isHeader: boolean = util.isHeaderFile(editor.document.uri);
         if (isHeader) {
             return emptyTasks;
         }
@@ -130,7 +129,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 ) &&
                 (
                     !isCompilerValid || (!!userCompilerPathAndArgs &&
-                    (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
+                        (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
                 ) &&
                 (
                     !isWindows || !info.path.startsWith("/")
@@ -392,7 +391,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.options = { "shell": true };
         }
         if (this.options.cwd) {
-            this.options.cwd = util.resolveVariables(this.options.cwd);
+            this.options.cwd = util.resolveVariables(this.options.cwd.toString());
         } else {
             const editor: TextEditor | undefined = window.activeTextEditor;
             let folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;

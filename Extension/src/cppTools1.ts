@@ -64,6 +64,7 @@ export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
     }
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * This is an empty implementation of the API. Used when the extension is activated on
  * an unsupported platform.

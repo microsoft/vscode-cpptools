@@ -27,7 +27,7 @@ export class FindAllRefsView {
         if (this.referencesModel) {
             hasResults = this.referencesModel.hasResults();
         }
-        vscode.commands.executeCommand('setContext', 'cpptools.hasReferencesResults', hasResults);
+        void vscode.commands.executeCommand('setContext', 'cpptools.hasReferencesResults', hasResults);
     }
 
     setData(results: ReferencesResult, groupByFile: boolean): void {
@@ -64,7 +64,7 @@ export class FindAllRefsView {
             line += ref.filename;
             if (ref.referencePosition !== null && ref.referencePosition !== undefined) {
                 line += ":" + (ref.referencePosition.line + 1) + ":" + (ref.referencePosition.character + 1)
-                + " " + ref.referenceText;
+                    + " " + ref.referenceText;
             }
             if (includeConfirmedReferences && ref.referenceType === ReferenceType.Confirmed) {
                 confirmedRefs.push(line);
@@ -78,7 +78,7 @@ export class FindAllRefsView {
         for (const fileRef of fileReferences) {
             const line: string =
                 ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
-                + fileRef.filename);
+                    + fileRef.filename);
             fileRefs.push(line);
         }
 

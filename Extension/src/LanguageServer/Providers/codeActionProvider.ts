@@ -3,10 +3,12 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import {  Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
+import { Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import { DefaultClient } from '../client';
-import { CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
-    codeAnalysisAllFixes } from '../codeAnalysis';
+import {
+    CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
+    codeAnalysisAllFixes
+} from '../codeAnalysis';
 import { makeVscodeRange } from '../utils';
 import { CppSettings } from '../settings';
 import { getLocalizedString, LocalizeStringParams } from '../localization';
@@ -39,7 +41,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.ready;
         let r: Range;
         if (range instanceof vscode.Selection) {
             if (range.active.isBefore(range.anchor)) {
@@ -118,7 +120,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo !== undefined) {
                             if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                 (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
+                                    codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
                                 // Only show the "fix all type" if there is more than one fix for the type.
                                 fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                             }
@@ -135,7 +137,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo.removeAllTypeCodeAction !== undefined &&
                             codeActionCodeInfo.uriToInfo.size > 0 &&
                             (codeActionCodeInfo.uriToInfo.size > 1 ||
-                            codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
+                                codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
                             // Only show the "clear all type" if there is more than one fix for the type.
                             removeAllTypeAvailable = true;
                         }

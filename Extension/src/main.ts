@@ -23,6 +23,7 @@ import * as nls from 'vscode-nls';
 import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
 import { disposeOutputChannels, log } from './logger';
+import { returns } from './Automation/Async/returns';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -86,7 +87,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
     if (isOldMacOs) {
         languageServiceDisabled = true;
-        vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
+        void vscode.window.showErrorMessage(localize("macos.version.deprecated", "Versions of the C/C++ extension more recent than {0} require at least macOS version {1}.", "1.9.8", "10.12"));
     } else {
         if (settings.intelliSenseEngine === "disabled") {
             languageServiceDisabled = true;
@@ -99,11 +100,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                     // If switching from disabled to enabled, we can continue activation.
                     currentIntelliSenseEngineValue = settings.intelliSenseEngine;
                     languageServiceDisabled = false;
-                    LanguageServer.activate();
+                    return LanguageServer.activate();
                 } else {
                     // We can't deactivate or change engines on the fly, so prompt for window reload.
                     reloadMessageShown = true;
-                    util.promptForReloadWindowDueToSettingsChange();
+                    return util.promptForReloadWindowDueToSettingsChange();
                 }
             }
         }));
@@ -114,7 +115,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
             const config: string = path.join(vscode.workspace.workspaceFolders[i].uri.fsPath, ".vscode/c_cpp_properties.json");
             if (await util.checkFileExists(config)) {
                 const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(config);
-                vscode.languages.setTextDocumentLanguage(doc, "jsonc");
+                await vscode.languages.setTextDocumentLanguage(doc, "jsonc");
                 util.setWorkspaceIsCpp();
             }
         }
@@ -150,7 +151,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
 
 export async function deactivate(): Promise<void> {
     DebuggerExtension.dispose();
-    Telemetry.deactivate();
+    void Telemetry.deactivate().catch(returns.undefined);
     disposables.forEach(d => d.dispose());
     if (languageServiceDisabled) {
         return;
@@ -291,13 +292,12 @@ async function checkVsixCompatibility(): Promise<void> {
                 }
             }
             if (promise) {
-                promise.then(async (value) => {
-                    if (value === moreInfoButton) {
-                        await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(getLocalizedHtmlPath("Reinstalling the Extension.md")));
-                    } else if (value === ignoreButton) {
-                        ignoreMismatchedCompatibleVsix.Value = true;
-                    }
-                });
+                const value = await promise;
+                if (value === moreInfoButton) {
+                    await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                } else if (value === ignoreButton) {
+                    ignoreMismatchedCompatibleVsix.Value = true;
+                }
             }
         } else {
             console.log("Unable to find TargetPlatform in .vsixmanifest");

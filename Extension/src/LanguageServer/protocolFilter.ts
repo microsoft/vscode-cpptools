@@ -12,13 +12,13 @@ import * as util from '../common';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
-    const invoke1 = (a: any, next: (a: any) => any): any => clients.ActiveClient.requestWhenReady(() => next(a));
-    const invoke2 = (a: any, b: any, next: (a: any, b: any) => any): any => clients.ActiveClient.requestWhenReady(() => next(a, b));
-    const invoke3 = (a: any, b: any, c: any, next: (a: any, b: any, c: any) => any): any => clients.ActiveClient.requestWhenReady(() => next(a, b, c));
-    const invoke4 = (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any): any => clients.ActiveClient.requestWhenReady(() => next(a, b, c, d));
+    const invoke1 = (a: any, next: (a: any) => any): any => clients.ActiveClient.ready.then(() => next(a));
+    const invoke2 = (a: any, b: any, next: (a: any, b: any) => any): any => clients.ActiveClient.ready.then(() => next(a, b));
+    const invoke3 = (a: any, b: any, c: any, next: (a: any, b: any, c: any) => any): any => clients.ActiveClient.ready.then(() => next(a, b, c));
+    const invoke4 = (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any): any => clients.ActiveClient.ready.then(() => next(a, b, c, d));
 
     return {
-        didOpen: async (document, sendMessage) => {
+        didOpen: async (document, _sendMessage) => {
             if (util.isCpp(document)) {
                 util.setWorkspaceIsCpp();
             }
@@ -27,7 +27,8 @@ export function createProtocolFilter(): Middleware {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
-                await clients.ActiveClient.requestWhenReady(() => processDelayedDidOpen(document));
+                await clients.ActiveClient.ready;
+                await processDelayedDidOpen(document);
                 if (editor && editor === vscode.window.activeTextEditor) {
                     onDidChangeActiveTextEditor(editor);
                 }
@@ -42,15 +43,14 @@ export function createProtocolFilter(): Middleware {
             }
         },
         didChange: async (textDocumentChangeEvent, sendMessage) => {
-            await clients.ActiveClient.requestWhenReady(async () => {
-                const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
-                me.onDidChangeTextDocument(textDocumentChangeEvent);
-                await sendMessage(textDocumentChangeEvent);
-            });
+            await clients.ActiveClient.ready;
+            const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
+            me.onDidChangeTextDocument(textDocumentChangeEvent);
+            await sendMessage(textDocumentChangeEvent);
         },
         willSave: invoke1,
         willSaveWaitUntil: async (event, sendMessage) => {
-            // await clients.ActiveClient.awaitUntilLanguageClientReady();
+            // await clients.ActiveClient.ready;
             // Don't use awaitUntilLanguageClientReady.
             // Otherwise, the message can be delayed too long.
             const me: Client = clients.getClientFor(event.document.uri);
@@ -61,25 +61,25 @@ export function createProtocolFilter(): Middleware {
         },
         didSave: invoke1,
         didClose: async (document, sendMessage) => {
-            await clients.ActiveClient.requestWhenReady(async () => {
-                const me: Client = clients.getClientFor(document.uri);
-                if (me.TrackedDocuments.has(document)) {
-                    me.onDidCloseTextDocument(document);
-                    me.TrackedDocuments.delete(document);
-                    await sendMessage(document);
-                }
-            });
+            await clients.ActiveClient.ready;
+
+            const me: Client = clients.getClientFor(document.uri);
+            if (me.TrackedDocuments.has(document)) {
+                me.onDidCloseTextDocument(document);
+                me.TrackedDocuments.delete(document);
+                await sendMessage(document);
+            }
         },
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) =>
-            clients.ActiveClient.requestWhenReady(async () => {
-                const me: Client = clients.getClientFor(document.uri);
-                if (me.TrackedDocuments.has(document)) {
-                    return next(document, position, token);
-                }
-                return null;
-            }),
+        provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => {
+            await clients.ActiveClient.ready;
+            const me: Client = clients.getClientFor(document.uri);
+            if (me.TrackedDocuments.has(document)) {
+                return next(document, position, token);
+            }
+            return null;
+        },
         provideSignatureHelp: invoke4,
         provideDefinition: invoke3,
         provideReferences: invoke4,

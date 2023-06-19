@@ -66,7 +66,7 @@ export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode>, vs
             }
         }
         if (activeTargetRemoved) {
-            setActiveSshTarget(undefined);
+            await setActiveSshTarget(undefined);
         }
         return targetNodes;
     }
@@ -82,7 +82,7 @@ export async function initializeSshTargets(): Promise<void> {
         }
     }
     if (activeTargetRemoved) {
-        setActiveSshTarget(undefined);
+        await setActiveSshTarget(undefined);
     }
     await setActiveSshTarget(extensionContext?.workspaceState.get(workspaceState_activeSshTarget));
 }

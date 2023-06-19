@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath, isWindows } from '../common';
+import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath } from '../common';
 import * as os from 'os';
 import * as which from 'which';
 import { execSync } from 'child_process';
@@ -18,6 +18,7 @@ import * as editorConfig from 'editorconfig';
 import { PersistentState } from './persistentState';
 import * as nls from 'vscode-nls';
 import { clients } from './extension';
+import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -342,7 +343,7 @@ export class CppSettings extends Settings {
             return;
         }
         checks.push(value);
-        super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
+        void super.Section.update("codeAnalysis.clangTidy.checks.disabled", checks, vscode.ConfigurationTarget.WorkspaceFolder);
     }
     public get clangFormatStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_style")); }
     public get clangFormatFallbackStyle(): string | undefined { return changeBlankStringToUndefined(super.Section.get<string>("clang_format_fallbackStyle")); }
@@ -395,10 +396,10 @@ export class CppSettings extends Settings {
         } else if (compilerPathInfo.workspaceValue !== undefined) {
             target = vscode.ConfigurationTarget.Workspace;
         }
-        this.Section.update(defaultCompilerPathStr, value, target);
+        void this.Section.update(defaultCompilerPathStr, value, target);
         if (this.resource !== undefined && !hasTrustedCompilerPaths()) {
             // Also set the user/remote compiler path if no other path has been trusted yet.
-            this.Section.update(defaultCompilerPathStr, value, vscode.ConfigurationTarget.Global);
+            void this.Section.update(defaultCompilerPathStr, value, vscode.ConfigurationTarget.Global);
             clients.forEach(client => {
                 if (client instanceof DefaultClient) {
                     client.setShowConfigureIntelliSenseButton(false);
@@ -419,7 +420,7 @@ export class CppSettings extends Settings {
     public get defaultCustomConfigurationVariables(): { [key: string]: string } | undefined { return super.Section.get<{ [key: string]: string }>("default.customConfigurationVariables"); }
     public get useBacktickCommandSubstitution(): boolean | undefined { return super.Section.get<boolean>("debugger.useBacktickCommandSubstitution"); }
     public get codeFolding(): boolean { return super.Section.get<string>("codeFolding")?.toLowerCase() === "enabled"; }
-    public get caseSensitiveFileSupport(): boolean { return !isWindows() || super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
+    public get caseSensitiveFileSupport(): boolean { return !isWindows || super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
     public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
     public get hover(): string | undefined { return super.Section.get<string>("hover"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
@@ -736,11 +737,11 @@ export class CppSettings extends Settings {
 
     public toggleSetting(name: string, value1: string, value2: string): void {
         const value: string | undefined = super.Section.get<string>(name);
-        super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
+        void super.Section.update(name, value?.toLowerCase() === value1.toLowerCase() ? value2 : value1, getTarget());
     }
 
     public update<T>(name: string, value: T): void {
-        super.Section.update(name, value);
+        void super.Section.update(name, value);
     }
 
     public populateEditorConfig(document: vscode.TextDocument): void {
@@ -874,7 +875,7 @@ export class CppSettings extends Settings {
             const lastPosition: vscode.Position = document.lineAt(document.lineCount - 1).range.end;
             edits.insert(document.uri, lastPosition, remainingSettingsText);
         }
-        vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
+        void vscode.workspace.applyEdit(edits).then(() => vscode.window.showTextDocument(document));
     }
 
     public async generateEditorConfig(): Promise<void> {
@@ -925,7 +926,7 @@ export class CppSettings extends Settings {
                             foundEditorConfigWithVcFormatSettings = true;
                             const didEditorConfigNotice: PersistentState<boolean> = new PersistentState<boolean>("Cpp.didEditorConfigNotice", false);
                             if (!didEditorConfigNotice.Value) {
-                                vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
+                                void vscode.window.showInformationMessage(localize({ key: "editorconfig.default.behavior", comment: ["Single-quotes are used here, as this message is displayed in a context that does not render markdown. Do not change them to back-ticks. Do not change the contents of the single-quoted text."] },
                                     "Code formatting is using settings from .editorconfig instead of .clang-format. For more information, see the documentation for the 'default' value of the 'C_Cpp.formatting' setting."));
                                 didEditorConfigNotice.Value = true;
                             }
@@ -993,7 +994,7 @@ export class OtherSettings {
     public get filesEncoding(): string | undefined { return vscode.workspace.getConfiguration("files", { uri: this.resource, languageId: "cpp" }).get<string>("encoding"); }
     public get filesAssociations(): any { return vscode.workspace.getConfiguration("files").get("associations"); }
     public set filesAssociations(value: any) {
-        vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
+        void vscode.workspace.getConfiguration("files").update("associations", value, vscode.ConfigurationTarget.Workspace);
     }
     public get filesExclude(): vscode.WorkspaceConfiguration | undefined { return vscode.workspace.getConfiguration("files", this.resource).get("exclude"); }
     public get filesAutoSaveAfterDelay(): boolean { return vscode.workspace.getConfiguration("files").get("autoSave") === "afterDelay"; }

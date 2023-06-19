@@ -8,6 +8,7 @@ import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import { CppSettings } from './LanguageServer/settings';
 import * as util from './common';
+import { logAndReturn } from './Automation/Async/returns';
 
 interface IPackageInfo {
     name: string;
@@ -96,16 +97,8 @@ async function isExperimentEnabled(experimentName: string): Promise<boolean> {
 }
 
 export async function deactivate(): Promise<void> {
-    if (initializationPromise) {
-        try {
-            await initializationPromise;
-        } catch (e) {
-            // Continue even if we were not able to initialize the experimentation platform.
-        }
-    }
-    if (experimentationTelemetry) {
-        experimentationTelemetry.dispose();
-    }
+    await initializationPromise?.catch(logAndReturn.undefined);
+    await experimentationTelemetry?.dispose().catch(logAndReturn.undefined);
 }
 
 export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
@@ -116,14 +109,10 @@ export function logDebuggerEvent(eventName: string, properties?: { [key: string]
         }
     };
 
+    // simpler expression of the original:
+    // Uses 'then' instead of 'await' because telemetry should be "fire and forget".
     if (initializationPromise) {
-        try {
-            // Use 'then' instead of 'await' because telemetry should be "fire and forget".
-            initializationPromise.then(sendTelemetry);
-            return;
-        } catch (e) {
-            // Continue even if we were not able to initialize the experimentation platform.
-        }
+        return void initializationPromise.catch(logAndReturn.undefined).then(sendTelemetry).catch(logAndReturn.undefined);
     }
     sendTelemetry();
 }
@@ -137,13 +126,7 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
     };
 
     if (initializationPromise) {
-        try {
-            // Use 'then' instead of 'await' because telemetry should be "fire and forget".
-            initializationPromise.then(sendTelemetry);
-            return;
-        } catch (e) {
-            // Continue even if we were not able to initialize the experimentation platform.
-        }
+        void initializationPromise.then(sendTelemetry).catch(logAndReturn.undefined);
     }
     sendTelemetry();
 }

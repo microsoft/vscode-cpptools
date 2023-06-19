@@ -7,14 +7,15 @@ module.exports = {
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": "tsconfig.json",
+        "ecmaVersion": 2022,
         "sourceType": "module"
     },
     "plugins": [
         "@typescript-eslint",
-        "@typescript-eslint/tslint",
         "eslint-plugin-jsdoc",
-        "@typescript-eslint/eslint-plugin-tslint",
+        "@typescript-eslint/eslint-plugin",
         "eslint-plugin-import",
+        "eslint-plugin-header" 
     ],
     "rules": {
         "@typescript-eslint/adjacent-overload-signatures": "error",
@@ -57,6 +58,10 @@ module.exports = {
         "@typescript-eslint/triple-slash-reference": "error",
         "@typescript-eslint/type-annotation-spacing": "error",
         "@typescript-eslint/unified-signatures": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" } ],
+
         "arrow-body-style": "error",
         "comma-dangle": "error",
         "constructor-super": "error",
@@ -82,7 +87,6 @@ module.exports = {
         "no-irregular-whitespace": "error",
         "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
         "no-new-wrappers": "error",
-        "no-redeclare": "error",
         "no-return-await": "error",
         "no-sequences": "error",
         "no-sparse-arrays": "error",
@@ -103,54 +107,13 @@ module.exports = {
             "never"
         ],
         "spaced-comment": [
-            "error",
-            "always"
+            "off",
+            "always",
+            { "line": { "exceptions": ["/"] } }  // triple slash directives
         ],
         "use-isnan": "error",
         "valid-typeof": "error",
         "yoda": "error",
-        "@typescript-eslint/tslint/config": [
-            "error",
-            {
-                "rules": {
-                    "encoding": true,
-                    "file-header": [
-                        true,
-                        ".*"
-                    ],
-                    "import-spacing": true,
-                    "match-default-export-name": true,
-                    "no-boolean-literal-compare": true,
-                    "no-mergeable-namespace": true,
-                    "no-reference-import": true,
-                    "no-unnecessary-callback-wrapper": true,
-                    "number-literal-format": true,
-                    "one-line": [
-                        true,
-                        "check-catch",
-                        "check-finally",
-                        "check-else",
-                        "check-open-brace",
-                        "check-whitespace"
-                    ],
-                    "prefer-method-signature": true,
-                    "prefer-while": true,
-                    "typedef": [
-                        true,
-                        "variable-declaration",
-                        "call-signature",
-                        "variable-declaration-ignore-function"
-                    ],
-                    "whitespace": [
-                        true,
-                        "check-branch",
-                        "check-operator",
-                        "check-separator",
-                        "check-preblock",
-                        "check-type"
-                    ]
-                }
-            }
-        ]
+       
     }
 };

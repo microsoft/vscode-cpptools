@@ -2,8 +2,8 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+import assert from 'assert';
 import { Environment, ParsedEnvironmentFile } from '../../src/Debugger/ParsedEnvironmentFile';
-import * as assert from 'assert';
 
 // Because the environment variable is set as an array, the index does not matter.
 function assertEnvironmentEqual(env: Environment[], name: string, value: string): void {
@@ -102,7 +102,7 @@ MyName2=Value2
         const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning.startsWith("Ignoring non-parseable lines in envFile TestEnvFileName"), 'Checking if warning exists');
+        assert(result.Warning && result.Warning.startsWith("Ignoring non-parseable lines in envFile TestEnvFileName"), 'Checking if warning exists');
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });

@@ -166,6 +166,20 @@
                     }
                 }
             ]
+        },
+        {
+            "label": "Watch (internal-unit-tests)",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "node_modules/.bin/tsc --build ${workspaceFolder}/test.tsconfig.json --watch",
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

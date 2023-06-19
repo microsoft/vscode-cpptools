@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
-import { ExpansionOptions, expandAllStrings, expandString } from "../../src/expand";
+import { ExpansionOptions, expandAllStrings } from "../../src/expand";
 
 suite('Var expansion validation', () => {
     test('Expand all strings', async () => {

@@ -18,7 +18,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
         if (settings.formattingEngine === "disabled") {
             return [];
         }
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.ready;
         const filePath: string = document.uri.fsPath;
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {

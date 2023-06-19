@@ -24,7 +24,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         console.warn("This should only appear in a test scenario.");
 
         return new vscode.DebugAdapterExecutable('node', [path.join(this.context.extensionPath, './out/test/integrationTests/MockDebugger/mockDebug.js')]);
@@ -38,7 +38,7 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         console.warn("This should only appear in a test scenario.");
 
         return new vscode.DebugAdapterExecutable('node', [path.join(this.context.extensionPath, './out/test/integrationTests/MockDebugger/mockDebug.js')]);

@@ -6,7 +6,7 @@
 'use strict';
 
 const gulp = require('gulp');
-const eslint = require('gulp-eslint');
+const eslint = require('gulp-eslint-new');
 const fs = require('fs');
 const nls = require('vscode-nls-dev');
 const path = require('path');

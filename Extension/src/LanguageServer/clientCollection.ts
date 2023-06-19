@@ -10,6 +10,7 @@ import * as cpptools from './client';
 import * as telemetry from '../telemetry';
 import { getCustomConfigProviders } from './customProviders';
 import { TimeTelemetryCollector } from './timeTelemetryCollector';
+import { logAndReturn } from '../Automation/Async/returns';
 
 const defaultClientKey: string = "@@default@@";
 export interface ClientKey {
@@ -64,7 +65,6 @@ export class ClientCollection {
         this.languageClients.set(key, this.activeClient);
 
         this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
-        this.disposables.push(vscode.workspace.onDidCloseTextDocument(d => this.onDidCloseTextDocument(d)));
     }
 
     public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
@@ -121,7 +121,7 @@ export class ClientCollection {
             const client: cpptools.Client = pair[1];
 
             const newClient: cpptools.Client = this.createClient(client.RootFolder, true);
-            client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
+            client.TrackedDocuments.forEach(document => void this.transferOwnership(document, client).catch(logAndReturn.undefined));
 
             if (this.activeClient === client) {
                 // It cannot be undefined. If there is an active document, we activate it later.
@@ -158,7 +158,7 @@ export class ClientCollection {
 
                     // Transfer ownership of the client's documents to another client.
                     // (this includes calling textDocument/didOpen on the new client so that the server knows it's open too)
-                    client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
+                    client.TrackedDocuments.forEach(document => void this.transferOwnership(document, client).catch(logAndReturn.undefined));
 
                     if (this.activeClient === client) {
                         this.activeClient.deactivate();
@@ -205,10 +205,10 @@ export class ClientCollection {
         }
     }
 
-    private transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): void {
+    private async transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): Promise<void> {
         const newOwner: cpptools.Client = this.getClientFor(document.uri);
         if (newOwner !== oldOwner) {
-            newOwner.takeOwnership(document);
+            return newOwner.takeOwnership(document);
         }
     }
 
@@ -243,10 +243,6 @@ export class ClientCollection {
         this.languageClients.set(key, newClient);
         getCustomConfigProviders().forEach(provider => void newClient.onRegisterCustomConfigurationProvider(provider));
         return newClient;
-    }
-
-    private onDidCloseTextDocument(document: vscode.TextDocument): void {
-        // Don't seem to need to do anything here since we clean up when the workspace is closed instead.
     }
 
     public dispose(): Thenable<void> {

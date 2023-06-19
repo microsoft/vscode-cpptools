@@ -269,7 +269,7 @@ export class ReferencesManager {
         this.prevVisibleRangesLength = visibleRangesLength;
     }
 
-    private reportProgress(progress: vscode.Progress<{message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
+    private reportProgress(progress: vscode.Progress<{ message?: string; increment?: number }>, forceUpdate: boolean, mode: ReferencesCommandMode): void {
         const helpMessage: string = (mode !== ReferencesCommandMode.Find) ? "" : ` ${localize("click.search.icon", "To preview results, click the search icon in the status bar.")}`;
         if (this.referencesCurrentProgress) {
             switch (this.referencesCurrentProgress.referencesProgress) {
@@ -371,7 +371,7 @@ export class ReferencesManager {
         this.referencesDelayProgress = setInterval(() => {
             const progressTitle: string = referencesCommandModeToString(this.client.ReferencesCommandMode);
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: progressTitle, cancellable: true };
-            this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
+            this.referencesProgressMethod = (progress: vscode.Progress<{ message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                 new Promise((resolve) => {
                     this.currentUpdateProgressResolve = resolve;
                     this.reportProgress(progress, true, mode);
@@ -394,7 +394,7 @@ export class ReferencesManager {
                                 referencePreviousProgressUICounter = this.referencesCurrentProgressUICounter;
                                 this.referencesPrevProgressIncrement = 0; // Causes update bar to not reset.
                                 if (this.referencesProgressOptions && this.referencesProgressMethod) {
-                                    vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+                                    void vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
                                 }
                             }
                             resolve(undefined);
@@ -403,7 +403,7 @@ export class ReferencesManager {
                         }
                     }, this.referencesProgressUpdateInterval);
                 });
-            vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
+            void vscode.window.withProgress(this.referencesProgressOptions, this.referencesProgressMethod);
             if (this.referencesDelayProgress) {
                 clearInterval(this.referencesDelayProgress);
             }

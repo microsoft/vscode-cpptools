@@ -3,8 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { Logger, logger, LoggingDebugSession, InitializedEvent, TerminatedEvent } from 'vscode-debugadapter';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { Logger, logger, LoggingDebugSession, InitializedEvent, TerminatedEvent } from '@vscode/debugadapter';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { Subject } from 'await-notify';
 
 interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
@@ -22,7 +22,7 @@ export class MockDebugSession extends LoggingDebugSession {
         super("mock-debug.txt");
     }
 
-    protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
+    protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
         // build and return the capabilities of this debug adapter:
         response.body = response.body || {};
 
@@ -59,7 +59,7 @@ export class MockDebugSession extends LoggingDebugSession {
         this.sendEvent(new TerminatedEvent());
     }
 
-    protected async disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): Promise<void> {
+    protected async disconnectRequest(response: DebugProtocol.DisconnectResponse, _args: DebugProtocol.DisconnectArguments): Promise<void> {
         this.sendResponse(response);
     }
 }

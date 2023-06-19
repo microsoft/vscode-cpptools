@@ -81,8 +81,8 @@ export class CppTools implements CppToolsTestApi {
             this.removeNotifyReadyTimer(p);
             p.isReady = true;
             LanguageServer.getClients().forEach(client => {
-                client.updateCustomBrowseConfiguration(p);
-                client.updateCustomConfigurations(p);
+                void client.updateCustomBrowseConfiguration(p);
+                void client.updateCustomConfigurations(p);
             });
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered; 'notifyReady' ignored");

@@ -30,7 +30,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
         super(context);
     }
 
-    async createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
+    async createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor> {
         const adapter: string = "./debugAdapters/bin/OpenDebugAD7" + (os.platform() === 'win32' ? ".exe" : "");
 
         const command: string = path.join(this.context.extensionPath, adapter);
@@ -44,9 +44,9 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
         super(context);
     }
 
-    async createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
+    async createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): Promise<vscode.DebugAdapterDescriptor | null> {
         if (os.platform() !== 'win32') {
-            vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not avaliable for non-Windows machines.", "cppvsdbg"));
+            void vscode.window.showErrorMessage(localize("debugger.not.available", "Debugger type '{0}' is not avaliable for non-Windows machines.", "cppvsdbg"));
             return null;
         } else {
             return new vscode.DebugAdapterExecutable(

@@ -22,14 +22,14 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
     refresh(): void {
         if (this.referencesModel) {
-            vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
+            void vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
             this._onDidChangeTreeData.fire();
         }
     }
 
     setModel(model: ReferencesModel): void {
         this.referencesModel = model;
-        vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
+        void vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
         this._onDidChangeTreeData.fire();
     }
 

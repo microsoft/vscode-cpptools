@@ -54,7 +54,7 @@ export async function expandString(input: string, options: ExpansionOptions): Pr
     } while (i < MAX_RECURSION && options.recursive && didReplacement);
 
     if (i === MAX_RECURSION && didReplacement) {
-        getOutputChannelLogger().showErrorMessage(localize('max.recursion.reached', 'Reached max string expansion recursion. Possible circular reference.'));
+        void getOutputChannelLogger().showErrorMessage(localize('max.recursion.reached', 'Reached max string expansion recursion. Possible circular reference.'));
     }
 
     return replaceAll(result, '${dollar}', '$');
@@ -79,7 +79,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
             // Replace dollar sign at the very end of the expanding process
             const repl: string = options.vars[key];
             if (!repl) {
-                getOutputChannelLogger().showWarningMessage(localize('invalid.var.reference', 'Invalid variable reference {0} in string: {1}.', full, input));
+                void getOutputChannelLogger().showWarningMessage(localize('invalid.var.reference', 'Invalid variable reference {0} in string: {1}.', full, input));
             } else {
                 subs.set(full, repl);
             }
@@ -95,7 +95,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
         const full: string = match[0];
         const varname: string = match[1];
         if (process.env[varname] === undefined) {
-            getOutputChannelLogger().showWarningMessage(localize('env.var.not.found', 'Environment variable {0} not found', varname));
+            void getOutputChannelLogger().showWarningMessage(localize('env.var.not.found', 'Environment variable {0} not found', varname));
         }
         const repl: string = process.env[varname] || '';
         subs.set(full, repl);
@@ -104,7 +104,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
     const command_re: RegExp = RegExp(`\\$\\{command:(${varValueRegexp})\\}`, "g");
     while ((match = command_re.exec(input))) {
         if (options.doNotSupportCommands) {
-            getOutputChannelLogger().showWarningMessage(localize('commands.not.supported', 'Commands are not supported for string: {0}.', input));
+            void getOutputChannelLogger().showWarningMessage(localize('commands.not.supported', 'Commands are not supported for string: {0}.', input));
             break;
         }
         const full: string = match[0];
@@ -116,7 +116,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
             const command_ret: unknown = await vscode.commands.executeCommand(command, options.vars.workspaceFolder);
             subs.set(full, `${command_ret}`);
         } catch (e: any) {
-            getOutputChannelLogger().showWarningMessage(localize('exception.executing.command', 'Exception while executing command {0} for string: {1} {2}.', command, input, e));
+            void getOutputChannelLogger().showWarningMessage(localize('exception.executing.command', 'Exception while executing command {0} for string: {1} {2}.', command, input, e));
         }
     }
 

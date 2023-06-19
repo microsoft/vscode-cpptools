@@ -12,12 +12,13 @@ import * as config from './configurations';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 import { getLocalizedHtmlPath } from './localization';
-import _ = require('lodash');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-const deepCopy = (obj: any) => _.cloneDeep(obj);
+function deepCopy(obj: any) {
+    return JSON.parse(JSON.stringify(obj));
+}
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
@@ -195,7 +196,7 @@ export class SettingsPanel {
 
     public updateErrors(errors: config.ConfigurationErrors): void {
         if (this.panel) {
-            this.panel.webview.postMessage({ command: 'updateErrors', errors: errors});
+            void this.panel.webview.postMessage({ command: 'updateErrors', errors: errors });
         }
     }
 
@@ -230,11 +231,11 @@ export class SettingsPanel {
         this.configValues = deepCopy(configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
         if (this.panel && this.initialized) {
-            this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
-            this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
-            this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
+            void this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
+            void this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
+            void this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
             if (errors !== null) {
-                this.panel.webview.postMessage({ command: 'updateErrors', errors: errors });
+                void this.panel.webview.postMessage({ command: 'updateErrors', errors: errors });
             }
         }
     }

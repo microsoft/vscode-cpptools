@@ -4,9 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import { stripEscapeSequences, isWindows, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
+import { stripEscapeSequences, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
 import { getOutputChannelLogger } from '../logger';
 import * as nls from 'vscode-nls';
+import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -92,7 +93,7 @@ export class FingerprintInteractor implements IInteractor {
                 result.canceled = true;
             }
         } else if (
-            isWindows() &&
+            isWindows &&
             (data.includes('The authenticity of host ') || (data === '' && extraDetails?.detectedServerKey))
         ) {
             // hack for #1195
@@ -120,6 +121,7 @@ export class DifferingHostKeyInteractor implements IInteractor {
     get id(): string {
         return DifferingHostKeyInteractor.ID;
     }
+
     async onData(data: string, cancelToken?: vscode.CancellationToken, _extraDetails?: IInteractorDataDetails): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
         data = data.trim();
@@ -320,6 +322,7 @@ export class ContinueOnInteractor implements IInteractor {
         return ContinueOnInteractor.ID;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async onData(data: string, _cancelToken?: vscode.CancellationToken): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
         const pattern: string = escapeStringForRegex(this.continueOn);
@@ -344,7 +347,7 @@ export class ConnectionFailureInteractor implements IInteractor {
         const result: IInteraction = { postAction: 'keep' };
         if (data.includes('Connection refused') || data.includes('Could not resolve hostname')) {
             result.postAction = 'consume';
-            getOutputChannelLogger().showErrorMessage(localize('failed.to.connect', 'Failed to connect to {0}', this.hostName));
+            void getOutputChannelLogger().showErrorMessage(localize('failed.to.connect', 'Failed to connect to {0}', this.hostName));
         }
         return result;
     }

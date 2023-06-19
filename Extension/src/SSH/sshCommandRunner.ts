@@ -22,9 +22,10 @@ import {
     autoFilledPasswordForUsers,
     ConnectionFailureInteractor
 } from './commandInteractors';
-import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
+import { ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
 import { getSshChannel } from '../logger';
 import { CppSettings } from '../LanguageServer/settings';
+import { isWindows } from '../constants';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -301,7 +302,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                 if (continueWithoutExiting) {
                     const warningMessage: string = localize('ssh.continuing.command.canceled', 'Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command);
                     getSshChannel().appendLine(warningMessage);
-                    vscode.window.showWarningMessage(warningMessage);
+                    void vscode.window.showWarningMessage(warningMessage);
                 }
                 return reject(new CanceledError());
             }
@@ -315,7 +316,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             clean();
             const errorMessage: string = localize('ssh.process.failed', '"{0}" process failed: {1}', nickname, error);
             getSshChannel().appendLine(errorMessage);
-            vscode.window.showErrorMessage(errorMessage);
+            void vscode.window.showErrorMessage(errorMessage);
             reject(error);
         };
 
@@ -418,7 +419,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             });
         }
 
-        const terminalIsWindows: boolean = typeof args.terminalIsWindows === 'boolean' ? args.terminalIsWindows : isWindows();
+        const terminalIsWindows: boolean = typeof args.terminalIsWindows === 'boolean' ? args.terminalIsWindows : isWindows;
         try {
             // the terminal process should not fail, but exit cleanly
             let shellArgs: string | string[];
@@ -518,7 +519,7 @@ function logReceivedData(data: string, nickname: string): void {
 function lastNonemptyLine(str: string): string | undefined {
     const lines: string[] = splitLines(str);
 
-    if (isWindows()) {
+    if (isWindows) {
         let outputContainingPipeError: string = '';
         for (let i: number = lines.length - 1; i >= 0; i--) {
             const strippedLine: string = stripEscapeSequences(lines[i]);
