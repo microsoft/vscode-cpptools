@@ -168,12 +168,26 @@
             ]
         },
         {
-            "label": "Watch (internal-unit-tests)",
+            "label": "Compile:Watch (unit-tests)",
             "type": "shell",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "command": "node_modules/.bin/tsc --build ${workspaceFolder}/test.tsconfig.json --watch",
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Compile (unit-tests)",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "node_modules/.bin/tsc --build ${workspaceFolder}/test.tsconfig.json",
             "isBackground": true,
             "problemMatcher": "$tsc-watch",
             "group": {
