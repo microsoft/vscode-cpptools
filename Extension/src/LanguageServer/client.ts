@@ -3509,12 +3509,10 @@ export class DefaultClient implements Client {
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
-                if (lastEdit && lastEdit.newText.includes("#include")) {
-                    if (lastEdit.range.isEqual(range)) {
-                        // Destination file is empty.
-                        // The edit positions for #include header file and definition or declaration are the same.
-                        selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
-                    }
+                if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
+                    // Destination file is empty.
+                    // The edit positions for #include header file and definition or declaration are the same.
+                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
                 const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
