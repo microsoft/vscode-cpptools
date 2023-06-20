@@ -4,10 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as vscode from 'vscode';
-import { stripEscapeSequences, escapeStringForRegex, ISshHostInfo, getFullHostAddress, extensionContext } from '../common';
-import { getOutputChannelLogger } from '../logger';
 import * as nls from 'vscode-nls';
+import { escapeStringForRegex, extensionContext, getFullHostAddress, ISshHostInfo, stripEscapeSequences } from '../common';
 import { isWindows } from '../constants';
+import { getOutputChannelLogger } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -53,7 +53,7 @@ export class MitmInteractor implements IInteractor {
     }
 
     async onData(data: string): Promise<IInteraction> {
-        if (!!data.match('Port forwarding is disabled to avoid man-in-the-middle attacks.')) {
+        if (data.match('Port forwarding is disabled to avoid man-in-the-middle attacks.')) {
             throw Error('Port forwarding is disabled to avoid man-in-the-middle attacks.');
         }
 

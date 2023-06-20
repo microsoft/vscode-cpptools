@@ -4,13 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
-import * as util from '../common';
-import * as config from './configurations';
-import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
+import * as util from '../common';
+import * as telemetry from '../telemetry';
+import * as config from './configurations';
 import { getLocalizedHtmlPath } from './localization';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

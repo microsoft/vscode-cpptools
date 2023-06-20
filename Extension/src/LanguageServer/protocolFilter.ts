@@ -4,11 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { Middleware } from 'vscode-languageclient';
-import { Client } from './client';
 import * as vscode from 'vscode';
-import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
+import { Middleware } from 'vscode-languageclient';
 import * as util from '../common';
+import { Client } from './client';
+import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './extension';
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers

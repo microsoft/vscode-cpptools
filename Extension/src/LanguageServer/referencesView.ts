@@ -4,9 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferencesResult, ReferenceType, getReferenceTagString } from './references';
-import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
+import { getReferenceTagString, ReferencesResult, ReferenceType } from './references';
 import { ReferencesModel, TreeNode } from './referencesModel';
+import { ReferencesTreeDataProvider } from './referencesTreeDataProvider';
 
 export class FindAllRefsView {
     private referencesModel?: ReferencesModel;

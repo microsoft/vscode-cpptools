@@ -4,25 +4,25 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
+import * as jsonc from 'comment-json';
 import * as fs from "fs";
+import * as os from 'os';
+import * as path from 'path';
+import { setTimeout } from 'timers';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+import * as which from 'which';
+import { logAndReturn, returns } from '../Automation/Async/returns';
 import * as util from '../common';
+import { getOutputChannelLogger } from '../logger';
 import * as telemetry from '../telemetry';
+import { DefaultClient } from './client';
+import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
-import { CustomConfigurationProviderCollection, getCustomConfigProviders } from './customProviders';
 import { SettingsPanel } from './settingsPanel';
-import * as os from 'os';
+import { ConfigurationType, getUI } from './ui';
 import escapeStringRegExp = require('escape-string-regexp');
-import * as jsonc from 'comment-json';
-import * as nls from 'vscode-nls';
-import { setTimeout } from 'timers';
-import * as which from 'which';
-import { getOutputChannelLogger } from '../logger';
-import { DefaultClient } from './client';
-import { getUI, ConfigurationType } from './ui';
-import { logAndReturn, returns } from '../Automation/Async/returns';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -452,7 +452,7 @@ export class CppProperties {
                     });
                 }
             }
-        } catch (error) { } finally {
+        } catch (error) { /*ignore*/ } finally {
             this.vcpkgPathReady = true;
             this.handleConfigurationChange();
         }
@@ -620,7 +620,7 @@ export class CppProperties {
             // Any time parsePropertiesFile is called, configurationJson gets
             // reverted to an unprocessed state and needs to be reprocessed.
             this.handleConfigurationChange();
-        }, () => { }).catch(logAndReturn.undefined);;
+        }, () => { }).catch(logAndReturn.undefined);
     }
 
     public async updateCustomConfigurationProvider(providerId: string): Promise<void> {
@@ -673,11 +673,11 @@ export class CppProperties {
     public select(index: number): Configuration | undefined {
         if (this.configurationJson) {
             if (index === this.configurationJson.configurations.length) {
-                void this.handleConfigurationEditUICommand(() => { }, vscode.window.showTextDocument).catch(logAndReturn.undefined);;
+                void this.handleConfigurationEditUICommand(() => { }, vscode.window.showTextDocument).catch(logAndReturn.undefined);
                 return;
             }
             if (index === this.configurationJson.configurations.length + 1) {
-                void this.handleConfigurationEditJSONCommand(() => { }, vscode.window.showTextDocument).catch(logAndReturn.undefined);;
+                void this.handleConfigurationEditJSONCommand(() => { }, vscode.window.showTextDocument).catch(logAndReturn.undefined);
                 return;
             }
         }
@@ -911,7 +911,7 @@ export class CppProperties {
                 } else {
                     // add compiler to list of trusted compilers
                     if (i === this.CurrentConfigurationIndex) {
-                        void this.client.addTrustedCompiler(configuration.compilerPath).catch(logAndReturn.undefined);;
+                        void this.client.addTrustedCompiler(configuration.compilerPath).catch(logAndReturn.undefined);
                     }
                 }
             } else {
@@ -1178,7 +1178,7 @@ export class CppProperties {
                             this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
                     } else {
                         // Parse failed, open json file
-                        void vscode.workspace.openTextDocument(this.propertiesFile).then(undefined, logAndReturn.undefined);;
+                        void vscode.workspace.openTextDocument(this.propertiesFile).then(undefined, logAndReturn.undefined);
                     }
                 }
                 // Any time parsePropertiesFile is called, configurationJson gets
@@ -1258,7 +1258,7 @@ export class CppProperties {
             this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
         }
 
-        void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);;
+        void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);
         this.updateServerOnFolderSettingsChange();
     }
 
@@ -1282,7 +1282,7 @@ export class CppProperties {
                     }
                     this.resetToDefaultSettings(true);
                 }
-                void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);;
+                void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);
                 if (providerId) {
                     if (this.configurationJson) {
                         this.configurationJson.configurations[0].configurationProvider = providerId;
@@ -1776,7 +1776,7 @@ export class CppProperties {
         let paths: string[] = [];
         let compilerPath: string | undefined;
         for (const pathArray of [(currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-        currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
+            currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
                     paths.push(`${curPath}`);

@@ -34,7 +34,7 @@ export class is {
 
     static iterable<T = unknown>(instance: any): instance is Iterable<T> {
         return typeof instance !== 'string' && !!instance[Symbol.iterator];
-    };
+    }
 
     static asyncIterable(instance: any): instance is AsyncIterable<unknown> {
         return !!instance[Symbol.asyncIterator];

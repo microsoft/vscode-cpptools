@@ -5,12 +5,12 @@
 'use strict';
 import * as vscode from 'vscode';
 import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/node';
-import { Location, WorkspaceEdit } from './commonTypes';
-import { makeVscodeRange, makeVscodeLocation, makeVscodeTextEdits, rangeEquals } from './utils';
-import {LocalizeStringParams, getLocalizedString } from './localization';
-import { CppSourceStr } from './extension';
-import { CppSettings } from './settings';
 import * as nls from 'vscode-nls';
+import { Location, WorkspaceEdit } from './commonTypes';
+import { CppSourceStr } from './extension';
+import { getLocalizedString, LocalizeStringParams } from './localization';
+import { CppSettings } from './settings';
+import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -99,11 +99,11 @@ export interface CodeAnalysisDiagnosticIdentifiersAndUri {
 export interface RemoveCodeAnalysisProblemsParams {
     identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[];
     refreshSquigglesOnSave: boolean;
-};
+}
 
 interface RemoveCodeAnalysisCodeActionFixesParams {
     identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[];
-};
+}
 
 interface PublishCodeAnalysisDiagnosticsParams {
     uri: string;
@@ -119,8 +119,11 @@ export const codeAnalysisAllFixes: CodeActionAllInfo = {
     version: 0,
     fixAllCodeAction: {
         title: localize("fix_all_code_analysis_problems", "Fix all code analysis problems"),
-        command: { title: 'FixAllCodeAnalysisProblems', command: 'C_Cpp.FixAllCodeAnalysisProblems',
-            arguments: [ 0, undefined, true, [] ] },
+        command: {
+            title: 'FixAllCodeAnalysisProblems',
+            command: 'C_Cpp.FixAllCodeAnalysisProblems',
+            arguments: [ 0, undefined, true, [] ]
+        },
         kind: vscode.CodeActionKind.QuickFix
     },
     removeAllCodeAction: {
@@ -173,8 +176,11 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
             ++numFixTypes;
             codeToFixes[1].fixAllTypeCodeAction = {
                 title: localize("fix_all_type_problems", "Fix all {0} problems", codeToFixes[0]),
-                command: { title: 'FixAllTypeCodeAnalysisProblems', command: 'C_Cpp.FixAllTypeCodeAnalysisProblems',
-                    arguments: [ codeToFixes[0], ++codeToFixes[1].version, allTypeWorkspaceEdit, true, identifiersAndUris ] },
+                command: {
+                    title: 'FixAllTypeCodeAnalysisProblems',
+                    command: 'C_Cpp.FixAllTypeCodeAnalysisProblems',
+                    arguments: [ codeToFixes[0], ++codeToFixes[1].version, allTypeWorkspaceEdit, true, identifiersAndUris ]
+                },
                 kind: vscode.CodeActionKind.QuickFix
             };
         }
@@ -182,8 +188,11 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
         if (new CppSettings().clangTidyCodeActionShowDisable) {
             codeToFixes[1].disableAllTypeCodeAction = {
                 title: localize("disable_all_type_problems", "Disable all {0} problems",  codeToFixes[0]),
-                command: { title: 'DisableAllTypeCodeAnalysisProblems', command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
-                    arguments: [ codeToFixes[0], identifiersAndUris ] },
+                command: {
+                    title: 'DisableAllTypeCodeAnalysisProblems',
+                    command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
+                    arguments: [ codeToFixes[0], identifiersAndUris ]
+                },
                 kind: vscode.CodeActionKind.QuickFix
             };
         } else {
@@ -193,8 +202,11 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
         if (new CppSettings().clangTidyCodeActionShowClear !== "None") {
             codeToFixes[1].removeAllTypeCodeAction = {
                 title: localize("clear_all_type_problems", "Clear all {0} problems", codeToFixes[0]),
-                command: { title: 'RemoveAllTypeCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                    arguments: [ false, identifiersAndUris ] },
+                command: {
+                    title: 'RemoveAllTypeCodeAnalysisProblems',
+                    command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                    arguments: [ false, identifiersAndUris ]
+                },
                 kind: vscode.CodeActionKind.QuickFix
             };
         }
@@ -254,8 +266,11 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
             code: identifier.code,
             removeCodeAction: {
                 title: localize("clear_this_problem", "Clear this {0} problem", d.code),
-                command: { title: 'RemoveCodeAnalysisProblems', command: 'C_Cpp.RemoveCodeAnalysisProblems',
-                    arguments: [ false, [ identifiersAndUri ] ] },
+                command: {
+                    title: 'RemoveCodeAnalysisProblems',
+                    command: 'C_Cpp.RemoveCodeAnalysisProblems',
+                    arguments: [ false, [ identifiersAndUri ] ]
+                },
                 kind: vscode.CodeActionKind.QuickFix
             }
         };
@@ -267,8 +282,11 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
             }
             const fixThisCodeAction: vscode.CodeAction = {
                 title: localize("fix_this_problem", "Fix this {0} problem", d.code),
-                command: { title: 'FixThisCodeAnalysisProblem', command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                    arguments: [ nextVersion, workspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ] },
+                command: {
+                    title: 'FixThisCodeAnalysisProblem',
+                    command: 'C_Cpp.FixThisCodeAnalysisProblem',
+                    arguments: [ nextVersion, workspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ]
+                },
                 kind: vscode.CodeActionKind.QuickFix
             };
             codeAction.fixCodeAction = fixThisCodeAction;
@@ -298,8 +316,11 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     uri: info.location.uri, identifiers: [ relatedIdentifier ] };
                 const relatedCodeAction: vscode.CodeAction = {
                     title: localize("fix_this_problem", "Fix this {0} problem", d.code),
-                    command: { title: 'FixThisCodeAnalysisProblem', command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                        arguments: [ nextVersion, relatedWorkspaceEdit, true, [ relatedIdentifiersAndUri ] ] },
+                    command: {
+                        title: 'FixThisCodeAnalysisProblem',
+                        command: 'C_Cpp.FixThisCodeAnalysisProblem',
+                        arguments: [ nextVersion, relatedWorkspaceEdit, true, [ relatedIdentifiersAndUri ] ]
+                    },
                     kind: vscode.CodeActionKind.QuickFix
                 };
                 if (codeAction.fixCodeAction === undefined) {
@@ -364,8 +385,11 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     if (codeActionCodeInfo.docCodeAction === undefined) {
                         codeActionCodeInfo.docCodeAction = {
                             title: localize("show_documentation_for", "Show documentation for {0}", primaryCode),
-                            command: { title: 'ShowDocumentation', command: 'C_Cpp.ShowCodeAnalysisDocumentation',
-                                arguments: [ primaryDocUri ] },
+                            command: {
+                                title: 'ShowDocumentation',
+                                command: 'C_Cpp.ShowCodeAnalysisDocumentation',
+                                arguments: [ primaryDocUri ]
+                            },
                             kind: vscode.CodeActionKind.QuickFix
                         };
                     }

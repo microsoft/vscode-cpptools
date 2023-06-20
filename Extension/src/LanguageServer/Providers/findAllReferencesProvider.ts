@@ -3,9 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, workspaceReferences } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
-import { ReferencesParams, ReferencesResult, ReferenceType, ReferenceInfo, CancellationSender } from '../references';
+import { DefaultClient, workspaceReferences } from '../client';
+import { CancellationSender, ReferenceInfo, ReferencesParams, ReferencesResult, ReferenceType } from '../references';
 
 const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, void> =
     new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/findAllReferences');
@@ -17,8 +17,7 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         this.client = client;
     }
 
-    public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken):
-        Promise<vscode.Location[] | undefined> {
+    public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
         await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 

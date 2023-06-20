@@ -6,12 +6,11 @@ import * as vscode from 'vscode';
 import { Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import { DefaultClient } from '../client';
 import {
-    CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
-    codeAnalysisAllFixes
+    CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions
 } from '../codeAnalysis';
-import { makeVscodeRange } from '../utils';
-import { CppSettings } from '../settings';
 import { getLocalizedString, LocalizeStringParams } from '../localization';
+import { CppSettings } from '../settings';
+import { makeVscodeRange } from '../utils';
 
 interface GetCodeActionsRequestParams {
     uri: string;

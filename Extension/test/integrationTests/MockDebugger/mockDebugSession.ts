@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { Logger, logger, LoggingDebugSession, InitializedEvent, TerminatedEvent } from '@vscode/debugadapter';
+import { InitializedEvent, Logger, logger, LoggingDebugSession, TerminatedEvent } from '@vscode/debugadapter';
 import { DebugProtocol } from '@vscode/debugprotocol';
 import { Subject } from 'await-notify';
 

@@ -12,7 +12,7 @@ declare module 'posix-getopt' {
     }
 
     export class BasicParser {
-        constructor(template: string, arguments: ReadonlyArray<string>, skipArgs?: number);
+        constructor(template: string, arguments: readonly string[], skipArgs?: number);
         getopt(): IParsedOption | void;
         optind(): number;
     }

@@ -3,10 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { ManualPromise } from '../../src/Automation/Async/manual-promise';
-import { describe } from 'mocha';
 import { ok, strictEqual, throws } from 'assert';
+import { describe } from 'mocha';
 import { setTimeout } from 'timers/promises';
+import { ManualPromise } from '../../src/Automation/Async/manual-promise';
 
 // force dev mode (which throws on duplicate resolve calls)
 (global as any).DEVMODE = true;

@@ -175,6 +175,7 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
     // prefix with `:` to tell the library not to log anything itself
     const parser: BasicParser = new BasicParser(`:${getOptDirective}`, input, 0);
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         const next: void | IParsedOption = parser.getopt();
         if (!next) {

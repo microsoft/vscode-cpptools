@@ -4,31 +4,28 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
-import * as vscode from 'vscode';
-import * as os from 'os';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import * as rd from 'readline';
+import { Readable } from 'stream';
+import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+import * as yauzl from 'yauzl';
+import { logAndReturn } from '../Automation/Async/returns';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { TreeNode, NodeType } from './referencesModel';
-import { getUI, LanguageStatusUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
-import {
-    CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
-    codeAnalysisFileToCodeActions, codeAnalysisAllFixes
-} from './codeAnalysis';
-import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
 import { ClientCollection } from './clientCollection';
-import { CppSettings } from './settings';
-import { PersistentState } from './persistentState';
-import { getLanguageConfig } from './languageConfig';
-import { getCustomConfigProviders } from './customProviders';
-import * as rd from 'readline';
-import * as yauzl from 'yauzl';
-import { Readable } from 'stream';
-import * as nls from 'vscode-nls';
+import { CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisFileToCodeActions } from './codeAnalysis';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
-import { logAndReturn } from '../Automation/Async/returns';
+import { getCustomConfigProviders } from './customProviders';
+import { getLanguageConfig } from './languageConfig';
+import { PersistentState } from './persistentState';
+import { NodeType, TreeNode } from './referencesModel';
+import { CppSettings } from './settings';
+import { getUI, LanguageStatusUI } from './ui';
+import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

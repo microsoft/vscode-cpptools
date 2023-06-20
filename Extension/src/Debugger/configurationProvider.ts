@@ -3,33 +3,29 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as debugUtils from './utils';
+import * as jsonc from 'comment-json';
+import * as fs from 'fs';
+import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
-import * as vscode from 'vscode';
-import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
-import * as util from '../common';
-import * as fs from 'fs';
-import * as Telemetry from '../telemetry';
-import * as logger from '../logger';
-import * as nls from 'vscode-nls';
-import {
-    IConfiguration, IConfigurationSnippet, DebuggerType, DebuggerEvent, MIConfigurations,
-    WindowsConfigurations, WSLConfigurations, PipeTransportConfigurations, CppDebugConfiguration,
-    ConfigSource, TaskStatus, isDebugLaunchStr, ConfigMenu, ConfigMode, DebugType
-} from './configurations';
-import * as jsonc from 'comment-json';
-import { PlatformInformation } from '../platform';
-import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
-import { CppSettings, OtherSettings } from '../LanguageServer/settings';
-import { configPrefix } from '../LanguageServer/extension';
-import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
-import { rsync, scp, ssh } from '../SSH/commands';
-import * as glob from 'glob';
 import { promisify } from 'util';
-import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
-import { NativeAttachItemsProviderFactory } from './nativeAttach';
+import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+import * as util from '../common';
 import { isWindows } from '../constants';
+import { expandAllStrings, ExpansionOptions, ExpansionVars } from '../expand';
+import { CppBuildTask, CppBuildTaskDefinition, cppBuildTaskProvider } from '../LanguageServer/cppBuildTaskProvider';
+import { configPrefix } from '../LanguageServer/extension';
+import { CppSettings, OtherSettings } from '../LanguageServer/settings';
+import * as logger from '../logger';
+import { PlatformInformation } from '../platform';
+import { rsync, scp, ssh } from '../SSH/commands';
+import * as Telemetry from '../telemetry';
+import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
+import { ConfigMenu, ConfigMode, ConfigSource, CppDebugConfiguration, DebuggerEvent, DebuggerType, DebugType, IConfiguration, IConfigurationSnippet, isDebugLaunchStr, MIConfigurations, PipeTransportConfigurations, TaskStatus, WindowsConfigurations, WSLConfigurations } from './configurations';
+import { NativeAttachItemsProviderFactory } from './nativeAttach';
+import { Environment, ParsedEnvironmentFile } from './ParsedEnvironmentFile';
+import * as debugUtils from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -245,6 +241,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             }
 
             // Handle legacy 'externalConsole' bool and convert to console: "externalTerminal"
+            // eslint-disable-next-line no-prototype-builtins
             if (config.hasOwnProperty("externalConsole")) {
                 void logger.getOutputChannelLogger().showWarningMessage(localize("debugger.deprecated.config", "The key '{0}' is deprecated. Please use '{1}' instead.", "externalConsole", "console"));
                 if (config.externalConsole && !config.console) {
@@ -453,60 +450,55 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const isCl: boolean = compilerName === "cl.exe";
                 newConfig.cwd = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
 
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                return new Promise<CppDebugConfiguration | undefined>(async resolve => {
-                    if (platformInfo.platform === "darwin") {
-                        return resolve(newConfig);
-                    } else {
-                        let debuggerName: string;
-                        if (compilerName.startsWith("clang")) {
-                            newConfig.MIMode = "lldb";
-                            if (isWindows) {
-                                debuggerName = "lldb";
-                            } else {
-                                debuggerName = "lldb-mi";
-                                // Search for clang-8, clang-10, etc.
-                                if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
-                                    const suffixIndex: number = compilerName.indexOf("-");
-                                    if (suffixIndex !== -1) {
-                                        const suffix: string = compilerName.substring(suffixIndex);
-                                        debuggerName += suffix;
-                                    }
+                if (platformInfo.platform !== "darwin") {
+                    let debuggerName: string;
+                    if (compilerName.startsWith("clang")) {
+                        newConfig.MIMode = "lldb";
+                        if (isWindows) {
+                            debuggerName = "lldb";
+                        } else {
+                            debuggerName = "lldb-mi";
+                            // Search for clang-8, clang-10, etc.
+                            if ((compilerName !== "clang-cl.exe") && (compilerName !== "clang-cpp.exe")) {
+                                const suffixIndex: number = compilerName.indexOf("-");
+                                if (suffixIndex !== -1) {
+                                    const suffix: string = compilerName.substring(suffixIndex);
+                                    debuggerName += suffix;
                                 }
                             }
-                            newConfig.type = DebuggerType.cppdbg;
-                        } else if (compilerName === "cl.exe") {
-                            newConfig.miDebuggerPath = undefined;
-                            newConfig.type = DebuggerType.cppvsdbg;
-                            return resolve(newConfig);
-                        } else {
-                            debuggerName = "gdb";
                         }
-                        if (isWindows) {
-                            debuggerName = debuggerName.endsWith(".exe") ? debuggerName : (debuggerName + ".exe");
-                        }
-                        const compilerDirname: string = path.dirname(compilerPath);
-                        const debuggerPath: string = path.join(compilerDirname, debuggerName);
-
-                        // Check if debuggerPath exists.
-                        if (await util.checkFileExists(debuggerPath)) {
-                            newConfig.miDebuggerPath = debuggerPath;
-                        } else if ((await util.whichAsync(debuggerName)) !== undefined) {
-                            // Check if debuggerName exists on $PATH
-                            newConfig.miDebuggerPath = debuggerName;
-                        } else {
-                            // Try the usr path for non-windows platforms.
-                            const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
-                            if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
-                                newConfig.miDebuggerPath = usrDebuggerPath;
-                            } else {
-                                logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
-                                return resolve(undefined);
-                            }
-                        }
-                        return resolve(newConfig);
+                        newConfig.type = DebuggerType.cppdbg;
+                    } else if (compilerName === "cl.exe") {
+                        newConfig.miDebuggerPath = undefined;
+                        newConfig.type = DebuggerType.cppvsdbg;
+                        return newConfig;
+                    } else {
+                        debuggerName = "gdb";
                     }
-                });
+                    if (isWindows) {
+                        debuggerName = debuggerName.endsWith(".exe") ? debuggerName : (debuggerName + ".exe");
+                    }
+                    const compilerDirname: string = path.dirname(compilerPath);
+                    const debuggerPath: string = path.join(compilerDirname, debuggerName);
+
+                    // Check if debuggerPath exists.
+                    if (await util.checkFileExists(debuggerPath)) {
+                        newConfig.miDebuggerPath = debuggerPath;
+                    } else if ((await util.whichAsync(debuggerName)) !== undefined) {
+                        // Check if debuggerName exists on $PATH
+                        newConfig.miDebuggerPath = debuggerName;
+                    } else {
+                        // Try the usr path for non-windows platforms.
+                        const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
+                        if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
+                            newConfig.miDebuggerPath = usrDebuggerPath;
+                        } else {
+                            logger.getOutputChannelLogger().appendLine(localize('debugger.path.not.exists', "Unable to find the {0} debugger. The debug configuration for {1} is ignored.", `\"${debuggerName}\"`, compilerName));
+                            return undefined;
+                        }
+                    }
+                }
+                return newConfig;
             }))).filter((item): item is CppDebugConfiguration => !!item);
         }
         configs.push(defaultTemplateConfig);
@@ -748,6 +740,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
     }
 
     private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
+        // eslint-disable-next-line no-prototype-builtins
         return configs.filter((config: CppDebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
     }
 
@@ -1264,7 +1257,9 @@ export class ConfigurationSnippetProvider implements vscode.CompletionItemProvid
             const launch: any = jsonc.parse(document.getText());
             hasLaunchConfigs = launch.configurations.length !== 0;
         } catch {
+            // ignore
         }
+
         // Check to see if the array is empty, so any additional inserted snippets will need commas.
         if (hasLaunchConfigs) {
             items = [];

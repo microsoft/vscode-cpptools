@@ -57,5 +57,5 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             const editorConfigSettings: any = getEditorConfigSettings(filePath);
             return configCallBack(editorConfigSettings);
         }
-    };
+    }
 }

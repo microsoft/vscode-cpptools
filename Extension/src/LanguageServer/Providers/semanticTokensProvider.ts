@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, openFileVersions, GetSemanticTokensResult, semanticTokensLegend } from '../client';
+import { DefaultClient, GetSemanticTokensParams, GetSemanticTokensRequest, GetSemanticTokensResult, openFileVersions, semanticTokensLegend } from '../client';
 import { processDelayedDidOpen } from '../extension';
 
 export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {

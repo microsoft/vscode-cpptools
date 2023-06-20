@@ -3,22 +3,23 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as path from 'path';
-import * as which from "which";
+import * as assert from 'assert';
+import * as child_process from 'child_process';
+import * as jsonc from 'comment-json';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as child_process from 'child_process';
-import * as vscode from 'vscode';
-import * as Telemetry from './telemetry';
-import { PlatformInformation } from './platform';
-import { getOutputChannelLogger, showOutputChannel } from './logger';
-import * as assert from 'assert';
+import * as path from 'path';
 import * as tmp from 'tmp';
-import * as nls from 'vscode-nls';
-import * as jsonc from 'comment-json';
-import { TargetPopulation } from 'vscode-tas-client';
+import * as vscode from 'vscode';
 import { DocumentFilter } from 'vscode-languageclient';
+import * as nls from 'vscode-nls';
+import { TargetPopulation } from 'vscode-tas-client';
+import * as which from "which";
+import { ManualPromise } from './Automation/Async/manual-promise';
 import { isWindows } from './constants';
+import { getOutputChannelLogger, showOutputChannel } from './logger';
+import { PlatformInformation } from './platform';
+import * as Telemetry from './telemetry';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -545,8 +546,8 @@ export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
     } catch (e) {
+        return false;
     }
-    return false;
 }
 
 export function checkExecutableWithoutExtensionExistsSync(filePath: string): boolean {
@@ -578,8 +579,8 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
     try {
         return fs.statSync(dirPath).isDirectory();
     } catch (e) {
+        return false;
     }
-    return false;
 }
 
 /** Test whether a relative path exists */
@@ -760,60 +761,60 @@ interface ProcessOutput {
 }
 
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return new Promise(async (resolve, reject) => {
-        // Do not use CppSettings to avoid circular require()
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    const result = new ManualPromise<ProcessOutput>();
 
-        let proc: child_process.ChildProcess;
-        if (await isExecutable(program)) {
-            proc = child_process.spawn(`.${isWindows ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
-        } else {
-            proc = child_process.spawn(program, args, { shell: true });
-        }
+    // Do not use CppSettings to avoid circular require()
+    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
 
-        const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
-            getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
-            proc.kill();
-        });
+    let proc: child_process.ChildProcess;
+    if (await isExecutable(program)) {
+        proc = child_process.spawn(`.${isWindows ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
+    } else {
+        proc = child_process.spawn(program, args, { shell: true });
+    }
 
-        const clean = () => {
-            proc.removeAllListeners();
-            if (cancellationTokenListener) {
-                cancellationTokenListener.dispose();
-            }
-        };
-
-        let stdout: string = '';
-        let stderr: string = '';
-        if (proc.stdout) {
-            proc.stdout.on('data', data => {
-                const str: string = data.toString();
-                if (loggingLevel !== "None") {
-                    getOutputChannelLogger().append(str);
-                }
-                stdout += str;
-                if (continueOn) {
-                    const continueOnReg: string = escapeStringForRegex(continueOn);
-                    if (stdout.search(continueOnReg)) {
-                        resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
-                    }
-                }
-            });
-        }
-        if (proc.stderr) {
-            proc.stderr.on('data', data => stderr += data.toString());
-        }
-        proc.on('close', (code, signal) => {
-            clean();
-            resolve({ exitCode: code || signal || undefined, stdout: stdout.trim(), stderr: stderr.trim() });
-        });
-        proc.on('error', error => {
-            clean();
-            reject(error);
-        });
+    const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
+        getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
+        proc.kill();
     });
+
+    const clean = () => {
+        proc.removeAllListeners();
+        if (cancellationTokenListener) {
+            cancellationTokenListener.dispose();
+        }
+    };
+
+    let stdout: string = '';
+    let stderr: string = '';
+    if (proc.stdout) {
+        proc.stdout.on('data', data => {
+            const str: string = data.toString();
+            if (loggingLevel !== "None") {
+                getOutputChannelLogger().append(str);
+            }
+            stdout += str;
+            if (continueOn) {
+                const continueOnReg: string = escapeStringForRegex(continueOn);
+                if (stdout.search(continueOnReg)) {
+                    result.resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+                }
+            }
+        });
+    }
+    if (proc.stderr) {
+        proc.stderr.on('data', data => stderr += data.toString());
+    }
+    proc.on('close', (code, signal) => {
+        clean();
+        result.resolve({ exitCode: code || signal || undefined, stdout: stdout.trim(), stderr: stderr.trim() });
+    });
+    proc.on('error', error => {
+        clean();
+        result.reject(error);
+    });
+    return result;
 }
 
 /**
@@ -1400,6 +1401,7 @@ export function findPowerShell(): string | undefined {
                     return name;
                 }
             } catch (e) {
+                return undefined;
             }
         }
     }
@@ -1426,7 +1428,9 @@ export function isVsCodeInsiders(): boolean {
 
 export function stripEscapeSequences(str: string): string {
     return str
+        // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
+        // eslint-disable-next-line no-control-regex
         .replace(/\u0008/g, '')
         .replace(/\r/g, '');
 }

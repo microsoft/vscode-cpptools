@@ -4,28 +4,28 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as vscode from 'vscode';
-import { CommentPattern } from './languageConfig';
-import { getExtensionFilePath, getCachedClangFormatPath, setCachedClangFormatPath, getCachedClangTidyPath, setCachedClangTidyPath } from '../common';
-import * as os from 'os';
-import * as which from 'which';
 import { execSync } from 'child_process';
-import * as semver from 'semver';
-import * as fs from 'fs';
-import * as path from 'path';
-import { cachedEditorConfigLookups, cachedEditorConfigSettings, hasTrustedCompilerPaths, DefaultClient } from './client';
 import * as editorConfig from 'editorconfig';
-import { PersistentState } from './persistentState';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import * as semver from 'semver';
+import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { clients } from './extension';
+import * as which from 'which';
+import { getCachedClangFormatPath, getCachedClangTidyPath, getExtensionFilePath, setCachedClangFormatPath, setCachedClangTidyPath } from '../common';
 import { isWindows } from '../constants';
+import { cachedEditorConfigLookups, cachedEditorConfigSettings, DefaultClient, hasTrustedCompilerPaths } from './client';
+import { clients } from './extension';
+import { CommentPattern } from './languageConfig';
+import { PersistentState } from './persistentState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
 export interface Excludes {
     [key: string]: boolean | { when: string };
-};
+}
 
 export interface WorkspaceFolderSettingsParams {
     uri: string | undefined;
@@ -131,7 +131,7 @@ export interface WorkspaceFolderSettingsParams {
     editorAutoClosingBrackets: string | undefined;
     editorInlayHintsEnabled: boolean | undefined;
     editorParameterHintsEnabled: boolean | undefined;
-};
+}
 
 export interface SettingsParams {
     filesAssociations: { [key: string]: string } | undefined;
@@ -155,7 +155,7 @@ export interface SettingsParams {
     codeAnalysisMaxMemory: number | null | undefined;
     codeAnalysisUpdateDelay: number | undefined;
     workspaceFolderSettings: WorkspaceFolderSettingsParams[];
-};
+}
 
 function getTarget(): vscode.ConfigurationTarget {
     return (vscode.workspace.workspaceFolders) ? vscode.ConfigurationTarget.WorkspaceFolder : vscode.ConfigurationTarget.Global;

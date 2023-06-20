@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult, CppFoldingRange } from '../client';
+import { CppFoldingRange, DefaultClient, FoldingRangeKind, GetFoldingRangesParams, GetFoldingRangesRequest, GetFoldingRangesResult } from '../client';
 import { processDelayedDidOpen } from '../extension';
 import { CppSettings } from '../settings';
 

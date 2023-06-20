@@ -3,10 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, openFileVersions } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
-import { CppSettings } from '../settings';
+import { DefaultClient, openFileVersions } from '../client';
 import { processDelayedDidOpen } from '../extension';
+import { CppSettings } from '../settings';
 
 interface GetInlayHintsParams {
     uri: string;
@@ -151,7 +151,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
             resolvedHints.push(inlayHint);
-        };
+        }
         return resolvedHints;
     }
 

@@ -50,16 +50,16 @@ export class Signal<T> implements Promise<T>, Resolveable<T> {
 
     get isPending(): boolean {
         return this.promise.isPending;
-    };
+    }
     get isCompleted(): boolean {
         return this.promise.isCompleted;
-    };
+    }
     get isResolved(): boolean {
         return this.promise.isResolved;
-    };
+    }
     get isRejected(): boolean {
         return this.promise.isRejected;
-    };
+    }
     /**
      * A method to manually resolve the Promise.
      *

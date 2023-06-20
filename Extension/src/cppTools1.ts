@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CustomConfigurationProvider, Version, CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
-import { CppToolsTestApi, CppToolsTestHook, CppToolsTestExtension } from 'vscode-cpptools/out/testApi';
+import { CppToolsApi, CppToolsExtension, CustomConfigurationProvider, Version } from 'vscode-cpptools';
+import { CppToolsTestApi, CppToolsTestExtension, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
 import { CppTools } from './cppTools';
 
 /**

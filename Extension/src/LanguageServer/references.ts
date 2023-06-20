@@ -3,15 +3,15 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 'use strict';
-import * as vscode from 'vscode';
-import { DefaultClient } from './client';
-import * as telemetry from '../telemetry';
-import * as nls from 'vscode-nls';
-import * as logger from '../logger';
-import { PersistentState } from './persistentState';
-import * as util from '../common';
 import { setInterval } from 'timers';
+import * as vscode from 'vscode';
 import { Position, TextDocumentIdentifier } from 'vscode-languageclient';
+import * as nls from 'vscode-nls';
+import * as util from '../common';
+import * as logger from '../logger';
+import * as telemetry from '../telemetry';
+import { DefaultClient } from './client';
+import { PersistentState } from './persistentState';
 import { FindAllRefsView } from './referencesView';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

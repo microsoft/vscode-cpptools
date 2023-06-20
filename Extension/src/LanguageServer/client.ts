@@ -8,57 +8,57 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 // Start provider imports
-import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
-import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
-import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
+import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
+import { CodeActionProvider } from './Providers/codeActionProvider';
 import { DocumentFormattingEditProvider } from './Providers/documentFormattingEditProvider';
 import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFormattingEditProvider';
 import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
-import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
-import { RenameProvider } from './Providers/renameProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
-import { CallHierarchyProvider } from './Providers/callHierarchyProvider';
-import { CodeActionProvider } from './Providers/codeActionProvider';
+import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
+import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
+import { RenameProvider } from './Providers/renameProvider';
+import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
+import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
-import { LanguageClientOptions, NotificationType, TextDocumentIdentifier, RequestType, ErrorAction, CloseAction, DidOpenTextDocumentParams, Range, Position } from 'vscode-languageclient';
-import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
-import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration, SourceFileConfiguration, Version } from 'vscode-cpptools';
-import { Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
-import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
-import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
-import { makeVscodeRange, makeVscodeLocation, handleChangedFromCppToC } from './utils';
-import * as util from '../common';
-import * as configs from './configurations';
-import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
-import * as telemetry from '../telemetry';
-import { PersistentState, PersistentFolderState, PersistentWorkspaceState } from './persistentState';
-import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
-import { createProtocolFilter } from './protocolFilter';
-import { DataBinding } from './dataBinding';
-import minimatch = require("minimatch");
-import { updateLanguageConfigurations, CppSourceStr, configPrefix, clients } from './extension';
-import { SettingsTracker } from './settingsTracker';
-import { getTestHook, TestHook } from '../testHook';
-import { getCustomConfigProviders, CustomConfigurationProvider1, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { fail } from 'assert';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as refs from './references';
+import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
-import { lookupString, localizedStringCount } from '../nativeStrings';
+import { logAndReturn, returns } from '../Automation/Async/returns';
+import * as util from '../common';
+import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
+import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
+import { localizedStringCount, lookupString } from '../nativeStrings';
+import * as telemetry from '../telemetry';
+import { getTestHook, TestHook } from '../testHook';
 import {
     CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams
 } from './codeAnalysis';
-import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
-import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
-import { fail } from 'assert';
-import { logAndReturn, returns } from '../Automation/Async/returns';
+import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
+import * as configs from './configurations';
+import { DataBinding } from './dataBinding';
+import { clients, configPrefix, CppSourceStr, updateLanguageConfigurations } from './extension';
+import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
+import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
+import { createProtocolFilter } from './protocolFilter';
+import * as refs from './references';
+import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
+import { SettingsTracker } from './settingsTracker';
+import { ConfigurationType, getUI, LanguageStatusUI } from './ui';
+import { handleChangedFromCppToC, makeVscodeLocation, makeVscodeRange } from './utils';
+import minimatch = require("minimatch");
 
 function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
-};
+}
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -248,7 +248,7 @@ interface InactiveRegionParams {
 
 interface InternalSourceFileConfiguration extends SourceFileConfiguration {
     compilerArgsLegacy?: string[];
-};
+}
 
 interface InternalWorkspaceBrowseConfiguration extends WorkspaceBrowseConfiguration {
     compilerArgsLegacy?: string[];
@@ -472,7 +472,7 @@ interface GoToDirectiveInGroupParams {
     uri: string;
     position: Position;
     next: boolean;
-};
+}
 
 export interface GenerateDoxygenCommentParams {
     uri: string;
@@ -500,7 +500,7 @@ export interface DoxygenCodeActionCommandArguments {
     initialCursor: Position;
     adjustedCursor: Position;
     isCursorAboveSignatureLine: boolean;
-};
+}
 
 interface SetTemporaryTextDocumentLanguageParams {
     path: string;
@@ -513,7 +513,7 @@ enum CodeAnalysisScope {
     OpenFiles,
     AllFiles,
     ClearSquiggles
-};
+}
 
 interface CodeAnalysisParams {
     scope: CodeAnalysisScope;
@@ -525,7 +525,7 @@ interface FinishedRequestCustomConfigParams {
 
 interface IntervalTimerParams {
     freeMemory: number;
-};
+}
 
 export interface TextDocumentWillSaveParams {
     textDocument: TextDocumentIdentifier;
@@ -544,7 +544,7 @@ interface InitializationOptions {
     edgeMessagesDirectory: string;
     localizedStrings: string[];
     settings: SettingsParams;
-};
+}
 
 interface TagParseStatus {
     localizeStringParams: LocalizeStringParams;
@@ -1131,7 +1131,7 @@ export class DefaultClient implements Client {
         if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
             await this.promptSelectCompiler(true, sender);
         }
-    };
+    }
 
     public async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
         secondPromptCounter = 0;
@@ -1194,9 +1194,9 @@ export class DefaultClient implements Client {
                 }
                 telemetry.logLanguageServerEvent('compilerNotification', { action });
             } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                await this.showPrompt(selectCompiler, false, sender);
+                return this.showPrompt(selectCompiler, false, sender);
             } else {
-                await this.handleIntelliSenseConfigurationQuickPick(isCommand, sender);
+                return this.handleIntelliSenseConfigurationQuickPick(isCommand, sender);
             }
         }
     }
@@ -1486,7 +1486,7 @@ export class DefaultClient implements Client {
             editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled
         };
         return result;
-    };
+    }
 
     private getAllWorkspaceFolderSettings(): WorkspaceFolderSettingsParams[] {
         const workspaceSettings: CppSettings = new CppSettings();
@@ -1633,8 +1633,7 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidChangeSettingsNotification, this.getAllSettings());
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
+    public async onDidChangeSettings(_event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> {
         const defaultClient: Client = clients.getDefaultClient();
         if (this === defaultClient) {
             // Only send the updated settings information once, as it includes values for all folders.
@@ -2663,8 +2662,7 @@ export class DefaultClient implements Client {
                             }
                             return false;
                         });
-                    },
-                        () => ask.Value = false);
+                    }, () => ask.Value = false);
                     return;
                 }
             }
@@ -3052,6 +3050,7 @@ export class DefaultClient implements Client {
         this.browseConfigurationLogging = "";
 
         // This while (true) is here just so we can break out early if the config is set on error
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             // config is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
             if (timeoutOccured || !config || config instanceof Array) {
@@ -3487,7 +3486,7 @@ export class DefaultClient implements Client {
                 workspaceEdits.insert(uri, position, edit.newText);
             }
             modifiedDocument = uri;
-        };
+        }
 
         if (modifiedDocument === undefined || lastEdit === undefined) {
             return;

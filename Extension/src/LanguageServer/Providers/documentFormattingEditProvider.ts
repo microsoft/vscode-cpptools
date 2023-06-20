@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, FormatDocumentRequest, FormatResult } from '../client';
+import { DefaultClient, FormatDocumentRequest, FormatParams, FormatResult } from '../client';
 import { CppSettings, getEditorConfigSettings, OtherSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 

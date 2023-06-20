@@ -5,12 +5,12 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { logAndReturn } from '../Automation/Async/returns';
 import * as util from '../common';
-import * as cpptools from './client';
 import * as telemetry from '../telemetry';
+import * as cpptools from './client';
 import { getCustomConfigProviders } from './customProviders';
 import { TimeTelemetryCollector } from './timeTelemetryCollector';
-import { logAndReturn } from '../Automation/Async/returns';
 
 const defaultClientKey: string = "@@default@@";
 export interface ClientKey {

@@ -4,9 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferencesModel, TreeNode, NodeType } from './referencesModel';
-import { ReferenceType, getReferenceTagString, getReferenceItemIconPath } from './references';
 import * as nls from 'vscode-nls';
+import { getReferenceItemIconPath, getReferenceTagString, ReferenceType } from './references';
+import { NodeType, ReferencesModel, TreeNode } from './referencesModel';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

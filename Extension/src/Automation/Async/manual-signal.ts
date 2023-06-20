@@ -24,16 +24,16 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     }
     get isPending(): boolean {
         return this.promise.isPending;
-    };
+    }
     get isCompleted(): boolean {
         return this.promise.isCompleted;
-    };
+    }
     get isResolved(): boolean {
         return this.promise.isResolved;
-    };
+    }
     get isRejected(): boolean {
         return this.promise.isRejected;
-    };
+    }
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.

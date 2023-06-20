@@ -4,26 +4,26 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as DebuggerExtension from './Debugger/extension';
-import * as LanguageServer from './LanguageServer/extension';
 import * as os from 'os';
 import * as path from 'path';
-import * as Telemetry from './telemetry';
-import * as util from './common';
 import * as vscode from 'vscode';
+import * as util from './common';
+import * as DebuggerExtension from './Debugger/extension';
+import * as LanguageServer from './LanguageServer/extension';
+import * as Telemetry from './telemetry';
 
-import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
-import { PlatformInformation } from './platform';
-import { CppTools1 } from './cppTools1';
-import { CppSettings } from './LanguageServer/settings';
-import { PersistentState } from './LanguageServer/persistentState';
-import { TargetPopulation } from 'vscode-tas-client';
 import * as semver from 'semver';
+import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import * as nls from 'vscode-nls';
+import { TargetPopulation } from 'vscode-tas-client';
+import { returns } from './Automation/Async/returns';
+import { CppTools1 } from './cppTools1';
 import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
+import { PersistentState } from './LanguageServer/persistentState';
+import { CppSettings } from './LanguageServer/settings';
 import { disposeOutputChannels, log } from './logger';
-import { returns } from './Automation/Async/returns';
+import { PlatformInformation } from './platform';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

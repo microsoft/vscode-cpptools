@@ -3,24 +3,24 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as vscode from 'vscode';
+import * as chokidar from 'chokidar';
 import * as os from 'os';
-import { AttachPicker, RemoteAttachPicker, AttachItemsProvider } from './attachToProcess';
-import { NativeAttachItemsProviderFactory } from './nativeAttach';
-import { DebugConfigurationProvider, ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, IConfigurationAssetProvider } from './configurationProvider';
-import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
-import { DebuggerType } from './configurations';
+import { Configuration } from 'ssh-config';
+import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { getActiveSshTarget, initializeSshTargets, selectSshTarget, SshTargetsProvider } from '../SSH/TargetsView/sshTargetsProvider';
-import { addSshTargetCmd, BaseNode, refreshCppSshTargetsViewCmd } from '../SSH/TargetsView/common';
-import { setActiveSshTarget, TargetLeafNode } from '../SSH/TargetsView/targetNodes';
+import { pathAccessible } from '../common';
+import { CppSettings } from '../LanguageServer/settings';
+import { getSshChannel } from '../logger';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { Configuration } from 'ssh-config';
-import { CppSettings } from '../LanguageServer/settings';
-import * as chokidar from 'chokidar';
-import { getSshChannel } from '../logger';
-import { pathAccessible } from '../common';
+import { addSshTargetCmd, BaseNode, refreshCppSshTargetsViewCmd } from '../SSH/TargetsView/common';
+import { getActiveSshTarget, initializeSshTargets, selectSshTarget, SshTargetsProvider } from '../SSH/TargetsView/sshTargetsProvider';
+import { setActiveSshTarget, TargetLeafNode } from '../SSH/TargetsView/targetNodes';
+import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
+import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
+import { DebuggerType } from './configurations';
+import { CppdbgDebugAdapterDescriptorFactory, CppvsdbgDebugAdapterDescriptorFactory } from './debugAdapterDescriptorFactory';
+import { NativeAttachItemsProviderFactory } from './nativeAttach';
 
 // The extension deactivate method is asynchronous, so we handle the disposables ourselves instead of using extensionContext.subscriptions.
 const disposables: vscode.Disposable[] = [];

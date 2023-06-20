@@ -2,13 +2,13 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
+import { Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import * as Telemetry from '../../telemetry';
 import { DefaultClient, workspaceReferences } from '../client';
 import { processDelayedDidOpen } from '../extension';
 import { CancellationSender } from '../references';
-import { Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { makeVscodeRange } from '../utils';
 
 interface CallHierarchyItem {
@@ -103,8 +103,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         this.client = client;
     }
 
-    public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
-        Promise<vscode.CallHierarchyItem | undefined> {
+    public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
         await this.client.ready;
         await processDelayedDidOpen(document);
 
@@ -150,7 +149,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-        Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
+    Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
         await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
@@ -203,7 +202,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async provideCallHierarchyOutgoingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
-        Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
+    Promise<vscode.CallHierarchyOutgoingCall[] | undefined> {
         const CallHierarchyCallsFromEvent: string = "CallHierarchyCallsFrom";
         if (item === undefined) {
             this.logTelemetry(CallHierarchyCallsFromEvent, CallHierarchyRequestStatus.Failed);

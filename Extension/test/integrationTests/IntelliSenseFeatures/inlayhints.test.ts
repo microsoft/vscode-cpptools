@@ -2,8 +2,8 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as vscode from 'vscode';
 import * as assert from 'assert';
+import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as testHelpers from '../testHelpers';
@@ -57,7 +57,7 @@ suite("[Inlay hints test]", function(): void {
         // Start language server
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
-        await vscode.window.showTextDocument(document)
+        await vscode.window.showTextDocument(document);
         await getIntelliSenseStatus;
         saveOriginalSettings();
         await useDefaultSettings();

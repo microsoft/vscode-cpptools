@@ -6,12 +6,12 @@
 
 import { CustomConfigurationProvider, Version } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
-import { CustomConfigurationProvider1, getCustomConfigProviders, CustomConfigurationProviderCollection } from './LanguageServer/customProviders';
-import { getOutputChannel } from './logger';
-import * as LanguageServer from './LanguageServer/extension';
-import * as test from './testHook';
 import * as nls from 'vscode-nls';
+import { CustomConfigurationProvider1, CustomConfigurationProviderCollection, getCustomConfigProviders } from './LanguageServer/customProviders';
+import * as LanguageServer from './LanguageServer/extension';
 import { CppSettings } from './LanguageServer/settings';
+import { getOutputChannel } from './logger';
+import * as test from './testHook';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

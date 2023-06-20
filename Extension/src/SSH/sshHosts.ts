@@ -4,24 +4,22 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { promises as fs } from 'fs';
+import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
 import {
-    Configuration,
-    parse,
-    ResolvedConfiguration,
-    Type as ConfigurationEntryType,
-    ConfigurationDirective,
+    Configuration, ConfigurationDirective,
     ConfigurationEntry,
-    HostConfigurationDirective
+    HostConfigurationDirective, parse,
+    ResolvedConfiguration,
+    Type as ConfigurationEntryType
 } from 'ssh-config';
 import { promisify } from 'util';
-import { ISshConfigHostInfo, resolveHome } from "../common";
-import { getSshChannel } from '../logger';
-import * as glob from 'glob';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { ISshConfigHostInfo, resolveHome } from "../common";
 import { isWindows } from '../constants';
+import { getSshChannel } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

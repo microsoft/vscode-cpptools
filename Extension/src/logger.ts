@@ -4,10 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as vscode from 'vscode';
 import * as os from 'os';
-import { CppSourceStr } from './LanguageServer/extension';
+import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { CppSourceStr } from './LanguageServer/extension';
 import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

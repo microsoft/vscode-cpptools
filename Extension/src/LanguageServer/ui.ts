@@ -5,14 +5,14 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Client } from './client';
 import * as nls from 'vscode-nls';
-import { ReferencesCommandMode, referencesCommandModeToString } from './references';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
-import * as telemetry from '../telemetry';
-import * as util from '../common';
-import { CppSettings } from './settings';
 import { sleep } from '../Automation/Async/sleep';
+import * as util from '../common';
+import * as telemetry from '../telemetry';
+import { Client } from './client';
+import { CustomConfigurationProviderCollection, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
+import { ReferencesCommandMode, referencesCommandModeToString } from './references';
+import { CppSettings } from './settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -160,7 +160,6 @@ export class LanguageStatusUI {
         if (this.browseEngineStatusItem.command) {
             // Currently needed in order to update hover tooltip
             this.browseEngineStatusItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
-            this.browseEngineStatusItem.text = this.browseEngineStatusItem.text;
         }
     }
 
@@ -381,7 +380,6 @@ export class LanguageStatusUI {
 
         if (this.codeAnalysisStatusItem.command) {
             this.codeAnalysisStatusItem.command.tooltip = this.codeAnalysProgress;
-            this.codeAnalysisStatusItem.text = this.codeAnalysisStatusItem.text;
 
         }
         this.setIsRunningCodeAnalysis(true);
