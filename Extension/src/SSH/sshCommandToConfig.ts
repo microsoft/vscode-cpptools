@@ -91,7 +91,7 @@ const flags: {
     q: null,
     R: (entries, address) => (entries.RemoteForward = address),
     S: (entries, path) => (entries.ControlPath = path),
-    // -s (remote subsystem invokation), no setting in the config for this
+    // -s (remote subsystem invocation), no setting in the config for this
     s: null,
     // -T (disable pseudo tty), no setting in the config for this
     T: null,

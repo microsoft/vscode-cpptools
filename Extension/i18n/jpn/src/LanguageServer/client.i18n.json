@@ -14,15 +14,15 @@
 	"configuration.providers": "構成プロバイダー",
 	"compilers": "コンパイラ",
 	"setCompiler.message": "IntelliSense が構成されていません。独自の構成を設定しない限り、IntelliSense は機能しない可能性があります。",
-	"selectCompiler.string": "IntelliSense 構成を選択...",
+	"selectIntelliSenseConfiguration.string": "IntelliSense 構成を選択...",
 	"use.provider": "{0}を使用する",
 	"use.compileCommands": "{0}を使用する",
 	"selectAnotherCompiler.string": "コンピューター上の別のコンパイラを選択...",
 	"installCompiler.string": "コンパイラのインストールに関するヘルプ",
 	"noConfig.string": "コンパイラで構成しない (推奨されません)",
+	"selectCompiler.string": "コンパイラを選択する",
 	"confirmCompiler.string": "はい",
 	"selectCompiler.message": "コンパイラ {0} が見つかりました。このコンパイラで IntelliSense を構成しますか?",
-	"selectIntelliSenseConfiguration.string": "IntelliSense 構成を選択...",
 	"server.crashed.restart": "言語サーバーがクラッシュしました。再起動しています...",
 	"server.crashed2": "言語サーバーが過去 3 分間に 5 回クラッシュしました。再起動されません。",
 	"loggingLevel.changed": "{0} が次に変更されました: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "はい",
 	"no.button": "いいえ",
 	"configurations.received": "カスタム構成を受信しました:",
-	"browse.configuration.received": "カスタムの参照構成を受信しました: {0}"
+	"browse.configuration.received": "カスタムの参照構成を受信しました: {0}",
+	"fallback.clipboard": " 宣言/定義がコピーされました。"
 }

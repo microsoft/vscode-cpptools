@@ -14,15 +14,15 @@
 	"configuration.providers": "poskytovatelé konfigurace",
 	"compilers": "kompilátory",
 	"setCompiler.message": "Nemáte nakonfigurovaný technologii IntelliSense. Pokud nenastavíte vlastní konfigurace, IntelliSense nemusí být funkční.",
-	"selectCompiler.string": "Vybrat konfiguraci IntelliSense...",
+	"selectIntelliSenseConfiguration.string": "Vybrat konfiguraci IntelliSense...",
 	"use.provider": "Použít {0}",
 	"use.compileCommands": "Použít {0}",
 	"selectAnotherCompiler.string": "Vybrat jiný kompilátor na mém počítači...",
 	"installCompiler.string": "Pomoc s instalací kompilátoru",
 	"noConfig.string": "Nekonfigurovat pomocí kompilátoru (nedoporučuje se)",
+	"selectCompiler.string": "Vybrat kompilátor",
 	"confirmCompiler.string": "Ano",
 	"selectCompiler.message": "Byl nalezen {0} kompilátoru. Chcete nakonfigurovat IntelliSense s tímto kompilátorem?",
-	"selectIntelliSenseConfiguration.string": "Vybrat konfiguraci IntelliSense...",
 	"server.crashed.restart": "Došlo k chybovému ukončení jazykového serveru. Restartuje se…",
 	"server.crashed2": "Jazykový server se 5krát za poslední 3 minuty chybově ukončil. Nebude se restartovat.",
 	"loggingLevel.changed": "{0} se změnila na: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Ano",
 	"no.button": "Ne",
 	"configurations.received": "Přijaly se vlastní konfigurace:",
-	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}"
+	"browse.configuration.received": "Přijala se vlastní konfigurace procházení: {0}",
+	"fallback.clipboard": " Deklarace nebo definice se zkopírovala."
 }

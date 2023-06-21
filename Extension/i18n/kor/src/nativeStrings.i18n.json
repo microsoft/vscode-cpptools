@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "'%s' 파일을 찾을 수 없습니다.",
 	"refactor_create_declaration_definition_failed": "선언/정의 만들기 실패: %s",
 	"refactor_create_default_delete": "함수 '%s'을(를) 만들 수 없습니다. 기본값 또는 삭제된 함수 만들기는 지원되지 않습니다.",
-	"refactor_function_copied_to_clipboard": "함수 서명이 클립보드에 복사되었습니다.",
 	"refactor_function_not_created": "'%s' 함수를 만들 수 없습니다.",
 	"refactor_ambiguous_locations": "'%s' 함수에 대한 명확한 위치를 찾을 수 없습니다.",
 	"refactor_file_not_in_project": "'%s' 파일을 찾을 수 없습니다.",
 	"refactor_not_class_namespace": "'%s' 클래스 또는 네임스페이스를 찾을 수 없습니다.",
 	"refactor_operation_unsupported": "'%s'에서는 작업이 지원되지 않습니다.",
 	"unknown_error": "알 수 없는 오류입니다.",
-	"run_select_intellisense_configuration": "시스템 헤더를 찾으려면 'IntelliSense 구성 선택...' 명령을 실행하세요."
+	"run_select_intellisense_configuration": "시스템 헤더를 찾으려면 'IntelliSense 구성 선택...' 명령을 실행하세요.",
+	"offer_copy_declaration": "'{0}'의 선언 복사",
+	"offer_copy_definition": "'{0}'의 정의 복사",
+	"refactor_copy_declaration_definition_failed": "선언/정의를 클립보드에 복사하지 못했습니다. %s"
 }

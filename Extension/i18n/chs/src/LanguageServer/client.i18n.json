@@ -14,15 +14,15 @@
 	"configuration.providers": "配置提供程序",
 	"compilers": "编译器",
 	"setCompiler.message": "未配置编译器。除非设置自己的配置，否则 IntelliSense 可能无法正常工作。",
-	"selectCompiler.string": "选择 IntelliSense 配置...",
+	"selectIntelliSenseConfiguration.string": "选择 IntelliSense 配置...",
 	"use.provider": "使用 {0}",
 	"use.compileCommands": "使用 {0}",
 	"selectAnotherCompiler.string": "在我的计算机上选择另一个编译器...",
 	"installCompiler.string": "帮助我安装编译器",
 	"noConfig.string": "请勿适用编译器进行配置(不推荐)",
+	"selectCompiler.string": "选择编译器",
 	"confirmCompiler.string": "是",
 	"selectCompiler.message": "已找到编译器 {0}。是否要使用此编译器配置 IntelliSense?",
-	"selectIntelliSenseConfiguration.string": "选择 IntelliSense 配置...",
 	"server.crashed.restart": "语言服务器崩溃。正在重新启动...",
 	"server.crashed2": "在过去 3 分钟内，语言服务器崩溃了 5 次。它不会重新启动。",
 	"loggingLevel.changed": "{0} 已更改为: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "是",
 	"no.button": "否",
 	"configurations.received": "已收到自定义配置:",
-	"browse.configuration.received": "已收到自定义浏览配置: {0}"
+	"browse.configuration.received": "已收到自定义浏览配置: {0}",
+	"fallback.clipboard": "已复制声明/定义。"
 }

@@ -41,19 +41,19 @@ export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
 
-let cachedClangFormatPath: string | null | undefined;
-export function getCachedClangFormatPath(): string | null | undefined {
+let cachedClangFormatPath: string | undefined;
+export function getCachedClangFormatPath(): string | undefined {
     return cachedClangFormatPath;
 }
-export function setCachedClangFormatPath(path: string | null): void {
+export function setCachedClangFormatPath(path: string): void {
     cachedClangFormatPath = path;
 }
 
-let cachedClangTidyPath: string | null | undefined;
-export function getCachedClangTidyPath(): string | null | undefined {
+let cachedClangTidyPath: string | undefined;
+export function getCachedClangTidyPath(): string | undefined {
     return cachedClangTidyPath;
 }
-export function setCachedClangTidyPath(path: string | null): void {
+export function setCachedClangTidyPath(path: string): void {
     cachedClangTidyPath = path;
 }
 
@@ -335,7 +335,7 @@ export function isOptionalArrayOfString(input: any): input is string[] | undefin
 
 export function resolveCachePath(input: string | undefined, additionalEnvironment: { [key: string]: string | string[] }): string {
     let resolvedPath: string = "";
-    if (!input) {
+    if (!input || input.trim() === "") {
         // If no path is set, return empty string to language service process, where it will set the default path as
         // Windows: %LocalAppData%/Microsoft/vscode-cpptools/
         // Linux and Mac: ~/.vscode-cpptools/

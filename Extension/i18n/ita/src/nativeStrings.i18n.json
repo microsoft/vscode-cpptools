@@ -287,12 +287,14 @@
 	"e_cm_file_not_in_project": "Impossibile trovare il file \"%s\".",
 	"refactor_create_declaration_definition_failed": "La creazione della dichiarazione/definizione non è stata completata: %",
 	"refactor_create_default_delete": "Impossibile creare la funzione '%s'. La creazione di funzioni eliminate o predefinite non è supportata.",
-	"refactor_function_copied_to_clipboard": "La firma della funzione è stata copiata negli Appunti.",
 	"refactor_function_not_created": "Non è possibile creare la funzione '%s'.",
 	"refactor_ambiguous_locations": "Non è possibile trovare una posizione non ambigua per la funzione '%s'.",
 	"refactor_file_not_in_project": "Impossibile trovare il file \"%s\".",
 	"refactor_not_class_namespace": "Non è stato possibile trovare la classe o lo spazio dei nomi '%s'.",
 	"refactor_operation_unsupported": "L'operazione non è supportata per '%s'.",
 	"unknown_error": "Errore sconosciuto.",
-	"run_select_intellisense_configuration": "Eseguire il comando 'Seleziona configurazione IntelliSense' per individuare le intestazioni di sistema."
+	"run_select_intellisense_configuration": "Eseguire il comando 'Seleziona configurazione IntelliSense' per individuare le intestazioni di sistema.",
+	"offer_copy_declaration": "Copia dichiarazione di '{0}'",
+	"offer_copy_definition": "Copia definizione di '{0}'",
+	"refactor_copy_declaration_definition_failed": "Copia della dichiarazione/definizione negli Appunti non riuscita: %s"
 }

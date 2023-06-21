@@ -14,15 +14,15 @@
 	"configuration.providers": "dostawcy konfiguracji",
 	"compilers": "kompilatory",
 	"setCompiler.message": "Nie skonfigurowano funkcji IntelliSense. Jeśli nie ustawisz własnych konfiguracji, funkcja IntelliSense może nie działać.",
-	"selectCompiler.string": "Wybierz konfigurację funkcji IntelliSense...",
+	"selectIntelliSenseConfiguration.string": "Wybierz konfigurację funkcji IntelliSense...",
 	"use.provider": "Użyj kompilatora {0}",
 	"use.compileCommands": "Użyj kompilatora {0}",
 	"selectAnotherCompiler.string": "Wybierz inny kompilator na mojej maszynie...",
 	"installCompiler.string": "Pomóż mi zainstalować kompilator",
 	"noConfig.string": "Nie konfiguruj za pomocą kompilatora (niezalecane)",
+	"selectCompiler.string": "Wybierz kompilator",
 	"confirmCompiler.string": "Tak",
 	"selectCompiler.message": "Znaleziono kompilator {0}. Czy chcesz skonfigurować funkcję IntelliSense za pomocą tego kompilatora?",
-	"selectIntelliSenseConfiguration.string": "Wybierz konfigurację funkcji IntelliSense...",
 	"server.crashed.restart": "Wystąpiła awaria serwera języka. Trwa ponowne uruchamianie...",
 	"server.crashed2": "W ciągu ostatnich 3 minut awaria serwera języka wystąpiła 5 razy. Nie zostanie on ponownie uruchomiony.",
 	"loggingLevel.changed": "Poziom {0} zmienił się na: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Tak",
 	"no.button": "Nie",
 	"configurations.received": "Odebrano konfiguracje niestandardowe:",
-	"browse.configuration.received": "Odebrano niestandardową konfigurację przeglądania: {0}"
+	"browse.configuration.received": "Odebrano niestandardową konfigurację przeglądania: {0}",
+	"fallback.clipboard": " Deklaracja/definicja została skopiowana."
 }

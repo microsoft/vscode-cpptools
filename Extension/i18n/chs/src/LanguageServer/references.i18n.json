@@ -7,6 +7,7 @@
 	"find.all.references": "查找所有引用",
 	"peek.references": "速览引用",
 	"rename": "重命名",
+	"call.hierarchy": "调用层次结构",
 	"confirmed.reference.upper": "已确认引用",
 	"confirmation.in.progress.upper": "正在进行确认",
 	"comment.reference.upper": "注释引用",
