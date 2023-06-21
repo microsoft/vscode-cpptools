@@ -3458,7 +3458,6 @@ export class DefaultClient implements Client {
         const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let modifiedDocument: vscode.Uri | undefined;
         let lastEdit: vscode.TextEdit | undefined;
-        let editPositionAdjustment: number = 0;
         let selectionPositionAdjustment: number = 0;
         for (const file in result.edit.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
@@ -3468,23 +3467,13 @@ export class DefaultClient implements Client {
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
-                if (lastEdit && lastEdit.newText.includes("#include")) {
-                    if (lastEdit.range.isEqual(range)) {
-                        // Destination file is empty.
-                        // The edit positions for #include header file and definition or declaration are the same.
-                        selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
-                    } else {
-                        // Destination file is not empty.
-                        // VS Code workspace.applyEdit calculates the position of subsequent edits.
-                        // That is, the positions of text edits that are originally calculated by the language server
-                        // are adjusted based on the number of text edits applied by VS Code workspace.applyEdit.
-                        // Since the language server's refactoring API already pre-calculates the positions of multiple text edits,
-                        // re-adjust the new line of the next text edit for the VS Code applyEdit to calculate again.
-                        editPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
-                    }
+                if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
+                    // Destination file is empty.
+                    // The edit positions for #include header file and definition or declaration are the same.
+                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
-                const position: vscode.Position = new vscode.Position(edit.range.start.line - editPositionAdjustment, edit.range.start.character);
+                const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
                 workspaceEdits.insert(uri, position, edit.newText);
             }
             modifiedDocument = uri;
