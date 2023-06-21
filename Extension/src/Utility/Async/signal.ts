@@ -8,7 +8,7 @@ import { Resolveable } from './resolvable';
 
 /**
  * A signal is an externally fulfillable promise ( @see ManualPromise )
- * that once awaited, will automatically reset to the unwaited state
+ * that once resolved, will automatically reset to the unwaited state
  *
  * The virtue of this vs some kind of event emitter, is that it can be used
  * to arbitrarily await a change in some kind of status without the overhead
