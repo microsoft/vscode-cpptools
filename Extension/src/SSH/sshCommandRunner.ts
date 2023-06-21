@@ -7,19 +7,19 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { ManualPromise } from '../Automation/Async/manual-promise';
+import { CppSettings } from '../LanguageServer/settings';
+import { ManualPromise } from '../Utility/Async/manual-promise';
 import { ISshHostInfo, ProcessReturnType, splitLines, stripEscapeSequences } from '../common';
 import { isWindows } from '../constants';
-import { CppSettings } from '../LanguageServer/settings';
 import { getSshChannel } from '../logger';
 import {
-    autoFilledPasswordForUsers,
     ConnectionFailureInteractor, ContinueOnInteractor, DifferingHostKeyInteractor,
     DuoTwoFacInteractor,
     FingerprintInteractor, IInteraction, IInteractor, ISystemInteractor, MitmInteractor,
     PassphraseInteractor,
     PasswordInteractor,
-    TwoFacInteractor
+    TwoFacInteractor,
+    autoFilledPasswordForUsers
 } from './commandInteractors';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

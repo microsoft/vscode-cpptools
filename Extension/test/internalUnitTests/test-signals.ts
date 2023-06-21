@@ -6,8 +6,8 @@
 import { ok, strictEqual } from 'assert';
 import { describe } from 'mocha';
 import { setTimeout } from 'timers/promises';
-import { ManualSignal } from '../../src/Automation/Async/manual-signal';
-import { Signal } from '../../src/Automation/Async/signal';
+import { ManualSignal } from '../../src/Utility/Async/manual-signal';
+import { Signal } from '../../src/Utility/Async/signal';
 
 describe('Signal', () => {
     it('automatically resets once awaited', async () => {

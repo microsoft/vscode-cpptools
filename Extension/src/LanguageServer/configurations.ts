@@ -12,7 +12,7 @@ import { setTimeout } from 'timers';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
-import { logAndReturn, returns } from '../Automation/Async/returns';
+import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
 import { getOutputChannelLogger } from '../logger';
 import * as telemetry from '../telemetry';

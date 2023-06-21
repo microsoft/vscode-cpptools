@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { sleep } from '../Automation/Async/sleep';
+import { sleep } from '../Utility/Async/sleep';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';

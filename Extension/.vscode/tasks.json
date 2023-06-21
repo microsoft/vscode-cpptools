@@ -173,12 +173,16 @@
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "command": "node_modules/.bin/tsc --build ${workspaceFolder}/test.tsconfig.json --watch",
+            "command": "yarn",
+            "args": [
+                "run",
+                "compile-watch-unit-tests"
+            ],
             "isBackground": true,
             "problemMatcher": "$tsc-watch",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             }
         },
         {
@@ -187,12 +191,15 @@
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "command": "node_modules/.bin/tsc --build ${workspaceFolder}/test.tsconfig.json",
-            "isBackground": true,
-            "problemMatcher": "$tsc-watch",
+            "command": "yarn",
+            "args": [
+                "run",
+                "compile-unit-tests"
+            ],
+            "problemMatcher": "$tsc",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             }
         }
     ]

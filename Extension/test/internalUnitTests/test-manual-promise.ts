@@ -6,7 +6,7 @@
 import { ok, strictEqual, throws } from 'assert';
 import { describe } from 'mocha';
 import { setTimeout } from 'timers/promises';
-import { ManualPromise } from '../../src/Automation/Async/manual-promise';
+import { ManualPromise } from '../../src/Utility/Async/manual-promise';
 
 // force dev mode (which throws on duplicate resolve calls)
 (global as any).DEVMODE = true;

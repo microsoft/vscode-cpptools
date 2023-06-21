@@ -5,7 +5,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { logAndReturn } from '../Automation/Async/returns';
+import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as cpptools from './client';

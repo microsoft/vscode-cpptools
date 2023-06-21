@@ -30,29 +30,31 @@ import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
 import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
-import { logAndReturn, returns } from '../Automation/Async/returns';
-import * as util from '../common';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
-import { DebugProtocolParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, Logger, logLocalized, showWarning, ShowWarningParams } from '../logger';
+import { logAndReturn, returns } from '../Utility/Async/returns';
+import * as util from '../common';
+import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
 import * as telemetry from '../telemetry';
-import { getTestHook, TestHook } from '../testHook';
+import { TestHook, getTestHook } from '../testHook';
 import {
-    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications, removeAllCodeAnalysisProblems,
-    removeCodeAnalysisProblems, RemoveCodeAnalysisProblemsParams
+    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications,
+    RemoveCodeAnalysisProblemsParams,
+    removeAllCodeAnalysisProblems,
+    removeCodeAnalysisProblems
 } from './codeAnalysis';
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
-import { clients, configPrefix, CppSourceStr, updateLanguageConfigurations } from './extension';
-import { getLocaleId, getLocalizedString, LocalizeStringParams } from './localization';
+import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations } from './extension';
+import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
-import { CppSettings, getEditorConfigSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams } from './settings';
+import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams, getEditorConfigSettings } from './settings';
 import { SettingsTracker } from './settingsTracker';
-import { ConfigurationType, getUI, LanguageStatusUI } from './ui';
+import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 import { handleChangedFromCppToC, makeVscodeLocation, makeVscodeRange } from './utils';
 import minimatch = require("minimatch");
 
@@ -1062,10 +1064,10 @@ export class DefaultClient implements Client {
             if (index === paths.length - 3) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
-                    if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
-                        await this.showPrompt(selectIntelliSenseConfig, true, sender);
-                    }
                     action = "browse dismissed";
+                    if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
+                        return this.showPrompt(selectIntelliSenseConfig, true, sender);
+                    }
                     return;
                 }
                 configurationSelected = true;
@@ -1150,9 +1152,9 @@ export class DefaultClient implements Client {
                     await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
-                    await ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
+                    void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
                 } else if (value === selectCompiler) {
-                    await this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
+                    void this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
                     action = "show quickpick";
                 } else {
                     void this.showPrompt(selectCompiler, true, sender);
@@ -1181,15 +1183,15 @@ export class DefaultClient implements Client {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    await this.addTrustedCompiler(settings.defaultCompilerPath);
+                    void this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                     await ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
                 } else if (value === selectCompiler) {
-                    await this.handleIntelliSenseConfigurationQuickPick(true, sender);
+                    void this.handleIntelliSenseConfigurationQuickPick(true, sender);
                     action = "show quickpick";
                 } else {
-                    await this.showPrompt(selectCompiler, true, sender);
+                    void this.showPrompt(selectCompiler, true, sender);
                     action = "dismissed";
                 }
                 telemetry.logLanguageServerEvent('compilerNotification', { action });
@@ -1202,7 +1204,7 @@ export class DefaultClient implements Client {
     }
 
     /**
-     * All public methods on this class must be guarded by the ".ready" promise. Requests and notifications received before the task is
+     * All public methods on this class must be guarded by the "ready" promise. Requests and notifications received before the task is
      * complete are executed after this promise is resolved.
      */
 
@@ -1780,7 +1782,7 @@ export class DefaultClient implements Client {
         this.configStateReceived.configProviders.push(provider);
         const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
         if (!selectedProvider || this.showConfigureIntelliSenseButton) {
-            await this.handleConfigStatusOrPrompt("configProviders");
+            void this.handleConfigStatusOrPrompt("configProviders");
             if (!selectedProvider) {
                 return;
             }

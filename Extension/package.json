@@ -6000,6 +6000,8 @@
     "compile-dev": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && webpack --mode development",
     "compile-watch": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && gulp translations-generate && webpack --mode production --env vscode_nls --watch --progress",
     "compile-dev-watch": "node ./tools/prepublish.js && gulp copy-walkthrough-media && gulp generate-native-strings && webpack --mode development --watch --progress",
+    "compile-unit-tests": "tsc --build test.tsconfig.json",
+    "compile-watch-unit-tests": "tsc --build test.tsconfig.json --watch",
     "generateOptionsSchema": "node ./tools/prepublish.js && node ./out/tools/generateOptionsSchema.js",
     "generate-native-strings": "node ./tools/prepublish.js && gulp generate-native-strings",
     "translations-export": "node ./tools/prepublish.js && gulp generate-native-strings && gulp translations-export",

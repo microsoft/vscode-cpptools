@@ -8,7 +8,7 @@ import { Resetable } from './resolvable';
 
 /**
  * A signal is an externally fulfillable promise ( @see ManualPromise )
- * that once awaited, will automatically reset to the unwaited state
+ * that once awaited, can be manually reset to the unwaited state
  *
  * The virtue of this vs some kind of event emitter, is that it can be used
  * to arbitrarily await a change in some kind of status without the overhead
@@ -66,7 +66,7 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     /**
      * A method to manually resolve the Promise.
      *
-     * This also resets this instance to a new promise interally, so that any new awaiters will not be instantly resolved.
+     * This doesn't reset this instance to a new promise interally, call 'reset' to do that.
      * @param value
      */
     resolve(value: T): Resetable<T> {
@@ -77,7 +77,7 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     /**
      * A method to manually reject the Promise.
      *
-     * This also resets this instance to a new promise interally, so that any new awaiters will not be instantly resolved.
+     *  This doesn't reset this instance to a new promise interally, call 'reset' to do that.
      * @param value
      */
     reject(reason: any): Resetable<T> {
@@ -85,6 +85,7 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
         return this as unknown as Resetable<T>;
     }
 
+    /** Manually reset the promise to an uncompleted state.  */
     reset(): Resetable<T> {
         if (this.promise.isCompleted) {
             this.promise = new ManualPromise<T>();

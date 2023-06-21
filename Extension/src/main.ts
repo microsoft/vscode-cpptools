@@ -7,21 +7,21 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as util from './common';
 import * as DebuggerExtension from './Debugger/extension';
 import * as LanguageServer from './LanguageServer/extension';
+import * as util from './common';
 import * as Telemetry from './telemetry';
 
 import * as semver from 'semver';
 import { CppToolsApi, CppToolsExtension } from 'vscode-cpptools';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
-import { returns } from './Automation/Async/returns';
-import { CppTools1 } from './cppTools1';
-import { cppBuildTaskProvider, CppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
+import { CppBuildTaskProvider, cppBuildTaskProvider } from './LanguageServer/cppBuildTaskProvider';
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
 import { PersistentState } from './LanguageServer/persistentState';
 import { CppSettings } from './LanguageServer/settings';
+import { returns } from './Utility/Async/returns';
+import { CppTools1 } from './cppTools1';
 import { disposeOutputChannels, log } from './logger';
 import { PlatformInformation } from './platform';
 
