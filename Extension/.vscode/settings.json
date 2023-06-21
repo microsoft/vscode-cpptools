@@ -25,7 +25,7 @@
     "mochaExplorer.monkeyPatch": true,
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features",
-        "editor.tabSize": 2,
+        "editor.tabSize": 4,
         "files.insertFinalNewline": true
     },
     "[jsonc]": {
