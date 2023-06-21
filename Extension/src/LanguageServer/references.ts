@@ -4,14 +4,15 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { DefaultClient, RenameParams, FindAllReferencesParams } from './client';
-import { FindAllRefsView } from './referencesView';
+import { DefaultClient } from './client';
 import * as telemetry from '../telemetry';
 import * as nls from 'vscode-nls';
 import * as logger from '../logger';
 import { PersistentState } from './persistentState';
 import * as util from '../common';
 import { setInterval } from 'timers';
+import { Position, TextDocumentIdentifier } from 'vscode-languageclient';
+import { FindAllRefsView } from './referencesView';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -33,17 +34,25 @@ export interface ReferenceInfo {
     type: ReferenceType;
 }
 
+export interface ReferencesParams {
+    newName: string;
+    position: Position;
+    textDocument: TextDocumentIdentifier;
+}
+
 export interface ReferencesResult {
     referenceInfos: ReferenceInfo[];
     text: string;
     isFinished: boolean;
+    isCanceled: boolean;
 }
 
-export type ReferencesResultCallback = (result: ReferencesResult | null, doResolve: boolean) => void;
+export type ReferencesResultCallback = (result: ReferencesResult | null) => void;
 
 enum ReferencesProgress {
     Started,
     StartedRename,
+    StartedCallHierarchy,
     ProcessingSource,
     ProcessingTargets
 }
@@ -67,7 +76,25 @@ export enum ReferencesCommandMode {
     None,
     Find,
     Peek,
-    Rename
+    Rename,
+    CallHierarchy
+}
+
+export enum CancellationSender {
+    /* No cancellations */
+    None,
+
+    /* Cancellation was from a new request */
+    NewRequest,
+
+    /* Cancellation was from the provider cancellation token */
+    ProviderToken,
+
+    /* Cancellation was from the language server */
+    LanguageServer,
+
+    /* Cancellation was from the user selecting the cancel button in the reference search progress bar */
+    User
 }
 
 export function referencesCommandModeToString(referencesCommandMode: ReferencesCommandMode): string {
@@ -78,6 +105,8 @@ export function referencesCommandModeToString(referencesCommandMode: ReferencesC
             return localize("peek.references", "Peek References");
         case ReferencesCommandMode.Rename:
             return localize("rename", "Rename");
+        case ReferencesCommandMode.CallHierarchy:
+            return localize("call.hierarchy", "Call Hierarchy");
         default:
             return "";
     }
@@ -105,7 +134,6 @@ export function convertReferenceTypeToString(referenceType: ReferenceType, upper
             case ReferenceType.NotAReference: return localize("not.a.reference", "Not a reference");
         }
     }
-    return "";
 }
 
 function getReferenceCanceledString(upperCase?: boolean): string {
@@ -167,39 +195,36 @@ export class ReferencesManager {
     private findAllRefsView?: FindAllRefsView;
     private viewsInitialized: boolean = false;
 
-    public symbolSearchInProgress: boolean = false;
+    public renamePending: boolean = false;
+    private referenceRequestCanceled = new vscode.EventEmitter<CancellationSender>();
+
     private referencesCurrentProgress?: ReportReferencesProgressNotification;
     private referencesPrevProgressIncrement: number = 0;
     private referencesPrevProgressMessage: string = "";
-    public referencesRequestHasOccurred: boolean = false;
-    private referencesFinished: boolean = false;
-    public referencesRequestPending: boolean = false;
-    public referencesRefreshPending: boolean = false;
     private referencesDelayProgress?: NodeJS.Timeout;
     private referencesProgressOptions?: vscode.ProgressOptions;
-    public referencesCanceled: boolean = false;
-    public referencesCanceledWhilePreviewing?: boolean;
     private referencesStartedWhileTagParsing?: boolean;
     private referencesProgressMethod?: (progress: vscode.Progress<{
         message?: string;
         increment?: number;
     }>, token: vscode.CancellationToken) => Thenable<unknown>;
+    private referencesProgressBarStartTime: number = 0;
     private referencesCurrentProgressUICounter: number = 0;
     private readonly referencesProgressUpdateInterval: number = 1000;
     private readonly referencesProgressDelayInterval: number = 2000;
+    private currentUpdateProgressTimer?: NodeJS.Timeout;
+    private currentUpdateProgressResolve?: (value: unknown) => void;
 
     private prevVisibleRangesLength: number = 0;
     private visibleRangesDecreased: boolean = false;
     private visibleRangesDecreasedTicks: number = 0;
     private readonly ticksForDetectingPeek: number = 1000; // TODO: Might need tweaking?
 
-    private resultsCallback?: ReferencesResultCallback;
-    private currentUpdateProgressTimer?: NodeJS.Timeout;
-    private currentUpdateProgressResolve?: (value: unknown) => void;
     public groupByFile: PersistentState<boolean> = new PersistentState<boolean>("CPP.referencesGroupByFile", false);
 
     constructor(client: DefaultClient) {
         this.client = client;
+        this.disposables.push(vscode.Disposable.from(this.referenceRequestCanceled));
     }
 
     initializeViews(): void {
@@ -207,6 +232,15 @@ export class ReferencesManager {
             this.findAllRefsView = new FindAllRefsView();
             this.viewsInitialized = true;
         }
+    }
+
+    public get onCancellationRequested(): vscode.Event<CancellationSender> {
+        return this.referenceRequestCanceled.event;
+    }
+
+    public cancelCurrentReferenceRequest(sender: CancellationSender): void {
+        // Notify the current listener to cancel its request.
+        this.referenceRequestCanceled.fire(sender);
     }
 
     public dispose(): void {
@@ -241,6 +275,7 @@ export class ReferencesManager {
             switch (this.referencesCurrentProgress.referencesProgress) {
                 case ReferencesProgress.Started:
                 case ReferencesProgress.StartedRename:
+                case ReferencesProgress.StartedCallHierarchy:
                     progress.report({ message: localize("started", "Started."), increment: 0 });
                     break;
                 case ReferencesProgress.ProcessingSource:
@@ -312,10 +347,16 @@ export class ReferencesManager {
     private handleProgressStarted(referencesProgress: ReferencesProgress): void {
         this.referencesStartedWhileTagParsing = this.client.IsTagParsing;
 
-        const mode: ReferencesCommandMode =
-                (referencesProgress === ReferencesProgress.StartedRename) ? ReferencesCommandMode.Rename :
-                    (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek) ?
-                        ReferencesCommandMode.Peek : ReferencesCommandMode.Find);
+        let mode: ReferencesCommandMode = ReferencesCommandMode.None;
+        if (referencesProgress === ReferencesProgress.StartedCallHierarchy) {
+            mode = ReferencesCommandMode.CallHierarchy;
+        } else if (referencesProgress === ReferencesProgress.StartedRename) {
+            mode = ReferencesCommandMode.Rename;
+        } else if (this.visibleRangesDecreased && (Date.now() - this.visibleRangesDecreasedTicks < this.ticksForDetectingPeek)) {
+            mode = ReferencesCommandMode.Peek;
+        } else {
+            mode = ReferencesCommandMode.Find;
+        }
         this.client.setReferencesCommandMode(mode);
 
         this.referencesPrevProgressIncrement = 0;
@@ -324,20 +365,25 @@ export class ReferencesManager {
         this.currentUpdateProgressTimer = undefined;
         this.currentUpdateProgressResolve = undefined;
         let referencePreviousProgressUICounter: number = 0;
-
+        this.referencesProgressBarStartTime = Date.now();
         this.clearViews();
 
         this.referencesDelayProgress = setInterval(() => {
-
-            this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: referencesCommandModeToString(this.client.ReferencesCommandMode), cancellable: true };
+            const progressTitle: string = referencesCommandModeToString(this.client.ReferencesCommandMode);
+            this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: progressTitle, cancellable: true };
             this.referencesProgressMethod = (progress: vscode.Progress<{message?: string; increment?: number }>, token: vscode.CancellationToken) =>
                 new Promise((resolve) => {
                     this.currentUpdateProgressResolve = resolve;
                     this.reportProgress(progress, true, mode);
                     this.currentUpdateProgressTimer = setInterval(() => {
-                        if (token.isCancellationRequested && !this.referencesCanceled) {
-                            this.client.cancelReferences();
-                            this.referencesCanceled = true;
+                        if (token.isCancellationRequested) {
+                            this.cancelCurrentReferenceRequest(CancellationSender.User);
+                            if (this.currentUpdateProgressTimer) {
+                                clearInterval(this.currentUpdateProgressTimer);
+                            }
+                            if (this.referencesDelayProgress) {
+                                clearInterval(this.referencesDelayProgress);
+                            }
                         }
                         if (this.referencesCurrentProgressUICounter !== referencePreviousProgressUICounter) {
                             if (this.currentUpdateProgressTimer) {
@@ -368,6 +414,7 @@ export class ReferencesManager {
         this.initializeViews();
 
         switch (notificationBody.referencesProgress) {
+            case ReferencesProgress.StartedCallHierarchy:
             case ReferencesProgress.StartedRename:
             case ReferencesProgress.Started:
                 if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
@@ -381,42 +428,34 @@ export class ReferencesManager {
         }
     }
 
-    public startRename(params: RenameParams): void {
-        this.lastResults = null;
-        this.referencesFinished = false;
-        this.referencesRequestHasOccurred = false;
-        this.referencesRequestPending = false;
-        this.referencesCanceledWhilePreviewing = false;
-        if (this.referencesCanceled) {
-            this.referencesCanceled = false;
-            if (this.resultsCallback) {
-                this.resultsCallback(null, true);
-            }
-        } else {
-            this.client.sendRenameNotification(params);
+    public resetProgressBar(): void {
+        if (this.referencesDelayProgress) {
+            clearInterval(this.referencesDelayProgress);
         }
+        if (this.currentUpdateProgressTimer) {
+            if (this.currentUpdateProgressTimer) {
+                clearInterval(this.currentUpdateProgressTimer);
+            }
+            if (this.currentUpdateProgressResolve) {
+                this.currentUpdateProgressResolve(undefined);
+            }
+            this.currentUpdateProgressResolve = undefined;
+            this.currentUpdateProgressTimer = undefined;
+        }
+        this.referencesProgressBarStartTime = 0;
     }
 
-    public startFindAllReferences(params: FindAllReferencesParams): void {
-        this.lastResults = null;
-        this.referencesFinished = false;
-        this.referencesRequestHasOccurred = false;
-        this.referencesRequestPending = false;
-        this.referencesCanceledWhilePreviewing = false;
-        if (this.referencesCanceled) {
-            this.referencesCanceled = false;
-            if (this.resultsCallback) {
-                this.resultsCallback(null, true);
-            }
-        } else {
-            this.client.sendFindAllReferencesNotification(params);
-        }
+    public startRename(): void {
+        this.renamePending = true;
     }
 
-    public processResults(referencesResult: ReferencesResult): void {
-        if (this.referencesFinished) {
-            return;
-        }
+    public resetReferences(): void {
+        this.renamePending = false;
+        this.initializeViews();
+        this.client.setReferencesCommandMode(ReferencesCommandMode.None);
+    }
+
+    public showResultsInPanelView(referencesResult: ReferencesResult): void {
         this.initializeViews();
         this.clearViews();
 
@@ -442,52 +481,14 @@ export class ReferencesManager {
             }
         }
 
-        // Need to reset these before we call the callback, as the callback my trigger another request
-        // and we need to ensure these values are already reset before that happens.
-        const referencesRequestPending: boolean = this.referencesRequestPending;
-        const referencesCanceled: boolean = this.referencesCanceled;
-        this.referencesRequestPending = false;
-        this.referencesCanceled = false;
-
-        const currentReferenceCommandMode: ReferencesCommandMode = this.client.ReferencesCommandMode;
-
-        if (referencesResult.isFinished) {
-            this.symbolSearchInProgress = false;
-            if (this.referencesDelayProgress) {
-                clearInterval(this.referencesDelayProgress);
-            }
-            if (this.currentUpdateProgressTimer) {
-                if (this.currentUpdateProgressTimer) {
-                    clearInterval(this.currentUpdateProgressTimer);
-                }
-                if (this.currentUpdateProgressResolve) {
-                    this.currentUpdateProgressResolve(undefined);
-                }
-                this.currentUpdateProgressResolve = undefined;
-                this.currentUpdateProgressTimer = undefined;
-            }
-            this.client.setReferencesCommandMode(ReferencesCommandMode.None);
-        }
-
-        if (currentReferenceCommandMode === ReferencesCommandMode.Rename) {
-            if (!referencesCanceled) {
-                if (this.resultsCallback) {
-                    this.resultsCallback(referencesResult, true);
-                }
-            } else {
-                // Do nothing when rename is canceled while searching for references was in progress.
-                if (this.resultsCallback) {
-                    this.resultsCallback(null, true);
-                }
-            }
-        } else {
+        if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find || this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
             if (this.findAllRefsView) {
-                this.findAllRefsView.setData(referencesResult, referencesCanceled, this.groupByFile.Value);
+                this.findAllRefsView.setData(referencesResult, this.groupByFile.Value);
             }
 
-            // Display data based on command mode: peek references OR find all references
-            if (currentReferenceCommandMode === ReferencesCommandMode.Peek) {
-                const showConfirmedReferences: boolean = referencesCanceled;
+            // Display in "Other References" view or channel based on command mode: "peek references" OR "find all references"
+            if (this.client.ReferencesCommandMode === ReferencesCommandMode.Peek) {
+                const showConfirmedReferences: boolean = referencesResult.isCanceled;
                 if (this.findAllRefsView) {
                     const peekReferencesResults: string = this.findAllRefsView.getResultsAsText(showConfirmedReferences);
                     if (peekReferencesResults) {
@@ -497,33 +498,27 @@ export class ReferencesManager {
                         }
                     }
                 }
-            } else if (currentReferenceCommandMode === ReferencesCommandMode.Find) {
+            } else if (this.client.ReferencesCommandMode === ReferencesCommandMode.Find) {
                 if (this.findAllRefsView) {
                     this.findAllRefsView.show(true);
                 }
             }
-            if (referencesResult.isFinished) {
-                this.lastResults = referencesResult;
-                this.referencesFinished = true;
-            }
-            if (!this.referencesRefreshPending) {
-                if (referencesResult.isFinished && this.referencesRequestHasOccurred && !referencesRequestPending && !this.referencesCanceledWhilePreviewing) {
-                    this.referencesRefreshPending = true;
-                    vscode.commands.executeCommand("references-view.refresh");
-                } else {
-                    if (this.resultsCallback) {
-                        this.resultsCallback(referencesResult, !this.referencesCanceledWhilePreviewing);
-                    }
-                }
-            }
+        }
+
+        // If this is the final result, reset after process results.
+        if (referencesResult.isFinished || referencesResult.isCanceled) {
+            this.resetReferences();
         }
     }
 
-    public lastResults: ReferencesResult | null = null; // Saved for the final request after a preview occurs.
+    public getCallHierarchyProgressBarDuration(): number | undefined {
+        let referencesProgressBarDuration: number | undefined;
 
-    public setResultsCallback(callback: ReferencesResultCallback): void {
-        this.symbolSearchInProgress = true;
-        this.resultsCallback = callback;
+        if (this.referencesProgressBarStartTime !== 0) {
+            referencesProgressBarDuration = Date.now() - this.referencesProgressBarStartTime;
+            this.referencesProgressBarStartTime = 0;
+        }
+        return referencesProgressBarDuration;
     }
 
     public clearViews(): void {

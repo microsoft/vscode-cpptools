@@ -7,6 +7,7 @@
 	"find.all.references": "尋找所有參考",
 	"peek.references": "瞄核參考",
 	"rename": "重新命名",
+	"call.hierarchy": "呼叫階層圖",
 	"confirmed.reference.upper": "已確認參考",
 	"confirmation.in.progress.upper": "正在確認",
 	"comment.reference.upper": "註解參考",

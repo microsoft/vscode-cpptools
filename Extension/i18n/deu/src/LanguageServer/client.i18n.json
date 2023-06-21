@@ -14,15 +14,15 @@
 	"configuration.providers": "Konfigurationsanbieter",
 	"compilers": "Compiler",
 	"setCompiler.message": "IntelliSense ist nicht konfiguriert. Wenn Sie keine eigenen Konfigurationen festlegen, ist IntelliSense möglicherweise nicht funktionsfähig.",
-	"selectCompiler.string": "IntelliSense-Konfiguration auswählen...",
+	"selectIntelliSenseConfiguration.string": "IntelliSense-Konfiguration auswählen...",
 	"use.provider": "{0} verwenden",
 	"use.compileCommands": "{0} verwenden",
 	"selectAnotherCompiler.string": "Anderen Compiler auf meinem Computer auswählen...",
 	"installCompiler.string": "Hilfe bei der Installation eines Compilers",
 	"noConfig.string": "Nicht mit einem Compiler konfigurieren (nicht empfohlen)",
+	"selectCompiler.string": "Compiler auswählen",
 	"confirmCompiler.string": "Ja",
 	"selectCompiler.message": "Der Compiler {0} wurde gefunden. Möchten Sie IntelliSense mit diesem Compiler konfigurieren?",
-	"selectIntelliSenseConfiguration.string": "IntelliSense-Konfiguration auswählen...",
 	"server.crashed.restart": "Der Sprach-Server ist abgestürzt. Neustart wird ausgeführt ...",
 	"server.crashed2": "Der Sprachserver ist in den letzten 3 Minuten 5-mal abgestürzt. Er wird nicht neu gestartet.",
 	"loggingLevel.changed": "{0} wurde geändert in {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Ja",
 	"no.button": "Nein",
 	"configurations.received": "Benutzerdefinierte Konfigurationen empfangen:",
-	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}"
+	"browse.configuration.received": "Benutzerdefinierte Suchkonfiguration empfangen: {0}",
+	"fallback.clipboard": " Die Deklaration/Definition wurde kopiert."
 }

@@ -14,15 +14,15 @@
 	"configuration.providers": "proveedores de configuración",
 	"compilers": "Compiladores",
 	"setCompiler.message": "No tiene configurado IntelliSense. A menos que establezca sus propias configuraciones, puede que IntelliSense no funcione.",
-	"selectCompiler.string": "Seleccionar configuración de IntelliSense...",
+	"selectIntelliSenseConfiguration.string": "Seleccionar configuración de IntelliSense...",
 	"use.provider": "Uso {0}",
 	"use.compileCommands": "Uso {0}",
 	"selectAnotherCompiler.string": "Seleccionar otro compilador en mi máquina...",
 	"installCompiler.string": "Ayuda para instalar un compilador",
 	"noConfig.string": "No configurar con un compilador (no recomendado)",
+	"selectCompiler.string": "Selecciona un compilador",
 	"confirmCompiler.string": "Sí",
 	"selectCompiler.message": "Se encontró el compilador {0}. ¿Desea configurar IntelliSense con este compilador?",
-	"selectIntelliSenseConfiguration.string": "Seleccionar configuración de IntelliSense...",
 	"server.crashed.restart": "El servidor de lenguaje se bloqueó. Se está reiniciando...",
 	"server.crashed2": "El servidor de lenguaje se ha bloqueado cinco veces en los tres últimos minutos. No se reiniciará.",
 	"loggingLevel.changed": "{0} se cambió a: {1}",
@@ -49,5 +49,6 @@
 	"yes.button": "Sí",
 	"no.button": "No",
 	"configurations.received": "Configuraciones personalizadas recibidas:",
-	"browse.configuration.received": "Configuración de exploración personalizada recibida: {0}"
+	"browse.configuration.received": "Configuración de exploración personalizada recibida: {0}",
+	"fallback.clipboard": " Se copió la declaración o definición."
 }

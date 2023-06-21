@@ -7,6 +7,7 @@
 	"find.all.references": "Tüm Başvuruları Bul",
 	"peek.references": "Başvurulara Göz Atın",
 	"rename": "Yeniden Adlandır",
+	"call.hierarchy": "Çağrı Hiyerarşisi",
 	"confirmed.reference.upper": "BAŞVURU ONAYLANDI",
 	"confirmation.in.progress.upper": "Onay işlemi devam ediyor",
 	"comment.reference.upper": "AÇIKLAMA BAŞVURUSU",

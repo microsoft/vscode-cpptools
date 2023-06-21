@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "IntelliSense 구성",
 	"c.cpp.configureIntelliSenseStatus.cppText": "C/C++ IntelliSense 구성",
 	"select.command": "명령 선택...",
+	"select.code.analysis.command": "코드 분석 명령 선택...",
 	"c.cpp.configuration.tooltip": "C/C++ 구성",
 	"c.cpp.references.statusbar": "C/C++ 참조 상태",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense 상태",
@@ -29,7 +30,8 @@
 	"select.workspace": "작업 영역 폴더 선택...",
 	"resume.parsing": "작업 영역 구문 분석 다시 시작",
 	"pause.parsing": "작업 영역 구문 분석 일시 중지",
-	"cancel.analysis": "{0} 취소",
-	"resume.analysis": "{0} 다시 시작",
-	"pause.analysis": "{0} 일시 중지"
+	"cancel.analysis": "취소",
+	"resume.analysis": "다시 시작",
+	"pause.analysis": "일시 중지",
+	"another.analysis": "다른 시작..."
 }

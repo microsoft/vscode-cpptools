@@ -10,6 +10,7 @@
 	"c.cpp.configureIntelliSenseStatus.text": "IntelliSense'i Yapılandır",
 	"c.cpp.configureIntelliSenseStatus.cppText": "C/C++ IntelliSense'i Yapılandır",
 	"select.command": "Komut seç...",
+	"select.code.analysis.command": "Kod analizi komutu seçin...",
 	"c.cpp.configuration.tooltip": "C/C++ Yapılandırması",
 	"c.cpp.references.statusbar": "C/C++ Başvuruları Durumu",
 	"c.cpp.intellisense.statusbar": "C/C++ IntelliSense Durumu",
@@ -29,7 +30,8 @@
 	"select.workspace": "Çalışma alanı klasörü seçin...",
 	"resume.parsing": "Çalışma Alanı Ayrıştırmasını Sürdür",
 	"pause.parsing": "Çalışma Alanı Ayrıştırmasını Duraklat",
-	"cancel.analysis": "{0} işlemini iptal et",
-	"resume.analysis": "{0} işlemini sürdür",
-	"pause.analysis": "{0} işlemini duraklat"
+	"cancel.analysis": "İptal",
+	"resume.analysis": "Sürdür",
+	"pause.analysis": "Duraklat",
+	"another.analysis": "Başkasını Başlat..."
 }

@@ -64,6 +64,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         this.type = type;
     }
 
+    public static ClearDetectedBuildTasks(): void {
+        DebugConfigurationProvider.detectedCppBuildTasks = [];
+        DebugConfigurationProvider.detectedCBuildTasks = [];
+    }
+
     /**
      * Returns a list of initial debug configurations based on contextual information, e.g. package.json or folder.
      * resolveDebugConfiguration will be automatically called after this function.
@@ -429,7 +434,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 if (newConfig.type === DebuggerType.cppdbg) {
                     newConfig.externalConsole = false;
                 } else {
-                    newConfig.console = "externalTerminal";
+                    newConfig.console = "integratedTerminal";
                 }
                 const isWindows: boolean = platformInfo.platform === 'win32';
                 // Extract the .exe path from the defined task.
