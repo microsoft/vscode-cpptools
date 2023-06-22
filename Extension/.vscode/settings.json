@@ -44,4 +44,7 @@
         },
     },
     "eslint.format.enable": true,
+    "[javascript]": {
+        "editor.tabSize": 4,
+    }
 }
