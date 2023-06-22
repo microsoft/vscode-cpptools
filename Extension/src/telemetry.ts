@@ -126,7 +126,7 @@ export function logLanguageServerEvent(eventName: string, properties?: { [key: s
     };
 
     if (initializationPromise) {
-        void initializationPromise.then(sendTelemetry).catch(logAndReturn.undefined);
+        return void initializationPromise.catch(logAndReturn.undefined).then(sendTelemetry).catch(logAndReturn.undefined);
     }
     sendTelemetry();
 }
