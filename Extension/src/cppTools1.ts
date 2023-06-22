@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CppToolsApi, CppToolsExtension, CustomConfigurationProvider, Version } from 'vscode-cpptools';
+import { CppToolsApi, CustomConfigurationProvider, Version } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestExtension, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
 import { CppTools } from './cppTools';
 
@@ -61,38 +61,5 @@ export class CppTools1 implements CppToolsTestApi, CppToolsTestExtension {
 
     getTestHook(): CppToolsTestHook {
         return this.BackupApi.getTestHook();
-    }
-}
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/**
- * This is an empty implementation of the API. Used when the extension is activated on
- * an unsupported platform.
- */
-export class NullCppTools implements CppToolsApi, CppToolsExtension {
-    private version: Version = Version.v0;
-
-    getApi(version: Version): CppToolsApi {
-        this.version = version;
-        return this;
-    }
-
-    getVersion(): Version {
-        return this.version;
-    }
-
-    registerCustomConfigurationProvider(provider: CustomConfigurationProvider): void {
-    }
-
-    notifyReady(provider: CustomConfigurationProvider): void {
-    }
-
-    didChangeCustomConfiguration(provider: CustomConfigurationProvider): void {
-    }
-
-    didChangeCustomBrowseConfiguration(provider: CustomConfigurationProvider): void {
-    }
-
-    dispose(): void {
     }
 }
