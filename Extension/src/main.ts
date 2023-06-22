@@ -20,7 +20,7 @@ import { CppBuildTaskProvider, cppBuildTaskProvider } from './LanguageServer/cpp
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
 import { PersistentState } from './LanguageServer/persistentState';
 import { CppSettings } from './LanguageServer/settings';
-import { returns } from './Utility/Async/returns';
+import { logAndReturn, returns } from './Utility/Async/returns';
 import { CppTools1 } from './cppTools1';
 import { disposeOutputChannels, log } from './logger';
 import { PlatformInformation } from './platform';
@@ -291,14 +291,14 @@ async function checkVsixCompatibility(): Promise<void> {
                     promise = vscode.window.showWarningMessage(localize("vsix.platform.mismatching", "The C/C++ extension installed is compatible with but does not match your system.", vsixTargetPlatform), moreInfoButton, ignoreButton);
                 }
             }
-            if (promise) {
-                const value = await promise;
+
+            void promise?.then((value) => {
                 if (value === moreInfoButton) {
-                    await vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(getLocalizedHtmlPath("Reinstalling the Extension.md")));
+                    void vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(getLocalizedHtmlPath("Reinstalling the Extension.md")));
                 } else if (value === ignoreButton) {
                     ignoreMismatchedCompatibleVsix.Value = true;
                 }
-            }
+            }, logAndReturn.undefined);
         } else {
             console.log("Unable to find TargetPlatform in .vsixmanifest");
         }
