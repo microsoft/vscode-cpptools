@@ -45,6 +45,15 @@ enum LanguageStatusPriority {
     Low = 3
 }
 
+export enum ConfigurationType {
+    AutoConfigProvider = "autoConfigProvider",
+    ConfigProvider = "configProvider",
+    CompileCommands = "compileCommands",
+    AutoCompilerPath = "autoCompilerPath",
+    CompilerPath = "compilerPath",
+    NotConfigured = "notConfigured"
+}
+
 const commandArguments: string[] = []; // We report the sender of the command
 
 export class LanguageStatusUI {
@@ -426,12 +435,20 @@ export class LanguageStatusUI {
     private showConfigureIntelliSenseButton: boolean = false;
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
-    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
-        if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
+    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
+        if (client !== this.currentClient) {
+            return;
+        }
+        if (configurationType !== undefined && sender !== undefined) {
+            const showButton: string = show ? 'true' : 'false';
+            telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
+        }
+
+        if (!await telemetry.showStatusBarIntelliSenseButton()) {
             return;
         }
         this.showConfigureIntelliSenseButton = show;
-        if (client) {
+        if (client !== undefined) {
             client.setShowConfigureIntelliSenseButton(show);
         }
         if (show) {
