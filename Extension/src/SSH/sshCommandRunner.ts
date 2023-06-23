@@ -255,8 +255,6 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
     const { systemInteractor, command, interactors, nickname, token } = args;
     let logIsPaused: boolean = false;
     const loggingLevel: string | undefined = new CppSettings().loggingLevel;
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    // return new Promise(async (resolve, reject) => {
     const result = new ManualPromise<ProcessReturnType>();
 
     let stdout: string = '';

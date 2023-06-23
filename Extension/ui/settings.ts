@@ -357,7 +357,7 @@ class SettingsApp {
                 // Get HTML element containing the string, as we can't localize strings in HTML js
                 const noCompilerSpan: HTMLSpanElement = <HTMLSpanElement>document.getElementById(elementId.noCompilerPathsDetected);
                 const option: HTMLOptionElement = document.createElement("option");
-                option.text = noCompilerSpan.textContent ||"";
+                option.text = noCompilerSpan.textContent ?? "";
                 option.disabled = true;
                 list.append(option);
             } else {
