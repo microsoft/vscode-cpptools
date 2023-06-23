@@ -1,11 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.16.3: June 23, 2023
-### Bug Fixes
+### Bug Fix
 * Fix "cout is ambiguous" error. [#11122](https://github.com/microsoft/vscode-cpptools/issues/11122)
 
 ## Version 1.16.2: June 22, 2023
-
 ### New Features
 * Add Call Hierarchy. [#16](https://github.com/microsoft/vscode-cpptools/issues/16)
 * Add "Copy Definition" and "Copy Declaration" code actions (for when the default Create placement isn't desired). [#10238](https://github.com/microsoft/vscode-cpptools/issues/10238), [#10942](https://github.com/microsoft/vscode-cpptools/issues/10942)
