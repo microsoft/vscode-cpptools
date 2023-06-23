@@ -1,7 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.16.2: June 22, 2023
+## Version 1.16.3: June 23, 2023
+### Bug Fix
+* Fix "cout is ambiguous" error. [#11122](https://github.com/microsoft/vscode-cpptools/issues/11122)
 
+## Version 1.16.2: June 22, 2023
 ### New Features
 * Add Call Hierarchy. [#16](https://github.com/microsoft/vscode-cpptools/issues/16)
 * Add "Copy Definition" and "Copy Declaration" code actions (for when the default Create placement isn't desired). [#10238](https://github.com/microsoft/vscode-cpptools/issues/10238), [#10942](https://github.com/microsoft/vscode-cpptools/issues/10942)
@@ -17,7 +20,7 @@
 
 ### Bug Fixes
 * Fix an IntelliSense parsing bug with C++20 ranges. [#8039](https://github.com/microsoft/vscode-cpptools/issues/8039)
-* Fix incorrect insertion of Create Declaration/Definition when it also adds a #include. [#10464](https://github.com/microsoft/vscode-cpptools/issues/#10464)
+* Fix incorrect insertion of Create Declaration/Definition when it also adds a #include. [#10464](https://github.com/microsoft/vscode-cpptools/issues/10464)
 * Fix an IntelliSense bug with user-defined floating-point literals. [#10837](https://github.com/microsoft/vscode-cpptools/issues/10837)
 * Fix deadlock with Find All References. [#10855](https://github.com/microsoft/vscode-cpptools/issues/10855)
 * Fix performance issues on machines with > 32 threads. [#10874](https://github.com/microsoft/vscode-cpptools/issues/10874)
