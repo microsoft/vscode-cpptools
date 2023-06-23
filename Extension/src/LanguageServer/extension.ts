@@ -348,14 +348,16 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
     if (client) {
         // Log warm start.
         if (clients.checkOwnership(client, document)) {
+            if (!client.isInitialized()) {
+                // This can randomly get hit when adding/removing workspace folders.
+                await client.ready;
+            }
+            // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
+            // to avoid sending redundant didOpen notifications.
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-                if (!client.isInitialized()) {
-                    // This can randomly get hit when adding/removing workspace folders.
-                    await client.ready;
-                }
                 client.TrackedDocuments.add(document);
+                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                     const baseFileName: string = path.basename(document.fileName);
@@ -365,8 +367,8 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                     document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
                 }
                 await client.provideCustomConfiguration(document.uri, undefined);
-                client.onDidOpenTextDocument(document);
-                await client.sendDidOpen(document);
+                // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
+                await client.takeOwnership(document);
                 return true;
             }
         }
