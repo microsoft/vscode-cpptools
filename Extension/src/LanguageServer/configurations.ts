@@ -737,51 +737,53 @@ export class CppProperties {
 
     private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob = false): string[] {
         const result: string[] = [];
+        if (paths) {
+            paths = this.resolveDefaults(paths, defaultValue);
+            if (paths && !glob) {
+                paths.forEach(entry => {
+                    const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
+                    result.push(...entries);
+                });
+                return result;
+            }
+        }
+
+        const globResult: string[] = [];
         let recursiveDoubleStar: boolean = false;
         let recursiveForwardSlash: boolean = false;
         let recursiveForwardSlashSingleStar: boolean = false;
         let recursiveDoubleBackwardSlashDoubleStar: boolean = false;
         if (paths) {
-            paths = this.resolveDefaults(paths, defaultValue);
-            recursiveDoubleStar = paths[0].endsWith('**') && !paths[0].endsWith('\\**');
-            recursiveForwardSlash = paths[0].endsWith('/');
-            recursiveForwardSlashSingleStar = paths[0].endsWith('/*');
-            recursiveDoubleBackwardSlashDoubleStar = paths[0].endsWith('\\**');
-            paths.forEach(entry => {
-                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
-                result.push(...entries);
-            });
-        }
-        if (!glob) {
-            return result;
-        }
+            for (let res of paths) {
+                recursiveDoubleStar = res.endsWith('**') && res.endsWith('\\**');
+                recursiveForwardSlash = res.endsWith('/');
+                recursiveForwardSlashSingleStar = res.endsWith('/*');
+                recursiveDoubleBackwardSlashDoubleStar = res.endsWith('\\**');
+                // fastGlob will expand the ending double wildcard. temporary strip them before expanding
+                if (recursiveDoubleStar || recursiveForwardSlashSingleStar) {
+                    res = res.slice(0, res.length - 2);
+                } else if (recursiveForwardSlash) {
+                    res = res.slice(0, res.length - 1);
+                } else if (recursiveDoubleBackwardSlashDoubleStar) {
+                    res = res.slice(0, res.length - 4);
+                }
 
-        const globResult: string[] = [];
-        for (let res of result) {
-            // fastGlob will expand the ending double wildcard. temporary strip them before expanding
-            if (recursiveDoubleStar || recursiveForwardSlashSingleStar) {
-                res = res.slice(0, res.length - 2);
-            } else if (recursiveForwardSlash) {
-                res = res.slice(0, res.length - 1);
-            } else if (recursiveDoubleBackwardSlashDoubleStar) {
-                res = res.slice(0, res.length - 4);
-            }
+                // fastGlob can't deal with backslash-separated path => remove them
+                const normalized: string = res.replace(/\\/g, '/');
+                const cwd: string = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+                // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
+                const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
+                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
 
-            // fastGlob can't deal with backslash-separated path => remove them
-            const normalized: string = res.replace(/\\/g, '/');
-            const cwd: string = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
-            // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
-            const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                fastGlob.sync(normalized, { onlyDirectories: true, cwd}) : [res];
-
-            if (recursiveForwardSlash) {
-                globResult.push(...matches.map(s => recursiveForwardSlash ? s + '/' : s));
-            } else if (recursiveDoubleBackwardSlashDoubleStar) {
-                globResult.push(...matches.map(s => recursiveDoubleBackwardSlashDoubleStar ? s + '\\**' : s));
-            } else if (recursiveForwardSlashSingleStar) {
-                globResult.push(...matches.map(s => recursiveForwardSlashSingleStar ? s + '/*' : s));
-            } else {
-                globResult.push(...matches.map(s => recursiveDoubleStar ? s + '**' : s));
+                if (recursiveForwardSlash) {
+                    globResult.push(...matches.map(s => recursiveForwardSlash ? s + '/' : s));
+                } else if (recursiveDoubleBackwardSlashDoubleStar) {
+                    globResult.push(...matches.map(s => recursiveDoubleBackwardSlashDoubleStar ? s + '\\**' : s));
+                } else if (recursiveForwardSlashSingleStar) {
+                    globResult.push(...matches.map(s => recursiveForwardSlashSingleStar ? s + '/*' : s));
+                } else {
+                    globResult.push(...matches.map(s => recursiveDoubleStar ? s + '**' : s));
+                }
             }
         }
         return globResult;
