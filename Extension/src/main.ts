@@ -104,7 +104,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
                 } else {
                     // We can't deactivate or change engines on the fly, so prompt for window reload.
                     reloadMessageShown = true;
-                    return util.promptForReloadWindowDueToSettingsChange();
+                    void util.promptForReloadWindowDueToSettingsChange();
                 }
             }
         }));
