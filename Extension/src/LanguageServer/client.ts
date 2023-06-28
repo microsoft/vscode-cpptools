@@ -1183,7 +1183,7 @@ export class DefaultClient implements Client {
                 const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
                 if (value === confirmCompiler) {
                     settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    void this.addTrustedCompiler(settings.defaultCompilerPath);
+                    await this.addTrustedCompiler(settings.defaultCompilerPath);
                     DefaultClient.updateClientConfigurations();
                     action = "confirm compiler";
                     await ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
