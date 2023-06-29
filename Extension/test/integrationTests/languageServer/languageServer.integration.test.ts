@@ -2,13 +2,13 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as vscode from 'vscode';
 import * as assert from 'assert';
-import { getLanguageConfigFromPatterns } from '../../../src/LanguageServer/languageConfig';
-import * as util from '../../../src/common';
+import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import * as util from '../../../src/common';
 import * as config from '../../../src/LanguageServer/configurations';
+import { getLanguageConfigFromPatterns } from '../../../src/LanguageServer/languageConfig';
 import * as testHelpers from '../testHelpers';
 
 suite("multiline comment setting tests", function(): void {

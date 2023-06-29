@@ -3,12 +3,12 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { getSshConfigHostInfos } from '../sshHosts';
 import * as vscode from 'vscode';
-import { addSshTargetCmd, BaseNode, LabelLeafNode, refreshCppSshTargetsViewCmd } from './common';
-import { TargetLeafNode, filesWritable, setActiveSshTarget, _activeTarget, workspaceState_activeSshTarget } from './targetNodes';
-import { extensionContext, ISshConfigHostInfo } from '../../common';
 import * as nls from 'vscode-nls';
+import { extensionContext, ISshConfigHostInfo } from '../../common';
+import { getSshConfigHostInfos } from '../sshHosts';
+import { addSshTargetCmd, BaseNode, LabelLeafNode, refreshCppSshTargetsViewCmd } from './common';
+import { filesWritable, setActiveSshTarget, TargetLeafNode, workspaceState_activeSshTarget, _activeTarget } from './targetNodes';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -66,7 +66,7 @@ export class SshTargetsProvider implements vscode.TreeDataProvider<BaseNode>, vs
             }
         }
         if (activeTargetRemoved) {
-            setActiveSshTarget(undefined);
+            await setActiveSshTarget(undefined);
         }
         return targetNodes;
     }
@@ -82,7 +82,7 @@ export async function initializeSshTargets(): Promise<void> {
         }
     }
     if (activeTargetRemoved) {
-        setActiveSshTarget(undefined);
+        await setActiveSshTarget(undefined);
     }
     await setActiveSshTarget(extensionContext?.workspaceState.get(workspaceState_activeSshTarget));
 }

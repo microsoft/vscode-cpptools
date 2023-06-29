@@ -1,10 +1,50 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"files.exclude": {
-		"out": false // set this to true to hide the "out" folder with the compiled JS files
-	},
-	"search.exclude": {
-		"out": true // set this to false to include "out" folder in search results
-	},
-	"typescript.tsdk": "./node_modules/typescript/lib" // we want to use the TS server from our node_modules folder to control its version
+    "files.exclude": {
+        "out": false // set this to true to hide the "out" folder with the compiled JS files
+    },
+    "search.exclude": {
+        "out": true // set this to false to include "out" folder in search results
+    },
+    "typescript.tsdk": "./node_modules/typescript/lib", // we want to use the TS server from our node_modules folder to control its version
+    // if you install the mocha test explorer extension, you can run the unit tests from the test explorer UI
+    "testExplorer.useNativeTesting": true,
+    "mochaExplorer.files": "./**/internalUnitTests/**/test-*.js",
+    "mochaExplorer.watch": "./**/internalUnitTests/**/test-*.js",
+    "mochaExplorer.ignore": [
+        "**/*skip*",
+        "**/dist/test/**/*.d.ts",
+        "**/node_modules/**"
+    ],
+    "mochaExplorer.debuggerConfig": "MochaTest",
+    "mochaExplorer.logpanel": true,
+    "mochaExplorer.timeout": 500000,
+    "mochaExplorer.require": [
+        "source-map-support/register"
+    ],
+    "mochaExplorer.monkeyPatch": true,
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.tabSize": 4,
+        "files.insertFinalNewline": true
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.tabSize": 4,
+        "files.insertFinalNewline": true
+    },
+    "[typescript]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.formatOnSave": true,
+        "files.insertFinalNewline": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": true,
+            "source.organizeImports": true
+        },
+    },
+    "eslint.format.enable": true,
+    "[javascript]": {
+        "editor.tabSize": 4,
+    }
 }

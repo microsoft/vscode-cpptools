@@ -5,11 +5,11 @@
 
 import * as child_process from 'child_process';
 import * as os from 'os';
-import { AttachItemsProvider } from './attachToProcess';
-import { AttachItem } from './attachQuickPick';
+import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { findPowerShell } from '../common';
-import * as vscode from 'vscode';
+import { AttachItem } from './attachQuickPick';
+import { AttachItemsProvider } from './attachToProcess';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

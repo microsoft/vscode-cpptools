@@ -124,5 +124,20 @@
 			"request": "attach",
 			"port": 5858
 		},
+		{
+			"name": "MochaTest",
+			"type": "node",
+			"request": "attach",
+			"port": 9229,
+			"continueOnAttach": true,
+			"autoAttachChildProcesses": false,
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"outFiles": [
+				"${workspaceFolder}/**/out/**/*.js",
+				"!**/node_modules/**"
+			]
+		}
 	]
 }

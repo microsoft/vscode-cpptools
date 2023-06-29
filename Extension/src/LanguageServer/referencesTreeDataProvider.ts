@@ -4,9 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferencesModel, TreeNode, NodeType } from './referencesModel';
-import { ReferenceType, getReferenceTagString, getReferenceItemIconPath } from './references';
 import * as nls from 'vscode-nls';
+import { getReferenceItemIconPath, getReferenceTagString, ReferenceType } from './references';
+import { NodeType, ReferencesModel, TreeNode } from './referencesModel';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -22,14 +22,14 @@ export class ReferencesTreeDataProvider implements vscode.TreeDataProvider<TreeN
 
     refresh(): void {
         if (this.referencesModel) {
-            vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
+            void vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
             this._onDidChangeTreeData.fire();
         }
     }
 
     setModel(model: ReferencesModel): void {
         this.referencesModel = model;
-        vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
+        void vscode.commands.executeCommand('setContext', 'refView.isGroupedByFile', this.referencesModel.groupByFile);
         this._onDidChangeTreeData.fire();
     }
 

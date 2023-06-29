@@ -1,4 +1,9 @@
 module.exports = {
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended"
+        //"plugin:@typescript-eslint/strict", // I want to enable this. Lots of little changes will happen.
+    ],
     "env": {
         "browser": true,
         "es6": true,
@@ -7,16 +12,29 @@ module.exports = {
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": "tsconfig.json",
-        "sourceType": "module"
+        "ecmaVersion": 2022,
+        "sourceType": "module",
+        "warnOnUnsupportedTypeScriptVersion": false,
     },
     "plugins": [
         "@typescript-eslint",
-        "@typescript-eslint/tslint",
         "eslint-plugin-jsdoc",
-        "@typescript-eslint/eslint-plugin-tslint",
+        "@typescript-eslint/eslint-plugin",
         "eslint-plugin-import",
+        "eslint-plugin-header"
     ],
     "rules": {
+        "indent": [
+            "warn",
+            4,
+            {
+                "SwitchCase": 1,
+                "ObjectExpression": "first"
+            }
+        ],
+        "@typescript-eslint/indent": [
+            "error", 4
+        ],
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": "error",
         "@typescript-eslint/await-thenable": "error",
@@ -41,6 +59,9 @@ module.exports = {
                 }
             }
         ],
+        "no-case-declarations": "off",
+        "no-useless-escape": "off",
+        "no-floating-decimal": "error",
         "@typescript-eslint/no-for-in-array": "error",
         "@typescript-eslint/no-misused-new": "error",
         "@typescript-eslint/no-misused-promises": "error",
@@ -57,6 +78,11 @@ module.exports = {
         "@typescript-eslint/triple-slash-reference": "error",
         "@typescript-eslint/type-annotation-spacing": "error",
         "@typescript-eslint/unified-signatures": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/method-signature-style": ["error", "method"],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",
         "arrow-body-style": "error",
         "comma-dangle": "error",
         "constructor-super": "error",
@@ -82,7 +108,6 @@ module.exports = {
         "no-irregular-whitespace": "error",
         "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
         "no-new-wrappers": "error",
-        "no-redeclare": "error",
         "no-return-await": "error",
         "no-sequences": "error",
         "no-sparse-arrays": "error",
@@ -103,54 +128,25 @@ module.exports = {
             "never"
         ],
         "spaced-comment": [
-            "error",
-            "always"
+            "off",
+            "always",
+            { "line": { "exceptions": ["/"] } }  // triple slash directives
         ],
         "use-isnan": "error",
         "valid-typeof": "error",
         "yoda": "error",
-        "@typescript-eslint/tslint/config": [
-            "error",
-            {
-                "rules": {
-                    "encoding": true,
-                    "file-header": [
-                        true,
-                        ".*"
-                    ],
-                    "import-spacing": true,
-                    "match-default-export-name": true,
-                    "no-boolean-literal-compare": true,
-                    "no-mergeable-namespace": true,
-                    "no-reference-import": true,
-                    "no-unnecessary-callback-wrapper": true,
-                    "number-literal-format": true,
-                    "one-line": [
-                        true,
-                        "check-catch",
-                        "check-finally",
-                        "check-else",
-                        "check-open-brace",
-                        "check-whitespace"
-                    ],
-                    "prefer-method-signature": true,
-                    "prefer-while": true,
-                    "typedef": [
-                        true,
-                        "variable-declaration",
-                        "call-signature",
-                        "variable-declaration-ignore-function"
-                    ],
-                    "whitespace": [
-                        true,
-                        "check-branch",
-                        "check-operator",
-                        "check-separator",
-                        "check-preblock",
-                        "check-type"
-                    ]
-                }
-            }
-        ]
+        "space-infix-ops": "error",
+        "header/header": [
+            "warn",
+            "block",
+            [
+                " --------------------------------------------------------------------------------------------",
+                " * Copyright (c) Microsoft Corporation. All Rights Reserved.",
+                " * See 'LICENSE' in the project root for license information.",
+                " * ------------------------------------------------------------------------------------------ "
+
+            ],
+        ],
+
     }
 };

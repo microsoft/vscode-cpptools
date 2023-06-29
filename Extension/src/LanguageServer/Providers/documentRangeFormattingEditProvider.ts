@@ -18,7 +18,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
         if (settings.formattingEngine === "disabled") {
             return [];
         }
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.ready;
         const filePath: string = document.uri.fsPath;
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {
@@ -57,5 +57,5 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             const editorConfigSettings: any = getEditorConfigSettings(filePath);
             return configCallBack(editorConfigSettings);
         }
-    };
+    }
 }
