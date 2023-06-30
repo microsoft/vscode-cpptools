@@ -11,7 +11,6 @@ import * as os from 'os';
 import * as path from 'path';
 import { setTimeout } from 'timers';
 import * as vscode from 'vscode';
-import { integer } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { logAndReturn, returns } from '../Utility/Async/returns';
@@ -753,15 +752,15 @@ export class CppProperties {
         const globResult: string[] = [];
         if (paths) {
             for (let res of paths) {
-                let counter: integer = 0;
+                let counter: number = 0;
                 let replacementString: string = '';
-                const lastIndex: integer = res.length - 1;
+                const lastIndex: number = res.length - 1;
                 // Detect and glob all wildcard variations by looking at last character in the path first.
-                for (let i: integer = lastIndex; i >= 0; i--) {
+                for (let i: number = lastIndex; i >= 0; i--) {
                     if (res[i] === '*') {
                         counter++;
                         replacementString = replacementString.replace (/^/, res[i]);
-                    } else if (res[i] === '/' || res[i] === '\\') {
+                    } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
                         replacementString = replacementString.replace (/^/, res[i]);
                         counter++;
                         break;
