@@ -3,12 +3,12 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as os from 'os';
-import { LinuxDistribution } from './linuxDistribution';
-import * as plist from 'plist';
 import * as fs from 'fs';
-import * as logger from './logger';
+import * as os from 'os';
+import * as plist from 'plist';
 import * as nls from 'vscode-nls';
+import { LinuxDistribution } from './linuxDistribution';
+import * as logger from './logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

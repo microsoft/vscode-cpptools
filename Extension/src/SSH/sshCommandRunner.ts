@@ -7,24 +7,20 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { CppSettings } from '../LanguageServer/settings';
+import { ManualPromise } from '../Utility/Async/manual-promise';
+import { ISshHostInfo, ProcessReturnType, splitLines, stripEscapeSequences } from '../common';
+import { isWindows } from '../constants';
+import { getSshChannel } from '../logger';
 import {
-    DifferingHostKeyInteractor,
+    ConnectionFailureInteractor, ContinueOnInteractor, DifferingHostKeyInteractor,
     DuoTwoFacInteractor,
-    FingerprintInteractor,
-    IInteractor,
-    MitmInteractor,
+    FingerprintInteractor, IInteraction, IInteractor, ISystemInteractor, MitmInteractor,
     PassphraseInteractor,
     PasswordInteractor,
     TwoFacInteractor,
-    ContinueOnInteractor,
-    ISystemInteractor,
-    IInteraction,
-    autoFilledPasswordForUsers,
-    ConnectionFailureInteractor
+    autoFilledPasswordForUsers
 } from './commandInteractors';
-import { isWindows, ISshHostInfo, splitLines, stripEscapeSequences, ProcessReturnType } from '../common';
-import { getSshChannel } from '../logger';
-import { CppSettings } from '../LanguageServer/settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -259,230 +255,231 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
     const { systemInteractor, command, interactors, nickname, token } = args;
     let logIsPaused: boolean = false;
     const loggingLevel: string | undefined = new CppSettings().loggingLevel;
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return new Promise(async (resolve, reject) => {
-        let stdout: string = '';
-        let windowListener: vscode.Disposable | undefined;
-        let terminalListener: vscode.Disposable | undefined;
-        let terminal: vscode.Terminal | undefined;
-        let tokenListener: vscode.Disposable;
-        let continueWithoutExiting: boolean = false;
+    const result = new ManualPromise<ProcessReturnType>();
 
-        const clean = () => {
-            if (terminalListener) {
-                terminalListener.dispose();
-                terminalListener = undefined;
-            }
+    let stdout: string = '';
+    let windowListener: vscode.Disposable | undefined;
+    let terminalListener: vscode.Disposable | undefined;
+    let terminal: vscode.Terminal | undefined;
+    let tokenListener: vscode.Disposable;
+    let continueWithoutExiting: boolean = false;
 
-            if (terminal) {
-                terminal.dispose();
-                terminal = undefined;
-            }
+    const clean = () => {
+        if (terminalListener) {
+            terminalListener.dispose();
+            terminalListener = undefined;
+        }
 
-            if (windowListener) {
-                windowListener.dispose();
-                windowListener = undefined;
-            }
+        if (terminal) {
+            terminal.dispose();
+            terminal = undefined;
+        }
 
-            if (tokenListener) {
-                tokenListener.dispose();
-            }
+        if (windowListener) {
+            windowListener.dispose();
+            windowListener = undefined;
+        }
 
-            disposables.forEach(disposable => disposable.dispose());
-        };
+        if (tokenListener) {
+            tokenListener.dispose();
+        }
 
-        const done = (cancel: boolean = false, noClean: boolean = false, exitCode?: number) => {
-            if (!noClean) {
-                clean();
-            }
-            getSshChannel().appendLine(cancel ? localize('ssh.terminal.command.canceled', '"{0}" terminal command canceled.', nickname) : localize('ssh.terminal.command.done', '"{0}" terminal command done.', nickname));
+        disposables.forEach(disposable => disposable.dispose());
+    };
 
-            if (cancel) {
-                if (continueWithoutExiting) {
-                    const warningMessage: string = localize('ssh.continuing.command.canceled', 'Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command);
-                    getSshChannel().appendLine(warningMessage);
-                    vscode.window.showWarningMessage(warningMessage);
-                }
-                return reject(new CanceledError());
-            }
-
-            // When using showLoginTerminal, stdout include the passphrase prompt, etc. Try to get just the command output on the last line.
-            const actualOutput: string | undefined = cancel ? '' : lastNonemptyLine(stdout);
-            resolve({ succeeded: !exitCode, exitCode, output: actualOutput || '' });
-        };
-
-        const failed = (error?: any) => {
+    const done = (cancel: boolean = false, noClean: boolean = false, exitCode?: number) => {
+        if (!noClean) {
             clean();
-            const errorMessage: string = localize('ssh.process.failed', '"{0}" process failed: {1}', nickname, error);
-            getSshChannel().appendLine(errorMessage);
-            vscode.window.showErrorMessage(errorMessage);
-            reject(error);
-        };
+        }
+        getSshChannel().appendLine(cancel ? localize('ssh.terminal.command.canceled', '"{0}" terminal command canceled.', nickname) : localize('ssh.terminal.command.done', '"{0}" terminal command done.', nickname));
 
-        const handleOutputLogging = (data: string): void => {
-            let nextPauseState: boolean | undefined;
-            if (args.marker) {
-                const pauseMarker: string = getPauseLogMarker(args.marker);
-                const pauseIdx: number = data.lastIndexOf(pauseMarker);
-                if (pauseIdx >= 0) {
-                    data = data.substring(0, pauseIdx + pauseMarker.length);
-                    nextPauseState = true;
-                }
-
-                const resumeIdx: number = data.lastIndexOf(getResumeLogMarker(args.marker));
-                if (resumeIdx >= 0) {
-                    data = data.substring(resumeIdx);
-                    nextPauseState = false;
-                }
-            }
-
-            // Log the chunk of data that includes the pause/resume markers,
-            // so unpause first and pause after logging
-            if (!logIsPaused) {
-                logReceivedData(data, nickname);
-            }
-
-            if (typeof nextPauseState === 'boolean') {
-                logIsPaused = nextPauseState;
-            }
-        };
-
-        const handleTerminalOutput = async (dataWrite: vscode.TerminalDataWriteEvent): Promise<void> => {
-            if (loggingLevel !== 'None') {
-                handleOutputLogging(dataWrite.data);
-            }
-
+        if (cancel) {
             if (continueWithoutExiting) {
-                // Skip the interactors after we have continued since I haven't see a use case for now.
+                const warningMessage: string = localize('ssh.continuing.command.canceled', 'Task \'{0}\' is canceled, but the underlying command may not be terminated. Please check manually.', command);
+                getSshChannel().appendLine(warningMessage);
+                void vscode.window.showWarningMessage(warningMessage);
+            }
+            return result.reject(new CanceledError());
+        }
+
+        // When using showLoginTerminal, stdout include the passphrase prompt, etc. Try to get just the command output on the last line.
+        const actualOutput: string | undefined = cancel ? '' : lastNonemptyLine(stdout);
+        result.resolve({ succeeded: !exitCode, exitCode, output: actualOutput || '' });
+    };
+
+    const failed = (error?: any) => {
+        clean();
+        const errorMessage: string = localize('ssh.process.failed', '"{0}" process failed: {1}', nickname, error);
+        getSshChannel().appendLine(errorMessage);
+        void vscode.window.showErrorMessage(errorMessage);
+        result.reject(error);
+    };
+
+    const handleOutputLogging = (data: string): void => {
+        let nextPauseState: boolean | undefined;
+        if (args.marker) {
+            const pauseMarker: string = getPauseLogMarker(args.marker);
+            const pauseIdx: number = data.lastIndexOf(pauseMarker);
+            if (pauseIdx >= 0) {
+                data = data.substring(0, pauseIdx + pauseMarker.length);
+                nextPauseState = true;
+            }
+
+            const resumeIdx: number = data.lastIndexOf(getResumeLogMarker(args.marker));
+            if (resumeIdx >= 0) {
+                data = data.substring(resumeIdx);
+                nextPauseState = false;
+            }
+        }
+
+        // Log the chunk of data that includes the pause/resume markers,
+        // so unpause first and pause after logging
+        if (!logIsPaused) {
+            logReceivedData(data, nickname);
+        }
+
+        if (typeof nextPauseState === 'boolean') {
+            logIsPaused = nextPauseState;
+        }
+    };
+
+    const handleTerminalOutput = async (dataWrite: vscode.TerminalDataWriteEvent): Promise<void> => {
+        if (loggingLevel !== 'None') {
+            handleOutputLogging(dataWrite.data);
+        }
+
+        if (continueWithoutExiting) {
+            // Skip the interactors after we have continued since I haven't see a use case for now.
+            return;
+        }
+
+        stdout += dataWrite.data;
+
+        if (interactors) {
+            for (const interactor of interactors) {
+                try {
+                    const interaction: IInteraction = await interactor.onData(stdout);
+
+                    if (interaction.postAction === 'consume') {
+                        if (args.usedInteractors) {
+                            args.usedInteractors.add(interactor.id);
+                        }
+
+                        stdout = '';
+                    }
+
+                    if (interaction.canceled) {
+                        if (args.usedInteractors) {
+                            args.usedInteractors.add(interactor.id);
+                        }
+
+                        done(true);
+                        return;
+                    }
+
+                    if (interaction.continue) {
+                        if (args.usedInteractors) {
+                            args.usedInteractors.add(interactor.id);
+                        }
+                        continueWithoutExiting = true;
+                        done(false, true);
+                        return;
+                    }
+
+                    if (typeof interaction.response === 'string') {
+                        if (args.usedInteractors) {
+                            args.usedInteractors.add(interactor.id);
+                        }
+
+                        if (terminal) {
+                            terminal.sendText(`${interaction.response}\n`);
+                            const logOutput: string = interaction.isPassword
+                                ? interaction.response.replace(/./g, '*')
+                                : interaction.response;
+                            if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
+                                getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
+                            }
+                        }
+                    }
+                } catch (e) {
+                    failed(e);
+                }
+            }
+        }
+    };
+
+    if (token) {
+        tokenListener = token.onCancellationRequested(() => {
+            done(true);
+        });
+    }
+
+    const terminalIsWindows: boolean = typeof args.terminalIsWindows === 'boolean' ? args.terminalIsWindows : isWindows;
+    try {
+        // the terminal process should not fail, but exit cleanly
+        let shellArgs: string | string[];
+        if (args.sendText) {
+            shellArgs = '';
+        } else {
+            shellArgs = terminalIsWindows ? `/c (${command})\nexit /b %ErrorLevel%` : ['-c', `${command}\nexit $?`];
+        }
+
+        const options: vscode.TerminalOptions = {
+            cwd:
+                args.cwd ||
+                (terminalIsWindows
+                    ? vscode.Uri.file(os.homedir() || 'c:\\')
+                    : vscode.Uri.file(os.homedir() || '/')),
+            name: nickname,
+            shellPath: getShellPath(terminalIsWindows),
+            shellArgs,
+            hideFromUser: true
+        };
+
+        let terminalDataHandlingQueue: Promise<void> = Promise.resolve();
+        terminalListener = systemInteractor.onDidWriteTerminalData(async e => {
+            if (e.terminal !== terminal) {
                 return;
             }
 
-            stdout += dataWrite.data;
+            terminalDataHandlingQueue = terminalDataHandlingQueue.finally(() => void handleTerminalOutput(e));
+        });
+        terminal = systemInteractor.createTerminal(options);
 
-            if (interactors) {
-                for (const interactor of interactors) {
-                    try {
-                        const interaction: IInteraction = await interactor.onData(stdout);
-
-                        if (interaction.postAction === 'consume') {
-                            if (args.usedInteractors) {
-                                args.usedInteractors.add(interactor.id);
-                            }
-
-                            stdout = '';
-                        }
-
-                        if (interaction.canceled) {
-                            if (args.usedInteractors) {
-                                args.usedInteractors.add(interactor.id);
-                            }
-
-                            done(true);
-                            return;
-                        }
-
-                        if (interaction.continue) {
-                            if (args.usedInteractors) {
-                                args.usedInteractors.add(interactor.id);
-                            }
-                            continueWithoutExiting = true;
-                            done(false, true);
-                            return;
-                        }
-
-                        if (typeof interaction.response === 'string') {
-                            if (args.usedInteractors) {
-                                args.usedInteractors.add(interactor.id);
-                            }
-
-                            if (terminal) {
-                                terminal.sendText(`${interaction.response}\n`);
-                                const logOutput: string = interaction.isPassword
-                                    ? interaction.response.replace(/./g, '*')
-                                    : interaction.response;
-                                if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
-                                    getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        failed(e);
+        if (args.revealTerminal) {
+            disposables.push(
+                args.revealTerminal(() => {
+                    if (terminal) {
+                        terminal.show();
                     }
-                }
-            }
-        };
-
-        if (token) {
-            tokenListener = token.onCancellationRequested(() => {
-                done(true);
-            });
+                })
+            );
         }
 
-        const terminalIsWindows: boolean = typeof args.terminalIsWindows === 'boolean' ? args.terminalIsWindows : isWindows();
-        try {
-            // the terminal process should not fail, but exit cleanly
-            let shellArgs: string | string[];
-            if (args.sendText) {
-                shellArgs = '';
-            } else {
-                shellArgs = terminalIsWindows ? `/c (${command})\nexit /b %ErrorLevel%` : ['-c', `${command}\nexit $?`];
+        if (args.sendText) {
+            const sendText: string = terminalIsWindows ? `(${args.sendText})\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
+
+            terminal.sendText(sendText);
+            if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
+                getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
             }
-
-            const options: vscode.TerminalOptions = {
-                cwd:
-                    args.cwd ||
-                    (terminalIsWindows
-                        ? vscode.Uri.file(os.homedir() || 'c:\\')
-                        : vscode.Uri.file(os.homedir() || '/')),
-                name: nickname,
-                shellPath: getShellPath(terminalIsWindows),
-                shellArgs,
-                hideFromUser: true
-            };
-
-            let terminalDataHandlingQueue: Promise<void> = Promise.resolve();
-            terminalListener = systemInteractor.onDidWriteTerminalData(async e => {
-                if (e.terminal !== terminal) {
-                    return;
-                }
-
-                terminalDataHandlingQueue = terminalDataHandlingQueue.finally(() => void handleTerminalOutput(e));
-            });
-            terminal = systemInteractor.createTerminal(options);
-
-            if (args.revealTerminal) {
-                disposables.push(
-                    args.revealTerminal(() => {
-                        if (terminal) {
-                            terminal.show();
-                        }
-                    })
-                );
-            }
-
-            if (args.sendText) {
-                const sendText: string = terminalIsWindows ? `(${args.sendText})\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
-
-                terminal.sendText(sendText);
-                if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
-                    getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
-                }
-            }
-
-            if (args.showLoginTerminal) {
-                terminal.show();
-            }
-
-            windowListener = systemInteractor.onDidCloseTerminal(t => {
-                if (t === terminal) {
-                    terminal = undefined; // Is already disposed
-                    done(false, false, t.exitStatus?.code);
-                }
-            });
-        } catch (error) {
-            failed(error);
         }
-    });
+
+        if (args.showLoginTerminal) {
+            terminal.show();
+        }
+
+        windowListener = systemInteractor.onDidCloseTerminal(t => {
+            if (t === terminal) {
+                terminal = undefined; // Is already disposed
+                done(false, false, t.exitStatus?.code);
+            }
+        });
+    } catch (error) {
+        failed(error);
+    }
+
+    return result;
 }
 
 function getShellPath(_isWindows: boolean): string {
@@ -518,7 +515,7 @@ function logReceivedData(data: string, nickname: string): void {
 function lastNonemptyLine(str: string): string | undefined {
     const lines: string[] = splitLines(str);
 
-    if (isWindows()) {
+    if (isWindows) {
         let outputContainingPipeError: string = '';
         for (let i: number = lines.length - 1; i >= 0; i--) {
             const strippedLine: string = stripEscapeSequences(lines[i]);
@@ -526,7 +523,7 @@ function lastNonemptyLine(str: string): string | undefined {
                 outputContainingPipeError = strippedLine;
                 continue;
             }
-            if (!!strippedLine) {
+            if (strippedLine) {
                 return strippedLine;
             }
         }

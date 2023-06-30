@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as os from 'os';
-import * as nls from 'vscode-nls';
 import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
 import { configPrefix } from '../LanguageServer/extension';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();

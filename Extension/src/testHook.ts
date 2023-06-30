@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { CppToolsTestHook, Status, IntelliSenseStatus } from 'vscode-cpptools/out/testApi';
 import * as vscode from 'vscode';
+import { CppToolsTestHook, IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
 
 export class TestHook implements CppToolsTestHook {
     private intelliSenseStatusChangedEvent: vscode.EventEmitter<IntelliSenseStatus> = new vscode.EventEmitter<IntelliSenseStatus>();
