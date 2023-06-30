@@ -23,6 +23,7 @@ import * as which from 'which';
 import { getOutputChannelLogger } from '../logger';
 import { DefaultClient } from './client';
 import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
+import { integer } from 'vscode-languageclient';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -749,24 +750,25 @@ export class CppProperties {
         }
 
         const globResult: string[] = [];
-        let recursiveDoubleStar: boolean = false;
-        let recursiveForwardSlash: boolean = false;
-        let recursiveForwardSlashSingleStar: boolean = false;
-        let recursiveDoubleBackwardSlashDoubleStar: boolean = false;
         if (paths) {
             for (let res of paths) {
-                recursiveDoubleStar = res.endsWith('**') && res.endsWith('\\**');
-                recursiveForwardSlash = res.endsWith('/');
-                recursiveForwardSlashSingleStar = res.endsWith('/*');
-                recursiveDoubleBackwardSlashDoubleStar = res.endsWith('\\**');
-                // fastGlob will expand the ending double wildcard. temporary strip them before expanding
-                if (recursiveDoubleStar || recursiveForwardSlashSingleStar) {
-                    res = res.slice(0, res.length - 2);
-                } else if (recursiveForwardSlash) {
-                    res = res.slice(0, res.length - 1);
-                } else if (recursiveDoubleBackwardSlashDoubleStar) {
-                    res = res.slice(0, res.length - 4);
+                let counter: integer = 0;
+                let replacementString: string = '';
+                const lastIndex: integer = res.length - 1;
+                // Detect and glob all wildcard variations by looking at last character in the path first.
+                for (let i: integer = lastIndex; i >= 0; i--) {
+                    if (res[i] === '*') {
+                        counter++;
+                        replacementString = replacementString.replace (/^/, res[i]);
+                    } else if (res[i] === '/' || res[i] === '\\') {
+                        replacementString = replacementString.replace (/^/, res[i]);
+                        counter++;
+                        break;
+                    } else {
+                        break;
+                    }
                 }
+                res = res.slice(0, res.length - counter);
 
                 // fastGlob can't deal with backslash-separated path => remove them
                 const normalized: string = res.replace(/\\/g, '/');
@@ -775,15 +777,7 @@ export class CppProperties {
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
 
-                if (recursiveForwardSlash) {
-                    globResult.push(...matches.map(s => recursiveForwardSlash ? s + '/' : s));
-                } else if (recursiveDoubleBackwardSlashDoubleStar) {
-                    globResult.push(...matches.map(s => recursiveDoubleBackwardSlashDoubleStar ? s + '\\**' : s));
-                } else if (recursiveForwardSlashSingleStar) {
-                    globResult.push(...matches.map(s => recursiveForwardSlashSingleStar ? s + '/*' : s));
-                } else {
-                    globResult.push(...matches.map(s => recursiveDoubleStar ? s + '**' : s));
-                }
+                globResult.push(...matches.map(s => s + replacementString));
             }
         }
         return globResult;
