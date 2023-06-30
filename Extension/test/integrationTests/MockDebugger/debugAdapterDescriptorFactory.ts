@@ -2,8 +2,8 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as vscode from "vscode";
 import * as path from 'path';
+import * as vscode from "vscode";
 
 // import * as util from '../src/common' <- DO NOT USE. Also do not use anything with relative paths, it will break during replacing in test/integrationTests/debug/integration.test.ts
 
@@ -24,7 +24,7 @@ export class CppdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterDes
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         console.warn("This should only appear in a test scenario.");
 
         return new vscode.DebugAdapterExecutable('node', [path.join(this.context.extensionPath, './out/test/integrationTests/MockDebugger/mockDebug.js')]);
@@ -38,7 +38,7 @@ export class CppvsdbgDebugAdapterDescriptorFactory extends AbstractDebugAdapterD
         super(context);
     }
 
-    createDebugAdapterDescriptor(session: vscode.DebugSession, executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
+    createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable?: vscode.DebugAdapterExecutable): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
         console.warn("This should only appear in a test scenario.");
 
         return new vscode.DebugAdapterExecutable('node', [path.join(this.context.extensionPath, './out/test/integrationTests/MockDebugger/mockDebug.js')]);

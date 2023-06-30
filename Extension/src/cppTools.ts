@@ -6,12 +6,12 @@
 
 import { CustomConfigurationProvider, Version } from 'vscode-cpptools';
 import { CppToolsTestApi, CppToolsTestHook } from 'vscode-cpptools/out/testApi';
-import { CustomConfigurationProvider1, getCustomConfigProviders, CustomConfigurationProviderCollection } from './LanguageServer/customProviders';
-import { getOutputChannel } from './logger';
-import * as LanguageServer from './LanguageServer/extension';
-import * as test from './testHook';
 import * as nls from 'vscode-nls';
+import { CustomConfigurationProvider1, CustomConfigurationProviderCollection, getCustomConfigProviders } from './LanguageServer/customProviders';
+import * as LanguageServer from './LanguageServer/extension';
 import { CppSettings } from './LanguageServer/settings';
+import { getOutputChannel } from './logger';
+import * as test from './testHook';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -81,8 +81,8 @@ export class CppTools implements CppToolsTestApi {
             this.removeNotifyReadyTimer(p);
             p.isReady = true;
             LanguageServer.getClients().forEach(client => {
-                client.updateCustomBrowseConfiguration(p);
-                client.updateCustomConfigurations(p);
+                void client.updateCustomBrowseConfiguration(p);
+                void client.updateCustomConfigurations(p);
             });
         } else if (this.failedRegistrations.find(p => p === provider)) {
             console.warn("provider not successfully registered; 'notifyReady' ignored");

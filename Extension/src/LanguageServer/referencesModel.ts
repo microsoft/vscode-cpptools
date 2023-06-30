@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 import * as vscode from 'vscode';
-import { ReferenceType, ReferenceInfo, ReferencesResult } from './references';
+import { ReferenceInfo, ReferencesResult, ReferenceType } from './references';
 
 export class ReferencesModel {
     readonly nodes: TreeNode[] = []; // Raw flat list of references

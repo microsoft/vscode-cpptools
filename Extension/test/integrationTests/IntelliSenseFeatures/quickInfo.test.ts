@@ -2,9 +2,9 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as os from 'os';
+import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
 import * as testHelpers from '../testHelpers';
@@ -12,7 +12,7 @@ import * as testHelpers from '../testHelpers';
 suite("[Quick info test]", function(): void {
     let cpptools: apit.CppToolsTestApi;
     const disposables: vscode.Disposable[] = [];
-    const filePath: string = vscode.workspace.workspaceFolders[1].uri.fsPath + "/quickInfo.cpp";
+    const filePath: string = `${vscode.workspace.workspaceFolders?.[1]?.uri.fsPath}/quickInfo.cpp`;
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     let platform: string = "";
 

@@ -5,9 +5,9 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { CustomConfigurationProvider, Version, SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
-import { CppSettings } from './settings';
+import { CustomConfigurationProvider, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import * as ext from './extension';
+import { CppSettings } from './settings';
 
 /**
  * An interface that is guaranteed to be backward compatible with version 0

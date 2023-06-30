@@ -5,8 +5,8 @@
 
 import * as assert from 'assert';
 import * as os from 'os';
+import { CimProcessParser, Process, PsProcessParser, WmicProcessParser } from '../../src/Debugger/nativeAttach';
 import { LinuxDistribution } from '../../src/linuxDistribution';
-import { Process, WmicProcessParser, PsProcessParser, CimProcessParser } from '../../src/Debugger/nativeAttach';
 
 suite("LinuxDistro Tests", () => {
     test("Parse valid os-release file", () => {

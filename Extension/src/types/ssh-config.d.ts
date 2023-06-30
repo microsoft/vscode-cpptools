@@ -77,5 +77,5 @@ declare module 'ssh-config' {
 
     export function parse(raw: string): Configuration;
 
-    export function stringify(directive: ReadonlyArray<HostConfigurationDirective>): string;
+    export function stringify(directive: readonly HostConfigurationDirective[]): string;
 }

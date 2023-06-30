@@ -3,10 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, openFileVersions } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
-import { CppSettings } from '../settings';
+import { DefaultClient, openFileVersions } from '../client';
 import { processDelayedDidOpen } from '../extension';
+import { CppSettings } from '../settings';
 
 interface GetInlayHintsParams {
     uri: string;
@@ -55,7 +55,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     public async provideInlayHints(document: vscode.TextDocument, range: vscode.Range,
         token: vscode.CancellationToken): Promise<vscode.InlayHint[] | undefined> {
-        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
+        await this.client.ready;
+        await processDelayedDidOpen(document);
+
         const uriString: string = document.uri.toString();
 
         // Get results from cache if available.
@@ -103,7 +105,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.position.line, hint.position.character +
-                        (showOnLeft ? 0 : hint.identifierLength)),
+                    (showOnLeft ? 0 : hint.identifierLength)),
                 (showOnLeft ? hint.label : ": " + hint.label),
                 vscode.InlayHintKind.Type);
             inlayHint.paddingRight = showOnLeft || hint.rightPadding;
@@ -145,11 +147,11 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.position.line, hint.position.character),
-                refOperatorString +  paramHintLabel + ":",
+                refOperatorString + paramHintLabel + ":",
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
             resolvedHints.push(inlayHint);
-        };
+        }
         return resolvedHints;
     }
 

@@ -2,9 +2,9 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as telemetry from '../telemetry';
-import * as util from '../common';
 import * as vscode from 'vscode';
+import * as util from '../common';
+import * as telemetry from '../telemetry';
 
 interface TimeStampSequence {
     firstFile?: number; // when the extension is activated. Defined only for "cold" start cases.
