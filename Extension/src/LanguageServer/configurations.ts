@@ -11,10 +11,12 @@ import * as os from 'os';
 import * as path from 'path';
 import { setTimeout } from 'timers';
 import * as vscode from 'vscode';
+import { integer } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
+import { isWindows } from '../constants';
 import { getOutputChannelLogger } from '../logger';
 import * as telemetry from '../telemetry';
 import { DefaultClient } from './client';
@@ -24,12 +26,6 @@ import { CppSettings, OtherSettings } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
 import escapeStringRegExp = require('escape-string-regexp');
-import * as nls from 'vscode-nls';
-import { setTimeout } from 'timers';
-import * as which from 'which';
-import { getOutputChannelLogger } from '../logger';
-import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
-import { integer } from 'vscode-languageclient';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -776,8 +772,7 @@ export class CppProperties {
                 res = res.slice(0, res.length - counter);
                 let normalized: string = '';
                 let cwd: string = '';
-                // fastGlob can't deal with backslash-separated path => remove them
-                if (util.isWindows()){
+                if (isWindows) {
                     normalized = res.replace(/\\/g, '/');
                     cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
                 }
