@@ -750,7 +750,6 @@ export class CppProperties {
             return result;
         }
 
-        const globResult: string[] = [];
         for (let res of paths) {
             let counter: number = 0;
             let slashFound: boolean = false;
@@ -782,15 +781,15 @@ export class CppProperties {
             const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                 fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
 
-            globResult.push(...matches.map(s => s + suffix));
-            globResult.forEach(entry => {
+            result.push(...matches.map(s => s + suffix));
+            result.forEach(entry => {
                 const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
-                globResult.push(...entries);
+                result.push(...entries);
             });
             return result;
 
         }
-        return globResult;
+        return result;
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
