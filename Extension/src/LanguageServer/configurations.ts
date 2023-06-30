@@ -753,22 +753,25 @@ export class CppProperties {
         if (paths) {
             for (let res of paths) {
                 let counter: number = 0;
-                let replacementString: string = '';
+                let slashFound: boolean = false;
                 const lastIndex: number = res.length - 1;
                 // Detect and glob all wildcard variations by looking at last character in the path first.
                 for (let i: number = lastIndex; i >= 0; i--) {
                     if (res[i] === '*') {
                         counter++;
-                        replacementString = replacementString.replace (/^/, res[i]);
                     } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
-                        replacementString = replacementString.replace (/^/, res[i]);
                         counter++;
+                        slashFound = true;
                         break;
                     } else {
                         break;
                     }
                 }
-                res = res.slice(0, res.length - counter);
+                let suffix: string = '';
+                if (slashFound) {
+                    suffix = res.slice(res.length - counter);
+                    res = res.slice(0, res.length - counter);
+                }
                 let normalized: string = '';
                 let cwd: string = '';
                 if (isWindows) {
@@ -777,9 +780,9 @@ export class CppProperties {
                 }
                 // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
+                fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
 
-                globResult.push(...matches.map(s => s + replacementString));
+                globResult.push(...matches.map(s => s + suffix));
             }
         }
         return globResult;
