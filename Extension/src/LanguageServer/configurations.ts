@@ -783,6 +783,12 @@ export class CppProperties {
                 fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
 
             globResult.push(...matches.map(s => s + suffix));
+            globResult.forEach(entry => {
+                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
+                globResult.push(...entries);
+            });
+            return result;
+
         }
         return globResult;
     }
