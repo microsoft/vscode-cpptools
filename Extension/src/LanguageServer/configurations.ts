@@ -769,10 +769,13 @@ export class CppProperties {
                     }
                 }
                 res = res.slice(0, res.length - counter);
-
+                let normalized: string = '';
+                let cwd: string = '';
                 // fastGlob can't deal with backslash-separated path => remove them
-                const normalized: string = res.replace(/\\/g, '/');
-                const cwd: string = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+                if (util.isWindows()){
+                    normalized = res.replace(/\\/g, '/');
+                    cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+                }
                 // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
