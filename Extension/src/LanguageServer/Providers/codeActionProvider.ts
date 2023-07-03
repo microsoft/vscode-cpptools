@@ -8,7 +8,7 @@ import { DefaultClient } from '../client';
 import {
     CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions
 } from '../codeAnalysis';
-import { getLocalizedString, LocalizeStringParams } from '../localization';
+import { LocalizeStringParams, getLocalizedString } from '../localization';
 import { CppSettings } from '../settings';
 import { makeVscodeRange } from '../utils';
 
@@ -84,6 +84,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let title: string = getLocalizedString(command.localizeStringParams);
             let wsEdit: vscode.WorkspaceEdit | undefined;
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
+            let disabledReason: string | undefined;
             if (command.edit) {
                 // Inline macro feature.
                 codeActionKind = vscode.CodeActionKind.RefactorInline;
@@ -194,6 +195,12 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 } else {
                     return;
                 }
+            } else if (command.command === "C_Cpp.ExpandFunction" ||
+                command.command === "C_Cpp.ExpandFreeFunction" || command.command === "C_Cpp.ExpandFreeFunction") {
+                if (command.arguments && command.arguments.length === 1) {
+                    disabledReason = getLocalizedString(command.arguments[0]);
+                }
+                codeActionKind = vscode.CodeActionKind.RefactorExtract;
             }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,
@@ -203,7 +210,8 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     arguments: command.arguments
                 },
                 edit: wsEdit,
-                kind: codeActionKind
+                kind: codeActionKind,
+                disabled: disabledReason ? { reason: disabledReason } : undefined
             };
             resultCodeActions.push(vscodeCodeAction);
         });
