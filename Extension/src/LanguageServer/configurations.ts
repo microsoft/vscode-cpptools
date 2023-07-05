@@ -758,7 +758,7 @@ export class CppProperties {
             for (let i: number = lastIndex; i >= 0; i--) {
                 if (res[i] === '*') {
                     counter++;
-                } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
+                } else if (res[i] === '/' || res[i] === '\\' && isWindows) {
                     counter++;
                     slashFound = true;
                     break;
