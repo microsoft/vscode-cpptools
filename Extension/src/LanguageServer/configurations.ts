@@ -742,55 +742,53 @@ export class CppProperties {
             return result;
         }
         paths = this.resolveDefaults(paths, defaultValue);
-        if (!glob) {
-            paths.forEach(entry => {
-                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
+        paths.forEach(entry => {
+            const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
+            if (!entry.includes('*')){
                 result.push(...entries);
-            });
-            return result;
-        }
-
-        const globResult: string[] = [];
-        for (let res of paths) {
-            let counter: number = 0;
-            let slashFound: boolean = false;
-            const lastIndex: number = res.length - 1;
-            // Detect and glob all wildcard variations by looking at last character in the path first.
-            for (let i: number = lastIndex; i >= 0; i--) {
-                if (res[i] === '*') {
-                    counter++;
-                } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
-                    counter++;
-                    slashFound = true;
-                    break;
-                } else {
-                    break;
+            }
+        });
+        if (glob) {
+            for (let res of paths) {
+                let counter: number = 0;
+                let slashFound: boolean = false;
+                const lastIndex: number = res.length - 1;
+                let isGlobPattern: boolean = false;
+                if (res.includes('*')){
+                    isGlobPattern = true;
+                }
+                // Detect and glob all wildcard variations by looking at last character in the path first.
+                for (let i: number = lastIndex; i >= 0; i--) {
+                    if (res[i] === '*') {
+                        counter++;
+                    } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
+                        counter++;
+                        slashFound = true;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                let suffix: string = '';
+                if (slashFound) {
+                    suffix = res.slice(res.length - counter);
+                    res = res.slice(0, res.length - counter);
+                }
+                let normalized: string = '';
+                let cwd: string = '';
+                if (isWindows) {
+                    normalized = res.replace(/\\/g, '/');
+                    cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+                }
+                // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
+                const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
+                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
+                if (isGlobPattern){
+                    result.push(...matches.map(s => s + suffix));
                 }
             }
-            let suffix: string = '';
-            if (slashFound) {
-                suffix = res.slice(res.length - counter);
-                res = res.slice(0, res.length - counter);
-            }
-            let normalized: string = '';
-            let cwd: string = '';
-            if (isWindows) {
-                normalized = res.replace(/\\/g, '/');
-                cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
-            }
-            // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
-            const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
-
-            globResult.push(...matches.map(s => s + suffix));
-            globResult.forEach(entry => {
-                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
-                globResult.push(...entries);
-            });
-            return result;
-
         }
-        return globResult;
+        return result;
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
