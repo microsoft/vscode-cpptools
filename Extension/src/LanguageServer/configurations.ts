@@ -737,20 +737,20 @@ export class CppProperties {
     }
 
     private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob = false): string[] {
-        const result: string[] = [];
+        const resolvedVariables: string[] = [];
         if (paths === undefined) {
-            return result;
+            return resolvedVariables;
         }
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
             const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
-            result.push(...entries);
+            resolvedVariables.push(...entries);
         });
         if (!glob) {
-            return result;
+            return resolvedVariables;
         }
-        const result2: string[] = [];
-        for (let res of result) {
+        const resolvedGlob: string[] = [];
+        for (let res of resolvedVariables) {
             let counter: number = 0;
             let slashFound: boolean = false;
             const lastIndex: number = res.length - 1;
@@ -782,12 +782,12 @@ export class CppProperties {
             // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
-                result2.push(...matches.map(s => s + suffix));
+                resolvedGlob.push(...matches.map(s => s + suffix));
             } else {
-                result2.push(normalized + suffix);
+                resolvedGlob.push(normalized + suffix);
             }
         }
-        return result2;
+        return resolvedGlob;
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
