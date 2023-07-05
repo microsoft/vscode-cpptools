@@ -784,7 +784,7 @@ export class CppProperties {
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
                 result2.push(...matches.map(s => s + suffix));
             } else {
-                result2.push(res);
+                result2.push(normalized + suffix);
             }
         }
         return result2;
