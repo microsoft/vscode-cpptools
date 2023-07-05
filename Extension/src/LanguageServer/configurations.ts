@@ -744,51 +744,50 @@ export class CppProperties {
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
             const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
-            if (!entry.includes('*')){
-                result.push(...entries);
-            }
+            result.push(...entries);
         });
-        if (glob) {
-            for (let res of paths) {
-                let counter: number = 0;
-                let slashFound: boolean = false;
-                const lastIndex: number = res.length - 1;
-                let isGlobPattern: boolean = false;
-                if (res.includes('*')){
-                    isGlobPattern = true;
+        if (!glob) {
+            return result;
+        }
+        const result2: string[] = [];
+        for (let res of result) {
+            let counter: number = 0;
+            let slashFound: boolean = false;
+            const lastIndex: number = res.length - 1;
+            // Detect and glob all wildcard variations by looking at last character in the path first.
+            for (let i: number = lastIndex; i >= 0; i--) {
+                if (res[i] === '*') {
+                    counter++;
+                } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
+                    counter++;
+                    slashFound = true;
+                    break;
+                } else {
+                    break;
                 }
-                // Detect and glob all wildcard variations by looking at last character in the path first.
-                for (let i: number = lastIndex; i >= 0; i--) {
-                    if (res[i] === '*') {
-                        counter++;
-                    } else if (res[i] === '/' || (res[i] === '\\' && isWindows)) {
-                        counter++;
-                        slashFound = true;
-                        break;
-                    } else {
-                        break;
-                    }
-                }
-                let suffix: string = '';
-                if (slashFound) {
-                    suffix = res.slice(res.length - counter);
-                    res = res.slice(0, res.length - counter);
-                }
-                let normalized: string = '';
-                let cwd: string = '';
-                if (isWindows) {
-                    normalized = res.replace(/\\/g, '/');
-                    cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
-                }
-                // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
+            }
+            let suffix: string = '';
+            if (slashFound) {
+                suffix = res.slice(res.length - counter);
+                res = res.slice(0, res.length - counter);
+            }
+            let normalized: string = '';
+            let cwd: string = '';
+            if (isWindows) {
+                normalized = res.replace(/\\/g, '/');
+                cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+            }
+            const isGlobPattern: boolean = res.includes('*');
+            if (isGlobPattern) {
+            // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
-                if (isGlobPattern){
-                    result.push(...matches.map(s => s + suffix));
-                }
+                result2.push(...matches.map(s => s + suffix));
+            } else {
+                result2.push(res);
             }
         }
-        return result;
+        return result2;
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
