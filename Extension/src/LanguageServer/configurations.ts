@@ -736,7 +736,7 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob = false): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob: boolean = false): string[] {
         const resolvedVariables: string[] = [];
         if (paths === undefined) {
             return resolvedVariables;
@@ -754,7 +754,7 @@ export class CppProperties {
             let counter: number = 0;
             let slashFound: boolean = false;
             const lastIndex: number = res.length - 1;
-            // Detect and glob all wildcard variations by looking at last character in the path first.
+            // Detect all wildcard variations by looking at last character in the path first.
             for (let i: number = lastIndex; i >= 0; i--) {
                 if (res[i] === '*') {
                     counter++;
@@ -771,15 +771,15 @@ export class CppProperties {
                 suffix = res.slice(res.length - counter);
                 res = res.slice(0, res.length - counter);
             }
-            let normalized: string = '';
-            let cwd: string = '';
+            let normalized = res;
+            let cwd: string = this.rootUri?.fsPath || '';
             if (isWindows) {
                 normalized = res.replace(/\\/g, '/');
-                cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
+                cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') ?? '';
             }
-            const isGlobPattern: boolean = res.includes('*');
+            const isGlobPattern: boolean = normalized.includes('*');
             if (isGlobPattern) {
-            // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
+                // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
