@@ -775,7 +775,7 @@ export class CppProperties {
             let cwd: string = this.rootUri?.fsPath || '';
             if (isWindows) {
                 normalized = res.replace(/\\/g, '/');
-                cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') ?? '';
+                cwd = cwd.replace(/\\/g, '/');
             }
             const isGlobPattern: boolean = normalized.includes('*');
             if (isGlobPattern) {
