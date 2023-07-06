@@ -743,7 +743,7 @@ export class CppProperties {
         }
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
-            const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
+            const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
             resolvedVariables.push(...entries);
         });
         if (!glob) {
@@ -758,7 +758,7 @@ export class CppProperties {
             for (let i: number = lastIndex; i >= 0; i--) {
                 if (res[i] === '*') {
                     counter++;
-                } else if (res[i] === '/' || res[i] === '\\' && isWindows) {
+                } else if (res[i] === '/' || (isWindows && res[i] === '\\')) {
                     counter++;
                     slashFound = true;
                     break;
@@ -772,14 +772,14 @@ export class CppProperties {
                 res = res.slice(0, res.length - counter);
             }
             let normalized = res;
-            let cwd: string = this.rootUri?.fsPath || '';
+            let cwd: string = this.rootUri?.fsPath ?? '';
             if (isWindows) {
                 normalized = res.replace(/\\/g, '/');
-                cwd = this.rootUri?.fsPath?.replace(/\\/g, '/') ?? '';
+                cwd = cwd.replace(/\\/g, '/');
             }
             const isGlobPattern: boolean = normalized.includes('*');
             if (isGlobPattern) {
-                // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only
+                // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only.
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
