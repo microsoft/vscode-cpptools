@@ -15,6 +15,7 @@ import * as nls from 'vscode-nls';
 import * as which from 'which';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
+import { isWindows } from '../constants';
 import { getOutputChannelLogger } from '../logger';
 import * as telemetry from '../telemetry';
 import { DefaultClient } from './client';
@@ -735,35 +736,58 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob = false): string[] {
-        const result: string[] = [];
-        if (paths) {
-            paths = this.resolveDefaults(paths, defaultValue);
-            paths.forEach(entry => {
-                const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => this.resolvePath(e, false)).filter(e => e);
-                result.push(...entries);
-            });
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob: boolean = false): string[] {
+        const resolvedVariables: string[] = [];
+        if (paths === undefined) {
+            return resolvedVariables;
         }
+        paths = this.resolveDefaults(paths, defaultValue);
+        paths.forEach(entry => {
+            const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+            resolvedVariables.push(...entries);
+        });
         if (!glob) {
-            return result;
+            return resolvedVariables;
         }
-
-        const globResult: string[] = [];
-        for (let res of result) {
-            // fastGlob will expand the ending double wildcard. temporary strip them before expanding
-            const recursive: boolean = res.endsWith('**');
-            if (recursive) {
-                res = res.slice(0, res.length - 2);
+        const resolvedGlob: string[] = [];
+        for (let res of resolvedVariables) {
+            let counter: number = 0;
+            let slashFound: boolean = false;
+            const lastIndex: number = res.length - 1;
+            // Detect all wildcard variations by looking at last character in the path first.
+            for (let i: number = lastIndex; i >= 0; i--) {
+                if (res[i] === '*') {
+                    counter++;
+                } else if (res[i] === '/' || (isWindows && res[i] === '\\')) {
+                    counter++;
+                    slashFound = true;
+                    break;
+                } else {
+                    break;
+                }
             }
-            // fastGlob can't deal with backslash-separated path => remove them
-            const normalized: string = res.replace(/\\/g, '/');
-            const cwd: string = this.rootUri?.fsPath?.replace(/\\/g, '/') || '';
-            // fastGlob silently strip non-found paths. limit that behavior to dynamic paths only
-            const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                fastGlob.sync(normalized, { onlyDirectories: true, cwd}) : [res];
-            globResult.push(...matches.map(s => recursive ? s + '**' : s));
+            let suffix: string = '';
+            if (slashFound) {
+                suffix = res.slice(res.length - counter);
+                res = res.slice(0, res.length - counter);
+            }
+            let normalized = res;
+            let cwd: string = this.rootUri?.fsPath ?? '';
+            if (isWindows) {
+                normalized = res.replace(/\\/g, '/');
+                cwd = cwd.replace(/\\/g, '/');
+            }
+            const isGlobPattern: boolean = normalized.includes('*');
+            if (isGlobPattern) {
+                // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only.
+                const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
+                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
+                resolvedGlob.push(...matches.map(s => s + suffix));
+            } else {
+                resolvedGlob.push(normalized + suffix);
+            }
         }
-        return globResult;
+        return resolvedGlob;
     }
 
     private updateConfigurationString(property: string | undefined | null, defaultValue: string | undefined | null, env: Environment, acceptBlank?: boolean): string | undefined {
