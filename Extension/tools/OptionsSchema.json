@@ -52,6 +52,10 @@
             "description": "%c_cpp.debuggers.pipeTransport.quoteArgs.description%",
             "default": true
           }
+        },
+        "customRemoteProcessCommand": {
+          "type": "string",
+          "description": "%c_cpp.debuggers.pipeTransport.customRemoteProcessCommand.description%"
         }
       }
     },

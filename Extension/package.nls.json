@@ -271,6 +271,7 @@
     "c_cpp.debuggers.pipeTransport.pipeArgs.description": "Command line arguments passed to the pipe program to configure the connection.",
     "c_cpp.debuggers.pipeTransport.pipeEnv.description": "Environment variables passed to the pipe program.",
     "c_cpp.debuggers.pipeTransport.quoteArgs.description": "If the pipeProgram's individual arguments contain characters (such as spaces or tabs), should it be quoted? If 'false', the debugger command will no longer be automatically quoted. Default is 'true'.",
+    "c_cpp.debuggers.pipeTransport.customRemoteProcessCommand.description": "If you have *nix system that doesn't support default command for getting processes list, you can override it here. For example, you can use `ps -A` or any other custom command or script that will be properly parsed by this extension.",
     "c_cpp.debuggers.logging.description": "Optional flags to determine what types of messages should be logged to the Debug Console.",
     "c_cpp.debuggers.logging.exceptions.description": "Optional flag to determine whether exception messages should be logged to the Debug Console. Defaults to true.",
     "c_cpp.debuggers.logging.moduleLoad.description": "Optional flag to determine whether module load events should be logged to the Debug Console. Defaults to true.",
