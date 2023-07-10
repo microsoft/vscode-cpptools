@@ -457,6 +457,17 @@
             ],
             "scope": "resource"
           },
+          "C_Cpp.markdownCommentFormatting": {
+            "type": "string",
+            "enum": [
+              "subsetEnabled",
+              "enabled",
+              "disabled"
+            ],
+            "default": "subsetEnabled",
+            "description": "%c_cpp.configuration.markdownCommentFormatting.description%",
+            "scope": "resource"
+          },
           "C_Cpp.hover": {
             "type": "string",
             "enum": [
