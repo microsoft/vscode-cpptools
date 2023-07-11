@@ -24,7 +24,6 @@ import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 
 import { fail } from 'assert';
 import * as fs from 'fs';
-//import { minimatch } from "minimatch";
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
