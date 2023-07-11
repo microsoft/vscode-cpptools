@@ -6021,7 +6021,7 @@
   "devDependencies": {
     "@octokit/rest": "^18.12.0",
     "@types/glob": "^7.1.6",
-    "@types/minimatch": "^5.1.2",
+    "@types/minimatch": "^3.0.5",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.11.9",
@@ -6071,7 +6071,7 @@
     "editorconfig": "^0.15.3",
     "escape-string-regexp": "^2.0.0",
     "glob": "^7.1.6",
-    "minimatch": "^9.0.3",
+    "minimatch": "^3.0.5",
     "mkdirp": "^0.5.5",
     "node-loader": "^2.0.0",
     "plist": "^3.0.5",
