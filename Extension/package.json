@@ -457,7 +457,7 @@
             ],
             "scope": "resource"
           },
-          "C_Cpp.markdownCommentFormatting": {
+          "C_Cpp.commentFormatting": {
             "type": "string",
             "enum": [
               "subsetEnabled",
@@ -465,7 +465,7 @@
               "disabled"
             ],
             "default": "subsetEnabled",
-            "description": "%c_cpp.configuration.markdownCommentFormatting.description%",
+            "description": "%c_cpp.configuration.commentFormatting.description%",
             "scope": "resource"
           },
           "C_Cpp.hover": {

@@ -63,7 +63,7 @@ export interface WorkspaceFolderSettingsParams {
     clangTidyChecksEnabled: string[] | undefined;
     clangTidyChecksDisabled: string[] | undefined;
     hover: string | undefined;
-    markdownCommentFormatting: string | undefined;
+    commentFormatting: string | undefined;
     vcFormatIndentBraces: boolean | undefined;
     vcFormatIndentMultiLineRelativeTo: string | undefined;
     vcFormatIndentWithinParentheses: string | undefined;
@@ -424,7 +424,7 @@ export class CppSettings extends Settings {
     public get caseSensitiveFileSupport(): boolean { return !isWindows || super.Section.get<string>("caseSensitiveFileSupport") === "enabled"; }
     public get doxygenSectionTags(): string[] | undefined { return super.Section.get<string[]>("doxygen.sectionTags"); }
     public get hover(): string | undefined { return super.Section.get<string>("hover"); }
-    public get markdownCommentFormatting(): string | undefined { return super.Section.get<string>("markdownCommentFormatting"); }
+    public get commentFormatting(): string | undefined { return super.Section.get<string>("commentFormatting"); }
     public get legacyCompilerArgsBehavior(): boolean | undefined { return super.Section.get<boolean>("legacyCompilerArgsBehavior"); }
 
     public get inlayHintsAutoDeclarationTypes(): boolean {
