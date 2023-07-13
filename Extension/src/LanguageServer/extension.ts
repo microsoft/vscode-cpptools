@@ -14,6 +14,7 @@ import * as nls from 'vscode-nls';
 import * as yauzl from 'yauzl';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
 import { ClientCollection } from './clientCollection';
@@ -404,6 +405,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.InstallCompiler', enabled ? installCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationProviderSelect', enabled ? onSelectConfigurationProvider : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationEditJSON', enabled ? onEditConfigurationJSON : onDisabledCommand));
@@ -555,6 +557,45 @@ async function onRescanCompilers(sender?: any): Promise<void> {
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
     return clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
+}
+
+async function installCompiler(sender?: any): Promise<void> {
+    switch (os.platform()) {
+        case "win32": // nope
+            break;
+        case "darwin": {
+            await vscode.window.showInformationMessage('The clang compiler will now be installed on your computer. You may need to type in your password in the terminal window that will appear to accept the installation');
+            const terminal = vscode.window.createTerminal('Install C++ Compiler');
+            terminal.sendText('sudo xcode-select --install');
+            break;
+        }
+        default: {
+            const info = await PlatformInformation.GetPlatformInformation();
+            switch (info.distribution?.name) {
+                case 'ubuntu':
+                case 'linuxmint':
+                case 'debian': {
+                    await vscode.window.showInformationMessage('The gcc compiler will now be installed on your computer. You may need to type in your password in the terminal window that will appear to accept the installation');
+                    const terminal = vscode.window.createTerminal('Install C++ Compiler');
+                    terminal.sendText('sudo apt update');
+                    terminal.sendText('sudo apt install -y build-essential');
+                    break;
+                }
+                case 'centos':
+                case 'fedora':
+                case 'opensuse':
+                case 'opensuse-leap':
+                case 'opensuse-tumbleweed':
+                case 'rhel': {
+                    await vscode.window.showInformationMessage('The gcc compiler will now be installed on your computer. You may need to type in your password in the terminal window that will appear to accept the installation');
+                    const terminal = vscode.window.createTerminal('Install C++ Compiler');
+                    terminal.sendText('sudo yum update');
+                    terminal.sendText('sudo yum install gcc-c++');
+                    break;
+                }
+            }
+        }
+    }
 }
 
 async function onSelectConfiguration(): Promise<void> {

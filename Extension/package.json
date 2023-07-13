@@ -3011,6 +3011,11 @@
         "category": "C/C++"
       },
       {
+        "command": "C_Cpp.InstallCompiler",
+        "title": "%c_cpp.command.installCompiler.title%",
+        "category": "C/C++"
+      },
+      {
         "command": "C_Cpp.RescanCompilers",
         "title": "%c_cpp.command.rescanCompilers.title%",
         "category": "C/C++"
@@ -5512,6 +5517,10 @@
         },
         {
           "command": "C_Cpp.SelectDefaultCompiler",
+          "when": "never"
+        },
+        {
+          "command": "C_Cpp.InstallCompiler",
           "when": "never"
         },
         {
