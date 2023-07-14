@@ -1071,7 +1071,7 @@ export class DefaultClient implements Client {
                         step = step + "linux";
                         break;
                 }
-                vscode.commands.executeCommand(
+                void vscode.commands.executeCommand(
                     "workbench.action.openWalkthrough",
                     { category: 'ms-vscode.cpptools#cppWelcome', step },
                     false);
