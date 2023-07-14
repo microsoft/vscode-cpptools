@@ -1074,7 +1074,13 @@ export class DefaultClient implements Client {
                 void vscode.commands.executeCommand(
                     "workbench.action.openWalkthrough",
                     { category: 'ms-vscode.cpptools#cppWelcome', step },
-                    false);
+                    false)
+                    // Run it twice for now because of VS Code bug #187958
+                    .then(() => vscode.commands.executeCommand(
+                        "workbench.action.openWalkthrough",
+                        { category: 'ms-vscode.cpptools#cppWelcome', step },
+                        false)
+                    );
                 return;
             }
             const showButtonSender: string = "quickPick";
