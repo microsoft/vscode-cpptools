@@ -1172,37 +1172,6 @@ export function escapeForSquiggles(s: string): string {
     return newResults;
 }
 
-export class BlockingTask<T> {
-    private done: boolean = false;
-    private promise: Thenable<T>;
-
-    constructor(task: () => Thenable<T>, dependency?: BlockingTask<any>) {
-        if (!dependency) {
-            this.promise = task();
-        } else {
-            this.promise = new Promise<T>((resolve, reject) => {
-                const f1: () => void = () => {
-                    task().then(resolve, reject);
-                };
-                const f2: (err: any) => void = (err) => {
-                    console.log(err);
-                    task().then(resolve, reject);
-                };
-                dependency.promise.then(f1, f2);
-            });
-        }
-        this.promise.then(() => this.done = true, () => this.done = true);
-    }
-
-    public get Done(): boolean {
-        return this.done;
-    }
-
-    public getPromise(): Thenable<T> {
-        return this.promise;
-    }
-}
-
 export function getSenderType(sender?: any): string {
     if (isString(sender)) {
         return sender;
