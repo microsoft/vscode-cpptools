@@ -18,9 +18,11 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     [Symbol.toStringTag] = 'Promise';
 
     private promise = new ManualPromise<T>();
-    constructor() {
-        // initially not reset.
-        this.promise.resolve();
+    constructor(initiallyReset = false) {
+        if(!initiallyReset) {
+            // initially not reset.
+            this.promise.resolve();
+        }
     }
     get isPending(): boolean {
         return this.promise.isPending;
@@ -33,6 +35,12 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     }
     get isRejected(): boolean {
         return this.promise.isRejected;
+    }
+    get isSet(): boolean {
+        return this.promise.isCompleted;
+    }
+    get isReset(): boolean {
+        return !this.promise.isCompleted;
     }
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.

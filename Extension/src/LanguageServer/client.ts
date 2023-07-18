@@ -32,6 +32,7 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { ManualPromise } from '../Utility/Async/manual-promise';
 import { ManualSignal } from '../Utility/Async/manual-signal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
@@ -717,6 +718,8 @@ class ClientModel {
 
 export interface Client {
     readonly ready: Promise<void>;
+    readonly dispatching: Promise<void>;
+    queue<T>(task: () => Promise<T>): Promise<T>;
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
     ParsingWorkspaceChanged: vscode.Event<boolean>;
@@ -841,6 +844,20 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
+
+    /** A queue of asynchronous tasks that need to be processed befofe ready is considered active.  */
+    private tasks = new Array<[ManualPromise<unknown>|undefined,() => Promise<unknown>]>();
+
+    /** returns a promise that waits for the all pending tasks are complete (i.e. language client is ready for use) */
+    public readonly ready = new ManualSignal<void>(true);
+
+    /**
+     * Indicates if the blocking task dispatcher is currently running
+     *
+     * This will be in the Set state when the dispatcher is not running (ie, if you await this it will be resolved immediately)
+     * If the dispatcher is running, this will be in the Reset state (ie, if you await this it will be resolved when the dispatcher is done)
+     */
+    public readonly dispatching = new ManualSignal<void>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -2076,9 +2093,9 @@ export class DefaultClient implements Client {
                     settings.toggleSetting("configurationWarnings", "enabled", "disabled");
                 }
             }
+        } finally {
+            this.ready.resolve();
         }
-
-        this.ready.resolve();
     }
 
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
@@ -2145,8 +2162,7 @@ export class DefaultClient implements Client {
     public async takeOwnership(document: vscode.TextDocument): Promise<void> {
         this.trackedDocuments.add(document);
         this.updateActiveDocumentTextOptions();
-        await this.ready;
-        return this.sendDidOpen(document);
+        await this.sendDidOpen(document);
     }
 
     public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
@@ -2161,46 +2177,45 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    /** returns a promise that waits for the all pending tasks are complete (e.g. language client is ready for use) */
-    ready = new ManualSignal<void>();
-
-    /** A queue of asynchronous tasks that need to be processed befofe ready is considered active.  */
-    private tasks = new Array<() => Promise<unknown>>();
-
-    /** indicates if the blocking task dispatcher is currently running */
-    private dispatching = false;
-
     /**
-     * Queue a task that blocks '.ready' tasks until it completes.
+     * Queue a task to ensure that the order is maintained. The tasks are executed sequentially after the client is ready.
      */
-    queueTask<T>(task: () => Promise<T>) {
+    queue<T>(task: () => Promise<T>) {
         ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
 
+        const result = new ManualPromise<unknown>();
+
         // add the task to the queue
-        this.tasks.push(task);
+        this.tasks.push([result,task]);
 
         // if we're not already dispatching, start
-        if(!this.dispatching) {
+        if(this.dispatching.isSet) {
             // start dispatching
             void this.dispatch();
         }
+
+        return result as Promise<T>;
     }
 
     private async dispatch() {
         ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
 
         // set the dispatching flag
-        this.dispatching = true;
+        this.dispatching.reset();
 
         do {
             // pick items up off the queue and run then one at a time until the queue is empty
-            for(let task = this.tasks.shift(); task ; task = this.tasks.shift()) {
-            // execute the task and wait for it to complete.
-                await task().catch(logAndReturn.undefined);
+            const [promise,task] = this.tasks.shift() || [];
+            if(promise && task)  {
+                try {
+                    promise.resolve(await task());
+                } catch (e) {
+                    console.log(e);
+                    promise.reject(e);
+                }
             }
-            // if tasks were added after we cleared the queue, continue dispatching.
-        } while(this.tasks.length > 0);
-        this.dispatching = false;
+        } while(this.tasks.length);
+        this.dispatching.resolve();
     }
 
     private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
@@ -2735,8 +2750,7 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        await this.ready;
-        return this.languageClient.sendRequest(SwitchHeaderSourceRequest, params);
+        return this.queue(async ()=> this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -3666,6 +3680,11 @@ class NullClient implements Client {
     private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
     readonly ready: Promise<void> = Promise.resolve();
+    readonly dispatching: Promise<void> = Promise.resolve();
+
+    async queue<T>(task: () => Promise<T>) {
+        return task();
+    }
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
