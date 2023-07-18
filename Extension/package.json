@@ -6086,6 +6086,7 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
+    "chokidar": "^3.5.3",
     "gulp-mocha/mocha/nanoid": "^3.1.20",
     "gulp-mocha/mocha/minimatch": "^3.0.5",
     "gulp/**/glob-parent": "^5.1.2"
