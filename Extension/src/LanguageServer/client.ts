@@ -1440,6 +1440,7 @@ export class DefaultClient implements Client {
             clangTidyFixNotes: settings.clangTidyFixNotes,
             clangTidyChecksEnabled: settings.clangTidyChecksEnabled,
             clangTidyChecksDisabled: settings.clangTidyChecksDisabled,
+            markdownInComments: settings.markdownInComments,
             hover: settings.hover,
             vcFormatIndentBraces: settings.vcFormatIndentBraces,
             vcFormatIndentMultiLineRelativeTo: settings.vcFormatIndentMultiLineRelativeTo,
