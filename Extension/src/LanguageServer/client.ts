@@ -94,6 +94,7 @@ interface ConfigStateReceived {
 
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
+let scanForCompilersDone: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -942,7 +943,7 @@ export class DefaultClient implements Client {
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
             (vscode.workspace.workspaceFolders.length > 1 ?
                 localize("configure.intelliSense.forFolder", "How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
-                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense this folder?"));
+                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense for this folder?"));
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -1048,17 +1049,39 @@ export class DefaultClient implements Client {
             }
             if (index === paths.length - 2) {
                 action = "help";
+                // Because we need to conditionally enable/disable steps to alter their contents,
+                // we need to determine which step is actually visible. If the steps change, this
+                // logic will need to change to reflect them.
+                let step: string = "ms-vscode.cpptools#";
+                if (!scanForCompilersDone) {
+                    step = step + "awaiting.activation.";
+                } else if (compilerDefaults?.knownCompilers === undefined || !compilerDefaults.knownCompilers.length) {
+                    step = step + "no.compilers.found.";
+                } else {
+                    step = step + "verify.compiler.";
+                }
                 switch (os.platform()) {
                     case 'win32':
-                        void vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217614");
-                        return;
+                        step = step + "windows";
+                        break;
                     case 'darwin':
-                        void vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217706");
-                        return;
+                        step = step + "mac";
+                        break;
                     default: // Linux
-                        void vscode.commands.executeCommand('vscode.open', "https://go.microsoft.com/fwlink/?linkid=2217615");
-                        return;
+                        step = step + "linux";
+                        break;
                 }
+                void vscode.commands.executeCommand(
+                    "workbench.action.openWalkthrough",
+                    { category: 'ms-vscode.cpptools#cppWelcome', step },
+                    false)
+                    // Run it twice for now because of VS Code bug #187958
+                    .then(() => vscode.commands.executeCommand(
+                        "workbench.action.openWalkthrough",
+                        { category: 'ms-vscode.cpptools#cppWelcome', step },
+                        false)
+                    );
+                return;
             }
             const showButtonSender: string = "quickPick";
             if (index === paths.length - 3) {
@@ -2717,6 +2740,7 @@ export class DefaultClient implements Client {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
+        scanForCompilersDone = true;
         void vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
         void vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
         void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);
