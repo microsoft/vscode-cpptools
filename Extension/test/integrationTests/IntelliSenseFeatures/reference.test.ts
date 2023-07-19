@@ -6,38 +6,39 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import { ManualSignal } from '../../../src/Utility/Async/manualSignal';
+import { timeout } from '../../../src/Utility/Async/timeout';
 import * as testHelpers from '../testHelpers';
 
 suite(`[Reference test]`, function(): void {
     let cpptools: apit.CppToolsTestApi;
     const disposables: vscode.Disposable[] = [];
-    const path: string = vscode.workspace.workspaceFolders[1].uri.fsPath + "/references.cpp";
+    const wf = vscode.workspace.workspaceFolders?.[1] ?? assert.fail("Could not get workspace folder");
+    const path: string = wf.uri.fsPath + "/references.cpp";
     const fileUri: vscode.Uri = vscode.Uri.file(path);
     let testHook: apit.CppToolsTestHook;
-    let getIntelliSenseStatus: any;
+    const getIntelliSenseStatus = new ManualSignal<void>();
     let document: vscode.TextDocument;
 
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
 
-        cpptools = await apit.getCppToolsTestApi(api.Version.latest);
+        cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get CppToolsTestApi");
         testHook = cpptools.getTestHook();
-        getIntelliSenseStatus = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.IntelliSenseStatusChanged(result => {
-                result = result as apit.IntelliSenseStatus;
-                if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
-                    resolve();
-                }
-            }));
-            setTimeout(() => { reject(new Error("Timeout: IntelliSenseStatusChanged event")); }, testHelpers.defaultTimeout);
+
+        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus)=> {
+            if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
+                getIntelliSenseStatus.resolve();
+            }
         });
+
         disposables.push(testHook);
 
         // Start language server
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await getIntelliSenseStatus;
+        await timeout(5000, getIntelliSenseStatus.then(()=>getIntelliSenseStatus.reset()));
     });
 
     test("[Find confirmed references of a symbol]", async () => {

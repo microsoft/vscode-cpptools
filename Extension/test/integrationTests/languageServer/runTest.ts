@@ -4,8 +4,12 @@ import { mkdir as md, stat } from 'fs/promises';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
 
-const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0,6) );
-        
+// The folder containing the Extension Manifest package.json
+// Passed to `--extensionDevelopmentPath`
+const extensionDevelopmentPath = resolve(__dirname, '../../../../');
+
+const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(extensionDevelopmentPath).digest('hex').substring(0,6) );
+
 const options = {
     cachePath: `${isolated}/cache`,
     launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', `--extensions-dir=${isolated}/extensions`, `--user-data-dir=${isolated}/user-data`]
@@ -37,11 +41,6 @@ async function main() {
 
         // clean up args so that it works with the isolate extensions and data directories
         launchArgs.push(`--extensions-dir=${isolated}/extensions`, `--user-data-dir=${isolated}/user-data`);
-
-
-        // The folder containing the Extension Manifest package.json
-        // Passed to `--extensionDevelopmentPath`
-        const extensionDevelopmentPath = resolve(__dirname, '../../../../');
 
         // The path to the extension test script
         // Passed to --extensionTestsPath

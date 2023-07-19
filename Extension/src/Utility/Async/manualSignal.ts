@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { ManualPromise } from './manual-promise';
+import { ManualPromise } from './manualPromise';
 import { Resetable } from './resolvable';
 
 /**
@@ -78,7 +78,9 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
      * @param value
      */
     resolve(value: T): Resetable<T> {
-        this.promise.resolve(value);
+        if(!this.promise.isCompleted) {
+            this.promise.resolve(value);
+        }
         return this as unknown as Resetable<T>;
     }
 
@@ -89,7 +91,9 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
      * @param value
      */
     reject(reason: any): Resetable<T> {
-        this.promise.reject(reason);
+        if(!this.promise.isCompleted) {
+            this.promise.reject(reason);
+        }
         return this as unknown as Resetable<T>;
     }
 

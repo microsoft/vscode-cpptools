@@ -1,7 +1,9 @@
 /* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+
+/* eslint-disable no-prototype-builtins */
 
 import * as fs from 'fs';
 import * as os from 'os';
@@ -64,7 +66,7 @@ function refReplace(definitions: any, ref: any): any {
 
     // Retrieve ObjectName from definitions. (TODO: Does not retrieve inner objects)
     // Need to deep copy, there are no functions in these objects.
-    const reference: any = JSON.parse(JSON.stringify(definitions[referenceName]));
+    const reference: any = JSON.parse(JSON.stringify(definitions[referenceName],null,4));
 
     ref = appendFieldsToObject(reference, ref);
 
@@ -132,7 +134,7 @@ function generateOptionsSchema(): void {
     packageJSON.contributes.debuggers[1].configurationAttributes.launch = schemaJSON.definitions.CppvsdbgLaunchOptions;
     packageJSON.contributes.debuggers[1].configurationAttributes.attach = schemaJSON.definitions.CppvsdbgAttachOptions;
 
-    let content: string = JSON.stringify(packageJSON, null, 2);
+    let content: string = JSON.stringify(packageJSON, null, 4);
     if (os.platform() === 'win32') {
         content = content.replace(/\n/gm, "\r\n");
     }

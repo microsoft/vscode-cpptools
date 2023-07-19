@@ -15,7 +15,7 @@ import { DocumentFilter } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
-import { ManualPromise } from './Utility/Async/manual-promise';
+import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';

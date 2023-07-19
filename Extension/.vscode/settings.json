@@ -9,8 +9,8 @@
     "typescript.tsdk": "./node_modules/typescript/lib", // we want to use the TS server from our node_modules folder to control its version
     // if you install the mocha test explorer extension, you can run the unit tests from the test explorer UI
     "testExplorer.useNativeTesting": true,
-    "mochaExplorer.files": "./**/internalUnitTests/**/test-*.js",
-    "mochaExplorer.watch": "./**/internalUnitTests/**/test-*.js",
+    "mochaExplorer.files": "./**/internalUnitTests/**/*.test.js",
+    "mochaExplorer.watch": "./**/internalUnitTests/**/*.test.js",
     "mochaExplorer.ignore": [
         "**/*skip*",
         "**/dist/test/**/*.d.ts",

@@ -6,7 +6,7 @@
 import { ok, strictEqual } from 'assert';
 import { describe } from 'mocha';
 import { setTimeout } from 'timers/promises';
-import { ManualSignal } from '../../src/Utility/Async/manual-signal';
+import { ManualSignal } from '../../src/Utility/Async/manualSignal';
 import { Signal } from '../../src/Utility/Async/signal';
 
 describe('Signal', () => {
