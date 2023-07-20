@@ -383,7 +383,7 @@ function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): v
     editors.forEach(async (editor) => {
         if (util.isCpp(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
-            await client.queue(() => processDelayedDidOpen(editor.document));
+            await client.enqueue(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
         }
     });

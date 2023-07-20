@@ -718,9 +718,9 @@ class ClientModel {
 }
 
 export interface Client {
-    readonly ready: Promise<void>;
+    readonly ready: Promise<unknown>;
     readonly dispatching: Promise<void>;
-    queue<T>(task: () => Promise<T>): Promise<T>;
+    enqueue<T>(task: () => Promise<T>): Promise<T>;
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
     ParsingWorkspaceChanged: vscode.Event<boolean>;
@@ -847,10 +847,10 @@ export class DefaultClient implements Client {
     private showConfigureIntelliSenseButton: boolean = false;
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active.  */
-    private tasks = new Array<[ManualPromise<unknown>|undefined,() => Promise<unknown>]>();
+    private queue = new Array<[ManualPromise<unknown>,() => Promise<unknown>]|[ManualPromise<unknown>]>();
 
-    /** returns a promise that waits for the all pending tasks are complete (i.e. language client is ready for use) */
-    public readonly ready = new ManualSignal<void>(true);
+    /** returns a promise that waits initialization and/or a change to configuration to complete  (i.e. language client is ready-to-use) */
+    private readonly isStarted = new ManualSignal<void>(true);
 
     /**
      * Indicates if the blocking task dispatcher is currently running
@@ -1421,7 +1421,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        this.ready.resolve();
+        this.isStarted.resolve();
             
     }
 
@@ -2005,7 +2005,7 @@ export class DefaultClient implements Client {
     }
 
     private async provideCustomConfigurationAsync(docUri: vscode.Uri,requestFile: string|undefined,  replaceExisting: boolean|undefined, onFinished:()=>void, provider: CustomConfigurationProvider1  ) {
-        this.ready.reset();
+        this.isStarted.reset();
 
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
         console.log("provideCustomConfiguration");
@@ -2120,7 +2120,7 @@ export class DefaultClient implements Client {
                 }
             }
         } finally {
-            this.ready.resolve();
+            this.isStarted.resolve();
         }
     
     }
@@ -2204,16 +2204,46 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    /**
-     * Queue a task to ensure that the order is maintained. The tasks are executed sequentially after the client is ready.
+    /** 
+     * a Promise that can be awaited to know when it's ok to proceed.
+     * 
+     * This is a lighter-weight complement to `enqueue()` 
+     * 
+     * Use `await <client>.ready` when you need to ensure that the client is initialized, and to run in order
+     * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
+     * 
+     * This is lightweight, because if the queue is empty, then the only thing to wait for is the client itself to be initialized
      */
-    queue<T>(task: () => Promise<T>) {
+    get ready():  Promise<unknown> {
+        if(!this.dispatching.isCompleted || this.queue.length) {
+            // if the dispatcher has stuff going on, then we need to stick in a promise into the queue so we can 
+            // be notified when it's our turn
+            const p = new ManualPromise<void>();
+            this.queue.push([p as ManualPromise<unknown>]);
+            return p;
+        }
+
+        // otherwise, we're only waiting for the client to be in an initialized state, in which case just wait for that.
+        return this.isStarted;
+    }
+
+    /**
+     * Enqueue a task to ensure that the order is maintained. The tasks are executed sequentially after the client is ready.
+     * 
+     * this is a bit more expensive than `.ready` - this ensures the task is absolutely finished executing before allowing
+     * the dispatcher to move forward. 
+     * 
+     * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
+     * Use `await <client>.ready` when you need to ensure that the client is initialized, and still run in order.
+     */
+    enqueue<T>(task: () => Promise<T>) {
         ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
 
+        // create a placeholder promise that is resolved when the task is complete.
         const result = new ManualPromise<unknown>();
 
         // add the task to the queue
-        this.tasks.push([result,task]);
+        this.queue.push([result,task]);
 
         // if we're not already dispatching, start
         if(this.dispatching.isSet) {
@@ -2221,30 +2251,35 @@ export class DefaultClient implements Client {
             void this.dispatch();
         }
 
+        // return the placeholder promise to the caller.
         return result as Promise<T>;
     }
 
+    /** 
+     * The dispatch loop asynchronously processes items in the async queue in order, and ensures that tasks are dispatched in the 
+     * order they were inserted.
+     */
     private async dispatch() {
         ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
         
         // ensure that this is OK to start working 
-        await this.ready;
+        await this.isStarted;
 
         // reset the promise for the dispatcher
         this.dispatching.reset();
 
         do {
             // pick items up off the queue and run then one at a time until the queue is empty
-            const [promise,task] = this.tasks.shift() || [];
-            if(promise && task)  {
+            const [promise,task] = this.queue.shift() || [];
+            if(promise)  {
                 try {
-                    promise.resolve(await task());
+                    promise.resolve(task ? await task(): undefined);
                 } catch (e) {
                     console.log(e);
                     promise.reject(e);
                 }
             }
-        } while(this.tasks.length);
+        } while(this.queue.length);
 
         // unblock anything that is waiting for the dispatcher to empty
         this.dispatching.resolve();
@@ -2782,7 +2817,7 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        return this.queue(async ()=> this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        return this.enqueue(async ()=> this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -3712,10 +3747,10 @@ class NullClient implements Client {
     private stringEvent = new vscode.EventEmitter<string>();
     private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
-    readonly ready: Promise<void> = Promise.resolve();
+    readonly ready: Promise<unknown> = Promise.resolve();
     readonly dispatching: Promise<void> = Promise.resolve();
 
-    async queue<T>(task: () => Promise<T>) {
+    async enqueue<T>(task: () => Promise<T>) {
         return task();
     }
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }

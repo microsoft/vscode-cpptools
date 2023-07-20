@@ -12,10 +12,10 @@ import { clients, onDidChangeActiveTextEditor, processDelayedDidOpen } from './e
 
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
-    const invoke1 = (a: any, next: (a: any) => any): any => clients.ActiveClient.queue(() => next(a));
-    const invoke2 = (a: any, b: any, next: (a: any, b: any) => any): any => clients.ActiveClient.queue(() => next(a, b));
-    const invoke3 = (a: any, b: any, c: any, next: (a: any, b: any, c: any) => any): any => clients.ActiveClient.queue(() => next(a, b, c));
-    const invoke4 = (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any): any => clients.ActiveClient.queue(() => next(a, b, c, d));
+    const invoke1 = (a: any, next: (a: any) => any): any => clients.ActiveClient.enqueue(() => next(a));
+    const invoke2 = (a: any, b: any, next: (a: any, b: any) => any): any => clients.ActiveClient.enqueue(() => next(a, b));
+    const invoke3 = (a: any, b: any, c: any, next: (a: any, b: any, c: any) => any): any => clients.ActiveClient.enqueue(() => next(a, b, c));
+    const invoke4 = (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any): any => clients.ActiveClient.enqueue(() => next(a, b, c, d));
 
     return {
         didOpen: async (document, _sendMessage) => {
@@ -27,7 +27,7 @@ export function createProtocolFilter(): Middleware {
                 // If the file was visible editor when we were activated, we will not get a call to
                 // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
                 // Otherwise, we defer opening the file until it's actually visible.
-                await clients.ActiveClient.queue(() => processDelayedDidOpen(document));
+                await clients.ActiveClient.enqueue(() => processDelayedDidOpen(document));
                 if (editor && editor === vscode.window.activeTextEditor) {
                     onDidChangeActiveTextEditor(editor);
                 }
@@ -41,7 +41,7 @@ export function createProtocolFilter(): Middleware {
                 // didOpen), and first becomes visible.
             }
         },
-        didChange: async (textDocumentChangeEvent, sendMessage) => clients.ActiveClient.queue(async () => {
+        didChange: async (textDocumentChangeEvent, sendMessage) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
             me.onDidChangeTextDocument(textDocumentChangeEvent);
             await sendMessage(textDocumentChangeEvent);
@@ -58,7 +58,7 @@ export function createProtocolFilter(): Middleware {
             return [];
         },
         didSave: invoke1,
-        didClose: async (document, sendMessage) => clients.ActiveClient.queue(async () => {
+        didClose: async (document, sendMessage) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
@@ -68,7 +68,7 @@ export function createProtocolFilter(): Middleware {
         }),
         provideCompletionItem: invoke4,
         resolveCompletionItem: invoke2,
-        provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => clients.ActiveClient.queue(async () => {
+        provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
                 return next(document, position, token);
