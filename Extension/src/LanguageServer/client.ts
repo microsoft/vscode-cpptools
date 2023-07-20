@@ -1321,7 +1321,7 @@ export class DefaultClient implements Client {
                 isFirstClient = true;
             }
             void this.init(rootUri, isFirstClient).catch(logAndReturn.undefined);
-            
+
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
             this.isSupported = false;   // Running on an OS we don't support yet.
@@ -1338,7 +1338,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private async init(rootUri:vscode.Uri|undefined, isFirstClient: boolean ) {
+    private async init(rootUri: vscode.Uri|undefined, isFirstClient: boolean) {
         ui = getUI();
         ui.bind(this);
         await firstClientStarted;
@@ -1422,7 +1422,7 @@ export class DefaultClient implements Client {
         }
 
         this.isStarted.resolve();
-            
+
     }
 
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
@@ -2001,10 +2001,10 @@ export class DefaultClient implements Client {
             return;
         }
         telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId });
-        void this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, onFinished, provider)
+        void this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, onFinished, provider);
     }
 
-    private async provideCustomConfigurationAsync(docUri: vscode.Uri,requestFile: string|undefined,  replaceExisting: boolean|undefined, onFinished:()=>void, provider: CustomConfigurationProvider1  ) {
+    private async provideCustomConfigurationAsync(docUri: vscode.Uri,requestFile: string|undefined,  replaceExisting: boolean|undefined, onFinished: () => void, provider: CustomConfigurationProvider1) {
         this.isStarted.reset();
 
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
@@ -2122,7 +2122,7 @@ export class DefaultClient implements Client {
         } finally {
             this.isStarted.resolve();
         }
-    
+
     }
 
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
@@ -2204,19 +2204,19 @@ export class DefaultClient implements Client {
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
-    /** 
+    /**
      * a Promise that can be awaited to know when it's ok to proceed.
-     * 
-     * This is a lighter-weight complement to `enqueue()` 
-     * 
+     *
+     * This is a lighter-weight complement to `enqueue()`
+     *
      * Use `await <client>.ready` when you need to ensure that the client is initialized, and to run in order
      * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
-     * 
+     *
      * This is lightweight, because if the queue is empty, then the only thing to wait for is the client itself to be initialized
      */
     get ready():  Promise<unknown> {
         if(!this.dispatching.isCompleted || this.queue.length) {
-            // if the dispatcher has stuff going on, then we need to stick in a promise into the queue so we can 
+            // if the dispatcher has stuff going on, then we need to stick in a promise into the queue so we can
             // be notified when it's our turn
             const p = new ManualPromise<void>();
             this.queue.push([p as ManualPromise<unknown>]);
@@ -2229,10 +2229,10 @@ export class DefaultClient implements Client {
 
     /**
      * Enqueue a task to ensure that the order is maintained. The tasks are executed sequentially after the client is ready.
-     * 
+     *
      * this is a bit more expensive than `.ready` - this ensures the task is absolutely finished executing before allowing
-     * the dispatcher to move forward. 
-     * 
+     * the dispatcher to move forward.
+     *
      * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
      * Use `await <client>.ready` when you need to ensure that the client is initialized, and still run in order.
      */
@@ -2255,14 +2255,14 @@ export class DefaultClient implements Client {
         return result as Promise<T>;
     }
 
-    /** 
-     * The dispatch loop asynchronously processes items in the async queue in order, and ensures that tasks are dispatched in the 
+    /**
+     * The dispatch loop asynchronously processes items in the async queue in order, and ensures that tasks are dispatched in the
      * order they were inserted.
      */
     private async dispatch() {
         ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
-        
-        // ensure that this is OK to start working 
+
+        // ensure that this is OK to start working
         await this.isStarted;
 
         // reset the promise for the dispatcher
@@ -2273,7 +2273,7 @@ export class DefaultClient implements Client {
             const [promise,task] = this.queue.shift() || [];
             if(promise)  {
                 try {
-                    promise.resolve(task ? await task(): undefined);
+                    promise.resolve(task ? await task() : undefined);
                 } catch (e) {
                     console.log(e);
                     promise.reject(e);
