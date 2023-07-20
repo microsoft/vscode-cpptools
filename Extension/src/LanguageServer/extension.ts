@@ -368,6 +368,7 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                 }
                 await client.provideCustomConfiguration(document.uri, undefined);
                 // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
+                client.onDidOpenTextDocument(document);
                 await client.takeOwnership(document);
                 return true;
             }
