@@ -52,7 +52,7 @@ suite("[Inlay hints test]", function(): void {
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        // await timeout(maxWaitForChange, getIntelliSenseStatus.then(()=>getIntelliSenseStatus.reset()));
+        
         saveOriginalSettings();
         await useDefaultSettings();
     });

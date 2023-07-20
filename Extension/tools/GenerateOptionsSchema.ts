@@ -66,7 +66,7 @@ function refReplace(definitions: any, ref: any): any {
 
     // Retrieve ObjectName from definitions. (TODO: Does not retrieve inner objects)
     // Need to deep copy, there are no functions in these objects.
-    const reference: any = JSON.parse(JSON.stringify(definitions[referenceName],null,4));
+    const reference: any = JSON.parse(JSON.stringify(definitions[referenceName]));
 
     ref = appendFieldsToObject(reference, ref);
 
