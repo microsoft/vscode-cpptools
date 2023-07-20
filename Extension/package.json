@@ -65,7 +65,6 @@
         "id": "cppWelcome",
         "title": "%c_cpp.walkthrough.title%",
         "description": "%c_cpp.walkthrough.description%",
-        "when": "false",
         "steps": [
           {
             "id": "awaiting.activation.mac",
@@ -455,6 +454,22 @@
               "%c_cpp.configuration.autocomplete.default.description%",
               "%c_cpp.configuration.autocomplete.disabled.description%"
             ],
+            "scope": "resource"
+          },
+          "C_Cpp.markdownInComments": {
+            "type": "string",
+            "enum": [
+              "subsetEnabled",
+              "enabled",
+              "disabled"
+            ],
+            "enumDescriptions": [
+              "%c_cpp.configuration.markdownInComments.subsetEnabled.description%",
+              "%c_cpp.configuration.markdownInComments.enabled.description%",
+              "%c_cpp.configuration.markdownInComments.disabled.description%"
+            ],
+            "default": "subsetEnabled",
+            "description": "%c_cpp.configuration.markdownInComments.description%",
             "scope": "resource"
           },
           "C_Cpp.hover": {
@@ -6087,6 +6102,7 @@
     "yauzl": "^2.10.0"
   },
   "resolutions": {
+    "chokidar": "^3.5.3",
     "gulp-mocha/mocha/nanoid": "^3.1.20",
     "gulp-mocha/mocha/minimatch": "^3.0.5",
     "gulp/**/glob-parent": "^5.1.2"
