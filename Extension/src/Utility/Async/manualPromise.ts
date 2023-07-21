@@ -47,7 +47,7 @@ export class ManualPromise<T = void> implements Promise<T> {
     };
 
     /**
-     *  A method to manually reject the Promise
+     * A method to manually reject the Promise
      */
     public reject: (e: any) => void = (e) => {
         void e; /* */

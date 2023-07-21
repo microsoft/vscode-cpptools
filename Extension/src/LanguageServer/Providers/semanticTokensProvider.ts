@@ -26,7 +26,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
             const tokens: vscode.SemanticTokens = builder.build();
             return tokens;
         }
-        await this.client.enqueue(()=> processDelayedDidOpen(document));
+        await this.client.enqueue(() => processDelayedDidOpen(document));
 
         const uriString: string = document.uri.toString();
         // First check the semantic token cache to see if we already have results for that file and version

@@ -845,10 +845,10 @@ export class DefaultClient implements Client {
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
 
-    /** A queue of asynchronous tasks that need to be processed befofe ready is considered active.  */
-    private static queue = new Array<[ManualPromise<unknown>,() => Promise<unknown>]|[ManualPromise<unknown>]>();
+    /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
+    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>]|[ManualPromise<unknown>]>();
 
-    /** returns a promise that waits initialization and/or a change to configuration to complete  (i.e. language client is ready-to-use) */
+    /** returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use) */
     private static readonly isStarted = new ManualSignal<void>(true);
 
     /**
@@ -1272,7 +1272,7 @@ export class DefaultClient implements Client {
             // Semantic token types are identified by indexes in this list of types, in the legend.
             const tokenTypesLegend: string[] = [];
             for (const e in SemanticTokenTypes) {
-                // An enum is actually a set of mappings from key <=> value.  Enumerate over only the names.
+                // An enum is actually a set of mappings from key <=> value. Enumerate over only the names.
                 // This allow us to represent the constants using an enum, which we can match in native code.
                 if (isNaN(Number(e))) {
                     tokenTypesLegend.push(e);
@@ -1337,7 +1337,7 @@ export class DefaultClient implements Client {
         }
     }
 
-    private async init(rootUri: vscode.Uri|undefined, isFirstClient: boolean) {
+    private async init(rootUri: vscode.Uri | undefined, isFirstClient: boolean) {
         ui = getUI();
         ui.bind(this);
         await firstClientStarted;
@@ -1659,7 +1659,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            // TODO: should I set the output channel?  Does this sort output between servers?
+            // TODO: should I set the output channel? Does this sort output between servers?
         };
 
         // Create the language client
@@ -2002,7 +2002,7 @@ export class DefaultClient implements Client {
         void this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, onFinished, provider);
     }
 
-    private async provideCustomConfigurationAsync(docUri: vscode.Uri,requestFile: string|undefined,  replaceExisting: boolean|undefined, onFinished: () => void, provider: CustomConfigurationProvider1) {
+    private async provideCustomConfigurationAsync(docUri: vscode.Uri, requestFile: string | undefined, replaceExisting: boolean | undefined, onFinished: () => void, provider: CustomConfigurationProvider1) {
         DefaultClient.isStarted.reset();
 
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
@@ -2018,6 +2018,7 @@ export class DefaultClient implements Client {
         if (!response.candidates || response.candidates.length === 0) {
         // If we didn't receive any candidates, no configuration is needed.
             onFinished();
+            DefaultClient.isStarted.resolve();
             return;
         }
 
@@ -2139,13 +2140,13 @@ export class DefaultClient implements Client {
 
     public async getCurrentConfigCustomVariable(variableName: string): Promise<string> {
         await this.ready;
-        return this.configuration.CurrentConfiguration?.customConfigurationVariables?.[variableName] || '';
+        return this.configuration.CurrentConfiguration?.customConfigurationVariables?.[variableName] ?? '';
     }
 
     public async setCurrentConfigName(configurationName: string): Promise<void> {
         await this.ready;
 
-        const configurations: configs.Configuration[] = this.configuration.Configurations || [];
+        const configurations: configs.Configuration[] = this.configuration.Configurations ?? [];
         const configurationIndex: number = configurations.findIndex((config) => config.name === configurationName);
 
         if (configurationIndex === -1) {
@@ -2212,8 +2213,8 @@ export class DefaultClient implements Client {
      *
      * This is lightweight, because if the queue is empty, then the only thing to wait for is the client itself to be initialized
      */
-    get ready():  Promise<unknown> {
-        if(!DefaultClient.dispatching.isCompleted || DefaultClient.queue.length) {
+    get ready(): Promise<unknown> {
+        if (!DefaultClient.dispatching.isCompleted || DefaultClient.queue.length) {
             // if the dispatcher has stuff going on, then we need to stick in a promise into the queue so we can
             // be notified when it's our turn
             const p = new ManualPromise<void>();
@@ -2241,10 +2242,10 @@ export class DefaultClient implements Client {
         const result = new ManualPromise<unknown>();
 
         // add the task to the queue
-        DefaultClient.queue.push([result,task]);
+        DefaultClient.queue.push([result, task]);
 
         // if we're not already dispatching, start
-        if(DefaultClient.dispatching.isSet) {
+        if (DefaultClient.dispatching.isSet) {
             // start dispatching
             void DefaultClient.dispatch();
         }
@@ -2266,8 +2267,8 @@ export class DefaultClient implements Client {
 
         do {
             // pick items up off the queue and run then one at a time until the queue is empty
-            const [promise,task] = DefaultClient.queue.shift() || [];
-            if(promise)  {
+            const [promise, task] = DefaultClient.queue.shift() ?? [];
+            if (promise) {
                 try {
                     promise.resolve(task ? await task() : undefined);
                 } catch (e) {
@@ -2275,7 +2276,7 @@ export class DefaultClient implements Client {
                     promise.reject(e);
                 }
             }
-        } while(DefaultClient.queue.length);
+        } while (DefaultClient.queue.length);
 
         // unblock anything that is waiting for the dispatcher to empty
         this.dispatching.resolve();
@@ -2813,7 +2814,7 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        return this.enqueue(async ()=> this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
+        return this.enqueue(async () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -3575,7 +3576,7 @@ export class DefaultClient implements Client {
                 if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
                     // Destination file is empty.
                     // The edit positions for #include header file and definition or declaration are the same.
-                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
+                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
                 const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
@@ -3593,7 +3594,7 @@ export class DefaultClient implements Client {
 
         // Move the cursor to the new declaration/definition edit, accounting for \n or \n\n at the start.
         let startLine: number = lastEdit.range.start.line;
-        let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+        let numNewlines: number = (lastEdit.newText.match(/\n/g) ?? []).length;
         if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
             startLine += 2;
             numNewlines -= 2;

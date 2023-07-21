@@ -19,7 +19,7 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
 
     private promise = new ManualPromise<T>();
     constructor(initiallyReset = false) {
-        if(!initiallyReset) {
+        if (!initiallyReset) {
             // initially not reset.
             this.promise.resolve();
         }
@@ -78,7 +78,7 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
      * @param value
      */
     resolve(value: T): Resetable<T> {
-        if(!this.promise.isCompleted) {
+        if (!this.promise.isCompleted) {
             this.promise.resolve(value);
         }
         return this as unknown as Resetable<T>;
@@ -87,17 +87,17 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     /**
      * A method to manually reject the Promise.
      *
-     *  This doesn't reset this instance to a new promise interally, call 'reset' to do that.
+     * This doesn't reset this instance to a new promise interally, call 'reset' to do that.
      * @param value
      */
     reject(reason: any): Resetable<T> {
-        if(!this.promise.isCompleted) {
+        if (!this.promise.isCompleted) {
             this.promise.reject(reason);
         }
         return this as unknown as Resetable<T>;
     }
 
-    /** Manually reset the promise to an uncompleted state.  */
+    /** Manually reset the promise to an uncompleted state. */
     reset(): Resetable<T> {
         if (this.promise.isCompleted) {
             this.promise = new ManualPromise<T>();

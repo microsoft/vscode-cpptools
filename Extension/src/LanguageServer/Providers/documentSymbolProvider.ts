@@ -57,7 +57,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = <DefaultClient>client;
-            await client.enqueue(()=> processDelayedDidOpen(document));
+            await client.enqueue(() => processDelayedDidOpen(document));
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
