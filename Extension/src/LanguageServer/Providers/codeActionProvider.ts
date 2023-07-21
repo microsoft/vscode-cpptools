@@ -198,7 +198,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             } else if (command.command === "C_Cpp.ExpandFunction" ||
                 command.command === "C_Cpp.ExpandFreeFunction" || command.command === "C_Cpp.ExpandFreeFunction") {
                 if (command.arguments && command.arguments.length === 1) {
-                    disabledReason = getLocalizedString(command.arguments[0]);
+                    disabledReason = command.arguments[0];
                 }
                 codeActionKind = vscode.CodeActionKind.RefactorExtract;
             }
