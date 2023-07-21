@@ -224,12 +224,11 @@ let isExtensionNotReadyPromptDisplayed: boolean = false;
 export const extensionNotReadyString: string = localize("extension.not.ready", 'The C/C++ extension is still installing. See the output window for more information.');
 
 export function displayExtensionNotReadyPrompt(): void {
-
     if (!isExtensionNotReadyPromptDisplayed) {
         isExtensionNotReadyPromptDisplayed = true;
         showOutputChannel();
 
-        getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
+        void getOutputChannelLogger().showInformationMessage(extensionNotReadyString).then(
             () => { isExtensionNotReadyPromptDisplayed = false; },
             () => { isExtensionNotReadyPromptDisplayed = false; }
         );

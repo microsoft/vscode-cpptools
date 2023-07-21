@@ -9,6 +9,7 @@ import * as plist from 'plist';
 import * as nls from 'vscode-nls';
 import { LinuxDistribution } from './linuxDistribution';
 import * as logger from './logger';
+import { SessionState } from './sessionState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -32,6 +33,10 @@ export class PlatformInformation {
         let version: string | undefined;
         switch (platform) {
             case "win32":
+                version = PlatformInformation.GetWindowsVersion();
+                if (version === '10' || version === '11') {
+                    SessionState.windowsVersion.set(version);
+                }
                 break;
             case "linux":
                 distribution = await LinuxDistribution.GetDistroInformation();
@@ -83,5 +88,13 @@ export class PlatformInformation {
         }
 
         return Promise.resolve(productDarwinVersion);
+    }
+
+    private static GetWindowsVersion(): string | undefined {
+        const version = os.release().split('.');
+        if (version.length > 0) {
+            return version[0];
+        }
+        return undefined;
     }
 }

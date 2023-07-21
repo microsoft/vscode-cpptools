@@ -26,7 +26,7 @@ import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
-import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
+import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp, showInstallCompilerWalkthrough } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -561,7 +561,8 @@ async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
 
 async function installCompiler(sender?: any): Promise<void> {
     switch (os.platform()) {
-        case "win32": // goto walkthrough
+        case "win32":
+            showInstallCompilerWalkthrough();
             break;
         case "darwin": {
             const response = await vscode.window.showInformationMessage(

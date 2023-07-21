@@ -34,8 +34,10 @@ import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
+import { isWindows } from '../constants';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
+import { SessionState } from '../sessionState';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
 import {
@@ -94,7 +96,6 @@ interface ConfigStateReceived {
 
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
-let scanForCompilersDone: boolean = false;
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -1024,7 +1025,11 @@ export class DefaultClient implements Client {
         const compilersIndex: number = paths.length;
         const compilerCount: number = compilersIndex === compileCommandsIndex ? 0 : compilersIndex - compileCommandsIndex - 1;
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
-        paths.push(localize("installCompiler.string", "Help me install a compiler"));
+        if (isWindows) {
+            paths.push(localize("installCompiler.string", "Help me install a compiler"));
+        } else {
+            paths.push(localize("installCompiler.string.nix", "Install a compiler"));
+        }
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
         let action: string = "";
@@ -1048,39 +1053,8 @@ export class DefaultClient implements Client {
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
             if (index === paths.length - 2) {
-                action = "help";
-                // Because we need to conditionally enable/disable steps to alter their contents,
-                // we need to determine which step is actually visible. If the steps change, this
-                // logic will need to change to reflect them.
-                let step: string = "ms-vscode.cpptools#";
-                if (!scanForCompilersDone) {
-                    step = step + "awaiting.activation.";
-                } else if (compilerDefaults?.knownCompilers === undefined || !compilerDefaults.knownCompilers.length) {
-                    step = step + "no.compilers.found.";
-                } else {
-                    step = step + "verify.compiler.";
-                }
-                switch (os.platform()) {
-                    case 'win32':
-                        step = step + "windows";
-                        break;
-                    case 'darwin':
-                        step = step + "mac";
-                        break;
-                    default: // Linux
-                        step = step + "linux";
-                        break;
-                }
-                void vscode.commands.executeCommand(
-                    "workbench.action.openWalkthrough",
-                    { category: 'ms-vscode.cpptools#cppWelcome', step },
-                    false)
-                    // Run it twice for now because of VS Code bug #187958
-                    .then(() => vscode.commands.executeCommand(
-                        "workbench.action.openWalkthrough",
-                        { category: 'ms-vscode.cpptools#cppWelcome', step },
-                        false)
-                    );
+                action = "install";
+                void vscode.commands.executeCommand('C_Cpp.InstallCompiler');
                 return;
             }
             const showButtonSender: string = "quickPick";
@@ -1096,7 +1070,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
+                SessionState.trustedCompilerFound.set(true);
             } else {
                 configurationSelected = true;
                 if (index < configProvidersIndex && configProviders) {
@@ -1114,7 +1088,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                    void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
+                    SessionState.trustedCompilerFound.set(true);
                 }
             }
 
@@ -1748,10 +1722,10 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(document.uri));
+            SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
+            SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
         } else {
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', false);
+            SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
@@ -2741,18 +2715,17 @@ export class DefaultClient implements Client {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
-        scanForCompilersDone = true;
-        void vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
-        void vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
-        void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);
+        SessionState.scanForCompilersDone.set(true);
+        SessionState.scanForCompilersEmpty.set(results.knownCompilers === undefined || !results.knownCompilers.length);
+        SessionState.trustedCompilerFound.set(results.trustedCompilerFound);
         return results;
     }
 
     private updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor && util.isCpp(editor.document)) {
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
+            SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri));
+            SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2774,7 +2747,7 @@ export class DefaultClient implements Client {
                 }
             }
         } else {
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', false).then(undefined, logAndReturn.undefined);
+            SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
