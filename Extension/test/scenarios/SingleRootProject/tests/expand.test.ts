@@ -3,9 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
-import { expandAllStrings, ExpansionOptions } from "../../src/expand";
+import { expandAllStrings, ExpansionOptions } from "../../../../src/expand";
 
-suite('Var expansion validation', () => {
+describe('${Variable} Expansion', () => {
     test('Expand all strings', async () => {
         const input: object = {
             in1: "${test2}",

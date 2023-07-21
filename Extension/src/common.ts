@@ -30,9 +30,6 @@ export type Mutable<T> = {
     -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? Mutable<U>[] : Mutable<T[P]>
 };
 
-// Platform-specific environment variable delimiter
-export const envDelimiter: string = (process.platform === 'win32') ? ";" : ":";
-
 export let extensionPath: string;
 export let extensionContext: vscode.ExtensionContext | undefined;
 export function setExtensionContext(context: vscode.ExtensionContext): void {
@@ -401,7 +398,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
                                 newValue = "";
                                 break;
                             } else {
-                                newValue = v.join(envDelimiter);
+                                newValue = v.join(path.delimiter);
                             }
                         }
                     }

@@ -5,8 +5,8 @@
 
 /* eslint-disable no-prototype-builtins */
 
-import * as fs from 'fs';
-import * as os from 'os';
+import { resolve } from 'path';
+import { $root, read, write } from './common';
 
 function appendFieldsToObject(reference: any, obj: any): any {
     // Make sure it is an object type
@@ -116,10 +116,10 @@ function mergeReferences(baseDefinitions: any, additionalDefinitions: any): void
     }
 }
 
-function generateOptionsSchema(): void {
-    const packageJSON: any = JSON.parse(fs.readFileSync('package.json').toString());
-    const schemaJSON: any = JSON.parse(fs.readFileSync('tools/OptionsSchema.json').toString());
-    const symbolSettingsJSON: any = JSON.parse(fs.readFileSync('tools/VSSymbolSettings.json').toString());
+export async function main() {
+    const packageJSON: any = JSON.parse(await read(resolve($root,'package.json')));
+    const schemaJSON: any = JSON.parse(await read(resolve($root,'tools/OptionsSchema.json')));
+    const symbolSettingsJSON: any = JSON.parse(await read(resolve($root,'tools/VSSymbolSettings.json')));
 
     mergeReferences(schemaJSON.definitions, symbolSettingsJSON.definitions);
 
@@ -135,15 +135,10 @@ function generateOptionsSchema(): void {
     packageJSON.contributes.debuggers[1].configurationAttributes.attach = schemaJSON.definitions.CppvsdbgAttachOptions;
 
     let content: string = JSON.stringify(packageJSON, null, 4);
-    if (os.platform() === 'win32') {
-        content = content.replace(/\n/gm, "\r\n");
-    }
 
     // We use '\u200b' (unicode zero-length space character) to break VS Code's URL detection regex for URLs that are examples. This process will
     // convert that from the readable espace sequence, to just an invisible character. Convert it back to the visible espace sequence.
-    content = content.replace(/\u200b/gm, "\\u200b");
+    content = content.replace(/\u200b/gm, "\\u200b") + "\n";
 
-    fs.writeFileSync('package.json', content);
+    await write('package.json', content);
 }
-
-generateOptionsSchema();

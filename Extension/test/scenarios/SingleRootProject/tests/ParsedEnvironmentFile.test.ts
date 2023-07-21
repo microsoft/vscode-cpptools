@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from 'assert';
-import { Environment, ParsedEnvironmentFile } from '../../src/Debugger/ParsedEnvironmentFile';
+import { Environment, ParsedEnvironmentFile } from '../../../../src/Debugger/ParsedEnvironmentFile';
 
 // Because the environment variable is set as an array, the index does not matter.
 function assertEnvironmentEqual(env: Environment[], name: string, value: string): void {

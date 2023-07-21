@@ -4,9 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as assert from 'assert';
+import { suite } from 'mocha';
 import * as os from 'os';
-import { CimProcessParser, Process, PsProcessParser, WmicProcessParser } from '../../src/Debugger/nativeAttach';
-import { LinuxDistribution } from '../../src/linuxDistribution';
+import { CimProcessParser, Process, PsProcessParser, WmicProcessParser } from '../../../../src/Debugger/nativeAttach';
+import { LinuxDistribution } from '../../../../src/linuxDistribution';
 
 suite("LinuxDistro Tests", () => {
     test("Parse valid os-release file", () => {
@@ -115,7 +116,7 @@ suite("Pick Process Tests", () => {
 
         const process1: Process = parsedOutput[0];
         const process2: Process = parsedOutput[1];
-        const process3: Process = parsedOutput[2];
+        // const process3: Process = parsedOutput[2];
 
         assert.equal(process1.commandLine, 'ScopedBookmarkAgent');
         assert.equal(process1.name, 'ScopedBookmarkAgent');

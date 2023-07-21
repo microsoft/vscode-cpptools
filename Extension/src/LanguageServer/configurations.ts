@@ -743,7 +743,7 @@ export class CppProperties {
         }
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
-            const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+            const entries: string[] = util.resolveVariables(entry, env).split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
             resolvedVariables.push(...entries);
         });
         if (!glob) {

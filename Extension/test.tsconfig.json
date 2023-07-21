@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2022",
-    "outDir": "out",
+     "outDir": "dist",
     "lib": [
       "ES2022",
       "dom"

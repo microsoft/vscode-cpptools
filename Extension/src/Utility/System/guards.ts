@@ -5,6 +5,7 @@
 
 import { Socket } from 'node:net';
 import { isPromise } from 'node:util/types';
+import { Emitter } from '../Eventing/emitter';
 import { AsyncConstructor, Constructor, Primitive } from './types';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -25,7 +26,7 @@ export class is {
     }
 
     static nullish(value: any): value is null | undefined {
-        return value === null || value === undefined || value === '';
+        return value === null || value === undefined;
     }
 
     static promise(value: any): value is Promise<any> {
@@ -33,11 +34,11 @@ export class is {
     }
 
     static iterable<T = unknown>(instance: any): instance is Iterable<T> {
-        return typeof instance !== 'string' && !!instance[Symbol.iterator];
+        return !(is.nullish(instance) || is.string(instance)) && !!instance[Symbol.iterator];
     }
 
     static asyncIterable(instance: any): instance is AsyncIterable<unknown> {
-        return !!instance[Symbol.asyncIterator];
+        return !is.nullish(instance) && !!instance[Symbol.asyncIterator];
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -63,5 +64,15 @@ export class is {
 
     static function(instance: any): instance is Function {
         return typeof instance === 'function';
+    }
+
+    static emitter(instance: any): instance is Emitter {
+        return (typeof instance?.isKnownEvent) === 'function';
+    }
+    static cancelled(instance: any): instance is 'Cancelled' {
+        return instance === 'Cancelled';
+    }
+    static continue(instance: any): instance is undefined {
+        return instance === undefined;
     }
 }
