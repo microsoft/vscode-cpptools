@@ -27,7 +27,7 @@ suite("[Quick info test]", function(): void {
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         disposables.push(testHook);
 
-        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus)=> {
+        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus) => {
             if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
                 getIntelliSenseStatus.resolve();
             }
@@ -36,7 +36,7 @@ suite("[Quick info test]", function(): void {
         // Start language server
         console.log("Open file: " + fileUri.toString());
         await vscode.commands.executeCommand("vscode.open", fileUri);
-        await timeout(5000, getIntelliSenseStatus.then(()=>getIntelliSenseStatus.reset()));
+        await timeout(5000, getIntelliSenseStatus.then(() => getIntelliSenseStatus.reset()));
     });
 
     suiteTeardown(function(): void {
@@ -56,7 +56,7 @@ suite("[Quick info test]", function(): void {
         assert.strictEqual(actual, expected);
     });
 
-    // [TODO] - temporarily skip this test at the moment - it doesn't currently work (locally anyway) -- 
+    // [TODO] - temporarily skip this test at the moment - it doesn't currently work (locally anyway) --
     test.skip("[Hover over function call - Doxygen comment]", async () => {
         const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', fileUri, new vscode.Position(36, 9)));
 

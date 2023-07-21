@@ -718,7 +718,7 @@ class ClientModel {
 }
 
 export interface Client {
-    readonly ready: Promise<unknown>;
+    readonly ready: Promise<void>;
     enqueue<T>(task: () => Promise<T>): Promise<T>;
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
@@ -2213,7 +2213,7 @@ export class DefaultClient implements Client {
      *
      * This is lightweight, because if the queue is empty, then the only thing to wait for is the client itself to be initialized
      */
-    get ready(): Promise<unknown> {
+    get ready(): Promise<void> {
         if (!DefaultClient.dispatching.isCompleted || DefaultClient.queue.length) {
             // if the dispatcher has stuff going on, then we need to stick in a promise into the queue so we can
             // be notified when it's our turn
@@ -3744,7 +3744,7 @@ class NullClient implements Client {
     private stringEvent = new vscode.EventEmitter<string>();
     private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
-    readonly ready: Promise<unknown> = Promise.resolve();
+    readonly ready: Promise<void> = Promise.resolve();
 
     async enqueue<T>(task: () => Promise<T>) {
         return task();

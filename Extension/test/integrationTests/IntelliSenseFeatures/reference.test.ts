@@ -26,7 +26,7 @@ suite(`[Reference test]`, function(): void {
         cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get CppToolsTestApi");
         testHook = cpptools.getTestHook();
 
-        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus)=> {
+        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus) => {
             if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
                 getIntelliSenseStatus.resolve();
             }
@@ -38,7 +38,7 @@ suite(`[Reference test]`, function(): void {
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await timeout(5000, getIntelliSenseStatus.then(()=>getIntelliSenseStatus.reset()));
+        await timeout(5000, getIntelliSenseStatus.then(() => getIntelliSenseStatus.reset()));
     });
 
     test("[Find confirmed references of a symbol]", async () => {
