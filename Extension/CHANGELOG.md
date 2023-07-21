@@ -8,7 +8,7 @@
 
 ### Bug Fixes
 * Fix a couple bugs with documentation comments. [#5241](https://github.com/microsoft/vscode-cpptools/issues/5241)
-* Added `__float128` support in gcc. [#9558](https://github.com/microsoft/vscode-cpptools/issues/9558)
+* Added `__float128` support in gcc IntelliSense mode. [#9558](https://github.com/microsoft/vscode-cpptools/issues/9558)
 * Address various issues with support for gcc 13. [#11038](https://github.com/microsoft/vscode-cpptools/issues/11038)
 * Fix `#include` completion leaving an extra `>`. [#11042](https://github.com/microsoft/vscode-cpptools/issues/11042)
 * Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
