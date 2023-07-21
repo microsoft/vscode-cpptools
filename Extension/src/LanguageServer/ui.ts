@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { sleep } from '../Utility/Async/sleep';
+import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
@@ -654,7 +655,7 @@ export class LanguageStatusUI {
             });
         };
 
-        if (this.curConfigurationStatus) {
+        if (is.promise(this.curConfigurationStatus)) {
             this.curConfigurationStatus = this.curConfigurationStatus.then(result => {
                 if (priority > result.priority) {
                     return showPrompt();

@@ -16,7 +16,7 @@ suite(`[Reference test]`, function(): void {
     const path: string = wf.uri.fsPath + "/references.cpp";
     const fileUri: vscode.Uri = vscode.Uri.file(path);
     let testHook: apit.CppToolsTestHook;
-   
+
     let document: vscode.TextDocument;
 
     suiteSetup(async function(): Promise<void> {

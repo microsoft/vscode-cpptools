@@ -88,17 +88,17 @@ function posix(argsString: string): string[] {
     let brace = 0;
 
     let arg = '';
-    let args = ['printf',`%s\\\\n`];
+    let args = ['printf', `%s\\\\n`];
 
-    for(let i = 0; i < argsString.length; ++i) {
+    for (let i = 0; i < argsString.length; ++i) {
         const char = argsString[i];
         const next = argsString[i + 1];
 
-        switch(char) {
+        switch (char) {
 
             case '\\':
-                if(!singleQuote) {
-                    if(next === '\\') {
+                if (!singleQuote) {
+                    if (next === '\\') {
                         arg += '\\\\\\\\';
                         ++i;
                         continue;
@@ -110,31 +110,31 @@ function posix(argsString: string): string[] {
                 break;
 
             case '\'':
-                if(!doubleQuote) {
+                if (!doubleQuote) {
                     singleQuote = !singleQuote;
                 }
                 arg += "'";
                 continue;
 
             case '"':
-                if(!singleQuote) {
+                if (!singleQuote) {
                     doubleQuote = !doubleQuote;
                 }
                 arg += '"';
                 continue;
             case '(':
-                if(!singleQuote && !doubleQuote) {
+                if (!singleQuote && !doubleQuote) {
                     ++paren;
                 }
                 break;
             case ')':
-                if(!singleQuote && !doubleQuote) {
+                if (!singleQuote && !doubleQuote) {
                     --paren;
                 }
                 break;
 
             case '}':
-                if(!singleQuote && !doubleQuote && !brace) {
+                if (!singleQuote && !doubleQuote && !brace) {
                     throw new Error(`Unsupported character: ${char}`);
                 }
                 brace--;
@@ -148,14 +148,14 @@ function posix(argsString: string): string[] {
             case '>':
             case '{':
 
-                if(!singleQuote && !doubleQuote) {
+                if (!singleQuote && !doubleQuote) {
                     throw new Error(`Unsupported character: ${char}`);
                 }
                 break;
             case '$':
-                if(!singleQuote) {
-                    if(next === '(') {
-                        if(argsString[i + 2] === '(') {
+                if (!singleQuote) {
+                    if (next === '(') {
+                        if (argsString[i + 2] === '(') {
                             paren += 2;
                             i += 2;
                             arg += '$((';
@@ -163,7 +163,7 @@ function posix(argsString: string): string[] {
                         }
                         throw new Error(`Nested Commands not supported`);
                     }
-                    if(next === '{') {
+                    if (next === '{') {
                         arg += '${';
                         brace++;
                         i++;
@@ -172,16 +172,16 @@ function posix(argsString: string): string[] {
                 }
                 break;
             case '`':
-                if(!singleQuote) {
+                if (!singleQuote) {
                     throw new Error(`Nested Commands not supported`);
                 }
                 break;
             case ' ':
             case '\t':
-                if(doubleQuote || singleQuote || paren || brace) {
+                if (doubleQuote || singleQuote || paren || brace) {
                     break;
                 }
-                if(arg.length > 0) {
+                if (arg.length > 0) {
                     args.push(arg);
                     arg = '';
                 }
@@ -189,33 +189,33 @@ function posix(argsString: string): string[] {
         }
         arg += char;
     }
-    if(arg.length > 0) {
+    if (arg.length > 0) {
         args.push(arg);
     }
 
     // args = args.map(s => s.includes('"') ? `'${s}'` : s);
     args = args.map(s => {
-        if(s.startsWith(`'`) && s.endsWith(`'`)) {
+        if (s.startsWith(`'`) && s.endsWith(`'`)) {
             return `"${s}"`;
         }
-        if(s.startsWith('$[') && s.endsWith(']')) {
+        if (s.startsWith('$[') && s.endsWith(']')) {
             return `${s}`;
         }
         return `'${s}'`;
     });
 
-    if(paren !== 0) {
+    if (paren !== 0) {
         throw new Error(`Unbalanced parenthesis`);
     }
-    if(singleQuote || doubleQuote) {
+    if (singleQuote || doubleQuote) {
         throw new Error(`Unbalanced quotes`);
     }
-    if(brace) {
+    if (brace) {
         throw new Error(`Unbalanced braces`);
     }
 
-    const r = spawnSync(`eval`, args,{shell: process.env['SHELL'] || true});
-    if(r.error || r.status !== 0) {
+    const r = spawnSync(`eval`, args, {shell: process.env['SHELL'] || true});
+    if (r.error || r.status !== 0) {
         throw new Error('Failed to parse command line');
     }
     const txt = r.stdout.toString();
@@ -232,7 +232,7 @@ function posix(argsString: string): string[] {
 */
 export function extractArgs(argsString: string): string[] {
     argsString = argsString.trim();
-    switch(OperatingSystem) {
+    switch (OperatingSystem) {
         case 'win32':
             return windows(argsString);
         case 'linux':

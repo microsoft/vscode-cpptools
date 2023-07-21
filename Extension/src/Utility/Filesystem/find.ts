@@ -72,7 +72,7 @@ async function readDirectory(fullPath: string, executableExtensions: Set<string>
     if (!folder.children) {
         folder.children = new Map();
 
-        if (!promise) {
+        if (!is.promise(promise)) {
             // if we didn't already have a promise, create one now.
             // this can happen when the parent has scanned and added in the child but nobody has asked for the children yet.
             promise = new ManualPromise<FolderWithChildren | undefined>();

@@ -794,7 +794,7 @@ export class CppProperties {
         if (property === null || property === undefined || property === "${default}") {
             property = defaultValue;
         }
-        if (property === null || property === undefined || (acceptBlank !== true && property === "")) {
+        if (property === null || property === undefined || (acceptBlank && property === "")) {
             return undefined;
         }
         return util.resolveVariables(property, env);

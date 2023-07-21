@@ -35,6 +35,7 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderE
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
+import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
@@ -2100,7 +2101,7 @@ export class DefaultClient implements Client {
                 return;
             }
             const settings: CppSettings = new CppSettings(this.RootUri);
-            if (settings.configurationWarnings === true && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+            if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                 const dismiss: string = localize("dismiss.button", "Dismiss");
                 const disable: string = localize("diable.warnings.button", "Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2171,7 +2172,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(cppSettings.vcpkgEnabled === true);
+        return Promise.resolve(!!cppSettings.vcpkgEnabled);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
@@ -2268,7 +2269,7 @@ export class DefaultClient implements Client {
         do {
             // pick items up off the queue and run then one at a time until the queue is empty
             const [promise, task] = DefaultClient.queue.shift() ?? [];
-            if (promise) {
+            if (is.promise(promise)) {
                 try {
                     promise.resolve(task ? await task() : undefined);
                 } catch (e) {

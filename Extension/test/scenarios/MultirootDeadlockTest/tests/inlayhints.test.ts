@@ -52,7 +52,7 @@ suite("[Inlay hints test]", function(): void {
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        
+
         saveOriginalSettings();
         await useDefaultSettings();
     });
@@ -97,12 +97,12 @@ suite("[Inlay hints test]", function(): void {
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, disabled);
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, disabled);
-        
+
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, enabled);
-        
+
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Type;

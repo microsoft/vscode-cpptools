@@ -93,7 +93,7 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
             }
 
             // we were given a valid executable path, so we'll just check with the event listeners real quick.
-            const bin = await emitNow<string>('select-binary', Descriptors.none, executable, opts.choices ? await opts.choices : new Set()) || executable;
+            const bin = await emitNow<string>('select-binary', Descriptors.none, executable, is.promise(opts.choices) ? await opts.choices : new Set()) || executable;
 
             // ensure that the executable is an absolute path
             asserts.isAbsolute(bin);

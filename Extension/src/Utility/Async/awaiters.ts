@@ -51,7 +51,7 @@ export function reiterable<T>(iterable: AsyncIterable<T>): AsyncIterable<T> {
                         return { value: undefined, done: true };
                     }
                     index++;
-                    if (!nextElement) {
+                    if (!is.promise(nextElement)) {
                         nextElement = iterable[Symbol.asyncIterator]().next().then(element => {
                             if (!(done = element.done)) {
                                 cache.push(element.value);
@@ -136,7 +136,7 @@ export function accumulator<T>(...iterables: Some<T>[]): AsynchIterable<T> {
 export type Some<T> = T | Promise<T> | AsyncIterable<T | undefined> | AsyncIterable<Promise<T> | Promise<undefined>> | Iterable<T> | Iterable<Promise<T>>;
 
 export async function* asyncOf<T>(...items: (undefined | Promise<undefined> | Some<T>)[]): AsyncIterable<NonNullable<T>> {
-    if(is.asyncIterable(items)) {
+    if (is.asyncIterable(items)) {
         for await (const item of items)  {
             if (is.asyncIterable(item) || is.iterable(item)) {
                 yield* item as any;

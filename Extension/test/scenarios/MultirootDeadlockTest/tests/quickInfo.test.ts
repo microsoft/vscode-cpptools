@@ -27,7 +27,7 @@ suite("[Quick info test]", function(): void {
         // Start language server
         console.log("Open file: " + fileUri.toString());
         await vscode.commands.executeCommand("vscode.open", fileUri);
-        
+
     });
 
     suiteTeardown(function(): void {

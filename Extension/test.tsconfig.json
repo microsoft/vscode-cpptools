@@ -1,23 +1,28 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2022",
-     "outDir": "dist",
-    "lib": [
-      "ES2022",
-      "dom"
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2022",
+        "outDir": "dist",
+        "lib": [
+            "ES2022",
+            "dom"
+        ],
+        "sourceMap": true,
+        "rootDir": ".",
+        "removeComments": true,
+        "forceConsistentCasingInFileNames": true,
+        "strictNullChecks": true
+    },
+    "include": [
+        "test/**/*.ts",
+        "tools/**/*.ts",
+        "ui/**/*.ts",
+        "./vscode*.d.ts",
+        "src/types/*.d.ts",
+        "src/**/*.ts"
     ],
-    "sourceMap": true,
-    "rootDir": ".",
-    "removeComments": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "test/**/*.ts",
-    "tools/**/*.ts",
-    "ui/**/*.ts",
-    "./vscode*.d.ts",
-    "src/types/*.d.ts",
-    "src/**/*.ts"
-  ]
+    "exclude": [
+        "test/attic/**",
+        "node_modules/**"
+    ]
 }

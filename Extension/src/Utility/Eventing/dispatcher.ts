@@ -77,7 +77,7 @@ async function dispatch<TResult>(event: Event<any, TResult>): Promise<void> {
             }) : r;
 
             // if it is an event/request (as opposed to a notification), then process it.
-            if (event.completed) {
+            if (is.promise(event.completed)) {
                 // if they returned some kind of value, then use that as the result, otherwise, use the default
                 resultValue = r as TResult | EventStatus;
 
@@ -96,7 +96,7 @@ async function dispatch<TResult>(event: Event<any, TResult>): Promise<void> {
 
     // then the async handlers (for events with possible result handling)
 
-    if (!event.completed) {
+    if (!is.promise(event.completed)) {
         // no event.completed, which means this is a notifier
         // since notifiers are not cancellable, we can run them all in parallel
         // and they don't need to worry about rentrancy

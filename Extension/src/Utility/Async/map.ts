@@ -24,11 +24,11 @@ export class AsyncMap<TKey, TValue> {
     }
     async *entries(): AsyncIterable<[TKey, TValue]> {
         // eslint-disable-next-line prefer-const
-        for(let [key,value] of this.map.entries()) {
-            if(is.promise(value)) {
+        for (let [key, value] of this.map.entries()) {
+            if (is.promise(value)) {
                 value = await value;
             }
-            if(!is.nullish(value)) {
+            if (!is.nullish(value)) {
                 yield [key, value];
             }
         }
@@ -37,11 +37,11 @@ export class AsyncMap<TKey, TValue> {
         return this.map.keys();
     }
     async *values(): AsyncIterable<TValue > {
-        for(let value of this.map.values()) {
-            if(is.promise(value)) {
+        for (let value of this.map.values()) {
+            if (is.promise(value)) {
                 value = await value;
             }
-            if(!is.nullish(value)) {
+            if (!is.nullish(value)) {
                 yield value;
             }
         }
@@ -55,14 +55,14 @@ export class AsyncMap<TKey, TValue> {
         let result: Promise<TValue|undefined>|TValue|undefined = this.map.get(key);
 
         // if we don't get a match, then we'll try to set the value with the initializer
-        if(is.nullish(result)) {
+        if (is.nullish(result)) {
             // if the initializer is a function, then we'll call it to get the value
-            if(is.function(initializer)) {
+            if (is.function(initializer)) {
                 result = initializer();
             }
 
             // if we're not handed a promise or a value, then we're done
-            if(is.nullish(result)) {
+            if (is.nullish(result)) {
                 return undefined;
             }
 
@@ -70,9 +70,9 @@ export class AsyncMap<TKey, TValue> {
             this.map.set(key, result);
 
             // if the initializer is a promise, then we'll tack on a bit of logic to remove the value from the map if the promise resolves to undefined
-            if(is.promise(result)) {
+            if (is.promise(result)) {
                 return result.then(v => {
-                    if(is.nullish(v)) {
+                    if (is.nullish(v)) {
                         this.map.delete(key);
                     }
                     return v;
