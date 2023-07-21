@@ -14,7 +14,7 @@
 * Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
 * Fix an issue with matching of glob patterns containing path delimiters. [#11132](https://github.com/microsoft/vscode-cpptools/issues/11132)
 * Fix Rank > 1 Display Strings for Natvis. [PR MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
-* Fix a crash (stack overflow) related to directories with a very large number of files.
+* Fix a crash related to directories with a very large number of files. [#11226](https://github.com/microsoft/vscode-cpptools/issues/11226)
 * Fix some crashes identified by crash telemetry.
 * Fix an issue that could cause zombie processes on Linux/Mac.
 * Address some issues with glibc version compatibility. Native binaries for cpptools and the bundled clang-tidy/clang-format are now built with musl and fully statically linked.
