@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.17.0: July 24, 2023
+## Version 1.17.0: July 26, 2023
 ### Enhancements
 * Enable a subset of markdown to render in hover by default and a `C_Cpp.markdownInComments` setting. [#6020](https://github.com/microsoft/vscode-cpptools/issues/6020), [#10461](https://github.com/microsoft/vscode-cpptools/issues/10461)
 * Add default compiler detection of additional compilers in MSYS environments. [#11211](https://github.com/microsoft/vscode-cpptools/issues/11211)
@@ -13,7 +13,7 @@
 * Fix `#include` completion leaving an extra `>`. [#11042](https://github.com/microsoft/vscode-cpptools/issues/11042)
 * Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
 * Fix an issue with matching of glob patterns containing path delimiters. [#11132](https://github.com/microsoft/vscode-cpptools/issues/11132)
-* Fix Rank > 1 Display Strings for Natvis. [MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
+* Fix Rank > 1 Display Strings for Natvis. [PR MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
 * Fix a crash (stack overflow) related to directories with a very large number of files.
 * Fix some crashes identified by crash telemetry.
 * Fix an issue that could cause zombie processes on Linux/Mac.
@@ -21,10 +21,10 @@
 * Fix the wrong compiler being set as default when configured to use `compile_commands.json` and overriding the compiler used there with an explicit `compilerPath`.
 
 ### Thank You to the Contributors
-* [@gareth-rees (Gareth Rees)](https://github.com/gareth-rees): Always use `--simple-values` in newer versions of GDB. [MIEngine#1400](https://github.com/microsoft/MIEngine/pull/1400)
-* [@iAbadia (Iñaki)](https://github.com/iAbadia): Align use of 'sendInvalidate' request arguments. [MIEngine#1402](https://github.com/microsoft/MIEngine/pull/1402)
-* [@intel-rganesh (Rakesh Ganesh)](https://github.com/intel-rganesh): Introduce `--thread` and `--frame options`. [MIEngine#1401](https://github.com/microsoft/MIEngine/pull/1401)
-* [@sbobko (Sergey Bobko)](https://github.com/sbobko): Add 'sendInvalidate' request. [MIEngine#1367](https://github.com/microsoft/MIEngine/pull/1367)
+* [@gareth-rees (Gareth Rees)](https://github.com/gareth-rees): Always use `--simple-values` in newer versions of GDB. [PR MIEngine#1400](https://github.com/microsoft/MIEngine/pull/1400)
+* [@iAbadia (Iñaki)](https://github.com/iAbadia): Align use of 'sendInvalidate' request arguments. [PR MIEngine#1402](https://github.com/microsoft/MIEngine/pull/1402)
+* [@intel-rganesh (Rakesh Ganesh)](https://github.com/intel-rganesh): Introduce `--thread` and `--frame options`. [PR MIEngine#1401](https://github.com/microsoft/MIEngine/pull/1401)
+* [@sbobko (Sergey Bobko)](https://github.com/sbobko): Add 'sendInvalidate' request. [PR MIEngine#1367](https://github.com/microsoft/MIEngine/pull/1367)
 * [@yne (Rémy F.)](https://github.com/yne): Add wildcard support for `includePath`. [PR #10388](https://github.com/microsoft/vscode-cpptools/pull/10388)
 
 ## Version 1.16.3: June 23, 2023
