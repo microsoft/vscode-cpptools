@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 /* eslint-disable no-cond-assign */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { fail } from 'assert';
 import { IOptions, glob as globSync } from 'glob';

@@ -3,12 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from 'assert';
+import { suite } from 'mocha';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
-import { ManualSignal } from '../../../src/Utility/Async/manualSignal';
-import { timeout } from '../../../src/Utility/Async/timeout';
-import * as testHelpers from '../testHelpers';
+import * as testHelpers from '../../../common/testHelpers';
 
 suite(`[Reference test]`, function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -17,28 +16,20 @@ suite(`[Reference test]`, function(): void {
     const path: string = wf.uri.fsPath + "/references.cpp";
     const fileUri: vscode.Uri = vscode.Uri.file(path);
     let testHook: apit.CppToolsTestHook;
-    const getIntelliSenseStatus = new ManualSignal<void>();
+   
     let document: vscode.TextDocument;
 
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
 
-        cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get CppToolsTestApi");
+        cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail('Could not get CppToolsTestApi');
         testHook = cpptools.getTestHook();
-
-        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus) => {
-            if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
-                getIntelliSenseStatus.resolve();
-            }
-        });
-
         disposables.push(testHook);
 
         // Start language server
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await timeout(5000, getIntelliSenseStatus.then(() => getIntelliSenseStatus.reset()));
     });
 
     test("[Find confirmed references of a symbol]", async () => {

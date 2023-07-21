@@ -4,9 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/triple-slash-reference */
-/// <reference path="../../../vscode.d.ts" />
-import * as vscode from 'vscode';
+/// <reference path="../../../../vscode.d.ts" />
 import * as assert from 'assert';
+import { suite } from 'mocha';
+import * as vscode from 'vscode';
 
 suite(`Debug Integration Test: `, function(): void {
     let origFactoryFile: string;

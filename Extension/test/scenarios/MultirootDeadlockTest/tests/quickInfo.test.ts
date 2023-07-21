@@ -7,9 +7,7 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
-import { ManualSignal } from '../../../src/Utility/Async/manualSignal';
-import { timeout } from '../../../src/Utility/Async/timeout';
-import * as testHelpers from '../testHelpers';
+import * as testHelpers from '../../../common/testHelpers';
 
 suite("[Quick info test]", function(): void {
     let cpptools: apit.CppToolsTestApi;
@@ -17,26 +15,19 @@ suite("[Quick info test]", function(): void {
     const filePath: string = `${vscode.workspace.workspaceFolders?.[1]?.uri.fsPath}/quickInfo.cpp`;
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     let platform: string = "";
-    const getIntelliSenseStatus = new ManualSignal<void>();
 
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
 
-        cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get CppToolsTestApi");
+        cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail('Could not get CppToolsTestApi');
         platform = os.platform();
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         disposables.push(testHook);
 
-        testHook.IntelliSenseStatusChanged((result: apit.IntelliSenseStatus) => {
-            if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
-                getIntelliSenseStatus.resolve();
-            }
-        });
-
         // Start language server
         console.log("Open file: " + fileUri.toString());
         await vscode.commands.executeCommand("vscode.open", fileUri);
-        await timeout(5000, getIntelliSenseStatus.then(() => getIntelliSenseStatus.reset()));
+        
     });
 
     suiteTeardown(function(): void {

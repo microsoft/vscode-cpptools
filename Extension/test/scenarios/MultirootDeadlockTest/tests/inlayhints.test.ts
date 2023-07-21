@@ -2,17 +2,17 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-
-/* eslint-disable @typescript-eslint/triple-slash-reference */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-
-/// <reference path="../../../vscode.d.ts" />
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/triple-slash-reference */
+/// <reference path="../../../../vscode.d.ts" />
 
 import * as assert from 'assert';
+import { suite } from 'mocha';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
-import * as testHelpers from '../testHelpers';
+import * as testHelpers from '../../../common/testHelpers';
 
 suite("[Inlay hints test]", function(): void {
     // Settings
@@ -119,7 +119,7 @@ suite("[Inlay hints test]", function(): void {
         assertHintValues(result2, 10, 28, 14, ": int", expectedKind);
         assertHintValues(result2, 11, 29, 15, ": int", expectedKind);
     });
-    
+
     test("[Inlay Hints - auto type, show on left]", async () => {
         const range: vscode.Range = new vscode.Range(new vscode.Position(15, 0), new vscode.Position(31, 0));
 

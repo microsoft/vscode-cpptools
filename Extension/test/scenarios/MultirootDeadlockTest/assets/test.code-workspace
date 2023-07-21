@@ -1,0 +1,14 @@
+{
+	"folders": [
+        {
+            "path": "./sub1/sub2"
+        },
+        {
+            "path": "./SingleRootProject"
+        },
+        {
+            "path": "./sub1"
+        }
+    ],
+    "settings": {}
+}
