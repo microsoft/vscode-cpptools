@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { ManualPromise } from './manual-promise';
+import { ManualPromise } from './manualPromise';
 import { Resetable } from './resolvable';
 
 /**
@@ -18,9 +18,11 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     [Symbol.toStringTag] = 'Promise';
 
     private promise = new ManualPromise<T>();
-    constructor() {
-        // initially not reset.
-        this.promise.resolve();
+    constructor(initiallyReset = false) {
+        if (!initiallyReset) {
+            // initially not reset.
+            this.promise.resolve();
+        }
     }
     get isPending(): boolean {
         return this.promise.isPending;
@@ -33,6 +35,12 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
     }
     get isRejected(): boolean {
         return this.promise.isRejected;
+    }
+    get isSet(): boolean {
+        return this.promise.isCompleted;
+    }
+    get isReset(): boolean {
+        return !this.promise.isCompleted;
     }
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -70,22 +78,26 @@ export class ManualSignal<T> implements Promise<T>, Resetable<T> {
      * @param value
      */
     resolve(value: T): Resetable<T> {
-        this.promise.resolve(value);
+        if (!this.promise.isCompleted) {
+            this.promise.resolve(value);
+        }
         return this as unknown as Resetable<T>;
     }
 
     /**
      * A method to manually reject the Promise.
      *
-     *  This doesn't reset this instance to a new promise interally, call 'reset' to do that.
+     * This doesn't reset this instance to a new promise interally, call 'reset' to do that.
      * @param value
      */
     reject(reason: any): Resetable<T> {
-        this.promise.reject(reason);
+        if (!this.promise.isCompleted) {
+            this.promise.reject(reason);
+        }
         return this as unknown as Resetable<T>;
     }
 
-    /** Manually reset the promise to an uncompleted state.  */
+    /** Manually reset the promise to an uncompleted state. */
     reset(): Resetable<T> {
         if (this.promise.isCompleted) {
             this.promise = new ManualPromise<T>();

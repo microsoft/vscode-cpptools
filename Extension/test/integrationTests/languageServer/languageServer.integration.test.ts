@@ -2,13 +2,17 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+
+/* eslint-disable @typescript-eslint/triple-slash-reference */
+/// <reference path="../../../vscode.d.ts" />
+
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
-import * as util from '../../../src/common';
 import * as config from '../../../src/LanguageServer/configurations';
 import { getLanguageConfigFromPatterns } from '../../../src/LanguageServer/languageConfig';
+import * as util from '../../../src/common';
 import * as testHelpers from '../testHelpers';
 
 suite("multiline comment setting tests", function(): void {
@@ -52,27 +56,27 @@ suite("multiline comment setting tests", function(): void {
     ];
 
     test("Check the default OnEnterRules for C", () => {
-        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('c', [ "/**" ]).onEnterRules;
+        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('c', [ "/**" ]).onEnterRules ?? assert.fail('onEnterRules is undefined');
         assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Check for removal of single line comment continuations for C", () => {
-        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('c', [ "/**", "///" ]).onEnterRules;
+        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('c', [ "/**", "///" ]).onEnterRules ?? assert.fail('onEnterRules is undefined');
         assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Check the default OnEnterRules for C++", () => {
-        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "/**" ]).onEnterRules;
+        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "/**" ]).onEnterRules ?? assert.fail('onEnterRules is undefined');
         assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Make sure duplicate rules are removed", () => {
-        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "/**", { begin: "/**", continue: " * " }, "/**" ]).onEnterRules;
+        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "/**", { begin: "/**", continue: " * " }, "/**" ]).onEnterRules ?? assert.fail('onEnterRules is undefined');
         assert.deepStrictEqual(rules, defaultMLRules);
     });
 
     test("Check single line rules for C++", () => {
-        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "///" ]).onEnterRules;
+        const rules: vscode.OnEnterRule[] = getLanguageConfigFromPatterns('cpp', [ "///" ]).onEnterRules ?? assert.fail('onEnterRules is undefined');
         assert.deepStrictEqual(rules, defaultSLRules);
     });
 
@@ -81,10 +85,11 @@ suite("multiline comment setting tests", function(): void {
 /* **************************************************************************** */
 
 function cppPropertiesPath(): string {
-    return vscode.workspace.workspaceFolders[0].uri.fsPath + "/.vscode/c_cpp_properties.json";
+    const wf = vscode.workspace.workspaceFolders?.[0] ?? assert.fail("No workspace folder open");
+    return `${wf.uri.fsPath}/.vscode/c_cpp_properties.json`;
 }
 
-async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
+async function changeCppProperties(cppProperties: config.ConfigurationJson, _disposables: vscode.Disposable[]): Promise<void> {
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     const contents: string = await util.readFileText(cppPropertiesPath());
     console.log("    wrote c_cpp_properties.json: " + contents);
@@ -121,7 +126,7 @@ suite("extensibility tests v3", function(): void {
     const provider: api.CustomConfigurationProvider = {
         name: "cpptoolsTest-v3",
         extensionId: "ms-vscode.cpptools-test3",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -145,7 +150,7 @@ suite("extensibility tests v3", function(): void {
         canProvideBrowseConfigurationsPerFolder(): Thenable<boolean> {
             return Promise.resolve(true);
         },
-        provideFolderBrowseConfiguration(uri: vscode.Uri): Thenable<api.WorkspaceBrowseConfiguration> {
+        provideFolderBrowseConfiguration(_uri: vscode.Uri): Thenable<api.WorkspaceBrowseConfiguration> {
             lastBrowseResult = defaultFolderBrowseConfig;
             return Promise.resolve(defaultFolderBrowseConfig);
         },
@@ -156,7 +161,7 @@ suite("extensibility tests v3", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        cpptools = await apit.getCppToolsTestApi(api.Version.v3);
+        cpptools = await apit.getCppToolsTestApi(api.Version.v3) ?? assert.fail('Unable to get the CppToolsTestApi');
         cpptools.registerCustomConfigurationProvider(provider);
         cpptools.notifyReady(provider);
         disposables.push(cpptools);
@@ -174,7 +179,8 @@ suite("extensibility tests v3", function(): void {
 
     test("Check provider - main3.cpp", async () => {
         // Open a c++ file to start the language server.
-        const path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main3.cpp";
+        const wf = vscode.workspace.workspaceFolders?.[0] ?? assert.fail("No workspace folder open");
+        const path: string = `${wf.uri.fsPath}/main3.cpp`;
         const uri: vscode.Uri = vscode.Uri.file(path);
 
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
@@ -221,7 +227,7 @@ suite("extensibility tests v2", function(): void {
     const provider: any = {
         name: "cpptoolsTest-v2",
         extensionId: "ms-vscode.cpptools-test2",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -249,7 +255,7 @@ suite("extensibility tests v2", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        cpptools = await apit.getCppToolsTestApi(api.Version.v2);
+        cpptools = await apit.getCppToolsTestApi(api.Version.v2) ?? assert.fail('Unable to get the CppToolsTestApi');
         cpptools.registerCustomConfigurationProvider(provider);
         cpptools.notifyReady(provider);
         disposables.push(cpptools);
@@ -267,7 +273,8 @@ suite("extensibility tests v2", function(): void {
 
     test("Check provider - main2.cpp", async () => {
         // Open a c++ file to start the language server.
-        const path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main2.cpp";
+        const wf = vscode.workspace.workspaceFolders?.[0] ?? assert.fail("No workspace folder open");
+        const path: string = `${wf.uri.fsPath}/main2.cpp`;
         const uri: vscode.Uri = vscode.Uri.file(path);
 
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
@@ -308,7 +315,7 @@ suite("extensibility tests v1", function(): void {
     const provider: any = {
         name: "cpptoolsTest-v1",
         extensionId: "ms-vscode.cpptools-test",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -329,7 +336,7 @@ suite("extensibility tests v1", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        cpptools = await apit.getCppToolsTestApi(api.Version.v1);
+        cpptools = await apit.getCppToolsTestApi(api.Version.v1) ?? assert.fail('Unable to get the CppToolsTestApi');
         cpptools.registerCustomConfigurationProvider(provider);
         disposables.push(cpptools);
 
@@ -346,7 +353,8 @@ suite("extensibility tests v1", function(): void {
 
     test("Check provider - main1.cpp", async () => {
         // Open a c++ file to start the language server.
-        const path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main1.cpp";
+        const wf = vscode.workspace.workspaceFolders?.[0] ?? assert.fail("No workspace folder open");
+        const path: string = `${wf.uri.fsPath}/main1.cpp`;
         const uri: vscode.Uri = vscode.Uri.file(path);
 
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
@@ -384,7 +392,7 @@ suite("extensibility tests v0", function(): void {
     // Has to be 'any' instead of api.CustomConfigurationProvider because of missing interface members.
     const provider: any = {
         name: "cpptoolsTest-v0",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -402,7 +410,7 @@ suite("extensibility tests v0", function(): void {
     const disposables: vscode.Disposable[] = [];
 
     suiteSetup(async function(): Promise<void> {
-        cpptools = await apit.getCppToolsTestApi(api.Version.v0);
+        cpptools = await apit.getCppToolsTestApi(api.Version.v0) ?? assert.fail('Unable to get the CppToolsTestApi');
         cpptools.registerCustomConfigurationProvider(provider);
         disposables.push(cpptools); // This is a no-op for v0, but do it anyway to make sure nothing breaks.
 
@@ -420,7 +428,8 @@ suite("extensibility tests v0", function(): void {
 
     test("Check provider - main.cpp", async () => {
         // Open a C++ file to start the language server.
-        const path: string = vscode.workspace.workspaceFolders[0].uri.fsPath + "/main.cpp";
+        const wf = vscode.workspace.workspaceFolders?.[0] ?? assert.fail("No workspace folder open");
+        const path: string = `${wf.uri.fsPath}/main.cpp`;
         const uri: vscode.Uri = vscode.Uri.file(path);
 
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();

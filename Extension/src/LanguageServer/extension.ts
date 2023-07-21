@@ -368,6 +368,7 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                 }
                 await client.provideCustomConfiguration(document.uri, undefined);
                 // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
+                client.onDidOpenTextDocument(document);
                 await client.takeOwnership(document);
                 return true;
             }
@@ -382,8 +383,7 @@ function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): v
     editors.forEach(async (editor) => {
         if (util.isCpp(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
-            await client.ready;
-            await processDelayedDidOpen(editor.document);
+            await client.enqueue(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
         }
     });

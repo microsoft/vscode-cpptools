@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { CppSettings } from '../LanguageServer/settings';
-import { ManualPromise } from '../Utility/Async/manual-promise';
+import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ISshHostInfo, ProcessReturnType, splitLines, stripEscapeSequences } from '../common';
 import { isWindows } from '../constants';
 import { getSshChannel } from '../logger';
