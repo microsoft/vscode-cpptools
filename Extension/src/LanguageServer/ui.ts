@@ -5,18 +5,18 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Client } from './client';
 import * as nls from 'vscode-nls';
-import { ReferencesCommandMode, referencesCommandModeToString } from './references';
-import { getCustomConfigProviders, CustomConfigurationProviderCollection, isSameProviderExtensionId } from './customProviders';
-import * as telemetry from '../telemetry';
+import { sleep } from '../Utility/Async/sleep';
 import * as util from '../common';
+import * as telemetry from '../telemetry';
+import { Client } from './client';
+import { CustomConfigurationProviderCollection, getCustomConfigProviders, isSameProviderExtensionId } from './customProviders';
+import { ReferencesCommandMode, referencesCommandModeToString } from './references';
 import { CppSettings } from './settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-let uiPromise: Promise<LanguageStatusUI> | undefined;
 let ui: LanguageStatusUI;
 
 interface IndexableQuickPickItem extends vscode.QuickPickItem {
@@ -43,6 +43,15 @@ enum LanguageStatusPriority {
     High = 1,
     Mid = 2,
     Low = 3
+}
+
+export enum ConfigurationType {
+    AutoConfigProvider = "autoConfigProvider",
+    ConfigProvider = "configProvider",
+    CompileCommands = "compileCommands",
+    AutoCompilerPath = "autoCompilerPath",
+    CompilerPath = "compilerPath",
+    NotConfigured = "notConfigured"
 }
 
 const commandArguments: string[] = []; // We report the sender of the command
@@ -118,7 +127,7 @@ export class LanguageStatusUI {
             title: this.configureIntelliSenseStatusItem.name,
             arguments: ['statusBar']
         };
-        this.ShowConfigureIntelliSenseButton(false, this.currentClient);
+        void this.ShowConfigureIntelliSenseButton(false, this.currentClient);
 
         this.intelliSenseStatusItem = vscode.languages.createLanguageStatusItem(`cpptools.status.${LanguageStatusPriority.Mid}.intellisense`, util.documentSelector);
         this.intelliSenseStatusItem.name = localize("cpptools.status.intellisense", "C/C++ IntelliSense Status");
@@ -151,7 +160,6 @@ export class LanguageStatusUI {
         if (this.browseEngineStatusItem.command) {
             // Currently needed in order to update hover tooltip
             this.browseEngineStatusItem.command.tooltip = (this.isParsingFiles ? `${this.parsingFilesTooltip} | ` : "") + this.workspaceParsingProgress;
-            this.browseEngineStatusItem.text = this.browseEngineStatusItem.text;
         }
     }
 
@@ -372,7 +380,6 @@ export class LanguageStatusUI {
 
         if (this.codeAnalysisStatusItem.command) {
             this.codeAnalysisStatusItem.command.tooltip = this.codeAnalysProgress;
-            this.codeAnalysisStatusItem.text = this.codeAnalysisStatusItem.text;
 
         }
         this.setIsRunningCodeAnalysis(true);
@@ -426,12 +433,20 @@ export class LanguageStatusUI {
     private showConfigureIntelliSenseButton: boolean = false;
     private configureIntelliSenseTimeout?: NodeJS.Timeout;
 
-    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client): Promise<void> {
-        if (!await telemetry.showStatusBarIntelliSenseButton() || client !== this.currentClient) {
+    public async ShowConfigureIntelliSenseButton(show: boolean, client?: Client, configurationType?: ConfigurationType, sender?: string): Promise<void> {
+        if (client !== this.currentClient) {
+            return;
+        }
+        if (configurationType !== undefined && sender !== undefined) {
+            const showButton: string = show ? 'true' : 'false';
+            telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
+        }
+
+        if (!await telemetry.showStatusBarIntelliSenseButton()) {
             return;
         }
         this.showConfigureIntelliSenseButton = show;
-        if (client) {
+        if (client !== undefined) {
             client.setShowConfigureIntelliSenseButton(show);
         }
         if (show) {
@@ -465,7 +480,7 @@ export class LanguageStatusUI {
         } else {
             const isCppPropertiesJson: boolean = util.isCppPropertiesJson(activeEditor.document);
             if (isCppPropertiesJson) {
-                vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
+                void vscode.languages.setTextDocumentLanguage(activeEditor.document, "jsonc");
             }
             const isCppOrRelated: boolean = isCppPropertiesJson || util.isCppOrRelated(activeEditor.document);
 
@@ -507,7 +522,7 @@ export class LanguageStatusUI {
         client.ActiveConfigChanged(value => {
             this.ActiveConfig = value;
             this.currentClient = client;
-            this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), client);
+            void this.ShowConfigureIntelliSenseButton(client.getShowConfigureIntelliSenseButton(), client);
         });
     }
 
@@ -615,10 +630,9 @@ export class LanguageStatusUI {
         return (selection) ? selection.index : -1;
     }
 
-    public showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
-        setTimeout(() => {
-            this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
-        }, 10000);
+    public async showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): Promise<void> {
+        await sleep(10000);
+        this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
     }
 
     public showConfigureCompileCommandsMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
@@ -667,14 +681,10 @@ export class LanguageStatusUI {
     }
 }
 
-export async function getUI(): Promise<LanguageStatusUI> {
-    if (!uiPromise) {
-        uiPromise = _getUI();
+export function getUI(): LanguageStatusUI {
+    if (!ui) {
+        ui = new LanguageStatusUI();
     }
-    return uiPromise;
-}
-
-async function _getUI(): Promise<LanguageStatusUI> {
-    ui = new LanguageStatusUI();
     return ui;
 }
+

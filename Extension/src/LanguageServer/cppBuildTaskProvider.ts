@@ -2,21 +2,18 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-/* eslint-disable no-unused-expressions */
-import * as path from 'path';
-import {
-    TaskDefinition, Task, TaskGroup, ShellExecution, workspace,
-    TaskProvider, TaskScope, CustomExecution, ProcessExecution, TextEditor, Pseudoterminal, EventEmitter, Event, TerminalDimensions, window, WorkspaceFolder, tasks, TaskExecution, TaskEndEvent, Disposable
-} from 'vscode';
+
+import * as cp from "child_process";
 import * as os from 'os';
+import * as path from 'path';
+import { CustomExecution, Disposable, Event, EventEmitter, ProcessExecution, Pseudoterminal, ShellExecution, Task, TaskDefinition, TaskEndEvent, TaskExecution, TaskGroup, TaskProvider, tasks, TaskScope, TerminalDimensions, TextEditor, window, workspace, WorkspaceFolder } from 'vscode';
+import * as nls from 'vscode-nls';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
 import * as configs from './configurations';
 import * as ext from './extension';
-import * as cp from "child_process";
 import { OtherSettings } from './settings';
-import * as nls from 'vscode-nls';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -30,7 +27,6 @@ export interface CppBuildTaskDefinition extends TaskDefinition {
 }
 
 export class CppBuildTask extends Task {
-    detail?: string;
     existing?: boolean;
     isDefault?: boolean;
 }
@@ -76,7 +72,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Don't offer tasks for header files.
-        const isHeader: boolean = util.isHeaderFile (editor.document.uri);
+        const isHeader: boolean = util.isHeaderFile(editor.document.uri);
         if (isHeader) {
             return emptyTasks;
         }
@@ -130,7 +126,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 ) &&
                 (
                     !isCompilerValid || (!!userCompilerPathAndArgs &&
-                    (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
+                        (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
                 ) &&
                 (
                     !isWindows || !info.path.startsWith("/")
@@ -392,7 +388,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.options = { "shell": true };
         }
         if (this.options.cwd) {
-            this.options.cwd = util.resolveVariables(this.options.cwd);
+            this.options.cwd = util.resolveVariables(this.options.cwd.toString());
         } else {
             const editor: TextEditor | undefined = window.activeTextEditor;
             let folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;

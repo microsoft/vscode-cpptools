@@ -9,8 +9,10 @@ import { Location, TextEdit } from './commonTypes';
 import { CppSettings } from './settings';
 
 export function makeCpptoolsRange(vscRange: vscode.Range): Range {
-    return { start: { line: vscRange.start.line, character: vscRange.start.character },
-        end: { line: vscRange.end.line, character: vscRange.end.character } };
+    return {
+        start: { line: vscRange.start.line, character: vscRange.start.character },
+        end: { line: vscRange.end.line, character: vscRange.end.character }
+    };
 }
 
 export function makeVscodeRange(cpptoolsRange: Range): vscode.Range {

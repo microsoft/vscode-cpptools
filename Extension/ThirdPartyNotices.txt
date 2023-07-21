@@ -336,7 +336,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---------------------------------------------------------
 
-anymatch 3.1.2 - ISC
+anymatch 3.1.3 - ISC
 https://github.com/micromatch/anymatch
 
 Copyright (c) 2019 Elan Shanker, Paul Miller (https://paulmillr.com)
@@ -417,7 +417,7 @@ the licensed code:
 
 ---------------------------------------------------------
 
-glob 7.1.6 - ISC
+glob 7.2.3 - ISC
 https://github.com/isaacs/node-glob#readme
 
 Copyright (c) Isaac Z. Schlueter and Contributors
@@ -632,6 +632,32 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
+minimatch 5.1.6 - ISC
+https://github.com/isaacs/minimatch#readme
+
+Copyright (c) 2011-2023 Isaac Z. Schlueter and Contributors
+
+The ISC License
+
+Copyright (c) 2011-2023 Isaac Z. Schlueter and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
 once 1.4.0 - ISC
 https://github.com/isaacs/once#readme
 
@@ -710,7 +736,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-semver 5.7.1 - ISC
+semver 5.7.2 - ISC
 https://github.com/npm/node-semver#readme
 
 Copyright Isaac Z.
@@ -738,7 +764,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-semver 7.3.7 - ISC
+semver 7.5.4 - ISC
 https://github.com/npm/node-semver#readme
 
 Copyright Isaac Z. Schlueter
@@ -895,7 +921,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/1ds-core-js 3.2.3 - MIT
+@microsoft/1ds-core-js 3.2.12 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 copyright Microsoft 2018
@@ -903,11 +929,10 @@ copyright Microsoft 2019
 Copyright (c) Microsoft Corporation
 copyright Microsoft 2019 Simplified
 Copyright (c) Microsoft and contributors
-copyright Microsoft 2018 import AppInsightsCore as InternalCore
 
-Copyright (c) Microsoft Corporation.
+The MIT License (MIT)
 
-MIT License
+Copyright (c) Microsoft Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -919,7 +944,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -931,7 +956,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/1ds-post-js 3.2.3 - MIT
+@microsoft/1ds-post-js 3.2.12 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 copyright Microsoft 2018
@@ -940,12 +965,11 @@ copyright Microsoft 2018-2020
 copyright Microsoft 2022 Simple
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
-copyright Microsoft 2018-2020 import IExtendedAppInsightsCore, SendRequestReason, EventSendType
-copyright Microsoft 2018-2020 import IPerfManagerProvider, IValueSanitizer, FieldValueSanitizerType, FieldValueSanitizerFunc, SendRequestReason, EventSendType
+copyright Microsoft 2018-2020 import EventSendType, FieldValueSanitizerFunc, FieldValueSanitizerType, IPerfManagerProvider, IValueSanitizer, SendRequestReason
 
-Copyright (c) Microsoft Corporation.
+The MIT License (MIT)
 
-MIT License
+Copyright (c) Microsoft Corporation
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -957,7 +981,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -969,134 +993,100 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-core-js 2.8.4 - MIT
+@microsoft/applicationinsights-core-js 2.8.14 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
 
-    MIT License
+The MIT License (MIT)
 
-    Copyright (c) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-
----------------------------------------------------------
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-shims 2.0.1 - MIT
+---------------------------------------------------------
+
+@microsoft/applicationinsights-shims 2.0.2 - MIT
 https://github.com/microsoft/ApplicationInsights-JS/tree/master/tools/shims
 
-Copyright (c) Microsoft Corporation.
-Copyright (c) Microsoft and contributors.
+Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft and contributors
 
-    MIT License
+The MIT License (MIT)
 
-    Copyright (c) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-
----------------------------------------------------------
 
 ---------------------------------------------------------
 
-@microsoft/dynamicproto-js 1.1.6 - MIT
+---------------------------------------------------------
+
+@microsoft/dynamicproto-js 1.1.9 - MIT
 https://github.com/microsoft/DynamicProto-JS#readme
 
-(c) James Halliday
 Copyright (c) Microsoft Corporation
-Copyright (c) 2012 Maximilian Antoni
-Copyright (c) 2013 Maximilian Antoni
-Copyright (c) 2020 Oliver Nightingale
-Copyright (c) 2020 Oliver Nightingale A
-Copyright (c) 2020 Oliver Nightingale An
 Copyright (c) Microsoft and contributors
-Copyright (c) 2010-2013 Christian Johansen
-Copyright (c) 2010-2014 Christian Johansen
-Copyright (c) 2011 Sven Fuchs, Christian Johansen
-Copyright Joyent, Inc. and other Node contributors
-Copyright jQuery Foundation and other contributors
-Copyright 2013 jQuery Foundation, Inc. and other contributors
-Copyright (c) 2010-2014, Christian Johansen, christian@cjohansen.no
-Copyright 2005, 2014 jQuery Foundation, Inc. and other contributors
-Copyright 2006 Google Inc. https://code.google.com/p/google-diff-match-patch
 
-    MIT License
-
-    Copyright (c) Microsoft Corporation.
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE
-
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-@types/lodash 4.14.192 - MIT
-https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/lodash
+The MIT License (MIT)
 
 Copyright (c) Microsoft Corporation
 
-MIT License
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Copyright (c) <year> <copyright holders>
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
@@ -1136,6 +1126,26 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
+@xmldom/xmldom 0.8.8 - MIT
+https://github.com/xmldom/xmldom
+
+Copyright 2012 - 2017 jindw <jindw@xidea.org> and other contributors
+Copyright 2019 - present Christopher J. Brody and other contributors
+
+Copyright 2019 - present Christopher J. Brody and other contributors, as listed in: https://github.com/xmldom/xmldom/graphs/contributors
+Copyright 2012 - 2017 @jindw <jindw@xidea.org> and other contributors, as listed in: https://github.com/jindw/xmldom/graphs/contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
 array-timsort 1.0.3 - MIT
 https://github.com/kaelzhang/node-array-timsort
 
@@ -1167,7 +1177,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-axios 0.22.0 - MIT
+axios 0.26.1 - MIT
 https://axios-http.com/
 
 Copyright (c) 2014-present Matt Zabriskie
@@ -1197,7 +1207,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-balanced-match 1.0.0 - MIT
+balanced-match 1.0.2 - MIT
 https://github.com/juliangruber/balanced-match
 
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
@@ -1317,6 +1327,38 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ---------------------------------------------------------
 
 brace-expansion 1.1.11 - MIT
+https://github.com/juliangruber/brace-expansion
+
+Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
+
+MIT License
+
+Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+brace-expansion 2.0.1 - MIT
 https://github.com/juliangruber/brace-expansion
 
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>
@@ -1477,10 +1519,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-comment-json 4.1.1 - MIT
+comment-json 4.2.3 - MIT
 https://github.com/kaelzhang/node-comment-json#readme
 
-Copyright (c) 2013
+Copyright (c) 2013 kaelzhang
 
 Copyright (c) 2013 kaelzhang <>, contributors
 http://kael.me/
@@ -1537,7 +1579,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-core-util-is 1.0.2 - MIT
+core-util-is 1.0.3 - MIT
 https://github.com/isaacs/core-util-is#readme
 
 Copyright Joyent, Inc. and other Node contributors
@@ -1704,7 +1746,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-follow-redirects 1.14.8 - MIT
+follow-redirects 1.15.2 - MIT
 https://github.com/follow-redirects/follow-redirects
 
 Copyright 2014-present Olivier Lalonde <olalonde@gmail.com> , James Talmage <james@talmage.io> , Ruben Verborgh
@@ -1841,7 +1883,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-is-glob 4.0.1 - MIT
+is-glob 4.0.3 - MIT
 https://github.com/micromatch/is-glob
 
 Copyright (c) 2014-2017, Jon Schlinkert
@@ -1907,9 +1949,11 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-json5 1.0.2 - MIT
+json5 2.2.3 - MIT
 http://json5.org/
 
+(c) 2019 Denis Pushkarev
+copyright (c) 2019 Denis Pushkarev
 Copyright (c) 2012-2018 Aseem Kishore, and others
 
 MIT License
@@ -1972,67 +2016,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-lodash 4.17.21 - MIT
-https://lodash.com/
-
-Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
-Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
-
-Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
-
-Based on Underscore.js, copyright Jeremy Ashkenas,
-DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
-
-This software consists of voluntary contributions made by many
-individuals. For exact contribution history, see the revision history
-available at https://github.com/lodash/lodash
-
-The following license applies to all parts of this software except as
-documented below:
-
-====
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-====
-
-Copyright and related rights for sample code are waived via CC0. Sample
-code is defined as all source code displayed within the prose of the
-documentation.
-
-CC0: http://creativecommons.org/publicdomain/zero/1.0/
-
-====
-
-Files located in the node_modules and vendor directories are externally
-maintained libraries used by this software which have their own
-licenses; we recommend you read them, as their terms may differ from the
-terms above.
-
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-minimist 1.2.7 - MIT
+minimist 1.2.8 - MIT
 https://github.com/minimistjs/minimist
 
 
@@ -2060,7 +2044,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-mkdirp 0.5.5 - MIT
+mkdirp 0.5.6 - MIT
 https://github.com/substack/node-mkdirp#readme
 
 Copyright 2010 James Halliday (mail@substack.net)
@@ -2222,11 +2206,11 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-picomatch 2.2.2 - MIT
+picomatch 2.3.1 - MIT
 https://github.com/micromatch/picomatch
 
-Copyright (c) 2017-present, Jon Schlinkert.
-Copyright (c) 2017-present, Jon Schlinkert (https://github.com/jonschlinkert).
+Copyright (c) 2017-present, Jon Schlinkert
+Copyright (c) 2017-present, Jon Schlinkert (https://github.com/jonschlinkert)
 
 The MIT License (MIT)
 
@@ -2249,41 +2233,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-
----------------------------------------------------------
-
----------------------------------------------------------
-
-plist 3.0.5 - MIT
-https://github.com/TooTallNate/node-plist#readme
-
-Copyright (c) 2010-2017 Nathan Rajlich <nathan@tootallnate.net>
-
-(The MIT License)
-
-Copyright (c) 2010-2017 Nathan Rajlich <nathan@tootallnate.net>
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
 
 
 ---------------------------------------------------------
@@ -2387,8 +2336,8 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-shell-quote 1.7.3 - MIT
-https://github.com/substack/node-shell-quote
+shell-quote 1.8.1 - MIT
+https://github.com/ljharb/shell-quote
 
 Copyright (c) 2013 James Halliday (mail@substack.net)
 
@@ -2421,7 +2370,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-ssh-config 4.1.6 - MIT
+ssh-config 4.2.1 - MIT
 https://github.com/cyjake/ssh-config#readme
 
 Copyright (c) 2017 Chen Yangjian
@@ -2542,7 +2491,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-jsonrpc 8.1.0-next.5 - MIT
+vscode-jsonrpc 8.1.0 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2564,7 +2513,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageclient 8.1.0-next.4 - MIT
+vscode-languageclient 8.1.0 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2586,7 +2535,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageserver-protocol 3.17.3-next.4 - MIT
+vscode-languageserver-protocol 3.17.3 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2609,7 +2558,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-languageserver-types 3.17.3-next.1 - MIT
+vscode-languageserver-types 3.17.3 - MIT
 https://github.com/Microsoft/vscode-languageserver-node#readme
 
 Copyright (c) Microsoft Corporation
@@ -2631,10 +2580,10 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-nls 5.0.0 - MIT
+vscode-nls 5.2.0 - MIT
 https://github.com/Microsoft/vscode-nls#readme
 
-Copyright (c) Microsoft Corporation.
+Copyright (c) Microsoft Corporation
 
 The MIT License (MIT)
 
@@ -2659,7 +2608,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 ---------------------------------------------------------
 
-xmlbuilder 9.0.7 - MIT
+xmlbuilder 15.1.1 - MIT
 http://github.com/oozcitak/xmlbuilder-js
 
 Copyright (c) 2013 Ozgur Ozcitak
@@ -2741,6 +2690,7 @@ The notices below are from non-npm sources.
 - Mono (https://github.com/mono/mono)
 - SQLite (https://www.sqlite.org/)
 		Includes:functions (from fossil) (https://fossil-scm.org)
+- SoftFloat (http://www.jhauser.us/arithmetic/SoftFloat.html)
 
 %% ANTLR NOTICES AND INFORMATION BEGIN HERE
 =========================================
@@ -3683,3 +3633,43 @@ as representing official policies, either expressed or implied, of anybody
 else.
 =========================================
 END OF SQLite NOTICES AND INFORMATION
+
+%% SoftFloat NOTICES AND INFORMATION BEGIN HERE
+=========================================
+License for Berkeley SoftFloat Release 3e
+
+John R. Hauser
+2018 January 20
+
+The following applies to the whole of SoftFloat Release 3e as well as to
+each source file individually.
+
+Copyright 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018 The Regents of the
+University of California.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ 1. Redistributions of source code must retain the above copyright notice,
+    this list of conditions, and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions, and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ 3. Neither the name of the University nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS "AS IS", AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE
+DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+=========================================
+END OF SoftFloat NOTICES AND INFORMATION

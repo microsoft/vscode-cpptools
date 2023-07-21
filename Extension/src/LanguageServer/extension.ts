@@ -4,28 +4,28 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as path from 'path';
-import * as vscode from 'vscode';
-import * as os from 'os';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import * as rd from 'readline';
+import { Readable } from 'stream';
+import * as vscode from 'vscode';
+import * as nls from 'vscode-nls';
+import * as yauzl from 'yauzl';
+import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
-import { TreeNode, NodeType } from './referencesModel';
-import { LanguageStatusUI, getUI } from './ui';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
-import { CodeAnalysisDiagnosticIdentifiersAndUri, CodeActionDiagnosticInfo, codeAnalysisCodeToFixes,
-    codeAnalysisFileToCodeActions, codeAnalysisAllFixes } from './codeAnalysis';
-import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
 import { ClientCollection } from './clientCollection';
-import { CppSettings } from './settings';
-import { PersistentState } from './persistentState';
-import { getLanguageConfig } from './languageConfig';
-import { getCustomConfigProviders } from './customProviders';
-import * as rd from 'readline';
-import * as yauzl from 'yauzl';
-import { Readable } from 'stream';
-import * as nls from 'vscode-nls';
+import { CodeActionDiagnosticInfo, CodeAnalysisDiagnosticIdentifiersAndUri, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions } from './codeAnalysis';
 import { CppBuildTaskProvider } from './cppBuildTaskProvider';
+import { getCustomConfigProviders } from './customProviders';
+import { getLanguageConfig } from './languageConfig';
+import { PersistentState } from './persistentState';
+import { NodeType, TreeNode } from './referencesModel';
+import { CppSettings } from './settings';
+import { LanguageStatusUI, getUI } from './ui';
+import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -46,8 +46,8 @@ export const intelliSenseDisabledError: string = "Do not activate the extension 
 type VcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
 function initVcpkgDatabase(): Promise<VcpkgDatabase> {
-    return new Promise((resolve, reject) => {
-        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err?: Error, zipfile?: yauzl.ZipFile) => {
+    return new Promise((resolve) => {
+        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err?: Error | null, zipfile?: yauzl.ZipFile) => {
             // Resolves with an empty database instead of rejecting on failure.
             const database: VcpkgDatabase = {};
             if (err || !zipfile) {
@@ -63,7 +63,7 @@ function initVcpkgDatabase(): Promise<VcpkgDatabase> {
                     zipfile.readEntry();
                     return;
                 }
-                zipfile.openReadStream(entry, (err?: Error, stream?: Readable) => {
+                zipfile.openReadStream(entry, (err?: Error | null, stream?: Readable) => {
                     if (err || !stream) {
                         zipfile.close();
                         return;
@@ -165,7 +165,7 @@ export async function activate(): Promise<void> {
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
         checkForConflictingExtensions.Value = false;
-        const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>, index: number, array: Readonly<vscode.Extension<any>[]>): boolean =>
+        const clangCommandAdapterActive: boolean = vscode.extensions.all.some((extension: vscode.Extension<any>): boolean =>
             extension.isActive && extension.id === "mitaki28.vscode-clang");
         if (clangCommandAdapterActive) {
             telemetry.logLanguageServerEvent("conflictingExtension");
@@ -174,7 +174,7 @@ export async function activate(): Promise<void> {
 
     console.log("starting language server");
     clients = new ClientCollection();
-    ui = await getUI();
+    ui = getUI();
 
     // There may have already been registered CustomConfigurationProviders.
     // Request for configurations from those providers.
@@ -194,15 +194,11 @@ export async function activate(): Promise<void> {
 
     vcpkgDbPromise = initVcpkgDatabase();
 
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        intervalTimer = global.setInterval(onInterval, 2500);
-    });
+    void clients.ActiveClient.ready.then(() => intervalTimer = global.setInterval(onInterval, 2500));
 
     registerCommands(true);
 
-    vscode.tasks.onDidStartTask(event => {
-        getActiveClient().PauseCodeAnalysis();
-    });
+    vscode.tasks.onDidStartTask(() => getActiveClient().PauseCodeAnalysis());
 
     vscode.tasks.onDidEndTask(event => {
         getActiveClient().ResumeCodeAnalysis();
@@ -213,14 +209,14 @@ export async function activate(): Promise<void> {
                 if (folder) {
                     const settings: CppSettings = new CppSettings(folder.uri);
                     if (settings.codeAnalysisRunOnBuild && settings.clangTidyEnabled) {
-                        clients.getClientFor(folder.uri).handleRunCodeAnalysisOnAllFiles();
+                        void clients.getClientFor(folder.uri).handleRunCodeAnalysisOnAllFiles().catch(logAndReturn.undefined);
                     }
                     return;
                 }
             }
             const settings: CppSettings = new CppSettings();
             if (settings.codeAnalysisRunOnBuild && settings.clangTidyEnabled) {
-                clients.ActiveClient.handleRunCodeAnalysisOnAllFiles();
+                void clients.ActiveClient.handleRunCodeAnalysisOnAllFiles().catch(logAndReturn.undefined);
             }
         }
     });
@@ -231,7 +227,7 @@ export async function activate(): Promise<void> {
         { scheme: 'file', language: 'cuda-cpp' }
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
-        provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<vscode.CodeAction[]> => {
+        provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext): Promise<vscode.CodeAction[]> => {
             if (!await clients.ActiveClient.getVcpkgEnabled()) {
                 return [];
             }
@@ -274,14 +270,14 @@ export function updateLanguageConfigurations(): void {
 /**
  * workspace events
  */
-function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): void {
+async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
         const defaultClient: DefaultClient = <DefaultClient>client;
-        const changedDefaultClientSettings: { [key: string]: string } = defaultClient.onDidChangeSettings(event);
+        const changedDefaultClientSettings: { [key: string]: string } = await defaultClient.onDidChangeSettings(event);
         clients.forEach(client => {
             if (client !== defaultClient) {
-                client.onDidChangeSettings(event);
+                void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         });
         const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
@@ -318,7 +314,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
 
     if (util.isCppOrRelated(editor.document)) {
         // This is required for the UI to update correctly.
-        clients.activeDocumentChanged(editor.document);
+        void clients.activeDocumentChanged(editor.document).catch(logAndReturn.undefined);
         if (util.isCpp(editor.document)) {
             activeDocument = editor.document.uri.toString();
             clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
@@ -328,7 +324,7 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     } else {
         activeDocument = "";
     }
-    ui.activeDocumentChanged();
+    getUI().activeDocumentChanged();
 }
 
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
@@ -341,7 +337,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
         activeDocument = event.textEditor.document.uri.toString();
-        clients.activeDocumentChanged(event.textEditor.document);
+        void clients.activeDocumentChanged(event.textEditor.document).catch(logAndReturn.undefined);
         ui.activeDocumentChanged();
     }
     clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
@@ -352,14 +348,16 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
     if (client) {
         // Log warm start.
         if (clients.checkOwnership(client, document)) {
+            if (!client.isInitialized()) {
+                // This can randomly get hit when adding/removing workspace folders.
+                await client.ready;
+            }
+            // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
+            // to avoid sending redundant didOpen notifications.
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-                if (!client.isInitialized()) {
-                    // This can randomly get hit when adding/removing workspace folders.
-                    await client.awaitUntilLanguageClientReady();
-                }
                 client.TrackedDocuments.add(document);
+                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                     const baseFileName: string = path.basename(document.fileName);
@@ -369,8 +367,9 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                     document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
                 }
                 await client.provideCustomConfiguration(document.uri, undefined);
+                // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                 client.onDidOpenTextDocument(document);
-                await client.sendDidOpen(document);
+                await client.takeOwnership(document);
                 return true;
             }
         }
@@ -384,7 +383,7 @@ function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): v
     editors.forEach(async (editor) => {
         if (util.isCpp(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
-            await client.requestWhenReady(() => processDelayedDidOpen(editor.document));
+            await client.enqueue(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
         }
     });
@@ -455,7 +454,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
-function onDisabledCommand(): void {
+function onDisabledCommand() {
     const message: string = localize(
         {
             key: "on.disabled.command",
@@ -464,15 +463,15 @@ function onDisabledCommand(): void {
             ]
         },
         "IntelliSense-related commands cannot be executed when `C_Cpp.intelliSenseEngine` is set to `disabled`.");
-    vscode.window.showWarningMessage(message);
+    return vscode.window.showWarningMessage(message);
 }
 
-function onRestartIntelliSenseForFile(sender?: any): void {
+async function onRestartIntelliSenseForFile() {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (!activeEditor || !util.isCpp(activeEditor.document)) {
         return;
     }
-    clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
+    return clients.ActiveClient.restartIntelliSenseForFile(activeEditor.document);
 }
 
 async function onSwitchHeaderSource(): Promise<void> {
@@ -507,13 +506,13 @@ async function onSwitchHeaderSource(): Promise<void> {
         vscode.window.visibleTextEditors.forEach(editor => {
             if (editor.document === document && !foundEditor) {
                 foundEditor = true;
-                vscode.window.showTextDocument(document, editor.viewColumn);
+                void vscode.window.showTextDocument(document, editor.viewColumn).then(undefined, logAndReturn.undefined);
             }
         });
     }
 
     if (!foundEditor) {
-        vscode.window.showTextDocument(document);
+        void vscode.window.showTextDocument(document).then(undefined, logAndReturn.undefined);
     }
 }
 
@@ -538,121 +537,115 @@ async function selectClient(): Promise<Client> {
     }
 }
 
-function onResetDatabase(): void {
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        clients.ActiveClient.resetDatabase();
-    });
+async function onResetDatabase(): Promise<void> {
+    await clients.ActiveClient.ready;
+    clients.ActiveClient.resetDatabase();
 }
 
-function selectDefaultCompiler(sender?: any): void {
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        clients.ActiveClient.promptSelectCompiler(true, sender);
-    });
+async function selectDefaultCompiler(sender?: any): Promise<void> {
+    await clients.ActiveClient.ready;
+    return clients.ActiveClient.promptSelectCompiler(true, sender);
 }
 
-function onRescanCompilers(sender?: any): void {
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        clients.ActiveClient.rescanCompilers(sender);
-    });
+async function onRescanCompilers(sender?: any): Promise<void> {
+    await clients.ActiveClient.ready;
+    return clients.ActiveClient.rescanCompilers(sender);
 }
 
-function selectIntelliSenseConfiguration(sender?: any): void {
-    clients.ActiveClient.notifyWhenLanguageClientReady(() => {
-        clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
-    });
+async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
+    await clients.ActiveClient.ready;
+    return clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
 }
 
-function onSelectConfiguration(sender?: any): void {
+async function onSelectConfiguration(): Promise<void> {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
+        void vscode.window.showInformationMessage(localize("configuration.select.first", 'Open a folder first to select a configuration.'));
     } else {
         // This only applies to the active client. You cannot change the configuration for
         // a client that is not active since that client's UI will not be visible.
-        clients.ActiveClient.handleConfigurationSelectCommand();
+        return clients.ActiveClient.handleConfigurationSelectCommand();
     }
 }
 
 function onSelectConfigurationProvider(): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider.'));
+        void vscode.window.showInformationMessage(localize("configuration.provider.select.first", 'Open a folder first to select a configuration provider.'));
     } else {
-        selectClient().then(client => client.handleConfigurationProviderSelectCommand(), rejected => {});
+        void selectClient().then(client => client.handleConfigurationProviderSelectCommand(), logAndReturn.undefined);
     }
 }
 
 function onEditConfigurationJSON(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "json" }, undefined);
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
+        void vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditJSONCommand(viewColumn), rejected => {});
+        void selectClient().then(client => client.handleConfigurationEditJSONCommand(viewColumn), logAndReturn.undefined);
     }
 }
 
 function onEditConfigurationUI(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     telemetry.logLanguageServerEvent("SettingsCommand", { "palette": "ui" }, undefined);
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
+        void vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditUICommand(viewColumn), rejected => {});
+        void selectClient().then(client => client.handleConfigurationEditUICommand(viewColumn), logAndReturn.undefined);
     }
 }
 
 function onEditConfiguration(viewColumn: vscode.ViewColumn = vscode.ViewColumn.Active): void {
     if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
+        void vscode.window.showInformationMessage(localize('edit.configurations.open.first', 'Open a folder first to edit configurations'));
     } else {
-        selectClient().then(client => client.handleConfigurationEditCommand(viewColumn), rejected => {});
+        void selectClient().then(client => client.handleConfigurationEditCommand(viewColumn), logAndReturn.undefined);
     }
 }
 
 function onGenerateEditorConfig(): void {
     if (!isFolderOpen()) {
         const settings: CppSettings = new CppSettings();
-        settings.generateEditorConfig();
+        void settings.generateEditorConfig();
     } else {
-        selectClient().then(client => {
+        void selectClient().then(client => {
             const settings: CppSettings = new CppSettings(client.RootUri);
-            settings.generateEditorConfig();
-        });
+            void settings.generateEditorConfig();
+        }).catch(logAndReturn.undefined);
     }
 }
 
-function onGoToNextDirectiveInGroup(): void {
-    const client: Client = getActiveClient();
-    client.handleGoToDirectiveInGroup(true);
+async function onGoToNextDirectiveInGroup(): Promise<void> {
+    return getActiveClient().handleGoToDirectiveInGroup(true);
 }
 
-function onGoToPrevDirectiveInGroup(): void {
-    const client: Client = getActiveClient();
-    client.handleGoToDirectiveInGroup(false);
+async function onGoToPrevDirectiveInGroup(): Promise<void> {
+    return getActiveClient().handleGoToDirectiveInGroup(false);
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
     if (activeDocument !== "") {
         await vscode.commands.executeCommand("workbench.action.files.saveAll");
-        getActiveClient().handleRunCodeAnalysisOnActiveFile();
+        return getActiveClient().handleRunCodeAnalysisOnActiveFile();
     }
 }
 
 async function onRunCodeAnalysisOnOpenFiles(): Promise<void> {
     if (openFileVersions.size > 0) {
         await vscode.commands.executeCommand("workbench.action.files.saveAll");
-        getActiveClient().handleRunCodeAnalysisOnOpenFiles();
+        return getActiveClient().handleRunCodeAnalysisOnOpenFiles();
     }
 }
 
 async function onRunCodeAnalysisOnAllFiles(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.files.saveAll");
-    getActiveClient().handleRunCodeAnalysisOnAllFiles();
+    return getActiveClient().handleRunCodeAnalysisOnAllFiles();
 }
 
 async function onRemoveAllCodeAnalysisProblems(): Promise<void> {
-    getActiveClient().handleRemoveAllCodeAnalysisProblems();
+    return getActiveClient().handleRemoveAllCodeAnalysisProblems();
 }
 
 async function onRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
-    getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
+    return getActiveClient().handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave, identifiersAndUris);
 }
 
 // Needed due to https://github.com/microsoft/vscode/issues/148723 .
@@ -669,33 +662,31 @@ async function onFixThisCodeAnalysisProblem(version: number, workspaceEdit: vsco
     for (const codeAction of codeActions) {
         if (codeAction.code === identifiersAndUris[0].identifiers[0].code && rangeEquals(codeAction.range, identifiersAndUris[0].identifiers[0].range)) {
             if (version !== codeAction.version) {
-                vscode.window.showErrorMessage(codeActionAbortedString);
+                void vscode.window.showErrorMessage(codeActionAbortedString);
                 return;
             }
             break;
         }
     }
-    getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
+    return getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
 }
 
 async function onFixAllTypeCodeAnalysisProblems(type: string, version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     if (version === codeAnalysisCodeToFixes.get(type)?.version) {
-        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
-    } else {
-        vscode.window.showErrorMessage(codeActionAbortedString);
+        return getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
     }
+    void vscode.window.showErrorMessage(codeActionAbortedString);
 }
 
 async function onFixAllCodeAnalysisProblems(version: number, workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
     if (version === codeAnalysisAllFixes.version) {
-        getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
-    } else {
-        vscode.window.showErrorMessage(codeActionAbortedString);
+        return getActiveClient().handleFixCodeAnalysisProblems(workspaceEdit, refreshSquigglesOnSave, identifiersAndUris);
     }
+    void vscode.window.showErrorMessage(codeActionAbortedString);
 }
 
 async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> {
-    getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
+    return getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
 async function onCopyDeclarationOrDefinition(sender?: any): Promise<void> {
@@ -703,7 +694,7 @@ async function onCopyDeclarationOrDefinition(sender?: any): Promise<void> {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
-    getActiveClient().handleCreateDeclarationOrDefinition(true);
+    return getActiveClient().handleCreateDeclarationOrDefinition(true);
 }
 
 async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
@@ -711,17 +702,16 @@ async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
-    getActiveClient().handleCreateDeclarationOrDefinition();
+    return getActiveClient().handleCreateDeclarationOrDefinition();
 }
 
 function onAddToIncludePath(path: string): void {
-    if (!isFolderOpen()) {
-        vscode.window.showInformationMessage(localize('add.includepath.open.first', 'Open a folder first to add to {0}', "includePath"));
-    } else {
+    if (isFolderOpen()) {
         // This only applies to the active client. It would not make sense to add the include path
         // suggestion to a different workspace.
-        clients.ActiveClient.handleAddToIncludePathCommand(path);
+        return clients.ActiveClient.handleAddToIncludePathCommand(path);
     }
+
 }
 
 function onEnableSquiggles(): void {
@@ -748,11 +738,11 @@ function onToggleDimInactiveRegions(): void {
     settings.update<boolean>("dimInactiveRegions", !settings.dimInactiveRegions);
 }
 
-function onPauseParsing(sender?: any): void {
+function onPauseParsing(): void {
     clients.ActiveClient.pauseParsing();
 }
 
-function onResumeParsing(sender?: any): void {
+function onResumeParsing(): void {
     clients.ActiveClient.resumeParsing();
 }
 
@@ -768,19 +758,19 @@ function onCancelCodeAnalysis(): void {
     clients.ActiveClient.CancelCodeAnalysis();
 }
 
-function onShowParsingCommands(sender?: any): void {
-    clients.ActiveClient.handleShowParsingCommands();
+function onShowParsingCommands(): Promise<void> {
+    return clients.ActiveClient.handleShowParsingCommands();
 }
 
-function onShowActiveCodeAnalysisCommands(sender?: any): void {
-    clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
+function onShowActiveCodeAnalysisCommands(): Promise<void> {
+    return clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
 }
 
-function onShowIdleCodeAnalysisCommands(sender?: any): void {
-    clients.ActiveClient.handleShowIdleCodeAnalysisCommands();
+function onShowIdleCodeAnalysisCommands(): Promise<void> {
+    return clients.ActiveClient.handleShowIdleCodeAnalysisCommands();
 }
 
-function onShowReferencesProgress(sender?: any): void {
+function onShowReferencesProgress(): void {
     clients.ActiveClient.handleReferencesIcon();
 }
 
@@ -793,13 +783,13 @@ function onToggleRefGroupView(): void {
 function onTakeSurvey(): void {
     telemetry.logLanguageServerEvent("onTakeSurvey");
     const uri: vscode.Uri = vscode.Uri.parse(`https://www.research.net/r/VBVV6C6?o=${os.platform()}&m=${vscode.env.machineId}`);
-    vscode.commands.executeCommand('vscode.open', uri);
+    void vscode.commands.executeCommand('vscode.open', uri);
 }
 
 function onVcpkgOnlineHelpSuggested(dummy?: any): void {
     telemetry.logLanguageServerEvent('vcpkgAction', { 'source': dummy ? 'CodeAction' : 'CommandPalette', 'action': 'vcpkgOnlineHelpSuggested' });
     const uri: vscode.Uri = vscode.Uri.parse(`https://aka.ms/vcpkg`);
-    vscode.commands.executeCommand('vscode.open', uri);
+    void vscode.commands.executeCommand('vscode.open', uri);
 }
 
 async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void> {
@@ -857,8 +847,8 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
     await vscode.env.clipboard.writeText(installCommand);
 }
 
-function onGenerateDoxygenComment(arg: DoxygenCodeActionCommandArguments): void {
-    getActiveClient().handleGenerateDoxygenComment(arg);
+function onGenerateDoxygenComment(arg: DoxygenCodeActionCommandArguments): Promise<void> {
+    return getActiveClient().handleGenerateDoxygenComment(arg);
 }
 
 function onSetActiveConfigName(configurationName: string): Thenable<void> {
@@ -873,12 +863,12 @@ function onGetActiveConfigCustomVariable(variableName: string): Thenable<string>
     return clients.ActiveClient.getCurrentConfigCustomVariable(variableName);
 }
 
-function onLogDiagnostics(): void {
-    clients.ActiveClient.logDiagnostics();
+function onLogDiagnostics(): Promise<void> {
+    return clients.ActiveClient.logDiagnostics();
 }
 
-function onRescanWorkspace(sender?: string): void {
-    clients.ActiveClient.rescanFolder();
+function onRescanWorkspace(): Promise<void> {
+    return clients.ActiveClient.rescanFolder();
 }
 
 function onShowRefCommand(arg?: TreeNode): void {
@@ -889,14 +879,14 @@ function onShowRefCommand(arg?: TreeNode): void {
     if (node === NodeType.reference) {
         const { referenceLocation } = arg;
         if (referenceLocation) {
-            vscode.window.showTextDocument(referenceLocation.uri, {
+            void vscode.window.showTextDocument(referenceLocation.uri, {
                 selection: referenceLocation.range.with({ start: referenceLocation.range.start, end: referenceLocation.range.end })
-            });
+            }).then(undefined, logAndReturn.undefined);
         }
     } else if (node === NodeType.fileWithPendingRef) {
         const { fileUri } = arg;
         if (fileUri) {
-            vscode.window.showTextDocument(fileUri);
+            void vscode.window.showTextDocument(fileUri).then(undefined, logAndReturn.undefined);
         }
     }
 }
@@ -906,7 +896,7 @@ function reportMacCrashes(): void {
         prevCrashFile = "";
         const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
-        fs.stat(crashFolder, (err, stats) => {
+        fs.stat(crashFolder, (err) => {
             const crashObject: { [key: string]: string } = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
@@ -921,7 +911,7 @@ function reportMacCrashes(): void {
                     if (event !== "rename") {
                         return;
                     }
-                    if (filename === prevCrashFile) {
+                    if (!filename || filename === prevCrashFile) {
                         return;
                     }
                     prevCrashFile = filename;
@@ -1012,7 +1002,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     const processNames: string[] = ["cpptools-srv", "cpptools-wordexp", "cpptools",
         // Since only crash logs that start with "cpptools" are reported, the cases below would only occur
         // if the crash were to happen before the new process had fully started and renamed itself.
-        "clang-tidy", "clang-format", "clang", "gcc" ];
+        "clang-tidy", "clang-format", "clang", "gcc"];
     let processNameFound: boolean = false;
     for (const processName of processNames) {
         if (data.includes(processName)) {
@@ -1112,6 +1102,6 @@ export function UpdateInsidersAccess(): void {
     }
 
     if (installPrerelease) {
-        vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true });
+        void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
     }
 }
