@@ -136,7 +136,7 @@ export async function run() {
     await runTests({
       ...options,
       extensionDevelopmentPath: $root,
-      extensionTestsPath: resolve( $root, 'dist/test/common/select-tests' ),
+      extensionTestsPath: resolve( $root, 'dist/test/common/selectTests' ),
       launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
       extensionTestsEnv: { 
         SCENARIO: scenario,

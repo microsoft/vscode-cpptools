@@ -3,7 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
-import { expandAllStrings, ExpansionOptions } from "../../../../src/expand";
+import { describe, test } from "mocha";
+import { ExpansionOptions, expandAllStrings } from "../../../../src/expand";
 
 describe('${Variable} Expansion', () => {
     test('Expand all strings', async () => {
