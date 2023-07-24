@@ -12,7 +12,9 @@
 * Address various issues with support for gcc 13. [#11038](https://github.com/microsoft/vscode-cpptools/issues/11038)
 * Fix `#include` completion leaving an extra `>`. [#11042](https://github.com/microsoft/vscode-cpptools/issues/11042)
 * Fix an issue with matching of glob patterns containing path delimiters. [#11132](https://github.com/microsoft/vscode-cpptools/issues/11132)
+* Fix Create Declaration/Definition via `Quick Fix…` from hover tooltip. [#11157](https://github.com/microsoft/vscode-cpptools/issues/11157)
 * Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
+* Fix `files.encoding` setting on startup. [#11210](https://github.com/microsoft/vscode-cpptools/issues/11210)
 * Fix a crash related to directories with a very large number of files. [#11226](https://github.com/microsoft/vscode-cpptools/issues/11226)
 * Fix Rank > 1 Display Strings for Natvis. [PR MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
 * Fix some crashes identified by crash telemetry.
