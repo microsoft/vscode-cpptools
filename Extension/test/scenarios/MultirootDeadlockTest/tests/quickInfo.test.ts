@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import { ManualSignal } from '../../../../src/Utility/Async/manualSignal';
 import * as testHelpers from '../../../common/testHelpers';
 
 suite("[Quick info test]", function(): void {
@@ -15,6 +16,7 @@ suite("[Quick info test]", function(): void {
     const filePath: string = `${vscode.workspace.workspaceFolders?.[1]?.uri.fsPath}/quickInfo.cpp`;
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     let platform: string = "";
+    const getIntelliSenseStatus = new ManualSignal<void>();
 
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();

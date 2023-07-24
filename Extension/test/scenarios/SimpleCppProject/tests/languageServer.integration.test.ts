@@ -93,7 +93,7 @@ function cppPropertiesPath(): string {
     return folder.uri.fsPath + "/.vscode/c_cpp_properties.json";
 }
 
-async function changeCppProperties(cppProperties: config.ConfigurationJson, disposables: vscode.Disposable[]): Promise<void> {
+async function changeCppProperties(cppProperties: config.ConfigurationJson, _disposables: vscode.Disposable[]): Promise<void> {
     await util.writeFileText(cppPropertiesPath(), JSON.stringify(cppProperties));
     const contents: string = await util.readFileText(cppPropertiesPath());
     console.log("    wrote c_cpp_properties.json: " + contents);
@@ -130,7 +130,7 @@ suite("extensibility tests v3", function(): void {
     const provider: api.CustomConfigurationProvider = {
         name: "cpptoolsTest-v3",
         extensionId: "ms-vscode.cpptools-test3",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -154,7 +154,7 @@ suite("extensibility tests v3", function(): void {
         canProvideBrowseConfigurationsPerFolder(): Thenable<boolean> {
             return Promise.resolve(true);
         },
-        provideFolderBrowseConfiguration(uri: vscode.Uri): Thenable<api.WorkspaceBrowseConfiguration> {
+        provideFolderBrowseConfiguration(_uri: vscode.Uri): Thenable<api.WorkspaceBrowseConfiguration> {
             lastBrowseResult = defaultFolderBrowseConfig;
             return Promise.resolve(defaultFolderBrowseConfig);
         },
@@ -233,7 +233,7 @@ suite("extensibility tests v2", function(): void {
     const provider: any = {
         name: "cpptoolsTest-v2",
         extensionId: "ms-vscode.cpptools-test2",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -323,7 +323,7 @@ suite("extensibility tests v1", function(): void {
     const provider: any = {
         name: "cpptoolsTest-v1",
         extensionId: "ms-vscode.cpptools-test",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
@@ -402,7 +402,7 @@ suite("extensibility tests v0", function(): void {
     // Has to be 'any' instead of api.CustomConfigurationProvider because of missing interface members.
     const provider: any = {
         name: "cpptoolsTest-v0",
-        canProvideConfiguration(document: vscode.Uri): Thenable<boolean> {
+        canProvideConfiguration(_document: vscode.Uri): Thenable<boolean> {
             return Promise.resolve(true);
         },
         provideConfigurations(uris: vscode.Uri[]): Thenable<api.SourceFileConfigurationItem[]> {
