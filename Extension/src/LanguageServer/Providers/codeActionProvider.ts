@@ -8,7 +8,7 @@ import { DefaultClient } from '../client';
 import {
     CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions
 } from '../codeAnalysis';
-import { getLocalizedString, LocalizeStringParams } from '../localization';
+import { LocalizeStringParams, getLocalizedString } from '../localization';
 import { CppSettings } from '../settings';
 import { makeVscodeRange } from '../utils';
 
@@ -23,10 +23,16 @@ interface CodeActionCommand {
     arguments?: any[];
     edit?: TextEdit;
     uri?: string;
+    range?: Range;
 }
 
 interface GetCodeActionsResult {
     commands: CodeActionCommand[];
+}
+
+export interface CreateDeclDefnCommandArguments {
+    sender: string;
+    range: Range;
 }
 
 export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void> =
@@ -180,8 +186,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 resultCodeActions.push(...disableCodeActions);
                 resultCodeActions.push(...docCodeActions);
                 return;
-            } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
-                command.arguments = ['codeAction']; // We report the sender of the command
+            } else if ((command.command === 'C_Cpp.CreateDeclarationOrDefinition' || command.command === 'C_Cpp.CopyDeclarationOrDefinition')
+                && (command.arguments ?? []).length === 0 && command.range != undefined) {
+                const args: CreateDeclDefnCommandArguments = {
+                    sender: 'codeAction',
+                    range: command.range
+                };
+                command.arguments = [];
+                command.arguments.push(args);
             } else if (command.command === "C_Cpp.SelectIntelliSenseConfiguration") {
                 command.arguments = ['codeAction'];
                 hasSelectIntelliSenseConfiguration = true;
