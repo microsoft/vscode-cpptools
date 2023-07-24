@@ -187,7 +187,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 resultCodeActions.push(...docCodeActions);
                 return;
             } else if ((command.command === 'C_Cpp.CreateDeclarationOrDefinition' || command.command === 'C_Cpp.CopyDeclarationOrDefinition')
-                && (command.arguments ?? []).length === 0 && command.range != undefined) {
+                && (command.arguments ?? []).length === 0 && command.range !== undefined) {
                 const args: CreateDeclDefnCommandArguments = {
                     sender: 'codeAction',
                     range: command.range
