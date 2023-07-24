@@ -119,7 +119,7 @@ suite("[Inlay hints test]", function(): void {
         assertHintValues(result2, 10, 28, 14, ": int", expectedKind);
         assertHintValues(result2, 11, 29, 15, ": int", expectedKind);
     });
-    
+
     test("[Inlay Hints - auto type, show on left]", async () => {
         const range: vscode.Range = new vscode.Range(new vscode.Position(15, 0), new vscode.Position(31, 0));
 

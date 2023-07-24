@@ -12,7 +12,7 @@ export async function foreach<T, TResult>(items: undefined | Iterable<T> | Promi
     items = is.promise(items) ? await items : items;                      // unwrap the promise if it is one
 
     if (items) {
-        const result = [];
+        const result = [] as Promise<TResult>[];
         if (is.asyncIterable(items)) {
             for await (const item of items) {
                 result.push(predicate(item));                                            // run the predicate on each item
