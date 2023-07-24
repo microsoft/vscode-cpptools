@@ -1856,9 +1856,11 @@ export class DefaultClient implements Client {
         if (!currentProvider.isReady) {
             return;
         }
+
         await Promise.all([
             this.clearCustomConfigurations(),
-            this.handleRemoveAllCodeAnalysisProblems(),
+            this.handleRemoveAllCodeAnalysisProblems()]);
+        await Promise.all([
             ...[...this.trackedDocuments].map(document => this.provideCustomConfiguration(document.uri, undefined, true))
         ]);
     }
