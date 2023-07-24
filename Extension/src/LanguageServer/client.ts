@@ -1857,9 +1857,11 @@ export class DefaultClient implements Client {
         if (!currentProvider.isReady) {
             return;
         }
+
         await Promise.all([
             this.clearCustomConfigurations(),
-            this.handleRemoveAllCodeAnalysisProblems(),
+            this.handleRemoveAllCodeAnalysisProblems()]);
+        await Promise.all([
             ...[...this.trackedDocuments].map(document => this.provideCustomConfiguration(document.uri, undefined, true))
         ]);
     }
@@ -1925,7 +1927,7 @@ export class DefaultClient implements Client {
                 hasCompleted = true;
                 this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
                 if (currentProvider.version >= Version.v2) {
-                    console.warn("Configuration Provider timed out in {0}ms.", configProviderTimeout);
+                    console.warn(`Configuration Provider timed out in ${configProviderTimeout}ms.`);
                     void this.resumeParsing().catch(logAndReturn.undefined);
                 }
             }
