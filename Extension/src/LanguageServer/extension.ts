@@ -689,20 +689,22 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
     return getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
-async function onCopyDeclarationOrDefinition(sender?: any): Promise<void> {
+async function onCopyDeclarationOrDefinition(args?: any): Promise<void> {
+    const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
     const properties: { [key: string]: string } = {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
-    return getActiveClient().handleCreateDeclarationOrDefinition(true);
+    return getActiveClient().handleCreateDeclarationOrDefinition(true, args?.range);
 }
 
-async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
+async function onCreateDeclarationOrDefinition(args?: any): Promise<void> {
+    const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
     const properties: { [key: string]: string } = {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
-    return getActiveClient().handleCreateDeclarationOrDefinition();
+    return getActiveClient().handleCreateDeclarationOrDefinition(false, args?.range);
 }
 
 function onAddToIncludePath(path: string): void {
@@ -711,7 +713,6 @@ function onAddToIncludePath(path: string): void {
         // suggestion to a different workspace.
         return clients.ActiveClient.handleAddToIncludePathCommand(path);
     }
-
 }
 
 function onEnableSquiggles(): void {
