@@ -37,7 +37,7 @@
     },
     "[typescript]": {
         "editor.tabSize": 4,
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.defaultFormatter": "vscode.typescript-language-features",
         "editor.formatOnSave": true,
         "files.insertFinalNewline": true,
         "editor.codeActionsOnSave": {
