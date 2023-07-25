@@ -10,8 +10,8 @@ import { lazy } from '../Async/lazy';
 import { Descriptors } from '../Eventing/descriptor';
 import { emitNow } from '../Eventing/dispatcher';
 import { ArbitraryObject } from '../Eventing/interfaces';
+import { filepath, filterToFolders, pathsFromVariable } from '../Filesystem/filepath';
 import { Finder } from '../Filesystem/find';
-import { filterToFolders, path, pathsFromVariable } from '../Filesystem/path';
 import { first } from '../System/array';
 import { asserts } from '../System/assertions';
 import { is } from '../System/guards';
@@ -80,15 +80,15 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
 
     if (typeof (executable) === 'string') {
         fullPath = lazy<string>(async () => {
-            if (!await path.isExecutable(executable)) {
+            if (!await filepath.isExecutable(executable)) {
                 // if they didn't pass in a valid executable path, let's see if we can figure it out.
 
                 // if we were handed some choices, we'll look at them, otherwise we'll see what we can find on the PATH.
                 opts.choices ??= lazy(async () => new Finder(executable).scan(... await searchPaths).results);
                 // but before we look at any of that, let's see if someone else wants to take that off our hands
                 const bin = await emitNow<string>('select-binary', Descriptors.none, executable, is.promise(opts.choices) ? await opts.choices : new Set());
-                return await path.isExecutable(bin) || // we have a good one coming back from the event
-                    await path.isExecutable(first(opts.choices)) || // we're gonna pick the first one in the choices, if there are any.
+                return await filepath.isExecutable(bin) || // we have a good one coming back from the event
+                    await filepath.isExecutable(first(opts.choices)) || // we're gonna pick the first one in the choices, if there are any.
                     fail(new Error(`Unable to find full path to binary '${executable}'`)); // we're out of options.
             }
 

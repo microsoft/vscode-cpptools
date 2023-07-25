@@ -12,12 +12,12 @@ import { logAndReturn } from '../Async/returns';
 import { Process } from '../Process/process';
 import { ProcessFunction, Program } from '../Process/program';
 import { Instance } from '../System/types';
-import { path } from './path';
+import { filepath } from './filepath';
 
 let ripgrep: Instance<ProcessFunction> | undefined;
 export async function initRipGrep(filename: string) {
     if (!ripgrep) {
-        const rg = await path.isExecutable(filename);
+        const rg = await filepath.isExecutable(filename);
         strict(rg, `File ${filename} is not executable`);
         ripgrep = await new Program(filename);
     }
@@ -81,7 +81,7 @@ export class FastFinder implements AsyncIterable<string> {
                         continue;
                     }
                     this.distinct.add(line);
-                    if (!this.keepOnlyExecutables || await path.isExecutable(line)) {
+                    if (!this.keepOnlyExecutables || await filepath.isExecutable(line)) {
                         this.#files.add(line);
                     }
                 }

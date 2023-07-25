@@ -10,7 +10,7 @@ import * as Mocha from 'mocha';
 import { basename, dirname, resolve } from 'path';
 import { env } from 'process';
 import { promisify } from 'util';
-import { path } from '../../src/Utility/Filesystem/path';
+import { filepath } from '../../src/Utility/Filesystem/filepath';
 
 export const glob: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(globSync);
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -25,7 +25,7 @@ const scenarios = resolve($root, 'test', 'scenarios');
 export async function getScenarioFolder(val: string) {
     console.log(scenarios);
     // is it a name relative to the tests/scenarios folder?
-    const folder = await path.isFolder(val, scenarios);
+    const folder = await filepath.isFolder(val, scenarios);
 
     if (folder) {
         let name = basename(folder);
@@ -40,7 +40,7 @@ export async function getScenarioFolder(val: string) {
         };
     }
 
-    const file = await path.isFile(val, scenarios);
+    const file = await filepath.isFile(val, scenarios);
     if (file) {
         const assets = dirname(dirname(file));
 

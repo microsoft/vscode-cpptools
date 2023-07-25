@@ -13,7 +13,7 @@ import { dirname, resolve } from 'path';
 import { chdir } from 'process';
 import { setImmediate } from 'timers/promises';
 import { promisify } from 'util';
-import { path } from '../src/Utility/Filesystem/path';
+import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 export const $root = resolve(`${__dirname}/..`);
@@ -46,13 +46,13 @@ export async function getModifiedIgnoredFiles() {
     }
     
     // return the full path of files that would be removed.
-    return Promise.all(stdio.filter("Would remove").map( (s) => path.exists(s.replace(/^Would remove /,''),$root)).filter(p=>p));
+    return Promise.all(stdio.filter("Would remove").map( (s) => filepath.exists(s.replace(/^Would remove /,''),$root)).filter(p=>p));
 }
 
 export async function rimraf(...paths: string[]) {
     const all = [];
     for( const each of paths) {
-        if(await path.isFolder(each)) {
+        if(await filepath.isFolder(each)) {
             verbose(`Removing folder ${each}`);
             all.push(rm(each, {recursive: true, force: true}));
             continue;
@@ -63,7 +63,7 @@ export async function rimraf(...paths: string[]) {
     await Promise.all(all);
 }
 export async function mkdir(filePath:string) {
-    const [fullPath, info] = await path.stats(filePath,$root);
+    const [fullPath, info] = await filepath.stats(filePath,$root);
     if( info ) {
         if( info.isDirectory() ) {
             return fullPath;
@@ -80,7 +80,7 @@ export const glob: (pattern: string, options?: IOptions | undefined) => Promise<
 export async function write( filePath: string, data: Buffer|string) {
     await mkdir(dirname(filePath));
 
-    if(await path.isFile(filePath)) {
+    if(await filepath.isFile(filePath)) {
         const content = await readFile(filePath);
         if (is.string(data)) {
             // if we're passed a text file, we should match the line endings of the existing file.
@@ -110,7 +110,7 @@ export async function write( filePath: string, data: Buffer|string) {
 export async function updateFiles( files: string[], dest: string| Promise<string>) {
     const target = is.promise(dest) ? await dest : dest;
     await Promise.all(files.map( async (each) => {
-        const sourceFile = await path.isFile(each,$root);
+        const sourceFile = await filepath.isFile(each,$root);
         if( sourceFile ) {
             const targetFile = resolve(target, each);
             await write(targetFile,await readFile(sourceFile));

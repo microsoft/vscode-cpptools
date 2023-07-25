@@ -3,16 +3,16 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { delimiter, normalize as norm, basename, extname, join, resolve } from 'path';
+import { basename, delimiter, extname, join, normalize as norm, resolve } from 'path';
 
 import { fail } from 'assert';
 import { randomBytes } from 'crypto';
 import { constants, Stats } from 'fs';
 import { stat } from 'fs/promises';
 import { tmpdir } from 'os';
+import { isWindows } from '../../constants';
 import { returns } from '../Async/returns';
 import { is } from '../System/guards';
-import { isWindows } from '../../constants';
 
 export const normalize = isWindows ? (p: string) => norm(p).toLowerCase() : norm;
 
@@ -23,7 +23,7 @@ export function pathsFromVariable(environmentVariable: string = 'PATH'): string[
 export async function filterToFolders(paths: string[]): Promise<string[]> {
     const set = new Set(paths);
     for (const each of [...set.keys()]) {
-        if (!each || !await path.isFolder(each)) {
+        if (!each || !await filepath.isFolder(each)) {
             set.delete(each);
         }
     }
@@ -54,7 +54,7 @@ export interface Folder extends Entry {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export class path {
+export class filepath {
     static async stats(name: string | undefined | Promise<string | undefined>, baseFolder?: string): Promise<[string, Stats | undefined] | [undefined, undefined]> {
         if (is.promise(name)) {
             name = await name;
@@ -72,7 +72,7 @@ export class path {
     }
 
     static async info(name: string | undefined | Promise<string | undefined>, baseFolder?: string, executableExtensions: Set<string> = process.platform === 'win32' ? new Set(['.exe'/* ,'.cmd','.bat' */]) : new Set()): Promise<undefined | File | Folder> {
-        const [fullPath, stats] = await path.stats(name, baseFolder);
+        const [fullPath, stats] = await filepath.stats(name, baseFolder);
         if (!stats) {
             return undefined;
         }
@@ -109,29 +109,29 @@ export class path {
     }
 
     static async isFile(name: any | string | undefined | Promise<string | undefined>, baseFolder?: string): Promise<undefined | string> {
-        const [fullName, stats] = await path.stats(name, baseFolder);
+        const [fullName, stats] = await filepath.stats(name, baseFolder);
         return stats?.isFile() ? fullName : undefined;
     }
 
     static async isFolder(name: string | undefined | Promise<string | undefined>, baseFolder?: string): Promise<undefined | string> {
-        const [fullName, stats] = await path.stats(name, baseFolder);
+        const [fullName, stats] = await filepath.stats(name, baseFolder);
         return stats?.isDirectory() ? fullName : undefined;
     }
 
     static async exists(name: string | undefined | Promise<string | undefined>, baseFolder?: string): Promise<undefined | string> {
-        const [fullName, stats] = await path.stats(name, baseFolder);
+        const [fullName, stats] = await filepath.stats(name, baseFolder);
         return stats ? fullName : undefined;
     }
 
     static async isExecutable(name: string | undefined | Promise<string | undefined>, baseFolder?: string): Promise<undefined | string> {
-        const info = await path.info(name, baseFolder);
+        const info = await filepath.info(name, baseFolder);
         return info?.isFile && info.isExecutable ? info.fullPath : undefined;
     }
 
     static parent(name: Promise<string | undefined>): Promise<string | undefined>;
     static parent(name: string | undefined): string | undefined;
     static parent(name: string | undefined | Promise<string | undefined>): string | undefined | Promise<string | undefined> {
-        return is.promise(name) ? name.then(path.parent) : name ? normalize(resolve(name, '..')) : undefined;
+        return is.promise(name) ? name.then(filepath.parent) : name ? normalize(resolve(name, '..')) : undefined;
     }
 }
 export function tmpFile(prefix = 'tmp.', suffix = '.tmp', folder = tmpdir()) {

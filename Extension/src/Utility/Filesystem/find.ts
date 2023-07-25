@@ -14,7 +14,7 @@ import { accumulator, foreach } from '../Async/awaiters';
 import { ManualPromise } from '../Async/manualPromise';
 import { returns } from '../Async/returns';
 import { is } from '../System/guards';
-import { File, Folder, normalize } from './path';
+import { File, Folder, normalize } from './filepath';
 
 interface FolderWithChildren extends Folder {
     children?: Map<string, File | FolderWithChildren>;

@@ -10,7 +10,7 @@ import { readFile } from 'node:fs/promises';
 import { ManualPromise } from '../Async/manualPromise';
 import { ManualSignal } from '../Async/manualSignal';
 import { returns } from '../Async/returns';
-import { path } from '../Filesystem/path';
+import { filepath } from '../Filesystem/filepath';
 import { hasErrors } from '../Sandbox/interfaces';
 import { Sandbox } from '../Sandbox/sandbox';
 import { collectGarbage } from '../System/garbage-collector';
@@ -294,7 +294,7 @@ export function subscribe<T extends Record<string, any>>(subscriber: Promise<Sub
                 const text = subscriber[name] as string;
 
                 try {
-                    const filename = await path.isFile(text, options.folder);
+                    const filename = await filepath.isFile(text, options.folder);
                     if (filename) {
                         // it is a file, so load it as a functionlet
                         const code = await readFile(filename, 'utf8');

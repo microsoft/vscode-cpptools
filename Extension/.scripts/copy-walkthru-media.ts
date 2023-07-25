@@ -5,7 +5,7 @@
 
 
 import { watch as watchFiles } from 'fs/promises';
-import { path } from '../src/Utility/Filesystem/path';
+import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
 import { $root, glob, mkdir, updateFiles } from './common';
 
@@ -14,7 +14,7 @@ export async function main() {
     await updateFiles(await glob('walkthrough/images/**/*'), mkdir('dist'));
 }
 export async function watch() {
-    const source = await path.isFolder('walkthrough/images',$root);
+    const source = await filepath.isFolder('walkthrough/images',$root);
     if( source ) {
         verbose(`Watching ${source} folder for changes.`);
         console.log('Press Ctrl+C to exit.');
