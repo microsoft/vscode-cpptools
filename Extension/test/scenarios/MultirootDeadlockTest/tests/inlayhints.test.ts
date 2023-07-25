@@ -12,6 +12,7 @@ import { suite } from 'mocha';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import { timeout } from '../../../../src/Utility/Async/timeout';
 import * as testHelpers from '../../../common/testHelpers';
 
 suite("[Inlay hints test]", function(): void {
@@ -98,7 +99,7 @@ suite("[Inlay hints test]", function(): void {
         await changeInlayHintSetting(autoDeclarationTypesEnabled, disabled);
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, disabled);
 
-        const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
+        const result1 =  await timeout(1000, vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range) as Promise<any>);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, enabled);

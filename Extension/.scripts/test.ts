@@ -4,18 +4,16 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
-import { fail } from 'assert';
 import { createHash } from 'crypto';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
-import { env } from 'process';
-import { path } from '../src/Utility/Filesystem/path';
 import { verbose } from '../src/Utility/Text/streams';
-import { $args, $root, glob, mkdir, rimraf } from './common';
+import { getTestInfo } from '../test/common/selectTests';
+import { $root, mkdir, rimraf } from './common';
 
 const sowrite = process.stdout.write.bind(process.stdout) as (...args: unknown[]) => boolean;
 const sewrite = process.stderr.write.bind(process.stderr) as (...args: unknown[]) => boolean;
-const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0,6) );
+const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0,6));
 const scenarios = resolve($root,'test','scenarios');
         
 const options = {
@@ -33,6 +31,10 @@ const filters = [
     /^Extension '/,
     /^Found existing install/
 ];
+
+function filter() {
+
+
 
 process.stdout.write = function (...args: unknown[]) {
     //console.error(`***************${JSON.stringify(args)}`);
@@ -68,7 +70,8 @@ process.stderr.write = function (...args: unknown[]) {
     }
     return sewrite(...args);
 };
-
+}
+/*
 async function getScenarioFolder() {
     let folder ='';
     let scenario = '';
@@ -98,6 +101,7 @@ async function getScenarioFolder() {
 
     throw new Error(`The Scenario folder must be specified either by '--scenario=...' or an environment variable 'SCENARIO=...'`);
 }
+*/
 
 async function install() {
     try {
@@ -131,15 +135,15 @@ export async function reset() {
 }
 
 export async function run() {
-    const { scenario, assets, tests, workspace } = await getScenarioFolder();
-    
+    const { assets, name, workspace } = await getTestInfo();
+    console.log( workspace);
     await runTests({
       ...options,
       extensionDevelopmentPath: $root,
       extensionTestsPath: resolve( $root, 'dist/test/common/selectTests' ),
       launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
       extensionTestsEnv: { 
-        SCENARIO: scenario,
+        SCENARIO: assets,
       }
     });
 }
