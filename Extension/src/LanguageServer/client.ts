@@ -539,7 +539,6 @@ export interface TextDocumentWillSaveParams {
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
-    storagePath: string;
     freeMemory: number;
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
@@ -829,7 +828,6 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -925,7 +923,6 @@ export class DefaultClient implements Client {
     public get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return {
             workspaceFolderBasename: this.Name,
-            workspaceStorage: this.storagePath,
             execPath: process.execPath,
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
         };
@@ -1291,21 +1288,6 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        let storagePath: string | undefined;
-        if (util.extensionContext) {
-            const path: string | undefined = util.extensionContext.storageUri?.fsPath;
-            if (path) {
-                storagePath = path;
-            }
-        }
-
-        if (!storagePath) {
-            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
-        }
-        if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
-        }
-        this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = new SettingsTracker(rootUri);
 
@@ -1614,7 +1596,6 @@ export class DefaultClient implements Client {
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
-            storagePath: this.storagePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
