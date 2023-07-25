@@ -13,7 +13,7 @@ import { returns } from '../Async/returns';
 import { filepath } from '../Filesystem/filepath';
 import { hasErrors } from '../Sandbox/interfaces';
 import { Sandbox } from '../Sandbox/sandbox';
-import { collectGarbage } from '../System/garbage-collector';
+import { collectGarbage } from '../System/garbageCollector';
 import { is } from '../System/guards';
 import { isAnonymousObject, members, typeOf } from '../System/info';
 import { getOrAdd } from '../System/map';

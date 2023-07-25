@@ -18,7 +18,7 @@ export function when(prerequisite: boolean|(() => boolean)): {it: Mocha.TestFunc
 }
 
 import { MessagePort } from 'worker_threads';
-import { collectGarbage } from '../../src/Utility/System/garbage-collector';
+import { collectGarbage } from '../../src/Utility/System/garbageCollector';
 
 function showActiveHandles() {
     const open = (process as any)._getActiveHandles().filter(

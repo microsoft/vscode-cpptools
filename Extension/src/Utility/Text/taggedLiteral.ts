@@ -8,7 +8,7 @@
 import { safeEval } from '../Sandbox/sandbox';
 import { is } from '../System/guards';
 import { Primitive } from '../System/types';
-import { isIdentifierPart, isIdentifierStart } from './character-codes';
+import { isIdentifierPart, isIdentifierStart } from './characteCodes';
 
 /** simple dynamic tagged literal implementation */
 export function taggedLiteral(templateString: string, templateVars: Record<string, any>): string {

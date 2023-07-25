@@ -13,6 +13,7 @@ export async function main() {
     verbose(`Copying walkthrough media to extension/dist folder`);
     await updateFiles(await glob('walkthrough/images/**/*'), mkdir('dist'));
 }
+
 export async function watch() {
     const source = await filepath.isFolder('walkthrough/images',$root);
     if( source ) {
