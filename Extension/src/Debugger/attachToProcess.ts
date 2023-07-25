@@ -81,7 +81,7 @@ export class RemoteAttachPicker {
 
             const pipeCmd: string = `"${pipeProgram}" ${argList}`;
 
-            processes = await this.getRemoteOSAndProcesses(pipeCmd, pipeTransport.customRemoteProcessCommand);
+            processes = await this.getRemoteOSAndProcesses(pipeCmd);
         } else if (!pipeTransport && useExtendedRemote) {
             if (!miDebuggerPath || !miDebuggerServerAddress) {
                 throw new Error(localize("debugger.path.and.server.address.required", "{0} in debug configuration requires {1} and {2}", "useExtendedRemote", "miDebuggerPath", "miDebuggerServerAddress"));
@@ -106,7 +106,7 @@ export class RemoteAttachPicker {
     }
 
     // Creates a string to run on the host machine which will execute a shell script on the remote machine to retrieve OS and processes
-    private getRemoteProcessCommand(customRemoteProcessCommand?: string): string {
+    private getRemoteProcessCommand(): string {
         let innerQuote: string = `'`;
         let outerQuote: string = `"`;
         let parameterBegin: string = `$(`;
@@ -132,18 +132,15 @@ export class RemoteAttachPicker {
             shPrefix = `/bin/`;
         }
 
-        if (customRemoteProcessCommand) {
-            return `${outerQuote}${shPrefix}sh -c ${innerQuote}${customRemoteProcessCommand}${innerQuote}${outerQuote}`;
-        }
-
-        return `${outerQuote}${shPrefix}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
-            `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
+        return `${outerQuote}${shPrefix}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname -o${parameterEnd} = ${escapedQuote}Toybox${escapedQuote} ] ; ` +
+            `then ${PsProcessParser.psToyboxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
+            `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
             `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
-    private async getRemoteOSAndProcesses(pipeCmd: string, customRemoteProcessCommand?: string): Promise<AttachItem[]> {
+    private async getRemoteOSAndProcesses(pipeCmd: string): Promise<AttachItem[]> {
         // Do not add any quoting in execCommand.
-        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand(customRemoteProcessCommand)}`;
+        const execCommand: string = `${pipeCmd} ${this.getRemoteProcessCommand()}`;
 
         const output: string = await util.execChildProcess(execCommand, undefined, this._channel);
         // OS will be on first line
