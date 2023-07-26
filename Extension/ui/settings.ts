@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 'use strict';
+export const xxxx = 0;
 
 const elementId: { [key: string]: string } = {
     // Basic settings
@@ -386,4 +387,4 @@ class SettingsApp {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const app: SettingsApp = new SettingsApp();
+export const app: SettingsApp = new SettingsApp();

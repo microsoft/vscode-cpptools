@@ -130,3 +130,11 @@ export async function read(filename: string ) {
     ok(content,`File '${filename}' has no content`);
     return content.toString();
 }
+
+export async function readJson(filename: string, fallback?: {} ) {
+    try { 
+        return JSON.parse(await read(filename));
+    } catch {
+        return fallback;
+    }
+}

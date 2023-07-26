@@ -12,7 +12,7 @@ import { Command, Program } from '../../src/Utility/Process/program';
 import { isWindows } from '../../src/constants';
 
 describe('Program Automation', () => {
-    if(isWindows) {
+    if (isWindows) {
         it('can run a program without output [cmd.exe /c rem]', async () => {
 
             const echo = await new Program('c:/windows/system32/cmd.exe', '/c', 'rem');
@@ -29,7 +29,7 @@ describe('Program Automation', () => {
             const echo = await new Command('c:/windows/system32/cmd.exe', '/c', 'rem');
             const p = await echo();
             console.log("before iter");
-            for await(const line of p.stdio) {
+            for await (const line of p.stdio) {
                 console.log(line);
                 fail('should not have any text output');
             }

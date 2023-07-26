@@ -8,6 +8,7 @@
 import { deepEqual, throws } from 'assert';
 import { describe } from 'mocha';
 import { extractArgs } from '../../src/Utility/Process/commandLine';
+import { is } from '../../src/Utility/System/guards';
 import { isWindows } from '../../src/constants';
 import { when } from '../common/internal';
 
@@ -18,11 +19,13 @@ function marker() {
     try {
         throw new Error('Test Marker');
     } catch (E) {
-        return E.stack?.split('\n').filter(each => each.includes('.ts') && each.includes('<anonymous>')).join('\n');
+        if (is.error(E)){
+            return E.stack?.split('\n').filter(each => each.includes('.ts') && each.includes('<anonymous>')).join('\n');
+        }
     }
 }
 
-const fails: [ string|undefined, string, Error?][] = [
+const fails: [ string|undefined, string, string?][] = [
     /** command substitution not supported */
     [undefined, "explicit ``", marker()],
     [undefined, "$(echo hello)", marker()],
@@ -70,7 +73,7 @@ const fails: [ string|undefined, string, Error?][] = [
     [ undefined, "${1/0]", marker() ] /* BZ 18100 */
 ];
 
-const success: [string|undefined, string, string[], Error?][] = [
+const success: [string|undefined, string, string[], string?][] = [
     /* Simple word- and field-splitting */
     [ undefined, "one", [ "one" ], marker() ],
     [ undefined, "one two", [ "one", "two" ], marker() ],

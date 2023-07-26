@@ -21,8 +21,7 @@ function assertEnvironmentEqual(env: Environment[], name: string, value: string)
 suite("ParsedEnvironmentFile", () => {
     test("Add single variable", () => {
         const content: string = `MyName=VALUE`;
-        const fakeConfig: Environment[] = [];
-        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
@@ -30,8 +29,7 @@ suite("ParsedEnvironmentFile", () => {
 
     test("Handle quoted values", () => {
         const content: string = `MyName="VALUE"`;
-        const fakeConfig: Environment[] = [];
-        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
@@ -39,8 +37,7 @@ suite("ParsedEnvironmentFile", () => {
 
     test("Handle BOM", () => {
         const content: string = "\uFEFFMyName=VALUE";
-        const fakeConfig: Environment[] = [];
-        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName", "VALUE");
@@ -52,8 +49,7 @@ MyName1=Value1
 MyName2=Value2
 
 `;
-        const fakeConfig: Environment[] = [];
-        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
@@ -84,8 +80,7 @@ MyName1=Value1
 # This is a comment in the middle of the file
 MyName2=Value2
 `;
-        const fakeConfig: Environment[] = [];
-        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(!result.Warning, `Failed to assert that Warning was empty: ${result.Warning}`);
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
@@ -99,8 +94,7 @@ MyName1=Value1
 MyName2=Value2
 
 `;
-        const fakeConfig: Environment[] = [];
-        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
+        const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", []);
 
         assert(result.Warning && result.Warning.startsWith("Ignoring non-parseable lines in envFile TestEnvFileName"), 'Checking if warning exists');
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");

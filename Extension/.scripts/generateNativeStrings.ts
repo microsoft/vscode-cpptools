@@ -7,6 +7,12 @@ import { parse } from 'comment-json';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
+// ****************************
+// Command: generate-native-strings
+// The following is used to generate nativeStrings.ts and localized_string_ids.h from ./src/nativeStrings.json
+// If adding localized strings to the native side, start by adding it to nativeStrings.json and use this to generate the others.
+// ****************************
+
 const $root = resolve(`${__dirname}/..`);
 const stringTable = parse(readFileSync(`${$root}/src/nativeStrings.json`).toString()) as any;
 

@@ -242,8 +242,7 @@ describe('Event Emitters', () => {
     });
 
     it('works with source code handlers', async () => {
-        const count = 0;
-        const unsub = await subscribe({
+        await subscribe({
             'note': 'console.log(\'hi there\');'
         }, { bindAll: true, folder: 'C:/work/2022/getting-started/STMicroelectronics/B-L4S5I-IOT01A' });
 

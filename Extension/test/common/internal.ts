@@ -2,7 +2,7 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import { it } from 'mocha';
+import { AsyncFunc, Func, it } from 'mocha';
 import { is } from '../../src/Utility/System/guards';
 
 export function when(prerequisite: boolean|(() => boolean)): {it: Mocha.TestFunction} {
@@ -12,7 +12,7 @@ export function when(prerequisite: boolean|(() => boolean)): {it: Mocha.TestFunc
     if (prerequisite) {
         return {it};
     } else {
-        const skip = (title, test) => it.skip(`Dynamically skipping test: <<${title}>> - prerequisite not met.`, test);
+        const skip = (title: string, test: AsyncFunc|Func) => it.skip(`Dynamically skipping test: <<${title}>> - prerequisite not met.`, test);
         return {it:skip as Mocha.TestFunction};
     }
 }
@@ -47,7 +47,7 @@ export function addMisbehavingPromise(promise: Promise<any>) {
     misbehavingPromises?.add(promise);
     return promise;
 }
-global.addMisbehavingPromise  = addMisbehavingPromise;
+(global as any).addMisbehavingPromise  = addMisbehavingPromise;
 let MAX = 20;
 
 export function initDevModeChecks() {

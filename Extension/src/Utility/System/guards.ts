@@ -75,4 +75,7 @@ export class is {
     static continue(instance: any): instance is undefined {
         return instance === undefined;
     }
+    static error(instance: any): instance is Error {
+        return instance instanceof Error;
+    }
 }
