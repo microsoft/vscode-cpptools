@@ -6,6 +6,8 @@
 import { parse } from 'comment-json';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
+import { verbose } from '../src/Utility/Text/streams';
+import { green } from './common';
 
 // ****************************
 // Command: generate-native-strings
@@ -105,7 +107,7 @@ ${typeScriptSwitchContent}
 
 // If the file isn't there, or the contents are different, write it out
 if( !existsSync(`${$root}/src/nativeStrings.ts`) ||  readFileSync(`${$root}/src/nativeStrings.ts`).toString() !== typeScriptContent ) {
-    console.log("Writing file: ./src/nativeStrings.ts");
+    verbose(`Writing file: ${green('./src/nativeStrings.ts')}`);
     writeFileSync(`${$root}/src/nativeStrings.ts`, typeScriptContent, 'utf8');
 }
 

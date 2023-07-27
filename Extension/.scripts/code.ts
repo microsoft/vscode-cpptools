@@ -5,7 +5,7 @@
 
 import { spawnSync } from 'child_process';
 import { verbose } from '../src/Utility/Text/streams';
-import { $args, $root, $scenario, brightGreen, checkFile, pwd } from './common';
+import { $args, $root, $scenario, brightGreen, checkFile, gray, green, pwd } from './common';
 
 import { resolve } from 'path';
 import { getTestInfo } from '../test/common/selectTests';
@@ -32,9 +32,9 @@ export async function main() {
     // example of installing an extension into code
     //verbose(`Installing release version of 'ms-vscode.cpptools'`);
     //spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' })
-    verbose('Launch VSCode');
+    verbose(green('Launch VSCode'));
     const ARGS =[...args, ... options.launchArgs.filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir=')), `--extensionDevelopmentPath=${$root}`, ...$args ];
-    verbose(`${cli}\n  ${ [...ARGS ].join('\n  ')}`);
+    verbose(gray(`${cli}\n  ${ [...ARGS ].join('\n  ')}`));
     
     spawnSync(cli, ARGS,{ encoding: 'utf-8', stdio: 'ignore' })
 }

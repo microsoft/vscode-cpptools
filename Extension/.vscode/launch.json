@@ -3,120 +3,46 @@
     "version": "0.1.0",
     "configurations": [
         {
-            "name": "Launch Extension (development)",
+            "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",
-            "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "preLaunchTask": "Compile Dev",
-        },
-        {
-            "name": "Launch Extension (production)",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "preLaunchTask": "TypeScript Compile",
-        },
-        {
-            "name": "Launch Extension (do not build)",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ]
-        },
-        {
-            "name": "Launch Extension (watch, development)",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "preLaunchTask": "Compile Dev Watch",
-        },
-        {
-            "name": "Launch Extension (watch, production)",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "preLaunchTask": "TypeScript Compile Watch",
-        },
-        {
-            "name": "Launch Unit Tests",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
+                "--no-sandbox",
+                "--disable-updates",
+                "--skip-welcome",
+                "--skip-release-notes",
+                "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/unitTests/index"
+                "${input:pickScenario}",
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceFolder}/out/test/**/*.js"
+                "${workspaceFolder}/dist/**"
             ],
-            "preLaunchTask": "Pretest"
         },
         {
-            "name": "Launch Integration Tests",
+            "name": "Launch VSCode Tests",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
+            "env": {
+                "SCENARIO": "${input:pickScenario}"
+            },
             "args": [
-                "${workspaceFolder}/test/integrationTests/testAssets/SimpleCppProject/simpleCppProject.code-workspace",
+                "--no-sandbox",
+                "--disable-updates",
+                "--skip-welcome",
+                "--skip-release-notes",
+                "--disable-extensions",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/languageServer/index"
+                "--extensionTestsPath=${workspaceFolder}/dist/test/common/selectTests",
+                "--scenario=${input:pickScenario}",
+                "${input:pickScenario}"
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceFolder}/out/test/**/*.js"
+                "${workspaceFolder}/dist/**"
             ],
-            "preLaunchTask": "Pretest",
-        },
-        {
-            "name": "Launch E2E IntelliSense features tests",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "${workspaceFolder}/../../Vcls-vscode-test/MultirootDeadlockTest/test.code-workspace",
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/integrationTests/IntelliSenseFeatures/index"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/out/test/**/*.js"
-            ],
-            "preLaunchTask": "Pretest"
         },
         {
             "name": "Node Attach",
@@ -135,8 +61,33 @@
                 "<node_internals>/**"
             ],
             "outFiles": [
-                "${workspaceFolder}/**/out/**/*.js",
+                "${workspaceFolder}/dist/**",
                 "!**/node_modules/**"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "pickScenario",
+            "description": "Which scenario to run VSCode Tests for?",
+            "options": [
+                {
+                    "label": "MultiRootDeadlockTest",
+                    "value": "${workspaceFolder}/test/scenarios/MultirootDeadlockTest/assets/test.code-workspace"
+                },
+                {
+                    "label": "SimpleCppProject",
+                    "value": "${workspaceFolder}/test/scenarios/SimpleCppProject/assets/simpleCppProject.code-workspace"
+                },
+                {
+                    "label": "SingleRootProject",
+                    "value": "${workspaceFolder}/test/scenarios/SingleRootProject/assets/"
+                },
+                {
+                    "label": "No Workspace",
+                    "value": "-n"
+                },
             ]
         }
     ]

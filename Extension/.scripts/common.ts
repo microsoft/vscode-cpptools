@@ -35,7 +35,7 @@ chdir($root);
 
 // dump unhandled async errors to the console and exit.
 process.on('unhandledRejection', (reason: any, p) => {
-    console.log(`${reason?.stack?.split(/\r?\n/).filter(l => !l.includes('node:internal') && !l.includes('node_modules') ).join('\n')}`);
+    error(`${reason?.stack?.split(/\r?\n/).filter(l => !l.includes('node:internal') && !l.includes('node_modules') ).join('\n')}`);
     process.exit(1);
 });
 
@@ -57,11 +57,11 @@ export async function rimraf(...paths: string[]) {
     const all = [];
     for( const each of paths) {
         if(await filepath.isFolder(each)) {
-            verbose(`Removing folder ${each}`);
+            verbose(`Removing folder ${red(each)}`);
             all.push(rm(each, {recursive: true, force: true}));
             continue;
         }
-        verbose(`Removing file ${each}`);
+        verbose(`Removing file ${red(each)}`);
         all.push(await rm(each, {force: true}));
     }
     await Promise.all(all);
@@ -133,7 +133,7 @@ export async function go() {
             }
         }
 
-        verbose(`Running task: ${$cmd} ${$args.join(' ')}`);
+        verbose(`${yellow("Running task:")} ${green($cmd)} ${green($args.join(' '))}`);
         require.main.exports[$cmd](...$args);
     }
 }

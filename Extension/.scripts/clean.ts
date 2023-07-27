@@ -7,7 +7,7 @@
 import { resolve, sep } from 'node:path';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
-import { $root, getModifiedIgnoredFiles, rimraf } from './common';
+import { $root, brightGreen, cyan, getModifiedIgnoredFiles, rimraf } from './common';
 
 // list all gitignore'd files that are modified git clean -Xd -n 
 // list all untracked and ignored files that are modified/created git clean -Xd -n 
@@ -21,7 +21,7 @@ export async function all() {
 }
 
 export async function reset() {
-    verbose( `Resetting all .gitignored files in extension`);
+    verbose(`Resetting all .gitignored files in extension`);
     await rimraf(...await getModifiedIgnoredFiles());
 }
 
@@ -31,7 +31,7 @@ export async function show() {
     let all  = await Promise.all(files.map( async (each) => {
         const [filename, stats ] = await filepath.stats(each);
         return { 
-            filename: stats.isDirectory() ? `${each}${sep}**` : each,
+            filename: stats.isDirectory() ? cyan(`${each}${sep}**`) : brightGreen(`${each}`),
             date: stats.mtime.toLocaleDateString().replace(/\b(\d)\//g,'0$1\/'),
             time: stats.mtime.toLocaleTimeString().replace(/^(\d)\:/g,'0$1:'),
             modified: stats.mtime

@@ -7,7 +7,7 @@
             "ES2022",
             "dom"
         ],
-        "sourceMap": true,
+        "inlineSourceMap": true,
         "rootDir": ".",
         "removeComments": true,
         "noUnusedLocals": true,
