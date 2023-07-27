@@ -70,22 +70,22 @@
         {
             "type": "pickString",
             "id": "pickScenario",
-            "description": "Which scenario to run VSCode Tests for?",
+            "description": "Select which scenario to run VSCode.",
             "options": [
                 {
-                    "label": "MultiRootDeadlockTest",
+                    "label": "MultiRootDeadlockTest   ",
                     "value": "${workspaceFolder}/test/scenarios/MultirootDeadlockTest/assets/test.code-workspace"
                 },
                 {
-                    "label": "SimpleCppProject",
+                    "label": "SimpleCppProject   ",
                     "value": "${workspaceFolder}/test/scenarios/SimpleCppProject/assets/simpleCppProject.code-workspace"
                 },
                 {
-                    "label": "SingleRootProject",
+                    "label": "SingleRootProject   ",
                     "value": "${workspaceFolder}/test/scenarios/SingleRootProject/assets/"
                 },
                 {
-                    "label": "No Workspace",
+                    "label": "(Run without Workspace)   ",
                     "value": "-n"
                 },
             ]
