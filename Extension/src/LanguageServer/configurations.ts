@@ -625,6 +625,10 @@ export class CppProperties {
     }
 
     public async updateCompilerPathIfSet(path: string): Promise<void> {
+        if (!this.propertiesFile) {
+            // properties file does not exist.
+            return;
+        }
         return this.handleConfigurationEditJSONCommand(() => {
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             const config: Configuration | undefined = this.CurrentConfiguration;
