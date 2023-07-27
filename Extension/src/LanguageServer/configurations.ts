@@ -624,7 +624,7 @@ export class CppProperties {
         }, () => { }).catch(logAndReturn.undefined);
     }
 
-    public async updateCompilerPath(path: string): Promise<void> {
+    public async updateCompilerPathIfSet(path: string): Promise<void> {
         return this.handleConfigurationEditJSONCommand(() => {
             this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
             const config: Configuration | undefined = this.CurrentConfiguration;
