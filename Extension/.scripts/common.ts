@@ -3,28 +3,32 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-
 import { Command, CommandFunction } from '../src/Utility/Process/program';
 
 import { ok } from 'assert';
 import { mkdir as md, readFile, rm, writeFile } from 'fs/promises';
 import { IOptions, glob as globSync } from 'glob';
 import { dirname, resolve } from 'path';
-import { chdir } from 'process';
+import { chdir, cwd, env } from 'process';
 import { setImmediate } from 'timers/promises';
 import { promisify } from 'util';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 export const $root = resolve(`${__dirname}/..`);
-export const $cmd = process.argv.slice(2).find( each => !each.startsWith('--')) ?? 'main'
-export const $args = process.argv.slice(3);
+export let $cmd = 'main';
+export let $scenario = '';
+ 
+// loop thru the args and pick out --scenario=... and remove it from the $args and set $scenario
+export const $args  = process.argv.slice(2).filter( each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
 
 /** enqueue the call to the callback function to happen on the next available tick, and return a promise to the result */
 export function then<T>(callback: () => Promise<T>|T): Promise<T> {
     return setImmediate().then(callback);
 }
 
+export const pwd = env.INIT_CWD ?? cwd();
+verbose(yellow(`pwd: ${pwd}`));
 
 // ensure we're in the extension folder.
 chdir($root);
@@ -119,6 +123,16 @@ export async function updateFiles( files: string[], dest: string| Promise<string
 }
 export async function go() {
     if( require.main ) {
+        // loop thru the args and pick out the first non --arg and remove it from the $args and set $cmd
+        for( let i = 0;i<$args.length;i++ ) {
+            const each = $args[i];
+            if( !each.startsWith('--') && require.main.exports[each] ) {
+                $cmd = each;
+                $args.splice(i,1);
+                break;
+            }
+        }
+
         verbose(`Running task: ${$cmd} ${$args.join(' ')}`);
         require.main.exports[$cmd](...$args);
     }
@@ -137,4 +151,104 @@ export async function readJson(filename: string, fallback?: {} ) {
     } catch {
         return fallback;
     }
+}
+
+export function error(text:string) {
+    console.error( `\n${red('ERROR')}: ${text}`);
+}
+
+export function underline(text: string) {
+  return `\u001b[4m${text}\u001b[0m`;
+}
+
+export function bold(text: string) {
+  return `\u001b[1m${text}\u001b[0m`;
+}
+
+export function dim(text: string) {
+  return `\u001b[2m${text}\u001b[0m`;
+}
+
+export function brightGreen(text: string) {
+  return `\u001b[38;2;19;161;14m${text}\u001b[0m`;
+}
+
+export function green(text: string) {
+  return `\u001b[38;2;78;154;6m${text}\u001b[0m`;
+}
+
+export function brightWhite(text: string) {
+  return `\u001b[38;2;238;238;236m${text}\u001b[0m`;
+}
+
+export function gray(text: string) {
+  return `\u001b[38;2;117;113;94m${text}\u001b[0m`;
+}
+
+export function yellow(text: string) {
+  return `\u001b[38;2;252;233;79m${text}\u001b[0m`;
+}
+
+export function red(text: string) {
+  return `\u001b[38;2;197;15;31m${text}\u001b[0m`;
+}
+
+export function cyan(text: string) {
+  return `\u001b[38;2;0;174;239m${text}\u001b[0m`;
+}
+
+export function heading(text: string, level = 1) {
+  switch (level) {
+    case 1:
+      return `${underline(bold(text))}`;
+    case 2:
+      return `${brightGreen(text)}`;
+    case 3:
+      return `${green(text)}`;
+  }
+  return `${bold(text)}\n`;
+}
+
+export function optional(text: string) {
+  return gray(text);
+}
+export function cmdSwitch(text: string) {
+  return optional(`--${text}`);
+}
+
+export function command(text: string) {
+  return brightWhite(bold(text));
+}
+
+export function hint(text: string) {
+  return green(dim(text));
+}
+
+export function count(num: number) {
+  return gray(`${num}`);
+}
+
+export function position(text: string) {
+  return gray(`${text}`);
+}
+
+export async function checkFolder(folder: string|string[],errMsg: string){
+    for( const each of is.array(folder) ? folder : [folder]) {
+        const result = await filepath.isFolder(each, $root);
+        if( result ) {
+            return result;
+        }
+    }
+    error(errMsg);
+    process.exit(1);
+}
+export async function checkFile(file: string|string[],errMsg: string){
+    for( const each of is.array(file) ? file : [file]) {
+        const result = await filepath.isFile(each, $root);
+        if( result ) {
+            return result;
+        }
+    }
+    error(errMsg);
+    process.exit(1);
 }

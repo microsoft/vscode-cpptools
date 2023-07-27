@@ -3,28 +3,23 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
+import { runTests } from '@vscode/test-electron';
 import { spawnSync } from 'child_process';
-import { createHash } from 'crypto';
-import { tmpdir } from 'os';
+import { readdir } from 'fs/promises';
 import { resolve } from 'path';
+import { env } from 'process';
+import { returns } from '../src/Utility/Async/returns';
+import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
 import { getTestInfo } from '../test/common/selectTests';
-import { $root, mkdir, readJson, rimraf, write } from './common';
+import { $root, $scenario, brightGreen, checkFile, checkFolder, cmdSwitch, cyan, error, green, red } from './common';
+import { install, isolated, options } from './vscode';
+
+export { install, reset } from './vscode';
 
 const sowrite = process.stdout.write.bind(process.stdout) as (...args: unknown[]) => boolean;
 const sewrite = process.stderr.write.bind(process.stderr) as (...args: unknown[]) => boolean;
-const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0,6));
-const scenarios = resolve($root,'test','scenarios');
-const extensionsDir = resolve(isolated,'extensions');
-const userDir = resolve(isolated,'user-data');
-const settings = resolve(userDir,"User", 'settings.json');
         
-const options = {
-    cachePath: `${isolated}/cache`,
-    launchArgs: ['--no-sandbox', '--disable-updates', '--skip-welcome', '--skip-release-notes', `--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`, '--disable-workspace-trust']
-};
-
 const filters = [
     /^\[(.*)\].*/,
     /^Unexpected token A/,
@@ -36,9 +31,9 @@ const filters = [
     /^Found existing install/
 ];
 
-function filter() {
+// remove unwanted messages from stdio
+function filterStdio() {
     process.stdout.write = function (...args: unknown[]) {
-        //console.error(`***************${JSON.stringify(args)}`);
         if (typeof(args[0]) === 'string') {
             const text = args[0];
 
@@ -73,71 +68,81 @@ function filter() {
     };
 }
 
-async function install() {
-    try {
-        // Create a new isolated directory for VS Code instance in the test folder, and make it specific to the extension folder so we can avoid collisions.
-        // keeping this out of the Extension folder means we're not worried about VS Code getting weird with locking files and such.
-        
-        verbose(`Isolated VSCode test folder: ${isolated}`);
-        await mkdir(isolated);
+filterStdio();
 
-        const vscodeExecutablePath = await downloadAndUnzipVSCode(options);
-        const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath).filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir='));
+async function unitTests() {
+    const mocha = await checkFile(["node_modules/.bin/mocha.cmd","node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
+    const result = spawnSync(mocha, [`${$root}/dist/test/internalUnitTests/**/*.test.js`], { stdio:'inherit'});
+    verbose(`\n${green("NOTE:")} If you want to run a scenario test (end-to-end) use ${cmdSwitch('scenario=<NAME>')} \n\n`);
+    return result.status;
+}
 
-        args.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDir}`);
-
-        // install the appropriate extensions
-        // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' });
-        // spawnSync(cli, [...args, '--install-extension', 'twxs.cmake'], { encoding: 'utf-8', stdio: 'ignore' });
-        // spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cmake-tools'], { encoding: 'utf-8', stdio: 'ignore' });
-        return { 
-            cli, args
+async function scenarioTests( assets: string, name:string, workspace:string ) {
+    return runTests({
+        ...options,
+        extensionDevelopmentPath: $root,
+        extensionTestsPath: resolve( $root, 'dist/test/common/selectTests' ),
+        launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
+        extensionTestsEnv: { 
+            SCENARIO: assets,
         }
-      
-    } catch (err: unknown) {
-        console.log(err);
-    }
-
-}
-
-export async function reset() {
-    verbose(`Removing VSCode test folder: ${isolated}`);
-    await rimraf(isolated);
-}
-
-export async function run() {
-    const { assets, name, workspace } = await getTestInfo();
-    console.log( workspace);
-    await runTests({
-      ...options,
-      extensionDevelopmentPath: $root,
-      extensionTestsPath: resolve( $root, 'dist/test/common/selectTests' ),
-      launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
-      extensionTestsEnv: { 
-        SCENARIO: assets,
-      }
     });
 }
 
-export async function start() {
-    const { cli, args } = await install();
-    //verbose(`Installing release version of 'ms-vscode.cpptools'`);
-    //spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' })
-    verbose('Launch VSCode');
-    const ARGS =[...args, ... options.launchArgs.filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir=')), `--extensionDevelopmentPath=${$root}`, resolve($root, 'test/scenarios/SimpleCppProject/assets') ];
-    verbose(`${cli}\n  ${ [...ARGS ].join('\n  ')}`);
-    const settingsJson = await readJson(settings, {});
-    if( !settingsJson["workbench.colorTheme"] ) {
-        settingsJson["workbench.colorTheme"] = "Tomorrow Night Blue";
+export async function main() {
+    await checkFolder('dist/test/',`The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    const testInfo = await getTestInfo($scenario, env.SCENARIO);
+
+    if( !testInfo ) {
+        // lets just run the unit tests
+        process.exit(await unitTests());
     }
-    
-    settingsJson["git.openRepositoryInParentFolders"] =  "never";
-    write(settings, JSON.stringify(settingsJson,null, 4));
-    
-    spawnSync(cli, ARGS,{ encoding: 'utf-8', stdio: 'ignore' })
-    
+
+    // at this point, we're going to run some vscode tests
+    if(!await filepath.isFolder(isolated)) {
+        await install();
+    }
+    process.exit( await scenarioTests(testInfo.assets, testInfo.name, testInfo.workspace));
 }
 
-export async function main() {
-    await install();
+export async function all() {
+    const finished: string[] = [];
+
+    if( await unitTests() !== 0 ) {
+        console.log(`${cyan("UNIT TESTS: ")}${red("failed")}`);
+        process.exit(1);
+    }
+    finished.push(`${cyan("UNIT TESTS: ")}${green("success")}`);
+
+    // at this point, we're going to run some vscode tests
+    if(!await filepath.isFolder(isolated)) {
+        await install();
+    }
+    try {
+        const scenarios = await readdir(`${$root}/test/scenarios`).catch(returns.empty);
+        for( const each of scenarios) {
+            if( each === 'Debugger') {
+                continue;
+            }
+            if( await filepath.isFolder(`${$root}/test/scenarios/${each}/tests`) ) {
+                const ti = await getTestInfo(each);
+                
+                if( ti ) {
+                    console.log(`\n\nRunning scenario ${each}`);
+                    const result = await scenarioTests(ti.assets, ti.name, ti.workspace);
+                    if( result ) {
+                        console.log( finished.join('\n') );
+                        console.log(`${cyan(`${ti.name} Tests:`)}${red("failed")}`);
+                        process.exit(result);
+                    }
+                    finished.push(`${cyan(`${ti.name} Tests:`)}${green("success")}`);
+                }
+            }
+        }
+    } catch (e) {
+        error(e);
+    } finally {
+        console.log( finished.join('\n') );
+    }
+    
 }

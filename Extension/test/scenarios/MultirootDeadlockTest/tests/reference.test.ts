@@ -7,6 +7,7 @@ import { suite } from 'mocha';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
 import * as apit from 'vscode-cpptools/out/testApi';
+import { timeout } from '../../../../src/Utility/Async/timeout';
 import * as testHelpers from '../../../common/testHelpers';
 
 suite(`[Reference test]`, function(): void {
@@ -25,10 +26,20 @@ suite(`[Reference test]`, function(): void {
         testHook = cpptools.getTestHook();
         disposables.push(testHook);
 
+        const getIntelliSenseStatus = new Promise<void>((resolve) => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
+                    console.log(`IntelliSense for '${result.filename}' is ready`);
+                    resolve();
+                }
+            }));
+        });
         // Start language server
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
+        await timeout(5000, getIntelliSenseStatus);
     });
 
     test("[Find confirmed references of a symbol]", async () => {

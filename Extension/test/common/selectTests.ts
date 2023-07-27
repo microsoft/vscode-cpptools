@@ -5,11 +5,13 @@
 /* eslint-disable no-cond-assign */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+import { readdir } from 'fs/promises';
 import { IOptions, glob as globSync } from 'glob';
 import * as Mocha from 'mocha';
 import { basename, dirname, resolve } from 'path';
 import { env } from 'process';
 import { promisify } from 'util';
+import { returns } from '../../src/Utility/Async/returns';
 import { filepath } from '../../src/Utility/Filesystem/filepath';
 
 export const glob: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(globSync);
@@ -19,20 +21,24 @@ export const glob: (pattern: string, options?: IOptions | undefined) => Promise<
 // depending if this is pulled in as a ts-node script, or an already-compiled file in dist/...
 const $root = __dirname.includes('dist') ? resolve(__dirname, '..', '..', '..') : resolve(__dirname, '..', '..') ;
 
-export const $args = process.argv.slice(2);
-const scenarios = resolve($root, 'test', 'scenarios');
+const scenariosFolder = resolve($root, 'test', 'scenarios');
 
-export async function getScenarioFolder(val: string) {
-    console.log(scenarios);
+async function getScenarioInfo(val: string) {
+
     // is it a name relative to the tests/scenarios folder?
-    const folder = await filepath.isFolder(val, scenarios);
+    const folder = await filepath.isFolder(val, scenariosFolder);
 
     if (folder) {
         let name = basename(folder);
         if (name === 'assets') {
             name = basename(dirname(folder));
         }
-        console.log(`Using :${folder} and ${(await glob(`${folder}/*.code-workspace`))[0] || folder} `);
+
+        if ((await readdir(`${$root}/dist/test/scenarios/${name}/tests`).catch(returns.empty)).length === 0) {
+            // no tests in this scenario have been compiled
+            return undefined;
+        }
+
         return {
             name,
             assets: folder,
@@ -40,38 +46,52 @@ export async function getScenarioFolder(val: string) {
         };
     }
 
-    const file = await filepath.isFile(val, scenarios);
+    const file = await filepath.isFile(val, scenariosFolder);
     if (file) {
         const assets = dirname(dirname(file));
+        const name = basename(assets);
+        if ((await readdir(`${$root}/dist/test/scenarios/${name}/tests`)).length === 0) {
+            // no tests in this scenario have been compiled
+            return undefined;
+        }
 
         return {
-            name: basename(assets),
+            name,
             assets,
             workspace: file
         };
     }
-    throw new Error(`Unable to find scenario folder for '${val}' \n\nThe Scenario folder must be specified either by '--scenario=...' or an environment variable 'SCENARIO=...'`);
+    return undefined;
 }
 
-export async function getTestInfo() {
-    let location: string|undefined = '';
-    if ($args.find(arg => arg.startsWith('--scenario=') && (location = arg.substring('--scenario='.length)))) {
-        return getScenarioFolder(location);
+export async function getTestInfo(...scenarioOptions: (string|undefined)[]) {
+    for (const each of scenarioOptions) {
+        if (each) {
+            const result = await getScenarioInfo(each);
+            if (result) {
+                return result;
+            }
+        }
     }
-
-    if (location = env.SCENARIO) {
-        return getScenarioFolder(location);
-    }
-
-    console.error(`The Scenario folder must be specified either by '--scenario=...' or an environment variable 'SCENARIO=...'`);
-    process.exit(1);
+    return undefined;
 }
 
 export function run (testsRoot: string, cb: (error: any, failures?: number) => void): void {
 /**
  * This code runs in the extension host process, and not in the launch (main.ts) process.
  */
-    void getTestInfo().then(async ({ name, assets, workspace}) => {
+    let location = '';
+
+    // scan thru the $args to find the --scenario=...
+    process.argv.slice(2).find(arg => arg.startsWith('--scenario=') && (location = arg.substring('--scenario='.length)));
+
+    void getTestInfo(location, env.SCENARIO).then(async (testInfo) => {
+        if (!testInfo) {
+            console.error(`The Scenario folder must be specified either by '--scenario=...' or an environment variable 'SCENARIO=...'`);
+            process.exit(1);
+        }
+        const { name} = testInfo;
+
         void glob(`${$root}/dist/test/scenarios/${name}/tests/**/**.test.js`).then((files) => {
 
             try {

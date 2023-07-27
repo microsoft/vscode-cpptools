@@ -23,10 +23,25 @@ suite("[Quick info test]", function(): void {
         platform = os.platform();
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         disposables.push(testHook);
+        /*
+        PROBLEM: waiting for the intellisense ready for the file changes the output of the Doxygen comment test
 
+        it changes from <T> to <int> and the test fails
+
+        const getIntelliSenseStatus = new Promise<void>((resolve) => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
+                    console.log(`IntelliSense for '${result.filename}' is ready`);
+                    resolve();
+                }
+            }));
+        });
+        */
         // Start language server
         console.log("Open file: " + fileUri.toString());
         await vscode.commands.executeCommand("vscode.open", fileUri);
+        // await timeout(5000, getIntelliSenseStatus);
 
     });
 

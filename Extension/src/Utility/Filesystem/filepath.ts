@@ -14,7 +14,7 @@ import { isWindows } from '../../constants';
 import { returns } from '../Async/returns';
 import { is } from '../System/guards';
 
-export const normalize = isWindows ? (p: string) => norm(p).toLowerCase() : norm;
+export const normalize = isWindows ? (p: string) => norm(p).toLowerCase().replace(/^([a-z]\:)/, ($1) => $1.toUpperCase()) : norm;
 
 export function pathsFromVariable(environmentVariable: string = 'PATH'): string[] {
     return process.env[environmentVariable]?.split(delimiter) || [];

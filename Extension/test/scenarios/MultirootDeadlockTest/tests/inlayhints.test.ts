@@ -49,11 +49,21 @@ suite("[Inlay hints test]", function(): void {
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         disposables.push(testHook);
 
+        const getIntelliSenseStatus = new Promise<void>((resolve) => {
+            disposables.push(testHook.IntelliSenseStatusChanged(result => {
+                result = result as apit.IntelliSenseStatus;
+                if (result.filename === "inlay_hints.cpp" && result.status === apit.Status.IntelliSenseReady) {
+                    console.log(`IntelliSense for '${result.filename}' is ready`);
+                    resolve();
+                }
+            }));
+        });
+
         // Start language server
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-
+        await timeout(5000, getIntelliSenseStatus);
         saveOriginalSettings();
         await useDefaultSettings();
     });
@@ -94,11 +104,13 @@ suite("[Inlay hints test]", function(): void {
     }
 
     test("[Inlay Hints - auto type]", async () => {
+
         const range: vscode.Range = new vscode.Range(new vscode.Position(15, 0), new vscode.Position(31, 0));
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, disabled);
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, disabled);
 
+        // WARNING: debugging this test will block on this call: (and others like it.)
         const result1 =  await timeout(1000, vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range) as Promise<any>);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
