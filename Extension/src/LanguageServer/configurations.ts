@@ -624,6 +624,21 @@ export class CppProperties {
         }, () => { }).catch(logAndReturn.undefined);
     }
 
+    public async updateCompilerPath(path: string): Promise<void> {
+        return this.handleConfigurationEditJSONCommand(() => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            const config: Configuration | undefined = this.CurrentConfiguration;
+            // Update compiler path if it's already set.
+            if (config && config.compilerPath !== undefined) {
+                config.compilerPath = path;
+                this.writeToJson();
+            }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
+        }, returns.undefined);
+    }
+
     public async updateCustomConfigurationProvider(providerId: string): Promise<void> {
         if (!this.propertiesFile) {
             const settings: CppSettings = new CppSettings(this.rootUri);
