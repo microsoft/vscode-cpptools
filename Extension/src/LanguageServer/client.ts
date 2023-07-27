@@ -1057,6 +1057,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 1) {
                 action = "disable";
                 settings.defaultCompilerPath = "";
+                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 configurationSelected = true;
                 if (showSecondPrompt) {
                     void this.showPrompt(selectIntelliSenseConfig, true, sender);
@@ -1112,6 +1113,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
             } else {
                 configurationSelected = true;
@@ -1130,6 +1132,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                     void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
                 }
             }
