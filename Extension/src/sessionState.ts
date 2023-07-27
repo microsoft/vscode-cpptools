@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
  */
 class SessionStateVariable<T> {
     constructor(private key: string, private value: T) {
-        this.setContext();
+        void this.setContext();
     }
 
     public get(): T {

@@ -93,6 +93,14 @@ export class PlatformInformation {
     private static GetWindowsVersion(): string | undefined {
         const version = os.release().split('.');
         if (version.length > 0) {
+            if (version[0] === '10') {
+                if (version.length > 2 && version[2].startsWith('1')) {
+                    // 10.0.10240 - 10.0.190##
+                    return '10';
+                }
+                // 10.0.22000+
+                return '11';
+            }
             return version[0];
         }
         return undefined;

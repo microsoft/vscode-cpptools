@@ -88,9 +88,27 @@
             "id": "awaiting.activation.windows",
             "title": "%c_cpp.walkthrough.set.up.title%",
             "description": "%c_cpp.walkthrough.activating.description%",
-            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == false",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == false && cpptools.windowsVersion != 10 && cpptools.windowsVersion != 11",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
+            }
+          },
+          {
+            "id": "awaiting.activation.windows10",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.activating.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == false && cpptools.windowsVersion == 10",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows10.md"
+            }
+          },
+          {
+            "id": "awaiting.activation.windows11",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.activating.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == false && cpptools.windowsVersion == 11",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows11.md"
             }
           },
           {
@@ -166,9 +184,33 @@
             "id": "verify.compiler.windows",
             "title": "%c_cpp.walkthrough.set.up.title%",
             "description": "%c_cpp.walkthrough.compilers.found.description%",
-            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false && cpptools.windowsVersion != 10 && cpptools.windowsVersion != 11",
             "media": {
               "markdown": "dist/walkthrough/installcompiler/install-compiler-windows.md"
+            },
+            "completionEvents": [
+              "onContext:cpptools.trustedCompilerFound"
+            ]
+          },
+          {
+            "id": "verify.compiler.windows10",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.compilers.found.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false && cpptools.windowsVersion == 10",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows10.md"
+            },
+            "completionEvents": [
+              "onContext:cpptools.trustedCompilerFound"
+            ]
+          },
+          {
+            "id": "verify.compiler.windows11",
+            "title": "%c_cpp.walkthrough.set.up.title%",
+            "description": "%c_cpp.walkthrough.compilers.found.description%",
+            "when": "workspacePlatform == windows && cpptools.scanForCompilersDone == true && cpptools.scanForCompilersEmpty == false && cpptools.windowsVersion == 11",
+            "media": {
+              "markdown": "dist/walkthrough/installcompiler/install-compiler-windows11.md"
             },
             "completionEvents": [
               "onContext:cpptools.trustedCompilerFound"

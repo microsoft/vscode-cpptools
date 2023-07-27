@@ -1070,7 +1070,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                SessionState.trustedCompilerFound.set(true);
+                await SessionState.trustedCompilerFound.set(true);
             } else {
                 configurationSelected = true;
                 if (index < configProvidersIndex && configProviders) {
@@ -1088,7 +1088,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                    SessionState.trustedCompilerFound.set(true);
+                    await SessionState.trustedCompilerFound.set(true);
                 }
             }
 
@@ -1722,10 +1722,10 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
-            SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
+            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
+            void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
         } else {
-            SessionState.buildAndDebugIsSourceFile.set(false);
+            void SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
@@ -2715,17 +2715,17 @@ export class DefaultClient implements Client {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
-        SessionState.scanForCompilersDone.set(true);
-        SessionState.scanForCompilersEmpty.set(results.knownCompilers === undefined || !results.knownCompilers.length);
-        SessionState.trustedCompilerFound.set(results.trustedCompilerFound);
+        await SessionState.scanForCompilersDone.set(true);
+        await SessionState.scanForCompilersEmpty.set(results.knownCompilers === undefined || !results.knownCompilers.length);
+        await SessionState.trustedCompilerFound.set(results.trustedCompilerFound);
         return results;
     }
 
     private updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor && util.isCpp(editor.document)) {
-            SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri));
-            SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(editor.document.uri));
+            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri));
+            void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2747,7 +2747,7 @@ export class DefaultClient implements Client {
                 }
             }
         } else {
-            SessionState.buildAndDebugIsSourceFile.set(false);
+            void SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 

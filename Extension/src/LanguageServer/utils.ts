@@ -81,12 +81,7 @@ export function showInstallCompilerWalkthrough(): void{
         }
     })();
 
-    const version = (() => {
-        if (step === Step.NoCompilers && platform === 'windows') {
-            return SessionState.windowsVersion.get();
-        }
-        return '';
-    })();
+    const version = (platform === 'windows') ? SessionState.windowsVersion.get() : '';
 
     const index = `ms-vscode.cpptools#${step}.${platform}${version}`;
 
