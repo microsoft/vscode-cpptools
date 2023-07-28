@@ -117,9 +117,9 @@ function mergeReferences(baseDefinitions: any, additionalDefinitions: any): void
 }
 
 export async function main() {
-    const packageJSON: any = JSON.parse(await read(resolve($root,'package.json')));
-    const schemaJSON: any = JSON.parse(await read(resolve($root,'tools/OptionsSchema.json')));
-    const symbolSettingsJSON: any = JSON.parse(await read(resolve($root,'tools/VSSymbolSettings.json')));
+    const packageJSON: any = JSON.parse(await read(resolve($root, 'package.json')));
+    const schemaJSON: any = JSON.parse(await read(resolve($root, 'tools/OptionsSchema.json')));
+    const symbolSettingsJSON: any = JSON.parse(await read(resolve($root, 'tools/VSSymbolSettings.json')));
 
     mergeReferences(schemaJSON.definitions, symbolSettingsJSON.definitions);
 

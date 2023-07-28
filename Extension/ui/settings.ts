@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 'use strict';
-export const xxxx = 0;
 
 const elementId: { [key: string]: string } = {
     // Basic settings

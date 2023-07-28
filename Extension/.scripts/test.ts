@@ -19,7 +19,7 @@ export { install, reset } from './vscode';
 
 const sowrite = process.stdout.write.bind(process.stdout) as (...args: unknown[]) => boolean;
 const sewrite = process.stderr.write.bind(process.stderr) as (...args: unknown[]) => boolean;
-        
+
 const filters = [
     /^\[(.*)\].*/,
     /^Unexpected token A/,
@@ -71,67 +71,68 @@ function filterStdio() {
 filterStdio();
 
 async function unitTests() {
-    const mocha = await checkFile(["node_modules/.bin/mocha.cmd","node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
-    const result = spawnSync(mocha, [`${$root}/dist/test/internalUnitTests/**/*.test.js`], { stdio:'inherit'});
+    await checkFolder('dist/test/unit', `The folder '${$root}/dist/test/unit is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    const mocha = await checkFile(["node_modules/.bin/mocha.cmd", "node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
+    const result = spawnSync(mocha, [`${$root}/dist/test/unit/**/*.test.js`], { stdio:'inherit'});
     verbose(`\n${green("NOTE:")} If you want to run a scenario test (end-to-end) use ${cmdSwitch('scenario=<NAME>')} \n\n`);
     return result.status;
 }
 
-async function scenarioTests( assets: string, name:string, workspace:string ) {
+async function scenarioTests(assets: string, name: string, workspace: string) {
     return runTests({
         ...options,
         extensionDevelopmentPath: $root,
-        extensionTestsPath: resolve( $root, 'dist/test/common/selectTests' ),
+        extensionTestsPath: resolve($root, 'dist/test/common/selectTests'),
         launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
-        extensionTestsEnv: { 
-            SCENARIO: assets,
+        extensionTestsEnv: {
+            SCENARIO: assets
         }
     });
 }
 
 export async function main() {
-    await checkFolder('dist/test/',`The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    await checkFolder('dist/test/', `The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
     const testInfo = await getTestInfo($scenario, env.SCENARIO);
 
-    if( !testInfo ) {
+    if (!testInfo) {
         // lets just run the unit tests
         process.exit(await unitTests());
     }
 
     // at this point, we're going to run some vscode tests
-    if(!await filepath.isFolder(isolated)) {
+    if (!await filepath.isFolder(isolated)) {
         await install();
     }
-    process.exit( await scenarioTests(testInfo.assets, testInfo.name, testInfo.workspace));
+    process.exit(await scenarioTests(testInfo.assets, testInfo.name, testInfo.workspace));
 }
 
 export async function all() {
     const finished: string[] = [];
 
-    if( await unitTests() !== 0 ) {
+    if (await unitTests() !== 0) {
         console.log(`${cyan("UNIT TESTS: ")}${red("failed")}`);
         process.exit(1);
     }
     finished.push(`${cyan("UNIT TESTS: ")}${green("success")}`);
 
     // at this point, we're going to run some vscode tests
-    if(!await filepath.isFolder(isolated)) {
+    if (!await filepath.isFolder(isolated)) {
         await install();
     }
     try {
         const scenarios = await readdir(`${$root}/test/scenarios`).catch(returns.empty);
-        for( const each of scenarios) {
-            if( each === 'Debugger') {
+        for (const each of scenarios) {
+            if (each === 'Debugger') {
                 continue;
             }
-            if( await filepath.isFolder(`${$root}/test/scenarios/${each}/tests`) ) {
+            if (await filepath.isFolder(`${$root}/test/scenarios/${each}/tests`)) {
                 const ti = await getTestInfo(each);
-                
-                if( ti ) {
+
+                if (ti) {
                     console.log(`\n\nRunning scenario ${each}`);
                     const result = await scenarioTests(ti.assets, ti.name, ti.workspace);
-                    if( result ) {
-                        console.log( finished.join('\n') );
+                    if (result) {
+                        console.log(finished.join('\n'));
                         console.log(`${cyan(`${ti.name} Tests:`)}${red("failed")}`);
                         process.exit(result);
                     }
@@ -142,7 +143,7 @@ export async function all() {
     } catch (e) {
         error(e);
     } finally {
-        console.log( finished.join('\n') );
+        console.log(finished.join('\n'));
     }
-    
+
 }

@@ -1,4 +1,8 @@
 *.js
-test/**/index.ts
-test/**/runTest.ts
-tools/prepublish.js
+# test/**/index.ts
+# test/**/runTest.ts
+# tools/prepublish.js
+
+dist/
+vscode.d.ts
+vscode.*.d.ts

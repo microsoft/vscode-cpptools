@@ -1,13 +1,16 @@
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All Rights Reserved.
+ * See 'LICENSE' in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
 import * as fs from "fs";
 import * as path from 'path';
 import { parseString } from 'xml2js';
-import { $root, } from './common';
-$root;
+import { mkdir, write } from './common';
 
 export async function main() {
 
-    let localizeRepoPath = process.argv[2];
-    let cpptoolsRepoPath = process.argv[3];
+    const localizeRepoPath = process.argv[2];
+    const cpptoolsRepoPath = process.argv[3];
 
     if (!localizeRepoPath || !cpptoolsRepoPath) {
         console.error(`ERROR: Usage: ${path.parse(process.argv[0]).base} ${path.parse(process.argv[1]).base} <Localize repo path> <vscode-cpptools repo path>`);
@@ -40,25 +43,25 @@ export async function main() {
         { id: "pl", folderName: "plk" }
     ];
 
-    var locFolderNames = fs.readdirSync(localizeRepoPath).filter(f => fs.lstatSync(path.join(localizeRepoPath, f)).isDirectory());
-    locFolderNames.forEach((locFolderName) => {
-        let lclPath = path.join(localizeRepoPath, locFolderName, "vc/vc/cpfeui.dll.lcl");
-        let languageInfo = languages.find(l => l.folderName == locFolderName);
+    const locFolderNames = fs.readdirSync(localizeRepoPath).filter(f => fs.lstatSync(path.join(localizeRepoPath, f)).isDirectory());
+    for (const locFolderName of locFolderNames) {
+        const lclPath = path.join(localizeRepoPath, locFolderName, "vc/vc/cpfeui.dll.lcl");
+        const languageInfo = languages.find(l => l.folderName === locFolderName);
         if (!languageInfo) {
             return;
         }
-        let languageId = languageInfo.id;
-        let outputLanguageFolder = path.join(cpptoolsRepoPath, "Extension/bin/messages", languageId);
-        let outputPath = path.join(outputLanguageFolder, "messages.json");
-        let sourceContent = fs.readFileSync(lclPath, 'utf-8');
+        const languageId = languageInfo.id;
+        const outputLanguageFolder = path.join(cpptoolsRepoPath, "Extension/bin/messages", languageId);
+        const outputPath = path.join(outputLanguageFolder, "messages.json");
+        const sourceContent = fs.readFileSync(lclPath, 'utf-8');
 
         // Scan once, just to determine how many there are the size of the array we need
         let highestValue = 0;
         parseString(sourceContent, function (err, result) {
             result.LCX.Item.forEach((item) => {
-                if (item.$.ItemId == ";String Table") {
+                if (item.$.ItemId === ";String Table") {
                     item.Item.forEach((subItem) => {
-                        let itemId = parseInt(subItem.$.ItemId, 10);
+                        const itemId = parseInt(subItem.$.ItemId, 10);
                         if (subItem.Str[0].Tgt) {
                             if (highestValue < itemId) {
                                 highestValue = itemId;
@@ -69,12 +72,12 @@ export async function main() {
             });
         });
 
-        let resultArray = new Array(highestValue);
+        const resultArray = new Array(highestValue);
         parseString(sourceContent, function (err, result) {
             result.LCX.Item.forEach((item) => {
-                if (item.$.ItemId == ";String Table") {
+                if (item.$.ItemId === ";String Table") {
                     item.Item.forEach((subItem) => {
-                        let itemId = parseInt(subItem.$.ItemId, 10);
+                        const itemId = parseInt(subItem.$.ItemId, 10);
                         if (subItem.Str[0].Tgt) {
                             resultArray[itemId] = subItem.Str[0].Tgt[0].Val[0].replace(/\]5D;/g, "]");
                             if (highestValue < itemId) {
@@ -86,7 +89,7 @@ export async function main() {
             });
         });
 
-        fs.mkdirSync(outputLanguageFolder, { recursive: true });
-        fs.writeFileSync(outputPath, JSON.stringify(resultArray, null, 2), 'utf8');
-    });
+        await mkdir(outputLanguageFolder);
+        await write(outputPath, JSON.stringify(resultArray, null, 2));
+    }
 }

@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-
 import { watch as watchFiles } from 'fs/promises';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
@@ -15,14 +14,15 @@ export async function main() {
 }
 
 export async function watch() {
-    const source = await filepath.isFolder('walkthrough/images',$root);
-    if( source ) {
+    const source = await filepath.isFolder('walkthrough/images', $root);
+    if (source) {
         verbose(`Watching ${source} folder for changes.`);
         console.log('Press Ctrl+C to exit.');
-        for await( const event of watchFiles(source, {recursive: true } )) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const event of watchFiles(source, {recursive: true })) {
             await main();
         }
     }
-    
+
 }
 

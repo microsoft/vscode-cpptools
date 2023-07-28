@@ -6014,7 +6014,6 @@
         "clean": "ts-node -T .scripts/clean.ts",
         "test": "ts-node -T .scripts/test.ts",
         "code": "ts-node -T .scripts/code.ts",
-        "generate": "// generate <native-strings> <options-schema> <translations> <all>",
         "generate-native-strings": "ts-node -T ./.scripts/generateNativeStrings.ts",
         "generate-options-schema": "ts-node -T ./.scripts/generateOptionsSchema.ts",
         "copy-walkthrough-media": "ts-node -T ./.scripts/copyWalkthruMedia.ts",
