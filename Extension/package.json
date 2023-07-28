@@ -3231,6 +3231,15 @@
                     "apply": "first"
                 },
                 "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+            },
+            {
+                "command": "editor.action.codeAction",
+                "key": "ctrl+shift+r ctrl+e",
+                "args": {
+                    "kind": "refactor.extract.function",
+                    "apply": "first"
+                },
+                "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
             }
         ],
         "debuggers": [
@@ -6136,6 +6145,18 @@
                     "kind": "refactor.inline.macro",
                     "title": "%c_cpp.codeActions.refactor.inline.macro.title%",
                     "description": "%c_cpp.codeActions.refactor.inline.macro.description%"
+                }
+            },
+            {
+                "languages": [
+                    "c",
+                    "cpp",
+                    "cude-cpp"
+                ],
+                "actions": {
+                    "kind": "refactor.extract.function",
+                    "title": "%c_cpp.codeActions.refactor.extract.function.title%",
+                    "description": "%c_cpp.codeActions.refactor.extract.function.description%"
                 }
             }
         ]
