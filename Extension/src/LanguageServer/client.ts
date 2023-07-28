@@ -1025,10 +1025,13 @@ export class DefaultClient implements Client {
         const compilersIndex: number = paths.length;
         const compilerCount: number = compilersIndex === compileCommandsIndex ? 0 : compilersIndex - compileCommandsIndex - 1;
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
-        if (isWindows) {
+        let installShown = true;
+        if (isWindows && util.getSenderType(sender) !== 'walkthrough') {
             paths.push(localize("installCompiler.string", "Help me install a compiler"));
-        } else {
+        } else if (!isWindows) {
             paths.push(localize("installCompiler.string.nix", "Install a compiler"));
+        } else {
+            installShown = false;
         }
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
@@ -1052,13 +1055,13 @@ export class DefaultClient implements Client {
                 }
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
-            if (index === paths.length - 2) {
+            if (installShown && index === paths.length - 2) {
                 action = "install";
-                void vscode.commands.executeCommand('C_Cpp.InstallCompiler');
+                void vscode.commands.executeCommand('C_Cpp.InstallCompiler', sender);
                 return;
             }
             const showButtonSender: string = "quickPick";
-            if (index === paths.length - 3) {
+            if (index === paths.length - 3 || (!installShown && index === paths.length - 2)) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     action = "browse dismissed";

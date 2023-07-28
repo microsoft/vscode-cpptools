@@ -560,55 +560,57 @@ async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
 }
 
 async function installCompiler(sender?: any): Promise<void> {
+    const telemetryProperties = { sender: util.getSenderType(sender), platform: os.platform(), ranCommand: 'false' };
+    const ok = localize('ok', 'OK');
     switch (os.platform()) {
         case "win32":
             showInstallCompilerWalkthrough();
             break;
         case "darwin": {
-            const response = await vscode.window.showInformationMessage(
-                'The clang compiler will now be installed on your computer. You may need to type in your password in the terminal window that will appear to authorize the installation',
-                'OK', 'Cancel');
-            if (response === 'OK') {
+            const title = localize('install.compiler.mac.title', 'The clang compiler will now be installed');
+            const detail = localize('install.compiler.mac.detail', 'You may need to type your password in the terminal window that will appear to authorize the installation.');
+            const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
+            if (response === ok) {
                 const terminal = vscode.window.createTerminal('Install C++ Compiler');
                 terminal.sendText('sudo xcode-select --install');
+                terminal.show();
+                telemetryProperties.ranCommand = 'true';
             }
             break;
         }
         default: {
             const info = await PlatformInformation.GetPlatformInformation();
-            switch (info.distribution?.name) {
-                case 'ubuntu':
-                case 'linuxmint':
-                case 'debian': {
-                    const response = await vscode.window.showInformationMessage(
-                        'The gcc compiler will now be installed on your computer. You may need to type in your password in the terminal window that will appear to authorize the installation',
-                        'OK', 'Cancel');
-                    if (response === 'OK') {
-                        const terminal = vscode.window.createTerminal('Install C++ Compiler');
-                        terminal.sendText('sudo apt update');
-                        terminal.sendText('sudo apt install -y build-essential');
+            const installCommand = (() => {
+                switch (info.distribution?.name) {
+                    case 'ubuntu':
+                    case 'linuxmint':
+                    case 'debian': {
+                        return 'sudo sh -c \'apt update ; apt install -y build-essential\'';
                     }
-                    break;
+                    case 'centos':
+                    case 'fedora':
+                    case 'opensuse':
+                    case 'opensuse-leap':
+                    case 'opensuse-tumbleweed':
+                    case 'rhel': {
+                        return 'sudo sh -c \'yum update ; yum install gcc-c++\'';
+                    }
                 }
-                case 'centos':
-                case 'fedora':
-                case 'opensuse':
-                case 'opensuse-leap':
-                case 'opensuse-tumbleweed':
-                case 'rhel': {
-                    const response = await vscode.window.showInformationMessage(
-                        'The gcc compiler will now be installed on your computer. You may need to type in your password in the terminal window that will appear to authorize the installation',
-                        'OK', 'Cancel');
-                    if (response === 'OK') {
-                        const terminal = vscode.window.createTerminal('Install C++ Compiler');
-                        terminal.sendText('sudo yum update');
-                        terminal.sendText('sudo yum install gcc-c++');
-                    }
-                    break;
+            })();
+            if (installCommand) {
+                const title = localize('install.compiler.linux.title', 'The gcc compiler will now be installed');
+                const detail = localize('install.compiler.linux.detail', 'You may need to type your password in the terminal window that will appear to authorize the installation.');
+                const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
+                if (response === ok) {
+                    const terminal = vscode.window.createTerminal('Install C++ Compiler');
+                    terminal.sendText(installCommand);
+                    terminal.show(true);
+                    telemetryProperties.ranCommand = 'true';
                 }
             }
         }
     }
+    telemetry.logLanguageServerEvent('installCompiler', telemetryProperties);
 }
 
 async function onSelectConfiguration(): Promise<void> {

@@ -1207,6 +1207,8 @@ export function getSenderType(sender?: any): string {
         return sender;
     } else if (isUri(sender)) {
         return 'contextMenu';
+    } else if (sender?.sender) {
+        return sender.sender;   // The walkthrough buttons send an object with a 'sender' property.
     }
     return 'commandPalette';
 }
