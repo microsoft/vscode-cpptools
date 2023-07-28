@@ -3230,7 +3230,7 @@
                     "kind": "refactor.inline.macro",
                     "apply": "first"
                 },
-                "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                "when": "editorLangId =~ /^(c|(cuda-)?cpp)?$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
             }
         ],
         "debuggers": [
