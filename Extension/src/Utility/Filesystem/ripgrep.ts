@@ -7,7 +7,7 @@
 
 import { strict } from 'assert';
 import { existsSync } from 'fs';
-import { accumulator } from '../Async/awaiters';
+import { accumulator } from '../Async/iterators';
 import { logAndReturn } from '../Async/returns';
 import { Process } from '../Process/process';
 import { ProcessFunction, Program } from '../Process/program';

@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it } from 'mocha';
 import { fail, ok, strictEqual } from 'node:assert';
-import { accumulator } from '../../src/Utility/Async/awaiters';
+import { accumulator } from '../../src/Utility/Async/iterators';
 
 // console.time();
 // console.debug = (...args: any) => console.timeLog('default',args);

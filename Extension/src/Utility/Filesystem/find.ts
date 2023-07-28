@@ -10,7 +10,7 @@ import { Dirent, constants } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { basename, extname, sep } from 'path';
 import { isWindows } from '../../constants';
-import { accumulator, foreach } from '../Async/awaiters';
+import { accumulator, foreach } from '../Async/iterators';
 import { ManualPromise } from '../Async/manualPromise';
 import { returns } from '../Async/returns';
 import { is } from '../System/guards';
