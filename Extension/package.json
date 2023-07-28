@@ -3221,7 +3221,7 @@
             {
                 "command": "C_Cpp.SwitchHeaderSource",
                 "key": "Alt+O",
-                "when": "editorLangId == 'c' && editorTextFocus || editorLangId == 'cpp' && editorTextFocus || editorLangId == 'cuda-cpp' && editorTextFocus"
+                "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
             }
         ],
         "debuggers": [
@@ -5458,65 +5458,173 @@
             "editor/title/run": [
                 {
                     "command": "C_Cpp.BuildAndDebugFile",
-                    "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile",
                     "group": "navigation@0"
                 },
                 {
                     "command": "C_Cpp.BuildAndRunFile",
-                    "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile",
                     "group": "navigation@1"
                 }
             ],
             "editor/title": [
                 {
                     "command": "C_Cpp.AddDebugConfiguration",
-                    "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen",
                     "group": "navigation"
                 }
             ],
             "editor/context": [
                 {
                     "command": "C_Cpp.SwitchHeaderSource",
-                    "when": "config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)",
                     "group": "custom1@1"
                 },
                 {
                     "command": "workbench.action.gotoSymbol",
-                    "when": "config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)",
                     "group": "custom1@2"
                 },
                 {
                     "command": "workbench.action.showAllSymbols",
-                    "when": "config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' && editorLangId == 'cuda-cpp'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)",
                     "group": "custom1@3"
                 },
                 {
                     "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
-                    "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/",
                     "group": "custom2@1"
                 },
                 {
                     "command": "C_Cpp.RestartIntelliSenseForFile",
-                    "when": "config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'c' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cpp' || config.C_Cpp.intelliSenseEngine == 'Default' && editorLangId == 'cuda-cpp' || config.C_Cpp.intelliSenseEngine == 'default' && editorLangId == 'cuda-cpp'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/",
                     "group": "custom2@2"
                 },
                 {
                     "command": "C_Cpp.AddDebugConfiguration",
-                    "when": "editorLangId == 'c' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen || editorLangId == 'cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen || editorLangId == 'cuda-cpp' && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile && cpptools.buildAndDebug.isFolderOpen",
                     "group": "custom2@3"
                 },
                 {
                     "command": "C_Cpp.GenerateDoxygenComment",
-                    "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)",
                     "group": "custom2@4"
                 },
                 {
                     "command": "C_Cpp.CreateDeclarationOrDefinition",
-                    "when": "editorLangId == 'c' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled' || editorLangId == 'cuda-cpp' && config.C_Cpp.intelliSenseEngine != 'disabled' && config.C_Cpp.intelliSenseEngine != 'Disabled'",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)",
                     "group": "custom2@5"
                 }
             ],
             "commandPalette": [
+                {
+                    "command": "C_Cpp.ConfigurationSelect",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.ConfigurationProviderSelect",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.ConfigurationEditJSON",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.ConfigurationEditUI",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.SelectIntelliSenseConfiguration",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.SwitchHeaderSource",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.EnableErrorSquiggles",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.DisableErrorSquiggles",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.ToggleIncludeFallback",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.ToggleDimInactiveRegions",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.ResetDatabase",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.RestartIntelliSenseForFile",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.LogDiagnostics",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.RescanWorkspace",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.VcpkgClipboardInstallSuggested",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.GenerateEditorConfig",
+                    "when": "!(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.GoToNextDirectiveInGroup",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.GoToPrevDirectiveInGroup",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.CreateDeclarationOrDefinition",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
+                {
+                    "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.RunCodeAnalysisOnOpenFiles",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.RunCodeAnalysisOnAllFiles",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.RemoveAllCodeAnalysisProblems",
+                    "when": "config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.BuildAndDebugFile",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile"
+                },
+                {
+                    "command": "C_Cpp.BuildAndRunFile",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isSourceFile"
+                },
+                {
+                    "command": "C_Cpp.AddDebugConfiguration",
+                    "when": "config.C_Cpp.debugShortcut && cpptools.buildAndDebug.isFolderOpen"
+                },
+                {
+                    "command": "C_Cpp.GenerateDoxygenComment",
+                    "when": "editorLangId =~ /^(cuda-)?c(pp)?$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+                },
                 {
                     "command": "C_Cpp.referencesViewGroupByType",
                     "when": "cpptools.hasReferencesResults"
