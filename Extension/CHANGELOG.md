@@ -12,7 +12,9 @@
 * Address various issues with support for gcc 13. [#11038](https://github.com/microsoft/vscode-cpptools/issues/11038)
 * Fix `#include` completion leaving an extra `>`. [#11042](https://github.com/microsoft/vscode-cpptools/issues/11042)
 * Fix an issue with matching of glob patterns containing path delimiters. [#11132](https://github.com/microsoft/vscode-cpptools/issues/11132)
+* Fix Create Declaration/Definition via `Quick Fix…` from hover tooltip. [#11157](https://github.com/microsoft/vscode-cpptools/issues/11157)
 * Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
+* Fix `files.encoding` setting on startup. [#11210](https://github.com/microsoft/vscode-cpptools/issues/11210)
 * Fix a crash related to directories with a very large number of files. [#11226](https://github.com/microsoft/vscode-cpptools/issues/11226)
 * Fix Rank > 1 Display Strings for Natvis. [PR MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
 * Fix some crashes identified by crash telemetry.
@@ -24,6 +26,7 @@
 * [@gareth-rees (Gareth Rees)](https://github.com/gareth-rees): Always use `--simple-values` in newer versions of GDB. [PR MIEngine#1400](https://github.com/microsoft/MIEngine/pull/1400)
 * [@iAbadia (Iñaki)](https://github.com/iAbadia): Align use of 'sendInvalidate' request arguments. [PR MIEngine#1402](https://github.com/microsoft/MIEngine/pull/1402)
 * [@intel-rganesh (Rakesh Ganesh)](https://github.com/intel-rganesh): Introduce `--thread` and `--frame options`. [PR MIEngine#1401](https://github.com/microsoft/MIEngine/pull/1401)
+* [@michalmaka (Michał Mąka)](https://github.com/michalmaka): Add support for Toybox to the remote process picker. [PR #11175](https://github.com/microsoft/vscode-cpptools/pull/11175)
 * [@sbobko (Sergey Bobko)](https://github.com/sbobko): Add 'sendInvalidate' request. [PR MIEngine#1367](https://github.com/microsoft/MIEngine/pull/1367)
 * [@yne (Rémy F.)](https://github.com/yne): Add wildcard support for `includePath`. [PR #10388](https://github.com/microsoft/vscode-cpptools/pull/10388)
 

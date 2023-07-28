@@ -796,7 +796,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
-    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void>;
+    handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -1058,6 +1058,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 1) {
                 action = "disable";
                 settings.defaultCompilerPath = "";
+                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 configurationSelected = true;
                 if (showSecondPrompt) {
                     void this.showPrompt(selectIntelliSenseConfig, true, sender);
@@ -1113,6 +1114,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
             } else {
                 configurationSelected = true;
@@ -1131,6 +1133,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                     void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
                 }
             }
@@ -3503,20 +3506,25 @@ export class DefaultClient implements Client {
         return this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
+    public async handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
 
-        // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
             uri = editor.document.uri;
-            if (editor.selection.isEmpty) {
-                range = new vscode.Range(editor.selection.active, editor.selection.active);
-            } else if (editor.selection.isReversed) {
-                range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+            if (codeActionRange !== undefined) {
+                // Request is from a code action command which provides range from code actions args.
+                range = makeVscodeRange(codeActionRange);
             } else {
-                range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+                // Request is from context menu or command palette. Use range from cursor position.
+                if (editor.selection.isEmpty) {
+                    range = new vscode.Range(editor.selection.active, editor.selection.active);
+                } else if (editor.selection.isReversed) {
+                    range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+                } else {
+                    range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+                }
             }
         }
 
@@ -3536,7 +3544,7 @@ export class DefaultClient implements Client {
                     line: range.end.line
                 }
             },
-            copyToClipboard: copy ?? false
+            copyToClipboard: isCopyToClipboard
         };
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
@@ -3826,7 +3834,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
-    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

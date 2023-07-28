@@ -4,5 +4,4 @@
 # tools/prepublish.js
 
 dist/
-vscode.d.ts
-vscode.*.d.ts
+vscode*.d.ts

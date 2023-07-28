@@ -132,8 +132,9 @@ export class RemoteAttachPicker {
             shPrefix = `/bin/`;
         }
 
-        return `${outerQuote}${shPrefix}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
-            `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
+        return `${outerQuote}${shPrefix}sh -c ${innerQuote}uname && if [ ${parameterBegin}uname -o${parameterEnd} = ${escapedQuote}Toybox${escapedQuote} ] ; ` +
+            `then ${PsProcessParser.psToyboxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Darwin${escapedQuote} ] ; ` +
+            `then ${PsProcessParser.psLinuxCommand} ; elif [ ${parameterBegin}uname${parameterEnd} = ${escapedQuote}Linux${escapedQuote} ] ; ` +
             `then ${PsProcessParser.psDarwinCommand}; fi${innerQuote}${outerQuote}`;
     }
 
