@@ -3225,7 +3225,7 @@
             },
             {
                 "command": "editor.action.codeAction",
-                "key": "shift+ctrl+i",
+                "key": "ctrl+shift+r ctrl+i",
                 "args": {
                     "kind": "refactor.inline.macro",
                     "apply": "first"
