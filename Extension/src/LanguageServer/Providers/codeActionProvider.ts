@@ -44,6 +44,8 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
         this.client = client;
     }
 
+    private static inlineMacroKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorInline.append("macro");
+
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
         await this.client.ready;
@@ -92,7 +94,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
             if (command.edit) {
                 // Inline macro feature.
-                codeActionKind = vscode.CodeActionKind.RefactorInline;
+                codeActionKind = CodeActionProvider.inlineMacroKind;
                 wsEdit = new vscode.WorkspaceEdit();
                 wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
             } else if (command.command === "C_Cpp.RemoveAllCodeAnalysisProblems" && command.uri !== undefined) {
