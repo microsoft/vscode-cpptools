@@ -55,9 +55,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     public async provideInlayHints(document: vscode.TextDocument, range: vscode.Range,
         token: vscode.CancellationToken): Promise<vscode.InlayHint[] | undefined> {
-        await this.client.ready;
-        await processDelayedDidOpen(document);
-
+        await this.client.enqueue(() => processDelayedDidOpen(document));
         const uriString: string = document.uri.toString();
 
         // Get results from cache if available.

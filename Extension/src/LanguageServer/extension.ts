@@ -368,6 +368,7 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
                 }
                 await client.provideCustomConfiguration(document.uri, undefined);
                 // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
+                client.onDidOpenTextDocument(document);
                 await client.takeOwnership(document);
                 return true;
             }
@@ -382,8 +383,7 @@ function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): v
     editors.forEach(async (editor) => {
         if (util.isCpp(editor.document)) {
             const client: Client = clients.getClientFor(editor.document.uri);
-            await client.ready;
-            await processDelayedDidOpen(editor.document);
+            await client.enqueue(() => processDelayedDidOpen(editor.document));
             client.onDidChangeVisibleTextEditor(editor);
         }
     });
@@ -689,20 +689,22 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
     return getActiveClient().handleDisableAllTypeCodeAnalysisProblems(code, identifiersAndUris);
 }
 
-async function onCopyDeclarationOrDefinition(sender?: any): Promise<void> {
+async function onCopyDeclarationOrDefinition(args?: any): Promise<void> {
+    const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
     const properties: { [key: string]: string } = {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
-    return getActiveClient().handleCreateDeclarationOrDefinition(true);
+    return getActiveClient().handleCreateDeclarationOrDefinition(true, args?.range);
 }
 
-async function onCreateDeclarationOrDefinition(sender?: any): Promise<void> {
+async function onCreateDeclarationOrDefinition(args?: any): Promise<void> {
+    const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
     const properties: { [key: string]: string } = {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
-    return getActiveClient().handleCreateDeclarationOrDefinition();
+    return getActiveClient().handleCreateDeclarationOrDefinition(false, args?.range);
 }
 
 function onAddToIncludePath(path: string): void {
@@ -711,7 +713,6 @@ function onAddToIncludePath(path: string): void {
         // suggestion to a different workspace.
         return clients.ActiveClient.handleAddToIncludePathCommand(path);
     }
-
 }
 
 function onEnableSquiggles(): void {

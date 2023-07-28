@@ -22,7 +22,7 @@ import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
 import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
-import { fail } from 'assert';
+import { ok } from 'assert';
 import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
@@ -32,6 +32,8 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { ManualPromise } from '../Utility/Async/manualPromise';
+import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
@@ -80,7 +82,6 @@ let languageClient: LanguageClient;
 let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
-let pendingTask: util.BlockingTask<any> | undefined;
 let compilerDefaults: configs.CompilerDefaults | undefined;
 let diagnosticsCollectionIntelliSense: vscode.DiagnosticCollection;
 let diagnosticsCollectionRefactor: vscode.DiagnosticCollection;
@@ -718,6 +719,7 @@ class ClientModel {
 
 export interface Client {
     readonly ready: Promise<void>;
+    enqueue<T>(task: () => Promise<T>): Promise<T>;
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
     ParsingWorkspaceChanged: vscode.Event<boolean>;
@@ -793,7 +795,7 @@ export interface Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
-    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void>;
+    handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -842,6 +844,20 @@ export class DefaultClient implements Client {
 
     private configStateReceived: ConfigStateReceived = { compilers: false, compileCommands: false, configProviders: undefined, timeout: false };
     private showConfigureIntelliSenseButton: boolean = false;
+
+    /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
+    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>]|[ManualPromise<unknown>]>();
+
+    /** returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use) */
+    private static readonly isStarted = new ManualSignal<void>(true);
+
+    /**
+     * Indicates if the blocking task dispatcher is currently running
+     *
+     * This will be in the Set state when the dispatcher is not running (ie, if you await this it will be resolved immediately)
+     * If the dispatcher is running, this will be in the Reset state (ie, if you await this it will be resolved when the dispatcher is done)
+     */
+    private static readonly dispatching = new ManualSignal<void>();
 
     // The "model" that is displayed via the UI (status bar).
     private model: ClientModel = new ClientModel();
@@ -1041,6 +1057,7 @@ export class DefaultClient implements Client {
             if (index === paths.length - 1) {
                 action = "disable";
                 settings.defaultCompilerPath = "";
+                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 configurationSelected = true;
                 if (showSecondPrompt) {
                     void this.showPrompt(selectIntelliSenseConfig, true, sender);
@@ -1096,6 +1113,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
+                await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
             } else {
                 configurationSelected = true;
@@ -1114,6 +1132,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
+                    await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                     void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
                 }
             }
@@ -1256,7 +1275,7 @@ export class DefaultClient implements Client {
             // Semantic token types are identified by indexes in this list of types, in the legend.
             const tokenTypesLegend: string[] = [];
             for (const e in SemanticTokenTypes) {
-                // An enum is actually a set of mappings from key <=> value.  Enumerate over only the names.
+                // An enum is actually a set of mappings from key <=> value. Enumerate over only the names.
                 // This allow us to represent the constants using an enum, which we can match in native code.
                 if (isNaN(Number(e))) {
                     tokenTypesLegend.push(e);
@@ -1303,91 +1322,8 @@ export class DefaultClient implements Client {
                 util.setProgress(util.getProgressExecutableStarted());
                 isFirstClient = true;
             }
+            void this.init(rootUri, isFirstClient).catch(logAndReturn.undefined);
 
-            // requests/notifications are deferred until this.languageClient is set.
-            void this.queueBlockingTask(async () => {
-                ui = getUI();
-                ui.bind(this);
-                await firstClientStarted;
-                try {
-                    const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
-                    this.innerConfiguration = new configs.CppProperties(this, rootUri, workspaceFolder);
-                    this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
-                    this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
-                    this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
-                    this.disposables.push(this.innerConfiguration);
-
-                    this.innerLanguageClient = languageClient;
-                    telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
-                    failureMessageShown = false;
-
-                    if (isFirstClient) {
-                        workspaceReferences = new refs.ReferencesManager(this);
-                        // Only register file watchers and providers after the extension has finished initializing,
-                        // e.g. prevents empty c_cpp_properties.json from generation.
-                        this.registerFileWatcher();
-                        initializedClientCount = 0;
-                        this.inlayHintsProvider = new InlayHintsProvider(this);
-
-                        this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
-                        this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
-                        this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
-                        this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
-                        this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, new DocumentSymbolProvider(), undefined));
-                        this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, new CodeActionProvider(this), undefined));
-                        this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, new CallHierarchyProvider(this)));
-                        // Because formatting and codeFolding can vary per folder, we need to register these providers once
-                        // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
-                        // within the providers themselves.
-                        this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, new DocumentFormattingEditProvider(this));
-                        this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, new DocumentRangeFormattingEditProvider(this));
-                        this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
-
-                        this.codeFoldingProvider = new FoldingRangeProvider(this);
-                        this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
-
-                        const settings: CppSettings = new CppSettings();
-                        if (settings.enhancedColorization && semanticTokensLegend) {
-                            this.semanticTokensProvider = new SemanticTokensProvider(this);
-                            this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
-                        }
-                        // Listen for messages from the language server.
-                        this.registerNotifications();
-                    }
-                    // update all client configurations
-                    this.configuration.setupConfigurations();
-                    initializedClientCount++;
-                    // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
-                    if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
-                        // Timeout waiting for compile_commands.json and config providers.
-                        // The quick pick options will update if they're added later on.
-                        clients.forEach(client => {
-                            if (client instanceof DefaultClient) {
-                                global.setTimeout(() => {
-                                    client.configStateReceived.timeout = true;
-                                    void client.handleConfigStatusOrPrompt();
-                                }, 15000);
-                            }
-                        });
-                        // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                        // The event handlers must be set before this happens.
-                        compilerDefaults = await this.requestCompiler();
-                        DefaultClient.updateClientConfigurations();
-                        clients.forEach(client => {
-                            if (client instanceof DefaultClient) {
-                                client.configStateReceived.compilers = true;
-                                void client.handleConfigStatusOrPrompt();
-                            }
-                        });
-                    }
-                } catch (err) {
-                    this.isSupported = false;   // Running on an OS we don't support yet.
-                    if (!failureMessageShown) {
-                        failureMessageShown = true;
-                        void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
-                    }
-                }
-            });
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
             this.isSupported = false;   // Running on an OS we don't support yet.
@@ -1402,6 +1338,92 @@ export class DefaultClient implements Client {
                 void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
             }
         }
+    }
+
+    private async init(rootUri: vscode.Uri | undefined, isFirstClient: boolean) {
+        ui = getUI();
+        ui.bind(this);
+        await firstClientStarted;
+        try {
+            const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
+            this.innerConfiguration = new configs.CppProperties(this, rootUri, workspaceFolder);
+            this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
+            this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
+            this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
+            this.disposables.push(this.innerConfiguration);
+
+            this.innerLanguageClient = languageClient;
+            telemetry.logLanguageServerEvent("NonDefaultInitialCppSettings", this.settingsTracker.getUserModifiedSettings());
+            failureMessageShown = false;
+
+            if (isFirstClient) {
+                workspaceReferences = new refs.ReferencesManager(this);
+                // Only register file watchers and providers after the extension has finished initializing,
+                // e.g. prevents empty c_cpp_properties.json from generation.
+                this.registerFileWatcher();
+                initializedClientCount = 0;
+                this.inlayHintsProvider = new InlayHintsProvider(this);
+
+                this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
+                this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
+                this.disposables.push(vscode.languages.registerReferenceProvider(util.documentSelector, new FindAllReferencesProvider(this)));
+                this.disposables.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider(this)));
+                this.disposables.push(vscode.languages.registerDocumentSymbolProvider(util.documentSelector, new DocumentSymbolProvider(), undefined));
+                this.disposables.push(vscode.languages.registerCodeActionsProvider(util.documentSelector, new CodeActionProvider(this), undefined));
+                this.disposables.push(vscode.languages.registerCallHierarchyProvider(util.documentSelector, new CallHierarchyProvider(this)));
+                // Because formatting and codeFolding can vary per folder, we need to register these providers once
+                // and leave them registered. The decision of whether to provide results needs to be made on a per folder basis,
+                // within the providers themselves.
+                this.documentFormattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider(util.documentSelector, new DocumentFormattingEditProvider(this));
+                this.formattingRangeProviderDisposable = vscode.languages.registerDocumentRangeFormattingEditProvider(util.documentSelector, new DocumentRangeFormattingEditProvider(this));
+                this.onTypeFormattingProviderDisposable = vscode.languages.registerOnTypeFormattingEditProvider(util.documentSelector, new OnTypeFormattingEditProvider(this), ";", "}", "\n");
+
+                this.codeFoldingProvider = new FoldingRangeProvider(this);
+                this.codeFoldingProviderDisposable = vscode.languages.registerFoldingRangeProvider(util.documentSelector, this.codeFoldingProvider);
+
+                const settings: CppSettings = new CppSettings();
+                if (settings.enhancedColorization && semanticTokensLegend) {
+                    this.semanticTokensProvider = new SemanticTokensProvider(this);
+                    this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
+                }
+                // Listen for messages from the language server.
+                this.registerNotifications();
+            }
+            // update all client configurations
+            this.configuration.setupConfigurations();
+            initializedClientCount++;
+            // count number of clients, once all clients are configured, check for trusted compiler to display notification to user and add a short delay to account for config provider logic to finish
+            if ((vscode.workspace.workspaceFolders === undefined) || (initializedClientCount >= vscode.workspace.workspaceFolders.length)) {
+                // Timeout waiting for compile_commands.json and config providers.
+                // The quick pick options will update if they're added later on.
+                clients.forEach(client => {
+                    if (client instanceof DefaultClient) {
+                        global.setTimeout(() => {
+                            client.configStateReceived.timeout = true;
+                            void client.handleConfigStatusOrPrompt();
+                        }, 15000);
+                    }
+                });
+                // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                // The event handlers must be set before this happens.
+                compilerDefaults = await this.requestCompiler();
+                DefaultClient.updateClientConfigurations();
+                clients.forEach(client => {
+                    if (client instanceof DefaultClient) {
+                        client.configStateReceived.compilers = true;
+                        void client.handleConfigStatusOrPrompt();
+                    }
+                });
+            }
+        } catch (err) {
+            this.isSupported = false;   // Running on an OS we don't support yet.
+            if (!failureMessageShown) {
+                failureMessageShown = true;
+                void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
+            }
+        }
+
+        DefaultClient.isStarted.resolve();
     }
 
     private getWorkspaceFolderSettings(workspaceFolderUri: vscode.Uri | undefined, settings: CppSettings, otherSettings: OtherSettings): WorkspaceFolderSettingsParams {
@@ -1640,7 +1662,7 @@ export class DefaultClient implements Client {
                 }
             }
 
-            // TODO: should I set the output channel?  Does this sort output between servers?
+            // TODO: should I set the output channel? Does this sort output between servers?
         };
 
         // Create the language client
@@ -1837,9 +1859,11 @@ export class DefaultClient implements Client {
         if (!currentProvider.isReady) {
             return;
         }
+
         await Promise.all([
             this.clearCustomConfigurations(),
-            this.handleRemoveAllCodeAnalysisProblems(),
+            this.handleRemoveAllCodeAnalysisProblems()]);
+        await Promise.all([
             ...[...this.trackedDocuments].map(document => this.provideCustomConfiguration(document.uri, undefined, true))
         ]);
     }
@@ -1905,7 +1929,7 @@ export class DefaultClient implements Client {
                 hasCompleted = true;
                 this.sendCustomBrowseConfiguration(null, undefined, Version.v0, true);
                 if (currentProvider.version >= Version.v2) {
-                    console.warn("Configuration Provider timed out in {0}ms.", configProviderTimeout);
+                    console.warn(`Configuration Provider timed out in ${configProviderTimeout}ms.`);
                     void this.resumeParsing().catch(logAndReturn.undefined);
                 }
             }
@@ -1980,123 +2004,129 @@ export class DefaultClient implements Client {
             return;
         }
         telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId });
+        void this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, onFinished, provider);
+    }
 
-        return this.queueBlockingTask(async () => {
-            const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-            console.log("provideCustomConfiguration");
+    private async provideCustomConfigurationAsync(docUri: vscode.Uri, requestFile: string | undefined, replaceExisting: boolean | undefined, onFinished: () => void, provider: CustomConfigurationProvider1) {
+        DefaultClient.isStarted.reset();
 
-            const providerName: string = provider.name;
+        const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+        console.log("provideCustomConfiguration");
 
-            const params: QueryTranslationUnitSourceParams = {
-                uri: docUri.toString(),
-                ignoreExisting: !!replaceExisting,
-                workspaceFolderUri: this.RootUri?.toString()
-            };
-            const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
-            if (!response.candidates || response.candidates.length === 0) {
-                // If we didn't receive any candidates, no configuration is needed.
+        const params: QueryTranslationUnitSourceParams = {
+            uri: docUri.toString(),
+            ignoreExisting: !!replaceExisting,
+            workspaceFolderUri: this.RootUri?.toString()
+        };
+
+        const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
+        if (!response.candidates || response.candidates.length === 0) {
+        // If we didn't receive any candidates, no configuration is needed.
+            onFinished();
+            DefaultClient.isStarted.resolve();
+            return;
+        }
+
+        // Need to loop through candidates, to see if we can get a custom configuration from any of them.
+        // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
+        const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
+            const uris: vscode.Uri[] = [];
+            for (let i: number = 0; i < response.candidates.length; ++i) {
+                const candidate: string = response.candidates[i];
+                const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
+                try {
+                    if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
+                        uris.push(tuUri);
+                    }
+                } catch (err) {
+                    console.warn("Caught exception from canProvideConfiguration");
+                }
+            }
+            if (!uris.length) {
+                return [];
+            }
+            let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
+            try {
+                configs = await provider.provideConfigurations(uris, tokenSource.token);
+            } catch (err) {
+                console.warn("Caught exception from provideConfigurations");
+            }
+
+            if (configs && configs.length > 0 && configs[0]) {
+                const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
+                if (fileConfiguration?.mergeConfigurations) {
+                    configs.forEach(config => {
+                        if (fileConfiguration.includePath) {
+                            fileConfiguration.includePath.forEach(p => {
+                                if (!config.configuration.includePath.includes(p)) {
+                                    config.configuration.includePath.push(p);
+                                }
+                            });
+                        }
+
+                        if (fileConfiguration.defines) {
+                            fileConfiguration.defines.forEach(d => {
+                                if (!config.configuration.defines.includes(d)) {
+                                    config.configuration.defines.push(d);
+                                }
+                            });
+                        }
+
+                        if (!config.configuration.forcedInclude) {
+                            config.configuration.forcedInclude = [];
+                        }
+
+                        if (fileConfiguration.forcedInclude) {
+                            fileConfiguration.forcedInclude.forEach(i => {
+                                if (config.configuration.forcedInclude) {
+                                    if (!config.configuration.forcedInclude.includes(i)) {
+                                        config.configuration.forcedInclude.push(i);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+                return configs as SourceFileConfigurationItem[];
+            }
+            if (tokenSource.token.isCancellationRequested) {
+                return null;
+            }
+        };
+        try {
+            const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            if (configs && configs.length > 0) {
+                this.sendCustomConfigurations(configs, provider.version);
+            }
+            onFinished();
+        } catch (err) {
+            if (requestFile) {
                 onFinished();
                 return;
             }
-
-            // Need to loop through candidates, to see if we can get a custom configuration from any of them.
-            // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
-            const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
-                const uris: vscode.Uri[] = [];
-                for (let i: number = 0; i < response.candidates.length; ++i) {
-                    const candidate: string = response.candidates[i];
-                    const tuUri: vscode.Uri = vscode.Uri.parse(candidate);
-                    try {
-                        if (await provider.canProvideConfiguration(tuUri, tokenSource.token)) {
-                            uris.push(tuUri);
-                        }
-                    } catch (err) {
-                        console.warn("Caught exception from canProvideConfiguration");
-                    }
-                }
-                if (!uris.length) {
-                    return [];
-                }
-                let configs: util.Mutable<SourceFileConfigurationItem>[] = [];
-                try {
-                    configs = await provider.provideConfigurations(uris, tokenSource.token);
-                } catch (err) {
-                    console.warn("Caught exception from provideConfigurations");
-                }
-
-                if (configs && configs.length > 0 && configs[0]) {
-                    const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
-                    if (fileConfiguration?.mergeConfigurations) {
-                        configs.forEach(config => {
-                            if (fileConfiguration.includePath) {
-                                fileConfiguration.includePath.forEach(p => {
-                                    if (!config.configuration.includePath.includes(p)) {
-                                        config.configuration.includePath.push(p);
-                                    }
-                                });
-                            }
-
-                            if (fileConfiguration.defines) {
-                                fileConfiguration.defines.forEach(d => {
-                                    if (!config.configuration.defines.includes(d)) {
-                                        config.configuration.defines.push(d);
-                                    }
-                                });
-                            }
-
-                            if (!config.configuration.forcedInclude) {
-                                config.configuration.forcedInclude = [];
-                            }
-
-                            if (fileConfiguration.forcedInclude) {
-                                fileConfiguration.forcedInclude.forEach(i => {
-                                    if (config.configuration.forcedInclude) {
-                                        if (!config.configuration.forcedInclude.includes(i)) {
-                                            config.configuration.forcedInclude.push(i);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    }
-                    return configs as SourceFileConfigurationItem[];
-                }
-                if (tokenSource.token.isCancellationRequested) {
-                    return null;
-                }
-            };
-            try {
-                const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
-                if (configs && configs.length > 0) {
-                    this.sendCustomConfigurations(configs, provider.version);
-                }
-                onFinished();
-            } catch (err) {
-                if (requestFile) {
-                    onFinished();
+            const settings: CppSettings = new CppSettings(this.RootUri);
+            if (settings.configurationWarnings === true && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                const dismiss: string = localize("dismiss.button", "Dismiss");
+                const disable: string = localize("diable.warnings.button", "Disable Warnings");
+                const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
+                if (!configName) {
                     return;
                 }
-                const settings: CppSettings = new CppSettings(this.RootUri);
-                if (settings.configurationWarnings === true && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
-                    const dismiss: string = localize("dismiss.button", "Dismiss");
-                    const disable: string = localize("diable.warnings.button", "Disable Warnings");
-                    const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
-                    if (!configName) {
-                        return;
-                    }
-                    let message: string = localize("unable.to.provide.configuration",
-                        "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                        providerName, docUri.fsPath, configName);
-                    if (err) {
-                        message += ` (${err})`;
-                    }
+                let message: string = localize("unable.to.provide.configuration",
+                    "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
+                    provider.name, docUri.fsPath, configName);
+                if (err) {
+                    message += ` (${err})`;
+                }
 
-                    if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
-                        settings.toggleSetting("configurationWarnings", "enabled", "disabled");
-                    }
+                if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
+                    settings.toggleSetting("configurationWarnings", "enabled", "disabled");
                 }
             }
-        });
+        } finally {
+            DefaultClient.isStarted.resolve();
+        }
+
     }
 
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
@@ -2115,13 +2145,13 @@ export class DefaultClient implements Client {
 
     public async getCurrentConfigCustomVariable(variableName: string): Promise<string> {
         await this.ready;
-        return this.configuration.CurrentConfiguration?.customConfigurationVariables?.[variableName] || '';
+        return this.configuration.CurrentConfiguration?.customConfigurationVariables?.[variableName] ?? '';
     }
 
     public async setCurrentConfigName(configurationName: string): Promise<void> {
         await this.ready;
 
-        const configurations: configs.Configuration[] = this.configuration.Configurations || [];
+        const configurations: configs.Configuration[] = this.configuration.Configurations ?? [];
         const configurationIndex: number = configurations.findIndex((config) => config.name === configurationName);
 
         if (configurationIndex === -1) {
@@ -2163,8 +2193,7 @@ export class DefaultClient implements Client {
     public async takeOwnership(document: vscode.TextDocument): Promise<void> {
         this.trackedDocuments.add(document);
         this.updateActiveDocumentTextOptions();
-        await this.ready;
-        return this.sendDidOpen(document);
+        await this.sendDidOpen(document);
     }
 
     public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
@@ -2180,24 +2209,82 @@ export class DefaultClient implements Client {
     }
 
     /**
-     * returns a promise that waits for the all pendingTasks are complete (e.g. language client is ready for use)
+     * a Promise that can be awaited to know when it's ok to proceed.
+     *
+     * This is a lighter-weight complement to `enqueue()`
+     *
+     * Use `await <client>.ready` when you need to ensure that the client is initialized, and to run in order
+     * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
+     *
+     * This is lightweight, because if the queue is empty, then the only thing to wait for is the client itself to be initialized
      */
     get ready(): Promise<void> {
-        return this.isSupported ? Promise.resolve(pendingTask?.getPromise() || undefined) : fail(localize("unsupported.client", "Unsupported client"));
+        if (!DefaultClient.dispatching.isCompleted || DefaultClient.queue.length) {
+            // if the dispatcher has stuff going on, then we need to stick in a promise into the queue so we can
+            // be notified when it's our turn
+            const p = new ManualPromise<void>();
+            DefaultClient.queue.push([p as ManualPromise<unknown>]);
+            return p;
+        }
+
+        // otherwise, we're only waiting for the client to be in an initialized state, in which case just wait for that.
+        return DefaultClient.isStarted;
     }
 
     /**
-     * Queue a task that blocks all future tasks until it completes. This is currently only intended to be used
-     * during language client startup and for custom configuration providers.
-     * @param task The task that blocks all future tasks
+     * Enqueue a task to ensure that the order is maintained. The tasks are executed sequentially after the client is ready.
+     *
+     * this is a bit more expensive than `.ready` - this ensures the task is absolutely finished executing before allowing
+     * the dispatcher to move forward.
+     *
+     * Use `enqueue()` when you want to ensure that subsequent calls are blocked until a critical bit of code is run.
+     * Use `await <client>.ready` when you need to ensure that the client is initialized, and still run in order.
      */
-    private async queueBlockingTask<T>(task: () => Thenable<T>): Promise<T> {
-        if (this.isSupported) {
-            pendingTask = new util.BlockingTask<T>(task, pendingTask);
-            return pendingTask.getPromise();
-        } else {
-            throw new Error(localize("unsupported.client", "Unsupported client"));
+    enqueue<T>(task: () => Promise<T>) {
+        ok(this.isSupported, localize("unsupported.client", "Unsupported client"));
+
+        // create a placeholder promise that is resolved when the task is complete.
+        const result = new ManualPromise<unknown>();
+
+        // add the task to the queue
+        DefaultClient.queue.push([result, task]);
+
+        // if we're not already dispatching, start
+        if (DefaultClient.dispatching.isSet) {
+            // start dispatching
+            void DefaultClient.dispatch();
         }
+
+        // return the placeholder promise to the caller.
+        return result as Promise<T>;
+    }
+
+    /**
+     * The dispatch loop asynchronously processes items in the async queue in order, and ensures that tasks are dispatched in the
+     * order they were inserted.
+     */
+    private static async dispatch() {
+        // ensure that this is OK to start working
+        await this.isStarted;
+
+        // reset the promise for the dispatcher
+        DefaultClient.dispatching.reset();
+
+        do {
+            // pick items up off the queue and run then one at a time until the queue is empty
+            const [promise, task] = DefaultClient.queue.shift() ?? [];
+            if (promise) {
+                try {
+                    promise.resolve(task ? await task() : undefined);
+                } catch (e) {
+                    console.log(e);
+                    promise.reject(e);
+                }
+            }
+        } while (DefaultClient.queue.length);
+
+        // unblock anything that is waiting for the dispatcher to empty
+        this.dispatching.resolve();
     }
 
     private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
@@ -2732,8 +2819,7 @@ export class DefaultClient implements Client {
             switchHeaderSourceFileName: fileName,
             workspaceFolderUri: rootUri.toString()
         };
-        await this.ready;
-        return this.languageClient.sendRequest(SwitchHeaderSourceRequest, params);
+        return this.enqueue(async () => this.languageClient.sendRequest(SwitchHeaderSourceRequest, params));
     }
 
     public async requestCompiler(newCompilerPath?: string): Promise<configs.CompilerDefaults> {
@@ -3419,20 +3505,25 @@ export class DefaultClient implements Client {
         return this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public async handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> {
+    public async handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
 
-        // range is based on the cursor position.
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
             uri = editor.document.uri;
-            if (editor.selection.isEmpty) {
-                range = new vscode.Range(editor.selection.active, editor.selection.active);
-            } else if (editor.selection.isReversed) {
-                range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+            if (codeActionRange !== undefined) {
+                // Request is from a code action command which provides range from code actions args.
+                range = makeVscodeRange(codeActionRange);
             } else {
-                range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+                // Request is from context menu or command palette. Use range from cursor position.
+                if (editor.selection.isEmpty) {
+                    range = new vscode.Range(editor.selection.active, editor.selection.active);
+                } else if (editor.selection.isReversed) {
+                    range = new vscode.Range(editor.selection.active, editor.selection.anchor);
+                } else {
+                    range = new vscode.Range(editor.selection.anchor, editor.selection.active);
+                }
             }
         }
 
@@ -3452,7 +3543,7 @@ export class DefaultClient implements Client {
                     line: range.end.line
                 }
             },
-            copyToClipboard: copy ?? false
+            copyToClipboard: isCopyToClipboard
         };
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
@@ -3495,7 +3586,7 @@ export class DefaultClient implements Client {
                 if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
                     // Destination file is empty.
                     // The edit positions for #include header file and definition or declaration are the same.
-                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) || []).length;
+                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
                 const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
@@ -3513,7 +3604,7 @@ export class DefaultClient implements Client {
 
         // Move the cursor to the new declaration/definition edit, accounting for \n or \n\n at the start.
         let startLine: number = lastEdit.range.start.line;
-        let numNewlines: number = (lastEdit.newText.match(/\n/g) || []).length;
+        let numNewlines: number = (lastEdit.newText.match(/\n/g) ?? []).length;
         if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
             startLine += 2;
             numNewlines -= 2;
@@ -3664,6 +3755,10 @@ class NullClient implements Client {
     private referencesCommandModeEvent = new vscode.EventEmitter<refs.ReferencesCommandMode>();
 
     readonly ready: Promise<void> = Promise.resolve();
+
+    async enqueue<T>(task: () => Promise<T>) {
+        return task();
+    }
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
@@ -3738,7 +3833,7 @@ class NullClient implements Client {
     handleRemoveCodeAnalysisProblems(refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
-    handleCreateDeclarationOrDefinition(copy?: boolean): Promise<void> { return Promise.resolve(); }
+    handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

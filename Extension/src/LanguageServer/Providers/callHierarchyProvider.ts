@@ -104,8 +104,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
-        await this.client.ready;
-        await processDelayedDidOpen(document);
+        await this.client.enqueue(() => processDelayedDidOpen(document));
 
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
         workspaceReferences.clearViews();

@@ -119,6 +119,7 @@ export class PsProcessParser {
     // Since 'args' contains the full path to the executable, even if truncated, searching will work as desired.
     public static get psLinuxCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
     public static get psDarwinCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args= -c`; }
+    public static get psToyboxCommand(): string { return `ps -A -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
 
     // Only public for tests.
     public static ParseProcessFromPs(processes: string): Process[] {

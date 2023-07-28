@@ -15,7 +15,7 @@ import { DocumentFilter } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
-import { ManualPromise } from './Utility/Async/manual-promise';
+import { ManualPromise } from './Utility/Async/manualPromise';
 import { isWindows } from './constants';
 import { getOutputChannelLogger, showOutputChannel } from './logger';
 import { PlatformInformation } from './platform';
@@ -1170,37 +1170,6 @@ export function escapeForSquiggles(s: string): string {
         newResults += "\\";
     }
     return newResults;
-}
-
-export class BlockingTask<T> {
-    private done: boolean = false;
-    private promise: Thenable<T>;
-
-    constructor(task: () => Thenable<T>, dependency?: BlockingTask<any>) {
-        if (!dependency) {
-            this.promise = task();
-        } else {
-            this.promise = new Promise<T>((resolve, reject) => {
-                const f1: () => void = () => {
-                    task().then(resolve, reject);
-                };
-                const f2: (err: any) => void = (err) => {
-                    console.log(err);
-                    task().then(resolve, reject);
-                };
-                dependency.promise.then(f1, f2);
-            });
-        }
-        this.promise.then(() => this.done = true, () => this.done = true);
-    }
-
-    public get Done(): boolean {
-        return this.done;
-    }
-
-    public getPromise(): Thenable<T> {
-        return this.promise;
-    }
 }
 
 export function getSenderType(sender?: any): string {
