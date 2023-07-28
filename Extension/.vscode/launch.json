@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "configurations": [
         {
-            "name": "Launch Extension",
+            "name": "Run Extension",
             "type": "extensionHost",
             "request": "launch",
             "args": [
@@ -13,7 +13,7 @@
                 "--skip-release-notes",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "${input:pickScenario}",
+                "${input:pickWorkspace}",
             ],
             "sourceMaps": true,
             "outFiles": [
@@ -21,7 +21,7 @@
             ],
         },
         {
-            "name": "Launch VSCode Tests",
+            "name": "VSCode Tests",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
@@ -70,7 +70,7 @@
         {
             "type": "pickString",
             "id": "pickScenario",
-            "description": "Select which scenario to run VSCode.",
+            "description": "Select which scenario to run VSCode tests.",
             "options": [
                 {
                     "label": "MultiRootDeadlockTest   ",
@@ -83,10 +83,30 @@
                 {
                     "label": "SingleRootProject   ",
                     "value": "${workspaceFolder}/test/scenarios/SingleRootProject/assets/"
-                },
+                }
+            ]
+        },
+        {
+            "type": "pickString",
+            "id": "pickWorkspace",
+            "description": "Select which workspace scenario to run VSCode.",
+            "default": "-n",
+            "options": [
                 {
                     "label": "(Run without Workspace)   ",
                     "value": "-n"
+                },
+                {
+                    "label": "MultiRootDeadlockTest   ",
+                    "value": "${workspaceFolder}/test/scenarios/MultirootDeadlockTest/assets/test.code-workspace"
+                },
+                {
+                    "label": "SimpleCppProject   ",
+                    "value": "${workspaceFolder}/test/scenarios/SimpleCppProject/assets/simpleCppProject.code-workspace"
+                },
+                {
+                    "label": "SingleRootProject   ",
+                    "value": "${workspaceFolder}/test/scenarios/SingleRootProject/assets/"
                 },
             ]
         }

@@ -6019,7 +6019,7 @@
         "copy-walkthrough-media": "ts-node -T ./.scripts/copyWalkthruMedia.ts",
         "prep": "yarn copy-walkthrough-media && yarn generate-native-strings && yarn translations-generate",
         "import-edge-strings": "ts-node -T ./import_edge_strings.ts",
-        "lint": "eslint -c .eslintrc.js src test ui",
+        "lint": "eslint -c .eslintrc.js src test ui .scripts",
         "compile": "tsc --build tsconfig.json",
         "compile-ui": "tsc --build ui.tsconfig.json",
         "watch": "tsc --build tsconfig.json --watch",
@@ -6029,10 +6029,6 @@
         "translations-export": "yarn generate-native-strings && gulp translations-export",
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
-        "internalUnitTests": "yarn test",
-        "unitTests": "yarn test --scenario=SingleRootProject",
-        "integrationTests": "yarn test --scenario=SimpleCppProject",
-        "intelliSenseFeaturesTests": "yarn test --scenario=MultirootDeadlockTest",
         "postinstall": "npx vscode-dts dev && npx vscode-dts main && yarn prep"
     },
     "devDependencies": {

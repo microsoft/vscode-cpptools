@@ -11,7 +11,7 @@ module.exports = {
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json",
+        "project": ["tsconfig.json", ".scripts/tsconfig.json"],
         "ecmaVersion": 2022,
         "sourceType": "module",
         "warnOnUnsupportedTypeScriptVersion": false,
@@ -152,5 +152,10 @@ module.exports = {
             ],
         ],
 
-    }
+    },
+    "ignorePatterns": [
+        "!/.scripts",
+    ]
+
 };
+
