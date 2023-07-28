@@ -175,7 +175,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         let result: vscode.CallHierarchyIncomingCall[] | undefined;
         const params: CallHierarchyParams = {
             textDocument: { uri: item.uri.toString() },
-            position: Position.create(item.range.start.line, item.range.start.character)
+            position: Position.create(item.selectionRange.start.line, item.selectionRange.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, cancelSource.token);
 
@@ -213,7 +213,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         let result: vscode.CallHierarchyOutgoingCall[] | undefined;
         const params: CallHierarchyParams = {
             textDocument: { uri: item.uri.toString() },
-            position: Position.create(item.range.start.line, item.range.start.character)
+            position: Position.create(item.selectionRange.start.line, item.selectionRange.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
 
