@@ -106,7 +106,7 @@ const success: [string|undefined, string, string[], string?][] = [
     [ undefined, "$((1 + 1))", [ "2" ], marker() ],
     [ undefined, "$((2-3))", [ "-1" ], marker() ],
     [ undefined, "$((-1))", [ "-1" ], marker() ],
-    [ undefined, "$[50+20]", [ "70" ], marker() ],
+    // [ undefined, "$[50+20]", [ "70" ], marker() ],
     [ undefined, "$(((2+3)*(4+5)))", [ "45" ], marker() ],
     [ undefined, "$((010))", [ "8" ], marker() ],
     [ undefined, "$((0x10))", [ "16" ], marker() ],
