@@ -6124,6 +6124,20 @@
                     ]
                 }
             }
+        ],
+        "codeActions": [
+            {
+                "languages": [
+                    "c",
+                    "cpp",
+                    "cude-cpp"
+                ],
+                "actions": {
+                    "kind": "refactor.inline.macro",
+                    "title": "%c_cpp.codeActions.refactor.inline.macro.title%",
+                    "description": "%c_cpp.codeActions.refactor.inline.macro.description%"
+                }
+            }
         ]
     },
     "scripts": {
