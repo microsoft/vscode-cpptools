@@ -2,7 +2,7 @@ module.exports = {
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended"
-        // "plugin:@typescript-eslint/strict", // I want to enable this. Lots of little changes will happen.
+        //"plugin:@typescript-eslint/strict", // I want to enable this. Lots of little changes will happen.
     ],
     "env": {
         "browser": true,
@@ -152,10 +152,5 @@ module.exports = {
             ],
         ],
 
-    },
-    "ignorePatterns": [
-        "!/.scripts",
-    ]
-
+    }
 };
-
