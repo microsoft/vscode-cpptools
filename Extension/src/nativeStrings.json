@@ -456,15 +456,15 @@
     },
     "refactor_extract_outsidefunc": "The selected text is not inside a function.",
     "refactor_extract_multifunc": "The selected text cannot span different functions.",
-    "refactor_extract_variable": "Variable '{0}' is declared in the selected region and then used below it.",
-    "refactor_extract_macro": "Preprocessor macro '{0}' is used below the selected region.",
+    "refactor_extract_variable": "Variable '%s' is declared in the selected region and then used below it.",
+    "refactor_extract_macro": "Preprocessor macro '%s' is used below the selected region.",
     "refactor_extract_inactive": "The selected region spans an inactive preprocessor block.",
     "refactor_extract_no_il": "The selected region does not contain any code that can be extracted.",
     "refactor_extract_entirefunc": "The selected region is not entirely within the function's body.",
     "refactor_extract_errors_selection": "The selection contains IntelliSense errors.",
     "refactor_extract_reference_c_code": {
-        "text": "'{0}' is not declared within the selected code, but is being modified. C code cannot pass arguments by reference.",
-        "hint": "{0} is the name of a variable."
+        "text": "'%s' is not declared within the selected code, but is being modified. C code cannot pass arguments by reference.",
+        "hint": "%s is the name of a variable."
     },
     "refactor_extract_reference_return_c_code": "The function would have to return a value by reference. C code cannot return references.",
     "refactor_extract_xborder_jump": "Jumps between the selected code and the surrounding code are present.",
