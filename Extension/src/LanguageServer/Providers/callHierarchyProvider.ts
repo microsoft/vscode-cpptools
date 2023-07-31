@@ -28,7 +28,7 @@ interface CallHierarchyItem {
     detail: string;
 
     /**
-     * The resource identifier of this item.
+     * The file path of this item.
      */
     file: string;
 
