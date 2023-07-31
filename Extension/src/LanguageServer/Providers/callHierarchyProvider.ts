@@ -30,7 +30,7 @@ interface CallHierarchyItem {
     /**
      * The resource identifier of this item.
      */
-    uri: string;
+    file: string;
 
     /**
      * The range enclosing this symbol not including leading/trailing whitespace but everything else, e.g. comments and code.
@@ -230,10 +230,10 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     private makeVscodeCallHierarchyItem(item: CallHierarchyItem): vscode.CallHierarchyItem {
         const containerDetail: string = (item.detail !== "") ? `${item.detail} - ` : "";
-        const fileDetail: string = `${path.basename(item.uri)} (${path.dirname(item.uri)})`;
+        const fileDetail: string = `${path.basename(item.file)} (${path.dirname(item.file)})`;
         return new vscode.CallHierarchyItem(
             item.kind, item.name, containerDetail + fileDetail,
-            vscode.Uri.file(item.uri),
+            vscode.Uri.file(item.file),
             makeVscodeRange(item.range),
             makeVscodeRange(item.selectionRange));
     }
