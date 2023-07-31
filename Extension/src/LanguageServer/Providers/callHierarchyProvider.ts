@@ -230,12 +230,21 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     private makeVscodeCallHierarchyItem(item: CallHierarchyItem): vscode.CallHierarchyItem {
         const containerDetail: string = (item.detail !== "") ? `${item.detail} - ` : "";
-        const dirPath: string = path.relative(this.client.RootPath, path.dirname(item.uri));
+        const itemUri: vscode.Uri = vscode.Uri.file(item.uri);
+
+        // Get file detail
+        const isInWorkspace: boolean = this.client.RootUri !== undefined &&
+            itemUri.fsPath.startsWith(this.client.RootUri?.fsPath);
+        const dirPath: string = isInWorkspace ?
+            path.relative(this.client.RootPath, path.dirname(item.uri)) : path.dirname(item.uri);
         const fileDetail: string = dirPath.length === 0 ?
             `${path.basename(item.uri)}` : `${path.basename(item.uri)} (${dirPath})`;
+
         return new vscode.CallHierarchyItem(
-            item.kind, item.name, containerDetail + fileDetail,
-            vscode.Uri.file(item.uri),
+            item.kind,
+            item.name,
+            containerDetail + fileDetail,
+            itemUri,
             makeVscodeRange(item.range),
             makeVscodeRange(item.selectionRange));
     }
