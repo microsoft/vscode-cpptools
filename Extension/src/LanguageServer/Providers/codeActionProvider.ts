@@ -45,7 +45,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
     }
 
     private static inlineMacroKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorInline.append("macro");
-    private static extractFunctionKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorExtract.append("function");
+    private static extractToFunctionKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorExtract.append("function");
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
@@ -210,12 +210,13 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 } else {
                     return;
                 }
-            } else if (command.command === "C_Cpp.ExtractFunction" ||
-                command.command === "C_Cpp.ExtractFreeFunction" || command.command === "C_Cpp.ExtractFreeFunction") {
+            } else if (command.command === "C_Cpp.ExtractToFunction" ||
+                command.command === "C_Cpp.ExtractToFreeFunction" ||
+                command.command === "C_Cpp.ExtractToMemberFunction") {
                 if (command.arguments && command.arguments.length === 1) {
                     disabledReason = command.arguments[0];
                 }
-                codeActionKind = CodeActionProvider.extractFunctionKind;
+                codeActionKind = CodeActionProvider.extractToFunctionKind;
             }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,
