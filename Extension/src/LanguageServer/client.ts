@@ -202,6 +202,16 @@ interface WorkspaceFolderParams {
     workspaceFolderUri?: string;
 }
 
+interface SelectionParams {
+    uri: string;
+    range: Range;
+}
+
+interface WorkspaceEditResult {
+    edit: WorkspaceEdit;
+    errorText?: string;
+}
+
 interface TelemetryPayload {
     event: string;
     properties?: { [key: string]: string };
@@ -325,16 +335,16 @@ interface PublishRefactorDiagnosticsParams {
     diagnostics: RefactorDiagnostic[];
 }
 
-export interface CreateDeclarationOrDefinitionParams {
-    uri: string;
-    range: Range;
+export interface CreateDeclarationOrDefinitionParams extends SelectionParams {
     copyToClipboard: boolean;
 }
 
-export interface CreateDeclarationOrDefinitionResult {
-    edit: WorkspaceEdit;
+export interface CreateDeclarationOrDefinitionResult extends WorkspaceEditResult {
     clipboardText?: string;
-    errorText?: string;
+}
+
+export interface ExtractToFunctionParams extends SelectionParams {
+    isMemberFunction: boolean;
 }
 
 interface ShowMessageWindowParams {
@@ -379,9 +389,7 @@ export interface LocalizeSymbolInformation {
     suffix: LocalizeStringParams;
 }
 
-export interface FormatParams {
-    uri: string;
-    range: Range;
+export interface FormatParams extends SelectionParams {
     character: string;
     insertSpaces: boolean;
     tabSize: number;
@@ -569,6 +577,7 @@ export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
 const CreateDeclarationOrDefinitionRequest: RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void> = new RequestType<CreateDeclarationOrDefinitionParams, CreateDeclarationOrDefinitionResult, void>('cpptools/createDeclDef');
+const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEditResult, void> = new RequestType<ExtractToFunctionParams, WorkspaceEditResult, void>('cpptools/extractToFunction');
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
@@ -796,6 +805,7 @@ export interface Client {
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void>;
+    handleExtractToFunction(isMemberFunction: boolean): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3648,6 +3658,121 @@ export class DefaultClient implements Client {
         await vscode.workspace.applyEdit(formatEdits);
     }
 
+    // TODO: This is currently largely identical to handleCreateDeclarationOrDefinition.
+    // I'm not sure yet how this will deviate in the future.
+    public async handleExtractToFunction(isMemberFunction: boolean): Promise<void> {
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor || editor.selection.isEmpty) {
+            return;
+        }
+
+        const params: ExtractToFunctionParams = {
+            uri: editor.document.uri.toString(),
+            range: {
+                start: {
+                    character: editor.selection.start.character,
+                    line: editor.selection.start.line
+                },
+                end: {
+                    character: editor.selection.end.character,
+                    line: editor.selection.end.line
+                }
+            },
+            isMemberFunction
+        };
+
+        const result: WorkspaceEditResult = await this.languageClient.sendRequest(ExtractToFunctionRequest, params);
+        // Create/Copy returned no result.
+        if (result.edit === undefined) {
+            // The only condition in which result.edit would be undefined is a
+            // server-initiated cancellation, in which case the object is actually
+            // a ResponseError. https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
+            return;
+        }
+
+        // Handle error messaging
+        if (result.errorText) {
+            void vscode.window.showInformationMessage(result.errorText);
+            return;
+        }
+
+        const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let modifiedDocument: vscode.Uri | undefined;
+        let lastEdit: vscode.TextEdit | undefined;
+        let selectionPositionAdjustment: number = 0;
+        for (const file in result.edit.changes) {
+            const uri: vscode.Uri = vscode.Uri.file(file);
+            // At most, there will only be two text edits:
+            // 1.) an edit for: #include header file
+            // 2.) an edit for: definition or declaration
+            for (const edit of result.edit.changes[file]) {
+                const range: vscode.Range = makeVscodeRange(edit.range);
+                // Get new lines from an edit for: #include header file.
+                if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
+                    // Destination file is empty.
+                    // The edit positions for #include header file and definition or declaration are the same.
+                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
+                }
+                lastEdit = new vscode.TextEdit(range, edit.newText);
+                const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
+                workspaceEdits.insert(uri, position, edit.newText);
+            }
+            modifiedDocument = uri;
+        }
+
+        if (modifiedDocument === undefined || lastEdit === undefined) {
+            return;
+        }
+
+        // Apply the create declaration/definition text edits.
+        await vscode.workspace.applyEdit(workspaceEdits);
+
+        // Move the cursor to the new declaration/definition edit, accounting for \n or \n\n at the start.
+        let startLine: number = lastEdit.range.start.line;
+        let numNewlines: number = (lastEdit.newText.match(/\n/g) ?? []).length;
+        if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
+            startLine += 2;
+            numNewlines -= 2;
+        } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
+            startLine += 1;
+            numNewlines -= 1;
+        }
+        if (!lastEdit.newText.endsWith("\n")) {
+            numNewlines++; // Increase the format range.
+        }
+
+        const selectionPosition: vscode.Position = new vscode.Position(startLine + selectionPositionAdjustment, 0);
+        const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
+        await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
+
+        // Format the new text edits.
+        const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
+        const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
+        const formatOptions: vscode.FormattingOptions = {
+            insertSpaces: settings.editorInsertSpaces ?? true,
+            tabSize: settings.editorTabSize ?? 4
+        };
+        const versionBeforeFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
+        if (versionBeforeFormatting === undefined) {
+            return;
+        }
+        const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
+        if (formatTextEdits && formatTextEdits.length > 0) {
+            formatEdits.set(modifiedDocument, formatTextEdits);
+        }
+        if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
+            return;
+        }
+        // Only apply formatting if the document version hasn't changed to prevent
+        // stale formatting results from being applied.
+        const versionAfterFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
+        if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
+            return;
+        }
+        await vscode.workspace.applyEdit(formatEdits);
+    }
+
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
@@ -3834,6 +3959,7 @@ class NullClient implements Client {
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> { return Promise.resolve(); }
+    handleExtractToFunction(isMemberFunction: boolean): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();

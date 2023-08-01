@@ -215,6 +215,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 command.command === "C_Cpp.ExtractToMemberFunction") {
                 if (command.arguments && command.arguments.length === 1) {
                     disabledReason = command.arguments[0];
+                } else {
+                    command.arguments = [];
+                    command.arguments.push('codeAction');
                 }
                 codeActionKind = CodeActionProvider.extractToFunctionKind;
             }

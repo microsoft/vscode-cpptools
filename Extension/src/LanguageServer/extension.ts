@@ -450,6 +450,8 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, sender) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? (sender: string | undefined) => onExtractToFunction(true, sender) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
@@ -705,6 +707,14 @@ async function onCreateDeclarationOrDefinition(args?: any): Promise<void> {
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     return getActiveClient().handleCreateDeclarationOrDefinition(false, args?.range);
+}
+
+async function onExtractToFunction(isMemberFunction: boolean, sender?: string): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: util.getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('ExtractToFreeFunction', properties);
+    return getActiveClient().handleExtractToFunction(isMemberFunction);
 }
 
 function onAddToIncludePath(path: string): void {
