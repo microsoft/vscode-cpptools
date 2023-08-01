@@ -28,9 +28,9 @@ interface CallHierarchyItem {
     detail: string;
 
     /**
-     * The resource identifier of this item.
+     * The file path of this item.
      */
-    uri: string;
+    file: string;
 
     /**
      * The range enclosing this symbol not including leading/trailing whitespace but everything else, e.g. comments and code.
@@ -175,7 +175,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         let result: vscode.CallHierarchyIncomingCall[] | undefined;
         const params: CallHierarchyParams = {
             textDocument: { uri: item.uri.toString() },
-            position: Position.create(item.range.start.line, item.range.start.character)
+            position: Position.create(item.selectionRange.start.line, item.selectionRange.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsToRequest, params, cancelSource.token);
 
@@ -213,7 +213,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         let result: vscode.CallHierarchyOutgoingCall[] | undefined;
         const params: CallHierarchyParams = {
             textDocument: { uri: item.uri.toString() },
-            position: Position.create(item.range.start.line, item.range.start.character)
+            position: Position.create(item.selectionRange.start.line, item.selectionRange.start.character)
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
 
@@ -230,15 +230,15 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
 
     private makeVscodeCallHierarchyItem(item: CallHierarchyItem): vscode.CallHierarchyItem {
         const containerDetail: string = (item.detail !== "") ? `${item.detail} - ` : "";
-        const itemUri: vscode.Uri = vscode.Uri.file(item.uri);
+        const itemUri: vscode.Uri = vscode.Uri.file(item.file);
 
         // Get file detail
         const isInWorkspace: boolean = this.client.RootUri !== undefined &&
             itemUri.fsPath.startsWith(this.client.RootUri?.fsPath);
         const dirPath: string = isInWorkspace ?
-            path.relative(this.client.RootPath, path.dirname(item.uri)) : path.dirname(item.uri);
+            path.relative(this.client.RootPath, path.dirname(item.file)) : path.dirname(item.file);
         const fileDetail: string = dirPath.length === 0 ?
-            `${path.basename(item.uri)}` : `${path.basename(item.uri)} (${dirPath})`;
+            `${path.basename(item.file)}` : `${path.basename(item.file)} (${dirPath})`;
 
         return new vscode.CallHierarchyItem(
             item.kind,
