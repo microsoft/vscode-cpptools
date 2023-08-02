@@ -228,6 +228,7 @@ export async function activate(): Promise<void> {
     ];
     codeActionProvider = vscode.languages.registerCodeActionsProvider(selector, {
         provideCodeActions: async (document: vscode.TextDocument, range: vscode.Range, context: vscode.CodeActionContext): Promise<vscode.CodeAction[]> => {
+
             if (!await clients.ActiveClient.getVcpkgEnabled()) {
                 return [];
             }
@@ -237,13 +238,17 @@ export async function activate(): Promise<void> {
                 return [];
             }
 
+            const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
+            if (ports.length <= 0) {
+                return [];
+            }
+
             telemetry.logLanguageServerEvent('codeActionsProvided', { "source": "vcpkg" });
 
             if (!await clients.ActiveClient.getVcpkgInstalled()) {
                 return [getVcpkgHelpAction()];
             }
 
-            const ports: string[] = await lookupIncludeInVcpkg(document, range.start.line);
             const actions: vscode.CodeAction[] = ports.map<vscode.CodeAction>(getVcpkgClipboardInstallAction);
             return actions;
         }
