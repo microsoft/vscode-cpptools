@@ -541,7 +541,7 @@ export function createDirIfNotExistsSync(filePath: string | undefined): void {
     }
     const dirPath: string = path.dirname(filePath);
     if (!checkDirectoryExistsSync(dirPath)) {
-        fs.mkdirSync(dirPath);
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 
