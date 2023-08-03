@@ -589,11 +589,13 @@ async function installCompiler(sender?: any): Promise<void> {
                     }
                     case 'centos':
                     case 'fedora':
+                    case 'rhel': {
+                        return 'sudo sh -c \'yum install -y gcc-c++ gdb\'';
+                    }
                     case 'opensuse':
                     case 'opensuse-leap':
-                    case 'opensuse-tumbleweed':
-                    case 'rhel': {
-                        return 'sudo sh -c \'yum update ; yum install gcc-c++\'';
+                    case 'opensuse-tumbleweed': {
+                        return 'sudo sh -c \'zypper refresh ; zypper install gcc-c++ gdb\'';
                     }
                 }
             })();
