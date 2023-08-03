@@ -11,6 +11,5 @@
 	"configuration.select.first": "Pokud chcete vybrat konfiguraci, otevřete nejdříve složku.",
 	"configuration.provider.select.first": "Pokud chcete vybrat poskytovatele konfigurace, otevřete nejdříve složku.",
 	"edit.configurations.open.first": "Pokud chcete upravit konfigurace, otevřete nejdříve složku.",
-	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn.",
-	"add.includepath.open.first": "Nejdříve otevřete složku, která se má přidat do {0}."
+	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn."
 }
