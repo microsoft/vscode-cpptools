@@ -243,7 +243,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     return false;
                 }
                 const hoverResult: vscode.MarkdownString = <vscode.MarkdownString>result[0].contents[0];
-                if (!hoverResult.value.includes(localize("expands_to", "Expands to:"))) {
+                if (!hoverResult.value.includes(localize("expands.to", "Expands to:"))) {
                     return false;
                 }
                 response = await this.client.languageClient.sendRequest(GetCodeActionsRequest, params, token);
@@ -260,7 +260,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             };
             if (!await processInlineMacro()) {
                 const disabledCodeAction: vscode.CodeAction = {
-                    title: localize({ key: "inline_macro", comment: ["'Inline' is a command and not an adjective, i.e. like 'Expand macro'."] }, "Inline macro"),
+                    title: localize({ key: "inline.macro", comment: ["'Inline' is a command and not an adjective, i.e. like 'Expand macro'."] }, "Inline macro"),
                     kind: CodeActionProvider.inlineMacroKind,
                     disabled: { reason: localize("inline.macro.not.available", "Inline macro is not available at this location.") }
                 };
