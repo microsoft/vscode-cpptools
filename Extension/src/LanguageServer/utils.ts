@@ -53,7 +53,7 @@ export function handleChangedFromCppToC(document: vscode.TextDocument): void {
     }
 }
 
-export function showInstallCompilerWalkthrough(): void{
+export function showInstallCompilerWalkthrough(): void {
     // Because we need to conditionally enable/disable steps to alter their contents,
     // we need to determine which step is actually visible. If the steps change, this
     // logic will need to change to reflect them.

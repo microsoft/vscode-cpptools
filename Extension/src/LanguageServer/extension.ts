@@ -598,6 +598,7 @@ async function installCompiler(sender?: any): Promise<void> {
                         return 'sudo sh -c \'zypper refresh ; zypper install gcc-c++ gdb\'';
                     }
                 }
+                return undefined;
             })();
             if (installCommand) {
                 const title = localize('install.compiler.linux.title', 'The gcc compiler will now be installed');

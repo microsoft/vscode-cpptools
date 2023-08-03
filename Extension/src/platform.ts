@@ -9,7 +9,7 @@ import * as plist from 'plist';
 import * as nls from 'vscode-nls';
 import { LinuxDistribution } from './linuxDistribution';
 import * as logger from './logger';
-import { SessionState } from './sessionState';
+import { SessionState, SupportedWindowsVersions } from './sessionState';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -34,9 +34,7 @@ export class PlatformInformation {
         switch (platform) {
             case "win32":
                 version = PlatformInformation.GetWindowsVersion();
-                if (version === '10' || version === '11') {
-                    SessionState.windowsVersion.set(version);
-                }
+                void SessionState.windowsVersion.set(version as SupportedWindowsVersions);
                 break;
             case "linux":
                 distribution = await LinuxDistribution.GetDistroInformation();
@@ -90,7 +88,7 @@ export class PlatformInformation {
         return Promise.resolve(productDarwinVersion);
     }
 
-    private static GetWindowsVersion(): string | undefined {
+    private static GetWindowsVersion(): SupportedWindowsVersions {
         const version = os.release().split('.');
         if (version.length > 0) {
             if (version[0] === '10') {
@@ -101,8 +99,7 @@ export class PlatformInformation {
                 // 10.0.22000+
                 return '11';
             }
-            return version[0];
         }
-        return undefined;
+        return '';
     }
 }

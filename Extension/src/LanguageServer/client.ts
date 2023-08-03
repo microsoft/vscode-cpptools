@@ -1073,7 +1073,7 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
-                await SessionState.trustedCompilerFound.set(true);
+                void SessionState.trustedCompilerFound.set(true);
             } else {
                 configurationSelected = true;
                 if (index < configProvidersIndex && configProviders) {
@@ -1091,7 +1091,7 @@ export class DefaultClient implements Client {
                 } else {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
-                    await SessionState.trustedCompilerFound.set(true);
+                    void SessionState.trustedCompilerFound.set(true);
                 }
             }
 
@@ -2718,9 +2718,9 @@ export class DefaultClient implements Client {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
-        await SessionState.scanForCompilersDone.set(true);
-        await SessionState.scanForCompilersEmpty.set(results.knownCompilers === undefined || !results.knownCompilers.length);
-        await SessionState.trustedCompilerFound.set(results.trustedCompilerFound);
+        void SessionState.scanForCompilersDone.set(true);
+        void SessionState.scanForCompilersEmpty.set(results.knownCompilers === undefined || !results.knownCompilers.length);
+        void SessionState.trustedCompilerFound.set(results.trustedCompilerFound);
         return results;
     }
 

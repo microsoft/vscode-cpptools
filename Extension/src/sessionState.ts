@@ -27,11 +27,14 @@ class SessionStateVariable<T> {
     }
 }
 
+// Used by the walkthrough to determine which markdown page to load. Any change to this type requires an update to the walkthrough.
+export type SupportedWindowsVersions = '10' | '11' | '';
+
 export abstract class SessionState {
     public static trustedCompilerFound = new SessionStateVariable<boolean>('cpptools.trustedCompilerFound', false);
     public static scanForCompilersDone = new SessionStateVariable<boolean>('cpptools.scanForCompilersDone', false);
     public static scanForCompilersEmpty = new SessionStateVariable<boolean>('cpptools.scanForCompilersEmpty', false);
     public static buildAndDebugIsFolderOpen = new SessionStateVariable<boolean>('cpptools.buildAndDebug.isFolderOpen', false);
     public static buildAndDebugIsSourceFile = new SessionStateVariable<boolean>('cpptools.buildAndDebug.isSourceFile', false);
-    public static windowsVersion = new SessionStateVariable<string>('cpptools.windowsVersion', '');
+    public static windowsVersion = new SessionStateVariable<SupportedWindowsVersions>('cpptools.windowsVersion', '');
 }
