@@ -432,7 +432,7 @@ export class CppProperties {
 
     private async buildVcpkgIncludePath(): Promise<void> {
         try {
-            // Check for vcpkgRoot and include relevent paths if found.
+            // Check for vcpkgRoot and include relevant paths if found.
             const vcpkgRoot: string = util.getVcpkgRoot();
             if (vcpkgRoot) {
                 const list: string[] = await util.readDir(vcpkgRoot);
@@ -622,6 +622,25 @@ export class CppProperties {
             // reverted to an unprocessed state and needs to be reprocessed.
             this.handleConfigurationChange();
         }, () => { }).catch(logAndReturn.undefined);
+    }
+
+    public async updateCompilerPathIfSet(path: string): Promise<void> {
+        if (!this.propertiesFile) {
+            // Properties file does not exist.
+            return;
+        }
+        return this.handleConfigurationEditJSONCommand(() => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            const config: Configuration | undefined = this.CurrentConfiguration;
+            // Update compiler path if it's already set.
+            if (config && config.compilerPath !== undefined) {
+                config.compilerPath = path;
+                this.writeToJson();
+            }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
+        }, returns.undefined);
     }
 
     public async updateCustomConfigurationProvider(providerId: string): Promise<void> {
@@ -1814,8 +1833,8 @@ export class CppProperties {
         // Check for path-related squiggles.
         let paths: string[] = [];
         let compilerPath: string | undefined;
-        for (const pathArray of [(currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
-            currentConfiguration.includePath, currentConfiguration.macFrameworkPath]) {
+        for (const pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
+            currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
             if (pathArray) {
                 for (const curPath of pathArray) {
                     paths.push(`${curPath}`);
@@ -1825,7 +1844,7 @@ export class CppProperties {
         // Skip the relative forcedInclude files.
         if (currentConfiguration.forcedInclude) {
             for (const file of currentConfiguration.forcedInclude) {
-                const resolvedFilePath: string = this.resolvePath(file, isWindows);
+                const resolvedFilePath: string = this.resolvePath(file);
                 if (path.isAbsolute(resolvedFilePath)) {
                     paths.push(`${file}`);
                 }
@@ -1843,7 +1862,7 @@ export class CppProperties {
         // Resolve and split any environment variables
         paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
         compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
-        compilerPath = this.resolvePath(compilerPath, isWindows);
+        compilerPath = this.resolvePath(compilerPath);
 
         // Get the start/end for properties that are file-only.
         const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1907,7 +1926,7 @@ export class CppProperties {
 
         dotConfigPath = currentConfiguration.dotConfig;
         dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
-        dotConfigPath = this.resolvePath(dotConfigPath, isWindows);
+        dotConfigPath = this.resolvePath(dotConfigPath);
         // does not try resolve if the dotConfig property is empty
         dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
 
@@ -1946,7 +1965,7 @@ export class CppProperties {
                 continue;
             }
 
-            let resolvedPath: string = this.resolvePath(curPath, isWindows);
+            let resolvedPath: string = this.resolvePath(curPath);
             if (!resolvedPath) {
                 continue;
             }
@@ -1986,7 +2005,7 @@ export class CppProperties {
                     let message: string;
                     if (!pathExists) {
                         if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
-                            && !path.isAbsolute(resolvedPath)) {
+                                && !path.isAbsolute(resolvedPath)) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
                         message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
@@ -1994,7 +2013,7 @@ export class CppProperties {
                     } else {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                            (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
                             if (util.checkFileExistsSync(resolvedPath)) {
                                 continue;
                             }
@@ -2018,7 +2037,6 @@ export class CppProperties {
                 // TODO: This never matches. https://github.com/microsoft/vscode-cpptools/issues/9140
                 const envMatches: string[] | null = envText.match(pattern);
                 if (envMatches) {
-
                     let curOffset: number = 0;
                     let endOffset: number = 0;
                     for (const curMatch of envMatches) {
@@ -2066,7 +2084,6 @@ export class CppProperties {
             telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
         }
         this.prevSquiggleMetrics.set(currentConfiguration.name, newSquiggleMetrics);
-
     }
 
     private updateToVersion2(): void {

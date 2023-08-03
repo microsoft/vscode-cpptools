@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { ManualPromise } from './manual-promise';
+import { ManualPromise } from './manualPromise';
 import { Resolveable } from './resolvable';
 
 /**

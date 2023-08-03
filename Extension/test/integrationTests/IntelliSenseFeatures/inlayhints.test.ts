@@ -2,6 +2,12 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
+
+/* eslint-disable @typescript-eslint/triple-slash-reference */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+/// <reference path="../../../vscode.d.ts" />
+
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as api from 'vscode-cpptools';
@@ -28,37 +34,25 @@ suite("[Inlay hints test]", function(): void {
     let referenceOperatorEnabledValue: any;
     let referenceOperatorShowSpaceValue: any;
     // Test setup
-    const rootUri: vscode.Uri = vscode.workspace.workspaceFolders[1].uri;
+    const wf = vscode.workspace.workspaceFolders?.[1] ?? assert.fail("Test failed because workspace folder is undefined.");
+    const rootUri: vscode.Uri = wf.uri;
     const filePath: string | undefined = rootUri.fsPath + "/inlay_hints.cpp";
     const fileUri: vscode.Uri = vscode.Uri.file(filePath);
     const disposables: vscode.Disposable[] = [];
-    let getIntelliSenseStatus: any;
 
     suiteSetup(async function(): Promise<void> {
         await testHelpers.activateCppExtension();
 
-        const cpptools = await apit.getCppToolsTestApi(api.Version.latest);
-        if (!cpptools) {
-            return;
-        }
+        const cpptools = await apit.getCppToolsTestApi(api.Version.latest) ?? assert.fail("Could not get cpptools test api");
+
         const testHook: apit.CppToolsTestHook = cpptools.getTestHook();
         disposables.push(testHook);
-
-        getIntelliSenseStatus = new Promise<void>((resolve, reject) => {
-            disposables.push(testHook.IntelliSenseStatusChanged(result => {
-                result = result as apit.IntelliSenseStatus;
-                if (result.filename === "inlay_hints.cpp" && result.status === apit.Status.IntelliSenseReady) {
-                    resolve();
-                }
-            }));
-            setTimeout(() => { reject(new Error("Timeout: IntelliSenseStatusChanged event")); }, testHelpers.defaultTimeout);
-        });
 
         // Start language server
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await getIntelliSenseStatus;
+        
         saveOriginalSettings();
         await useDefaultSettings();
     });
@@ -69,13 +63,13 @@ suite("[Inlay hints test]", function(): void {
     });
 
     function saveOriginalSettings(): void {
-        autoDeclarationTypesEnabledValue = inlayHintSettings.inspect(autoDeclarationTypesEnabled).globalValue;
-        autoDeclarationTypesShowOnLeftValue = inlayHintSettings.inspect(autoDeclarationTypesShowOnLeft).globalValue;
-        parameterNamesEnabledValue = inlayHintSettings.inspect(parameterNamesEnabled).globalValue;
-        parameterNamesSuppressValue = inlayHintSettings.inspect(parameterNamesSuppress).globalValue;
-        parameterNamesHideUnderScoreValue = inlayHintSettings.inspect(parameterNamesHideUnderScore).globalValue;
-        referenceOperatorEnabledValue = inlayHintSettings.inspect(referenceOperatorEnabled).globalValue;
-        referenceOperatorShowSpaceValue = inlayHintSettings.inspect(referenceOperatorShowSpace).globalValue;
+        autoDeclarationTypesEnabledValue = inlayHintSettings.inspect(autoDeclarationTypesEnabled)!.globalValue;
+        autoDeclarationTypesShowOnLeftValue = inlayHintSettings.inspect(autoDeclarationTypesShowOnLeft)!.globalValue;
+        parameterNamesEnabledValue = inlayHintSettings.inspect(parameterNamesEnabled)!.globalValue;
+        parameterNamesSuppressValue = inlayHintSettings.inspect(parameterNamesSuppress)!.globalValue;
+        parameterNamesHideUnderScoreValue = inlayHintSettings.inspect(parameterNamesHideUnderScore)!.globalValue;
+        referenceOperatorEnabledValue = inlayHintSettings.inspect(referenceOperatorEnabled)!.globalValue;
+        referenceOperatorShowSpaceValue = inlayHintSettings.inspect(referenceOperatorShowSpace)!.globalValue;
     }
 
     async function restoreOriginalSettings(): Promise<void> {
@@ -103,12 +97,12 @@ suite("[Inlay hints test]", function(): void {
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, disabled);
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, disabled);
-        await getIntelliSenseStatus;
+        
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, enabled);
-        await getIntelliSenseStatus;
+        
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Type;
@@ -125,19 +119,17 @@ suite("[Inlay hints test]", function(): void {
         assertHintValues(result2, 10, 28, 14, ": int", expectedKind);
         assertHintValues(result2, 11, 29, 15, ": int", expectedKind);
     });
-
+    
     test("[Inlay Hints - auto type, show on left]", async () => {
         const range: vscode.Range = new vscode.Range(new vscode.Position(15, 0), new vscode.Position(31, 0));
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, disabled);
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, disabled);
-        await getIntelliSenseStatus;
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, enabled);
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, enabled);
-        await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Type;
@@ -160,13 +152,11 @@ suite("[Inlay hints test]", function(): void {
 
         await changeInlayHintSetting(parameterNamesEnabled, disabled);
         await changeInlayHintSetting(referenceOperatorEnabled, disabled);
-        await getIntelliSenseStatus;
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(parameterNamesEnabled, enabled);
         await changeInlayHintSetting(parameterNamesSuppress, enabled);
-        await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 16, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
@@ -193,7 +183,6 @@ suite("[Inlay hints test]", function(): void {
 
         await changeInlayHintSetting(parameterNamesEnabled, enabled);
         await changeInlayHintSetting(parameterNamesHideUnderScore, disabled);
-        await getIntelliSenseStatus;
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 4, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
@@ -203,7 +192,6 @@ suite("[Inlay hints test]", function(): void {
         assertHintValues(result1, 3, 35, 25, "a:", expectedKind);
 
         await changeInlayHintSetting(parameterNamesHideUnderScore, enabled);
-        await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 4, "Incorrect number of results.");
         assertHintValues(result2, 0, 35, 16, "x:", expectedKind);
@@ -218,12 +206,10 @@ suite("[Inlay hints test]", function(): void {
         await changeInlayHintSetting(parameterNamesEnabled, disabled);
         await changeInlayHintSetting(referenceOperatorEnabled, disabled);
         await changeInlayHintSetting(referenceOperatorShowSpace, disabled);
-        await getIntelliSenseStatus;
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(referenceOperatorEnabled, enabled);
-        await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 16, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
@@ -254,7 +240,6 @@ suite("[Inlay hints test]", function(): void {
         await changeInlayHintSetting(parameterNamesSuppress, disabled);
         await changeInlayHintSetting(referenceOperatorEnabled, enabled);
         await changeInlayHintSetting(referenceOperatorShowSpace, disabled);
-        await getIntelliSenseStatus;
         const result1 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result1.length, 12, "Incorrect number of results.");
         const expectedKind = vscode.InlayHintKind.Parameter;
@@ -272,7 +257,6 @@ suite("[Inlay hints test]", function(): void {
         assertHintValues(result1, 11, 95, 9, "flag:", expectedKind);
 
         await changeInlayHintSetting(referenceOperatorShowSpace, enabled);
-        await getIntelliSenseStatus;
         const result2 = await vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range);
         assert.strictEqual(result2.length, 12, "Incorrect number of results.");
         assertHintValues(result2, 0, 87, 9, "& first:", expectedKind);
@@ -290,10 +274,10 @@ suite("[Inlay hints test]", function(): void {
     });
 
     async function changeInlayHintSetting(inlayHintSetting: string, valueNew: any): Promise<void> {
-        const valueBeforeChange: any = inlayHintSettings.inspect(inlayHintSetting).globalValue;
+        const valueBeforeChange: any = inlayHintSettings.inspect(inlayHintSetting)!.globalValue;
         if (valueBeforeChange !== valueNew) {
             await inlayHintSettings.update(inlayHintSetting, valueNew, vscode.ConfigurationTarget.Global);
-            const valueAfterChange: any = inlayHintSettings.inspect(inlayHintSetting).globalValue;
+            const valueAfterChange: any = inlayHintSettings.inspect(inlayHintSetting)!.globalValue;
             assert.strictEqual(valueAfterChange, valueNew, `Unable to change setting: ${inlayHintSetting}`);
         }
     }
