@@ -11,6 +11,5 @@
 	"configuration.select.first": "Öffnen Sie zum Auswählen einer Konfiguration zuerst einen Ordner.",
 	"configuration.provider.select.first": "Öffnen Sie zum Auswählen eines Konfigurationsanbieters zuerst einen Ordner.",
 	"edit.configurations.open.first": "Zum Bearbeiten von Konfigurationen zuerst einen Ordner öffnen",
-	"code.action.aborted": "Der Codeanalysepatch konnte nicht angewendet werden, da sich das Dokument geändert hat.",
-	"add.includepath.open.first": "Zuerst einen Ordner öffnen, der \"{0}\" hinzugefügt werden soll"
+	"code.action.aborted": "Der Codeanalysepatch konnte nicht angewendet werden, da sich das Dokument geändert hat."
 }

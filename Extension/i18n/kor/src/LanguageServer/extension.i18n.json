@@ -11,6 +11,5 @@
 	"configuration.select.first": "먼저 구성을 선택할 폴더를 엽니다.",
 	"configuration.provider.select.first": "먼저 구성 공급자를 선택할 폴더를 엽니다.",
 	"edit.configurations.open.first": "먼저 구성을 편집할 폴더 열기",
-	"code.action.aborted": "문서가 변경되어 코드 분석 수정 사항을 적용할 수 없습니다.",
-	"add.includepath.open.first": "먼저 {0}에 추가할 폴더 열기"
+	"code.action.aborted": "문서가 변경되어 코드 분석 수정 사항을 적용할 수 없습니다."
 }
