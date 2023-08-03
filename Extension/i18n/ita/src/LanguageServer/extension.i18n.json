@@ -11,6 +11,5 @@
 	"configuration.select.first": "Apri prima una cartella per selezionare una configurazione.",
 	"configuration.provider.select.first": "Apri prima una cartella per selezionare un provider di configurazione.",
 	"edit.configurations.open.first": "Aprire prima una cartella per modificare le configurazioni",
-	"code.action.aborted": "Impossibile applicare la correzione di Code Analysis perché il documento è stato modificato.",
-	"add.includepath.open.first": "Aprire prima una cartella da aggiungere a {0}"
+	"code.action.aborted": "Impossibile applicare la correzione di Code Analysis perché il documento è stato modificato."
 }

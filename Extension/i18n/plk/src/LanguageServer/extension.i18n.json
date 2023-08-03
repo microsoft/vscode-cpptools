@@ -11,6 +11,5 @@
 	"configuration.select.first": "Najpierw otwórz folder, aby wybrać konfigurację.",
 	"configuration.provider.select.first": "Najpierw otwórz folder, aby wybrać dostawcę konfiguracji.",
 	"edit.configurations.open.first": "Otwórz najpierw folder, aby edytować konfiguracje",
-	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony.",
-	"add.includepath.open.first": "Otwórz najpierw folder, aby dodać go do {0}"
+	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony."
 }
