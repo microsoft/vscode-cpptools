@@ -11,6 +11,5 @@
 	"configuration.select.first": "Primeiro, abra uma pasta para selecionar uma configuração.",
 	"configuration.provider.select.first": "Primeiro, abra uma pasta para selecionar um provedor de configuração.",
 	"edit.configurations.open.first": "Abrir uma pasta primeiro para editar as configurações",
-	"code.action.aborted": "Não foi possível aplicar a correção de análise de código porque o documento foi alterado.",
-	"add.includepath.open.first": "Abrir uma pasta primeiro para adicionar a {0}"
+	"code.action.aborted": "Não foi possível aplicar a correção de análise de código porque o documento foi alterado."
 }
