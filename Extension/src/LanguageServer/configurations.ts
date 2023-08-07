@@ -432,7 +432,7 @@ export class CppProperties {
 
     private async buildVcpkgIncludePath(): Promise<void> {
         try {
-            // Check for vcpkgRoot and include relevent paths if found.
+            // Check for vcpkgRoot and include relevant paths if found.
             const vcpkgRoot: string = util.getVcpkgRoot();
             if (vcpkgRoot) {
                 const list: string[] = await util.readDir(vcpkgRoot);

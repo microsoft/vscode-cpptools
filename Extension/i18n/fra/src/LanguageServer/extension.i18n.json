@@ -11,6 +11,5 @@
 	"configuration.select.first": "Commencer par ouvrir un dossier pour sélectionner une configuration",
 	"configuration.provider.select.first": "Commencer par ouvrir un dossier pour sélectionner un fournisseur de configuration",
 	"edit.configurations.open.first": "Commencer par ouvrir un dossier pour modifier des configurations",
-	"code.action.aborted": "Impossible d’appliquer le correctif d’analyse du code, car le document a changé.",
-	"add.includepath.open.first": "Commencer par ouvrir un dossier à ajouter à {0}"
+	"code.action.aborted": "Impossible d’appliquer le correctif d’analyse du code, car le document a changé."
 }

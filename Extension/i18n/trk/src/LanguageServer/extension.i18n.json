@@ -11,6 +11,5 @@
 	"configuration.select.first": "Yapılandırma seçmek için önce bir klasör açın.",
 	"configuration.provider.select.first": "Yapılandırma sağlayıcısı seçmek için önce bir klasör açın.",
 	"edit.configurations.open.first": "Yapılandırmaları düzenlemek için önce bir klasör açın",
-	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı.",
-	"add.includepath.open.first": "{0} öğesine eklemek için önce bir klasör açın"
+	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı."
 }
