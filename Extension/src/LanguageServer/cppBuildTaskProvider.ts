@@ -125,6 +125,10 @@ export class CppBuildTaskProvider implements TaskProvider {
                     (fileIsCpp && !info.isC) || (fileIsC && info.isC)
                 ) &&
                 (
+                    !isCompilerValid || (!!userCompilerPathAndArgs &&
+                        (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
+                ) &&
+                (
                     !isWindows || !info.path.startsWith("/")
                 );
             const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
@@ -144,15 +148,18 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Create a build task per compiler path
-        let result: CppBuildTask[] = [];
-        // Tasks for known compiler paths
-        if (knownCompilerPaths) {
-            result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
-        }
+        const result: CppBuildTask[] = [];
+
         // Task for valid user compiler path setting
         if (isCompilerValid && userCompilerPath) {
             result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.allCompilerArgs));
         }
+
+        // Tasks for known compiler paths
+        if (knownCompilerPaths) {
+            result.push(...knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined)));
+        }
+
         return result;
     }
 
