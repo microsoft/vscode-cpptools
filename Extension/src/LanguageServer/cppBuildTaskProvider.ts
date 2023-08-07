@@ -180,6 +180,8 @@ export class CppBuildTaskProvider implements TaskProvider {
                 isClang ?
                     ['-fcolor-diagnostics', '-fansi-escape-codes', '-g', '${file}', '-o', programName] :
                     ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+
+            // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
             if (isClang && os.platform() === 'darwin') {
                 args.unshift('-std=c++14');
             }
