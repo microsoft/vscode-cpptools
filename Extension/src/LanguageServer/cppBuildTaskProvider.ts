@@ -125,10 +125,6 @@ export class CppBuildTaskProvider implements TaskProvider {
                     (fileIsCpp && !info.isC) || (fileIsC && info.isC)
                 ) &&
                 (
-                    !isCompilerValid || (!!userCompilerPathAndArgs &&
-                        (path.basename(info.path) !== userCompilerPathAndArgs.compilerName))
-                ) &&
-                (
                     !isWindows || !info.path.startsWith("/")
                 );
             const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
