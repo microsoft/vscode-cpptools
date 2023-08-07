@@ -41,7 +41,8 @@ import { localizedStringCount, lookupString } from '../nativeStrings';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
 import {
-    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications,
+    CodeAnalysisDiagnosticIdentifiersAndUri,
+    RegisterCodeAnalysisNotifications,
     RemoveCodeAnalysisProblemsParams,
     removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems
@@ -539,6 +540,8 @@ export interface TextDocumentWillSaveParams {
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
+    baseStoragePath: string | undefined;
+    legacyStoragePath: string;
     storagePath: string;
     freeMemory: number;
     vcpkgRoot: string;
@@ -829,6 +832,8 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
+    private legacyStoragePath: string;
+    private baseStoragePath: string | undefined;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
@@ -846,7 +851,7 @@ export class DefaultClient implements Client {
     private showConfigureIntelliSenseButton: boolean = false;
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
-    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>]|[ManualPromise<unknown>]>();
+    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
 
     /** returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use) */
     private static readonly isStarted = new ManualSignal<void>(true);
@@ -925,7 +930,7 @@ export class DefaultClient implements Client {
     public get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return {
             workspaceFolderBasename: this.Name,
-            workspaceStorage: this.storagePath,
+            workspaceStorage: this.legacyStoragePath,
             execPath: process.execPath,
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
         };
@@ -1294,20 +1299,37 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        let storagePath: string | undefined;
+        let baseStoragePath: string | undefined = util.getBaseStoragePath();
+        let legacyStoragePath: string | undefined;
+        let storagePath: string | undefined = "";
+        let workspaceHash: string = "";
+
         if (util.extensionContext) {
             const path: string | undefined = util.extensionContext.storageUri?.fsPath;
             if (path) {
-                storagePath = path;
+                let pathArray: string[] = path.split("\\");
+                let hashIndex = pathArray.indexOf("workspaceStorage") + 1;
+                workspaceHash = pathArray[hashIndex];
+                legacyStoragePath = path;
             }
         }
 
-        if (!storagePath) {
-            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
+        if (!legacyStoragePath) {
+            legacyStoragePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
         }
+
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
+            legacyStoragePath = path.join(legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
+
+
+        this.legacyStoragePath = legacyStoragePath;
+        this.baseStoragePath = baseStoragePath;
+
+        if (baseStoragePath && workspaceHash) {
+            storagePath = baseStoragePath + workspaceHash;
+        }
+
         this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = new SettingsTracker(rootUri);
@@ -1618,6 +1640,8 @@ export class DefaultClient implements Client {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
             storagePath: this.storagePath,
+            legacyStoragePath: this.legacyStoragePath,
+            baseStoragePath: this.baseStoragePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
@@ -2021,7 +2045,7 @@ export class DefaultClient implements Client {
 
         const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
         if (!response.candidates || response.candidates.length === 0) {
-        // If we didn't receive any candidates, no configuration is needed.
+            // If we didn't receive any candidates, no configuration is needed.
             onFinished();
             DefaultClient.isStarted.resolve();
             return;

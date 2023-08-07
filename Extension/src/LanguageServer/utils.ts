@@ -29,7 +29,7 @@ export function makeVscodeTextEdits(cpptoolsTextEdits: TextEdit[]): vscode.TextE
 
 export function rangeEquals(range1: vscode.Range | Range, range2: vscode.Range | Range): boolean {
     return range1.start.line === range2.start.line && range1.start.character === range2.start.character &&
-    range1.end.line === range2.end.line && range1.end.character === range2.end.character;
+        range1.end.line === range2.end.line && range1.end.character === range2.end.character;
 }
 
 // Check this before attempting to switch a document from C to C++.
