@@ -180,6 +180,9 @@ export class CppBuildTaskProvider implements TaskProvider {
                 isClang ?
                     ['-fcolor-diagnostics', '-fansi-escape-codes', '-g', '${file}', '-o', programName] :
                     ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+            if (isClang && os.platform() === 'darwin') {
+                args.unshift('-std=c++14');
+            }
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
