@@ -90,8 +90,7 @@ export class FastFinder implements AsyncIterable<string> {
                 if (this.readyToComplete && this.pending === 0) {
                     this.#files.complete();
                 }
-            }
-            );
+            });
         }
         return this;
     }

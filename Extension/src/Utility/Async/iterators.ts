@@ -88,7 +88,7 @@ export function accumulator<T>(...iterables: Some<T>[]): AsynchIterable<T> {
     };
 
     result.autoComplete = (shouldAutocomplete: boolean) => { completeWhenEmpty = shouldAutocomplete; return result; };
-    result.complete = () => signal.resolve(completeWhenEmpty = true);
+    result.complete = () => signal.dispose(completeWhenEmpty = true);
     result.reiterable = () => reiterable(result);
 
     return result;
@@ -127,7 +127,7 @@ export function accumulator<T>(...iterables: Some<T>[]): AsynchIterable<T> {
             }
             // eslint-disable-next-line no-unmodified-loop-condition
         } while (!completeWhenEmpty);
-        signal.dispose();
+        signal.dispose(false);
 
         // prevent any more iterators from being added
         result.add = () => { throw new Error('AsyncIterable is finished'); };
