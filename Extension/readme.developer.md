@@ -109,6 +109,13 @@ More of the scripts will be converted out of `gulp` in the future.
 
 <hr>
 
+### `yarn scripts`
+> #### `yarn scripts` - shows the commands available in the `package.json`
+This shows the commands available in the `scripts` section of the `package.json` file along with their definition
+
+<hr>
+
+
 ### `yarn show`
 > #### `yarn show` - shows the files in the repository that are untracked and .gitignored
 This shows the files in the repository that are not tracked (ie, not in .git) and are 

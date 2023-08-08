@@ -6118,6 +6118,7 @@
         ]
     },
     "scripts": {
+        "scripts": "ts-node -T .scripts/scripts.ts",
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
         "test": "ts-node -T .scripts/test.ts",
