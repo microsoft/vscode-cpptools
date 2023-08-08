@@ -160,6 +160,15 @@ including cache, extensions, and configuration for the isolated environment.
 This installs the isolated vscode environment if it is not currently installed for this 
 repository. This is done automatically when running the tests, but can be run manually.
 
+> `yarn test regen` - update the pick lists in `.vscode/launch.json` for any new scenarios.
+
+This adds new entries in the the pick lists in `.vscode/launch.json` to include any new scenarios
+that you have added to the `test/scenarios` folder. It will add scenarios that have `assets` and `tests` folders
+(and have been compiled at least once). It does not overwrite or update existing entries.
+
+This saves you the effort of having to manually update the launch.json file.
+
+
 ---
 ### `yarn code`
 > #### `yarn code <folder|workspace|scenario>` - run vscode

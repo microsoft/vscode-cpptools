@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "configurations": [
         {
+            // debugs the extension (selecting the workspace)
             "name": "Run Extension",
             "type": "extensionHost",
             "request": "launch",
@@ -13,14 +14,15 @@
                 "--skip-release-notes",
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "${input:pickWorkspace}",
+                "${input:pickWorkspace}"
             ],
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**"
-            ],
+            ]
         },
         {
+            // debug scenario tests (selecting the workspace)
             "name": "VSCode Tests",
             "type": "extensionHost",
             "request": "launch",
@@ -42,15 +44,17 @@
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**"
-            ],
+            ]
         },
         {
+            // does anyone use this?
             "name": "Node Attach",
             "type": "node",
             "request": "attach",
             "port": 5858
         },
         {
+            // used for debugging unit tests
             "name": "MochaTest",
             "type": "node",
             "request": "attach",
@@ -70,10 +74,10 @@
         {
             "type": "pickString",
             "id": "pickScenario",
-            "description": "Select which scenario to run VSCode tests.",
+            "description": "Select which scenario to debug VSCode tests.",
             "options": [
                 {
-                    "label": "MultiRootDeadlockTest   ",
+                    "label": "MultirootDeadlockTest   ",
                     "value": "${workspaceFolder}/test/scenarios/MultirootDeadlockTest/assets/test.code-workspace"
                 },
                 {
@@ -89,15 +93,15 @@
         {
             "type": "pickString",
             "id": "pickWorkspace",
-            "description": "Select which workspace scenario to run VSCode.",
+            "description": "Select which workspace scenario to debug VSCode.",
             "default": "-n",
             "options": [
                 {
-                    "label": "(Run without Workspace)   ",
+                    "label": "(Debug without Workspace)   ",
                     "value": "-n"
                 },
                 {
-                    "label": "MultiRootDeadlockTest   ",
+                    "label": "MultirootDeadlockTest   ",
                     "value": "${workspaceFolder}/test/scenarios/MultirootDeadlockTest/assets/test.code-workspace"
                 },
                 {
@@ -107,7 +111,7 @@
                 {
                     "label": "SingleRootProject   ",
                     "value": "${workspaceFolder}/test/scenarios/SingleRootProject/assets/"
-                },
+                }
             ]
         }
     ]

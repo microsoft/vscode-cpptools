@@ -6,6 +6,7 @@
 import { Command, CommandFunction } from '../src/Utility/Process/program';
 
 import { ok } from 'assert';
+import { CommentJSONValue, parse, stringify } from 'comment-json';
 import { mkdir as md, readFile, rm, writeFile } from 'fs/promises';
 import { IOptions, glob as globSync } from 'glob';
 import { dirname, resolve } from 'path';
@@ -15,6 +16,7 @@ import { promisify } from 'util';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
+
 export const $root = resolve(`${__dirname}/..`);
 export let $cmd = 'main';
 export let $scenario = '';
@@ -145,16 +147,28 @@ export async function read(filename: string) {
     return content.toString();
 }
 
-export async function readJson(filename: string, fallback?: {}) {
+export async function readJson(filename: string, fallback?: {}): Promise<CommentJSONValue> {
     try {
-        return JSON.parse(await read(filename));
+        return parse(await read(filename));
     } catch {
-        return fallback;
+        return fallback as CommentJSONValue;
     }
+}
+
+export async function writeJson(filename: string, object: CommentJSONValue) {
+    await write(filename, stringify(object, null, 4));
 }
 
 export function error(text: string) {
     console.error(`\n${red('ERROR')}: ${text}`);
+}
+
+export function warn(text: string) {
+    console.error(`\n${yellow('WARNING')}: ${text}`);
+}
+
+export function note(text: string) {
+    console.error(`\n${cyan('NOTE')}: ${text}`);
 }
 
 export function underline(text: string) {
