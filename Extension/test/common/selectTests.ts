@@ -38,11 +38,12 @@ async function getScenarioInfo(val: string) {
             // no tests in this scenario have been compiled
             return undefined;
         }
+        const assets = (await filepath.isFolder('assets', folder)) ?? folder;
 
         return {
             name,
-            assets: folder,
-            workspace: (await glob(`${folder}/**/*.code-workspace`))[0] || folder
+            assets,
+            workspace: (await glob(`${folder}/**/*.code-workspace`))[0] || assets
         };
     }
 
