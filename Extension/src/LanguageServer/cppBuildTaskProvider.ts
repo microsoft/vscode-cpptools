@@ -189,10 +189,6 @@ export class CppBuildTaskProvider implements TaskProvider {
                     ['-fcolor-diagnostics', '-fansi-escape-codes', '-g', '${file}', '-o', programName] :
                     ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
 
-            // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
-            if (isClang && os.platform() === 'darwin') {
-                args.unshift('-std=c++14');
-            }
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
@@ -371,6 +367,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             this.closeEmitter.fire(-1);
             return;
         }
+
+        // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
         if (this.buildOptions.taskUsesActiveFile && window.activeTextEditor?.document.languageId === 'cpp' && this.buildOptions.insertStd) {
             this.args.unshift('-std=gnu++14');
         }
