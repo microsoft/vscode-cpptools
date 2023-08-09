@@ -58,13 +58,16 @@ export async function getModifiedIgnoredFiles() {
 export async function rimraf(...paths: string[]) {
     const all = [];
     for (const each of paths) {
+        if (!each) {
+            continue;
+        }
         if (await filepath.isFolder(each)) {
             verbose(`Removing folder ${red(each)}`);
             all.push(rm(each, {recursive: true, force: true}));
             continue;
         }
         verbose(`Removing file ${red(each)}`);
-        all.push(await rm(each, {force: true}));
+        all.push(rm(each, {force: true}));
     }
     await Promise.all(all);
 }
