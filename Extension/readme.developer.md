@@ -1,5 +1,40 @@
 # Developer Documentation
 
+## Table of Contents
+- [Developer Documentation](#developer-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Setup](#setup)
+    - [Required Tools](#required-tools)
+    - [Setting up the repository](#setting-up-the-repository)
+  - [Building the Extension](#building-the-extension)
+    - [When using F5 Debug](#when-using-f5-debug)
+    - [From Inside VSCode](#from-inside-vscode)
+    - [From Command line](#from-command-line)
+  - [Use of an isolated `vscode` environment](#use-of-an-isolated-vscode-environment)
+  - [Testing](#testing)
+    - [Unit tests](#unit-tests)
+    - [Scenario Tests](#scenario-tests)
+  - [Scripts](#scripts)
+    - [`yarn scripts`](#yarn-scripts)
+    - [`yarn show`](#yarn-show)
+    - [`yarn clean`](#yarn-clean)
+    - [`yarn test`](#yarn-test)
+    - [`yarn code`](#yarn-code)
+    - [`yarn generate-native-strings`](#yarn-generate-native-strings)
+    - [`yarn generate-options-schema`](#yarn-generate-options-schema)
+    - [`yarn copy-walkthrough-media`](#yarn-copy-walkthrough-media)
+    - [`yarn prep`](#yarn-prep)
+    - [`yarn import-edge-strings`](#yarn-import-edge-strings)
+    - [`yarn lint`](#yarn-lint)
+    - [`yarn compile`](#yarn-compile)
+    - [`yarn watch`](#yarn-watch)
+    - [`yarn verify`](#yarn-verify)
+    - [`yarn webpack`](#yarn-webpack)
+    - [`yarn translations-export`](#yarn-translations-export)
+    - [`yarn translations-generate`](#yarn-translations-generate)
+    - [`yarn translations-import`](#yarn-translations-import)
+    - [`yarn postinstall`](#yarn-postinstall)
+
 ## Setup
 
 ### Required Tools 
@@ -15,6 +50,12 @@
 
 ## Building the Extension
 
+### When using F5 Debug 
+The `launch.json` entries now specify a `preLaunchTask` that will build the extension before launching using 
+the `yarn watch` command, and will wait until the build is ready. The watch command will continue to watch from 
+that point.
+
+If the extension is already built, the the watch will be very quick.
 
 ### From Inside VSCode
 There are two tasks that can be run from inside VSCode to build the extension.
@@ -23,6 +64,7 @@ When you select `ctrl-shift-b` - there is a `Compile` task and a `Watch` task.
 
 During regular development, you probably want to use the `Watch` task as it will 
 compile changed files as you save them.
+
 
 
 ### From Command line
@@ -122,6 +164,11 @@ This shows the files in the repository that are not tracked (ie, not in .git) an
 ignored by `git` This will not show untracked files that are not ignored (ie, new files 
 that you could add to the repository)
 
+> #### `yarn show new` - shows new files that are not git ignored
+This shows the files in the repository that are not tracked and are not
+ignored by `git`.
+
+
 <hr>
 
 ### `yarn clean`
@@ -152,7 +199,8 @@ The mocha test runner is invoked for the unit tests. This does not use vscode in
 The unit tests are run, and then each of the scenario test sets are run in turn.  
 This will install the isolated vscode environment if it is not already installed.
 
-> `yarn test --scenario=<SCENARIONAME>` - run a single set of scenario tests
+> `yarn test --scenario=<SCENARIONAME>` - run a single set of scenario tests  
+> `yarn test <SCENARIONAME>` - run a single set of scenario tests
 
 This will just run the tests for the given scenario. You can pass in the folder name 
 (in `test/scenarios` or a full path to a folder with `assets` and `tests`) 
@@ -256,13 +304,7 @@ Runs the typescript compiler on the source code (`test`,`src`,`ui`) and the outp
 
 This means we don't use webpack for day-to-day use anymore. 
 
----
-### `yarn compile-ui`
-> #### `yarn compile-ui` - compile just the `ui/settings.ts` file 
-
-This will compile just the `ui/settings.ts` file and place it in the `dist` folder.
-
-This is only necessary when packaging the extension, as the `ui/settings.ts` file isn't in the webpack'd output
+This will also verify that the repository is prepped and tries to prep it if it's not.
 
 ---
 ### `yarn watch`
@@ -272,16 +314,28 @@ Runs the typescript compiler in watch mode on the source code (`test`,`src`,`ui`
 
 Any changes to the source files will be automatically compiled when saved.
 
+This will also verify that the repository is prepped and tries to prep it if it's not.
+
 ---
+
+### `yarn verify`
+> #### `yarn verify [--verbose]` - verifies that the repository is built correctly
+
+Checks for the presence of the compiled files and the prepped files ( see [`yarn verify prep`](#yarn-verify) )
+(no output unless it fails)
+> #### `yarn verify prep [--verbose]` - verifies that the repository has been prepped to build
+
+Checks for the presence of the generated loc files and other files that are necessary to build.
+(no output unless it fails)
+
+---
+
+
 ### `yarn webpack`
 > #### `yarn webpack` - uses webpack to build the extension
 
 This will use webpack to build the extension. This is only necessary when packaging the extension.
 
-
----
-### `yarn webpack-dev`
-> #### `yarn webpack-dev` -  [deprecated?]
 
 ---
 ### `yarn translations-export`

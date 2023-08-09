@@ -14,7 +14,7 @@ import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 import { getTestInfo } from '../test/common/selectTests';
-import { $root, $scenario, brightGreen, checkFile, checkFolder, cmdSwitch, cyan, error, green, readJson, red, writeJson } from './common';
+import { $args, $root, $scenario, brightGreen, checkFile, checkFolder, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
 import { install, isolated, options } from './vscode';
 
 export { install, reset } from './vscode';
@@ -94,9 +94,14 @@ async function scenarioTests(assets: string, name: string, workspace: string) {
 
 export async function main() {
     await checkFolder('dist/test/', `The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
-    const testInfo = await getTestInfo($scenario, env.SCENARIO);
+    const arg = $args.find(each => !each.startsWith("--"));
+    const specifiedScenario = $scenario || env.SCENARIO || await getScenarioFolder(arg);
+    const testInfo = await getTestInfo(specifiedScenario);
 
     if (!testInfo) {
+        if (arg) {
+            return error(`Could not find scenario ${arg}`);
+        }
         // lets just run the unit tests
         process.exit(await unitTests());
     }
@@ -112,21 +117,18 @@ export async function all() {
     const finished: string[] = [];
 
     if (await unitTests() !== 0) {
-        console.log(`${cyan("UNIT TESTS: ")}${red("failed")}`);
+        console.log(`${cyan("  UNIT TESTS: ")}${red("failed")}`);
         process.exit(1);
     }
-    finished.push(`${cyan("UNIT TESTS: ")}${green("success")}`);
+    finished.push(`${cyan("  UNIT TESTS: ")}${green("success")}`);
 
     // at this point, we're going to run some vscode tests
     if (!await filepath.isFolder(isolated)) {
         await install();
     }
     try {
-        const scenarios = await readdir(`${$root}/test/scenarios`).catch(returns.empty);
+        const scenarios = await getScenarioNames();
         for (const each of scenarios) {
-            if (each === 'Debugger') {
-                continue;
-            }
             if (await filepath.isFolder(`${$root}/test/scenarios/${each}/tests`)) {
                 const ti = await getTestInfo(each);
 
@@ -135,10 +137,10 @@ export async function all() {
                     const result = await scenarioTests(ti.assets, ti.name, ti.workspace);
                     if (result) {
                         console.log(finished.join('\n'));
-                        console.log(`${cyan(`${ti.name} Tests:`)}${red("failed")}`);
+                        console.log(`  ${cyan(`${ti.name} Tests:`)}${red("failed")}`);
                         process.exit(result);
                     }
-                    finished.push(`${cyan(`${ti.name} Tests:`)}${green("success")}`);
+                    finished.push(`  ${cyan(`${ti.name} Tests:`)}${green("success")}`);
                 }
             }
         }
@@ -155,36 +157,46 @@ interface Input {
     description: string;
     options: CommentArray<{label: string; value: string}>;
 }
+export async function getScenarioNames() {
+    return (await readdir(`${$root}/test/scenarios`).catch(returns.none)).filter(each => each !== 'Debugger');
+}
+
+export async function getScenarioFolder(scenarioName: string) {
+    return scenarioName ? resolve(`${$root}/test/scenarios/${(await getScenarioNames()).find(each => each.toLowerCase() === scenarioName.toLowerCase())}`) : undefined;
+}
+
+export async function list() {
+    console.log(`\n${cyan("Scenarios: ")}\n`);
+    const names = await getScenarioNames();
+    const max = names.reduce((max, each) => Math.max(max, each), 0);
+    for (const each of names) {
+        console.log(`  ${green(each.padEnd(max))}: ${gray(await getScenarioFolder(each))}`);
+    }
+}
 
 export async function regen() {
     // update the .vscode/launch.json file with the scenarios
-    const scenarios = await readdir(`${$root}/test/scenarios`).catch(returns.empty);
+    const scenarios = await getScenarioNames();
     const launch = await readJson(`${$root}/.vscode/launch.json`) as CommentObject;
     if (!is.object(launch)) {
-        error(`The file ${$root}/.vscode/launch.json is not valid json`);
-        return;
+        return error(`The file ${$root}/.vscode/launch.json is not valid json`);
     }
     if (!is.array(launch.inputs)) {
-        error(`The file ${$root}/.vscode/launch.json is missing the 'inputs' array`);
-        return;
+        return error(`The file ${$root}/.vscode/launch.json is missing the 'inputs' array`);
     }
 
     const inputs = launch.inputs as unknown as CommentArray<Input>;
     const pickScenario = inputs.find(each => each.id === 'pickScenario');
     if (!pickScenario) {
-        error(`The file ${$root}/.vscode/launch.json is missing the 'pickScenario' input`);
-        return;
+        return error(`The file ${$root}/.vscode/launch.json is missing the 'pickScenario' input`);
     }
     const pickWorkspace = inputs.find(each => each.id === 'pickWorkspace');
     if (!pickWorkspace) {
-        error(`The file ${$root}/.vscode/launch.json is missing the 'pickWorkspace' input`);
-        return;
+        return error(`The file ${$root}/.vscode/launch.json is missing the 'pickWorkspace' input`);
     }
 
     for (const scenarioFolder of scenarios) {
-        if (scenarioFolder === 'Debugger') {
-            continue;
-        }
+
         const prefix = $root.replace(/\\/g, '/');
 
         if (await filepath.isFolder(`${$root}/test/scenarios/${scenarioFolder}/tests`)) {

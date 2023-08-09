@@ -271,3 +271,16 @@ export async function checkFile(file: string|string[], errMsg: string){
     error(errMsg);
     process.exit(1);
 }
+
+export async function checkPrep() {
+    await checkFolder('dist/walkthrough', `The walkthru files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
+    await checkFolder('dist/html', `The html files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
+    await checkFolder('dist/schema', `The html files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
+    await checkFile('dist/nls.metadata.json', `The extension translation file '${$root}/dist/nls.metadata.json is missing. You should run ${brightGreen("yarn prep")}\n\n`);
+    verbose('Prep files appear to be in place.');
+}
+
+export async function checkCompiled() {
+    await checkFile('dist/src/main.js', `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    verbose('Compiled files appear to be in place.');
+}

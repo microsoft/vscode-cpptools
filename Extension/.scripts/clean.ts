@@ -3,10 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+import { error } from 'node:console';
 import { resolve, sep } from 'node:path';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
-import { $root, brightGreen, cyan, getModifiedIgnoredFiles, rimraf } from './common';
+import { $root, Git, brightGreen, cyan, getModifiedIgnoredFiles, rimraf } from './common';
 
 // list all gitignore'd files that are modified git clean -Xd -n
 // list all untracked and ignored files that are modified/created git clean -Xd -n
@@ -24,10 +25,8 @@ export async function reset() {
     await rimraf(...await getModifiedIgnoredFiles());
 }
 
-export async function show() {
-    console.log('Untracked+Ignored files:');
-    const files = await getModifiedIgnoredFiles();
-    let all  = await Promise.all(files.map(async (each) => {
+async function details(files: string[]) {
+    let all  = await Promise.all(files.filter(each => each).map(async (each) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [filename, stats ] = await filepath.stats(each);
         return {
@@ -41,5 +40,24 @@ export async function show() {
     // print a formatted table so the date and time are aligned
     const max = all.reduce((max, each) => Math.max(max, each.filename.length), 0);
     all.forEach(each => console.log(`  ${each.filename.padEnd(max)}  [${each.date} ${each.time}]`));
+    console.log('');
+}
 
+export async function show(opt?: string) {
+    switch (opt?.toLowerCase()) {
+        case 'new':
+            console.log(cyan('\n\nNew files:'));
+            const r = await Git('ls-files', '--others', '--exclude-standard', '-z');
+            return details(r.stdio.all().map(each => resolve(each.trim().replace(/\0/g, ''))));
+
+        case undefined:
+        case '':
+        case 'ignored':
+        case 'untracked':
+            console.log(cyan('\n\nUntracked+Ignored files:'));
+            return details(await getModifiedIgnoredFiles());
+
+        default:
+            return error(`Unknown option '${opt}'`);
+    }
 }
