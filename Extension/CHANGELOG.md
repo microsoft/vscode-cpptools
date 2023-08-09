@@ -1,5 +1,20 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.17.1: August 9, 2023
+## Bug Fixes
+* Fix an issue where the debugger would get stuck while using cl.exe options. [#10231](https://github.com/microsoft/vscode-cpptools/issues/10231)
+* Fix C/C++ commands showing in the Command Palette with non-C/C++ files. [#10421](https://github.com/microsoft/vscode-cpptools/issues/10421)
+* Fix the 'Select IntelliSense Configuration' command to also update an existing `compilerPath` in c_cpp_properties.json. [#10808](https://github.com/microsoft/vscode-cpptools/issues/10808)
+* Fix the parameter format of call hierarchy items. [#11247](https://github.com/microsoft/vscode-cpptools/issues/11247)
+* Remove the vcpkg code action from the missing includes code action list. [#11252](https://github.com/microsoft/vscode-cpptools/issues/11252)
+* Fix the file path info of call hierarchy items to display the relative path to a workspace folder. [#11254](https://github.com/microsoft/vscode-cpptools/issues/11254)
+* Fix colorization for macro expansions in macro arguments. [#11256](https://github.com/microsoft/vscode-cpptools/issues/11256) 
+* Fix a crash for CUDA projects with '>' in the command line. [#11289](https://github.com/microsoft/vscode-cpptools/issues/11289) 
+* Increase the default standard for the 'Build and Debug Active File' feature to c++14 on macOS. [#11292](https://github.com/microsoft/vscode-cpptools/issues/11292) 
+* Fix an issue with the compiler currently configured for use with IntelliSense being listed last in the task creation popup. [PR #11299](https://github.com/microsoft/vscode-cpptools/pull/11299)
+* Fix an issue to allow users to utilize the walkthrough without tasks.json. [PR #11300](https://github.com/microsoft/vscode-cpptools/pull/11300)
+* Fix an IPCH issue on Linux due to the Position Independent Executable (PIE) option not being set since 1.17.0.
+
 ## Version 1.17.0: July 26, 2023
 ### Enhancements
 * Enable a subset of markdown to render in hover by default and a `C_Cpp.markdownInComments` setting. [#6020](https://github.com/microsoft/vscode-cpptools/issues/6020), [#10461](https://github.com/microsoft/vscode-cpptools/issues/10461)
@@ -635,7 +650,7 @@
 * Add auto-detection of clang compilers on Windows (and different versions of cl.exe). [#6718](https://github.com/microsoft/vscode-cpptools/issues/6718)
 * Stop adding .cu files to `files.associations` (switch to using setTextDocumentLanguage). [#7359](https://github.com/microsoft/vscode-cpptools/issues/7359)
 * Add "Symbol Options" for CppVsdbg to configure symbol settings [PR #7680](https://github.com/microsoft/vscode-cpptools/pull/7680)
-* Update CppVsdbg to use newer CppEE and msdia. 
+* Update CppVsdbg to use newer CppEE and msdia.
 
 ### Bug Fixes
 * Fix switch header/source not checking `files.exclude`. [#4429](https://github.com/microsoft/vscode-cpptools/issues/4429)
@@ -681,7 +696,7 @@
 * Add `private` or `protected` scope labels to class symbols. [#7120](https://github.com/microsoft/vscode-cpptools/issues/7120)
 * Fix file:line path for $FILEPOS [#7193](https://github.com/microsoft/vscode-cpptools/issues/7193)
 	* [PR MIEngine#1124](https://github.com/microsoft/MIEngine/pull/1124)
-* Add `stopAtConnect` and `hardwareBreakpoints` launch options [PR #7449](https://github.com/microsoft/vscode-cpptools/pull/7449) 
+* Add `stopAtConnect` and `hardwareBreakpoints` launch options [PR #7449](https://github.com/microsoft/vscode-cpptools/pull/7449)
   * `stopAtConnect` stops the debugger on connection to a remote target [PR MIEngine#1109](https://github.com/microsoft/MIEngine/pull/1109)
   * `hardwareBreakpoints` controls usage and number of remote hardware breakpoints [PR MIEngine#1128](https://github.com/microsoft/MIEngine/pull/1128)
 * Add support for loading Concord extensions to the cppvsdbg debug adapter (see [documentation](https://github.com/microsoft/ConcordExtensibilitySamples/wiki/Support-for-VS-Code-cppvsdbg-Scenarios) for more information)
@@ -914,7 +929,7 @@
   * YuTengjing (@tjx666) [PR #6344](https://github.com/microsoft/vscode-cpptools/pull/6344)
 * Enable support for specifying a compiler by only the filename if it's in the environment path. [#6179](https://github.com/microsoft/vscode-cpptools/issues/6179)
 * Restart the IntelliSense process if its memory usage exceeds the `C_Cpp.intelliSenseMemoryLimit` setting. [#6230](https://github.com/microsoft/vscode-cpptools/issues/6230)
-* [cppdbg] Stepping out of a function will display '$ReturnValue'. 
+* [cppdbg] Stepping out of a function will display '$ReturnValue'.
   * @Trass3r [PR MIEngine#1036](https://github.com/microsoft/MIEngine/pull/1036)
 * [cppdbg] Support composite expressions in natvis ArrayItems
   * @Trass3r [PR MIEngine#1044](https://github.com/microsoft/MIEngine/pull/1044)
@@ -1295,7 +1310,7 @@
 * Add a code action for resolving missing includes via the `vcpkg` dependency manager. [PR #3791](https://github.com/microsoft/vscode-cpptools/pull/3791)
 
 ### Enhancements
-* Added support for compile commands: 
+* Added support for compile commands:
   * `-iquote`. [#2088](https://github.com/microsoft/vscode-cpptools/issues/2088)
   * `-imacros`. [#2417](https://github.com/microsoft/vscode-cpptools/issues/2417)
   * `-idirafter`(`--include-directory-after` & `--include-directory-after=`). [#3713](https://github.com/microsoft/vscode-cpptools/issues/3713)
