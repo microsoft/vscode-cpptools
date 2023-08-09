@@ -358,6 +358,9 @@ export function findExePathInArgs(args: string[]): string | undefined {
     if (exePath?.startsWith("/Fe")) {
         return exePath.substring(3);
     }
+    if (exePath?.toLowerCase().startsWith("/out:")) {
+        return exePath.substring(5);
+    }
     return exePath;
 }
 
@@ -538,7 +541,7 @@ export function createDirIfNotExistsSync(filePath: string | undefined): void {
     }
     const dirPath: string = path.dirname(filePath);
     if (!checkDirectoryExistsSync(dirPath)) {
-        fs.mkdirSync(dirPath);
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 

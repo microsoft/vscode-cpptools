@@ -31,6 +31,11 @@ export class CppBuildTask extends Task {
     isDefault?: boolean;
 }
 
+interface BuildOptions {
+    taskUsesActiveFile: boolean;
+    insertStd?: boolean;
+}
+
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
 
@@ -148,21 +153,25 @@ export class CppBuildTaskProvider implements TaskProvider {
         }
 
         // Create a build task per compiler path
-        let result: CppBuildTask[] = [];
-        // Tasks for known compiler paths
-        if (knownCompilerPaths) {
-            result = knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined));
-        }
+        const result: CppBuildTask[] = [];
+
         // Task for valid user compiler path setting
         if (isCompilerValid && userCompilerPath) {
             result.push(this.getTask(userCompilerPath, appendSourceToName, userCompilerPathAndArgs?.allCompilerArgs));
         }
+
+        // Tasks for known compiler paths
+        if (knownCompilerPaths) {
+            result.push(...knownCompilerPaths.map<Task>(compilerPath => this.getTask(compilerPath, appendSourceToName, undefined)));
+        }
+
         return result;
     }
 
     private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
         const compilerPathBase: string = path.basename(compilerPath);
         const isCl: boolean = compilerPathBase.toLowerCase() === "cl.exe";
+        const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
         // Double-quote the command if it is not already double-quoted.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
         if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
@@ -174,12 +183,12 @@ export class CppBuildTaskProvider implements TaskProvider {
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build_active_file", "build active file");
             const programName: string = util.defaultExePath();
-            const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
             let args: string[] = isCl ?
                 ['/Zi', '/EHsc', '/nologo', `/Fe${programName}`, '${file}'] :
                 isClang ?
                     ['-fcolor-diagnostics', '-fansi-escape-codes', '-g', '${file}', '-o', programName] :
                     ['-fdiagnostics-color=always', '-g', '${file}', '-o', programName];
+
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
@@ -202,7 +211,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const task: CppBuildTask = new Task(definition, scope, definition.label, ext.CppSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, taskUsesActiveFile)
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, {taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin'})
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -349,14 +358,19 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
     private endOfLine: string = "\r\n";
 
-    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private taskUsesActiveFile: boolean) {
+    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private buildOptions: BuildOptions) {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
-        if (this.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
+        if (this.buildOptions.taskUsesActiveFile && !util.isCppOrCFile(window.activeTextEditor?.document.uri)) {
             this.writeEmitter.fire(localize("cannot.build.non.cpp", 'Cannot build and debug because the active file is not a C or C++ source file.') + this.endOfLine);
             this.closeEmitter.fire(-1);
             return;
+        }
+
+        // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
+        if (this.buildOptions.taskUsesActiveFile && window.activeTextEditor?.document.languageId === 'cpp' && this.buildOptions.insertStd) {
+            this.args.unshift('-std=gnu++14');
         }
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
         // At this point we can start using the terminal.

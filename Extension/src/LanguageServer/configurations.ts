@@ -432,7 +432,7 @@ export class CppProperties {
 
     private async buildVcpkgIncludePath(): Promise<void> {
         try {
-            // Check for vcpkgRoot and include relevent paths if found.
+            // Check for vcpkgRoot and include relevant paths if found.
             const vcpkgRoot: string = util.getVcpkgRoot();
             if (vcpkgRoot) {
                 const list: string[] = await util.readDir(vcpkgRoot);
@@ -622,6 +622,25 @@ export class CppProperties {
             // reverted to an unprocessed state and needs to be reprocessed.
             this.handleConfigurationChange();
         }, () => { }).catch(logAndReturn.undefined);
+    }
+
+    public async updateCompilerPathIfSet(path: string): Promise<void> {
+        if (!this.propertiesFile) {
+            // Properties file does not exist.
+            return;
+        }
+        return this.handleConfigurationEditJSONCommand(() => {
+            this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
+            const config: Configuration | undefined = this.CurrentConfiguration;
+            // Update compiler path if it's already set.
+            if (config && config.compilerPath !== undefined) {
+                config.compilerPath = path;
+                this.writeToJson();
+            }
+            // Any time parsePropertiesFile is called, configurationJson gets
+            // reverted to an unprocessed state and needs to be reprocessed.
+            this.handleConfigurationChange();
+        }, returns.undefined);
     }
 
     public async updateCustomConfigurationProvider(providerId: string): Promise<void> {
