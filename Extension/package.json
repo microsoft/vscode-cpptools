@@ -6119,8 +6119,6 @@
     },
     "scripts": {
         "scripts": "ts-node -T .scripts/scripts.ts",
-        "install-hooks": "ts-node -T .scripts/installHooks.ts",
-        "post-checkout": "ts-node -T .scripts/postCheckout.ts",
         "show": "ts-node -T .scripts/clean.ts show",
         "clean": "ts-node -T .scripts/clean.ts",
         "test": "ts-node -T .scripts/test.ts",
@@ -6141,7 +6139,7 @@
         "translations-export": "yarn generate-native-strings && gulp translations-export",
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
-        "postinstall": "npx vscode-dts dev && npx vscode-dts main && yarn prep && yarn install-hooks"
+        "postinstall": "npx vscode-dts dev && npx vscode-dts main && yarn prep"
     },
     "devDependencies": {
         "@octokit/rest": "^18.12.0",
