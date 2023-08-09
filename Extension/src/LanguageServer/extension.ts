@@ -45,25 +45,33 @@ type VcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entr
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
 async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
     const database: VcpkgDatabase = {};
-    const zip = new StreamZip.async({ file: util.getExtensionFilePath('VCPkgHeadersDatabase.zip') });
-    const data = await zip.entryData('VCPkgHeadersDatabase.txt');
-    const lines = data.toString().split('\n');
-    lines.forEach(line => {
-        const portFilePair: string[] = line.split(':');
-        if (portFilePair.length !== 2) {
-            return;
+    try {
+        const zip = new StreamZip.async({ file: util.getExtensionFilePath('VCPkgHeadersDatabase.zip') });
+        try {
+            const data = await zip.entryData('VCPkgHeadersDatabase.txt');
+            const lines = data.toString().split('\n');
+            lines.forEach(line => {
+                const portFilePair: string[] = line.split(':');
+                if (portFilePair.length !== 2) {
+                    return;
+                }
+
+                const portName: string = portFilePair[0];
+                const relativeHeader: string = portFilePair[1];
+
+                if (!database[relativeHeader]) {
+                    database[relativeHeader] = [];
+                }
+
+                database[relativeHeader].push(portName);
+            });
+        } catch {
+            console.log("Unable to parse vcpkg database file.");
         }
-
-        const portName: string = portFilePair[0];
-        const relativeHeader: string = portFilePair[1];
-
-        if (!database[relativeHeader]) {
-            database[relativeHeader] = [];
-        }
-
-        database[relativeHeader].push(portName);
-    });
-    await zip.close();
+        await zip.close();
+    } catch {
+        console.log("Unable to open vcpkg database file.");
+    }
     return database;
 }
 
