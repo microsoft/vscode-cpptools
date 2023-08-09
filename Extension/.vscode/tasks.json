@@ -4,39 +4,25 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Watch",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "yarn",
-            "args": [
-                "run",
-                "watch"
-            ],
-            "isBackground": true,
-            "problemMatcher": "$tsc-watch",
+            "label": "compile",
+            "type": "npm",
+            "script": "compile",
+            "problemMatcher": "$tsc",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
         {
-            "label": "Compile",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "yarn",
-            "args": [
-                "run",
-                "compile"
-            ],
-            "problemMatcher": "$tsc",
+            "label": "watch",
+            "type": "npm",
+            "script": "watch",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "isBackground": true,
+            "problemMatcher": "$tsc-watch",
         }
     ]
 }

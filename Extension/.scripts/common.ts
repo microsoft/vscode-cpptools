@@ -211,6 +211,8 @@ export function cyan(text: string) {
     return `\u001b[38;2;0;174;239m${text}\u001b[0m`;
 }
 
+export const hr = "===============================================================================";
+
 export function heading(text: string, level = 1) {
     switch (level) {
         case 1:

@@ -19,7 +19,9 @@
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**"
-            ]
+            ],
+            // you can use a watch task as a prelaunch task and it works like you'd want it to.
+            "preLaunchTask": "watch"
         },
         {
             // debug scenario tests (selecting the workspace)
@@ -44,14 +46,9 @@
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**"
-            ]
-        },
-        {
-            // does anyone use this?
-            "name": "Node Attach",
-            "type": "node",
-            "request": "attach",
-            "port": 5858
+            ],
+            // you can use a watch task as a prelaunch task and it works like you'd want it to.
+            "preLaunchTask": "watch"
         },
         {
             // used for debugging unit tests
