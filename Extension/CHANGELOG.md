@@ -2,18 +2,18 @@
 
 ## Version 1.17.1: August 9, 2023
 ## Bug Fixes
-* Fix issue where debugger would get stuck while using cl.exe options. [#10231](https://github.com/microsoft/vscode-cpptools/issues/10231)
-* Fix issue where non C/C++ files invoke C/C++ commands in command pallete. [#10421](https://github.com/microsoft/vscode-cpptools/issues/10421)
-* Fix 'Select IntelliSense Configuration' command to also update an existing `compilerPath` in c_cpp_properties.json. [#10808](https://github.com/microsoft/vscode-cpptools/issues/10808)
+* Fix an issue where the debugger would get stuck while using cl.exe options. [#10231](https://github.com/microsoft/vscode-cpptools/issues/10231)
+* Fix C/C++ commands showing in the Command Palette with non-C/C++ files. [#10421](https://github.com/microsoft/vscode-cpptools/issues/10421)
+* Fix the 'Select IntelliSense Configuration' command to also update an existing `compilerPath` in c_cpp_properties.json. [#10808](https://github.com/microsoft/vscode-cpptools/issues/10808)
 * Fix the parameter format of call hierarchy items. [#11247](https://github.com/microsoft/vscode-cpptools/issues/11247)
-* Remove vcpkg code action from missing includes code action list. [#11252](https://github.com/microsoft/vscode-cpptools/issues/11252)
-* Fix file path info of call hierarchy items to display the relative path to a workspace folder. [#11254](https://github.com/microsoft/vscode-cpptools/issues/11254)
-* Fix colorization for macro expansions in macro arguments. [#11256](https://github.com/microsoft/vscode-cpptools/issues/11256)
-* Fix crash with CUDA projects with '>' in the command line. [#11289](https://github.com/microsoft/vscode-cpptools/issues/11289)
-* Increase the default standard for the Build and Debug Active File feature to c++14 on macOS. [#11292](https://github.com/microsoft/vscode-cpptools/issues/11292)
-* Fix issue with the compiler currently configured for use with IntelliSense being listed last in task creation popup. [#11299](https://github.com/microsoft/vscode-cpptools/pull/11299)
-* Fix issue to allow users to utilize walkthrough without tasks.json. [#11300](https://github.com/microsoft/vscode-cpptools/pull/11300)
-* Fix an IPCH issue on Linux due to Position Independent Executable (PIE) option not being set since 1.17.0.
+* Remove the vcpkg code action from the missing includes code action list. [#11252](https://github.com/microsoft/vscode-cpptools/issues/11252)
+* Fix the file path info of call hierarchy items to display the relative path to a workspace folder. [#11254](https://github.com/microsoft/vscode-cpptools/issues/11254)
+* Fix colorization for macro expansions in macro arguments. [#11256](https://github.com/microsoft/vscode-cpptools/issues/11256) 
+* Fix a crash for CUDA projects with '>' in the command line. [#11289](https://github.com/microsoft/vscode-cpptools/issues/11289) 
+* Increase the default standard for the 'Build and Debug Active File' feature to c++14 on macOS. [#11292](https://github.com/microsoft/vscode-cpptools/issues/11292) 
+* Fix an issue with the compiler currently configured for use with IntelliSense being listed last in the task creation popup. [PR #11299](https://github.com/microsoft/vscode-cpptools/pull/11299)
+* Fix an issue to allow users to utilize the walkthrough without tasks.json. [PR #11300](https://github.com/microsoft/vscode-cpptools/pull/11300)
+* Fix an IPCH issue on Linux due to the Position Independent Executable (PIE) option not being set since 1.17.0.
 
 ## Version 1.17.0: July 26, 2023
 ### Enhancements
