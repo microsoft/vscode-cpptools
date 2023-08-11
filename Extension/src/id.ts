@@ -39,9 +39,13 @@ export async function logMachineIdMappings(): Promise<void> {
  * Parse the output of getmac.exe to get the list of MAC addresses for the PC.
  */
 async function getMacAddresses(): Promise<string[]> {
-    const output = await execChildProcess('getmac');
-    const regex = /(?:[a-z0-9]{2}[:\-]){5}[a-z0-9]{2}/gmi;
-    return output.match(regex) ?? [];
+    try {
+        const output = await execChildProcess('getmac');
+        const regex = /(?:[a-z0-9]{2}[:\-]){5}[a-z0-9]{2}/gmi;
+        return output.match(regex) ?? [];
+    } catch (err) {
+        return [];
+    }
 }
 
 /**
