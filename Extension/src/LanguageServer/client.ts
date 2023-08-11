@@ -1313,7 +1313,7 @@ export class DefaultClient implements Client {
         }
 
         if (!legacyStoragePath) {
-            legacyStoragePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
+            legacyStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {

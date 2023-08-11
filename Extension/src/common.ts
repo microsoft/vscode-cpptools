@@ -1297,7 +1297,7 @@ export function isValidIdentifier(candidate: string): boolean {
     return true;
 }
 
-export function getBaseStoragePath(){
+export function getBaseStoragePath() {
     let defaultCachePath: string = "";
     let pathEnvironmentVariable: string | undefined = "";
     switch (os.platform()) {
@@ -1312,7 +1312,7 @@ export function getBaseStoragePath(){
         default: // Linux
             defaultCachePath = "\\vscode-cpptools\\"
             pathEnvironmentVariable = process.env["XDG_CACHE_HOME"]
-            if (!pathEnvironmentVariable){
+            if (!pathEnvironmentVariable) {
                 pathEnvironmentVariable = os.homedir();
             }
             break;
