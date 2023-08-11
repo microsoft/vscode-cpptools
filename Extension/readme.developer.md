@@ -10,7 +10,7 @@
     - [When using F5 Debug](#when-using-f5-debug)
     - [From Inside VSCode](#from-inside-vscode)
     - [From Command line](#from-command-line)
-  - [Use of an isolated `vscode` environment](#use-of-an-isolated-vscode-environment)
+  - [Use of an isolated VSCode environment](#use-of-an-isolated-vscode-environment)
   - [Testing](#testing)
     - [Unit tests](#unit-tests)
     - [Scenario Tests](#scenario-tests)
@@ -73,28 +73,28 @@ To build the extension from the command line, use the [`yarn compile`](#yarn-com
 
 <hr>
 
-## Use of an isolated `vscode` environment
-The scripts for this repository now support running vscode and the extension in a 
-completely isolated environment (separate install of vscode, private extensions and 
+## Use of an isolated VSCode environment
+The scripts for this repository now support running VSCode and the extension in a 
+completely isolated environment (separate install of VSCode, private extensions and 
 user folders, etc). 
 
-The scripts that install `vscode` place it in a `$ENV:TMP/.vscode-test/<UID>` folder where
+The scripts that install VSCode place it in a `$ENV:TMP/.vscode-test/<UID>` folder where
 `<UID>` is a has calculated from the extension folder (this permits multiple checkouts of 
 the source repository and each gets it's own isolated environment).
 
 The [`test scripts`](#yarn-test) will automatically install and use this isolated environment.
 
-You can invoke vscode from the command line using the [`yarn code`](#yarn-code) script.
+You can invoke VSCode from the command line using the [`yarn code`](#yarn-code) script.
 
 If you want to remove the isolate environment use the `yarn code reset` or `yarn test reset` scripts
 to delete the folders and remove all of the configuration files. Next time you use the `yarn test` or 
 `yarn code` commands, it will reinstall a fresh isolated environment.
 
 The Isolated environment has the theme automatically set to blue so that it is visually distinct from
-your normal vscode environment.
+your normal VSCode environment.
 
 > #### Note  
-> When debugging the scenario tests from VSCode, it has to use the same vscode binary 
+> When debugging the scenario tests from VSCode, it has to use the same VSCode binary 
 > as the debugger instance, so the isolated environment can't be used. 
 
 ## Testing
@@ -110,10 +110,10 @@ test/                       : the test folder for all the tests
                             # the test runner will use that for the workspace otherwise
                             # it will use the assets folder itself as the workspace. 
 
-      tests/                : location of the vscode mocha tests for the scenario
+      tests/                : location of the VSCode mocha tests for the scenario
                             # the tests must be in `*.test.ts` files
 
-  unit/                     : low-level unit tests (not in the vscode environment)
+  unit/                     : low-level unit tests (not in the VSCode environment)
                             # the tests must be in `*.test.ts` files
 ```
 
@@ -121,7 +121,7 @@ To create a new scenario, create a folder in the `scenarios` folder, and add a `
 inside of it. 
 
 ### Unit tests 
-Unit tests can be run with the vscode Test Explorer (install mocha test explorer to enable it). 
+Unit tests can be run with the VSCode Test Explorer (install mocha test explorer to enable it). 
 The Test Explorer allows you to debug into the tests as well. 
 
 You can also run the unit tests from the command line (see [`yarn test`](#yarn-test) below)
@@ -192,12 +192,12 @@ Will not touch any files that could be added to the repo (ie, new .ts files, etc
 
 > `yarn test` - run just the unit tests
 
-The mocha test runner is invoked for the unit tests. This does not use vscode in any way.
+The mocha test runner is invoked for the unit tests. This does not use VSCode in any way.
 
 > `yarn test all` - run all the tests 
 
 The unit tests are run, and then each of the scenario test sets are run in turn.  
-This will install the isolated vscode environment if it is not already installed.
+This will install the isolated VSCode environment if it is not already installed.
 
 > `yarn test --scenario=<SCENARIONAME>` - run a single set of scenario tests  
 > `yarn test <SCENARIONAME>` - run a single set of scenario tests
@@ -205,14 +205,14 @@ This will install the isolated vscode environment if it is not already installed
 This will just run the tests for the given scenario. You can pass in the folder name 
 (in `test/scenarios` or a full path to a folder with `assets` and `tests`) 
 
-> `yarn test reset` - remove the isolated vscode environment
+> `yarn test reset` - remove the isolated VSCode environment
 
-This will completely remove the isolated vscode environement for this repository, 
+This will completely remove the isolated VSCode environement for this repository, 
 including cache, extensions, and configuration for the isolated environment.
 
-> `yarn test install` - install the isolated vscode environment
+> `yarn test install` - install the isolated VSCode environment
 
-This installs the isolated vscode environment if it is not currently installed for this 
+This installs the isolated VSCode environment if it is not currently installed for this 
 repository. This is done automatically when running the tests, but can be run manually.
 
 > `yarn test regen` - update the pick lists in `.vscode/launch.json` for any new scenarios.
@@ -226,23 +226,23 @@ This saves you the effort of having to manually update the launch.json file.
 
 ---
 ### `yarn code`
-> #### `yarn code <folder|workspace|scenario>` - run vscode
+> #### `yarn code <folder|workspace|scenario>` - run VSCode
 
-This runs the isolated vscode environment, with the cpptools extension that is built in this repo
+This runs the isolated VSCode environment, with the cpptools extension that is built in this repo
 
 You can treat this essentially like using `code` from the command line. Settings can be configured, and 
 extensions can be installed into the isolated environment, and will be persisted across runs.
 
 Use `yarn code reset` to remove the isolated environment and start fresh.
 
-> `yarn code reset` - remove the isolated vscode environment
+> `yarn code reset` - remove the isolated VSCode environment
 
-This will completely remove the isolated vscode environement for this repository, 
+This will completely remove the isolated VSCode environement for this repository, 
 including cache, extensions, and configuration for the isolated environment.
 
-> `yarn code install` - install the isolated vscode environment
+> `yarn code install` - install the isolated VSCode environment
 
-This installs the isolated vscode environment if it is not currently installed for this 
+This installs the isolated VSCode environment if it is not currently installed for this 
 repository. This is done automatically when running the `yarn code`, but can be run manually.
 
 ---
@@ -257,7 +257,7 @@ If adding localized strings to the native side, start by adding it to nativeStri
 
 ---
 ### `yarn generate-options-schema`
-> #### `yarn generate-options-schema` - generates teh options schema
+> #### `yarn generate-options-schema` - generates the options schema
 
 Inserts the options schema into `package.json` from the `tools/OptionsSchema.json` and the `tools/VSSymbolSettings.json` file.
 
@@ -353,6 +353,6 @@ This will use webpack to build the extension. This is only necessary when packag
 ### `yarn postinstall`
 > #### `yarn postinstall` - post `yarn install` steps
 
-Installs the vscode `d.ts` files and then runs `yarn prep`
+Installs the VSCode `d.ts` files and then runs `yarn prep`
 
 

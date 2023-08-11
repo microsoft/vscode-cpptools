@@ -9,22 +9,22 @@ import { Signal } from './signal';
 
 /** an async foreach function to iterate over any iterable/async iterable, calling a function on each item in parallel as possible */
 export async function foreach<T, TResult>(items: undefined | Iterable<T> | Promise<Iterable<T> | undefined> | Promise<undefined> | AsyncIterable<T> | Promise<AsyncIterable<T>>, predicate: (item: T) => Promise<TResult>): Promise<TResult[]> {
-    items = is.promise(items) ? await items : items;                      // unwrap the promise if it is one
+    items = is.promise(items) ? await items : items; // unwrap the promise if it is one
 
     if (items) {
         const result = [] as Promise<TResult>[];
         if (is.asyncIterable(items)) {
             for await (const item of items) {
-                result.push(predicate(item));                                            // run the predicate on each item
+                result.push(predicate(item)); // run the predicate on each item
             }
         } else {
             for (const item of items) {
-                result.push(predicate(item));                                            // run the predicate on each item
+                result.push(predicate(item)); // run the predicate on each item
             }
         }
         return Promise.all(result);
     }
-    return [];                                                 // return an empty array if there is nothing to iterate over
+    return []; // return an empty array if there is nothing to iterate over
 }
 
 interface Cursor<T> {
@@ -133,6 +133,7 @@ export function accumulator<T>(...iterables: Some<T>[]): AsynchIterable<T> {
         result.add = () => { throw new Error('AsyncIterable is finished'); };
     }
 }
+
 export type Some<T> = T | Promise<T> | AsyncIterable<T | undefined> | AsyncIterable<Promise<T> | Promise<undefined>> | Iterable<T> | Iterable<Promise<T>>;
 
 export async function* asyncOf<T>(...items: (undefined | Promise<undefined> | Some<T>)[]): AsyncIterable<NonNullable<T>> {

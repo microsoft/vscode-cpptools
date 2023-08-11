@@ -157,6 +157,7 @@ interface Input {
     description: string;
     options: CommentArray<{label: string; value: string}>;
 }
+
 export async function getScenarioNames() {
     return (await readdir(`${$root}/test/scenarios`).catch(returns.none)).filter(each => each !== 'Debugger');
 }

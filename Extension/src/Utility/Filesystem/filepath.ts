@@ -134,6 +134,7 @@ export class filepath {
         return is.promise(name) ? name.then(filepath.parent) : name ? normalize(resolve(name, '..')) : undefined;
     }
 }
+
 export function tmpFile(prefix = 'tmp.', suffix = '.tmp', folder = tmpdir()) {
     return join(folder, prefix + randomBytes(32).toString('hex') + suffix);
 }

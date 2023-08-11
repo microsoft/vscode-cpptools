@@ -36,6 +36,7 @@ export function setExtensionContext(context: vscode.ExtensionContext): void {
     extensionContext = context;
     extensionPath = extensionContext.extensionPath;
 }
+
 export function setExtensionPath(path: string): void {
     extensionPath = path;
 }
@@ -44,6 +45,7 @@ let cachedClangFormatPath: string | undefined;
 export function getCachedClangFormatPath(): string | undefined {
     return cachedClangFormatPath;
 }
+
 export function setCachedClangFormatPath(path: string): void {
     cachedClangFormatPath = path;
 }
@@ -52,6 +54,7 @@ let cachedClangTidyPath: string | undefined;
 export function getCachedClangTidyPath(): string | undefined {
     return cachedClangTidyPath;
 }
+
 export function setCachedClangTidyPath(path: string): void {
     cachedClangTidyPath = path;
 }
@@ -197,6 +200,7 @@ export function isCpp(document: vscode.TextDocument): boolean {
     return document.uri.scheme === "file" &&
         (document.languageId === "c" || document.languageId === "cpp" || document.languageId === "cuda-cpp");
 }
+
 export function isCppPropertiesJson(document: vscode.TextDocument): boolean {
     return document.uri.scheme === "file" && (document.languageId === "json" || document.languageId === "jsonc") &&
         (document.fileName.endsWith("c_cpp_properties.json"));
@@ -207,9 +211,11 @@ export function setWorkspaceIsCpp(): void {
         isWorkspaceCpp = true;
     }
 }
+
 export function getWorkspaceIsCpp(): boolean {
     return isWorkspaceCpp;
 }
+
 export function isCppOrRelated(document: vscode.TextDocument): boolean {
     return isCpp(document) || isCppPropertiesJson(document) || (document.uri.scheme === "output" && document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")) ||
         (isWorkspaceCpp && (document.languageId === "json" || document.languageId === "jsonc") &&

@@ -14,6 +14,7 @@ export async function activateCppExtension(): Promise<void> {
         await extension.activate();
     }
 }
+
 export function delay(ms: number): Promise<void> {
     return new Promise<void>(resolve => setTimeout(resolve, ms));
 }

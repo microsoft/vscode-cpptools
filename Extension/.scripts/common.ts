@@ -71,6 +71,7 @@ export async function rimraf(...paths: string[]) {
     }
     await Promise.all(all);
 }
+
 export async function mkdir(filePath: string) {
     const [fullPath, info] = await filepath.stats(filePath, $root);
     if (info) {
@@ -126,6 +127,7 @@ export async function updateFiles(files: string[], dest: string| Promise<string>
         }
     }));
 }
+
 export async function go() {
     if (require.main) {
         // loop thru the args and pick out the first non --arg and remove it from the $args and set $cmd
@@ -231,6 +233,7 @@ export function heading(text: string, level = 1) {
 export function optional(text: string) {
     return gray(text);
 }
+
 export function cmdSwitch(text: string) {
     return optional(`--${text}`);
 }
@@ -261,6 +264,7 @@ export async function checkFolder(folder: string|string[], errMsg: string){
     error(errMsg);
     process.exit(1);
 }
+
 export async function checkFile(file: string|string[], errMsg: string){
     for (const each of is.array(file) ? file : [file]) {
         const result = await filepath.isFile(each, $root);
