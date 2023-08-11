@@ -16,7 +16,7 @@ export { install, reset } from './vscode';
 export async function main() {
     let ti = (await getTestInfo($scenario));
     if (!ti) {
-        // try using the $arg0 as a scenario
+        // try using the first arg as a scenario name or location
         ti = (await getTestInfo($args[0], $args[0] ? resolve(pwd, $args[0]) : undefined));
         if (ti) {
             $args[0] = ti.workspace;

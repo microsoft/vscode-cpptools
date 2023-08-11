@@ -78,7 +78,7 @@ export async function mkdir(filePath: string) {
         if (info.isDirectory()) {
             return fullPath;
         }
-        throw new Error(`Cannot create directory '${filePath}' because thre is a file there.`);
+        throw new Error(`Cannot create directory '${filePath}' because there is a file there.`);
     }
 
     await md(fullPath, { recursive: true });
