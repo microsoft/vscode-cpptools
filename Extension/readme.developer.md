@@ -24,15 +24,11 @@
     - [`yarn generate-options-schema`](#yarn-generate-options-schema)
     - [`yarn copy-walkthrough-media`](#yarn-copy-walkthrough-media)
     - [`yarn prep`](#yarn-prep)
-    - [`yarn import-edge-strings`](#yarn-import-edge-strings)
     - [`yarn lint`](#yarn-lint)
     - [`yarn compile`](#yarn-compile)
     - [`yarn watch`](#yarn-watch)
     - [`yarn verify`](#yarn-verify)
     - [`yarn webpack`](#yarn-webpack)
-    - [`yarn translations-export`](#yarn-translations-export)
-    - [`yarn translations-generate`](#yarn-translations-generate)
-    - [`yarn translations-import`](#yarn-translations-import)
     - [`yarn postinstall`](#yarn-postinstall)
 
 ## Setup
@@ -285,10 +281,6 @@ This will call `yarn copy-walkthrough-media`, `yarn generate-native-strings`, `y
 that the generated files are up to date.
 
 ---
-### `yarn import-edge-strings`
-> #### `yarn import-edge-strings` - TBD
-
----
 ### `yarn lint`
 > #### `yarn lint` - lint all the source files (tests, ui, src, and .scripts)
 
@@ -336,18 +328,6 @@ Checks for the presence of the generated loc files and other files that are nece
 
 This will use webpack to build the extension. This is only necessary when packaging the extension.
 
-
----
-### `yarn translations-export`
-> #### `yarn translations-export` - tba
-
----
-### `yarn translations-generate`
-> #### `yarn translations-generate` - tba
-
----
-### `yarn translations-import`
-> #### `yarn translations-import` - tba
 
 ---
 ### `yarn postinstall`
