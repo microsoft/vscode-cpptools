@@ -19,7 +19,7 @@ export const glob: (pattern: string, options?: IOptions | undefined) => Promise<
 //const MochaTest = (Mocha as any).default as (new (options?: Mocha.MochaOptions) => Mocha);
 
 // depending if this is pulled in as a ts-node script, or an already-compiled file in dist/...
-const $root = __dirname.includes('dist') ? resolve(__dirname, '..', '..', '..') : resolve(__dirname, '..', '..') ;
+const $root = __dirname.includes('dist') ? resolve(__dirname, '..', '..', '..') : resolve(__dirname, '..', '..');
 
 const scenariosFolder = resolve($root, 'test', 'scenarios');
 

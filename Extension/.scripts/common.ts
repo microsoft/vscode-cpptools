@@ -131,7 +131,7 @@ export async function updateFiles(files: string[], dest: string| Promise<string>
 export async function go() {
     if (require.main) {
         // loop thru the args and pick out the first non --arg and remove it from the $args and set $cmd
-        for (let i = 0;i < $args.length;i++) {
+        for (let i = 0; i < $args.length; i++) {
             const each = $args[i];
             if (!each.startsWith('--') && require.main.exports[each]) {
                 $cmd = each;
