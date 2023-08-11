@@ -1305,16 +1305,16 @@ export function getBaseStoragePath() {
     let pathEnvironmentVariable: string | undefined = "";
     switch (os.platform()) {
         case 'win32':
-            defaultCachePath = "\\Microsoft\\vscode-cpptools\\"
-            pathEnvironmentVariable = process.env["LOCALAPPDATA"]
+            defaultCachePath = "\\Microsoft\\vscode-cpptools\\";
+            pathEnvironmentVariable = process.env["LOCALAPPDATA"];
             break;
         case 'darwin':
-            defaultCachePath = "\\Library\\Caches\\vscode-cpptools\\"
+            defaultCachePath = "\\Library\\Caches\\vscode-cpptools\\";
             pathEnvironmentVariable = os.homedir();
             break;
         default: // Linux
-            defaultCachePath = "\\vscode-cpptools\\"
-            pathEnvironmentVariable = process.env["XDG_CACHE_HOME"]
+            defaultCachePath = "\\vscode-cpptools\\";
+            pathEnvironmentVariable = process.env["XDG_CACHE_HOME"];
             if (!pathEnvironmentVariable) {
                 pathEnvironmentVariable = os.homedir();
             }

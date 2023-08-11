@@ -1299,7 +1299,7 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        let baseStoragePath: string | undefined = util.getBaseStoragePath();
+        const baseStoragePath: string | undefined = util.getBaseStoragePath();
         let legacyStoragePath: string | undefined;
         let storagePath: string | undefined = "";
         let workspaceHash: string = "";
@@ -1307,7 +1307,7 @@ export class DefaultClient implements Client {
         if (util.extensionContext) {
             const fsPath: string | undefined = util.extensionContext.storageUri?.fsPath;
             if (fsPath) {
-                workspaceHash = path.basename(path.dirname(fsPath))
+                workspaceHash = path.basename(path.dirname(fsPath));
                 legacyStoragePath = fsPath;
             }
         }
@@ -1319,7 +1319,6 @@ export class DefaultClient implements Client {
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             legacyStoragePath = path.join(legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
-
 
         this.legacyStoragePath = legacyStoragePath;
         this.baseStoragePath = baseStoragePath;
