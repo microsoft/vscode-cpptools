@@ -23,7 +23,10 @@ export async function logMachineIdMappings(): Promise<void> {
         logLanguageServerEvent('machineIdMap', {primary});
     }
 
-    // VS Code uses os.networkInterfaces() which has different sorting and availability
+    // VS Code uses os.networkInterfaces() which has different sorting and availability,
+    // but all MAC addresses are returned by getmac.exe. The ID VS Code uses may change
+    // based on changes to the network configuration. Log the extras so we can assess
+    // how frequently this impacts the machine id.
     for (const macAddress of macAddresses) {
         const additional = await getMachineId(macAddress);
         if (additional) {
@@ -35,7 +38,6 @@ export async function logMachineIdMappings(): Promise<void> {
 /**
  * Parse the output of getmac.exe to get the list of MAC addresses for the PC.
  */
-
 async function getMacAddresses(): Promise<string[]> {
     const output = await execChildProcess('getmac');
     const regex = /(?:[a-z0-9]{2}[:\-]){5}[a-z0-9]{2}/gmi;
