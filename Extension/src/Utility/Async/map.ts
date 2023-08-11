@@ -6,14 +6,14 @@
 import { is } from '../System/guards';
 
 export class AsyncMap<TKey, TValue> {
-    private readonly map = new Map<TKey, TValue | Promise<TValue|undefined> |undefined>();
+    private readonly map = new Map<TKey, TValue | Promise<TValue | undefined> | undefined>();
     clear(): void {
         return this.map.clear();
     }
     delete(key: TKey): boolean {
         return this.map.delete(key);
     }
-    get(key: TKey): TValue | Promise<TValue|undefined> | undefined {
+    get(key: TKey): TValue | Promise<TValue | undefined> | undefined {
         return this.map.get(key);
     }
     has(key: TKey): boolean {
@@ -51,8 +51,8 @@ export class AsyncMap<TKey, TValue> {
         return this.entries();
     }
 
-    getOrAdd(key: TKey, initializer: TValue | Promise<TValue> | Promise<undefined> | (() => Promise<TValue|undefined>|TValue|undefined)): Promise<TValue|undefined>|TValue|undefined {
-        let result: Promise<TValue|undefined>|TValue|undefined = this.map.get(key);
+    getOrAdd(key: TKey, initializer: TValue | Promise<TValue> | Promise<undefined> | (() => Promise<TValue | undefined> | TValue | undefined)): Promise<TValue | undefined> | TValue | undefined {
+        let result: Promise<TValue | undefined> | TValue | undefined = this.map.get(key);
 
         // if we don't get a match, then we'll try to set the value with the initializer
         if (is.nullish(result)) {

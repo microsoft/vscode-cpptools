@@ -25,7 +25,7 @@ function marker() {
     }
 }
 
-const fails: [ string|undefined, string, string?][] = [
+const fails: [ string | undefined, string, string?][] = [
     /** command substitution not supported */
     [undefined, "explicit ``", marker()],
     [undefined, "$(echo hello)", marker()],
@@ -73,7 +73,7 @@ const fails: [ string|undefined, string, string?][] = [
     [ undefined, "${1/0]", marker() ] /* BZ 18100 */
 ];
 
-const success: [string|undefined, string, string[], string?][] = [
+const success: [string | undefined, string, string[], string?][] = [
     /* Simple word- and field-splitting */
     [ undefined, "one", [ "one" ], marker() ],
     [ undefined, "one two", [ "one", "two" ], marker() ],

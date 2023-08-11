@@ -5,14 +5,14 @@
 import { AsyncFunc, Func, it } from 'mocha';
 import { is } from '../../src/Utility/System/guards';
 
-export function when(prerequisite: boolean|(() => boolean)): {it: Mocha.TestFunction} {
+export function when(prerequisite: boolean | (() => boolean)): {it: Mocha.TestFunction} {
     if (is.function(prerequisite)) {
         prerequisite = prerequisite();
     }
     if (prerequisite) {
         return {it};
     } else {
-        const skip = (title: string, test: AsyncFunc|Func) => it.skip(`Dynamically skipping test: <<${title}>> - prerequisite not met.`, test);
+        const skip = (title: string, test: AsyncFunc | Func) => it.skip(`Dynamically skipping test: <<${title}>> - prerequisite not met.`, test);
         return {it:skip as Mocha.TestFunction};
     }
 }

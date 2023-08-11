@@ -65,7 +65,7 @@ async function getScenarioInfo(val: string) {
     return undefined;
 }
 
-export async function getTestInfo(...scenarioOptions: (string|undefined)[]) {
+export async function getTestInfo(...scenarioOptions: (string | undefined)[]) {
     for (const each of scenarioOptions) {
         if (each) {
             const result = await getScenarioInfo(each);

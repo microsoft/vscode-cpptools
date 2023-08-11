@@ -25,7 +25,7 @@ export let $scenario = '';
 export const $args  = process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
 
 /** enqueue the call to the callback function to happen on the next available tick, and return a promise to the result */
-export function then<T>(callback: () => Promise<T>|T): Promise<T> {
+export function then<T>(callback: () => Promise<T> | T): Promise<T> {
     return setImmediate().then(callback);
 }
 
@@ -87,7 +87,7 @@ export async function mkdir(filePath: string) {
 
 export const glob: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(globSync);
 
-export async function write(filePath: string, data: Buffer|string) {
+export async function write(filePath: string, data: Buffer | string) {
     await mkdir(dirname(filePath));
 
     if (await filepath.isFile(filePath)) {
@@ -117,7 +117,7 @@ export async function write(filePath: string, data: Buffer|string) {
     await writeFile(filePath, data);
 }
 
-export async function updateFiles(files: string[], dest: string| Promise<string>) {
+export async function updateFiles(files: string[], dest: string | Promise<string>) {
     const target = is.promise(dest) ? await dest : dest;
     await Promise.all(files.map(async (each) => {
         const sourceFile = await filepath.isFile(each, $root);
@@ -254,7 +254,7 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function checkFolder(folder: string|string[], errMsg: string){
+export async function checkFolder(folder: string | string[], errMsg: string){
     for (const each of is.array(folder) ? folder : [folder]) {
         const result = await filepath.isFolder(each, $root);
         if (result) {
@@ -265,7 +265,7 @@ export async function checkFolder(folder: string|string[], errMsg: string){
     process.exit(1);
 }
 
-export async function checkFile(file: string|string[], errMsg: string){
+export async function checkFile(file: string | string[], errMsg: string){
     for (const each of is.array(file) ? file : [file]) {
         const result = await filepath.isFile(each, $root);
         if (result) {

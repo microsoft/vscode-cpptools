@@ -849,7 +849,7 @@ export class DefaultClient implements Client {
     private showConfigureIntelliSenseButton: boolean = false;
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
-    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>]|[ManualPromise<unknown>]>();
+    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
 
     /** returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use) */
     private static readonly isStarted = new ManualSignal<void>(true);
