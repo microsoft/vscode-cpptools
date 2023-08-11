@@ -9,8 +9,9 @@ import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
 import { $root, Git, brightGreen, cyan, getModifiedIgnoredFiles, rimraf } from './common';
 
-// list all gitignore'd files that are modified git clean -Xd -n
-// list all untracked and ignored files that are modified/created git clean -Xd -n
+// notes:
+// list all gitignore'd files that are modified: `git clean -Xd -n`
+// list all untracked and ignored files that are modified/created: `git clean -Xd -n`
 
 export async function main() {
     await rimraf(resolve($root, 'dist'));
