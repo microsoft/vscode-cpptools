@@ -66,9 +66,6 @@ describe('Event Handler/Parser', () => {
     });
 
     it('parses events, fails filter matches.', async () => {
-
-        // const all = tests.map(each => parse(each, undefined).then(([once, isSync, handler]) => handler));
-        // const parsed = await Promise.all(all);
         const parsed = tests.map(each => parse(each, undefined)[2]);
 
         console.log(`Generated filter ${tests.length} functions :`);
