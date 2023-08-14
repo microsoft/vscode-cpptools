@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, FormatParams, FormatOnTypeRequest, FormatResult } from '../client';
+import { DefaultClient, FormatOnTypeRequest, FormatParams, FormatResult } from '../client';
 import { CppSettings, getEditorConfigSettings } from '../settings';
 import { makeVscodeTextEdits } from '../utils';
 
@@ -18,7 +18,7 @@ export class OnTypeFormattingEditProvider implements vscode.OnTypeFormattingEdit
         if (settings.formattingEngine === "disabled") {
             return [];
         }
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.ready;
         const filePath: string = document.uri.fsPath;
         const useVcFormat: boolean = settings.useVcFormat(document);
         const configCallBack = async (editorConfigSettings: any | undefined) => {

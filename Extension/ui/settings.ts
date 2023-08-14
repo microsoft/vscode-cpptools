@@ -76,14 +76,15 @@ class SettingsApp {
         // Add event listeners to UI elements
         this.addEventsToConfigNameChanges();
         this.addEventsToInputValues();
-        document.getElementById(elementId.knownCompilers).addEventListener("change", this.onKnownCompilerSelect.bind(this));
+        document.getElementById(elementId.knownCompilers)?.addEventListener("change", this.onKnownCompilerSelect.bind(this));
 
         // Set view state of advanced settings and add event
         const oldState: any = this.vsCodeApi.getState();
         const advancedShown: boolean = (oldState && oldState.advancedShown);
-        document.getElementById(elementId.advancedSection).style.display = advancedShown ? "block" : "none";
-        document.getElementById(elementId.showAdvanced).classList.toggle(advancedShown ? "collapse" : "expand", true);
-        document.getElementById(elementId.showAdvanced).addEventListener("click", this.onShowAdvanced.bind(this));
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        document.getElementById(elementId.advancedSection)!.style.display = advancedShown ? "block" : "none";
+        document.getElementById(elementId.showAdvanced)?.classList.toggle(advancedShown ? "collapse" : "expand", true);
+        document.getElementById(elementId.showAdvanced)?.addEventListener("click", this.onShowAdvanced.bind(this));
         this.vsCodeApi.postMessage({
             command: "initialized"
         });
@@ -96,16 +97,16 @@ class SettingsApp {
         });
 
         // Special case for checkbox elements
-        document.getElementById(elementId.limitSymbolsToIncludedHeaders).addEventListener("change", this.onChangedCheckbox.bind(this, elementId.limitSymbolsToIncludedHeaders));
-        document.getElementById(elementId.mergeConfigurations).addEventListener("change", this.onChangedCheckbox.bind(this, elementId.mergeConfigurations));
+        document.getElementById(elementId.limitSymbolsToIncludedHeaders)?.addEventListener("change", this.onChangedCheckbox.bind(this, elementId.limitSymbolsToIncludedHeaders));
+        document.getElementById(elementId.mergeConfigurations)?.addEventListener("change", this.onChangedCheckbox.bind(this, elementId.mergeConfigurations));
     }
 
     private addEventsToConfigNameChanges(): void {
-        document.getElementById(elementId.configName).addEventListener("change", this.onConfigNameChanged.bind(this));
-        document.getElementById(elementId.configSelection).addEventListener("change", this.onConfigSelect.bind(this));
-        document.getElementById(elementId.addConfigBtn).addEventListener("click", this.onAddConfigBtn.bind(this));
-        document.getElementById(elementId.addConfigOk).addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
-        document.getElementById(elementId.addConfigCancel).addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
+        document.getElementById(elementId.configName)?.addEventListener("change", this.onConfigNameChanged.bind(this));
+        document.getElementById(elementId.configSelection)?.addEventListener("change", this.onConfigSelect.bind(this));
+        document.getElementById(elementId.addConfigBtn)?.addEventListener("click", this.onAddConfigBtn.bind(this));
+        document.getElementById(elementId.addConfigOk)?.addEventListener("click", this.OnAddConfigConfirm.bind(this, true));
+        document.getElementById(elementId.addConfigCancel)?.addEventListener("click", this.OnAddConfigConfirm.bind(this, false));
     }
 
     private onTabKeyDown(e: any): void {
@@ -123,14 +124,17 @@ class SettingsApp {
     }
 
     private onShowAdvanced(): void {
-        const isShown: boolean = (document.getElementById(elementId.advancedSection).style.display === "block");
-        document.getElementById(elementId.advancedSection).style.display = isShown ? "none" : "block";
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const isShown: boolean = (document.getElementById(elementId.advancedSection)!.style.display === "block");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        document.getElementById(elementId.advancedSection)!.style.display = isShown ? "none" : "block";
 
         // Save view state
         this.vsCodeApi.setState({ advancedShown: !isShown });
 
         // Update chevron on button
-        const element: HTMLElement = document.getElementById(elementId.showAdvanced);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const element: HTMLElement = document.getElementById(elementId.showAdvanced)!;
         element.classList.toggle("collapse");
         element.classList.toggle("expand");
     }
@@ -312,7 +316,8 @@ class SettingsApp {
 
     private showErrorWithInfo(elementID: string, errorInfo: string): void {
         this.showElement(elementID, errorInfo ? true : false);
-        document.getElementById(elementID).innerHTML = errorInfo ? errorInfo : "";
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        document.getElementById(elementID)!.innerHTML = errorInfo ? errorInfo : "";
     }
 
     private updateConfigSelection(message: any): void {
@@ -352,7 +357,7 @@ class SettingsApp {
                 // Get HTML element containing the string, as we can't localize strings in HTML js
                 const noCompilerSpan: HTMLSpanElement = <HTMLSpanElement>document.getElementById(elementId.noCompilerPathsDetected);
                 const option: HTMLOptionElement = document.createElement("option");
-                option.text = noCompilerSpan.textContent;
+                option.text = noCompilerSpan.textContent ?? "";
                 option.disabled = true;
                 list.append(option);
             } else {
@@ -375,8 +380,10 @@ class SettingsApp {
     }
 
     private showElement(elementID: string, show: boolean): void {
-        document.getElementById(elementID).style.display = show ? "block" : "none";
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        document.getElementById(elementID)!.style.display = show ? "block" : "none";
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const app: SettingsApp = new SettingsApp();

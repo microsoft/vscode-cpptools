@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
 import * as os from "os";
-import { envDelimiter, resolveVariables, escapeForSquiggles, normalizeArg } from "../../src/common";
+import { envDelimiter, escapeForSquiggles, normalizeArg, resolveVariables } from "../../src/common";
 
 suite("Common Utility validation", () => {
     suite("resolveVariables", () => {

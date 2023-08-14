@@ -11,6 +11,5 @@
 	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください。",
 	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください。",
 	"edit.configurations.open.first": "構成を編集するには、まずフォルダーを開いてください",
-	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。",
-	"add.includepath.open.first": "{0} に追加するには、まずフォルダーを開いてください"
+	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。"
 }

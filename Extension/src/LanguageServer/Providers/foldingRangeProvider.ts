@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, GetFoldingRangesParams, GetFoldingRangesRequest, FoldingRangeKind, GetFoldingRangesResult, CppFoldingRange } from '../client';
+import { CppFoldingRange, DefaultClient, FoldingRangeKind, GetFoldingRangesParams, GetFoldingRangesRequest, GetFoldingRangesResult } from '../client';
 import { processDelayedDidOpen } from '../extension';
 import { CppSettings } from '../settings';
 
@@ -23,7 +23,9 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         const params: GetFoldingRangesParams = {
             uri: document.uri.toString()
         };
-        await this.client.requestWhenReady(() => processDelayedDidOpen(document));
+
+        await this.client.enqueue(() => processDelayedDidOpen(document));
+
         const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
         if (token.isCancellationRequested || response.ranges === undefined) {
             throw new vscode.CancellationError();

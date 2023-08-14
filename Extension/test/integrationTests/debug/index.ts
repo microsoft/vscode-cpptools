@@ -1,10 +1,11 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
+const MochaTest = (Mocha as any) as (new (options?: Mocha.MochaOptions) => Mocha);
 
 export function run(): Promise<void> {
     // Create the mocha test
-    const mocha = new Mocha({
+    const mocha = new MochaTest({
         ui: 'tdd',
         color: true
     });

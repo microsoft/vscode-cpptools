@@ -3,13 +3,14 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import {  Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
+import { Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import { DefaultClient } from '../client';
-import { CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisFileToCodeActions, codeAnalysisCodeToFixes,
-    codeAnalysisAllFixes } from '../codeAnalysis';
-import { makeVscodeRange } from '../utils';
+import {
+    CodeActionCodeInfo, CodeActionDiagnosticInfo, codeAnalysisAllFixes, codeAnalysisCodeToFixes, codeAnalysisFileToCodeActions
+} from '../codeAnalysis';
+import { LocalizeStringParams, getLocalizedString } from '../localization';
 import { CppSettings } from '../settings';
-import { getLocalizedString, LocalizeStringParams } from '../localization';
+import { makeVscodeRange } from '../utils';
 
 interface GetCodeActionsRequestParams {
     uri: string;
@@ -22,10 +23,16 @@ interface CodeActionCommand {
     arguments?: any[];
     edit?: TextEdit;
     uri?: string;
+    range?: Range;
 }
 
 interface GetCodeActionsResult {
     commands: CodeActionCommand[];
+}
+
+export interface CreateDeclDefnCommandArguments {
+    sender: string;
+    range: Range;
 }
 
 export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void> =
@@ -39,7 +46,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
-        await this.client.awaitUntilLanguageClientReady();
+        await this.client.ready;
         let r: Range;
         if (range instanceof vscode.Selection) {
             if (range.active.isBefore(range.anchor)) {
@@ -118,7 +125,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo !== undefined) {
                             if (codeActionCodeInfo.fixAllTypeCodeAction !== undefined &&
                                 (codeActionCodeInfo.uriToInfo.size > 1 ||
-                                codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
+                                    codeActionCodeInfo.uriToInfo.values().next().value.numValidWorkspaceEdits > 1)) {
                                 // Only show the "fix all type" if there is more than one fix for the type.
                                 fixCodeActions.push(codeActionCodeInfo.fixAllTypeCodeAction);
                             }
@@ -135,7 +142,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                         if (codeActionCodeInfo.removeAllTypeCodeAction !== undefined &&
                             codeActionCodeInfo.uriToInfo.size > 0 &&
                             (codeActionCodeInfo.uriToInfo.size > 1 ||
-                            codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
+                                codeActionCodeInfo.uriToInfo.values().next().value.identifiers.length > 1)) {
                             // Only show the "clear all type" if there is more than one fix for the type.
                             removeAllTypeAvailable = true;
                         }
@@ -179,8 +186,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 resultCodeActions.push(...disableCodeActions);
                 resultCodeActions.push(...docCodeActions);
                 return;
-            } else if (command.command === 'C_Cpp.CreateDeclarationOrDefinition' && (command.arguments ?? []).length === 0) {
-                command.arguments = ['codeAction']; // We report the sender of the command
+            } else if ((command.command === 'C_Cpp.CreateDeclarationOrDefinition' || command.command === 'C_Cpp.CopyDeclarationOrDefinition')
+                && (command.arguments ?? []).length === 0 && command.range !== undefined) {
+                const args: CreateDeclDefnCommandArguments = {
+                    sender: 'codeAction',
+                    range: command.range
+                };
+                command.arguments = [];
+                command.arguments.push(args);
             } else if (command.command === "C_Cpp.SelectIntelliSenseConfiguration") {
                 command.arguments = ['codeAction'];
                 hasSelectIntelliSenseConfiguration = true;

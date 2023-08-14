@@ -3,10 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, LocalizeDocumentSymbol, GetDocumentSymbolRequestParams, GetDocumentSymbolRequest, SymbolScope, Client, GetDocumentSymbolResult } from '../client';
+import { Client, DefaultClient, GetDocumentSymbolRequest, GetDocumentSymbolRequestParams, GetDocumentSymbolResult, LocalizeDocumentSymbol, SymbolScope } from '../client';
 import { clients, processDelayedDidOpen } from '../extension';
-import { makeVscodeRange } from '../utils';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
+import { makeVscodeRange } from '../utils';
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     private getChildrenSymbols(symbols: LocalizeDocumentSymbol[]): vscode.DocumentSymbol[] {
@@ -57,14 +57,14 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = <DefaultClient>client;
-            await client.requestWhenReady(() => processDelayedDidOpen(document));
+            await client.enqueue(() => processDelayedDidOpen(document));
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
             const response: GetDocumentSymbolResult = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
             if (token.isCancellationRequested || response.symbols === undefined) {
                 throw new vscode.CancellationError();
-            };
+            }
             const resultSymbols: vscode.DocumentSymbol[] = this.getChildrenSymbols(response.symbols);
             return resultSymbols;
         }
