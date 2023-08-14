@@ -94,7 +94,7 @@
             "default": "-n",
             "options": [
                 {
-                    "label": "(Debug without Workspace)   ",
+                    "label": "(Debug with new window)   ",
                     "value": "-n"
                 },
                 {

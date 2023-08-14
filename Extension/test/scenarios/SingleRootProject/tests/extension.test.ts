@@ -116,7 +116,6 @@ suite("Pick Process Tests", () => {
 
         const process1: Process = parsedOutput[0];
         const process2: Process = parsedOutput[1];
-        // const process3: Process = parsedOutput[2];
 
         assert.equal(process1.commandLine, 'ScopedBookmarkAgent');
         assert.equal(process1.name, 'ScopedBookmarkAgent');

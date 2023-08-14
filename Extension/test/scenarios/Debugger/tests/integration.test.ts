@@ -10,9 +10,6 @@ import { suite } from 'mocha';
 import * as vscode from 'vscode';
 
 suite(`Debug Integration Test: `, function(): void {
-    //let origFactoryFile: string;
-    //let tempFactoryFile: string;
-    //let hijackedFactoryFile: string;
 
     suiteSetup(async function(): Promise<void> {
         const extension: vscode.Extension<any> = vscode.extensions.getExtension("ms-vscode.cpptools") || assert.fail("Extension not found");

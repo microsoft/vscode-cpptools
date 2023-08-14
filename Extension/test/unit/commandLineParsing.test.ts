@@ -74,7 +74,7 @@ const fails: [ string | undefined, string, string?][] = [
 ];
 
 const success: [string | undefined, string, string[], string?][] = [
-    /* Simple word- and field-splitting */
+    /* Simple word and field splitting */
     [ undefined, "one", [ "one" ], marker() ],
     [ undefined, "one two", [ "one", "two" ], marker() ],
     [ undefined, "one two three", [ "one", "two", "three" ], marker() ],

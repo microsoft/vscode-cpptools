@@ -214,7 +214,7 @@ describe('Event Emitters', () => {
         ok(worked, 'worked should be true, because the event should have been triggered by the async constructor');
     });
 
-    it('Notifiers dont return stuff', async () => {
+    it('Notifiers don\'t return stuff', async () => {
         let count = 0;
         subscribe({
             'note': () => {
@@ -225,7 +225,7 @@ describe('Event Emitters', () => {
         notifyNow('note', Descriptors.none, 'hi there');
         notifyNow('note', Descriptors.none, 'hi there');
         notifyNow('note', Descriptors.none, 'hi there');
-        strictEqual(count, 3, 'count should be 3 -- notify now wont have to go async for any of this so far.');
+        strictEqual(count, 3, 'count should be 3 -- notify now won\'t have to go async for any of this so far.');
 
         notify('note', Descriptors.none, 'hi there');
         notify('note', Descriptors.none, 'hi there');
@@ -248,7 +248,7 @@ describe('Event Emitters', () => {
         notifyNow('note', Descriptors.none, 'note');
         notifyNow('note', Descriptors.none, 'note');
         notifyNow('note', Descriptors.none, 'note');
-        // strictEqual(count, 3, 'count should be 3 -- notify now wont have to go async for any of this so far.');
+
     });
 
 });

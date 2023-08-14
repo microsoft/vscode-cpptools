@@ -8,9 +8,6 @@ import { describe, it } from 'mocha';
 import { fail, ok, strictEqual } from 'node:assert';
 import { accumulator } from '../../src/Utility/Async/iterators';
 
-// console.time();
-// console.debug = (...args: any) => console.timeLog('default',args);
-
 describe('Async Iterators', () => {
     it('Use the accumulator() for async iterators (empty, manual close)', async () => {
         const result = accumulator<string>();

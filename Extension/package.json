@@ -6137,7 +6137,7 @@
         "translations-export": "yarn generate-native-strings && gulp translations-export",
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
-        "import-edge-strings": "ts-node -T ./import_edge_strings.ts",
+        "import-edge-strings": "ts-node -T ./.scripts/import_edge_strings.ts",
         "postinstall": "npx vscode-dts dev && npx vscode-dts main && yarn prep"
     },
     "devDependencies": {
