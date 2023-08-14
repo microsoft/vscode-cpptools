@@ -5,11 +5,11 @@
 
 import * as child_process from 'child_process';
 import * as os from 'os';
-import { AttachItemsProvider } from './attachToProcess';
-import { AttachItem } from './attachQuickPick';
+import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { findPowerShell } from '../common';
-import * as vscode from 'vscode';
+import { AttachItem } from './attachQuickPick';
+import { AttachItemsProvider } from './attachToProcess';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -119,6 +119,7 @@ export class PsProcessParser {
     // Since 'args' contains the full path to the executable, even if truncated, searching will work as desired.
     public static get psLinuxCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
     public static get psDarwinCommand(): string { return `ps axww -o pid=,comm=${PsProcessParser.commColumnTitle},args= -c`; }
+    public static get psToyboxCommand(): string { return `ps -A -o pid=,comm=${PsProcessParser.commColumnTitle},args=`; }
 
     // Only public for tests.
     public static ParseProcessFromPs(processes: string): Process[] {

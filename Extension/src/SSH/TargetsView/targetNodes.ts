@@ -3,11 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { extensionContext, ISshConfigHostInfo, pathAccessible } from "../../common";
-import { TreeItem } from "vscode";
-import { LabelLeafNode } from "./common";
 import { constants } from 'fs';
+import { TreeItem } from "vscode";
 import * as nls from 'vscode-nls';
+import { extensionContext, ISshConfigHostInfo, pathAccessible } from "../../common";
+import { LabelLeafNode } from "./common";
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

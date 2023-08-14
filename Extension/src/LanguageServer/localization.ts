@@ -4,11 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as fs from 'fs';
+import * as nls from 'vscode-nls';
 import { getExtensionFilePath } from '../common';
 import { lookupString } from '../nativeStrings';
-import * as nls from 'vscode-nls';
 import path = require('path');
-import * as fs from 'fs';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();

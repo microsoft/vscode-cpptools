@@ -4,9 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import * as util from '../common';
-import * as vscode from 'vscode';
 import * as path from 'path';
+import * as vscode from 'vscode';
+import * as util from '../common';
 
 class PersistentStateBase<T> {
     private key: string;
@@ -27,7 +27,7 @@ class PersistentStateBase<T> {
 
     public set Value(newValue: T) {
         if (this.state) {
-            this.state.update(this.key, newValue);
+            void this.state.update(this.key, newValue);
         }
         this.curvalue = newValue;
     }
@@ -38,7 +38,7 @@ class PersistentStateBase<T> {
 
     public setDefault(): void {
         if (this.state) {
-            this.state.update(this.key, this.defaultvalue);
+            void this.state.update(this.key, this.defaultvalue);
         }
         this.curvalue = this.defaultvalue;
     }
@@ -66,7 +66,7 @@ export class PersistentFolderState<T> extends PersistentWorkspaceState<T> {
         if (util.extensionContext) {
             old_val = util.extensionContext.workspaceState.get(old_key);
             if (old_val !== undefined) {
-                util.extensionContext.workspaceState.update(old_key, undefined);
+                void util.extensionContext.workspaceState.update(old_key, undefined);
             }
         }
         const newKey: string = key + (folder ? `-${folder.uri.fsPath}` : "-untitled");

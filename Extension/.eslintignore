@@ -2,3 +2,4 @@
 test/**/index.ts
 test/**/runTest.ts
 tools/prepublish.js
+vscode*.d.ts

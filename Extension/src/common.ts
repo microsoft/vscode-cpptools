@@ -3,21 +3,23 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as path from 'path';
-import * as which from 'which';
+import * as assert from 'assert';
+import * as child_process from 'child_process';
+import * as jsonc from 'comment-json';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as child_process from 'child_process';
-import * as vscode from 'vscode';
-import * as Telemetry from './telemetry';
-import { PlatformInformation } from './platform';
-import { getOutputChannelLogger, showOutputChannel } from './logger';
-import * as assert from 'assert';
+import * as path from 'path';
 import * as tmp from 'tmp';
-import * as nls from 'vscode-nls';
-import * as jsonc from 'comment-json';
-import { TargetPopulation } from 'vscode-tas-client';
+import * as vscode from 'vscode';
 import { DocumentFilter } from 'vscode-languageclient';
+import * as nls from 'vscode-nls';
+import { TargetPopulation } from 'vscode-tas-client';
+import * as which from "which";
+import { ManualPromise } from './Utility/Async/manualPromise';
+import { isWindows } from './constants';
+import { getOutputChannelLogger, showOutputChannel } from './logger';
+import { PlatformInformation } from './platform';
+import * as Telemetry from './telemetry';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -161,13 +163,13 @@ export function isHeaderFile(uri: vscode.Uri): boolean {
     return !fileExt || [".cuh", ".hpp", ".hh", ".hxx", ".h++", ".hp", ".h", ".ii", ".inl", ".idl", ""].some(ext => fileExtLower === ext);
 }
 
-export function isCppFile (uri: vscode.Uri): boolean {
+export function isCppFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
     return (fileExt === ".C") || [".cu", ".cpp", ".cc", ".cxx", ".c++", ".cp", ".ino", ".ipp", ".tcc"].some(ext => fileExtLower === ext);
 }
 
-export function isCFile (uri: vscode.Uri): boolean {
+export function isCFile(uri: vscode.Uri): boolean {
     const fileExt: string = path.extname(uri.fsPath);
     const fileExtLower: string = fileExt.toLowerCase();
     return (fileExt === ".C") || fileExtLower === ".c";
@@ -214,8 +216,8 @@ export function getWorkspaceIsCpp(): boolean {
 export function isCppOrRelated(document: vscode.TextDocument): boolean {
     return isCpp(document) || isCppPropertiesJson(document) || (document.uri.scheme === "output" && document.uri.fsPath.startsWith("extension-output-ms-vscode.cpptools")) ||
         (isWorkspaceCpp && (document.languageId === "json" || document.languageId === "jsonc") &&
-        ((document.fileName.endsWith("settings.json") && (document.uri.scheme === "file" || document.uri.scheme === "vscode-userdata")) ||
-            (document.uri.scheme === "file" && document.fileName.endsWith(".code-workspace"))));
+            ((document.fileName.endsWith("settings.json") && (document.uri.scheme === "file" || document.uri.scheme === "vscode-userdata")) ||
+                (document.uri.scheme === "file" && document.fileName.endsWith(".code-workspace"))));
 }
 
 let isExtensionNotReadyPromptDisplayed: boolean = false;
@@ -259,7 +261,7 @@ export function getIntelliSenseProgress(): number {
 
 export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
-        extensionContext.globalState.update(installProgressStr, progress);
+        void extensionContext.globalState.update(installProgressStr, progress);
         const telemetryProperties: { [key: string]: string } = {};
         let progressName: string | undefined;
         switch (progress) {
@@ -278,7 +280,7 @@ export function setProgress(progress: number): void {
 
 export function setIntelliSenseProgress(progress: number): void {
     if (extensionContext && getIntelliSenseProgress() < progress) {
-        extensionContext.globalState.update(intelliSenseProgressStr, progress);
+        void extensionContext.globalState.update(intelliSenseProgressStr, progress);
         const telemetryProperties: { [key: string]: string } = {};
         let progressName: string | undefined;
         switch (progress) {
@@ -346,19 +348,18 @@ export function resolveCachePath(input: string | undefined, additionalEnvironmen
     return resolvedPath;
 }
 
-export function isWindows(): boolean {
-    return os.platform() === 'win32';
-}
-
 export function defaultExePath(): string {
     const exePath: string = path.join('${fileDirname}', '${fileBasenameNoExtension}');
-    return isWindows() ? exePath + '.exe' : exePath;
+    return isWindows ? exePath + '.exe' : exePath;
 }
 
 export function findExePathInArgs(args: string[]): string | undefined {
     const exePath: string | undefined = args.find((arg: string, index: number) => (arg.includes(".exe") || (index > 0 && args[index - 1] === "-o")));
     if (exePath?.startsWith("/Fe")) {
         return exePath.substring(3);
+    }
+    if (exePath?.toLowerCase().startsWith("/out:")) {
+        return exePath.substring(5);
     }
     return exePath;
 }
@@ -454,7 +455,7 @@ export function resolveVariablesArray(variables: string[] | undefined, additiona
 
 // Resolve '~' at the start of the path.
 export function resolveHome(filePath: string): string {
-    return filePath.replace(/^\~/g, (match: string, name: string) => os.homedir());
+    return filePath.replace(/^\~/g, os.homedir());
 }
 
 export function asFolder(uri: vscode.Uri): string {
@@ -540,7 +541,7 @@ export function createDirIfNotExistsSync(filePath: string | undefined): void {
     }
     const dirPath: string = path.dirname(filePath);
     if (!checkDirectoryExistsSync(dirPath)) {
-        fs.mkdirSync(dirPath);
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 
@@ -548,8 +549,8 @@ export function checkFileExistsSync(filePath: string): boolean {
     try {
         return fs.statSync(filePath).isFile();
     } catch (e) {
+        return false;
     }
-    return false;
 }
 
 export function checkExecutableWithoutExtensionExistsSync(filePath: string): boolean {
@@ -581,8 +582,8 @@ export function checkDirectoryExistsSync(dirPath: string): boolean {
     try {
         return fs.statSync(dirPath).isDirectory();
     } catch (e) {
+        return false;
     }
-    return false;
 }
 
 /** Test whether a relative path exists */
@@ -621,9 +622,9 @@ export function readDir(dirPath: string): Promise<string[]> {
 }
 
 /** Reads the content of a text file */
-export function readFileText(filePath: string, encoding: string = "utf8"): Promise<string> {
+export function readFileText(filePath: string, encoding: BufferEncoding = "utf8"): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        fs.readFile(filePath, encoding, (err, data) => {
+        fs.readFile(filePath, { encoding }, (err: any, data: any) => {
             if (err) {
                 reject(err);
             } else {
@@ -763,60 +764,60 @@ interface ProcessOutput {
 }
 
 async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return new Promise(async (resolve, reject) => {
-        // Do not use CppSettings to avoid circular require()
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    const result = new ManualPromise<ProcessOutput>();
 
-        let proc: child_process.ChildProcess;
-        if (await isExecutable(program)) {
-            proc = child_process.spawn(`.${isWindows() ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
-        } else {
-            proc = child_process.spawn(program, args, { shell: true });
-        }
+    // Do not use CppSettings to avoid circular require()
+    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
 
-        const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
-            getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
-            proc.kill();
-        });
+    let proc: child_process.ChildProcess;
+    if (await isExecutable(program)) {
+        proc = child_process.spawn(`.${isWindows ? '\\' : '/'}${path.basename(program)}`, args, { shell: true, cwd: path.dirname(program) });
+    } else {
+        proc = child_process.spawn(program, args, { shell: true });
+    }
 
-        const clean = () => {
-            proc.removeAllListeners();
-            if (cancellationTokenListener) {
-                cancellationTokenListener.dispose();
-            }
-        };
-
-        let stdout: string = '';
-        let stderr: string = '';
-        if (proc.stdout) {
-            proc.stdout.on('data', data => {
-                const str: string = data.toString();
-                if (loggingLevel !== "None") {
-                    getOutputChannelLogger().append(str);
-                }
-                stdout += str;
-                if (continueOn) {
-                    const continueOnReg: string = escapeStringForRegex(continueOn);
-                    if (stdout.search(continueOnReg)) {
-                        resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
-                    }
-                }
-            });
-        }
-        if (proc.stderr) {
-            proc.stderr.on('data', data => stderr += data.toString());
-        }
-        proc.on('close', (code, signal) => {
-            clean();
-            resolve({ exitCode: code || signal, stdout: stdout.trim(), stderr: stderr.trim() });
-        });
-        proc.on('error', error => {
-            clean();
-            reject(error);
-        });
+    const cancellationTokenListener: vscode.Disposable | undefined = cancellationToken?.onCancellationRequested(() => {
+        getOutputChannelLogger().appendLine(localize('killing.process', 'Killing process {0}', program));
+        proc.kill();
     });
+
+    const clean = () => {
+        proc.removeAllListeners();
+        if (cancellationTokenListener) {
+            cancellationTokenListener.dispose();
+        }
+    };
+
+    let stdout: string = '';
+    let stderr: string = '';
+    if (proc.stdout) {
+        proc.stdout.on('data', data => {
+            const str: string = data.toString();
+            if (loggingLevel !== "None") {
+                getOutputChannelLogger().append(str);
+            }
+            stdout += str;
+            if (continueOn) {
+                const continueOnReg: string = escapeStringForRegex(continueOn);
+                if (stdout.search(continueOnReg)) {
+                    result.resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+                }
+            }
+        });
+    }
+    if (proc.stderr) {
+        proc.stderr.on('data', data => stderr += data.toString());
+    }
+    proc.on('close', (code, signal) => {
+        clean();
+        result.resolve({ exitCode: code || signal || undefined, stdout: stdout.trim(), stderr: stderr.trim() });
+    });
+    proc.on('error', error => {
+        clean();
+        result.reject(error);
+    });
+    return result;
 }
 
 /**
@@ -908,7 +909,7 @@ export async function promptReloadWindow(message: string): Promise<void> {
     const reload: string = localize("reload.string", "Reload");
     const value: string | undefined = await vscode.window.showInformationMessage(message, reload);
     if (value === reload) {
-        vscode.commands.executeCommand("workbench.action.reloadWindow");
+        return vscode.commands.executeCommand("workbench.action.reloadWindow");
     }
 }
 
@@ -954,7 +955,7 @@ function legacyExtractArgs(argsString: string): string[] {
             }
         } else if (c === '\'') {
             // On Windows, a single quote string is not allowed to join multiple args into a single arg
-            if (!isWindows()) {
+            if (!isWindows) {
                 if (!isWithinDoubleQuote) {
                     isWithinSingleQuote = !isWithinSingleQuote;
                 }
@@ -1056,7 +1057,7 @@ function extractArgs(argsString: string): string[] {
                 return [];
             }
             const jsonText: string = wordexpResult.toString();
-            return jsonc.parse(jsonText, undefined, true);
+            return jsonc.parse(jsonText, undefined, true) as any;
         } catch {
             return [];
         }
@@ -1172,37 +1173,6 @@ export function escapeForSquiggles(s: string): string {
         newResults += "\\";
     }
     return newResults;
-}
-
-export class BlockingTask<T> {
-    private done: boolean = false;
-    private promise: Thenable<T>;
-
-    constructor(task: () => Thenable<T>, dependency?: BlockingTask<any>) {
-        if (!dependency) {
-            this.promise = task();
-        } else {
-            this.promise = new Promise<T>((resolve, reject) => {
-                const f1: () => void = () => {
-                    task().then(resolve, reject);
-                };
-                const f2: (err: any) => void = (err) => {
-                    console.log(err);
-                    task().then(resolve, reject);
-                };
-                dependency.promise.then(f1, f2);
-            });
-        }
-        this.promise.then(() => this.done = true, () => this.done = true);
-    }
-
-    public get Done(): boolean {
-        return this.done;
-    }
-
-    public getPromise(): Thenable<T> {
-        return this.promise;
-    }
 }
 
 export function getSenderType(sender?: any): string {
@@ -1403,6 +1373,7 @@ export function findPowerShell(): string | undefined {
                     return name;
                 }
             } catch (e) {
+                return undefined;
             }
         }
     }
@@ -1429,7 +1400,9 @@ export function isVsCodeInsiders(): boolean {
 
 export function stripEscapeSequences(str: string): string {
     return str
+        // eslint-disable-next-line no-control-regex
         .replace(/\x1b\[\??[0-9]{0,3}(;[0-9]{1,3})?[a-zA-Z]/g, '')
+        // eslint-disable-next-line no-control-regex
         .replace(/\u0008/g, '')
         .replace(/\r/g, '');
 }

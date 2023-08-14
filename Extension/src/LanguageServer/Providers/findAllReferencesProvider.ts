@@ -3,9 +3,9 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { DefaultClient, workspaceReferences } from '../client';
 import { Position, RequestType } from 'vscode-languageclient';
-import { ReferencesParams, ReferencesResult, ReferenceType, ReferenceInfo, CancellationSender } from '../references';
+import { DefaultClient, workspaceReferences } from '../client';
+import { CancellationSender, ReferenceInfo, ReferencesParams, ReferencesResult, ReferenceType } from '../references';
 
 const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, void> =
     new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/findAllReferences');
@@ -17,16 +17,15 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         this.client = client;
     }
 
-    public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken):
-        Promise<vscode.Location[] | undefined> {
-        await this.client.awaitUntilLanguageClientReady();
+    public async provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): Promise<vscode.Location[] | undefined> {
+        await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         // Listen to a cancellation for this request. When this request is cancelled,
         // use a local cancellation source to explicitly cancel a token.
         const cancelSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
         const cancellationTokenListener: vscode.Disposable = token.onCancellationRequested(() => { cancelSource.cancel(); });
-        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(sender => { cancelSource.cancel(); });
+        const requestCanceledListener: vscode.Disposable = workspaceReferences.onCancellationRequested(_sender => { cancelSource.cancel(); });
 
         // Send the request to the language server.
         const locationsResult: vscode.Location[] = [];
