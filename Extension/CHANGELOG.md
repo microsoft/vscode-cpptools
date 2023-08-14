@@ -27,7 +27,6 @@
 * Fix a crash for CUDA projects with '>' in the command line. [#11289](https://github.com/microsoft/vscode-cpptools/issues/11289) 
 * Increase the default standard for the 'Build and Debug Active File' feature to c++14 on macOS. [#11292](https://github.com/microsoft/vscode-cpptools/issues/11292) 
 * Fix an issue with the compiler currently configured for use with IntelliSense being listed last in the task creation popup. [PR #11299](https://github.com/microsoft/vscode-cpptools/pull/11299)
-* Fix an issue to allow users to utilize the walkthrough without tasks.json. [PR #11300](https://github.com/microsoft/vscode-cpptools/pull/11300)
 * Fix an IPCH issue on Linux due to the Position Independent Executable (PIE) option not being set since 1.17.0.
 * Fix Rank > 1 Display Strings for Natvis. [PR MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
 * Fix some crashes identified by crash telemetry.
