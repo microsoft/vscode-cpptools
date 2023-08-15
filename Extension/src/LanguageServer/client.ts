@@ -1318,7 +1318,7 @@ export class DefaultClient implements Client {
         }
 
 
-        if ((this.baseStoragePath?.length !== undefined) && (workspaceHash.length > 0)) {
+        if ((this.baseStoragePath !== undefined) && (workspaceHash.length > 0)) {
             storagePath = path.join(this.baseStoragePath, workspaceHash)
         }
 

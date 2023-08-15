@@ -1302,7 +1302,7 @@ export function isValidIdentifier(candidate: string): boolean {
 
 export function getBaseStoragePath(): string | undefined {
     let defaultCachePath: string = "";
-    let pathEnvironmentVariable: string | undefined = "";
+    let pathEnvironmentVariable: string | undefined;
     switch (os.platform()) {
         case 'win32':
             defaultCachePath = "Microsoft\\vscode-cpptools\\";
