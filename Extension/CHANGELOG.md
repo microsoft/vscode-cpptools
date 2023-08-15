@@ -1,10 +1,25 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.17.1: August 9, 2023
-## Bug Fixes
+## Version 1.17.2: August 14, 2023
+### Enhancements
+* Enable a subset of markdown to render in hover by default and a `C_Cpp.markdownInComments` setting. [#6020](https://github.com/microsoft/vscode-cpptools/issues/6020), [#10461](https://github.com/microsoft/vscode-cpptools/issues/10461)
+* Add support for gcc 13 features. [#11038](https://github.com/microsoft/vscode-cpptools/issues/11038)
+* Add default compiler detection of additional compilers in MSYS environments. [#11211](https://github.com/microsoft/vscode-cpptools/issues/11211)
+* Use musl for building Linux binaries of the extension.
+* Add support for additional compiler wrappers: gomacc, distcc, buildcache, and icecc.
+
+### Bug Fixes
+* Fix a couple bugs with documentation comments. [#5241](https://github.com/microsoft/vscode-cpptools/issues/5241)
+* Added `__float128` support in gcc IntelliSense mode. [#9558](https://github.com/microsoft/vscode-cpptools/issues/9558)
 * Fix an issue where the debugger would get stuck while using cl.exe options. [#10231](https://github.com/microsoft/vscode-cpptools/issues/10231)
 * Fix C/C++ commands showing in the Command Palette with non-C/C++ files. [#10421](https://github.com/microsoft/vscode-cpptools/issues/10421)
 * Fix the 'Select IntelliSense Configuration' command to also update an existing `compilerPath` in c_cpp_properties.json. [#10808](https://github.com/microsoft/vscode-cpptools/issues/10808)
+* Fix `#include` completion leaving an extra `>`. [#11042](https://github.com/microsoft/vscode-cpptools/issues/11042)
+* Fix an issue with matching of glob patterns containing path delimiters. [#11132](https://github.com/microsoft/vscode-cpptools/issues/11132)
+* Fix Create Declaration/Definition via `Quick Fix…` from hover tooltip. [#11157](https://github.com/microsoft/vscode-cpptools/issues/11157)
+* Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
+* Fix `files.encoding` setting on startup. [#11210](https://github.com/microsoft/vscode-cpptools/issues/11210)
+* Fix a crash related to directories with a very large number of files. [#11226](https://github.com/microsoft/vscode-cpptools/issues/11226)
 * Fix the parameter format of call hierarchy items. [#11247](https://github.com/microsoft/vscode-cpptools/issues/11247)
 * Remove the vcpkg code action from the missing includes code action list. [#11252](https://github.com/microsoft/vscode-cpptools/issues/11252)
 * Fix the file path info of call hierarchy items to display the relative path to a workspace folder. [#11254](https://github.com/microsoft/vscode-cpptools/issues/11254)
@@ -12,25 +27,7 @@
 * Fix a crash for CUDA projects with '>' in the command line. [#11289](https://github.com/microsoft/vscode-cpptools/issues/11289) 
 * Increase the default standard for the 'Build and Debug Active File' feature to c++14 on macOS. [#11292](https://github.com/microsoft/vscode-cpptools/issues/11292) 
 * Fix an issue with the compiler currently configured for use with IntelliSense being listed last in the task creation popup. [PR #11299](https://github.com/microsoft/vscode-cpptools/pull/11299)
-* Fix an issue to allow users to utilize the walkthrough without tasks.json. [PR #11300](https://github.com/microsoft/vscode-cpptools/pull/11300)
 * Fix an IPCH issue on Linux due to the Position Independent Executable (PIE) option not being set since 1.17.0.
-
-## Version 1.17.0: July 26, 2023
-### Enhancements
-* Enable a subset of markdown to render in hover by default and a `C_Cpp.markdownInComments` setting. [#6020](https://github.com/microsoft/vscode-cpptools/issues/6020), [#10461](https://github.com/microsoft/vscode-cpptools/issues/10461)
-* Add default compiler detection of additional compilers in MSYS environments. [#11211](https://github.com/microsoft/vscode-cpptools/issues/11211)
-* Add support for additional compiler wrappers: gomacc, distcc, buildcache, and icecc.
-
-### Bug Fixes
-* Fix a couple bugs with documentation comments. [#5241](https://github.com/microsoft/vscode-cpptools/issues/5241)
-* Added `__float128` support in gcc IntelliSense mode. [#9558](https://github.com/microsoft/vscode-cpptools/issues/9558)
-* Address various issues with support for gcc 13. [#11038](https://github.com/microsoft/vscode-cpptools/issues/11038)
-* Fix `#include` completion leaving an extra `>`. [#11042](https://github.com/microsoft/vscode-cpptools/issues/11042)
-* Fix an issue with matching of glob patterns containing path delimiters. [#11132](https://github.com/microsoft/vscode-cpptools/issues/11132)
-* Fix Create Declaration/Definition via `Quick Fix…` from hover tooltip. [#11157](https://github.com/microsoft/vscode-cpptools/issues/11157)
-* Fix issues with compiler querying of clang-cl. [#11207](https://github.com/microsoft/vscode-cpptools/issues/11207)
-* Fix `files.encoding` setting on startup. [#11210](https://github.com/microsoft/vscode-cpptools/issues/11210)
-* Fix a crash related to directories with a very large number of files. [#11226](https://github.com/microsoft/vscode-cpptools/issues/11226)
 * Fix Rank > 1 Display Strings for Natvis. [PR MIEngine#1406](https://github.com/microsoft/MIEngine/pull/1406)
 * Fix some crashes identified by crash telemetry.
 * Fix an issue that could cause zombie processes on Linux/Mac.
