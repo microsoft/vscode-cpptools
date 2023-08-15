@@ -123,7 +123,6 @@ export function parse(triggerExpression: string, sourceToBindTo: ArbitraryObject
     // get the descriptor name
     // get the filter value
     // the filter expression is a javascript expression. (special case: if a regex is a part of the expression, it's assumed to be applied against the text of the event data)
-    // [/foo/g]
     if (sourceToBindTo !== source) {
         verbose(`source specified but 'this' not found in handler name or expression for '${triggerExpression}' `);
     }
