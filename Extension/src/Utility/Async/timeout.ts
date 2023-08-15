@@ -12,7 +12,7 @@ export async function timeout(msecs: number, ...promises: Thenable<any>[]): Prom
     // get a promise for the timeout
     const t = sleep(msecs).then(() => fail(`Timeout expired after ${msecs}ms`));
 
-    // wait until either the timout expires or one of the promises resolves
+    // wait until either the timeout expires or one of the promises resolves
     const result = await Promise.race([t, ...promises]);
 
     // tag the timeout with a catch to prevent unhandled rejection

@@ -203,7 +203,7 @@ This will just run the tests for the given scenario. You can pass in the folder 
 
 > `yarn test reset` - remove the isolated VSCode environment
 
-This will completely remove the isolated VSCode environement for this repository, 
+This will completely remove the isolated VSCode environment for this repository, 
 including cache, extensions, and configuration for the isolated environment.
 
 > `yarn test install` - install the isolated VSCode environment
@@ -233,7 +233,7 @@ Use `yarn code reset` to remove the isolated environment and start fresh.
 
 > `yarn code reset` - remove the isolated VSCode environment
 
-This will completely remove the isolated VSCode environement for this repository, 
+This will completely remove the isolated VSCode environment for this repository, 
 including cache, extensions, and configuration for the isolated environment.
 
 > `yarn code install` - install the isolated VSCode environment
@@ -264,18 +264,18 @@ Inserts the options schema into `package.json` from the `tools/OptionsSchema.jso
 ### `yarn copy-walkthrough-media`
 > #### `yarn copy-walkthrough-media` - copies the walkthrough media
 
-This copies the walkthru media into the `dist` folder.
+This copies the walkthrough media into the `dist` folder.
 
 > #### Note
 > The use of the `.scripts/common.ts:updateFiles()` function ensures that if the contents don't change the files won't be touched
 
 > #### `yarn copy-walkthrough-media watch` - watches for changes and automatically copies the walkthrough media
 
-This will watch for changes to the walkthru files and automatically copy them across when they change.
+This will watch for changes to the walkthrough files and automatically copy them across when they change.
 
 ---
 ### `yarn prep`
-> #### `yarn prep` - extension preperation
+> #### `yarn prep` - extension preparation
 
 This will call `yarn copy-walkthrough-media`, `yarn generate-native-strings`, `yarn translations-generate` to ensure
 that the generated files are up to date.

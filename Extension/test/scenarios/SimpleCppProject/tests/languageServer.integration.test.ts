@@ -88,7 +88,7 @@ suite("multiline comment setting tests", function(): void {
 
 function cppPropertiesPath(): string {
     const folder = vscode.workspace.workspaceFolders?.[0];
-    assert.ok(folder, 'workspace folder snould be set.');
+    assert.ok(folder, 'workspace folder should be set.');
 
     return folder.uri.fsPath + "/.vscode/c_cpp_properties.json";
 }
@@ -184,7 +184,7 @@ suite("extensibility tests v3", function(): void {
     test("Check provider - main3.cpp", async () => {
         // Open a c++ file to start the language server.
         const folder = vscode.workspace.workspaceFolders?.[0];
-        assert.ok(folder, 'workspace folder snould be set.');
+        assert.ok(folder, 'workspace folder should be set.');
 
         const path: string = folder.uri.fsPath + "/main3.cpp";
         const uri: vscode.Uri = vscode.Uri.file(path);
@@ -280,7 +280,7 @@ suite("extensibility tests v2", function(): void {
     test("Check provider - main2.cpp", async () => {
         // Open a c++ file to start the language server.
         const folder = vscode.workspace.workspaceFolders?.[0];
-        assert.ok(folder, 'workspace folder snould be set.');
+        assert.ok(folder, 'workspace folder should be set.');
 
         const path: string = folder.uri.fsPath + "/main2.cpp";
         const uri: vscode.Uri = vscode.Uri.file(path);
@@ -362,7 +362,7 @@ suite("extensibility tests v1", function(): void {
     test("Check provider - main1.cpp", async () => {
         // Open a c++ file to start the language server.
         const folder = vscode.workspace.workspaceFolders?.[0];
-        assert.ok(folder, 'workspace folder snould be set.');
+        assert.ok(folder, 'workspace folder should be set.');
 
         const path: string = folder.uri.fsPath + "/main1.cpp";
         const uri: vscode.Uri = vscode.Uri.file(path);
@@ -439,7 +439,7 @@ suite("extensibility tests v0", function(): void {
     test("Check provider - main.cpp", async () => {
         // Open a C++ file to start the language server.
         const folder = vscode.workspace.workspaceFolders?.[0];
-        assert.ok(folder, 'workspace folder snould be set.');
+        assert.ok(folder, 'workspace folder should be set.');
 
         const path: string = folder.uri.fsPath + "/main.cpp";
         const uri: vscode.Uri = vscode.Uri.file(path);

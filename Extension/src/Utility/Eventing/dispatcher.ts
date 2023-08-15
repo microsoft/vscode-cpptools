@@ -28,9 +28,9 @@ interface Event<TInput = any, TResult = void> {
 
     completed?: ManualPromise<EventStatus | TResult>;
     readonly variableArgs: any[];
-    source?: ArbitraryObject | undefined;
-    data?: TInput | undefined;
-    text?: string | undefined;
+    source?: ArbitraryObject;
+    data?: TInput;
+    text?: string;
 }
 
 const sandbox = new Sandbox();
@@ -99,7 +99,7 @@ async function dispatch<TResult>(event: Event<any, TResult>): Promise<void> {
     if (!is.promise(event.completed)) {
         // no event.completed, which means this is a notifier
         // since notifiers are not cancellable, we can run them all in parallel
-        // and they don't need to worry about rentrancy
+        // and they don't need to worry about reentrancy
         for (const [callback, captures] of getHandlers(event, asyncHandlers)) {
             // call the event handler, but don't await it
             // we don't care about the result, and we don't want to block
@@ -159,8 +159,8 @@ function* getHandlers<TResult>(event: Event<any, TResult>, category: Map<string,
 
         const captures = [] as string[];
 
-        // now we can check descriminators to see if they match
-        for (const [name, descriminator] of subscriber.filters) {
+        // now we can check discriminators to see if they match
+        for (const [name, discriminator] of subscriber.filters) {
             // verify we have a matching descriptor/eventname in the set
 
             // get the descriptor text values
@@ -170,12 +170,12 @@ function* getHandlers<TResult>(event: Event<any, TResult>, category: Map<string,
                 continue loop;
             }
 
-            if (descriminator === true) {
+            if (discriminator === true) {
                 continue;
             }
 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            if (!descriminator(event.data || event.source, [...strings, event.text!], captures)) {
+            if (!discriminator(event.data || event.source, [...strings, event.text!], captures)) {
                 // the filter (if it exists) didn't match, so skip this handler
                 continue loop;
             }
@@ -288,7 +288,7 @@ export function subscribe<T extends Record<string, any>>(subscriber: Promise<Sub
         return (async () => { // this has to be async - we may be pulling data from a file...
             const unsubs = new Array<Unsubscribe>();
 
-            // if a folder is passed in, then we're subscribing to *members* that are strings (either actual functionlets or strings that are the names of files that contain code)
+            // if a folder is passed in, then we're subscribing to *members* that are strings (either actual function-lets or strings that are the names of files that contain code)
             for (const [name, _type] of [...properties, ...fields]) {
                 // this is a string property, so it might be an event handler
                 const text = subscriber[name] as string;
@@ -296,7 +296,7 @@ export function subscribe<T extends Record<string, any>>(subscriber: Promise<Sub
                 try {
                     const filename = await filepath.isFile(text, options.folder);
                     if (filename) {
-                        // it is a file, so load it as a functionlet
+                        // it is a file, so load it as a function-let
                         const code = await readFile(filename, 'utf8');
                         const fn = await sandbox.createFunction(code, ['event'], { filename, transpile: true });
                         if (hasErrors(fn)) {
@@ -309,7 +309,7 @@ export function subscribe<T extends Record<string, any>>(subscriber: Promise<Sub
                         continue;
                     }
 
-                    // if it's not a file, then treat it as a functionlet
+                    // if it's not a file, then treat it as a function-let
                     const fn = await sandbox.createFunction(text, ['event'], { filename: `launch.json/${name}`, transpile: true });
                     if (hasErrors(fn)) {
                         for (const each of fn) {

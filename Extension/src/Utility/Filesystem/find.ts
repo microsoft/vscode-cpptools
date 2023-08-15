@@ -24,7 +24,7 @@ const cache = new Map<string, File | FolderWithChildren | Promise<FolderWithChil
 
 /**
  * This reads a directory and returns a map of the files and folders in it
- * It is quite tolerant of errors and rentrancy, so if multiple callers are trying to get the same results
+ * It is quite tolerant of errors and reentrancy, so if multiple callers are trying to get the same results
  * it will only do the work once per directory
  *
  * @param fullPath the full path of the folder to read
@@ -79,7 +79,7 @@ async function readDirectory(fullPath: string, executableExtensions: Set<string>
             cache.set(fullPath, promise);
         }
 
-        // this doesn't use the path.info function becuase in this case, the direntry is already available, and on windows we can skip a call to stat (which is expensive)
+        // this doesn't use the path.info function because in this case, the direntry is already available, and on windows we can skip a call to stat (which is expensive)
         // process all the entries, and add them to the cache and the children map
         await foreach(readdir(fullPath, { withFileTypes: true }).catch(returns.none), async (direntry: Dirent) => {
             const name = direntry.name;

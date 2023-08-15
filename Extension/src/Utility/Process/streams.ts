@@ -223,7 +223,7 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
 }
 
 /**
- * A buffer of lines from a stram (stdout or stderr).
+ * A buffer of lines from a stream (stdout or stderr).
  */
 export class ReadableLineStream implements AsyncIterable<string> {
     readonly changed = new Signal<void>();
@@ -291,7 +291,7 @@ export class ReadableLineStream implements AsyncIterable<string> {
         }
     }
 
-    /** gets an iterablor wrapper for the buffer */
+    /** gets an iterator wrapper for the buffer */
     get iterator() {
         return new LineIterator(this, this.head);
     }

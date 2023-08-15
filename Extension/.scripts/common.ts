@@ -85,7 +85,7 @@ export async function mkdir(filePath: string) {
     return fullPath;
 }
 
-export const glob: (pattern: string, options?: IOptions | undefined) => Promise<string[]> = promisify(globSync);
+export const glob: (pattern: string, options?: IOptions) => Promise<string[]> = promisify(globSync);
 
 export async function write(filePath: string, data: Buffer | string) {
     await mkdir(dirname(filePath));
@@ -277,7 +277,7 @@ export async function checkFile(file: string | string[], errMsg: string){
 }
 
 export async function checkPrep() {
-    await checkFolder('dist/walkthrough', `The walkthru files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
+    await checkFolder('dist/walkthrough', `The walkthrough files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
     await checkFolder('dist/html', `The html files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
     await checkFolder('dist/schema', `The html files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
     await checkFile('dist/nls.metadata.json', `The extension translation file '${$root}/dist/nls.metadata.json is missing. You should run ${brightGreen("yarn prep")}\n\n`);

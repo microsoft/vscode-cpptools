@@ -5,7 +5,7 @@
 
 import { is } from '../System/guards';
 
-/** takes an identifier string and desconstructs and normalizes it. */
+/** takes an identifier string and deconstructs and normalizes it. */
 export function deconstruct(identifier: string | string[]): string[] {
     if (is.array(identifier)) {
         return identifier.flatMap(deconstruct);
@@ -17,7 +17,7 @@ export function deconstruct(identifier: string | string[]): string[] {
         .split(/[\W|_]+/)
         .map((each) => each.toLowerCase());
 }
-/** takes an identifier string and desconstructs and normalizes it and smashes it together.
+/** takes an identifier string and deconstructs and normalizes it and smashes it together.
  *
  *  This is useful for supporting multiple naming conventions for the same identifier. (ie, 'fooBar' and 'foo-bar' are the same identifier)
  */

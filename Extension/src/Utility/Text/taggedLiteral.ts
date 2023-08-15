@@ -8,7 +8,7 @@
 import { safeEval } from '../Sandbox/sandbox';
 import { is } from '../System/guards';
 import { Primitive } from '../System/types';
-import { isIdentifierPart, isIdentifierStart } from './characteCodes';
+import { isIdentifierPart, isIdentifierStart } from './characterCodes';
 
 /** simple dynamic tagged literal implementation */
 export function taggedLiteral(templateString: string, templateVars: Record<string, any>): string {
@@ -226,10 +226,10 @@ export function render(templateString: string | string[], context: Record<string
         return templateString;
     }
     const { template, expressions, state, message } = parseTaggedLiteral(templateString);
-    const stablilize = asJs ? as.js : (x: string) => as.string(x) ?? '';
+    const stabilize = asJs ? as.js : (x: string) => as.string(x) ?? '';
     return state === 'error' ?
         message :  // return the error message if the parse failed. (this is fatal anyways)
-        template.reduce((result, each, index) => `${result}${stablilize(resolveValue(expressions[index - 1], context, customResolver))}${each}`); // resolve the inline expressions and join the template
+        template.reduce((result, each, index) => `${result}${stabilize(resolveValue(expressions[index - 1], context, customResolver))}${each}`); // resolve the inline expressions and join the template
 }
 
 export function evaluateExpression(expression: string, context: Record<string, any>, customResolver = (_prefix: string, _expression: string) => ''): Primitive | undefined {

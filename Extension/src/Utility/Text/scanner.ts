@@ -3,7 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { CharacterCodes, isBinaryDigit, isDigit, isHexDigit, isIdentifierPart, isIdentifierStart, isLineBreak, isWhiteSpaceSingleLine, sizeOf } from './characteCodes';
+import { CharacterCodes, isBinaryDigit, isDigit, isHexDigit, isIdentifierPart, isIdentifierStart, isLineBreak, isWhiteSpaceSingleLine, sizeOf } from './characterCodes';
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
@@ -112,7 +112,7 @@ export enum Kind {
     OpenBracket,
     CloseBracket,
     Dot,
-    Elipsis,
+    Ellipsis,
     Semicolon,
     Comma,
     QuestionDot,
@@ -203,7 +203,7 @@ interface TokenLocation extends Position {
 
 /** This is a fairly generic scanner for making it easy to parse expressions and code blocks in a variety of formats
  *
- * (the supported tokens is derrived from the TypeScript grammar)
+ * (the supported tokens are derived from the TypeScript grammar)
  */
 export class Scanner implements Token {
     #offset = 0;
@@ -397,7 +397,7 @@ export class Scanner implements Token {
                     return this.scanWhitespace();
 
                 case CharacterCodes.$:
-                    return isIdentifierPart(this.#chNext) ? this.scanVarible() : this.next(Kind.Dollar);
+                    return isIdentifierPart(this.#chNext) ? this.scanVariable() : this.next(Kind.Dollar);
 
                 case CharacterCodes.openParen:
                     return this.next(Kind.OpenParen);
@@ -493,7 +493,7 @@ export class Scanner implements Token {
                     return isDigit(this.#chNext) ?
                         this.scanNumber() :
                         this.#chNext === CharacterCodes.dot && this.#chNextNext === CharacterCodes.dot ?
-                            this.next(Kind.Elipsis, 3) :
+                            this.next(Kind.Ellipsis, 3) :
                             this.next(Kind.Dot);
 
                 case CharacterCodes.slash:
@@ -676,7 +676,7 @@ export class Scanner implements Token {
     /**
    * When the current token is greaterThan, this will return any tokens with characters
    * after the greater than character. This has to be scanned separately because greater
-   * thans appear in positions where longer tokens are incorrect, e.g. `model x<y>=y;`.
+   * than  appear in positions where longer tokens are incorrect, e.g. `model x<y>=y;`.
    * The solution is to call rescanGreaterThan from the parser in contexts where longer
    * tokens starting with `>` are allowed (i.e. when parsing binary expressions).
    */
@@ -957,7 +957,7 @@ export class Scanner implements Token {
         return this.kind = keywords.get(this.text) ?? Kind.Identifier;
     }
 
-    scanVarible() {
+    scanVariable() {
         this.text = '$';
         this.text += this.scanUntil((ch) => !isIdentifierPart(ch));
         return this.kind = Kind.Variable;
