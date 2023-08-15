@@ -832,8 +832,8 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private legacyStoragePath: string;
     private baseStoragePath: string | undefined;
+    private legacyStoragePath: string;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
@@ -1300,31 +1300,27 @@ export class DefaultClient implements Client {
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
         const baseStoragePath: string | undefined = util.getBaseStoragePath();
-        let legacyStoragePath: string | undefined;
-        let storagePath: string | undefined = "";
+        this.legacyStoragePath =  "";
+        let storagePath: string = "";
         let workspaceHash: string = "";
 
-        if (util.extensionContext) {
-            const fsPath: string | undefined = util.extensionContext.storageUri?.fsPath;
-            if (fsPath) {
-                workspaceHash = path.basename(path.dirname(fsPath));
-                legacyStoragePath = fsPath;
-            }
+        this.legacyStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
+        if (!this.legacyStoragePath.length) {
+            workspaceHash = path.basename(path.dirname(this.legacyStoragePath));
         }
 
-        if (!legacyStoragePath) {
-            legacyStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
+        if (!this.legacyStoragePath.length) {
+            this.legacyStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            legacyStoragePath = path.join(legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
+            this.legacyStoragePath = path.join(this.legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
 
-        this.legacyStoragePath = legacyStoragePath;
         this.baseStoragePath = baseStoragePath;
 
-        if (baseStoragePath && workspaceHash) {
-            storagePath = baseStoragePath + workspaceHash;
+        if (baseStoragePath?.length && workspaceHash.length) {
+            storagePath = path.join(baseStoragePath, workspaceHash)
         }
 
         this.storagePath = storagePath;
