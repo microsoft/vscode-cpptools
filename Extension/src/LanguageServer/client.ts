@@ -832,7 +832,7 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private baseStoragePath: string | undefined;
+    private baseStoragePath: string;
     private legacyStoragePath: string;
     private storagePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
@@ -1301,15 +1301,13 @@ export class DefaultClient implements Client {
 
         this.baseStoragePath = util.getBaseStoragePath();
         this.legacyStoragePath =  "";
-        let storagePath: string = "";
+        this.storagePath =  "";
         let workspaceHash: string = "";
 
         this.legacyStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
         if (this.legacyStoragePath.length > 0) {
             workspaceHash = path.basename(path.dirname(this.legacyStoragePath));
-        }
-
-        if (this.legacyStoragePath.length > 0 ) {
+        } else {
             this.legacyStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
@@ -1317,12 +1315,10 @@ export class DefaultClient implements Client {
             this.legacyStoragePath = path.join(this.legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
 
-
-        if ((this.baseStoragePath !== undefined) && (workspaceHash.length > 0)) {
-            storagePath = path.join(this.baseStoragePath, workspaceHash)
+        if ((this.baseStoragePath.length > 0) && (workspaceHash.length > 0)) {
+            this.storagePath = path.join(this.baseStoragePath, workspaceHash);
         }
 
-        this.storagePath = storagePath;
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = new SettingsTracker(rootUri);
 

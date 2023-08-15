@@ -1300,7 +1300,7 @@ export function isValidIdentifier(candidate: string): boolean {
     return true;
 }
 
-export function getBaseStoragePath(): string | undefined {
+export function getBaseStoragePath(): string {
     let defaultCachePath: string = "";
     let pathEnvironmentVariable: string | undefined;
     switch (os.platform()) {
@@ -1320,11 +1320,8 @@ export function getBaseStoragePath(): string | undefined {
             }
             break;
     }
-    if (pathEnvironmentVariable) {
-        pathEnvironmentVariable = path.join(pathEnvironmentVariable, defaultCachePath)
-    }
 
-    return pathEnvironmentVariable;
+    return pathEnvironmentVariable ? path.join(pathEnvironmentVariable, defaultCachePath) : "";
 }
 
 function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, addSubfolder: boolean): string {
