@@ -1299,17 +1299,17 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        const baseStoragePath: string | undefined = util.getBaseStoragePath();
+        this.baseStoragePath = util.getBaseStoragePath();
         this.legacyStoragePath =  "";
         let storagePath: string = "";
         let workspaceHash: string = "";
 
         this.legacyStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
-        if (!this.legacyStoragePath.length) {
+        if (this.legacyStoragePath.length > 0) {
             workspaceHash = path.basename(path.dirname(this.legacyStoragePath));
         }
 
-        if (!this.legacyStoragePath.length) {
+        if (this.legacyStoragePath.length > 0 ) {
             this.legacyStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
@@ -1317,10 +1317,9 @@ export class DefaultClient implements Client {
             this.legacyStoragePath = path.join(this.legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
 
-        this.baseStoragePath = baseStoragePath;
 
-        if (baseStoragePath?.length && workspaceHash.length) {
-            storagePath = path.join(baseStoragePath, workspaceHash)
+        if ((this.baseStoragePath?.length !== undefined) && (workspaceHash.length > 0)) {
+            storagePath = path.join(this.baseStoragePath, workspaceHash)
         }
 
         this.storagePath = storagePath;
