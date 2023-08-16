@@ -49,7 +49,7 @@ const flags: {
                 return;
             } else {
                 throw new CommandParseError(
-                    `LocalFoward needs a listener and a destination separate by a colon. ${args} does not match.`
+                    `LocalForward needs a listener and a destination separate by a colon. ${args} does not match.`
                 );
             }
         }
@@ -63,7 +63,7 @@ const flags: {
         const delimiter: number = args.indexOf(':');
         if (delimiter === -1) {
             throw new CommandParseError(
-                `LocalFoward needs a listener and a destination separate by a colon. ${args} does not match.`
+                `LocalForward needs a listener and a destination separate by a colon. ${args} does not match.`
             );
         }
 

@@ -102,7 +102,7 @@ MyName2=Value2
         const fakeConfig: Environment[] = [];
         const result: ParsedEnvironmentFile = ParsedEnvironmentFile.CreateFromContent(content, "TestEnvFileName", fakeConfig["env"]);
 
-        assert(result.Warning && result.Warning.startsWith("Ignoring non-parseable lines in envFile TestEnvFileName"), 'Checking if warning exists');
+        assert(result.Warning && result.Warning.startsWith("Ignoring non-parsable lines in envFile TestEnvFileName"), 'Checking if warning exists');
         assertEnvironmentEqual(result.Env, "MyName1", "Value1");
         assertEnvironmentEqual(result.Env, "MyName2", "Value2");
     });

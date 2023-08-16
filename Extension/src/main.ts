@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
+            console.assert(uri.path[0] === '/', "A preceding slash is expected on schema uri path");
             const fileName: string = uri.path.substring(1);
             const locale: string = getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
