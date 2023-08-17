@@ -517,14 +517,12 @@ export class ReadWriteLineStream extends ReadableLineStream {
                     this.writeable.write(this.#encoder.encode(content.join('\n') + '\n'), (error: Error | null | undefined) => {
                         if ((global as any).DEVMODE && error) {
                             verbose(`stream-closed - ${error.message}`);
-                            // reject(error);
                         }
                     });
                 }
             } catch (e: any) {
                 if ((global as any).DEVMODE) {
                     verbose(`stream-throws - ${e.message}`);
-                    // reject(error);
                 }
             } finally {
                 resolve(undefined);

@@ -38,8 +38,6 @@ export class FastFinder implements AsyncIterable<string> {
         if (this.pending === 0) {
             this.#files.complete();
         }
-        // this.#files.complete();
-        // todo: if the processes are still running after a bit of time, kill it.
 
         return this.#files[Symbol.asyncIterator]();
     }

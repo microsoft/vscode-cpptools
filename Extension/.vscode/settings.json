@@ -49,6 +49,11 @@
     "[javascript]": {
         "editor.tabSize": 4,
     },
+    "markdown.extension.list.indentationSize": "inherit",
+    "markdown.extension.toc.levels": "2..6",
+    "[markdown]": {
+        "editor.tabSize": 4,
+    },
     "eslint.workingDirectories": [
         {
             "changeProcessCWD": true,

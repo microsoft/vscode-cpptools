@@ -113,6 +113,7 @@ export function members(obj: any): Members {
                     // is it a function
                     if (type === 'function') {
                         // it is actually possible to get the 'declared name' of a member (if it was quoted in the source code)
+                        // (this might be useful in the future. For now, we're just going to use the member name)
                         // const declaredName = obj[memberName].toString().replace(/\([\S\s]*/gm,'') || memberName;
 
                         // distill out the info for the function itself

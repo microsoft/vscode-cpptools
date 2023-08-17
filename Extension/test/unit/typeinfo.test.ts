@@ -44,7 +44,6 @@ describe('Type Information', () => {
 
     it('is not failing subtest', () => {
         ok(true, 'looks ok');
-        // ok(false,'some relevant assertion here');
     });
 
     it('Show the names of what typeOf returns', async () => {

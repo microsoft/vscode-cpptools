@@ -37,7 +37,6 @@ function showActiveHandles() {
         console.log('Active Handles: ');
         console.log('################');
         console.log(open);
-    // console.log([...getReservations()].join('\n'));
     }
 }
 
@@ -72,7 +71,6 @@ export function initDevModeChecks() {
 
     process.on('multipleResolves', (type, promise, reason) => {
         if (misbehavingPromises.has(promise)) {
-            // misbehavingPromises.delete(promise);
             return;
         }
         if (reason && (reason as any).stack) {

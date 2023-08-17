@@ -193,7 +193,6 @@ function posix(argsString: string): string[] {
         args.push(arg);
     }
 
-    // args = args.map(s => s.includes('"') ? `'${s}'` : s);
     args = args.map(s => {
         if (s.startsWith(`'`) && s.endsWith(`'`)) {
             return `"${s}"`;

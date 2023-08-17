@@ -1,20 +1,19 @@
 # Developer Documentation
 
 ## Table of Contents
-- [Developer Documentation](#developer-documentation)
-  - [Table of Contents](#table-of-contents)
-  - [Setup](#setup)
+- [Table of Contents](#table-of-contents)
+- [Setup](#setup)
     - [Required Tools](#required-tools)
     - [Setting up the repository](#setting-up-the-repository)
-  - [Building the Extension](#building-the-extension)
+- [Building the Extension](#building-the-extension)
     - [When using F5 Debug](#when-using-f5-debug)
     - [From Inside VSCode](#from-inside-vscode)
     - [From Command line](#from-command-line)
-  - [Use of an isolated VSCode environment](#use-of-an-isolated-vscode-environment)
-  - [Testing](#testing)
+- [Use of an isolated VSCode environment](#use-of-an-isolated-vscode-environment)
+- [Testing](#testing)
     - [Unit tests](#unit-tests)
     - [Scenario Tests](#scenario-tests)
-  - [Scripts](#scripts)
+- [Scripts](#scripts)
     - [`yarn scripts`](#yarn-scripts)
     - [`yarn show`](#yarn-show)
     - [`yarn clean`](#yarn-clean)
@@ -313,7 +312,7 @@ This will also verify that the repository is prepped and tries to prep it if it'
 ### `yarn verify`
 > #### `yarn verify [--verbose]` - verifies that the repository is built correctly
 
-Checks for the presence of the compiled files and the prepped files ( see [`yarn verify prep`](#yarn-verify) )
+Checks for the presence of the compiled files and the prepped files (see [`yarn verify prep`](#yarn-verify))
 (no output unless it fails)
 > #### `yarn verify prep [--verbose]` - verifies that the repository has been prepped to build
 
@@ -333,6 +332,6 @@ This will use webpack to build the extension. This is only necessary when packag
 ### `yarn postinstall`
 > #### `yarn postinstall` - post `yarn install` steps
 
-Installs the VSCode `d.ts` files and then runs `yarn prep`
+Installs the VSCode `*.d.ts` files and then runs `yarn prep`
 
 
