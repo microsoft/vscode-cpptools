@@ -2193,7 +2193,7 @@ export class DefaultClient implements Client {
     public async takeOwnership(document: vscode.TextDocument): Promise<void> {
         this.trackedDocuments.add(document);
         this.updateActiveDocumentTextOptions();
-        await this.sendDidOpen(document);
+        void this.enqueue(() => this.sendDidOpen(document));
     }
 
     public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
