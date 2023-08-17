@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.17.3: August 16, 2023
-### Bug Fixes
+### Bug Fix
 * Fix a regression with attaching the debugger to processes on Linux and macOS. [#11328](https://github.com/microsoft/vscode-cpptools/issues/11328)
 
 ## Version 1.17.2: August 14, 2023
