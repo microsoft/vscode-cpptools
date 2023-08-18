@@ -6195,6 +6195,7 @@
         "minimatch": "^3.0.5",
         "mkdirp": "^0.5.5",
         "node-loader": "^2.0.0",
+        "node-stream-zip": "^1.15.0",
         "plist": "^3.0.5",
         "posix-getopt": "^1.2.1",
         "shell-quote": "^1.7.3",
@@ -6204,8 +6205,7 @@
         "vscode-languageclient": "^8.1.0-next.4",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.27",
-        "which": "^2.0.2",
-        "yauzl": "^2.10.0"
+        "which": "^2.0.2"
     },
     "resolutions": {
         "chokidar": "^3.5.3",
