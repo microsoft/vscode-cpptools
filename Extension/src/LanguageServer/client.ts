@@ -540,8 +540,8 @@ export interface TextDocumentWillSaveParams {
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
-    baseStoragePath: string | undefined;
-    legacyStoragePath: string;
+    cacheStoragePath: string | undefined;
+    workspaceStoragePath: string;
     storagePath: string;
     freeMemory: number;
     vcpkgRoot: string;
@@ -832,9 +832,9 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private baseStoragePath: string;
-    private legacyStoragePath: string;
-    private storagePath: string;
+    private cacheStoragePath: string;
+    private workspaceStoragePath: string;
+    private databaseStoragePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -930,7 +930,7 @@ export class DefaultClient implements Client {
     public get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return {
             workspaceFolderBasename: this.Name,
-            workspaceStorage: this.legacyStoragePath,
+            workspaceStorage: this.workspaceStoragePath,
             execPath: process.execPath,
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
         };
@@ -1299,24 +1299,24 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        this.baseStoragePath = util.getBaseStoragePath();
-        this.legacyStoragePath =  "";
-        this.storagePath =  "";
+        this.cacheStoragePath = util.getCacheStoragePath();
+        this.workspaceStoragePath =  "";
+        this.databaseStoragePath =  "";
         let workspaceHash: string = "";
 
-        this.legacyStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
-        if (this.legacyStoragePath.length > 0) {
-            workspaceHash = path.basename(path.dirname(this.legacyStoragePath));
+        this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
+        if (this.workspaceStoragePath.length > 0) {
+            workspaceHash = path.basename(path.dirname(this.workspaceStoragePath));
         } else {
-            this.legacyStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
+            this.workspaceStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            this.legacyStoragePath = path.join(this.legacyStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
+            this.workspaceStoragePath = path.join(this.workspaceStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
 
-        if ((this.baseStoragePath.length > 0) && (workspaceHash.length > 0)) {
-            this.storagePath = path.join(this.baseStoragePath, workspaceHash);
+        if ((this.cacheStoragePath.length > 0) && (workspaceHash.length > 0)) {
+            this.databaseStoragePath = path.join(this.cacheStoragePath, workspaceHash);
         }
 
         const rootUri: vscode.Uri | undefined = this.RootUri;
@@ -1627,9 +1627,9 @@ export class DefaultClient implements Client {
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
-            storagePath: this.storagePath,
-            legacyStoragePath: this.legacyStoragePath,
-            baseStoragePath: this.baseStoragePath,
+            storagePath: this.databaseStoragePath,
+            workspaceStoragePath: this.workspaceStoragePath,
+            cacheStoragePath: this.cacheStoragePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,

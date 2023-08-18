@@ -1300,7 +1300,7 @@ export function isValidIdentifier(candidate: string): boolean {
     return true;
 }
 
-export function getBaseStoragePath(): string {
+export function getCacheStoragePath(): string {
     let defaultCachePath: string = "";
     let pathEnvironmentVariable: string | undefined;
     switch (os.platform()) {
