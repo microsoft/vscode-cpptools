@@ -201,7 +201,7 @@ function generateFilterFn(scanner: Scanner): Filter {
                 break;
 
             case Kind.StringLiteral:
-                // if we're given a string literal and the next token after that is one of {||, &&, ],}
+                // if we're given a string literal and the next token after that is one of {||, &&, ]}
                 // then we can just use the string literal as a comparison
                 // otherwise it should be part of the JavaScript expression (ie, ['foo'===bar])
                 eatWhitespace(inner);
