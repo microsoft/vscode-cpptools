@@ -298,7 +298,7 @@ export function subscribe<T extends Record<string, any>>(subscriber: Promise<Sub
                     if (filename) {
                         // it is a file, so load it as a function-let
                         const code = await readFile(filename, 'utf8');
-                        const fn = await sandbox.createFunction(code, ['event'], { filename, transpile: true });
+                        const fn = sandbox.createFunction(code, ['event'], { filename });
                         if (hasErrors(fn)) {
                             for (const each of fn) {
                                 console.error(each);
@@ -310,7 +310,7 @@ export function subscribe<T extends Record<string, any>>(subscriber: Promise<Sub
                     }
 
                     // if it's not a file, then treat it as a function-let
-                    const fn = await sandbox.createFunction(text, ['event'], { filename: `launch.json/${name}`, transpile: true });
+                    const fn = sandbox.createFunction(text, ['event'], { filename: `launch.json/${name}` });
                     if (hasErrors(fn)) {
                         for (const each of fn) {
                             console.error(each);

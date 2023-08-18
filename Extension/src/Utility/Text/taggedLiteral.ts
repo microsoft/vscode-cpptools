@@ -16,7 +16,7 @@ export function taggedLiteral(templateString: string, templateVars: Record<strin
 }
 
 function parseTaggedLiteral(templateString: string) {
-    // must parse the inside of javascript tagged literal format
+    // must parse the inside of JavaScript tagged literal format
     // and ensure that escape sequences like \n \t \r \$ are handled correctly
     const result = {
         template: new Array<string>(),

@@ -7,7 +7,7 @@ import { is } from './guards';
 
 /** creates a JSON object,
  *
- * @param instance the object to clone into a plain old javascript object
+ * @param instance the object to clone into a plain old JavaScript object
  * @param options.format if true, the JSON will be formatted with 2 spaces
  * @param options.types the types to explicitly use getOwnPropertyNames instead of just enumerating the properties
  */

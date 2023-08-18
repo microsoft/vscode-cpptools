@@ -70,12 +70,10 @@ export class Sandbox {
     }
 
     /**
-     * Creates an adhoc function from raw JS code.
+     * Creates an adhoc function from raw JavaScript code.
      *
-     * This wraps raw javascript code into a function with some interesting caveats:
+     * This wraps raw JavaScript code into a function with some interesting caveats:
      *  - It has to do some magic to get 'return' statements to work correctly
-     *  - it suppresses some errors from the TS compiler about the use of 'await' at the top-level and module imports.
-     *    (no worries, this is expected)
      *
      * @param sourceCode the code to turn into a function
      * @param parameterNames the names of the parameters to generate for the function
@@ -83,25 +81,20 @@ export class Sandbox {
      * @return an array of errors if there were any
      * @returns a function that can be called with the given parameters
      */
-    createFunction<T = ((...args: any[]) => unknown)>(sourceCode: string, parameterNames: string[], options?: CreateOptions & { async?: false; transpile?: false }): ScriptError[] | T;
-    createFunction<T = ((...args: any[]) => Promise<unknown>)>(sourceCode: string, parameterNames: string[], options: CreateOptions & { async: true; transpile?: false | undefined }): ScriptError[] | T;
+    createFunction<T = ((...args: any[]) => unknown)>(sourceCode: string, parameterNames: string[], options?: CreateOptions & { async?: false }): ScriptError[] | T;
+    createFunction<T = ((...args: any[]) => Promise<unknown>)>(sourceCode: string, parameterNames: string[], options: CreateOptions & { async: true }): ScriptError[] | T;
 
-    createFunction<T = ((...args: any[]) => unknown)>(sourceCode: string, parameterNames: string[], options?: CreateOptions & { async?: false; transpile: true }): Promise<ScriptError[] | T>;
-    createFunction<T = ((...args: any[]) => Promise<unknown>)>(sourceCode: string, parameterNames: string[], options: CreateOptions & { async: true; transpile: true }): Promise<ScriptError[] | T>;
-    createFunction<T = ((...args: any[]) => unknown)>(sourceCode: string, parameterNames: string[] = [], options?: CreateOptions & { async?: boolean }): ScriptError[] | T | Promise<ScriptError[] | T> {
+    createFunction<T = ((...args: any[]) => unknown)>(sourceCode: string, parameterNames: string[] = [], options?: CreateOptions & { async?: boolean }): ScriptError[] | T {
         // insert defaults in options
         options = {
             lineOffset: 0,
             columnOffset: 0,
             filename: '<sandbox>',
-            transpile: false,
             ...options ? options : {}
         };
 
         let scriptSrc = sourceCode;
 
-        // if we don't have to invoke the transpiler, this is simple, and a lot cheaper.
-        // (but we don't get any fancy errors if it's not valid javascript, so, this should be used when it's not unverified user input)
         scriptSrc = `${options.async ? 'async ' : ''}(${parameterNames.join(',')}) => { ${scriptSrc} }`;
 
         // create the script object, run it, and capture the generated function
