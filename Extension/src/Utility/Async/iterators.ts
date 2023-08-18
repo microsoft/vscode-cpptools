@@ -76,7 +76,7 @@ export type AsynchIterable<T> = AsyncIterable<T> & {
 
 export function accumulator<T>(...iterables: Some<T>[]): AsynchIterable<T> {
     const iterators = new Map<number, Promise<Cursor<T>>>();
-    let completeWhenEmpty = iterables.length > 0;   // if we are given any items, they we auto-complete when we run out (so an add after the last item is yielded will throw)
+    let completeWhenEmpty = iterables.length > 0; // if we are given any items, they we auto-complete when we run out (so an add after the last item is yielded will throw)
     const signal = new Signal<boolean>();
 
     const result = combiner(iterables) as unknown as AsynchIterable<T>;

@@ -159,13 +159,13 @@ export abstract class Emitter {
                     emitNow<TOutput>(eventName, descriptors, this, input || '', data as any) : // text and data
                     emitNow<TOutput>(eventName, descriptors, this, input || '', input as any)); // text or data (or neither)
 
-                return is.cancelled(result) ?         // was the event cancelled?
-                    options?.cancel?.() || Cancelled :     // the event was cancelled - call the cancel function, or return Cancelled
-                    is.continue(result) ?               // was the event continued (handler returned nothing)?
-                        is.function(options?.default) ?     // the event is continued, is the default handler a function?
-                            options?.default() :                 // the default is a function, call it.
-                            options?.default || Continue :      // the default is a value, call it (or just return Continue)
-                        result as TOutput;                  // the event was not cancelled, and the handler returned a value.
+                return is.cancelled(result) ? // was the event cancelled?
+                    options?.cancel?.() || Cancelled : // the event was cancelled - call the cancel function, or return Cancelled
+                    is.continue(result) ? // was the event continued (handler returned nothing)?
+                        is.function(options?.default) ? // the event is continued, is the default handler a function?
+                            options?.default() : // the default is a function, call it.
+                            options?.default || Continue : // the default is a value, call it (or just return Continue)
+                        result as TOutput; // the event was not cancelled, and the handler returned a value.
             };
         }
 
@@ -184,13 +184,13 @@ export abstract class Emitter {
                 emit<TOutput>(eventName, descriptors, this, input || '', data as any) : // text and data
                 emit<TOutput>(eventName, descriptors, this, input || '', input as any)); // text or data (or neither)
 
-            return is.cancelled(result) ?         // was the event cancelled?
-                options?.cancel?.() || Cancelled :     // the event was cancelled - call the cancel function, or return Cancelled
-                is.continue(result) ?               // was the event continued (handler returned nothing)?
-                    is.function(options?.default) ?     // the event is continued, is the default handler a function?
-                        options?.default() :                 // the default is a function, call it.
-                        options?.default || Continue :      // the default is a value, call it (or just return Continue)
-                    result as TOutput;                  // the event was not cancelled, and the handler returned a value.
+            return is.cancelled(result) ? // was the event cancelled?
+                options?.cancel?.() || Cancelled : // the event was cancelled - call the cancel function, or return Cancelled
+                is.continue(result) ? // was the event continued (handler returned nothing)?
+                    is.function(options?.default) ? // the event is continued, is the default handler a function?
+                        options?.default() : // the default is a function, call it.
+                        options?.default || Continue : // the default is a value, call it (or just return Continue)
+                    result as TOutput; // the event was not cancelled, and the handler returned a value.
         };
     }
 

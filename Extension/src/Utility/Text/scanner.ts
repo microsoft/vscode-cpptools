@@ -976,8 +976,8 @@ export class Scanner implements Token {
             return { line: position.line, column: position.column };
         }
 
-        let first = 0;    // left endpoint
-        let last = this.#map.length - 1;   // right endpoint
+        let first = 0; // left endpoint
+        let last = this.#map.length - 1; // right endpoint
         let middle = Math.floor((first + last) / 2);
 
         while (first <= last) {

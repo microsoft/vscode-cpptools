@@ -118,12 +118,12 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
             const subscribers = opts.on ? moreOpts.on ? [opts.on, moreOpts.on] : [opts.on] : moreOpts.on ? [moreOpts.on] : [];
 
             const proc = await new Process(
-                await fullPath,                                                                                   // executable
-                [...result.cmdlineArgs, ...primitives(moreArgs)],                                                  // arguments
-                result.options.cwd || moreOpts.cwd || process.cwd(),                                              // cwd
-                { ...process.env, ...result.options.env, ...moreOpts.env },                                       // environment
-                false,                                                                                            // no stdin.
-                ...subscribers                                                                                    // event handlers
+                await fullPath, // executable
+                [...result.cmdlineArgs, ...primitives(moreArgs)], // arguments
+                result.options.cwd || moreOpts.cwd || process.cwd(), // cwd
+                { ...process.env, ...result.options.env, ...moreOpts.env }, // environment
+                false, // no stdin.
+                ...subscribers // event handlers
             );
 
             const code = await proc.exitCode;
@@ -141,19 +141,19 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
             const moreOpts = options(moreArgs);
             const subscribers = opts.on ? moreOpts.on ? [opts.on, moreOpts.on] : [opts.on] : moreOpts.on ? [moreOpts.on] : [];
             return new Process(
-                await fullPath,                                                                                   // executable
-                [...result.cmdlineArgs, ...primitives(moreArgs)],                                                  // arguments
-                result.options.cwd || moreOpts.cwd || process.cwd(),                                              // cwd
-                { ...process.env, ...result.options.env, ...moreOpts.env },                                       // environment
+                await fullPath, // executable
+                [...result.cmdlineArgs, ...primitives(moreArgs)], // arguments
+                result.options.cwd || moreOpts.cwd || process.cwd(), // cwd
+                { ...process.env, ...result.options.env, ...moreOpts.env }, // environment
                 true,
-                ...subscribers                                                                                    // event handlers
+                ...subscribers // event handlers
             );
         }) as any as ProcessFunction;
     }
 
     result.cmdlineArgs = cmdlineArgs; // bind the default args to the function
-    result.options = opts;            // bind the default options to the function
-    result.executable = fullPath;         // bind the executable to the function
+    result.options = opts; // bind the default options to the function
+    result.executable = fullPath; // bind the executable to the function
 
     return result;
 }

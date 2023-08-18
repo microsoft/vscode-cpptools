@@ -21,6 +21,6 @@ export function getEnvironmentVariable(name: string): string | undefined {
  */
 export function resolveEnvironmentVariables(str: string): string {
     return isWindows ?
-        str.replace(/%([^%]+)%/g, (withPercents, withoutPercents) => getEnvironmentVariable(withoutPercents) || withPercents) :  // windows
+        str.replace(/%([^%]+)%/g, (withPercents, withoutPercents) => getEnvironmentVariable(withoutPercents) || withPercents) : // windows
         str.replace(/\$(\w+)/g, (withDollars, withoutDollars) => getEnvironmentVariable(withoutDollars) || withDollars); // everything else
 }

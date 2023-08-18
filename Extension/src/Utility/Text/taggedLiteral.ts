@@ -126,11 +126,11 @@ function resolveValue(expression: string, context: Record<string, any>, customRe
 
     if (prefix) {
         const variable = context[prefix];
-        if (variable !== undefined && variable !== null) {                  // did we get back an actual value
+        if (variable !== undefined && variable !== null) { // did we get back an actual value
             // its a child of a variable
-            return joinIfArray(suffix.includes(':') ?                         // is the suffix another expression?
-                resolveValue(suffix, variable) :                                // Yeah, resolve it
-                variable[suffix] ?? customResolver(prefix, suffix) ?? '');      // No, return the member of the variable, or dynamic, or empty string
+            return joinIfArray(suffix.includes(':') ? // is the suffix another expression?
+                resolveValue(suffix, variable) : // Yeah, resolve it
+                variable[suffix] ?? customResolver(prefix, suffix) ?? ''); // No, return the member of the variable, or dynamic, or empty string
         }
 
         // no variable by that name, so return the dynamic value, or an empty string
@@ -228,7 +228,7 @@ export function render(templateString: string | string[], context: Record<string
     const { template, expressions, state, message } = parseTaggedLiteral(templateString);
     const stabilize = asJs ? as.js : (x: string) => as.string(x) ?? '';
     return state === 'error' ?
-        message :  // return the error message if the parse failed. (this is fatal anyways)
+        message : // return the error message if the parse failed. (this is fatal anyways)
         template.reduce((result, each, index) => `${result}${stabilize(resolveValue(expressions[index - 1], context, customResolver))}${each}`); // resolve the inline expressions and join the template
 }
 
