@@ -111,7 +111,7 @@ suite("[Inlay hints test]", function(): void {
         await changeInlayHintSetting(autoDeclarationTypesShowOnLeft, disabled);
 
         // WARNING: debugging this test will block on this call: (and others like it.)
-        const result1 =  await timeout(1000, vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range) as Promise<any>);
+        const result1 = await timeout(1000, vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider', fileUri, range) as Promise<any>);
         assert.strictEqual(result1.length, 0, "Incorrect number of results.");
 
         await changeInlayHintSetting(autoDeclarationTypesEnabled, enabled);

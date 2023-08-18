@@ -82,7 +82,7 @@ async function dispatch<TResult>(event: Event<any, TResult>): Promise<void> {
                 resultValue = r as TResult | EventStatus;
 
                 if (is.cancelled(resultValue)) {
-                    return event.completed.resolve(resultValue);  // the event has been cancelled
+                    return event.completed.resolve(resultValue); // the event has been cancelled
                 }
             }
         } catch (e: any) {

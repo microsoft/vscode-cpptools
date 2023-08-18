@@ -138,7 +138,7 @@ export type Some<T> = T | Promise<T> | AsyncIterable<T | undefined> | AsyncItera
 
 export async function* asyncOf<T>(...items: (undefined | Promise<undefined> | Some<T>)[]): AsyncIterable<NonNullable<T>> {
     if (is.asyncIterable(items)) {
-        for await (const item of items)  {
+        for await (const item of items) {
             if (is.asyncIterable(item) || is.iterable(item)) {
                 yield* item as any;
                 continue;

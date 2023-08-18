@@ -1259,7 +1259,7 @@ const allowedIdentifierUnicodeRanges: number[][] = [
     [0xB0000, 0xBFFFD], //
     [0xC0000, 0xCFFFD], //
     [0xD0000, 0xDFFFD], //
-    [0xE0000, 0xEFFFD]  // LANGUAGE TAG (U+E0001) - VARIATION SELECTOR-256 (U+E01EF)
+    [0xE0000, 0xEFFFD] // LANGUAGE TAG (U+E0001) - VARIATION SELECTOR-256 (U+E01EF)
 ];
 
 const disallowedFirstCharacterIdentifierUnicodeRanges: number[][] = [
@@ -1267,7 +1267,7 @@ const disallowedFirstCharacterIdentifierUnicodeRanges: number[][] = [
     [0x0300, 0x036F], // COMBINING GRAVE ACCENT - COMBINING LATIN SMALL LETTER X
     [0x1DC0, 0x1DFF], // COMBINING DOTTED GRAVE ACCENT - COMBINING RIGHT ARROWHEAD AND DOWN ARROWHEAD BELOW
     [0x20D0, 0x20FF], // COMBINING LEFT HARPOON ABOVE - COMBINING ASTERISK ABOVE
-    [0xFE20, 0xFE2F]  // COMBINING LIGATURE LEFT HALF - COMBINING CYRILLIC TITLO RIGHT HALF
+    [0xFE20, 0xFE2F] // COMBINING LIGATURE LEFT HALF - COMBINING CYRILLIC TITLO RIGHT HALF
 ];
 
 export function isValidIdentifier(candidate: string): boolean {

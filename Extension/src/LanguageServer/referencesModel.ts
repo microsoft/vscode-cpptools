@@ -140,11 +140,11 @@ export class ReferencesModel {
 }
 
 export enum NodeType {
-    undefined,              // Use undefined for creating a flat raw list of reference results.
-    referenceType,          // A node to group reference types.
-    file,                   // File node that has reference nodes.
-    fileWithPendingRef,     // File node with pending references to find (e.g. it has no reference children yet).
-    reference               // A reference node, which is either a string, comment, inactive reference, etc.
+    undefined, // Use undefined for creating a flat raw list of reference results.
+    referenceType, // A node to group reference types.
+    file, // File node that has reference nodes.
+    fileWithPendingRef, // File node with pending references to find (e.g. it has no reference children yet).
+    reference // A reference node, which is either a string, comment, inactive reference, etc.
 }
 
 export class TreeNode {

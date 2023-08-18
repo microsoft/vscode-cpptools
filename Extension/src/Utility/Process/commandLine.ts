@@ -219,7 +219,7 @@ function posix(argsString: string): string[] {
     }
     const txt = r.stdout.toString();
 
-    const result =  txt.split('\n');
+    const result = txt.split('\n');
 
     result.length--;
     return result;

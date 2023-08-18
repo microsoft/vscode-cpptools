@@ -46,7 +46,7 @@ export function addMisbehavingPromise(promise: Promise<any>) {
     misbehavingPromises?.add(promise);
     return promise;
 }
-(global as any).addMisbehavingPromise  = addMisbehavingPromise;
+(global as any).addMisbehavingPromise = addMisbehavingPromise;
 let MAX = 20;
 
 export function initDevModeChecks() {

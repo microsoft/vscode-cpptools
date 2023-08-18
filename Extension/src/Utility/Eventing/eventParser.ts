@@ -162,7 +162,7 @@ function generateFilterFn(scanner: Scanner): Filter {
                 while (inner.length) {
 
                     token = inner.shift()!;
-                    rxExpression.push(token);  // store this token as part of the regex
+                    rxExpression.push(token); // store this token as part of the regex
 
                     switch (token.kind) {
                         case Kind.Slash:

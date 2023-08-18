@@ -22,25 +22,25 @@ suite("multiline comment setting tests", function(): void {
     });
 
     const defaultMLRules: vscode.OnEnterRule[] = [
-        {   // e.g. /** | */
+        { // e.g. /** | */
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             afterText: /^\s*\*\/$/,
             action: { indentAction: vscode.IndentAction.IndentOutdent, appendText: ' * ' }
         },
-        {   // e.g. /** ...|
+        { // e.g. /** ...|
             beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
             action: { indentAction: vscode.IndentAction.None, appendText: ' * ' }
         },
-        {   // e.g.  * ...|
+        { // e.g.  * ...|
             beforeText: /^(\t|[ ])*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
             previousLineText: /(?=^(\s*(\/\*\*|\*)).*)(?=(?!(\s*\*\/)))/,
             action: { indentAction: vscode.IndentAction.None, appendText: '* ' }
         },
-        {   // e.g.  */|
+        { // e.g.  */|
             beforeText: /^(\t|[ ])*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         },
-        {   // e.g.  *-----*/|
+        { // e.g.  *-----*/|
             beforeText: /^(\t|[ ])*\*[^/]*\*\/\s*$/,
             action: { indentAction: vscode.IndentAction.None, removeText: 1 }
         }

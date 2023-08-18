@@ -35,12 +35,12 @@ const fails: [ string | undefined, string, string?][] = [
     [undefined, "$(echo ')')", marker()],
     [undefined, "$(echo hello; echo)", marker()],
     [undefined, "a$(echo b)c", marker()],
-    ["pepperoni", "${var%$(echo oni)}",  marker()],
-    [undefined, "\"$(echo hello there)\"",  marker()],
-    [undefined, "\"$(echo \"hello there\")\"",  marker()],
+    ["pepperoni", "${var%$(echo oni)}", marker()],
+    [undefined, "\"$(echo hello there)\"", marker()],
+    [undefined, "\"$(echo \"hello there\")\"", marker()],
     ["1", "$(( $(echo 3)+$var ))", marker()],
-    [undefined, "\"$(echo \"*\")\"",  marker()],
-    [ undefined, "\"a\n\n$(echo)b\"",  marker()],
+    [undefined, "\"$(echo \"*\")\"", marker()],
+    [ undefined, "\"a\n\n$(echo)b\"", marker()],
     /* Things that should fail */
     [ undefined, "new\nline", marker()],
     [ undefined, "pipe|symbol", marker()],
@@ -67,9 +67,9 @@ const fails: [ string | undefined, string, string?][] = [
     [ undefined, "$((1+`echo 1`))", marker() ],
     [ undefined, "$((1+$((`echo 1`))))", marker() ],
 
-    [ undefined, "`\\", marker() ],     /* BZ 18042  */
-    [ undefined, "${", marker() ],      /* BZ 18043  */
-    [ undefined, "L${a:", marker()],   /* BZ 18043#c4  */
+    [ undefined, "`\\", marker() ], /* BZ 18042  */
+    [ undefined, "${", marker() ], /* BZ 18043  */
+    [ undefined, "L${a:", marker()], /* BZ 18043#c4  */
     [ undefined, "${1/0]", marker() ] /* BZ 18100 */
 ];
 
@@ -171,7 +171,7 @@ const success: [string | undefined, string, string[], string?][] = [
 ];
 let stop = false;
 describe('Command Lines', () => {
-    for (const [variable, cmdline,  expected, err ] of success) {
+    for (const [variable, cmdline, expected, err ] of success) {
         if (stop) {
             break;
         }

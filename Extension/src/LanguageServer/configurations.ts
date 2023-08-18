@@ -1314,7 +1314,7 @@ export class CppProperties {
         }
 
         if (!this.configurationJson) {
-            this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
+            this.resetToDefaultSettings(true); // I don't think there's a case where this will be hit anymore.
         }
 
         void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);

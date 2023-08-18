@@ -56,7 +56,7 @@ export function classOf(instance: AribtraryObject | Constructor): Constructor | 
     return instance ? typeof instance === 'function' ? // is it a javascript function of some kind?
         is.asyncConstructor(instance) ? classOf(instance.class) :
             is.Constructor(instance) ? instance as Constructor // is it really a constructor?
-                : undefined  // no, it's a js function, but not a constructor
+                : undefined // no, it's a js function, but not a constructor
         : instance.constructor as Constructor : // it's an object, so get the constructor from the object
         undefined;
 }

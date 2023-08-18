@@ -22,7 +22,7 @@ export let $cmd = 'main';
 export let $scenario = '';
 
 // loop thru the args and pick out --scenario=... and remove it from the $args and set $scenario
-export const $args  = process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
+export const $args = process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
 
 /** enqueue the call to the callback function to happen on the next available tick, and return a promise to the result */
 export function then<T>(callback: () => Promise<T> | T): Promise<T> {
@@ -97,7 +97,7 @@ export async function write(filePath: string, data: Buffer | string) {
             const textContent = content.toString();
 
             // normalize the line endings to the same as the current file.
-            data = textContent.indexOf('\r\n') > -1 ? data.replace(/\r\n|\n/g, '\r\n') :  data.replace(/\r\n|\n/g, '\n');
+            data = textContent.indexOf('\r\n') > -1 ? data.replace(/\r\n|\n/g, '\r\n') : data.replace(/\r\n|\n/g, '\n');
 
             // if the text content is a match, we don't have to change anything
             if (textContent === data) {

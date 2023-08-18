@@ -118,6 +118,7 @@ module.exports = {
         "no-sequences": "error",
         "no-sparse-arrays": "error",
         "no-trailing-spaces": "error",
+        "no-multi-spaces": "error",
         "no-undef-init": "error",
         "no-unsafe-finally": "error",
         "no-unused-expressions": "error",

@@ -110,7 +110,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
         const full: string = match[0];
         const command: string = match[1];
         if (subs.has(full)) {
-            continue;  // Don't execute commands more than once per string
+            continue; // Don't execute commands more than once per string
         }
         try {
             const command_ret: unknown = await vscode.commands.executeCommand(command, options.vars.workspaceFolder);

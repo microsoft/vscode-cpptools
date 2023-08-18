@@ -42,7 +42,7 @@ export async function install() {
             settingsJson["workbench.colorTheme"] = "Tomorrow Night Blue";
         }
 
-        settingsJson["git.openRepositoryInParentFolders"] =  "never";
+        settingsJson["git.openRepositoryInParentFolders"] = "never";
         await write(settings, JSON.stringify(settingsJson, null, 4));
 
         return {
