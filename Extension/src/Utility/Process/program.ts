@@ -84,7 +84,7 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
                 // if they didn't pass in a valid executable path, let's see if we can figure it out.
 
                 // if we were handed some choices, we'll look at them, otherwise we'll see what we can find on the PATH.
-                opts.choices ??= lazy(async () => new Finder(executable).scan(... await searchPaths).results);
+                opts.choices ??= lazy(async () => new Finder(executable).scan(...await searchPaths).results);
                 // but before we look at any of that, let's see if someone else wants to take that off our hands
                 const bin = await emitNow<string>('select-binary', Descriptors.none, executable, is.promise(opts.choices) ? await opts.choices : new Set());
                 return await filepath.isExecutable(bin) || // we have a good one coming back from the event

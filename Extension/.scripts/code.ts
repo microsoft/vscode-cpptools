@@ -33,7 +33,7 @@ export async function main() {
     //verbose(`Installing release version of 'ms-vscode.cpptools'`);
     //spawnSync(cli, [...args, '--install-extension', 'ms-vscode.cpptools'], { encoding: 'utf-8', stdio: 'ignore' })
     verbose(green('Launch VSCode'));
-    const ARGS = [...args, ... options.launchArgs.filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir=')), `--extensionDevelopmentPath=${$root}`, ...$args ];
+    const ARGS = [...args, ...options.launchArgs.filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir=')), `--extensionDevelopmentPath=${$root}`, ...$args ];
     verbose(gray(`${cli}\n  ${ [...ARGS ].join('\n  ')}`));
 
     spawnSync(cli, ARGS, { encoding: 'utf-8', stdio: 'ignore', env: { ...process.env, DONT_PROMPT_WSL_INSTALL:"1" } });
