@@ -607,7 +607,7 @@ export class Scanner implements Token {
                         return;
                     }
 
-                    // we're done here, lose the last token and get out/
+                    // we're done here, lose the last token and get out
                     this.take();
                     return;
 
