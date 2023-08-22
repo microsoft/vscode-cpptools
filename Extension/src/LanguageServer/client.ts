@@ -540,9 +540,9 @@ export interface TextDocumentWillSaveParams {
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
-    cacheStoragePath: string | undefined;
+    cacheStoragePath: string;
     workspaceStoragePath: string;
-    storagePath: string;
+    databaseStoragePath: string;
     freeMemory: number;
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
@@ -1300,8 +1300,8 @@ export class DefaultClient implements Client {
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
         this.cacheStoragePath = util.getCacheStoragePath();
-        this.workspaceStoragePath =  "";
-        this.databaseStoragePath =  "";
+        this.workspaceStoragePath = "";
+        this.databaseStoragePath = "";
         let workspaceHash: string = "";
 
         this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
@@ -1627,7 +1627,7 @@ export class DefaultClient implements Client {
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
-            storagePath: this.databaseStoragePath,
+            databaseStoragePath: this.databaseStoragePath,
             workspaceStoragePath: this.workspaceStoragePath,
             cacheStoragePath: this.cacheStoragePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
