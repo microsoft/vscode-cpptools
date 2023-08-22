@@ -488,7 +488,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                         // Check if debuggerName exists on $PATH
                         newConfig.miDebuggerPath = debuggerName;
                     } else {
-                        // Try the usr path for non-windows platforms.
+                        // Try the usr path for non-Windows platforms.
                         const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
                         if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
                             newConfig.miDebuggerPath = usrDebuggerPath;

@@ -203,7 +203,7 @@ function generateFilterFn(scanner: Scanner): Filter {
             case Kind.StringLiteral:
                 // if we're given a string literal and the next token after that is one of {||, &&, ]}
                 // then we can just use the string literal as a comparison
-                // otherwise it should be part of the JavaScript expression (ie, ['foo'===bar])
+                // otherwise it should be part of the JavaScript expression (i.e. ['foo'===bar])
                 eatWhitespace(inner);
                 const peek = inner[0];
                 if (peek) {

@@ -28,8 +28,8 @@ const cache = new Map<string, File | FolderWithChildren | Promise<FolderWithChil
  * it will only do the work once per directory
  *
  * @param fullPath the full path of the folder to read
- * @param executableExtensions  a set of file extensions that are considered executable on windows
- * @returns a map of the files and folders in the directory, or undefined if the directory doesn't exist or is unaccessible.
+ * @param executableExtensions  a set of file extensions that are considered executable on Windows
+ * @returns a map of the files and folders in the directory, or undefined if the directory doesn't exist or is inaccessible.
  */
 async function readDirectory(fullPath: string, executableExtensions: Set<string> = process.platform === 'win32' ? new Set(['.exe'/* ,'.cmd','.bat' */]) : new Set()): Promise<Map<string, File | FolderWithChildren> | undefined> {
     // have we already read this directory?
@@ -79,7 +79,7 @@ async function readDirectory(fullPath: string, executableExtensions: Set<string>
             cache.set(fullPath, promise);
         }
 
-        // this doesn't use the path.info function because in this case, the direntry is already available, and on windows we can skip a call to stat (which is expensive)
+        // this doesn't use the path.info function because in this case, the direntry is already available, and on Windows we can skip a call to stat (which is expensive)
         // process all the entries, and add them to the cache and the children map
         await foreach(readdir(fullPath, { withFileTypes: true }).catch(returns.none), async (direntry: Dirent) => {
             const name = direntry.name;
@@ -103,7 +103,7 @@ async function readDirectory(fullPath: string, executableExtensions: Set<string>
                     entry.basename = basename(name, entry.extension);
                 } else {
                     entry.basename = basename(name);
-                    // in non-windows platforms, we need to check the file mode to see if it's executable.
+                    // in non-Windows platforms, we need to check the file mode to see if it's executable.
                     const stats = await stat(entry.fullPath).catch(returns.undefined);
                     if (!stats) {
                         return;

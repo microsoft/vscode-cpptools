@@ -15,9 +15,7 @@ import { verbose } from '../Text/streams';
 
 /* eslint-disable no-constant-condition */
 
-/**
- * An iterator/iterable wrapper to process a stream of lines.
- */
+/** An iterator/iterable wrapper to process a stream of lines. */
 export class LineIterator implements AsyncIterable<string>, AsyncIterator<string> {
     #current = 0;
     constructor(private lineBuffer: ReadableLineStream, private initial: number, private stopExpression?: string | RegExp) {
@@ -64,9 +62,7 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
         return this;
     }
 
-    /**
-     * resets the iterator to the beginning.
-     */
+    /** resets the iterator to the beginning. */
     reset() {
         // reset the current position to the initial position (or head if it's trimmed)
         this.initial = this.#current = Math.max(
@@ -100,8 +96,6 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
 
     /**
      * Splits the iterator into two, and advances the new iterator to the line that matches the expression.
-     * @param expression
-     * @returns
      */
     from(expression: string | RegExp) {
         return this.tee().skipTo(expression);
@@ -111,7 +105,6 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
      * Stops the iterator at the point where we find the matching line.
      *
      * @param expression the string or regex to stop at
-     * @returns
      */
     to(expression: string | RegExp) {
         return this.until(expression);
@@ -119,8 +112,6 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
 
     /**
      * Advances the iterator to the point where we find the line.
-     * @param expression
-     * @returns
      */
     async skipTo(expression: string | RegExp) {
         this.stopExpression = undefined;
@@ -222,9 +213,7 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
     }
 }
 
-/**
- * A buffer of lines from a stream (stdout or stderr).
- */
+/** A buffer of lines from a stream (stdout or stderr). */
 export class ReadableLineStream implements AsyncIterable<string> {
     readonly changed = new Signal<void>();
     #decoder: TextDecoder;
@@ -446,6 +435,8 @@ export class ReadWriteLineStream extends ReadableLineStream {
 
         this.writeable.on('error', (_error) => {
             /*
+            this is handy for debugging to see if errors are happening.
+
             if ((global as any).DEVMODE && error) {
               verbose(`write-stream - error - ${error.message}`);
             }

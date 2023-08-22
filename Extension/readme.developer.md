@@ -157,8 +157,8 @@ This shows the commands available in the `scripts` section of the `package.json`
 
 ### `yarn show`
 > #### `yarn show` - shows the files in the repository that are untracked and .gitignored
-This shows the files in the repository that are not tracked (ie, not in .git) and are 
-ignored by `git` This will not show untracked files that are not ignored (ie, new files 
+This shows the files in the repository that are not tracked (i.e. not in .git) and are 
+ignored by `git` This will not show untracked files that are not ignored (i.e. new files 
 that you could add to the repository)
 
 > #### `yarn show new` - shows new files that are not git ignored
@@ -176,13 +176,13 @@ Removes all of the files in the `dist` folder (where all the compiled .js files 
 > #### `yarn clean all` - cleans all the untracked/ignored files out of the repository except for `node_modules`
 Removes all of the `untracked` and `.gitignored` in the repository except for files in the `node_modules` folder.
 (this is useful to reset the repository to a clean state, but not have to reinstall all of the dependencies)  
-Will not touch any files that could be added to the repo (ie, new .ts files, etc)
+Will not touch any files that could be added to the repo (i.e. new .ts files, etc)
 
 > #### `yarn clean reset` - cleans all the untracked/ignored files out of the repository
 
 Removes all of the `untracked` and `.gitignored` in the repository except.
 (this is useful to reset the repository to a clean state)  
-Will not touch any files that could be added to the repo (ie, new .ts files, etc)
+Will not touch any files that could be added to the repo (i.e. new .ts files, etc)
 <hr>
 
 ### `yarn test`

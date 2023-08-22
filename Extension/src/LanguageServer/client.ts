@@ -857,8 +857,8 @@ export class DefaultClient implements Client {
     /**
      * Indicates if the blocking task dispatcher is currently running
      *
-     * This will be in the Set state when the dispatcher is not running (ie, if you await this it will be resolved immediately)
-     * If the dispatcher is running, this will be in the Reset state (ie, if you await this it will be resolved when the dispatcher is done)
+     * This will be in the Set state when the dispatcher is not running (i.e. if you await this it will be resolved immediately)
+     * If the dispatcher is running, this will be in the Reset state (i.e. if you await this it will be resolved when the dispatcher is done)
      */
     private static readonly dispatching = new ManualSignal<void>();
 

@@ -16,7 +16,8 @@ export interface ScriptError {
 }
 
 export interface CreateOptions {
-    /** the "filename" of the source to compile */
+    /** the filename (or identity of the the source code, which may or may not be an actual filename,
+     * it could be any textual identifier that the caller wants to call it.) of the source to compile */
     filename?: string;
 
     /** the column in the physical file where the source starts

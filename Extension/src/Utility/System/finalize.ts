@@ -45,7 +45,7 @@ export function finalize(...items: any[]): void {
                 if (is.promise(result)) {
                     // if the item has a finalize method, and it returns a promise,
                     // then we'll put the rest of the finalization on hold until that promise resolves.
-                    // (this is useful when things need a few moments to stop (ie, node:net:Server)
+                    // (this is useful when things need a few moments to stop (i.e. node:net:Server)
 
                     const fin = result.catch(returns.undefined).then(() => {
                         ignore(() => item.end?.());

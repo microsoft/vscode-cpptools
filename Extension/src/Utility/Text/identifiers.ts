@@ -19,7 +19,7 @@ export function deconstruct(identifier: string | string[]): string[] {
 }
 /** takes an identifier string and deconstructs and normalizes it and smashes it together.
  *
- *  This is useful for supporting multiple naming conventions for the same identifier. (ie, 'fooBar' and 'foo-bar' are the same identifier)
+ *  This is useful for supporting multiple naming conventions for the same identifier. (i.e. 'fooBar' and 'foo-bar' are the same identifier)
  */
 export function smash(identifier: string | string[]): string {
     return deconstruct(identifier).join('');
