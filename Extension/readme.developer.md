@@ -28,7 +28,7 @@
     - [`yarn watch`](#yarn-watch)
     - [`yarn verify`](#yarn-verify)
     - [`yarn webpack`](#yarn-webpack)
-    - [`yarn postinstall`](#yarn-postinstall)
+    - [`yarn install`](#yarn-install)
 
 ## Setup
 
@@ -42,6 +42,8 @@
 `git clone https://github.com/microsoft/vscode-cpptools.git`
 
 `yarn install`
+
+It's also good practice to run `yarn install` after merging from upstream or switching branches. 
 
 ## Building the Extension
 
@@ -329,9 +331,9 @@ This will use webpack to build the extension. This is only necessary when packag
 
 
 ---
-### `yarn postinstall`
-> #### `yarn postinstall` - post `yarn install` steps
+### `yarn install`
+> #### `yarn install` - post `yarn install` steps (runs the `postinstall` script)
 
 Installs the VS Code `*.d.ts` files and then runs `yarn prep`
 
-
+You should run `yarn install` after merging from upstream or switching branches. 
