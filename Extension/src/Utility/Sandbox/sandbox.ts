@@ -17,7 +17,7 @@ export function createSandbox(): <T>(code: string, context?: any) => T {
         const response = `SAFE_EVAL_${Math.floor(Math.random() * 1000000)}`;
         sandbox[response] = {};
         if (context) {
-            Object.keys(context).forEach((key) => (sandbox[key] = context[key]));
+            Object.keys(context).forEach((key) => sandbox[key] = context[key]);
             runInContext(
                 `try {  ${response} = ${code} } catch (e) { ${response} = undefined }`,
                 sandbox

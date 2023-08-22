@@ -255,7 +255,7 @@ export class Scanner implements Token {
     }
 
     private get eof() {
-        return this.#offset > (this.#length);
+        return this.#offset > this.#length;
     }
 
     private advance(count?: number): number {
@@ -761,7 +761,7 @@ export class Scanner implements Token {
                 main;
 
         // update the position
-        this.#column += (this.#offset - start);
+        this.#column += this.#offset - start;
         return this.kind = Kind.NumericLiteral;
     }
 

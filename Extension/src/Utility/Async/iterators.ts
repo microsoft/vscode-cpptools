@@ -172,6 +172,6 @@ export async function* asyncOf<T>(...items: (undefined | Promise<undefined> | So
  * By using this race function instead, we can ignore those (the v8 JIT will easily optimize this out in production)
  */
 export function race(promises: Promise<any>[]): Promise<any> {
-    const addMisbehavingPromise: <T>(p: Promise<T>) => Promise<T> = ((global as any).addMisbehavingPromise);
+    const addMisbehavingPromise: <T>(p: Promise<T>) => Promise<T> = (global as any).addMisbehavingPromise;
     return addMisbehavingPromise ? addMisbehavingPromise(Promise.race(promises)) : Promise.race(promises);
 }

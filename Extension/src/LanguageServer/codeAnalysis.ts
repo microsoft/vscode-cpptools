@@ -512,8 +512,8 @@ export function removeCodeAnalysisProblems(identifiersAndUris: CodeAnalysisDiagn
         const newDiagnostics: vscode.Diagnostic[] = [];
         for (const diagnostic of diagnostics) {
             const code: string = typeof diagnostic.code === "string" ? diagnostic.code :
-                (typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
-                    diagnostic.code.value : "");
+                typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
+                    diagnostic.code.value : "";
             let removed: boolean = false;
             for (const identifier of identifiersAndUri.identifiers) {
                 if (code !== identifier.code || !rangeEquals(diagnostic.range, identifier.range)) {

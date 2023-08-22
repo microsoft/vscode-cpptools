@@ -271,7 +271,7 @@ export function getLanguageConfigFromPatterns(languageId: string, patterns?: (st
     if (duplicates) {
         getOutputChannel().appendLine(localize("duplicate.multiline.patterns", "Duplicate multiline comment patterns detected."));
     }
-    return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => (e)) }; // Remove any 'undefined' entries
+    return { onEnterRules: beginRules.concat(continueRules).concat(endRules).filter(e => e) }; // Remove any 'undefined' entries
 }
 
 function constructCommentRules(comment: CommentPattern, languageId: string): Rules {

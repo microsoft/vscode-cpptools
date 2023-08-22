@@ -14,10 +14,10 @@ import { install, options } from "./vscode";
 export { install, reset } from './vscode';
 
 export async function main() {
-    let ti = (await getTestInfo($scenario));
+    let ti = await getTestInfo($scenario);
     if (!ti) {
         // try using the first arg as a scenario name or location
-        ti = (await getTestInfo($args[0], $args[0] ? resolve(pwd, $args[0]) : undefined));
+        ti = await getTestInfo($args[0], $args[0] ? resolve(pwd, $args[0]) : undefined);
         if (ti) {
             $args[0] = ti.workspace;
         }

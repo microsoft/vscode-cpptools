@@ -20,7 +20,7 @@ export const Something = Async(class Something {
             throw new Error('init throws on -2');
         }
         // ensure that this is delayed by 100ms
-        await (sleep(100));
+        await sleep(100);
 
         this.hasBeenInitialized = true;
         return this;

@@ -407,9 +407,9 @@ export class LanguageStatusUI {
 
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
-                (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
-                    ReferencesCommandMode.Peek));
+            this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
+                this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+                    ReferencesCommandMode.Peek;
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
@@ -539,7 +539,7 @@ export class LanguageStatusUI {
         items.push({ label: localize("edit.configuration.json", "Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showConfigurationProviders(currentProvider?: string): Promise<string | undefined> {
@@ -558,7 +558,7 @@ export class LanguageStatusUI {
         items.push({ label: `(${localize("none", "none")})`, description: localize("disable.configuration.provider", "Disable the active configuration provider, if applicable."), key: "" });
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.key : undefined;
+        return selection ? selection.key : undefined;
     }
 
     public async showCompileCommands(paths: string[]): Promise<number> {
@@ -571,7 +571,7 @@ export class LanguageStatusUI {
         }
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
@@ -582,7 +582,7 @@ export class LanguageStatusUI {
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.key : "";
+        return selection ? selection.key : "";
     }
 
     private readonly selectACommandString: string = localize("select.command", "Select a command...");
@@ -599,7 +599,7 @@ export class LanguageStatusUI {
             items.push({ label: localize("pause.parsing", "Pause Workspace Parsing"), description: "", index: 0 });
         }
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showActiveCodeAnalysisCommands(): Promise<number> {
@@ -616,7 +616,7 @@ export class LanguageStatusUI {
         }
         items.push({ label: localize("another.analysis", "Start Another..."), description: "", index: 3 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showIdleCodeAnalysisCommands(): Promise<number> {
@@ -628,7 +628,7 @@ export class LanguageStatusUI {
         items.push({ label: localize("all.analysis", "Run Code Analysis on All Files"), description: "", index: 1 });
         items.push({ label: localize("open.analysis", "Run Code Analysis on Open Files"), description: "", index: 2 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): Promise<void> {

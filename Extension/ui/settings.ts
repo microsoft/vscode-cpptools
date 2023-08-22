@@ -80,7 +80,7 @@ class SettingsApp {
 
         // Set view state of advanced settings and add event
         const oldState: any = this.vsCodeApi.getState();
-        const advancedShown: boolean = (oldState && oldState.advancedShown);
+        const advancedShown: boolean = oldState && oldState.advancedShown;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         document.getElementById(elementId.advancedSection)!.style.display = advancedShown ? "block" : "none";
         document.getElementById(elementId.showAdvanced)?.classList.toggle(advancedShown ? "collapse" : "expand", true);
@@ -125,7 +125,7 @@ class SettingsApp {
 
     private onShowAdvanced(): void {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const isShown: boolean = (document.getElementById(elementId.advancedSection)!.style.display === "block");
+        const isShown: boolean = document.getElementById(elementId.advancedSection)!.style.display === "block";
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         document.getElementById(elementId.advancedSection)!.style.display = isShown ? "none" : "block";
 
@@ -284,7 +284,7 @@ class SettingsApp {
             if (config.browse) {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = joinEntries(config.browse.path);
                 (<HTMLInputElement>document.getElementById(elementId.limitSymbolsToIncludedHeaders)).checked =
-                    (config.browse.limitSymbolsToIncludedHeaders && config.browse.limitSymbolsToIncludedHeaders);
+                    config.browse.limitSymbolsToIncludedHeaders && config.browse.limitSymbolsToIncludedHeaders;
                 (<HTMLInputElement>document.getElementById(elementId.databaseFilename)).value = config.browse.databaseFilename ? config.browse.databaseFilename : "";
             } else {
                 (<HTMLInputElement>document.getElementById(elementId.browsePath)).value = "";

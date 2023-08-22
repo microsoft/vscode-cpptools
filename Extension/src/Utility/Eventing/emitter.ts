@@ -37,7 +37,7 @@ export abstract class Emitter {
     protected async emit(event: string, data: ArbitraryObject): Promise<EventStatus>;
     protected async emit(event: string, text: string, data: ArbitraryObject): Promise<EventStatus>;
     protected async emit(event: string, tOrD: any, data?: ArbitraryObject): Promise<EventStatus> {
-        return (data) ?
+        return data ?
             emit(event, this.descriptors, this, tOrD, data) :
             emit(event, this.descriptors, this, tOrD);
     }
@@ -47,7 +47,7 @@ export abstract class Emitter {
     protected async emitNow(event: string, data: ArbitraryObject): Promise<EventStatus>;
     protected async emitNow(event: string, text: string, data: ArbitraryObject): Promise<EventStatus>;
     protected async emitNow(event: string, tOrD: any, data?: ArbitraryObject): Promise<EventStatus> {
-        return (data) ?
+        return data ?
             emitNow(event, this.descriptors, this, tOrD, data) :
             emitNow(event, this.descriptors, this, tOrD);
     }
@@ -57,7 +57,7 @@ export abstract class Emitter {
     protected notify(event: string, data: ArbitraryObject): void;
     protected notify(event: string, text: string, data: ArbitraryObject): void;
     protected notify(event: string, tOrD: any, data?: ArbitraryObject): void {
-        return (data) ?
+        return data ?
             notify(event, this.descriptors, this, tOrD, data) :
             notify(event, this.descriptors, this, tOrD);
     }
@@ -67,7 +67,7 @@ export abstract class Emitter {
     protected notifyNow(event: string, data: ArbitraryObject): void;
     protected notifyNow(event: string, text: string, data: ArbitraryObject): void;
     protected notifyNow(event: string, tOrD: any, data?: ArbitraryObject): void {
-        return (data) ?
+        return data ?
             notifyNow(event, this.descriptors, this, tOrD, data) :
             notifyNow(event, this.descriptors, this, tOrD);
     }
@@ -218,9 +218,9 @@ export abstract class Emitter {
                         options.once = false;
                 }
                 // trigger the event
-                return ((data !== undefined) ?
+                return (data !== undefined) ?
                     notifyNow(eventName, descriptors, this, input || '', data as any) : // text and data
-                    notifyNow(eventName, descriptors, this, input || '', input as any)); // text or data (or neither)
+                    notifyNow(eventName, descriptors, this, input || '', input as any); // text or data (or neither)
             };
         }
 
@@ -236,9 +236,9 @@ export abstract class Emitter {
                     options.once = false;
             }
             // trigger the event
-            return ((data !== undefined) ?
+            return (data !== undefined) ?
                 notify(eventName, descriptors, this, input || '', data as any) : // text and data
-                notify(eventName, descriptors, this, input || '', input as any)); // text or data (or neither)
+                notify(eventName, descriptors, this, input || '', input as any); // text or data (or neither)
         };
     }
 

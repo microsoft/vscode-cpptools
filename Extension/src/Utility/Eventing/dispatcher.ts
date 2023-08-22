@@ -357,7 +357,7 @@ function expandVariableArgs<TInput = any, TResult = void>(variableArgs: any[], e
             return event;
 
         case 1:
-            if ((typeof first === 'string')) {
+            if (typeof first === 'string') {
                 event.text = first;
             } else {
                 event.text = '';
@@ -365,7 +365,7 @@ function expandVariableArgs<TInput = any, TResult = void>(variableArgs: any[], e
             }
             return event;
         case 2:
-            if ((typeof first === 'string')) {
+            if (typeof first === 'string') {
                 event.text = first;
                 event.data = second;
             } else {

@@ -108,7 +108,7 @@ export function members(obj: any): Members {
                     } catch {
                         continue;
                     }
-                    const type = typeof (value);
+                    const type = typeof value;
 
                     // is it a function
                     if (type === 'function') {
@@ -139,7 +139,8 @@ export function members(obj: any): Members {
                     result.fields.set(memberName, type);
                 }
             }
-        } while ((instance = Object.getPrototypeOf(instance)));
+        // eslint-disable-next-line no-cond-assign
+        } while (instance = Object.getPrototypeOf(instance));
     }
     return result;
 }

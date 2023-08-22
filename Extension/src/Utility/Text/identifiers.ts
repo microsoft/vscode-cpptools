@@ -35,7 +35,7 @@ export function pascalCase(identifier: string | string[]): string {
 /** reformat an identifier to camelCase */
 export function camelCase(identifier: string | string[]): string {
     return deconstruct(identifier)
-        .map((each, index) => (index === 0 ? each : each.charAt(0).toUpperCase() + each.slice(1)))
+        .map((each, index) => index === 0 ? each : each.charAt(0).toUpperCase() + each.slice(1))
         .join('');
 }
 

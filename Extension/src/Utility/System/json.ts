@@ -29,7 +29,7 @@ export function stringify(value: any, options?: { format?: boolean; types?: (new
             }
             visited.add(value);
         }
-        if (value?.constructor?.name === 'Error' || (types.filter(each => value instanceof each).length)) {
+        if (value?.constructor?.name === 'Error' || types.filter(each => value instanceof each).length) {
             const result = {} as Record<string, any>;
             Object.getOwnPropertyNames(value).forEach((propName) => result[propName] = (value as any)[propName]);
             return result;

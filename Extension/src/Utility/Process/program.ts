@@ -78,7 +78,7 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
     let opts = options(initialArgs);
     let fullPath: Promise<string>;
 
-    if (typeof (executable) === 'string') {
+    if (typeof executable === 'string') {
         fullPath = lazy<string>(async () => {
             if (!await filepath.isExecutable(executable)) {
                 // if they didn't pass in a valid executable path, let's see if we can figure it out.
@@ -103,7 +103,7 @@ async function processFactory(executable: string | Launcher, ...initialArgs: Arr
         });
     } else {
         cmdlineArgs = [...(executable as Launcher).cmdlineArgs, ...cmdlineArgs];
-        opts = { ...opts, ...((executable as Launcher).options || {}) };
+        opts = { ...opts, ...(executable as Launcher).options || {} };
         fullPath = (executable as Launcher).executable;
     }
 

@@ -101,7 +101,7 @@ export class ClientCollection {
 
     public checkOwnership(client: cpptools.Client, document: vscode.TextDocument): boolean {
 
-        return (this.getClientFor(document.uri) === client);
+        return this.getClientFor(document.uri) === client;
     }
 
     /**

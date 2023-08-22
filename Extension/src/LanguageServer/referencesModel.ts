@@ -24,7 +24,7 @@ export class ReferencesModel {
         // Currently, the hierarchy is built each time referencesTreeDataProvider requests nodes.
         for (const r of results) {
             // Add reference to file
-            const noReferenceLocation: boolean = (r.position.line === 0 && r.position.character === 0);
+            const noReferenceLocation: boolean = r.position.line === 0 && r.position.character === 0;
             if (noReferenceLocation) {
                 const node: TreeNode = new TreeNode(this, NodeType.fileWithPendingRef);
                 node.fileUri = vscode.Uri.file(r.file);
@@ -79,7 +79,7 @@ export class ReferencesModel {
         for (const n of filteredFiles) {
             const i: number = result.findIndex(item => item.filename === n.filename);
             if (i < 0) {
-                const nodeType: NodeType = (n.node === NodeType.fileWithPendingRef ? NodeType.fileWithPendingRef : NodeType.file);
+                const nodeType: NodeType = n.node === NodeType.fileWithPendingRef ? NodeType.fileWithPendingRef : NodeType.file;
                 const node: TreeNode = new TreeNode(this, nodeType);
                 node.filename = n.filename;
                 node.fileUri = n.fileUri;

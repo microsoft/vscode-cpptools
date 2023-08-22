@@ -47,7 +47,7 @@ export async function getSshConfigHostInfos(): Promise<Map<string, ISshConfigHos
     for (const configPath of getSshConfigurationFiles()) {
         const config: Configuration = await getSshConfiguration(configPath);
         const hosts: { [host: string]: string } = extractHostNames(config);
-        Object.keys(hosts).forEach(name => (hostInfos.set(name, { hostName: hosts[name], file: configPath })));
+        Object.keys(hosts).forEach(name => hostInfos.set(name, { hostName: hosts[name], file: configPath }));
     }
 
     return hostInfos;

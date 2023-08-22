@@ -137,9 +137,9 @@ export class CppBuildTaskProvider implements TaskProvider {
                     !isWindows || !info.path.startsWith("/")
                 );
             const cl_to_add: configs.KnownCompiler | undefined = userCompilerIsCl ? undefined : knownCompilers.find(info =>
-                ((path.basename(info.path) === "cl.exe") && compiler_condition(info)));
+                (path.basename(info.path) === "cl.exe") && compiler_condition(info));
             knownCompilers = knownCompilers.filter(info =>
-                ((info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info))));
+                (info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info)));
             knownCompilers.map<void>(info => {
                 knownCompilerPathsSet.add(info.path);
             });
@@ -222,7 +222,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     public async getJsonTasks(): Promise<CppBuildTask[]> {
         const rawJson: any = await this.getRawTasksJson();
-        const rawTasksJson: any = (!rawJson.tasks) ? new Array() : rawJson.tasks;
+        const rawTasksJson: any = !rawJson.tasks ? new Array() : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
             if (!task.label || !task.type || task.type !== CppBuildTaskProvider.CppBuildScriptType) {
                 return null;

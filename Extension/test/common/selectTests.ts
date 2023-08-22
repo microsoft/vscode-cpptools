@@ -36,7 +36,7 @@ async function getScenarioInfo(val: string) {
             // no tests in this scenario have been compiled
             return undefined;
         }
-        const assets = (await filepath.isFolder('assets', folder)) ?? folder;
+        const assets = await filepath.isFolder('assets', folder) ?? folder;
 
         return {
             name,

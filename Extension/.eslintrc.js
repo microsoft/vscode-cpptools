@@ -65,6 +65,7 @@ module.exports = {
         "keyword-spacing": ["error", { "before": true, "overrides": { "this": { "before": false } } }],
         "arrow-spacing": ["error", { "before": true, "after": true }],
         "semi-spacing": ["error", { "before": false, "after": true }],
+        "no-extra-parens": ["error", "all", { "nestedBinaryExpressions": false, "ternaryOperandBinaryExpressions": false }],
         "@typescript-eslint/no-for-in-array": "error",
         "@typescript-eslint/no-misused-new": "error",
         "@typescript-eslint/no-misused-promises": "error",

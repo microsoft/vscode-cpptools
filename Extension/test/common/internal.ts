@@ -28,7 +28,7 @@ function showActiveHandles() {
       !(each.fd === 1) && // ignore stdin/stdout/stderr
       !(each.fd === 2) && // ignore stdin/stdout/stderr
       !(each instanceof MessagePort) && // ignore worker thread message ports
-      (each.listening) // keep servers that are still listening.
+      each.listening // keep servers that are still listening.
 
     );
 

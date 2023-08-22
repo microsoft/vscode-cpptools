@@ -36,7 +36,7 @@ const filters = [
 // remove unwanted messages from stdio
 function filterStdio() {
     process.stdout.write = function (...args: unknown[]) {
-        if (typeof(args[0]) === 'string') {
+        if (typeof args[0] === 'string') {
             const text = args[0];
 
             if (filters.some(each => text.match(each))) {
@@ -53,7 +53,7 @@ function filterStdio() {
     };
 
     process.stderr.write = function (...args: unknown[]) {
-        if (typeof(args[0]) === 'string') {
+        if (typeof args[0] === 'string') {
             const text = args[0];
 
             if (filters.some(each => text.match(each))) {
