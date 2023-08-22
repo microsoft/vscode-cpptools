@@ -1327,6 +1327,9 @@ export class DefaultClient implements Client {
             if (!languageClient || languageClientCrashedNeedsRestart) {
                 if (languageClientCrashedNeedsRestart) {
                     languageClientCrashedNeedsRestart = false;
+                    // if we're recovering, the isStarted needs to be reset.
+                    // because we're starting the first client again.
+                    DefaultClient.isStarted.reset();
                 }
                 firstClientStarted = this.createLanguageClient();
                 util.setProgress(util.getProgressExecutableStarted());
@@ -2205,7 +2208,9 @@ export class DefaultClient implements Client {
     public async takeOwnership(document: vscode.TextDocument): Promise<void> {
         this.trackedDocuments.add(document);
         this.updateActiveDocumentTextOptions();
-        await this.sendDidOpen(document);
+        // in case the client is recreated, wait for the isStarted to finish.
+        await DefaultClient.isStarted;
+        return this.sendDidOpen(document);
     }
 
     public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
@@ -2276,13 +2281,13 @@ export class DefaultClient implements Client {
      * order they were inserted.
      */
     private static async dispatch() {
-        // ensure that this is OK to start working
-        await this.isStarted;
-
         // reset the promise for the dispatcher
         DefaultClient.dispatching.reset();
 
         do {
+            // ensure that this is OK to start working
+            await this.isStarted;
+
             // pick items up off the queue and run then one at a time until the queue is empty
             const [promise, task] = DefaultClient.queue.shift() ?? [];
             if (promise) {
