@@ -778,7 +778,6 @@ export interface Client {
     CancelCodeAnalysis(): void;
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
-    handleShowParsingCommands(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
@@ -3299,16 +3298,6 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleShowParsingCommands(): Promise<void> {
-        await this.ready;
-        const index: number = await ui.showParsingCommands();
-        if (index === 0) {
-            return this.pauseParsing();
-        } else if (index === 1) {
-            return this.resumeParsing();
-        }
-    }
-
     public async handleShowActiveCodeAnalysisCommands(): Promise<void> {
         await this.ready;
         const index: number = await ui.showActiveCodeAnalysisCommands();
@@ -3821,7 +3810,6 @@ class NullClient implements Client {
     CancelCodeAnalysis(): void { }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
-    handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
     handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
