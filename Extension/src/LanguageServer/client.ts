@@ -1619,7 +1619,7 @@ export class DefaultClient implements Client {
             currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
         }
 
-        let cacheStoragePath: string = util.getCacheStoragePath();
+        const cacheStoragePath: string = util.getCacheStoragePath();
         let databaseStoragePath: string = "";
 
         if ((cacheStoragePath.length > 0) && (workspaceHash.length > 0)) {
