@@ -97,6 +97,7 @@ interface ConfigStateReceived {
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
 let scanForCompilersDone: boolean = false;
+let workspaceHash: string = "";
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -832,9 +833,7 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private cacheStoragePath: string;
     private workspaceStoragePath: string;
-    private databaseStoragePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -1299,10 +1298,7 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        this.cacheStoragePath = util.getCacheStoragePath();
         this.workspaceStoragePath = "";
-        this.databaseStoragePath = "";
-        let workspaceHash: string = "";
 
         this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
         if (this.workspaceStoragePath.length > 0) {
@@ -1313,10 +1309,6 @@ export class DefaultClient implements Client {
 
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
             this.workspaceStoragePath = path.join(this.workspaceStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
-        }
-
-        if ((this.cacheStoragePath.length > 0) && (workspaceHash.length > 0)) {
-            this.databaseStoragePath = path.join(this.cacheStoragePath, workspaceHash);
         }
 
         const rootUri: vscode.Uri | undefined = this.RootUri;
@@ -1627,12 +1619,19 @@ export class DefaultClient implements Client {
             currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
         }
 
+        let cacheStoragePath: string = util.getCacheStoragePath();
+        let databaseStoragePath: string = "";
+
+        if ((cacheStoragePath.length > 0) && (workspaceHash.length > 0)) {
+            databaseStoragePath = path.join(cacheStoragePath, workspaceHash);
+        }
+
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
-            databaseStoragePath: this.databaseStoragePath,
+            databaseStoragePath: databaseStoragePath,
             workspaceStoragePath: this.workspaceStoragePath,
-            cacheStoragePath: this.cacheStoragePath,
+            cacheStoragePath: cacheStoragePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
