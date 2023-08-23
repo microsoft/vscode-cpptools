@@ -90,6 +90,6 @@ export async function main() {
         });
 
         await mkdir(outputLanguageFolder);
-        await write(outputPath, JSON.stringify(resultArray, null, 2));
+        await write(outputPath, JSON.stringify(resultArray, null, 4) + "\n");
     }
 }
