@@ -82,7 +82,7 @@ function parseTaggedLiteral(templateString: string) {
                         expression += char;
                         continue;
                     }
-                    // error, fall thru
+                    // error, fall through
                 } else if (isIdentifierStart(char.codePointAt(0)!) || char === '-' || char === '/') {
                     expression += char;
                     continue;
@@ -127,7 +127,7 @@ function resolveValue(expression: string, context: Record<string, any>, customRe
     if (prefix) {
         const variable = context[prefix];
         if (variable !== undefined && variable !== null) { // did we get back an actual value
-            // its a child of a variable
+            // it's a child of a variable
             return joinIfArray(suffix.includes(':') ? // is the suffix another expression?
                 resolveValue(suffix, variable) : // Yeah, resolve it
                 variable[suffix] ?? customResolver(prefix, suffix) ?? ''); // No, return the member of the variable, or dynamic, or empty string

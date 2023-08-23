@@ -32,7 +32,7 @@ describe('Async Iterators', () => {
         result.add(1, 2, 3); // add more items
         result.add(-10, 10); // add more items
 
-        setTimeout(() => result.add(4, 5, 6), 5); // set an timeout to add more items again.
+        setTimeout(() => result.add(4, 5, 6), 5); // set a timeout to add more items again.
         setTimeout(() => result.complete(), 11); // set a timeout to tell it you won't add more iterables.
 
         for await (const each of result) {

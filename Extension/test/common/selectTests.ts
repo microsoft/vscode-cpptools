@@ -81,7 +81,7 @@ export function run (testsRoot: string, cb: (error: any, failures?: number) => v
  */
     let location = '';
 
-    // scan thru the $args to find the --scenario=...
+    // scan through the $args to find the --scenario=...
     process.argv.slice(2).find(arg => arg.startsWith('--scenario=') && (location = arg.substring('--scenario='.length)));
 
     void getTestInfo(location, env.SCENARIO).then(async (testInfo) => {

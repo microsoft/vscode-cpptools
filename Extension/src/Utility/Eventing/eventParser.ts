@@ -243,7 +243,7 @@ function generateFilterFn(scanner: Scanner): Filter {
         }
     }
 
-    // $data -- either the event data or the event source object if there is no event data.
+    // $data - either the event data or the event source object if there is no event data.
     // $strings - a set of string values to match a regex with.
 
     const fn = sandbox.createFunction<Filter>(`try { with($data) return ${expression.join(' ')} } catch ($e) { return false; }`, ['$data', '$strings', '$captures']);

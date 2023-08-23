@@ -21,7 +21,7 @@ export const $root = resolve(`${__dirname}/..`);
 export let $cmd = 'main';
 export let $scenario = '';
 
-// loop thru the args and pick out --scenario=... and remove it from the $args and set $scenario
+// loop through the args and pick out --scenario=... and remove it from the $args and set $scenario
 export const $args = process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
 
 /** enqueue the call to the callback function to happen on the next available tick, and return a promise to the result */
@@ -130,7 +130,7 @@ export async function updateFiles(files: string[], dest: string | Promise<string
 
 export async function go() {
     if (require.main) {
-        // loop thru the args and pick out the first non --arg and remove it from the $args and set $cmd
+        // loop through the args and pick out the first non --arg and remove it from the $args and set $cmd
         for (let i = 0; i < $args.length; i++) {
             const each = $args[i];
             if (!each.startsWith('--') && require.main.exports[each]) {

@@ -617,7 +617,7 @@ export class Scanner implements Token {
 
             // check for escaped tokens
             if (escape.includes(this.kind)) {
-                // pull thru the escape token
+                // pull through the escape token
                 // and the next token
                 yield this.take();
                 yield this.take();
@@ -674,12 +674,12 @@ export class Scanner implements Token {
     }
 
     /**
-   * When the current token is greaterThan, this will return any tokens with characters
-   * after the greater than character. This has to be scanned separately because greater
-   * than  appear in positions where longer tokens are incorrect, e.g. `model x<y>=y;`.
-   * The solution is to call rescanGreaterThan from the parser in contexts where longer
-   * tokens starting with `>` are allowed (i.e. when parsing binary expressions).
-   */
+     * When the current token is greaterThan, this will return any tokens with characters
+     * after the greater than character. This has to be scanned separately because greater
+     * than appears in positions where longer tokens are incorrect, e.g. `model x<y>=y;`.
+     * The solution is to call rescanGreaterThan from the parser in contexts where longer
+     * tokens starting with `>` are allowed (i.e. when parsing binary expressions).
+     */
     rescanGreaterThan(): Kind {
         if (this.kind === Kind.GreaterThan) {
             return this.#ch === CharacterCodes.greaterThan ?
@@ -965,7 +965,7 @@ export class Scanner implements Token {
 
     /**
    * Returns the zero-based line/column from the given offset
-   * (binary search thru the token start locations)
+   * (binary search through the token start locations)
    * @param offset the character position in the document
    */
     positionFromOffset(offset: number): Position {

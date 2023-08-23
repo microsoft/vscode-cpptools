@@ -62,7 +62,7 @@ const fails: [ string | undefined, string, string?][] = [
     [ undefined, "$((010+4+))", marker()],
     /* Test for CVE-2014-7817. We test 3 combinations of command
        substitution inside an arithmetic expression to make sure that
-       no commands are executed and error is returned.  */
+       no commands are executed and an error is returned.  */
     [ undefined, "$((`echo 1`))", marker() ],
     [ undefined, "$((1+`echo 1`))", marker() ],
     [ undefined, "$((1+$((`echo 1`))))", marker() ],
