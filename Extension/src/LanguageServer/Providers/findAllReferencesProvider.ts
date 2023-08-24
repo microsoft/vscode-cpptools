@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import { Position, RequestType } from 'vscode-languageclient';
 import { DefaultClient, workspaceReferences } from '../client';
-import { CancellationSender, ReferenceInfo, ReferencesParams, ReferencesResult, ReferenceType } from '../references';
+import { CancellationSender, ReferenceInfo, ReferenceType, ReferencesParams, ReferencesResult } from '../references';
 
 const FindAllReferencesRequest: RequestType<ReferencesParams, ReferencesResult, void> =
     new RequestType<ReferencesParams, ReferencesResult, void>('cpptools/findAllReferences');
@@ -37,7 +37,6 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
         const response: ReferencesResult = await this.client.languageClient.sendRequest(FindAllReferencesRequest, params, cancelSource.token);
 
         // Reset anything that can be cleared before processing the result.
-        // Note: ReferencesManager.resetReferences is called in ReferencesManager.showResultsInPanelView
         workspaceReferences.resetProgressBar();
         cancellationTokenListener.dispose();
         requestCanceledListener.dispose();
@@ -48,8 +47,9 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
             // "Cannot destructure property 'range' of 'e.location' as it is undefined."
             // TODO: per issue https://github.com/microsoft/vscode/issues/169698
             // vscode.CancellationError is expected, so when VS Code fixes the error use vscode.CancellationError again.
+            workspaceReferences.resetReferences();
             return undefined;
-        } else if (response.referenceInfos.length !== 0) {
+        } else if (response.referenceInfos.length > 0) {
             response.referenceInfos.forEach((referenceInfo: ReferenceInfo) => {
                 if (referenceInfo.type === ReferenceType.Confirmed) {
                     const uri: vscode.Uri = vscode.Uri.file(referenceInfo.file);
@@ -60,7 +60,10 @@ export class FindAllReferencesProvider implements vscode.ReferenceProvider {
             });
 
             // Display other reference types in panel or channel view.
+            // Note: ReferencesManager.resetReferences is called in ReferencesManager.showResultsInPanelView
             workspaceReferences.showResultsInPanelView(response);
+        } else {
+            workspaceReferences.resetReferences();
         }
 
         return locationsResult;

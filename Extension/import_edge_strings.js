@@ -85,5 +85,5 @@ locFolderNames.forEach((locFolderName) => {
     });
 
     fs.mkdirSync(outputLanguageFolder, { recursive: true });
-    fs.writeFileSync(outputPath, JSON.stringify(resultArray, null, 2), 'utf8');
+    fs.writeFileSync(outputPath, JSON.stringify(resultArray, null, 4) + '\n', 'utf8');
 });
