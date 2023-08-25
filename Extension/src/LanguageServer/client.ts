@@ -1606,18 +1606,18 @@ export class DefaultClient implements Client {
         let intelliSenseCacheDisabled: boolean = false;
         if (os.platform() === "darwin") {
             // AutoPCH doesn't work for arm64 macOS.
-            if (os.arch() == "arm64") {
+            if (os.arch() === "arm64") {
                 intelliSenseCacheDisabled = true;
             } else {
                 // AutoPCH doesn't work for older x64 macOS's.
                 const releaseParts: string[] = os.release().split(".");
                 if (releaseParts.length >= 1) {
-                  intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+                    intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
                 }
             }
         } else {
             // AutoPCH doesn't work for arm64 Windows.
-            intelliSenseCacheDisabled = os.platform() == "win32" && os.arch() === "arm64";
+            intelliSenseCacheDisabled = os.platform() === "win32" && os.arch() === "arm64";
         }
 
         const localizedStrings: string[] = [];
