@@ -1597,13 +1597,27 @@ export class DefaultClient implements Client {
             debug: { command: serverModule, args: [serverName], options: { detached: true } }
         };
 
+        // The IntelliSense process should automatically detect when AutoPCH is
+        // not supportable (on platforms that don't support disabling ASLR/PIE).
+        // We've had reports of issues on arm64 macOS that are addressed by
+        // disabling the IntelliSense cache, suggesting fallback does not
+        // always work as expected. It's actually more efficient to disable
+        // the cache on platforms we know do not support it. We do that here.
         let intelliSenseCacheDisabled: boolean = false;
         if (os.platform() === "darwin") {
-            const releaseParts: string[] = os.release().split(".");
-            if (releaseParts.length >= 1) {
-                // AutoPCH doesn't work for older Mac OS's.
-                intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+            // AutoPCH doesn't work for arm64 macOS.
+            if (os.arch() === "arm64") {
+                intelliSenseCacheDisabled = true;
+            } else {
+                // AutoPCH doesn't work for older x64 macOS's.
+                const releaseParts: string[] = os.release().split(".");
+                if (releaseParts.length >= 1) {
+                    intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+                }
             }
+        } else {
+            // AutoPCH doesn't work for arm64 Windows.
+            intelliSenseCacheDisabled = os.platform() === "win32" && os.arch() === "arm64";
         }
 
         const localizedStrings: string[] = [];
