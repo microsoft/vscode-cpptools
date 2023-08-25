@@ -552,7 +552,6 @@ interface InitializationOptions {
 
 interface TagParseStatus {
     localizeStringParams: LocalizeStringParams;
-    isPausable: boolean;
     isPaused: boolean;
 }
 
@@ -636,7 +635,6 @@ class ClientModel {
     public isInitializingWorkspace: DataBinding<boolean>;
     public isIndexingWorkspace: DataBinding<boolean>;
     public isParsingWorkspace: DataBinding<boolean>;
-    public isParsingWorkspacePausable: DataBinding<boolean>;
     public isParsingWorkspacePaused: DataBinding<boolean>;
     public isParsingFiles: DataBinding<boolean>;
     public isUpdatingIntelliSense: DataBinding<boolean>;
@@ -652,7 +650,6 @@ class ClientModel {
         this.isInitializingWorkspace = new DataBinding<boolean>(false);
         this.isIndexingWorkspace = new DataBinding<boolean>(false);
         this.isParsingWorkspace = new DataBinding<boolean>(false);
-        this.isParsingWorkspacePausable = new DataBinding<boolean>(false);
         this.isParsingWorkspacePaused = new DataBinding<boolean>(false);
         this.isParsingFiles = new DataBinding<boolean>(false);
         this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
@@ -669,7 +666,6 @@ class ClientModel {
         this.isInitializingWorkspace.activate();
         this.isIndexingWorkspace.activate();
         this.isParsingWorkspace.activate();
-        this.isParsingWorkspacePausable.activate();
         this.isParsingWorkspacePaused.activate();
         this.isParsingFiles.activate();
         this.isUpdatingIntelliSense.activate();
@@ -686,7 +682,6 @@ class ClientModel {
         this.isInitializingWorkspace.deactivate();
         this.isIndexingWorkspace.deactivate();
         this.isParsingWorkspace.deactivate();
-        this.isParsingWorkspacePausable.deactivate();
         this.isParsingWorkspacePaused.deactivate();
         this.isParsingFiles.deactivate();
         this.isUpdatingIntelliSense.deactivate();
@@ -703,7 +698,6 @@ class ClientModel {
         this.isInitializingWorkspace.dispose();
         this.isIndexingWorkspace.dispose();
         this.isParsingWorkspace.dispose();
-        this.isParsingWorkspacePausable.dispose();
         this.isParsingWorkspacePaused.dispose();
         this.isParsingFiles.dispose();
         this.isUpdatingIntelliSense.dispose();
@@ -723,7 +717,6 @@ export interface Client {
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
     ParsingWorkspaceChanged: vscode.Event<boolean>;
-    ParsingWorkspacePausableChanged: vscode.Event<boolean>;
     ParsingWorkspacePausedChanged: vscode.Event<boolean>;
     ParsingFilesChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
@@ -778,7 +771,6 @@ export interface Client {
     CancelCodeAnalysis(): void;
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
-    handleShowParsingCommands(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
@@ -865,7 +857,6 @@ export class DefaultClient implements Client {
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isInitializingWorkspace.ValueChanged; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isIndexingWorkspace.ValueChanged; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspace.ValueChanged; }
-    public get ParsingWorkspacePausableChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspacePausable.ValueChanged; }
     public get ParsingWorkspacePausedChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspacePaused.ValueChanged; }
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.model.isParsingFiles.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
@@ -2536,7 +2527,6 @@ export class DefaultClient implements Client {
             this.model.isParsingWorkspace.Value = true;
             this.model.isInitializingWorkspace.Value = false;
             this.model.isIndexingWorkspace.Value = false;
-            this.model.isParsingWorkspacePausable.Value = false;
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
@@ -2632,7 +2622,6 @@ export class DefaultClient implements Client {
 
     private updateTagParseStatus(tagParseStatus: TagParseStatus): void {
         this.model.parsingWorkspaceStatus.Value = getLocalizedString(tagParseStatus.localizeStringParams);
-        this.model.isParsingWorkspacePausable.Value = tagParseStatus.isPausable;
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
@@ -3313,16 +3302,6 @@ export class DefaultClient implements Client {
         }
     }
 
-    public async handleShowParsingCommands(): Promise<void> {
-        await this.ready;
-        const index: number = await ui.showParsingCommands();
-        if (index === 0) {
-            return this.pauseParsing();
-        } else if (index === 1) {
-            return this.resumeParsing();
-        }
-    }
-
     public async handleShowActiveCodeAnalysisCommands(): Promise<void> {
         await this.ready;
         const index: number = await ui.showActiveCodeAnalysisCommands();
@@ -3781,7 +3760,6 @@ class NullClient implements Client {
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
-    public get ParsingWorkspacePausableChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspacePausedChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
@@ -3835,7 +3813,6 @@ class NullClient implements Client {
     CancelCodeAnalysis(): void { }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
-    handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
     handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
