@@ -1599,7 +1599,7 @@ export class DefaultClient implements Client {
 
         // The IntelliSense process should automatically detect when AutoPCH is
         // not supportable (on platforms that don't support disabling ASLR/PIE).
-        // We've had reports of issues on M1 Mac that are addressed by
+        // We've had reports of issues on arm64 macOS that are addressed by
         // disabling the IntelliSense cache, suggesting fallback does not
         // always work as expected. It's actually more efficient to disable
         // the cache on platforms we know do not support it. We do that here.
