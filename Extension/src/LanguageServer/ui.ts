@@ -214,7 +214,7 @@ export class LanguageStatusUI {
         this.isParsingWorkspace = val;
         if (!val && this.isParsingWorkspacePaused) {
             // Unpause before handling the no longer parsing state.
-            this.setIsParsingWorkspacePaused(false);
+            this.isParsingWorkspacePaused = false;
         }
         this.setTagParseStatus();
     }
@@ -226,7 +226,6 @@ export class LanguageStatusUI {
 
     private getTagParsingDetail(): string {
         if (!this.isParsingWorkspace && !this.isParsingFiles) {
-            // No parsing in active.
             return "";
         }
         if (this.isParsingWorkspacePaused) {
@@ -239,9 +238,23 @@ export class LanguageStatusUI {
         }
     }
 
-    private setIsParsingWorkspacePausable(val: boolean): void {
-        if (val && this.isParsingWorkspace) {
-            this.tagParseStatusItem.command = {
+    private setIsParsingWorkspacePaused(val: boolean): void {
+        this.isParsingWorkspacePaused = val;
+        if (!this.isParsingWorkspace && !this.isParsingFiles) {
+            return;
+        }
+
+        this.tagParseStatusItem.busy = !this.isParsingWorkspacePaused || this.isParsingFiles;
+        this.tagParseStatusItem.text = this.dataBaseIcon;
+        this.tagParseStatusItem.detail = this.getTagParsingDetail();
+
+        if (this.isParsingWorkspace) {
+            this.tagParseStatusItem.command = this.isParsingWorkspacePaused ? {
+                command: "C_Cpp.ResumeParsing",
+                title: localize("tagparser.resume.text", "Resume"),
+                arguments: commandArguments,
+                tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
+            } : {
                 command: "C_Cpp.PauseParsing",
                 title: localize("tagparser.pause.text", "Pause"),
                 arguments: commandArguments,
@@ -250,41 +263,19 @@ export class LanguageStatusUI {
         }
     }
 
-    private setIsParsingWorkspacePaused(val: boolean): void {
-        this.isParsingWorkspacePaused = val;
-        if (!this.isParsingFiles && !this.isParsingWorkspace) {
-            // Ignore a pause change if no parsing is actually happening.
-            return;
-        }
-        this.tagParseStatusItem.busy = !val || this.isParsingFiles;
-        this.tagParseStatusItem.text = this.dataBaseIcon;
-        this.tagParseStatusItem.detail = this.getTagParsingDetail();
-        this.tagParseStatusItem.command = val ? {
-            command: "C_Cpp.ResumeParsing",
-            title: localize("tagparser.resume.text", "Resume"),
-            arguments: commandArguments,
-            tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
-        } : {
-            command: "C_Cpp.PauseParsing",
-            title: localize("tagparser.pause.text", "Pause"),
-            arguments: commandArguments,
-            tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
-        };
-    }
-
     private setTagParseStatus(): void {
         // Set busy icon outside of timer for more real-time response
-        this.tagParseStatusItem.busy = this.isParsingFiles || this.isParsingWorkspace;
+        this.tagParseStatusItem.busy = (this.isParsingWorkspace && !this.isParsingWorkspacePaused) || this.isParsingFiles;
+
+        this.tagParseStatusItem.text = (this.isParsingWorkspace || this.isParsingFiles) ? this.dataBaseIcon : "";
+        this.tagParseStatusItem.detail = this.getTagParsingDetail();
 
         if (this.tagParseStatusItem.busy) {
-            this.tagParseStatusItem.text = this.dataBaseIcon;
-            this.tagParseStatusItem.detail = this.getTagParsingDetail();
-
             if (this.tagParseTimeout) {
                 clearTimeout(this.tagParseTimeout);
                 this.tagParseTimeout = undefined;
             }
-        } else {
+        } else if (!this.isParsingWorkspace && !this.isParsingFiles) {
             this.tagParseTimeout = setTimeout(() => {
                 this.tagParseStatusItem.text = this.workspaceParsingDoneText;
                 this.tagParseStatusItem.detail = "";
@@ -424,6 +415,7 @@ export class LanguageStatusUI {
         };
         return item;
     }
+
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
             (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
@@ -671,7 +663,6 @@ export class LanguageStatusUI {
         client.InitializingWorkspaceChanged(value => { this.setIsInitializingWorkspace(value); });
         client.IndexingWorkspaceChanged(value => { this.setIsIndexingWorkspace(value); });
         client.ParsingWorkspaceChanged(value => { this.setIsParsingWorkspace(value); });
-        client.ParsingWorkspacePausableChanged(value => { this.setIsParsingWorkspacePausable(value); });
         client.ParsingWorkspacePausedChanged(value => { this.setIsParsingWorkspacePaused(value); });
         client.ParsingFilesChanged(value => { this.setIsParsingFiles(value); });
         client.IntelliSenseParsingChanged(value => { this.setIsUpdatingIntelliSense(value); });
