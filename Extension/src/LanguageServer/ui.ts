@@ -224,6 +224,13 @@ export class LanguageStatusUI {
         this.setTagParseStatus();
     }
 
+    private setIsParsingWorkspacePaused(val: boolean): void {
+        this.isParsingWorkspacePaused = val;
+        if (this.isParsingWorkspace || this.isParsingFiles) {
+            this.setTagParseStatus();
+        }
+    }
+
     private getTagParsingDetail(): string {
         if (!this.isParsingWorkspace && !this.isParsingFiles) {
             return "";
@@ -238,44 +245,40 @@ export class LanguageStatusUI {
         }
     }
 
-    private setIsParsingWorkspacePaused(val: boolean): void {
-        this.isParsingWorkspacePaused = val;
-        if (!this.isParsingWorkspace && !this.isParsingFiles) {
-            return;
-        }
-
-        this.tagParseStatusItem.busy = !this.isParsingWorkspacePaused || this.isParsingFiles;
-        this.tagParseStatusItem.text = this.dataBaseIcon;
-        this.tagParseStatusItem.detail = this.getTagParsingDetail();
-
-        if (this.isParsingWorkspace) {
-            this.tagParseStatusItem.command = this.isParsingWorkspacePaused ? {
-                command: "C_Cpp.ResumeParsing",
-                title: localize("tagparser.resume.text", "Resume"),
-                arguments: commandArguments,
-                tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
-            } : {
-                command: "C_Cpp.PauseParsing",
-                title: localize("tagparser.pause.text", "Pause"),
-                arguments: commandArguments,
-                tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
-            };
-        }
-    }
-
     private setTagParseStatus(): void {
         // Set busy icon outside of timer for more real-time response
         this.tagParseStatusItem.busy = (this.isParsingWorkspace && !this.isParsingWorkspacePaused) || this.isParsingFiles;
+        if (this.tagParseStatusItem.busy && this.tagParseTimeout) {
+            clearTimeout(this.tagParseTimeout);
+            this.tagParseTimeout = undefined;
+        }
 
-        this.tagParseStatusItem.text = (this.isParsingWorkspace || this.isParsingFiles) ? this.dataBaseIcon : "";
-        this.tagParseStatusItem.detail = this.getTagParsingDetail();
-
-        if (this.tagParseStatusItem.busy) {
-            if (this.tagParseTimeout) {
-                clearTimeout(this.tagParseTimeout);
-                this.tagParseTimeout = undefined;
+        if (this.isParsingWorkspace || this.isParsingFiles) {
+            this.tagParseStatusItem.text = this.dataBaseIcon;
+            this.tagParseStatusItem.detail = this.getTagParsingDetail();
+            if (this.isParsingWorkspace) {
+                // Pausing/resuming is only applicable to parsing workspace.
+                this.tagParseStatusItem.command = this.isParsingWorkspacePaused ? {
+                    command: "C_Cpp.ResumeParsing",
+                    title: localize("tagparser.resume.text", "Resume"),
+                    arguments: commandArguments,
+                    tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
+                } : {
+                    command: "C_Cpp.PauseParsing",
+                    title: localize("tagparser.pause.text", "Pause"),
+                    arguments: commandArguments,
+                    tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
+                };
+            } else {
+                this.tagParseStatusItem.command = {
+                    command: "C_Cpp.RescanWorkspace",
+                    title: this.workspaceRescanText,
+                    arguments: commandArguments,
+                    tooltip: this.tagParseStatusItem.command?.tooltip ?? undefined
+                };
             }
-        } else if (!this.isParsingWorkspace && !this.isParsingFiles) {
+        } else {
+            // Parsing completed.
             this.tagParseTimeout = setTimeout(() => {
                 this.tagParseStatusItem.text = this.workspaceParsingDoneText;
                 this.tagParseStatusItem.detail = "";
