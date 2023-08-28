@@ -239,15 +239,15 @@ export class LanguageStatusUI {
         if (this.isParsingWorkspacePaused) {
             const displayTwoStatus: boolean = this.isParsingFiles && this.isParsingWorkspace;
             return (this.isParsingFiles ? this.parsingFilesTooltip : "")
-        + (displayTwoStatus ? " | " : "")
-        + (this.isParsingWorkspace ? this.workspaceParsingPausedText : "");
+              + (displayTwoStatus ? " | " : "")
+              + (this.isParsingWorkspace ? this.workspaceParsingPausedText : "");
         } else {
             return this.isParsingWorkspace ? this.workspaceParsingRunningText : this.parsingFilesTooltip;
         }
     }
 
     private setTagParseStatus(): void {
-    // Set busy icon outside of timer for more real-time response
+        // Set busy icon outside of timer for more real-time response
         this.tagParseStatusItem.busy = (this.isParsingWorkspace && !this.isParsingWorkspacePaused) || this.isParsingFiles;
         if (this.tagParseStatusItem.busy && this.tagParseTimeout) {
             clearTimeout(this.tagParseTimeout);
@@ -544,8 +544,8 @@ export class LanguageStatusUI {
             // It's sometimes desirable to see the config and icons when making changes to files with C/C++-related content.
             // TODO: Check some "AlwaysShow" setting here.
             this.ShowConfiguration = isCppOrRelated || (util.getWorkspaceIsCpp() &&
-        (activeEditor.document.fileName.endsWith("tasks.json") ||
-          activeEditor.document.fileName.endsWith("launch.json")));
+                (activeEditor.document.fileName.endsWith("tasks.json") ||
+                activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
                 if (isCppOrRelated && !!this.currentClient && this.currentClient.getShowConfigureIntelliSenseButton()) {
