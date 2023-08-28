@@ -41,7 +41,7 @@ const config = {
                 loader: 'ts-loader',
                 options: {
                     compilerOptions: {
-                        "sourceMap": true,
+                        "inlineSourceMap": true,
                     }
                 }
             }]
