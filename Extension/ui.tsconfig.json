@@ -22,7 +22,6 @@
     ],
     "exclude": [
         "node_modules/@types/eslint-scope/node_modules/@types/eslint/index.d.ts",
-        "test/attic/**",
         "node_modules/**"
     ]
 }
