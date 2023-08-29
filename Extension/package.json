@@ -6138,7 +6138,8 @@
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
         "import-edge-strings": "ts-node -T ./.scripts/import_edge_strings.ts",
-        "postinstall": "npx vscode-dts dev && npx vscode-dts main && yarn prep"
+        "postinstall": "npx vscode-dts dev && npx vscode-dts main && yarn prep",
+        "install": ""
     },
     "devDependencies": {
         "@octokit/rest": "^18.12.0",
