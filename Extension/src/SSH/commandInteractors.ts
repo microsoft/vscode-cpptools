@@ -322,7 +322,6 @@ export class ContinueOnInteractor implements IInteractor {
         return ContinueOnInteractor.ID;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async onData(data: string, _cancelToken?: vscode.CancellationToken): Promise<IInteraction> {
         const result: IInteraction = { postAction: 'keep' };
         const pattern: string = escapeStringForRegex(this.continueOn);

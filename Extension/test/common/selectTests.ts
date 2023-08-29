@@ -2,8 +2,6 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-/* eslint-disable no-cond-assign */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { readdir } from 'fs/promises';
 import { IOptions, glob as globSync } from 'glob';

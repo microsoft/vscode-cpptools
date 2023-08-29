@@ -180,7 +180,7 @@ export class LineIterator implements AsyncIterable<string>, AsyncIterator<string
      * Iterator next function.
      * @returns the next line, or undefined if the iterator is done.
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     async next(): Promise<IteratorResult<string>> {
         do {
             // is the current line (regardless of whether it's full or not) a match

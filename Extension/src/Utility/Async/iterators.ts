@@ -125,7 +125,7 @@ export function accumulator<T>(...iterables: Some<T>[]): AsynchIterable<T> {
                 }
 
             }
-            // eslint-disable-next-line no-unmodified-loop-condition
+
         } while (!completeWhenEmpty);
         signal.dispose(false);
 

@@ -41,7 +41,6 @@ const asyncHandlers = new Map<string, Subscriber[]>();
 const queue = new Array<Event<any, any>>();
 const current = new Set<Callback>();
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export const DispatcherBusy = new ManualSignal<void>();
 
 /** starts the processing of the event queue. */

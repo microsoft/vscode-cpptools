@@ -70,7 +70,6 @@ describe('AsyncFactory', () => {
                 value.value = 200;
             };
 
-            // eslint-disable-next-line @typescript-eslint/ban-types
             return value as () => number;
         });
         const fn = await new f();
