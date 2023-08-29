@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 export interface EventData<TInput = any | undefined> {
     readonly name: string;
     completed?: Promise<unknown>;

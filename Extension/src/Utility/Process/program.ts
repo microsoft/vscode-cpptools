@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 import { fail } from 'assert';
 import { Factory } from '../Async/factory';
 import { lazy } from '../Async/lazy';

@@ -18,7 +18,6 @@ export function ignore<T>(fn: () => T | undefined) {
 }
 const finalized = new WeakSet();
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export let ActiveFinalizers = Promise.resolve();
 
 /** This closes/ends/stops/destroys/disposes of an object or a Promise<object>

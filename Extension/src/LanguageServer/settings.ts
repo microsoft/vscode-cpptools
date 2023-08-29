@@ -4,8 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-/* eslint-disable @typescript-eslint/no-unnecessary-boolean-literal-compare */
-
 import { execSync } from 'child_process';
 import * as editorConfig from 'editorconfig';
 import * as fs from 'fs';

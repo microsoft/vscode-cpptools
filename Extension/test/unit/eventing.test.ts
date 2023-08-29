@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { ok, strictEqual } from 'assert';
 import { beforeEach, describe, it } from 'mocha';
 import { Async } from '../../src/Utility/Async/constructor';
@@ -55,7 +53,7 @@ class Something extends SomeBase {
 }
 
 // make an async constructor for the Something class
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 const AsyncSomething = Async(Something);
 
 describe('Event Emitters', () => {
