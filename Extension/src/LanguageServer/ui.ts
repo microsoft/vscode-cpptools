@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { sleep } from '../Utility/Async/sleep';
+import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
@@ -238,8 +239,8 @@ export class LanguageStatusUI {
         if (this.isParsingWorkspacePaused) {
             const displayTwoStatus: boolean = this.isParsingFiles && this.isParsingWorkspace;
             return (this.isParsingFiles ? this.parsingFilesTooltip : "")
-                + (displayTwoStatus ? " | " : "")
-                + (this.isParsingWorkspace ? this.workspaceParsingPausedText : "");
+              + (displayTwoStatus ? " | " : "")
+              + (this.isParsingWorkspace ? this.workspaceParsingPausedText : "");
         } else {
             return this.isParsingWorkspace ? this.workspaceParsingRunningText : this.parsingFilesTooltip;
         }
@@ -390,7 +391,7 @@ export class LanguageStatusUI {
         }
         items.push({ label: localize("another.analysis", "Start Another..."), description: "", index: 3 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showIdleCodeAnalysisCommands(): Promise<number> {
@@ -402,7 +403,7 @@ export class LanguageStatusUI {
         items.push({ label: localize("all.analysis", "Run Code Analysis on All Files"), description: "", index: 1 });
         items.push({ label: localize("open.analysis", "Run Code Analysis on Open Files"), description: "", index: 2 });
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
     //#endregion Code analysis language status
 
@@ -421,9 +422,9 @@ export class LanguageStatusUI {
 
     private get ReferencesCommand(): ReferencesCommandMode {
         return this.referencesStatusBarItem.tooltip === "" ? ReferencesCommandMode.None :
-            (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
-                (this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
-                    ReferencesCommandMode.Peek));
+            this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Find) ? ReferencesCommandMode.Find :
+                this.referencesStatusBarItem.tooltip === referencesCommandModeToString(ReferencesCommandMode.Rename) ? ReferencesCommandMode.Rename :
+                    ReferencesCommandMode.Peek;
     }
 
     private set ReferencesCommand(val: ReferencesCommandMode) {
@@ -544,7 +545,7 @@ export class LanguageStatusUI {
             // TODO: Check some "AlwaysShow" setting here.
             this.ShowConfiguration = isCppOrRelated || (util.getWorkspaceIsCpp() &&
                 (activeEditor.document.fileName.endsWith("tasks.json") ||
-                    activeEditor.document.fileName.endsWith("launch.json")));
+                activeEditor.document.fileName.endsWith("launch.json")));
 
             if (this.showConfigureIntelliSenseButton) {
                 if (isCppOrRelated && !!this.currentClient && this.currentClient.getShowConfigureIntelliSenseButton()) {
@@ -574,7 +575,7 @@ export class LanguageStatusUI {
         items.push({ label: localize("edit.configuration.json", "Edit Configurations (JSON)"), description: "", index: configurationNames.length + 1 });
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showConfigurationProviders(currentProvider?: string): Promise<string | undefined> {
@@ -593,7 +594,7 @@ export class LanguageStatusUI {
         items.push({ label: `(${localize("none", "none")})`, description: localize("disable.configuration.provider", "Disable the active configuration provider, if applicable."), key: "" });
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.key : undefined;
+        return selection ? selection.key : undefined;
     }
 
     public async showCompileCommands(paths: string[]): Promise<number> {
@@ -606,7 +607,7 @@ export class LanguageStatusUI {
         }
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
@@ -617,7 +618,7 @@ export class LanguageStatusUI {
         workspaceNames.forEach(name => items.push({ label: name.name, description: "", key: name.key }));
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.key : "";
+        return selection ? selection.key : "";
     }
 
     public async showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): Promise<void> {
@@ -644,7 +645,7 @@ export class LanguageStatusUI {
             });
         };
 
-        if (this.curConfigurationStatus) {
+        if (is.promise(this.curConfigurationStatus)) {
             this.curConfigurationStatus = this.curConfigurationStatus.then(result => {
                 if (priority > result.priority) {
                     return showPrompt();

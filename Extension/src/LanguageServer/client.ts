@@ -35,6 +35,7 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderE
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
+import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
@@ -484,6 +485,7 @@ export interface GenerateDoxygenCommentParams {
     isCodeAction: boolean;
     isCursorAboveSignatureLine: boolean | undefined;
 }
+
 export interface GenerateDoxygenCommentResult {
     contents: string;
     initPosition: Position;
@@ -496,6 +498,7 @@ export interface GenerateDoxygenCommentResult {
 export interface IndexableQuickPickItem extends vscode.QuickPickItem {
     index: number;
 }
+
 export interface UpdateTrustedCompilerPathsResult {
     compilerPath: string;
 }
@@ -838,7 +841,7 @@ export class DefaultClient implements Client {
     private showConfigureIntelliSenseButton: boolean = false;
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
-    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>]|[ManualPromise<unknown>]>();
+    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
 
     /** returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use) */
     private static readonly isStarted = new ManualSignal<void>(true);
@@ -846,8 +849,8 @@ export class DefaultClient implements Client {
     /**
      * Indicates if the blocking task dispatcher is currently running
      *
-     * This will be in the Set state when the dispatcher is not running (ie, if you await this it will be resolved immediately)
-     * If the dispatcher is running, this will be in the Reset state (ie, if you await this it will be resolved when the dispatcher is done)
+     * This will be in the Set state when the dispatcher is not running (i.e. if you await this it will be resolved immediately)
+     * If the dispatcher is running, this will be in the Reset state (i.e. if you await this it will be resolved when the dispatcher is done)
      */
     private static readonly dispatching = new ManualSignal<void>();
 
@@ -875,13 +878,13 @@ export class DefaultClient implements Client {
      * don't use this.rootFolder directly since it can be undefined
      */
     public get RootPath(): string {
-        return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
+        return this.rootFolder ? this.rootFolder.uri.fsPath : "";
     }
     public get RootRealPath(): string {
         return this.rootRealPath;
     }
     public get RootUri(): vscode.Uri | undefined {
-        return (this.rootFolder) ? this.rootFolder.uri : undefined;
+        return this.rootFolder ? this.rootFolder.uri : undefined;
     }
     public get RootFolder(): vscode.WorkspaceFolder | undefined {
         return this.rootFolder;
@@ -948,9 +951,9 @@ export class DefaultClient implements Client {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
-            (vscode.workspace.workspaceFolders.length > 1 ?
+            vscode.workspace.workspaceFolders.length > 1 ?
                 localize("configure.intelliSense.forFolder", "How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
-                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense for this folder?"));
+                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense for this folder?");
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -976,7 +979,7 @@ export class DefaultClient implements Client {
         }
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showPrompt(buttonMessage: string, showSecondPrompt: boolean, sender?: any): Promise<void> {
@@ -1283,7 +1286,7 @@ export class DefaultClient implements Client {
         }
 
         this.rootFolder = workspaceFolder;
-        this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
+        this.rootRealPath = this.RootPath ? fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath : "";
 
         let storagePath: string | undefined;
         if (util.extensionContext) {
@@ -1320,7 +1323,7 @@ export class DefaultClient implements Client {
 
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
-            this.isSupported = false;   // Running on an OS we don't support yet.
+            this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 let additionalInfo: string;
@@ -1410,7 +1413,7 @@ export class DefaultClient implements Client {
                 });
             }
         } catch (err) {
-            this.isSupported = false;   // Running on an OS we don't support yet.
+            this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
@@ -1448,7 +1451,7 @@ export class DefaultClient implements Client {
             clangTidyPath: util.resolveVariables(settings.clangTidyPath, this.AdditionalEnvironment),
             clangTidyConfig: settings.clangTidyConfig,
             clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
-            clangTidyHeaderFilter: (settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null),
+            clangTidyHeaderFilter: settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null,
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
             clangTidyFixWarnings: settings.clangTidyFixWarnings,
@@ -2113,7 +2116,7 @@ export class DefaultClient implements Client {
                 return;
             }
             const settings: CppSettings = new CppSettings(this.RootUri);
-            if (settings.configurationWarnings === true && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+            if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                 const dismiss: string = localize("dismiss.button", "Dismiss");
                 const disable: string = localize("diable.warnings.button", "Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2184,7 +2187,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(cppSettings.vcpkgEnabled === true);
+        return Promise.resolve(!!cppSettings.vcpkgEnabled);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
@@ -2283,7 +2286,7 @@ export class DefaultClient implements Client {
 
             // pick items up off the queue and run then one at a time until the queue is empty
             const [promise, task] = DefaultClient.queue.shift() ?? [];
-            if (promise) {
+            if (is.promise(promise)) {
                 try {
                     promise.resolve(task ? await task() : undefined);
                 } catch (e) {
@@ -2366,13 +2369,13 @@ export class DefaultClient implements Client {
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
             const is_cuda: boolean = languageStr.startsWith("cu;");
-            languageStr = languageStr.substring(is_c ? 2 : (is_cuda ? 3 : 1));
-            this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
+            languageStr = languageStr.substring(is_c ? 2 : is_cuda ? 3 : 1);
+            this.addFileAssociations(languageStr, is_c ? "c" : is_cuda ? "cuda-cpp" : "cpp");
         }
     }
 
     private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
-        const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
+        const languageId: string = params.isC ? "c" : params.isCuda ? "cuda-cpp" : "cpp";
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
         if (!!document && document.languageId !== languageId) {
             if (document.languageId === "cpp" && languageId === "c") {
@@ -2704,7 +2707,7 @@ export class DefaultClient implements Client {
         // Handle config providers
         const provider: CustomConfigurationProvider1 | undefined =
             !this.configStateReceived.configProviders ? undefined :
-                (this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0]);
+                this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0];
         let showConfigStatus: boolean = false;
         if (rootFolder && configProviderNotSetAndNoCache && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
@@ -3069,13 +3072,13 @@ export class DefaultClient implements Client {
         } else {
             areOptionalsValid = util.isOptionalString(input.configuration.intelliSenseMode) && util.isOptionalString(input.configuration.standard);
         }
-        return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
+        return input && (util.isString(input.uri) || util.isUri(input.uri)) &&
             input.configuration &&
             areOptionalsValid &&
             util.isArrayOfString(input.configuration.includePath) &&
             util.isArrayOfString(input.configuration.defines) &&
             util.isOptionalArrayOfString(input.configuration.compilerArgs) &&
-            util.isOptionalArrayOfString(input.configuration.forcedInclude));
+            util.isOptionalArrayOfString(input.configuration.forcedInclude);
     }
 
     private sendCustomConfigurations(configs: any, providerVersion: Version): void {

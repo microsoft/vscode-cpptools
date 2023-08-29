@@ -15,7 +15,7 @@ const config = {
 
     entry: './src/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: { // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist', 'src'),
         filename: 'main.js',
         libraryTarget: "commonjs2",
         devtoolModuleFilenameTemplate: "../[resource-path]",
@@ -41,11 +41,11 @@ const config = {
                 loader: 'ts-loader',
                 options: {
                     compilerOptions: {
-                        "sourceMap": true,
+                        "inlineSourceMap": true,
                     }
                 }
             }]
-        },{
+        }, {
             test: /.node$/,
             loader: 'node-loader',
         }]
@@ -65,11 +65,10 @@ module.exports = (env) => {
         config.module.rules.unshift({
             loader: 'vscode-nls-dev/lib/webpack-loader',
             options: {
-                base: __dirname
+                base: `${__dirname}/src`
             }
         })
     }
 
     return config
-  };
-
+};
