@@ -179,9 +179,9 @@ describe('Command Lines', () => {
             }
 
             if (variable !== undefined) {
-                process.env['var'] = variable;
+                process.env.var = variable;
             } else {
-                delete process.env['var'];
+                delete process.env.var;
             }
             stop = true;
 
@@ -203,7 +203,7 @@ describe('Command Lines', () => {
             if (variable !== undefined) {
                 process.env['var'] = variable;
             } else {
-                delete process.env['var'];
+                delete process.env.var;
             }
             stop = true;
 

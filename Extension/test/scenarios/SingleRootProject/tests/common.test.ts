@@ -62,6 +62,7 @@ suite("resolveVariables", () => {
             process.env[processKey] = "bar";
             actual = resolveVariables(input, {});
         } finally {
+            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete process.env[processKey];
         }
         assert.equal(actual, "foobar");

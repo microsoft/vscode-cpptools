@@ -84,7 +84,7 @@ export abstract class Emitter {
    * @param eventName - the string name of the event
    * @param options - options for the event trigger
    */
-    protected newEvent(eventName: string, options?: EventOptions): () => Promise<void | EventStatus>;
+    protected newEvent(eventName: string, options?: EventOptions): () => Promise<undefined | EventStatus>;
 
     /**
    * Creates a named event function for triggering events in an {@link Emitter}

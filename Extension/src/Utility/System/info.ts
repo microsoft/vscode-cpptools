@@ -75,6 +75,7 @@ interface FunctionInfo {
 
     /** a bound callable function for the member (saves us from having to do it later anyway) */
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     fn: Function;
 }
 
