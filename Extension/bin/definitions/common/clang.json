@@ -1,0 +1,20 @@
+{
+  // common query file for gcc-style compilers
+  "analysis": {
+    /*
+  "query": {
+      "-E -dM -v ${tmp:c}": {
+        "macros": "^#define (\\S*) ?(.*)?$", // match defines in output 
+        "includePaths": "#include <...> search starts here:\n((?: [^\n]*\n)*)*", // match the lines for include folders 
+        "target": "^Target: (.*)", // get the target 
+        "cStandard": "^#define __STDC_VERSION__\\s*(.*)",
+        "cppStandard": "^#define __cplusplus\\s*(.*)",
+      },
+      "--version": {
+        "version": "^clang version (\\d+[.]\\d+[.]\\d+)(?:-\\S*)?$"
+      }
+    }
+  }*/
+  // how do we specify args to trim off if the discovery is handled/initiated by someone else
+}
+}

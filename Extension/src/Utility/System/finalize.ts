@@ -54,6 +54,10 @@ export function finalize(...items: any[]): void {
                         ignore(() => item.dispose?.());
                     });
                     ActiveFinalizers = Promise.all([fin, ActiveFinalizers, DispatcherBusy]).then(() => item.removeAllListeners?.());
+                    if (item[Symbol.dispose]) {
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        using _ = item; // make it call the [Symbol.dispose()] method
+                    }
                     return;
                 }
             } catch {

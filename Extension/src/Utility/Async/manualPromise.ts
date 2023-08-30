@@ -42,8 +42,9 @@ export class ManualPromise<T = void> implements Promise<T> {
     /**
      * A method to manually resolve the Promise.
      */
-    public resolve: (value?: T | PromiseLike<T> | undefined) => void = (v) => {
+    public resolve: (value?: T | PromiseLike<T> | undefined) => T = (v) => {
         void v; /* */
+        return v as T;
     };
 
     /**
@@ -89,6 +90,7 @@ export class ManualPromise<T = void> implements Promise<T> {
                 }
                 this.state = 'resolved';
                 r(v as any);
+                return v as T;
             };
             this.reject = (e: any) => {
                 if ((global as any).DEVMODE && this.state !== 'pending') {

@@ -13,6 +13,7 @@ import { setTimeout } from 'timers';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
+import { IntelliSenseConfiguration } from '../ToolsetDetection/interfaces';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import * as util from '../common';
 import { isWindows } from '../constants';
@@ -86,6 +87,14 @@ export interface Configuration {
     mergeConfigurations?: boolean;
     browse?: Browse;
     customConfigurationVariables?: { [key: string]: string };
+
+    /** new IntelliSense configuration */
+    intellisense?: IntelliSenseConfiguration;
+    /** select the compiler for new mode (full path, filename of binary in ${env:PATH} or compiler name (supports wildcards) )   */
+    compiler?: string;
+    /** will trigger the use of the new intellisense when the compiler is set. */
+    enableNewIntellisense?: boolean;
+
 }
 
 export interface ConfigurationErrors {
@@ -904,6 +913,12 @@ export class CppProperties {
         const env: Environment = this.ExtendedEnvironment;
         for (let i: number = 0; i < this.configurationJson.configurations.length; i++) {
             const configuration: Configuration = this.configurationJson.configurations[i];
+
+            if (configuration.compiler) {
+                // we are going to skip all the magic when it's a new intellisense config
+                continue;
+            }
+
             configuration.compilerPathInCppPropertiesJson = configuration.compilerPath;
             configuration.compileCommandsInCppPropertiesJson = configuration.compileCommands;
             configuration.configurationProviderInCppPropertiesJson = configuration.configurationProvider;

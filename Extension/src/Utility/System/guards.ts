@@ -21,6 +21,10 @@ export class is {
         return false;
     }
 
+    static numeric(node: any): node is number {
+        return typeof node === 'number' && !isNaN(node) && isFinite(node);
+    }
+
     static object(node: any): node is Record<string, any> {
         return typeof node === 'object' && node !== null && !is.array(node);
     }
@@ -41,6 +45,7 @@ export class is {
         return !is.nullish(instance) && !!instance[Symbol.asyncIterator];
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     static Constructor(instance: any): instance is Constructor {
         return typeof instance === 'function' && !!instance.prototype && !Object.getOwnPropertyNames(instance).includes('arguments') && instance.toString().match(/^function.*\{ \[native code\] \}|^class/g);
     }
@@ -51,6 +56,10 @@ export class is {
 
     static array(instance: any): instance is any[] {
         return Array.isArray(instance);
+    }
+
+    static set(instance: any): instance is Set<any> {
+        return instance instanceof Set;
     }
 
     static string(instance: any): instance is string {

@@ -1,0 +1,169 @@
+{
+  "analysis": { 
+    // analysis steps are applied in order
+
+    "tasks: # handle environment variables" : [
+      "inline-environment-variables",     // takes the $env:CL and $env:_CL_ variables and adds them to the command line
+      "inline-response-file",             // takes the @file response file and adds it to the command line
+      "consume-lib-path",                 // adds $env:LIB to the lib paths
+      "remove-linker-arguments",          // removes linker arguments from the command line
+    ],
+
+    "expressions: #environment variables": {
+      "${env:INCLUDE}":                   { "include.environmentPaths": "${env:INCLUDE}" },
+    },
+
+    "commandLineArguments: # detect target language": { // looks thru args to find things that set certain states (ie, /Tc, /Tp for language selection )
+      "${-/}T[cC]" :                      { "language": "c",},
+      "${-/}T[pP]" :                      { "language": "c++" },
+    },
+
+    "commandLineArguments: NO_CONSUME # telemetry check for CLR usage": {
+      // don"t consume the parameter
+      "${-/}clr.*" :                      {"telemetry:cliDetected": {"cliDetection": true} },
+      "${-/}ZW.*" :                       {"telemetry:cxDetected": {"cxDetection": true} } 
+    },
+
+    "commandLineArguments: # process most args": {
+      "${-/}I(?<path>.+)" :               { "include.paths": "${path}" },
+      "${-/}I;(?<path>.+)" :              { "include.paths": "${path}" },
+      "${-/}FI(?<path>.+)" :              { "forcedIncludeFiles": "${path}" }, // should we be validating the path exists against system and user include folders? -- cl_compiler_info.cpp@191
+      "${-/}FI;(?<path>.+)" :             { "forcedIncludeFiles": "${path}" },
+      "-include;(?<path>.+)" :            { "forcedIncludeFiles": "${path}" }, // This support for passing "-include" to cl.exe can be removed in the future, when Unreal Engine is updated to no longer pass it to cl.exe.
+      "${-/}external:I(?<path>.+)" :      { "include.externalPaths": "${path}" },
+      "${-/}external:I;(?<path>.+)" :     { "include.externalPaths": "${path}" },
+
+      "${-/}D;${keyEqualsValue}" :        { "macros": { "${key}": "${value}" } },
+      "${-/}D;${keyNoValue}" :            { "macros": { "${key}": 1 } },
+      "${-/}D${keyEqualsValue}" :         { "macros": { "${key}": "${value}" } },
+      "${-/}D${keyNoValue}" :             { "macros": { "${key}": 1 } },
+
+      "${-/}Zl" :                         { "macros": { "_VC_NODEFAULTLIB": 1 } },
+      "${-/}Zp(?<alignment>1|2|4|8|16)" : { "parserArguments": [ "--pack_alignment", "${alignment}" ] },
+      "${-/}Zp(?<alignment>.+)":          { "warning": "unknown pack alignment ${alignment}", "parserArguments": [ "--pack_alignment", 1 ] },
+
+      "${-/}fp:except":                   { "macros": { "_M_FP_EXCEPT": 1} },
+      "${-/}fp:except-":                  { "macros": { "_M_FP_EXCEPT": null} },
+      "${-/}fp:fast":                     { "macros": { "_M_FP_FAST": 1} },
+      "${-/}fp:precise":                  { "macros": { "_M_FP_PRECISE": 1} },
+      "${-/}fp:strict":                   { "macros": { "_M_FP_STRICT": 1, "_M_FP_EXCEPT":1} },
+      "${-/}GR":                          { "parserArguments": "--rtti" },
+      "${-/}GR-":                         { "parserArguments": "--no_rtti" },
+      "${-/}headerUnit;(?<hu>.+)":        { "parserArguments": ["--ms_header_unit","${hu}"] },
+      "${-/}headerUnit(?<hu>.+)":         { "parserArguments": ["--ms_header_unit","${hu}"] },
+      "${-/}ifcSearchDir;(?<md>.+)":      { "parserArguments": ["--modules_directory","${md}"] },
+      "${-/}ifcSearchDir(?<md>.+)":       { "parserArguments": ["--modules_directory","${md}"] },
+      "${-/}J":                           { "parserArguments": "--unsiged_chars" , "macros": { "_CHAR_UNSIGNED": 1 } },
+      "${-/}LD":                          { "macros": { "_MT":1 } },
+      "${-/}MT":                          { "macros": { "_MT":1 } },
+      "${-/}LDd":                         { "macros": { "_MT":1, "_DEBUG":1 } },
+      "${-/}MTd":                         { "macros": { "_MT":1, "_DEBUG":1 } },
+      "${-/}MD":                          { "macros": { "_MT":1, "_DLL":1 } },
+      "${-/}MDd":                         { "macros": { "_MT":1, "_DLL":1, "_DEBUG":1 } },
+      "${-/}openmp":                      { "macros": { "_OPENMP":"200203" } },
+      "${-/}openmp:experimental":         { "macros": { "_OPENMP":"2019" } },
+      "${-/}openmp:llvm":                 { "macros": { "_OPENMP":"200203", "_OPENMP_LLVM_RUNTIME":1 } },
+      "${-/}permissive":                  { "parserArguments": "--ms_permissive" },
+      "${-/}permissive-":                 { "parserArguments": "--no_ms_permissive" },
+      "${-/}reference;(?<path>.+)":       { "parserArguments": ["--ms_mod_file_map","${path}"] },
+      "${-/}reference(?<path>.+)":        { "parserArguments": ["--ms_mod_file_map","${path}"] },
+      "${-/}showIncludes":                { "parserArguments": "--trace_includes" },
+      "${-/}stdIfcDir;(?<path>.+)":       { "parserArguments": ["--std_modules_directory","${path}"] },
+      "${-/}stdIfcDir(?<path>.+)":        { "parserArguments": ["--std_modules_directory","${path}"] },
+      "${-/}volatile:iso":                { "macros": { "_VOLATILE_ISO":1 } },
+      "${-/}Za":                          { "parserArguments": "--alternative_tokens" },
+      "${-/}Zc:__cplusplus":              { "parserArguments": "--ms_cplusplus_std_value" },
+      "${-/}Zc:__cplusplus-":             { "parserArguments": "--no_ms_cplusplus_std_value" },
+      "${-/}Zc:char8_t":                  { "parserArguments": "--char8_t" },
+      "${-/}Zc:char8_t-":                 { "parserArguments": "--no_char8_t" },
+      "${-/}Zc:forScope":                 { "parserArguments": "--new_for_init" },
+      "${-/}Zc:forScope-":                { "parserArguments": "--old_for_init" },
+      "${-/}Zc:wchar_t":                  { "parserArguments": "--wchar_t_keyword" },
+      "${-/}Zc:wchar_t-":                 { "parserArguments": "--no_wchar_t_keyword" },
+      "${-/}Zc:auto-":                    { "parserArguments": "--no_auto_type" },
+      "${-/}Zc:trigraphs":                { "parserArguments": "--trigraphs" },
+      "${-/}Zc:trigraphs-":               { "parserArguments": "--no_trigraphs" },
+      "${-/}Zc:rvalueCast":               { "parserArguments": "--ms_rvalue_cast" },
+      "${-/}Zc:rvalueCast-":              { "parserArguments": "--no_ms_rvalue_cast" },
+      "${-/}Zc:strictStrings":            { "parserArguments": "--no_deprecated_string_conv" },
+      "${-/}Zc:strictStrings-":           { "parserArguments": "--deprecated_string_conv" },
+      "${-/}Zc:noexceptTypes":            { "parserArguments": "--exc_spec_in_func_type" },
+      "${-/}Zc:noexceptTypes-":           { "parserArguments": "--no_exc_spec_in_func_type" },
+      "${-/}Zc:alignedNew":               { "parserArguments": "--overaligned_allocation" },
+      "${-/}Zc:alignedNew-":              { "parserArguments": "--no_overaligned_allocation" },
+      "${-/}Zc:referenceBinding":         { "parserArguments": "--no_nonconst_ref_anachronism" },
+      "${-/}Zc:referenceBinding-":        { "parserArguments": "--nonconst_ref_anachronism" },
+      "${-/}Zc:ternary":                  { "parserArguments": "--ms_strict_ternary" },
+      "${-/}Zc:ternary-":                 { "parserArguments": "--no_ms_strict_ternary", "remove:parserArguments": "--ms_strict_ternary" },
+      "${-/}Zc:twoPhase":                 { "parserArguments": "--no_dep_name" },
+    },
+
+    "commandLineArguments:CPP": {
+      "${-/}await":                       { "parserArguments": "--ms_await"  },
+      "${-/}experimental:module" :        { "parserArguments": "--modules"  },
+      "${-/}experimental:preprocessor" :  { "parserArguments": "--ms_std_preprocessor"  },
+      "${-/}Zc:preprocessor" :            { "parserArguments": "--ms_std_preprocessor"  },
+      "${-/}experimental:preprocessor-" : { "parserArguments": "--no_ms_std_preprocessor" },
+      "${-/}Zc:preprocessor-" :           { "parserArguments": "--no_ms_std_preprocessor" },
+      "${-/}std:(?<std>.+)" :             { "standard":"${std}" },
+      "${-/}kernel":                      { "macros": { "_KERNEL_MODE": 1 }, "parserArguments": ["--no_exceptions","no_rtti"] },
+    },
+
+
+    "commandLineArguments: # CPP-CLI ??? todo - come back to this (cl_compiler_info.cpp@485 to )": {
+
+      // *** This section would not apply to ARM complier? <#if !VSCODE_ARM> -- see cl_compiler_info.cpp@485 --
+      // *** which I think may be a mistake, since being applied to ARM64 as a host isn"t right, we"re talking about a target?
+      // cpp/cli
+      "${-/}clr:initialAppDomain":        { "macros": { "_CPPUNWIND":1 }},
+      "${-/}clr:netcore":                 { "parserArguments": ["--cppcli_netcore","--no_using_framework_directory", "--cppcli"],"macros":{"D_CLR_NETCORE":1, "_MANAGED":1, "_M_CEE_":"001"} },
+      "${-/}clr:newSyntax":               { "parserArguments": "--cppcli", "macros": {"_CPPUNWIND":1, "_M_CEE_PURE":"001", "_MANAGED":1, "_M_CEE_":"001" }},
+      "${-/}clr:noAssembly":              { "parserArguments": "--cppcli", "macros": { "_MANAGED":1, "_M_CEE_":"001" }},
+      "${-/}clr:nostdlib":                { "parserArguments": ["--no_using_framework_directory"] },
+      "${-/}clr:nostdimport":             { "parserArguments": ["--no_stdlib"] },
+      "${-/}clr":                         { "parserArguments": "--cppcli", "macros": { "_MANAGED":1, "_M_CEE_":"001", "_CPPUNWIND":1, }},
+      "${-/}clr:pure":                    { "parserArguments": "--cppcli", "macros": { "_MANAGED":1, "_M_CEE_":"001", "_CPPUNWIND":1, }},
+      "${-/}clr:safe":                    { "parserArguments": "--cppcli", "macros": { "_MANAGED":1, "_M_CEE_":"001", "_CPPUNWIND":1, "_M_CEE_PURE":"001", "_M_CEE_SAFE":"001" }},
+
+      "${-/}zw":                          { "parserArguments": "--cppcx" },
+      "${-/}zw:nostdlib":                 { "parserArguments": "--cppcx"},
+    },
+    
+    "commandLineArguments:C" : {
+      "${-/}kernel":                      { "macros": { "_KERNEL_MODE": 1 } },
+      "${-/}std:(?<std>.+)" :             { "cStandard":"${std}" },
+    },
+
+    "query" : {
+      "-E /Zc:preprocessor ${queryArguments} /PD ${tmp.c}": {
+        "^#define (?<key>\\S*) ?(?<value>.*)?$":                        { "macros":{ "${key}": "${value}" } }, 
+      }
+    },
+    "expressions: PRIORITY=85" : { 
+      "${bits} === 64" : {
+          "parserArguments": [
+              "-D_MSC_EXTENSIONS",
+              "--microsoft",
+              "--microsoft_bugs",
+              "--microsoft_version", "1935",
+              "--pack_alignment", "8",
+              "-D_CPPUNWIND=1",
+              "-D_MSC_VER=1935",
+              "-D_MSC_FULL_VER=193532215",
+              "-D_MSC_BUILD=0",
+              "-D_M_X64=100",
+              "-D_M_AMD64=100"
+          ]
+        
+      }
+    },
+    "task:post-process": [
+      // see cl_compiler_info.cpp@617 - process zw directories
+      "zwCommandLineSwitch",
+      "experimentalModuleNegative",
+    ],
+    
+  }
+
+}
+

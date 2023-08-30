@@ -31,7 +31,7 @@ const cache = new Map<string, File | FolderWithChildren | Promise<FolderWithChil
  * @param executableExtensions  a set of file extensions that are considered executable on Windows
  * @returns a map of the files and folders in the directory, or undefined if the directory doesn't exist or is inaccessible.
  */
-async function readDirectory(fullPath: string, executableExtensions: Set<string> = process.platform === 'win32' ? new Set(['.exe'/* ,'.cmd','.bat' */]) : new Set()): Promise<Map<string, File | FolderWithChildren> | undefined> {
+async function readDirectory(fullPath: string, executableExtensions: Set<string> = process.platform === 'win32' ? new Set(['.exe']) : new Set()): Promise<Map<string, File | FolderWithChildren> | undefined> {
     // have we already read this directory?
     let folder = cache.get(fullPath) as FolderWithChildren | undefined;
     let promise: ManualPromise<FolderWithChildren | undefined> | undefined;

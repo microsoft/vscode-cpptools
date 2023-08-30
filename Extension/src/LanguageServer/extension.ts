@@ -10,6 +10,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { remote } from '../ToolsetDetection/detection';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -1021,6 +1022,9 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
 }
 
 export function deactivate(): Thenable<void> {
+    // shutdown the worker thread if it's running
+    remote.terminate();
+
     clients.timeTelemetryCollector.clear();
     console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");

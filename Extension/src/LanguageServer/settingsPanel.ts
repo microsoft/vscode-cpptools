@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
+import { structuredClone } from '../Utility/System/structuredClone';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as config from './configurations';
@@ -15,10 +16,6 @@ import { getLocalizedHtmlPath } from './localization';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-
-function deepCopy(obj: any) {
-    return JSON.parse(JSON.stringify(obj));
-}
 
 // TODO: share ElementId between SettingsPanel and SettingsApp. Investigate why SettingsApp cannot import/export
 const elementId: { [key: string]: string } = {
@@ -228,7 +225,7 @@ export class SettingsPanel {
     }
 
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
-        this.configValues = deepCopy(configuration); // Copy configuration values
+        this.configValues = structuredClone(configuration); // Copy configuration values
         this.isIntelliSenseModeDefined = this.configValues.intelliSenseMode !== undefined;
         if (this.panel && this.initialized) {
             void this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });

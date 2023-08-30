@@ -435,6 +435,7 @@ export class ReadWriteLineStream extends ReadableLineStream {
 
         this.writeable.on('error', (_error) => {
             /*
+            uncomment if testing :
             this is handy for debugging to see if errors are happening.
 
             if ((global as any).DEVMODE && error) {

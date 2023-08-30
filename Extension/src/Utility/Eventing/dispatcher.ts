@@ -81,7 +81,7 @@ async function dispatch<TResult>(event: Event<any, TResult>): Promise<void> {
                 resultValue = r as TResult | EventStatus;
 
                 if (is.cancelled(resultValue)) {
-                    return event.completed.resolve(resultValue); // the event has been cancelled
+                    event.completed.resolve(resultValue); // the event has been cancelled
                 }
             }
         } catch (e: any) {
@@ -135,7 +135,7 @@ async function dispatch<TResult>(event: Event<any, TResult>): Promise<void> {
 
     // wait for all the async handlers to complete
     // and return the first result that isn't 'Continue'
-    return event.completed.resolve((await Promise.all(results)).find((each: any) => each !== Continue));
+    event.completed.resolve((await Promise.all(results)).find((each: any) => each !== Continue));
 }
 
 function* getHandlers<TResult>(event: Event<any, TResult>, category: Map<string, Subscriber[]>): Iterable<[Callback, string[]]> {

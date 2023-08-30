@@ -20,6 +20,7 @@ import { CppBuildTaskProvider, cppBuildTaskProvider } from './LanguageServer/cpp
 import { getLocaleId, getLocalizedHtmlPath } from './LanguageServer/localization';
 import { PersistentState } from './LanguageServer/persistentState';
 import { CppSettings } from './LanguageServer/settings';
+import { initialize } from './ToolsetDetection/detection';
 import { logAndReturn, returns } from './Utility/Async/returns';
 import { CppTools1 } from './cppTools1';
 import { logMachineIdMappings } from './id';
@@ -55,6 +56,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     }
 
     vscode.workspace.registerTextDocumentContentProvider('cpptools-schema', new SchemaProvider());
+
+    // initialize the toolset detection
+
+    void initialize([util.getExtensionFilePath("bin/definitions")], {storagePath: context.globalStorageUri.fsPath});
 
     // Initialize the DebuggerExtension and register the related commands and providers.
     await DebuggerExtension.initialize(context);
@@ -146,7 +151,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
         // the message on old Macs that we've already displayed a warning for.
         log(localize("intellisense.disabled", "intelliSenseEngine is disabled"));
     }
-
     return cppTools;
 }
 

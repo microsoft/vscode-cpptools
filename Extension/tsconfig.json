@@ -5,6 +5,7 @@
         "outDir": "dist",
         "lib": [
             "ES2022",
+            "esnext.disposable",
             "dom"
         ],
         "inlineSourceMap": true,

@@ -1,0 +1,17 @@
+{
+  "name": "GNU C [ARM]",
+  "import": "common/gcc.json",
+  "discover": {
+    "binary": "arm-none-eabi-gcc",
+    "locations": [ "c:/nxp/", "c:/st/" ],
+    "match": {
+      "^(?<ver>\\d+[.]\\d+[.]\\d+)(?:-\\S*)?$" : { "version": "${ver}" }
+    }
+  },
+  "intellisense": {
+    "compiler": "gcc",
+    "architecture": "arm",
+    "bits": 32,
+    "platform": "none"
+  }
+}

@@ -62,7 +62,7 @@ export async function expandString(input: string, options: ExpansionOptions): Pr
     return replaceAll(result, '${dollar}', '$');
 }
 
-/** Returns [expandedString, didReplacement] */
+/** @returns a promise to [expandedString, didReplacement] */
 async function expandStringImpl(input: string, options: ExpansionOptions): Promise<[string, boolean]> {
     if (!input) {
         return [input, false];

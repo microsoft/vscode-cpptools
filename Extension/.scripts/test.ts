@@ -19,63 +19,11 @@ import { install, isolated, options } from './vscode';
 
 export { install, reset } from './vscode';
 
-const sowrite = process.stdout.write.bind(process.stdout) as (...args: unknown[]) => boolean;
-const sewrite = process.stderr.write.bind(process.stderr) as (...args: unknown[]) => boolean;
-
-const filters = [
-    /^\[(.*)\].*/,
-    /^Unexpected token A/,
-    /Cannot register 'cmake.cmakePath'/,
-    /\[DEP0005\] DeprecationWarning/,
-    /--trace-deprecation/,
-    /Iconv-lite warning/,
-    /^Extension '/,
-    /^Found existing install/
-];
-
-// remove unwanted messages from stdio
-function filterStdio() {
-    process.stdout.write = function (...args: unknown[]) {
-        if (typeof args[0] === 'string') {
-            const text = args[0];
-
-            if (filters.some(each => text.match(each))) {
-                return true;
-            }
-        }
-        if (args[0] instanceof Buffer) {
-            const text = args[0].toString();
-            if (filters.some(each => text.match(each))) {
-                return true;
-            }
-        }
-        return sowrite(...args);
-    };
-
-    process.stderr.write = function (...args: unknown[]) {
-        if (typeof args[0] === 'string') {
-            const text = args[0];
-
-            if (filters.some(each => text.match(each))) {
-                return true;
-            }
-        }
-        if (args[0] instanceof Buffer) {
-            const text = args[0].toString();
-            if (filters.some(each => text.match(each))) {
-                return true;
-            }
-        }
-        return sewrite(...args);
-    };
-}
-
-filterStdio();
-
 async function unitTests() {
     await checkFolder('dist/test/unit', `The folder '${$root}/dist/test/unit is missing. You should run ${brightGreen("yarn compile")}\n\n`);
     const mocha = await checkFile(["node_modules/.bin/mocha.cmd", "node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
     const result = spawnSync(mocha, [`${$root}/dist/test/unit/**/*.test.js`, '--timeout', '30000'], { stdio:'inherit'});
+
     verbose(`\n${green("NOTE:")} If you want to run a scenario test (end-to-end) use ${cmdSwitch('scenario=<NAME>')} \n\n`);
     return result.status;
 }
@@ -87,14 +35,15 @@ async function scenarioTests(assets: string, name: string, workspace: string) {
         extensionTestsPath: resolve($root, 'dist/test/common/selectTests'),
         launchArgs: workspace ? [...options.launchArgs, workspace] : options.launchArgs,
         extensionTestsEnv: {
-            SCENARIO: assets
+            SCENARIO: assets,
+            DONT_PROMPT_WSL_INSTALL:"1"
         }
     });
 }
 
 export async function main() {
     await checkFolder('dist/test/', `The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
-    const arg = $args.find(each => !each.startsWith("--"));
+    const arg = $args[0];
     const specifiedScenario = $scenario || env.SCENARIO || await getScenarioFolder(arg);
     const testInfo = await getTestInfo(specifiedScenario);
 

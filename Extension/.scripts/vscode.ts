@@ -4,11 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
+import { fail } from 'assert';
+import { spawnSync } from 'child_process';
 import { createHash } from 'crypto';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { verbose } from '../src/Utility/Text/streams';
-import { mkdir, readJson, rimraf, write } from './common';
+import { $switches, error, mkdir, readJson, rimraf, write } from './common';
 
 export const isolated = resolve(tmpdir(), '.vscode-test', createHash('sha256').update(__dirname).digest('hex').substring(0, 6));
 export const extensionsDir = resolve(isolated, 'extensions');
@@ -52,7 +54,57 @@ export async function install() {
     } catch (err: unknown) {
         console.log(err);
     }
+}
 
+export async function installExtension(name: string, version?: string) {
+    // eslint-disable-next-line prefer-const
+    let {cli, args} = await install();
+    args = [...args, '--install-extension', version ? `${name}@${version}` : name ];
+    if ($switches.includes('--pre-release')) {
+        args.push('--pre-release');
+    }
+    verbose({cli, args});
+    const result = spawnSync(cli, args, { encoding: 'utf-8', stdio: 'pipe', env:environment()});
+    verbose(result.stdout);
+    if (!result.status){
+        for (const line of result.output){
+            const [,id, ver] = /Extension '(.*)' v(.*?)\s/g.exec(line) ?? [];
+            if (id) {
+                return {id, ver};
+            }
+        }
+    }
+    error(result.stderr);
+    fail('Failed to install extension');
+}
+
+export async function uninstallExtension(name: string) {
+    // eslint-disable-next-line prefer-const
+    let {cli, args} = await install();
+    args = [...args, '--uninstall-extension', name];
+
+    const result = spawnSync(cli, args, { encoding: 'utf-8', stdio: 'pipe', env:environment()});
+    if (!result.status){
+        for (const line of result.output){
+            const [,id, ver] = /Extension '(.*)' v(.*?)\s/g.exec(line) ?? [];
+            if (id) {
+                return {id, ver};
+                break;
+            }
+        }
+    }
+}
+
+export async function extensions() {
+    // eslint-disable-next-line prefer-const, @typescript-eslint/no-unused-vars
+    let {cli, args} = await install();
+}
+
+/** returns a copy of the environment, with tweaks to ensure isolated instance works correctly in WSL and remote dev situations   */
+export function environment() {
+    const env = { ...process.env, DONT_PROMPT_WSL_INSTALL:"1" }; // this lets you run the native VSCODE instance, even if you're working in WSL
+    Object.keys(env).map(each => each.includes('VSCODE') && delete env[each]); // prevent VSCode remoting from hijacking the launching of the isolated vscode
+    return env;
 }
 
 export async function reset() {

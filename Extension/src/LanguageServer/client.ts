@@ -32,12 +32,15 @@ import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
+import { identifyToolset } from '../ToolsetDetection/detection';
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
 import { is } from '../Utility/System/guards';
+import { elapsed } from '../Utility/System/performance';
+import { structuredClone } from '../Utility/System/structuredClone';
 import * as util from '../common';
-import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
+import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
@@ -61,9 +64,6 @@ import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
 import { handleChangedFromCppToC, makeVscodeLocation, makeVscodeRange } from './utils';
 import minimatch = require("minimatch");
 
-function deepCopy(obj: any) {
-    return JSON.parse(JSON.stringify(obj));
-}
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
@@ -2997,8 +2997,9 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings(this.RootUri);
         // Clone each entry, as we make modifications before sending it, and don't
         // want to add those modifications to the original objects.
-        configurations.forEach((c) => {
-            const modifiedConfig: configs.Configuration = deepCopy(c);
+        // configurations.forEach((c) => {
+        for (const c of configurations) {
+            const modifiedConfig: configs.Configuration = structuredClone(c);
             // Separate compiler path and args before sending to language client
             const compilerPathAndArgs: util.CompilerPathAndArgs =
                 util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
@@ -3010,9 +3011,27 @@ export class DefaultClient implements Client {
                 modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
             }
 
-            params.configurations.push(modifiedConfig);
-        });
+            getOutputChannel().appendLine(`${elapsed()} OnConfigurationsChange`);
+            // temporary measure -
+            // if there is an `.compiler` member present
+            // then let's ask for the the toolset configuration for that.
+            if (is.string(modifiedConfig.compiler)) {
+                try {
+                    using toolset = await identifyToolset(modifiedConfig.compiler);
 
+                    if (toolset) {
+                        const intellisense = await toolset.getIntellisenseConfiguration(modifiedConfig.compilerArgs ?? [], is.object(modifiedConfig.intellisense) ? modifiedConfig.intellisense : {});
+                        modifiedConfig.intellisense = toolset.harvestFromConfiguration(modifiedConfig, intellisense);
+                    }
+                } catch (e) {
+                    console.log(`Unable to identify toolset from compilerPath: ${modifiedConfig.compiler} - ${e}`);
+                }
+                getOutputChannel().appendLine(JSON.stringify(modifiedConfig, null, 2));
+            }
+            params.configurations.push(modifiedConfig);
+        }
+        getOutputChannel().appendLine(`${elapsed()} ========= SENDING CONFIGS =========`);
+        // otherwise fall back to the orig
         await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
@@ -3112,7 +3131,7 @@ export class DefaultClient implements Client {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
                 // Separate compiler path and args before sending to language client
-                const itemConfig: util.Mutable<InternalSourceFileConfiguration> = deepCopy(item.configuration);
+                const itemConfig: util.Mutable<InternalSourceFileConfiguration> = structuredClone(item.configuration);
                 if (util.isString(itemConfig.compilerPath)) {
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
                         providerVersion < Version.v6,
@@ -3195,7 +3214,7 @@ export class DefaultClient implements Client {
             }
 
             const browseConfig: InternalWorkspaceBrowseConfiguration = <InternalWorkspaceBrowseConfiguration>config;
-            sanitized = deepCopy(browseConfig);
+            sanitized = structuredClone(browseConfig);
             if (!this.isWorkspaceBrowseConfiguration(sanitized) || sanitized.browsePath.length === 0) {
                 console.log("Received an invalid browse configuration from configuration provider: " + JSON.stringify(sanitized));
                 const configValue: WorkspaceBrowseConfiguration | undefined = this.lastCustomBrowseConfiguration.Value;

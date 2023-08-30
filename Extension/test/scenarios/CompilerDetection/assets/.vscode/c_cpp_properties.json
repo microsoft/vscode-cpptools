@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            // "compiler": "C:\\program files\\microsoft visual studio\\2022\\enterprise\\vc\\tools\\msvc\\14.36.32532\\bin\\hostx64\\x64\\cl.exe",
+            "compiler": "Microsoft Visual C++/19.*/x64/x64",
+            // "compiler": "cl.exe",
+            //  "compiler": "C:\\program files\\microsoft visual studio\\2022\\enterprise\\vc\\tools\\msvc\\14.36.32532\\bin\\hostx64\\x64\\cl.exe",
+            "name": "newstyle",
+            "compilerArgs": [
+                "-Dfoo=bar",
+                "-I${workspaceFolder}/include",
+                "/MD"
+            ]
+            // "intelliSenseMode": "windows-msvc-x64",
+            // "compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.36.32532\\bin\\Hostx64\\x64\\cl.exe",
+            // "cStandard": "c17",
+            // "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

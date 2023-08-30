@@ -66,7 +66,7 @@ function parseTaggedLiteral(templateString: string) {
                         result.state = 'text';
                         continue;
 
-                    case ' ':
+                    // ...case ' ':
                     case '\t':
                     case '\r':
                     case '\n':
@@ -78,12 +78,12 @@ function parseTaggedLiteral(templateString: string) {
                         continue;
                 }
                 if (expression) {
-                    if (isIdentifierPart(char.codePointAt(0)!) || char === '-' || char === '/') {
+                    if (isIdentifierPart(char.codePointAt(0)!) || char === '-' || char === '/' || char === ';' || char === ' ') {
                         expression += char;
                         continue;
                     }
                     // error, fall through
-                } else if (isIdentifierStart(char.codePointAt(0)!) || char === '-' || char === '/') {
+                } else if (isIdentifierStart(char.codePointAt(0)!) || char === '-' || char === '/' || char === ';' || char === ' ') {
                     expression += char;
                     continue;
                 }
@@ -117,7 +117,11 @@ function split(expression: string) {
     return (expression.match(/(.*?):(.*)/) || ['', '', expression]).slice(1);
 }
 
-function resolveValue(expression: string, context: Record<string, any>, customResolver = (_prefix: string, _expression: string) => ''): string {
+async function resolveValue(expression: string, context: Record<string, any>, customResolver: CustomResolver = async (_prefix: string, _expression: string) => ''): Promise<string> {
+    if (!expression) {
+        return '';
+    }
+
     const [prefix, suffix] = split(expression);
 
     function joinIfArray(value: any, separator = '\u0007') {
@@ -130,15 +134,15 @@ function resolveValue(expression: string, context: Record<string, any>, customRe
             // it's a child of a variable
             return joinIfArray(suffix.includes(':') ? // is the suffix another expression?
                 resolveValue(suffix, variable) : // Yeah, resolve it
-                variable[suffix] ?? customResolver(prefix, suffix) ?? ''); // No, return the member of the variable, or dynamic, or empty string
+                variable[suffix] ?? await customResolver(prefix, suffix) ?? ''); // No, return the member of the variable, or dynamic, or empty string
         }
 
         // no variable by that name, so return the dynamic value, or an empty string
-        return joinIfArray(customResolver(prefix, suffix) ?? '');
+        return joinIfArray(await customResolver(prefix, suffix) ?? '');
     }
 
     // look up the value in the variables, or ask the dynamic function to resolve it, failing that, an empty string
-    return joinIfArray(context[suffix] ?? customResolver(prefix, suffix) ?? '');
+    return joinIfArray(context[suffix] ?? await customResolver(prefix, suffix) ?? '');
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -214,38 +218,52 @@ class as {
     }
 }
 
-export function render(templateStrings: string[], context: Record<string, any>, customResolver?: (prefix: string, expression: string) => string, ensureValuesAreValidJS?: boolean): string[];
-export function render(templateString: string, context: Record<string, any>, customResolver?: (prefix: string, expression: string) => string, ensureValuesAreValidJS?: boolean): string;
-export function render(templateString: string | string[], context: Record<string, any>, customResolver = (_prefix: string, _expression: string) => '', asJs = false): string | string[] {
+export type CustomResolver = (prefix: string, expression: string) => Promise<string>;
+
+export async function render(templateStrings: string[], context: Record<string, any>, customResolver?: CustomResolver, ensureValuesAreValidJS?: boolean): Promise<string[]>;
+export async function render(templateString: string, context: Record<string, any>, customResolver?: CustomResolver, ensureValuesAreValidJS?: boolean): Promise<string>;
+export async function render(templateString: string | string[], context: Record<string, any>, customResolver: CustomResolver = async (_prefix: string, _expression: string) => '', asJs = false): Promise<string | string[]> {
     if (Array.isArray(templateString)) {
-        return templateString.map(each => render(each, context, customResolver, asJs));
+        return Promise.all(templateString.map(each => render(each, context, customResolver, asJs)));
     }
 
     // quick exit if it's not a templated string
     if (!templateString.includes('${')) {
         return templateString;
     }
+
     const { template, expressions, state, message } = parseTaggedLiteral(templateString);
     const stabilize = asJs ? as.js : (x: string) => as.string(x) ?? '';
-    return state === 'error' ?
-        message : // return the error message if the parse failed. (this is fatal anyways)
-        template.reduce((result, each, index) => `${result}${stabilize(resolveValue(expressions[index - 1], context, customResolver))}${each}`); // resolve the inline expressions and join the template
+
+    if (state === 'error') {
+        console.error(`Error parsing tagged literal: ${message}`);
+        return message;
+    }
+
+    let result = '';
+    for (let index = 0; index < template.length; ++index) {
+        const each = template[index];
+        result = `${result}${stabilize(await resolveValue(expressions[index - 1], context, customResolver))}${each}`;
+    }
+
+    // if the result isn't the same as the original, but still has template strings, resolve any additional ones we can.
+    return result !== templateString && result.includes('${') ? render(result, context, customResolver, asJs) : result;
 }
 
-export function evaluateExpression(expression: string, context: Record<string, any>, customResolver = (_prefix: string, _expression: string) => ''): Primitive | undefined {
-    const result = expression.match(/\!|==|!=|>=|<=|>|<|\?|\|\||&&/) ? safeEval(render(expression, context, customResolver, true)) as Primitive : render(expression, context, customResolver);
+export async function evaluateExpression(expression: string, context: Record<string, any>, customResolver: CustomResolver = async (_prefix: string, _expression: string) => ''): Promise<Primitive | undefined> {
+    const result = expression.match(/\!|==|!=|>=|<=|>|<|\?|\|\||&&/) ? safeEval(await render(expression, context, customResolver, true)) as Primitive : await render(expression, context, customResolver);
     return result === '' || result === 'undefined' || result === 'null' || result === null ? undefined : result;
 }
 
-export function recursiveRender<T extends Record<string, any>>(obj: T, context: Record<string, any>, customResolver = (_prefix: string, _expression: string) => ''): T {
+export async function recursiveRender<T extends Record<string, any>>(obj: T, context: Record<string, any>, customResolver = async (_prefix: string, _expression: string) => ''): Promise<T> {
     const result = (is.array(obj) ? [] : {}) as Record<string, any>;
     for (const [key, value] of Object.entries(obj)) {
-        const newKey = is.string(key) && key.includes('${') ? render(key, context, customResolver) : key;
+        const newKey = is.string(key) && key.includes('${') ? await render(key, context, customResolver) : key;
 
         if (is.string(value)) {
-            result[newKey] = evaluateExpression(value, context, customResolver);
+            result[newKey] = await evaluateExpression(value, context, customResolver);
         } else if (typeof value === 'object') {
-            result[newKey] = recursiveRender(value, context, customResolver);
+            result[newKey] = await recursiveRender(value, context, customResolver);
         } else {
             result[newKey] = value;
         }

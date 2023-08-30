@@ -1,0 +1,18 @@
+{
+  "name": "Clang C++",
+  "import": [
+    "common/defaults.json",
+    "common/clang.json",
+  ],
+  "discover": {
+    "binary": "clang++",
+    "match": {
+      "^clang (?<ver>\\d+[.]\\d+[.]\\d+)(?:-\\S*)?$": { "version": "${ver}" }
+    }
+  },
+  "intellisense": {
+    "compiler": "clang",
+    "architecture": "x64",
+    "bits": 64,
+  }
+}

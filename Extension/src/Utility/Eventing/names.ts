@@ -10,7 +10,7 @@ export class requests {
     static readonly get = 'get';
 }
 
-// [noun]-[verb]
+// event names should be like [noun]-[verb]
 export class events {
     static readonly writing = 'writing';
     static readonly reading = 'reading';
@@ -27,8 +27,7 @@ export class channels {
 }
 
 /** Notifications */
-// [state]
-// [pastTenseVerb]-[noun]
+// should be like [state] or [pastTenseVerb]-[noun]
 export class notifications {
     static readonly ready = 'ready';
     static readonly exited = 'exited';

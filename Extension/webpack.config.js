@@ -13,10 +13,23 @@ const path = require('path');
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
 
-    entry: './src/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+
+    // we now have two entries - one for the main entrypoint and one for the worker thread. 
+    // we can webpack each one and they won't interfere with each other.
+    entry: {
+        main: {
+            import: './src/main.ts',
+            filename: 'main.js'
+        },
+        worker: {
+            import: './src/ToolsetDetection/Service/worker.ts',
+            filename: 'ToolsetDetection/Service/worker.js'
+        },
+    },
+
+    // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: { // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
         path: path.resolve(__dirname, 'dist', 'src'),
-        filename: 'main.js',
         libraryTarget: "commonjs2",
         devtoolModuleFilenameTemplate: "../[resource-path]",
     },

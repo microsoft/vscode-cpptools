@@ -1,0 +1,33 @@
+{
+  "name": "IAR C/C++ [ARM]",
+  "import": [
+    "common/defaults.json"
+  ],
+  "discover": {
+    "binary": "iccarm",
+    "match": {
+      "^(?<ver>\\d{1,2}[.]\\d+[.]\\d+[.]\\d+)(?:/\\S*)?$": { "version": "${ver}" }
+    },
+    "expression: FOLDER" : {
+      "${binary}/../../" :                                 { "IARPath" : "${binary}/../../" }
+    }
+  },
+  "intellisense": {
+    "compiler": "iar", // this just gets us the 'base' that EDG will think it is
+    "architecture": "arm", // we can have a common file that remaps this to something else if needed
+    "bits": 32, // another hint for later.
+    "platform": "none", // bare-metal target. (can be remaped to windows/macos/linux if needed to make EDG happy)
+    "include.systemPaths": [ // we can't get the include path from the compiler, so we had to explicity state it
+      "${IARPath}inc/cpp" // include folder for c++ headers in IAR
+    ]
+  },
+  "analysis": {
+    "queries": {
+      "${tmp.c} --c++ --predef_macros ${tmp.stdout} --output ${tmp.o}": {
+        "^#define (?<key>\\S*) ?(?<value>.*)?$" : { "macros": { "${key}": "${value}" } },
+        "^#define __STDC_VERSION__\\s*(?<ver>.*)": { "cStandard": "${ver}" },
+        "^#define __cplusplus\\s*(?<ver>.*)": { "cppStandard": "${ver}" }
+      }
+    }
+  }
+}

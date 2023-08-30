@@ -74,7 +74,6 @@ interface FunctionInfo {
     isAsync: boolean;
 
     /** a bound callable function for the member (saves us from having to do it later anyway) */
-
     fn: Function;
 }
 

@@ -13,6 +13,7 @@ bin/cpptools*
 bin/*.dll
 bin/.vs
 bin/LICENSE.txt
+bin/rg*
 
 # ignore lock files
 install.lock

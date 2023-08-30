@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ES2022",
-        "module": "CommonJS",
+        "module": "Node16",
         "moduleResolution": "node16",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,

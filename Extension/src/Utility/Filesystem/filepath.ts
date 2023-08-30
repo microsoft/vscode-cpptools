@@ -5,10 +5,10 @@
 
 import { basename, delimiter, extname, join, normalize as norm, resolve } from 'path';
 
-import { fail } from 'assert';
+import { fail, ok } from 'assert';
 import { randomBytes } from 'crypto';
-import { constants, Stats } from 'fs';
-import { stat } from 'fs/promises';
+import { Stats, constants } from 'fs';
+import { mkdir as md, stat } from 'fs/promises';
 import { tmpdir } from 'os';
 import { isWindows } from '../../constants';
 import { returns } from '../Async/returns';
@@ -45,6 +45,7 @@ export interface File extends Entry {
     isFile: true;
     isExecutable: boolean;
     size: number;
+    timestamp: number;
 }
 
 export interface Folder extends Entry {
@@ -71,7 +72,7 @@ export class filepath {
         return [name, await stat(name).catch(returns.undefined)];
     }
 
-    static async info(name: string | undefined | Promise<string | undefined>, baseFolder?: string, executableExtensions: Set<string> = process.platform === 'win32' ? new Set(['.exe'/* ,'.cmd','.bat' */]) : new Set()): Promise<undefined | File | Folder> {
+    static async info(name: string | undefined | Promise<string | undefined>, baseFolder?: string, executableExtensions: Set<string> = process.platform === 'win32' ? new Set(['.exe']) : new Set()): Promise<undefined | File | Folder> {
         const [fullPath, stats] = await filepath.stats(name, baseFolder);
         if (!stats) {
             return undefined;
@@ -87,6 +88,7 @@ export class filepath {
 
         if (entry.isFile) {
             entry.size = stats.size;
+            entry.timestamp = stats.mtimeMs;
 
             if (isWindows) {
                 const fp = fullPath.toLowerCase();
@@ -137,4 +139,19 @@ export class filepath {
 
 export function tmpFile(prefix = 'tmp.', suffix = '.tmp', folder = tmpdir()) {
     return join(folder, prefix + randomBytes(32).toString('hex') + suffix);
+}
+
+/** Asnyc recursively create dir if it isn't there, no error if it is there already. */
+export async function mkdir(filePath: string) {
+    const [fullPath, info] = await filepath.stats(filePath);
+    if (info) {
+        if (info.isDirectory()) {
+            return fullPath;
+        }
+        throw new Error(`Cannot create directory '${filePath}' because there is a file there.`);
+    }
+    ok(fullPath, `Cannot create directory ${filePath} because the path is invalid.`);
+
+    await md(fullPath, { recursive: true });
+    return fullPath;
 }

@@ -9,7 +9,7 @@ import { $args, $root, $scenario, brightGreen, checkFile, gray, green, pwd } fro
 
 import { resolve } from 'path';
 import { getTestInfo } from '../test/common/selectTests';
-import { install, options } from "./vscode";
+import { environment, install, options } from "./vscode";
 
 export { install, reset } from './vscode';
 
@@ -36,5 +36,5 @@ export async function main() {
     const ARGS = [...args, ...options.launchArgs.filter(each => !each.startsWith('--extensions-dir=') && !each.startsWith('--user-data-dir=')), `--extensionDevelopmentPath=${$root}`, ...$args ];
     verbose(gray(`${cli}\n  ${ [...ARGS ].join('\n  ')}`));
 
-    spawnSync(cli, ARGS, { encoding: 'utf-8', stdio: 'ignore', env: { ...process.env, DONT_PROMPT_WSL_INSTALL:"1" } });
+    spawnSync(cli, ARGS, { encoding: 'utf-8', stdio: 'ignore', env:environment()});
 }

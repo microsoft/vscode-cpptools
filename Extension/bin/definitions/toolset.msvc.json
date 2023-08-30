@@ -1,0 +1,79 @@
+{
+  "name": "Microsoft Visual C++",
+  "import": [
+    "common/msvc.json",
+    "common/defaults.json"
+  ],
+  "discover": {
+    "binary": "cl",
+
+    // Add the default include paths for the WindowsSDK
+    "expression: FOLDER, OPTIONAL": {
+      "${KitsRoot10}/Include/${SDKVer}/um" :        { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/um" },
+      "${KitsRoot10}/Include/${SDKVer}/ucrt" :      { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/ucrt" },
+      "${KitsRoot10}/Include/${SDKVer}/shared" :    { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/shared" },
+      "${KitsRoot10}/Include/${SDKVer}/winrt" :     { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/winrt" },
+      "${KitsRoot10}/Include/${SDKVer}/cppwinrt" :  { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/cppwinrt" }
+    },
+    
+    // get the compiler version from the binary itself
+    "match: # detect the compiler version from the binary": { 
+      "^(?<ver>\\d+[.]\\d+[.]\\d+)[.].*$" : { "version": "${ver}" }
+    },
+
+    // get the host architecture based on the string we can find inside the binary
+    "match: ONEOF # detect the host architecture from the binary" : {
+      "\\\\amd64\\\\":                      { "hostArchitecture": "x64" ,"bits": 64, "architecture": "x64"},
+      "\\\\i386\\\\" :                      { "hostArchitecture": "x86" , "bits": 32, "architecture": "x86" },
+      "\\\\arm64\\\\":                      { "hostArchitecture": "arm64" , "bits": 64, "architecture": "arm64" },
+
+      "\\\\x86_amd64\\\\":                  { "hostArchitecture": "x86" ,"bits": 64, "architecture": "x64"},
+      "\\\\x86_arm64\\\\":                  { "hostArchitecture": "x86", "bits": 64, "architecture": "arm64"  },
+      "\\\\x86_arm\\\\":                    { "hostArchitecture": "x86", "bits": 32, "architecture": "arm" },
+      
+      "\\\\amd64_x86\\\\":                  { "hostArchitecture": "x64" , "bits": 32, "architecture": "x86" },
+      "\\\\amd64_arm\\\\":                  { "hostArchitecture": "x64" , "bits": 32, "architecture": "arm"},
+      "\\\\amd64_arm64\\\\":                { "hostArchitecture": "x64", "bits": 64, "architecture": "arm64"  },
+
+      "\\\\arm64_amd64\\\\":                { "hostArchitecture": "arm64" ,"bits": 64, "architecture": "x64"},
+      "\\\\arm64_x86\\\\":                  { "hostArchitecture": "arm64", "bits": 32, "architecture": "x86"  },
+      "\\\\arm64_arm\\\\":                  { "hostArchitecture": "arm64" , "bits": 32, "architecture": "arm"},
+    },
+ 
+    // add the default include paths for the Visual C++ compiler 
+    "expression: ONEOF,FOLDER # find the base include folder": {
+      "${binary}/../include":                  { "include.builtInPaths": "${binary}/../include"},
+      "${binary}/../../include":               { "include.builtInPaths": "${binary}/../../include"},
+      "${binary}/../../../include":            { "include.builtInPaths": "${binary}/../../../include"},
+      "${binary}/../../../../include":         { "include.builtInPaths": "${binary}/../../../../include" }
+    },
+
+    // add the atlmfc include paths for the Visual C++ compiler
+    "expression: ONEOF,OPTIONAL,FOLDER # find the optional atlmfc include folder": {
+      "${binary}/../atlmfc/include":           { "include.builtInPaths": "${binary}/../atlmfc/include" },
+      "${binary}/../../atlmfc/include":        { "include.builtInPaths": "${binary}/../../atlmfc/include" },
+      "${binary}/../../../atlmfc/include":     { "include.builtInPaths": "${binary}/../../../atlmfc/include" },
+      "${binary}/../../../../atlmfc/include":  { "include.builtInPaths": "${binary}/../../../../atlmfc/include" }
+    }
+  },
+  
+  "intellisense": {
+    // get the location of the SDK root from the registry
+    "KitsRoot10": "${HKLM:SOFTWARE/WOW6432Node/Microsoft/Windows Kits/Installed Roots;KitsRoot10}",
+    "KitsRoot81": "${HKLM:SOFTWARE/WOW6432Node/Microsoft/Windows Kits/Installed Roots;KitsRoot81}",
+
+    // set the default SDK version (todo: this should be able to be pulled in from the user's config)
+    "SDKVer": "10.0.22000.0",
+
+    "parserArguments": [
+      "--no_warnings",
+      "--rtti",
+      "--wchar_t_keyword",
+      "--edge",
+      "--exceptions",
+      "--error_limit", "25000",
+      "-D_EDG_COMPILER",
+      "-D_USE_DECLSPECS_FOR_SAL=1"
+    ]
+  }
+}

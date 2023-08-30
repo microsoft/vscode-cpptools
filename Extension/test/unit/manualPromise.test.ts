@@ -28,7 +28,7 @@ describe('Manual Promise', () => {
         // verify that the promise is resolved
         ok(promise.isResolved, "promise should be in the resolved state.");
 
-        // await it
+        // and await it
         strictEqual(await Promise.race([promise, setTimeout(1, "timed-out")]), "promise-resolved", "promise should have resolved.");
 
         // can't resolve it twice!

@@ -22,7 +22,9 @@ export let $cmd = 'main';
 export let $scenario = '';
 
 // loop through the args and pick out --scenario=... and remove it from the $args and set $scenario
-export const $args = process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
+process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
+export const $args = process.argv.slice(2).filter(each => !each.startsWith('--'));
+export const $switches = process.argv.slice(2).filter(each => each.startsWith('--'));
 
 /** enqueue the call to the callback function to happen on the next available tick, and return a promise to the result */
 export function then<T>(callback: () => Promise<T> | T): Promise<T> {
@@ -117,13 +119,17 @@ export async function write(filePath: string, data: Buffer | string) {
     await writeFile(filePath, data);
 }
 
-export async function updateFiles(files: string[], dest: string | Promise<string>) {
+export async function updateFiles(files: string[], dest: string | Promise<string>, prefix?: string) {
     const target = is.promise(dest) ? await dest : dest;
     await Promise.all(files.map(async (each) => {
         const sourceFile = await filepath.isFile(each, $root);
         if (sourceFile) {
-            const targetFile = resolve(target, each);
+            const targetFile = prefix ? resolve(target, each.replace(prefix, '.')) : resolve(target, each);
+            try {
             await write(targetFile, await readFile(sourceFile));
+            } catch (e) {
+                verbose(`Error during update of '${targetFile}' ${e} `);
+            }
         }
     }));
 }
@@ -133,7 +139,7 @@ export async function go() {
         // loop through the args and pick out the first non --arg and remove it from the $args and set $cmd
         for (let i = 0; i < $args.length; i++) {
             const each = $args[i];
-            if (!each.startsWith('--') && require.main.exports[each]) {
+            if (require.main.exports[each]) {
                 $cmd = each;
                 $args.splice(i, 1);
                 break;
@@ -288,3 +294,55 @@ export async function checkCompiled() {
     await checkFile('dist/src/main.js', `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`);
     verbose('Compiled files appear to be in place.');
 }
+
+const sowrite = process.stdout.write.bind(process.stdout) as (...args: unknown[]) => boolean;
+const sewrite = process.stderr.write.bind(process.stderr) as (...args: unknown[]) => boolean;
+
+const filters = [
+    /^\[(.*)\].*/,
+    /^Unexpected token A/,
+    /Cannot register 'cmake.cmakePath'/,
+    /\[DEP0005\] DeprecationWarning/,
+    /--trace-deprecation/,
+    /Iconv-lite warning/,
+    /^Found existing install/
+];
+
+// remove unwanted messages from stdio
+function filterStdio() {
+    process.stdout.write = function (...args: unknown[]) {
+        if (typeof args[0] === 'string') {
+            const text = args[0];
+
+            if (filters.some(each => text.match(each))) {
+                return true;
+            }
+        }
+        if (args[0] instanceof Buffer) {
+            const text = args[0].toString();
+            if (filters.some(each => text.match(each))) {
+                return true;
+            }
+        }
+        return sowrite(...args);
+    };
+
+    process.stderr.write = function (...args: unknown[]) {
+        if (typeof args[0] === 'string') {
+            const text = args[0];
+
+            if (filters.some(each => text.match(each))) {
+                return true;
+            }
+        }
+        if (args[0] instanceof Buffer) {
+            const text = args[0].toString();
+            if (filters.some(each => text.match(each))) {
+                return true;
+            }
+        }
+        return sewrite(...args);
+    };
+}
+
+filterStdio();

@@ -1,0 +1,104 @@
+{
+  "analysis": { // affects 
+    "queries: ONCE": { // we never need to do this more than once
+      // gets the version of the compiler by executing it with --version
+      "-dumpversion": {
+        "(?<version>.*)" : {"version": "${version}"}, // parse the version from the output 
+      },
+    },
+    
+    "tasks: ": [
+      // tasks are one-off, built-in functionality that can be executed during analysis
+    ],
+
+    "commandLineArguments: C #" :{
+      "-std=(?<std>.+)" :              { "standard":"${std}" },
+      "-ansi" :                        { "standard":"c90" },
+    },
+
+    "commandLineArguments: CPP # " :{
+      "-std=(?<std>.+)" :              { "standard":"${std}" },
+    },
+
+    "commandLineArguments: # drop these (maybe we don't even care to do this?...)": {
+      "-o;.+":                          { }, // output file
+      "-c;.+":                          { }, // input file
+      "-param;${keyEqualsValue}":       { }, // compiler parameter
+      "-aux-info;.+":                   { }, // aux info
+      "-MF;.+":                         { }, // output file for dependencies
+      "-MT;.+":                         { }, // target for dependencies
+      "-MQ;.+":                         { }, // target for dependencies
+      "-T;.+":                          { }, // link script
+      "-Xlinker;.+":                    { }, // pass to linker
+      "-Wl,.+":                         { }, // pass to linker
+      "-z;.+":                          { }, // pass to linker
+      "-Xpreprocessor;.+":              { }, // pass to preprocessor
+      "-Xassembler;.+":                 { }, // pass to assembler
+      "-Wa,.+":                         { }, // pass to assembler
+    },
+
+    "commandLineArguments: # " :{
+      "-B(?<prefix>.+)":                { "queryArguments": "-B${prefix}" }, // binary prefix
+
+      "-fms-extensions" :               { "parserArguments": "--ms_extensions" },
+      "-fno-ms-extensions" :            { "remove:parserArguments": "--ms_extensions" },
+
+      "-m(?<arch>.+)":                  { "queryArguments" : "-m${arch}" },
+      
+      "-I-":                            { "splitDir": true},
+
+      "-I(?<path>.+)":                  { "include.paths": "${path}", "queryArguments": "-I${path}" },
+      "-I;(?<path>.+)":                 { "include.paths": "${path}", "queryArguments": "-I${path}"},
+      "-isystem;(?<path>.+)":           { "include.systemPaths": "${path}", "queryArguments": ["-isystem","${path}"] },
+      "-idirafter;(?<path>.+)":         { "include.afterPaths": "${path}", "queryArguments": ["-idirafter","${path}"] },
+      "-iprefix;(?<path>.+)":           { "prefixPath": "${path}", "queryArguments": ["-iprefix","${path}"] },
+      "-iwithprefix;(?<path>.+)":       { "include.afterPaths": "${prefixPath}${path}", "queryArguments": ["-iwithprefix","${path}"] },
+      "-iwithprefixbefore;(?<path>.+)": { "include.paths": "${prefixPath}${path}", "queryArguments": ["-iwithprefixbefore","${path}"] },
+      "-iquote;(?<path>.+)":            { "include.quotePaths": "${path}", "queryArguments": ["-iquote","${path}"] },
+
+      "-isysroot;(?<path>.+)":          { "sysroot": "${path}" },
+      "-imultilib;(?<path>.+)":         { "include.multilibpaths": "${path}" },
+      "-F(?<path>.+)":                  { "include.frameworkPaths": "${path}" }, 
+
+      "-D${keyEqualsValue}" :           { "macros": { "${key}": "${value}" } , "queryArguments": ["-D", "${key}=${value}"]},
+      "-D${keyNoValue}" :               { "macros": { "${key}": 1 }, "queryArguments": ["-D", "${key}"]},
+      "-D;${keyEqualsValue}" :          { "macros": { "${key}": "${value}" }, "queryArguments": ["-D", "${key}=${value}"]},
+      "-D;${keyNoValue}" :              { "macros": { "${key}": 1 }, "queryArguments": ["-D", "${key}"]},
+      "-U${keyNoValue}" :               { "macros": { "${key}": null }, "queryArguments": ["-U", "${key}"]},
+      "-U$;{keyNoValue}" :              { "macros": { "${key}": null}, "queryArguments": ["-U", "${key}"]},
+
+      "-include;(?<path>.+)":           { "forcedIncludeFiles": "${path}" }, // forced include
+      "-fexperimental-library":         { "macros": {"__has_feature(experimental_library)": 1 }},
+      "-undef":                         { "queryArguments": "-undef" },
+
+      "-x;(?<language>.+)":             { "language": "${language}" },
+    },
+
+    "expressions: # environment variables" : {
+      "${env:CPATH}":                                     { "include.paths": "${env:CPATH}" },
+      "${language}=== 'c' && ${env:C_INCLUDE_PATH}":      { "include.systemPaths": "${env:C_INCLUDE_PATH}" },  
+      "${language}=== 'cpp' && ${env:CPLUS_INCLUDE_PATH}":{ "include.systemPaths": "${env:CPLUS_INCLUDE_PATH}" },  
+      "${language}=== 'objc' && ${env:OBJC_INCLUDE_PATH}":{ "include.systemPaths": "${env:OBJC_INCLUDE_PATH}" },
+    },
+
+    // before the sizes are set, we need to query the compiler with the right args to get the macros again 
+    // (so we can let things like -m32 or -m64 or -mthumb or other arch changes affect the macros )
+    "queries:":{
+      // ==== COMMAND LINE IS THE KEY ==== 
+      "-E -dM -v ${queryArguments} ${tmp:c}": {
+
+        /* regex on output */                                           /* apply this to the intellisense config*/
+        "^#define (?<key>\\S*) ?(?<value>.*)?$":                          { "macros":{ "${key}": "${value}" } },          
+        "#include <...> search starts here:\n(?<path>(?: [^\n]*\n)*)*":   { "include.builtInPaths": "${path}" },        
+        "#include \"...\" search starts here:\n(?<path>(?: [^\n]*\n)*)*": { "include.quotePaths": "${path}" },
+        "^COLLECT_GCC_OPTIONS=(?<opts>.*)":                               { "gcc.options" : "${opts}" },
+        "^Target: (?<target>.*)":                                         { "gcc.target": "${target}" },          
+        "^COMPILER_PATH=(?<cp>.*)":                                       { "gcc.compiler.paths": "${cp}" },
+        "^LIBRARY_PATH=(?<lp>.*)":                                        { "gcc.library.paths": "${lp}" },
+        "^#define __STDC_VERSION__\\s*(?<ver>.*)":                        { "cStandard": "${ver}" },      
+        "^#define __cplusplus\\s*(?<ver>.*)":                             { "cppStandard": "${ver}" },    
+      }
+    },
+  }
+  // how do we specify args to trim off if the discovery is handled/initiated by someone else
+}

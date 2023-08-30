@@ -21,7 +21,8 @@ module.exports = {
         "eslint-plugin-jsdoc",
         "@typescript-eslint/eslint-plugin",
         "eslint-plugin-import",
-        "eslint-plugin-header"
+        "eslint-plugin-header",
+        "etc"
     ],
     "rules": {
         "indent": [
@@ -79,6 +80,7 @@ module.exports = {
         "@typescript-eslint/prefer-function-type": "error",
         "@typescript-eslint/prefer-namespace-keyword": "error",
         "@typescript-eslint/semi": "error",
+        "etc/no-commented-out-code": "error",
         "@typescript-eslint/triple-slash-reference": "error",
         "@typescript-eslint/type-annotation-spacing": "error",
         "@typescript-eslint/unified-signatures": "error",

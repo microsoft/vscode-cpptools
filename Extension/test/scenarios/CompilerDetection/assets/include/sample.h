@@ -1,0 +1,1 @@
+#define APP_NAME "Sample"

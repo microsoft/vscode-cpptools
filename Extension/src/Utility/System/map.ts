@@ -33,3 +33,15 @@ export function getOrAdd<TKey, TValue>(map: Map<TKey, TValue> | WeakMap<any, TVa
         return initializer;
     }
 }
+
+export function entries<TKey, TValue>(map: Map<TKey, TValue>): [TKey, TValue][];
+export function entries<TKey, TValue>(map: Promise<Map<TKey, TValue>>): Promise<[TKey, TValue][]>;
+export function entries<TKey, TValue, TKeyOut, TValueOut>(map: Map<TKey, TValue>, selector?: (key: TKey, value: TValue) => [TKeyOut, TValueOut]): [TKeyOut, TValueOut][];
+export function entries<TKey, TValue, TKeyOut, TValueOut>(map: Promise<Map<TKey, TValue>>, selector?: (key: TKey, value: TValue) => [TKeyOut, TValueOut]): Promise<[TKeyOut, TValueOut][]>;
+export function entries<TKey, TValue, TKeyOut = TKey, TValueOut = TValue>(map: Promise<Map<TKey, TValue>> | Map<TKey, TValue>, selector?: (key: TKey, value: TValue) => [TKeyOut, TValueOut]): [TKeyOut, TValueOut][] | [TKey, TValue][] | Promise<[TKeyOut, TValueOut][] | [TKey, TValue][]> {
+    return is.promise(map) ?
+        map.then(m => entries(m, selector)) : // async version
+        selector ?
+            [...map.entries()].map(([key, value]) => selector(key, value)) : // map the values with a selector
+            [...map.entries()]; // return the values
+}

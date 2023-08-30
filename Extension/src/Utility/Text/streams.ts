@@ -6,5 +6,5 @@
 import { verboseEnabled } from '../../constants';
 
 export function verbose(...args: any[]): void {
-    return verboseEnabled || process.argv.includes('--verbose') ? console.log(...args) : undefined;
+    return verboseEnabled || process.argv.includes('--verbose') ? console.log(`${args.join(' ')}`) : undefined;
 }

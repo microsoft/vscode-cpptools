@@ -10,9 +10,10 @@ import * as path from 'path';
 import {
     Configuration, ConfigurationDirective,
     ConfigurationEntry,
-    HostConfigurationDirective, parse,
+    Type as ConfigurationEntryType,
+    HostConfigurationDirective,
     ResolvedConfiguration,
-    Type as ConfigurationEntryType
+    parse
 } from 'ssh-config';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
