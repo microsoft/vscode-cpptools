@@ -34,7 +34,7 @@ export function rangeEquals(range1: vscode.Range | Range, range2: vscode.Range |
 
 // Check this before attempting to switch a document from C to C++.
 export function shouldChangeFromCToCpp(document: vscode.TextDocument): boolean {
-    if ((document.fileName.endsWith(".C") || document.fileName.endsWith(".H"))) {
+    if (document.fileName.endsWith(".C") || document.fileName.endsWith(".H")) {
         const cppSettings: CppSettings = new CppSettings();
         if (cppSettings.autoAddFileAssociations) {
             return !docsChangedFromCppToC.has(document.fileName);

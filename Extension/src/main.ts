@@ -84,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
     // function, to allow any further setup to occur here, prior to activation.
     const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "disabled";
-    const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
+    const shouldActivateLanguageServer: boolean = !isIntelliSenseEngineDisabled && !isOldMacOs;
 
     if (isOldMacOs) {
         languageServiceDisabled = true;

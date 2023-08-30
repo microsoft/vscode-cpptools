@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-12
 
     steps:
       - uses: actions/checkout@v3
@@ -30,14 +30,14 @@ jobs:
         run: yarn run lint
         working-directory: Extension
 
-      - name: Compile Test Sources
-        run: yarn run pretest
+      - name: Run unit tests
+        run: yarn test
         working-directory: Extension
 
-      - name: Run unit tests
+      - name: Run simple vscode unit tests
         uses: GabrielBB/xvfb-action@v1.6
         with:
-          run: yarn run unitTests
+          run: yarn test --scenario=SingleRootProject
           working-directory: Extension
 
 #      - name: Run languageServer integration tests

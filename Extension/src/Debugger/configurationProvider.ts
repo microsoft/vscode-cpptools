@@ -204,7 +204,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             Telemetry.logDebuggerEvent(config.debuggerEvent || DebuggerEvent.debugPanel, { "debugType": config.debugType || DebugType.debug, "configSource": config.configSource || ConfigSource.unknown, "configMode": configMode, "cancelled": "false", "succeeded": "true" });
 
             if (!resolveByVsCode) {
-                if ((singleFile || (isDebugPanel && !folder && isExistingTask))) {
+                if (singleFile || (isDebugPanel && !folder && isExistingTask)) {
                     await this.resolvePreLaunchTask(config, configMode);
                     config.preLaunchTask = undefined;
                 } else {
@@ -384,7 +384,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         await this.loadDetectedTasks();
         // Remove the tasks that are already configured once in tasks.json.
         const dedupDetectedBuildTasks: CppBuildTask[] = DebugConfigurationProvider.detectedBuildTasks.filter(taskDetected =>
-            (!configuredBuildTasks.some(taskJson => (taskJson.definition.label === taskDetected.definition.label))));
+            !configuredBuildTasks.some(taskJson => taskJson.definition.label === taskDetected.definition.label));
         buildTasks = buildTasks.concat(configuredBuildTasks, dedupDetectedBuildTasks);
 
         // Filter out build tasks that don't match the currently selected debug configuration type.
@@ -419,7 +419,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     // Absolute path, just check if it exists
                     await util.checkFileExists(compilerPath) :
                     // Non-absolute. Check on $PATH
-                    ((await util.whichAsync(compilerPath)) !== undefined);
+                    (await util.whichAsync(compilerPath) !== undefined);
                 if (!compilerPathExists) {
                     logger.getOutputChannelLogger().appendLine(localize('compiler.path.not.exists', "Unable to find {0}. {1} task is ignored.", compilerPath, definition.label));
                 }
@@ -442,7 +442,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 newConfig.detail = localize("pre.Launch.Task", "preLaunchTask: {0}", task.name);
                 newConfig.taskDetail = task.detail;
                 newConfig.taskStatus = task.existing ?
-                    ((task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskStatus.recentlyUsed : TaskStatus.configured) :
+                    (task.name === DebugConfigurationProvider.recentBuildTaskLabelStr) ? TaskStatus.recentlyUsed : TaskStatus.configured :
                     TaskStatus.detected;
                 if (task.isDefault) {
                     newConfig.isDefault = true;
@@ -484,11 +484,11 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     // Check if debuggerPath exists.
                     if (await util.checkFileExists(debuggerPath)) {
                         newConfig.miDebuggerPath = debuggerPath;
-                    } else if ((await util.whichAsync(debuggerName)) !== undefined) {
+                    } else if (await util.whichAsync(debuggerName) !== undefined) {
                         // Check if debuggerName exists on $PATH
                         newConfig.miDebuggerPath = debuggerName;
                     } else {
-                        // Try the usr path for non-windows platforms.
+                        // Try the usr path for non-Windows platforms.
                         const usrDebuggerPath: string = path.join("/usr", "bin", debuggerName);
                         if (!isWindows && await util.checkFileExists(usrDebuggerPath)) {
                             newConfig.miDebuggerPath = usrDebuggerPath;
@@ -669,7 +669,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                     const newSourceFileMapTarget: string = util.resolveVariables(sourceFileMapTarget, undefined);
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
-                        message += (message ? ' ' : '\t');
+                        message += message ? ' ' : '\t';
                         message += localize("replacing.targetpath", "Replacing {0} '{1}' with '{2}'.", "targetPath", sourceFileMapTarget, newSourceFileMapTarget);
                         target = newSourceFileMapTarget;
                     }
@@ -679,7 +679,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
                     if (sourceFileMapTarget !== newSourceFileMapTarget) {
                         // Add a space if source was changed, else just tab the target message.
-                        message += (message ? ' ' : '\t');
+                        message += message ? ' ' : '\t';
                         message += localize("replacing.editorPath", "Replacing {0} '{1}' with '{2}'.", "editorPath", sourceFileMapTarget, newSourceFileMapTarget["editorPath"]);
                         target = newSourceFileMapTarget;
                     }
@@ -741,7 +741,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
 
     private findDefaultConfig(configs: CppDebugConfiguration[]): CppDebugConfiguration[] {
         // eslint-disable-next-line no-prototype-builtins
-        return configs.filter((config: CppDebugConfiguration) => (config.hasOwnProperty("isDefault") && config.isDefault));
+        return configs.filter((config: CppDebugConfiguration) => config.hasOwnProperty("isDefault") && config.isDefault);
     }
 
     private async isExistingTask(config: CppDebugConfiguration, folder?: vscode.WorkspaceFolder): Promise<boolean> {
@@ -812,7 +812,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 return item;
             }));
         }
-        detailedConfigs = detailedConfigs.filter((config: any) => (config.name && config.request === "launch" && type ? (config.type === type) : true));
+        detailedConfigs = detailedConfigs.filter((config: any) => config.name && config.request === "launch" && type ? (config.type === type) : true);
         return detailedConfigs;
     }
 
@@ -914,7 +914,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         // If the configs are coming from workspace or global settings and the task is not found in tasks.json, let that to be resolved by VsCode.
         if (selectedConfig.preLaunchTask && selectedConfig.configSource &&
             (selectedConfig.configSource === ConfigSource.global || selectedConfig.configSource === ConfigSource.workspace) &&
-            !(await this.isExistingTask(selectedConfig))) {
+            !await this.isExistingTask(selectedConfig)) {
             folder = undefined;
         }
         selectedConfig.debugType = debugModeOn ? DebugType.debug : DebugType.run;
@@ -950,7 +950,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         } else {
             let sortedItems: ConfigMenu[] = [];
             // Find the recently used task and place it at the top of quickpick list.
-            const recentTask: ConfigMenu[] = items.filter(item => (item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr));
+            const recentTask: ConfigMenu[] = items.filter(item => item.configuration.preLaunchTask && item.configuration.preLaunchTask === DebugConfigurationProvider.recentBuildTaskLabelStr);
             if (recentTask.length !== 0 && recentTask[0].detail !== TaskStatus.detected) {
                 recentTask[0].detail = TaskStatus.recentlyUsed;
                 sortedItems.push(recentTask[0]);
@@ -960,7 +960,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
             sortedItems = sortedItems.concat(items.filter(item => item.detail === undefined));
 
             selection = await vscode.window.showQuickPick(this.localizeConfigDetail(sortedItems), {
-                placeHolder: (items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration"))
+                placeHolder: items.length === 0 ? localize("no.compiler.found", "No compiler found") : localize("select.debug.configuration", "Select a debug configuration")
             });
         }
         if (selection && this.isClConfiguration(selection.configuration.name) && this.showErrorIfClNotAvailable(selection.configuration.name)) {

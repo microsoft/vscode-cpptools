@@ -101,7 +101,7 @@ export class ClientCollection {
 
     public checkOwnership(client: cpptools.Client, document: vscode.TextDocument): boolean {
 
-        return (this.getClientFor(document.uri) === client);
+        return this.getClientFor(document.uri) === client;
     }
 
     /**
@@ -154,7 +154,7 @@ export class ClientCollection {
                 const path: string = util.asFolder(folder.uri);
                 const client: cpptools.Client | undefined = this.languageClients.get(path);
                 if (client) {
-                    this.languageClients.delete(path);  // Do this first so that we don't iterate on it during the ownership transfer process.
+                    this.languageClients.delete(path); // Do this first so that we don't iterate on it during the ownership transfer process.
 
                     // Transfer ownership of the client's documents to another client.
                     // (this includes calling textDocument/didOpen on the new client so that the server knows it's open too)
