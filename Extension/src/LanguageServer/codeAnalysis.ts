@@ -187,7 +187,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
 
         if (new CppSettings().clangTidyCodeActionShowDisable) {
             codeToFixes[1].disableAllTypeCodeAction = {
-                title: localize("disable.all.type.problems", "Disable all {0} problems",  codeToFixes[0]),
+                title: localize("disable.all.type.problems", "Disable all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'DisableAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
@@ -512,8 +512,8 @@ export function removeCodeAnalysisProblems(identifiersAndUris: CodeAnalysisDiagn
         const newDiagnostics: vscode.Diagnostic[] = [];
         for (const diagnostic of diagnostics) {
             const code: string = typeof diagnostic.code === "string" ? diagnostic.code :
-                (typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
-                    diagnostic.code.value : "");
+                typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
+                    diagnostic.code.value : "";
             let removed: boolean = false;
             for (const identifier of identifiersAndUri.identifiers) {
                 if (code !== identifier.code || !rangeEquals(diagnostic.range, identifier.range)) {

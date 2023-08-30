@@ -3,6 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+/* eslint-disable no-cond-assign */
+
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { isString, replaceAll } from './common';
@@ -72,7 +74,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
 
     const var_re: RegExp = /\$\{(\w+)\}/g;
     let match: RegExpMatchArray | null = null;
-    while ((match = var_re.exec(input))) {
+    while (match = var_re.exec(input)) {
         const full: string = match[0];
         const key: string = match[1];
         if (key !== 'dollar') {
@@ -91,7 +93,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
     // as few times as possible, expanding as needed (lazy)
     const varValueRegexp: string = ".+?";
     const env_re: RegExp = RegExp(`\\$\\{env:(${varValueRegexp})\\}`, "g");
-    while ((match = env_re.exec(input))) {
+    while (match = env_re.exec(input)) {
         const full: string = match[0];
         const varname: string = match[1];
         if (process.env[varname] === undefined) {
@@ -102,7 +104,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
     }
 
     const command_re: RegExp = RegExp(`\\$\\{command:(${varValueRegexp})\\}`, "g");
-    while ((match = command_re.exec(input))) {
+    while (match = command_re.exec(input)) {
         if (options.doNotSupportCommands) {
             void getOutputChannelLogger().showWarningMessage(localize('commands.not.supported', 'Commands are not supported for string: {0}.', input));
             break;
@@ -110,7 +112,7 @@ async function expandStringImpl(input: string, options: ExpansionOptions): Promi
         const full: string = match[0];
         const command: string = match[1];
         if (subs.has(full)) {
-            continue;  // Don't execute commands more than once per string
+            continue; // Don't execute commands more than once per string
         }
         try {
             const command_ret: unknown = await vscode.commands.executeCommand(command, options.vars.workspaceFolder);

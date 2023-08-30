@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - uses: actions/checkout@v3
@@ -30,12 +30,12 @@ jobs:
         run: yarn run lint
         working-directory: Extension
 
-      - name: Compile Test Sources
-        run: yarn run pretest
+      - name: Run unit tests
+        run: yarn test
         working-directory: Extension
 
-      - name: Run unit tests
-        run: yarn run unitTests
+      - name: Run simple vscode unit tests
+        run: yarn test --scenario=SingleRootProject
         working-directory: Extension
 
 #      - name: Run languageServer integration tests

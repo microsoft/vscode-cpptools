@@ -77,8 +77,8 @@ export class FindAllRefsView {
         const fileReferences: TreeNode[] = this.referencesModel.getAllFilesWithPendingReferenceNodes();
         for (const fileRef of fileReferences) {
             const line: string =
-                ("[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
-                    + fileRef.filename);
+                "[" + getReferenceTagString(ReferenceType.ConfirmationInProgress, this.referencesModel.isCanceled) + "] "
+                    + fileRef.filename;
             fileRefs.push(line);
         }
 

@@ -229,7 +229,7 @@ export class SettingsPanel {
 
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         this.configValues = deepCopy(configuration); // Copy configuration values
-        this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
+        this.isIntelliSenseModeDefined = this.configValues.intelliSenseMode !== undefined;
         if (this.panel && this.initialized) {
             void this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
             void this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });

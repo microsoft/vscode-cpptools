@@ -104,7 +104,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
                 new vscode.Position(hint.position.line, hint.position.character +
                     (showOnLeft ? 0 : hint.identifierLength)),
-                (showOnLeft ? hint.label : ": " + hint.label),
+                showOnLeft ? hint.label : ": " + hint.label,
                 vscode.InlayHintKind.Type);
             inlayHint.paddingRight = showOnLeft || hint.rightPadding;
             inlayHint.paddingLeft = showOnLeft && hint.leftPadding;

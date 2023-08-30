@@ -5,13 +5,11 @@
 'use strict';
 
 import * as fs from 'fs';
+import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
-import * as rd from 'readline';
-import { Readable } from 'stream';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import * as yauzl from 'yauzl';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
@@ -45,55 +43,36 @@ export const intelliSenseDisabledError: string = "Do not activate the extension 
 
 type VcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
-function initVcpkgDatabase(): Promise<VcpkgDatabase> {
-    return new Promise((resolve) => {
-        yauzl.open(util.getExtensionFilePath('VCPkgHeadersDatabase.zip'), { lazyEntries: true }, (err?: Error | null, zipfile?: yauzl.ZipFile) => {
-            // Resolves with an empty database instead of rejecting on failure.
-            const database: VcpkgDatabase = {};
-            if (err || !zipfile) {
-                resolve(database);
-                return;
-            }
-            // Waits until the input file is closed before resolving.
-            zipfile.on('close', () => {
-                resolve(database);
-            });
-            zipfile.on('entry', entry => {
-                if (entry.fileName !== 'VCPkgHeadersDatabase.txt') {
-                    zipfile.readEntry();
+async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
+    const database: VcpkgDatabase = {};
+    try {
+        const zip = new StreamZip.async({ file: util.getExtensionFilePath('VCPkgHeadersDatabase.zip') });
+        try {
+            const data = await zip.entryData('VCPkgHeadersDatabase.txt');
+            const lines = data.toString().split('\n');
+            lines.forEach(line => {
+                const portFilePair: string[] = line.split(':');
+                if (portFilePair.length !== 2) {
                     return;
                 }
-                zipfile.openReadStream(entry, (err?: Error | null, stream?: Readable) => {
-                    if (err || !stream) {
-                        zipfile.close();
-                        return;
-                    }
-                    const reader: rd.ReadLine = rd.createInterface(stream);
-                    reader.on('line', (lineText: string) => {
-                        const portFilePair: string[] = lineText.split(':');
-                        if (portFilePair.length !== 2) {
-                            return;
-                        }
 
-                        const portName: string = portFilePair[0];
-                        const relativeHeader: string = portFilePair[1];
+                const portName: string = portFilePair[0];
+                const relativeHeader: string = portFilePair[1];
 
-                        if (!database[relativeHeader]) {
-                            database[relativeHeader] = [];
-                        }
+                if (!database[relativeHeader]) {
+                    database[relativeHeader] = [];
+                }
 
-                        database[relativeHeader].push(portName);
-                    });
-                    reader.on('close', () => {
-                        // We found the one file we wanted.
-                        // It's OK to close instead of progressing through more files in the zip.
-                        zipfile.close();
-                    });
-                });
+                database[relativeHeader].push(portName);
             });
-            zipfile.readEntry();
-        });
-    });
+        } catch {
+            console.log("Unable to parse vcpkg database file.");
+        }
+        await zip.close();
+    } catch {
+        console.log("Unable to open vcpkg database file.");
+    }
+    return database;
 }
 
 function getVcpkgHelpAction(): vscode.CodeAction {
@@ -424,7 +403,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', enabled ? onPauseCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', enabled ? onResumeCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', enabled ? onCancelCodeAnalysis : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', enabled ? onShowParsingCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
@@ -764,10 +742,6 @@ function onCancelCodeAnalysis(): void {
     clients.ActiveClient.CancelCodeAnalysis();
 }
 
-function onShowParsingCommands(): Promise<void> {
-    return clients.ActiveClient.handleShowParsingCommands();
-}
-
 function onShowActiveCodeAnalysisCommands(): Promise<void> {
     return clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
 }
@@ -838,7 +812,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
-        ports = ([] as string[]).concat(...(await Promise.all(portsPromises)));
+        ports = ([] as string[]).concat(...await Promise.all(portsPromises));
         if (!ports.length) {
             return;
         }
@@ -1030,8 +1004,8 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     lines.forEach((line: string) => {
         if (!line.includes(".dylib") && !line.includes("???")) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
-            line = line.replace(/std::__1::/g, "std::");  // __1:: is not helpful.
-            data += (line + "\n");
+            line = line.replace(/std::__1::/g, "std::"); // __1:: is not helpful.
+            data += line + "\n";
         }
     });
     data = data.trimRight();

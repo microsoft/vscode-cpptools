@@ -14,27 +14,27 @@ import { parse } from 'shell-quote';
 const flags: {
     [flag: string]: ((entries: { [key: string]: string }, value: string) => void) | null;
 } = {
-    1: entries => (entries.Protocol = '1'),
-    2: entries => (entries.Protocol = '2'),
-    4: entries => (entries.AddressFamily = 'inet'),
-    6: entries => (entries.AddressFamily = 'inet6'),
-    A: entries => (entries.ForwardAgent = 'yes'),
-    b: (entries, address) => (entries.BindAddress = address),
-    C: entries => (entries.Compression = 'yes'),
-    c: (entries, cipher) => (entries.Cipher = cipher),
-    D: (entries, address) => (entries.DynamicForward = address),
+    1: entries => entries.Protocol = '1',
+    2: entries => entries.Protocol = '2',
+    4: entries => entries.AddressFamily = 'inet',
+    6: entries => entries.AddressFamily = 'inet6',
+    A: entries => entries.ForwardAgent = 'yes',
+    b: (entries, address) => entries.BindAddress = address,
+    C: entries => entries.Compression = 'yes',
+    c: (entries, cipher) => entries.Cipher = cipher,
+    D: (entries, address) => entries.DynamicForward = address,
     // -e (escape code) is used as it's not useful for us and could mess with script execution
     e: null,
     // -F (config file) is irrelevant
     F: null,
     // -f (running in background) would interfere with execution
     f: null,
-    g: entries => (entries.GatewayPorts = 'yes'),
-    I: (entries, device) => (entries.SmartcardDevice = device),
-    i: (entries, identity) => (entries.IdentityFile = identity),
-    J: (entries, address) => (entries.ProxyJump = address),
-    K: entries => (entries.GSSAPIAuthentication = 'yes'),
-    k: entries => (entries.GSSAPIDelegateCredentials = 'no'),
+    g: entries => entries.GatewayPorts = 'yes',
+    I: (entries, device) => entries.SmartcardDevice = device,
+    i: (entries, identity) => entries.IdentityFile = identity,
+    J: (entries, address) => entries.ProxyJump = address,
+    K: entries => entries.GSSAPIAuthentication = 'yes',
+    k: entries => entries.GSSAPIDelegateCredentials = 'no',
     L: (entries, args) => {
         /**
          * For the cases of:
@@ -69,9 +69,9 @@ const flags: {
 
         entries.LocalForward = `${args.substring(0, delimiter)} ${args.substring(delimiter + 1)}`;
     },
-    l: (entries, user) => (entries.User = user),
-    M: entries => (entries.ControlMaster = 'yes'),
-    m: (entries, specs) => (entries.MACs = specs),
+    l: (entries, user) => entries.User = user,
+    M: entries => entries.ControlMaster = 'yes',
+    m: (entries, specs) => entries.MACs = specs,
     // -N (don't execute remote command) would interfere with execution
     N: null,
     // -n (redirect stdin) would interfere with execution
@@ -86,11 +86,11 @@ const flags: {
 
         entries[option.slice(0, delimiter)] = option.slice(delimiter + 1);
     },
-    p: (entries, port) => (entries.Port = port),
+    p: (entries, port) => entries.Port = port,
     // -q (quiet mode) not useful for us
     q: null,
-    R: (entries, address) => (entries.RemoteForward = address),
-    S: (entries, path) => (entries.ControlPath = path),
+    R: (entries, address) => entries.RemoteForward = address,
+    S: (entries, path) => entries.ControlPath = path,
     // -s (remote subsystem invocation), no setting in the config for this
     s: null,
     // -T (disable pseudo tty), no setting in the config for this
@@ -99,12 +99,12 @@ const flags: {
     t: null,
     // -V (display the version) not relevant for us
     V: null,
-    v: entries => (entries.LogLevel = 'verbose'),
-    W: (entries, address) => (entries.RemoteForward = address),
-    w: (entries, value) => (entries.TunnelDevice = value),
-    X: entries => (entries.ForwardX11 = 'yes'),
-    x: entries => (entries.ForwardX11 = 'no'),
-    Y: entries => (entries.ForwardX11Trusted = 'yes'),
+    v: entries => entries.LogLevel = 'verbose',
+    W: (entries, address) => entries.RemoteForward = address,
+    w: (entries, value) => entries.TunnelDevice = value,
+    X: entries => entries.ForwardX11 = 'yes',
+    x: entries => entries.ForwardX11 = 'no',
+    Y: entries => entries.ForwardX11Trusted = 'yes',
     // output logging
     y: null
 };
