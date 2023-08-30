@@ -839,7 +839,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         }
         const rawLaunchJson: any = await this.getRawLaunchJson();
         if (!rawLaunchJson.configurations) {
-            rawLaunchJson.configurations = new Array();
+            rawLaunchJson.configurations = [];
         }
         if (!rawLaunchJson.version) {
             rawLaunchJson.version = "2.0.0";
