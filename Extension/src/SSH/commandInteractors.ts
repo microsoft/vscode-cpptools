@@ -46,8 +46,6 @@ export interface IInteractor {
 export class MitmInteractor implements IInteractor {
     static ID = 'mitm';
 
-    constructor() { }
-
     get id(): string {
         return MitmInteractor.ID;
     }

@@ -39,8 +39,6 @@ interface BuildOptions {
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
 
-    constructor() { }
-
     public async provideTasks(): Promise<CppBuildTask[]> {
         return this.getTasks(false);
     }
