@@ -81,8 +81,12 @@ class SettingsApp {
         // Set view state of advanced settings and add event
         const oldState: any = this.vsCodeApi.getState();
         const advancedShown: boolean = oldState && oldState.advancedShown;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        document.getElementById(elementId.advancedSection)!.style.display = advancedShown ? "block" : "none";
+
+        const advancedSection: HTMLElement | null = document.getElementById(elementId.advancedSection);
+        if (advancedSection) {
+            advancedSection.style.display = advancedShown ? "block" : "none";
+        }
+
         document.getElementById(elementId.showAdvanced)?.classList.toggle(advancedShown ? "collapse" : "expand", true);
         document.getElementById(elementId.showAdvanced)?.addEventListener("click", this.onShowAdvanced.bind(this));
         this.vsCodeApi.postMessage({
