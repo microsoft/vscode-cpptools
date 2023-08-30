@@ -6,10 +6,14 @@
 import { checkCompiled, checkPrep } from './common';
 
 export async function main() {
-    await checkPrep();
-    await checkCompiled();
+    if (await checkPrep(false) || await checkCompiled(false)) {
+        process.exit(1);
+    }
+
 }
 
 export async function prep() {
-    await checkPrep();
+    if (await checkPrep(false)) {
+        process.exit(1);
+    }
 }

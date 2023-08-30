@@ -254,37 +254,82 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function checkFolder(folder: string | string[], errMsg: string){
+export async function checkFolder(folder: string | string[], options: {errMsg?: string; warnMsg?: string}){
+    let state: string = '';
     for (const each of is.array(folder) ? folder : [folder]) {
         const result = await filepath.isFolder(each, $root);
-        if (result) {
-            return result;
+        if (!result) {
+            if (options.warnMsg) {
+                warn(options.warnMsg);
+                state ||= 'warn';
+                continue;
+            }
+            if (options.errMsg) {
+                error(options.errMsg);
+                state = 'error';
+                continue;
+            }
         }
+        verbose(`Folder ${brightGreen(each)} exists.`);
     }
-    error(errMsg);
-    process.exit(1);
+    if (state === 'error') {
+        process.exit(1);
+    }
+    return state;
 }
 
-export async function checkFile(file: string | string[], errMsg: string){
+export async function checkFile(file: string | string[], options: {errMsg?: string; warnMsg?: string}){
+    let state: string = '';
     for (const each of is.array(file) ? file : [file]) {
         const result = await filepath.isFile(each, $root);
-        if (result) {
-            return result;
+        if (!result) {
+            if (options.warnMsg) {
+                warn(options.warnMsg);
+                state = state ?? 'warn';
+                continue;
+            }
+            if (options.errMsg) {
+                error(options.errMsg);
+                state = 'error';
+                continue;
+            }
         }
+        verbose(`File ${brightGreen(each)} exists.`);
     }
-    error(errMsg);
-    process.exit(1);
+    if (state === 'error') {
+        process.exit(1);
+    }
+    return state;
 }
 
-export async function checkPrep() {
-    await checkFolder('dist/walkthrough', `The walkthrough files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
-    await checkFolder('dist/html', `The html files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
-    await checkFolder('dist/schema', `The html files are not in place. You should run ${brightGreen("yarn prep")}\n\n`);
-    await checkFile('dist/nls.metadata.json', `The extension translation file '${$root}/dist/nls.metadata.json is missing. You should run ${brightGreen("yarn prep")}\n\n`);
+export async function checkPrep(exitOnFail = true) {
+    let state = '';
+    state += await checkFolder('dist/walkthrough', { warnMsg: `The walkthrough files are not in place.`});
+    state += await checkFolder('dist/html', { warnMsg:`The html files are not in place.` });
+    state += await checkFolder('dist/schema', { warnMsg:`The schema files are not in place.`});
+    state += await checkFile('dist/nls.metadata.json', { warnMsg:`The extension translation file '${$root}/dist/nls.metadata.json is missing.` });
+    if (state) {
+        if (exitOnFail) {
+            error(`You may need to run ${brightGreen("yarn prep")}\n\n`);
+            return process.exit(1);
+        }
+        return true;
+    }
     verbose('Prep files appear to be in place.');
+    return false;
 }
 
-export async function checkCompiled() {
-    await checkFile('dist/src/main.js', `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+export async function checkCompiled(exitOnFail = true) {
+    let state = '';
+
+    state += await checkFile('dist/src/main.js', {errMsg: `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`});
+    if (state) {
+        if (exitOnFail) {
+            error(`You may need to run ${brightGreen("yarn prep")}\n\n`);
+            return process.exit(1);
+        }
+        return true;
+    }
     verbose('Compiled files appear to be in place.');
+    return false;
 }
