@@ -1298,8 +1298,6 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
 
-        this.workspaceStoragePath = "";
-
         this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
         if (this.workspaceStoragePath.length > 0) {
             workspaceHash = path.basename(path.dirname(this.workspaceStoragePath));
@@ -1620,11 +1618,8 @@ export class DefaultClient implements Client {
         }
 
         const cacheStoragePath: string = util.getCacheStoragePath();
-        let databaseStoragePath: string = "";
-
-        if ((cacheStoragePath.length > 0) && (workspaceHash.length > 0)) {
-            databaseStoragePath = path.join(cacheStoragePath, workspaceHash);
-        }
+        const databaseStoragePath: string = (cacheStoragePath.length > 0) && (workspaceHash.length > 0) ?
+            path.join(cacheStoragePath, workspaceHash) : "";
 
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
