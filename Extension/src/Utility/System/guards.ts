@@ -41,7 +41,6 @@ export class is {
         return !is.nullish(instance) && !!instance[Symbol.asyncIterator];
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static Constructor(instance: any): instance is Constructor {
         return typeof instance === 'function' && !!instance.prototype && !Object.getOwnPropertyNames(instance).includes('arguments') && instance.toString().match(/^function.*\{ \[native code\] \}|^class/g);
     }

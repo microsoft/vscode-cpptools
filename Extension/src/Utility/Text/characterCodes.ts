@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const enum CharacterCodes {
     nullCharacter = 0,
     maxAsciiCharacter = 0x7F,

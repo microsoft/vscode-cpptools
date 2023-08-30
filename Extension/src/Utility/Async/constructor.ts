@@ -6,7 +6,6 @@
 import { is } from '../System/guards';
 import { ConstructorReturn, Reject, Resolve, AsyncConstructor } from '../System/types';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function Async<TClass extends new (...args: ConstructorParameters<TClass>) => ConstructorReturn<TClass>>(ctor: TClass) {
     class AsyncConstructed extends Promise<TClass> {
         static class: TClass = ctor;

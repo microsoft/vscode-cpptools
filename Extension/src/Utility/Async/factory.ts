@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { is } from '../System/guards';
 import { Reject, Resolve } from '../System/types';
 

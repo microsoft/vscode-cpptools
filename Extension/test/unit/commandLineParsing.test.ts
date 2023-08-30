@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { deepEqual, throws } from 'assert';
 import { describe } from 'mocha';
 import { extractArgs } from '../../src/Utility/Process/commandLine';

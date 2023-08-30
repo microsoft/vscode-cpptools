@@ -6,7 +6,6 @@
 import { Async } from '../../../src/Utility/Async/constructor';
 import { sleep } from '../../../src/Utility/Async/sleep';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const Something = Async(class Something {
     hasBeenInitialized: boolean = false;
     constructor(public num: number) {
