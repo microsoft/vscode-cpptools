@@ -48,9 +48,6 @@ export const AnotherTwo = Async(class AnotherTwo {
         this.works = true;
     }
     works = false;
-    constructor() {
-
-    }
 });
 
 export const AnotherThree = Async(class AnotherThree extends AnotherTwo.class {
