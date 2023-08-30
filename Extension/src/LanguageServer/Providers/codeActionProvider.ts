@@ -228,6 +228,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     command: command.command,
                     arguments: command.arguments
                 },
+                //isPreferred: command.command === "C_Cpp.ExtractToMemberFunction" ? true : undefined,
                 edit: wsEdit,
                 kind: codeActionKind,
                 disabled: disabledReason ? { reason: disabledReason } : undefined
