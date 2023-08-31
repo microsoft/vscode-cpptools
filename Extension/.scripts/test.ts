@@ -14,7 +14,7 @@ import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 import { getTestInfo } from '../test/common/selectTests';
-import { $args, $root, $scenario, assertAnyFile, assertAnyFolder, brightGreen, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
+import { $args, $root, $scenario, assertAnyFile, assertAnyFolder, brightGreen, checkBinaries, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
 import { install, isolated, options } from './vscode';
 
 export { install, reset } from './vscode';
@@ -81,6 +81,9 @@ async function unitTests() {
 }
 
 async function scenarioTests(assets: string, name: string, workspace: string) {
+    if (await checkBinaries()) {
+        process.exit(1);
+    }
     return runTests({
         ...options,
         extensionDevelopmentPath: $root,
@@ -114,6 +117,9 @@ export async function main() {
 }
 
 export async function all() {
+    if (await checkBinaries()) {
+        process.exit(1);
+    }
     const finished: string[] = [];
 
     if (await unitTests() !== 0) {
