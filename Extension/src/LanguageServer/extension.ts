@@ -720,7 +720,10 @@ async function onExtractToFunction(isMemberFunction: boolean, sender?: string): 
 }
 
 function onExpandSelection(r: Range) {
-    new vscode.Selection(new vscode.Position(r.start.line, r.start.character), new vscode.Position(r.end.line, r.end.character));
+    const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (activeTextEditor) {
+        activeTextEditor.selection = new vscode.Selection(new vscode.Position(r.start.line, r.start.character), new vscode.Position(r.end.line, r.end.character));
+    }
 }
 
 function onAddToIncludePath(path: string): void {
