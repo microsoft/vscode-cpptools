@@ -22,7 +22,9 @@ export let $cmd = 'main';
 export let $scenario = '';
 
 // loop through the args and pick out --scenario=... and remove it from the $args and set $scenario
-export const $args = process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
+process.argv.slice(2).filter(each => !(each.startsWith('--scenario=') && ($scenario = each.substring('--scenario='.length))));
+export const $args = process.argv.slice(2).filter(each => !each.startsWith('--'));
+export const $switches = process.argv.slice(2).filter(each => each.startsWith('--'));
 
 /** enqueue the call to the callback function to happen on the next available tick, and return a promise to the result */
 export function then<T>(callback: () => Promise<T> | T): Promise<T> {
@@ -166,10 +168,12 @@ export async function writeJson(filename: string, object: CommentJSONValue) {
 
 export function error(text: string) {
     console.error(`\n${red('ERROR')}: ${text}`);
+    return true;
 }
 
 export function warn(text: string) {
     console.error(`\n${yellow('WARNING')}: ${text}`);
+    return true;
 }
 
 export function note(text: string) {
@@ -254,82 +258,133 @@ export function position(text: string) {
     return gray(`${text}`);
 }
 
-export async function checkFolder(folder: string | string[], options: {errMsg?: string; warnMsg?: string}){
-    let state: string = '';
-    for (const each of is.array(folder) ? folder : [folder]) {
+export async function assertAnyFolder(oneOrMoreFolders: string | string[], errorMessage?: string): Promise<string> {
+    oneOrMoreFolders = is.array(oneOrMoreFolders) ? oneOrMoreFolders : [oneOrMoreFolders];
+    for (const each of oneOrMoreFolders) {
         const result = await filepath.isFolder(each, $root);
-        if (!result) {
-            if (options.warnMsg) {
-                warn(options.warnMsg);
-                state ||= 'warn';
-                continue;
-            }
-            if (options.errMsg) {
-                error(options.errMsg);
-                state = 'error';
-                continue;
-            }
+        if (result) {
+            verbose(`Folder ${brightGreen(each)} exists.`);
+            return result;
         }
-        verbose(`Folder ${brightGreen(each)} exists.`);
     }
-    if (state === 'error') {
+    if (errorMessage) {
+        if (!$switches.includes('--quiet')) {
+            error(errorMessage);
+        }
         process.exit(1);
     }
-    return state;
 }
 
-export async function checkFile(file: string | string[], options: {errMsg?: string; warnMsg?: string}){
-    let state: string = '';
+export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMessage?: string): Promise<string> {
+    oneOrMoreFiles = is.array(oneOrMoreFiles) ? oneOrMoreFiles : [oneOrMoreFiles];
+    for (const each of oneOrMoreFiles) {
+        const result = await filepath.isFile(each, $root);
+        if (result) {
+            verbose(`Folder ${brightGreen(each)} exists.`);
+            return result;
+        }
+    }
+    if (errorMessage) {
+        if (!$switches.includes('--quiet')) {
+            error(errorMessage);
+        }
+        process.exit(1);
+    }
+}
+
+export async function checkFolder(folder: string | string[], options: {errMsg?: string; warnMsg?: string}){
+    folder = is.array(folder) ? folder : [folder];
+    for (const each of folder) {
+        const result = await filepath.isFolder(each, $root);
+        if (result) {
+            verbose(`Folder ${brightGreen(each)} exists.`);
+            return result;
+        }
+    }
+    if (options.errMsg) {
+        if (!$switches.includes('--quiet')) {
+            error(options.errMsg);
+        }
+        process.exit(1);
+    }
+    if (options.warnMsg) {
+        if (!$switches.includes('--quiet')) {
+            warn(options.warnMsg);
+        }
+    }
+    return false;
+}
+
+export async function checkFile(file: string | string[], options: {errMsg?: string; warnMsg?: string}): Promise<string>{
     for (const each of is.array(file) ? file : [file]) {
         const result = await filepath.isFile(each, $root);
-        if (!result) {
-            if (options.warnMsg) {
-                warn(options.warnMsg);
-                state = state ?? 'warn';
-                continue;
-            }
-            if (options.errMsg) {
-                error(options.errMsg);
-                state = 'error';
-                continue;
-            }
+        if (result) {
+            verbose(`File ${brightGreen(each)} exists.`);
+            return result;
         }
-        verbose(`File ${brightGreen(each)} exists.`);
     }
-    if (state === 'error') {
+    if (options.errMsg) {
+        if (!$switches.includes('--quiet')) {
+            error(options.errMsg);
+        }
         process.exit(1);
     }
-    return state;
+    if (options.warnMsg) {
+        if (!$switches.includes('--quiet')) {
+            warn(options.warnMsg);
+        }
+    }
+    return '';
 }
 
-export async function checkPrep(exitOnFail = true) {
-    let state = '';
-    state += await checkFolder('dist/walkthrough', { warnMsg: `The walkthrough files are not in place.`});
-    state += await checkFolder('dist/html', { warnMsg:`The html files are not in place.` });
-    state += await checkFolder('dist/schema', { warnMsg:`The schema files are not in place.`});
-    state += await checkFile('dist/nls.metadata.json', { warnMsg:`The extension translation file '${$root}/dist/nls.metadata.json is missing.` });
-    if (state) {
-        if (exitOnFail) {
-            error(`You may need to run ${brightGreen("yarn prep")}\n\n`);
-            return process.exit(1);
-        }
-        return true;
+export async function checkPrep() {
+    let failing = false;
+    if (!await assertAnyFolder('dist/test')) {
+        warn(`The compiled test files are not in place.`);
+        failing = true;
     }
-    verbose('Prep files appear to be in place.');
-    return false;
+    if (!await assertAnyFolder('dist/walkthrough')) {
+        warn(`The walkthrough files are not in place.`);
+        failing = true;
+    }
+    if (!await assertAnyFolder('dist/html')) {
+        warn(`The html files are not in place.`);
+        failing = true;
+    }
+    if (!await assertAnyFolder('dist/schema')) {
+        warn(`The schema files are not in place.`);
+        failing = true;
+    }
+    if (!await assertAnyFile('dist/nls.metadata.json')) {
+        warn(`The extension translation file '${$root}/dist/nls.metadata.json is missing.`);
+        failing = true;
+    }
+    if (!failing) {
+        verbose('Prep files appear to be in place.');
+    }
+    return failing;
 }
 
-export async function checkCompiled(exitOnFail = true) {
-    let state = '';
-
-    state += await checkFile('dist/src/main.js', {errMsg: `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`});
-    if (state) {
-        if (exitOnFail) {
-            error(`You may need to run ${brightGreen("yarn prep")}\n\n`);
-            return process.exit(1);
-        }
-        return true;
+export async function checkCompiled() {
+    let failing = false;
+    if (!await assertAnyFile('dist/src/main.js')) {
+        warn(`The extension entry point '${$root}/dist/src/main.js is missing.`);
+        failing = true;
     }
-    verbose('Compiled files appear to be in place.');
-    return false;
+    if (!failing) {
+        verbose('Compiled files appear to be in place.');
+    }
+    return failing;
+}
+
+export async function checkBinaries() {
+    let failing = false;
+    if (!await assertAnyFile(['bin/cpptools.exe', 'bin/cpptools'])) {
+        warn(`The extension entry point '${$root}/dist/src/main.js is missing.`);
+        failing = true;
+    }
+    if (!failing) {
+        verbose('Native binary files appear to be in place.');
+    }
+    return failing;
 }
