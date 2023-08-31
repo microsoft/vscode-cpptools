@@ -5,6 +5,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/unified-signatures */
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 
 import { ChildProcess, spawn } from 'child_process';
 import { basename, resolve } from 'path';

@@ -56,7 +56,7 @@ function updateDefaults(object: any, defaults: any): any {
 
 function refReplace(definitions: any, ref: any): any {
     // $ref is formatted as "#/definitions/ObjectName"
-    const referenceStringArray: string[] = ref['$ref'].split('/');
+    const referenceStringArray: string[] = ref.$ref.split('/');
 
     // Getting "ObjectName"
     const referenceName: string = referenceStringArray[referenceStringArray.length - 1];
@@ -71,7 +71,7 @@ function refReplace(definitions: any, ref: any): any {
     ref = appendFieldsToObject(reference, ref);
 
     // Remove $ref field
-    delete ref['$ref'];
+    delete ref.$ref;
 
     return ref;
 }

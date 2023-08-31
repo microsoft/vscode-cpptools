@@ -138,7 +138,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 (path.basename(info.path) === "cl.exe") && compiler_condition(info));
             knownCompilers = knownCompilers.filter(info =>
                 (info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info)));
-            knownCompilers.map<void>(info => {
+            knownCompilers.forEach(info => {
                 knownCompilerPathsSet.add(info.path);
             });
         }

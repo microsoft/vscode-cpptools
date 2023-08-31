@@ -56,9 +56,9 @@ const elementId: { [key: string]: string } = {
 };
 
 interface VsCodeApi {
-    postMessage(msg: {}): void;
-    setState(state: {}): void;
-    getState(): {};
+    postMessage(msg: Record<string, any>): void;
+    setState(state: Record<string, any>): void;
+    getState(): any;
 }
 
 declare function acquireVsCodeApi(): VsCodeApi;

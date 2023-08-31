@@ -158,7 +158,7 @@ export async function read(filename: string) {
     return content.toString();
 }
 
-export async function readJson(filename: string, fallback?: {}): Promise<CommentJSONValue> {
+export async function readJson(filename: string, fallback = {}): Promise<CommentJSONValue> {
     try {
         return parse(await read(filename));
     } catch {
