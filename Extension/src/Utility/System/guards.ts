@@ -61,6 +61,7 @@ export class is {
         return instance instanceof Socket;
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     static function(instance: any): instance is Function {
         return typeof instance === 'function';
     }

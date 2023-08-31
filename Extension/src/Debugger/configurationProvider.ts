@@ -661,6 +661,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const newSourceFileMapSource: string = util.resolveVariables(sourceFileMapSource, undefined);
                 if (sourceFileMapSource !== newSourceFileMapSource) {
                     message = "\t" + localize("replacing.sourcepath", "Replacing {0} '{1}' with '{2}'.", "sourcePath", sourceFileMapSource, newSourceFileMapSource);
+                    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                     delete config.sourceFileMap[sourceFileMapSource];
                     source = newSourceFileMapSource;
                 }
