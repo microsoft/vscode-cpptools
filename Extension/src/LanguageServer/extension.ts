@@ -10,6 +10,7 @@ import * as path from 'path';
 import * as rd from 'readline';
 import { Readable } from 'stream';
 import * as vscode from 'vscode';
+import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as yauzl from 'yauzl';
 import { logAndReturn } from '../Utility/Async/returns';
@@ -452,6 +453,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, sender) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? (sender: string | undefined) => onExtractToFunction(true, sender) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
@@ -715,6 +717,10 @@ async function onExtractToFunction(isMemberFunction: boolean, sender?: string): 
     };
     telemetry.logLanguageServerEvent('ExtractToFreeFunction', properties);
     return getActiveClient().handleExtractToFunction(isMemberFunction);
+}
+
+function onExpandSelection(r: Range) {
+    new vscode.Selection(new vscode.Position(r.start.line, r.start.character), new vscode.Position(r.end.line, r.end.character));
 }
 
 function onAddToIncludePath(path: string): void {
