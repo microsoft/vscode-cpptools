@@ -494,7 +494,7 @@ export class CppProperties {
                 for (const [dep, execCmd] of nodeAddonMap) {
                     if (dep in packageJson.dependencies) {
                         try {
-                            let stdout: string | void = await util.execChildProcess(execCmd, rootPath);
+                            let stdout: string = await util.execChildProcess(execCmd, rootPath);
                             if (!stdout) {
                                 continue;
                             }
@@ -1413,12 +1413,12 @@ export class CppProperties {
 
             // Remove disallowed variable overrides
             if (this.configurationJson.env) {
-                delete this.configurationJson.env['workspaceRoot'];
-                delete this.configurationJson.env['workspaceFolder'];
-                delete this.configurationJson.env['workspaceFolderBasename'];
-                delete this.configurationJson.env['execPath'];
-                delete this.configurationJson.env['pathSeparator'];
-                delete this.configurationJson.env['default'];
+                delete this.configurationJson.env.workspaceRoot;
+                delete this.configurationJson.env.workspaceFolder;
+                delete this.configurationJson.env.workspaceFolderBasename;
+                delete this.configurationJson.env.execPath;
+                delete this.configurationJson.env.pathSeparator;
+                delete this.configurationJson.env.default;
             }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before

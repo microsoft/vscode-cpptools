@@ -1,8 +1,8 @@
 module.exports = {
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended"
-        //"plugin:@typescript-eslint/strict", // I want to enable this. Lots of little changes will happen.
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/strict",
     ],
     "env": {
         "browser": true,
@@ -59,6 +59,8 @@ module.exports = {
                 }
             }
         ],
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-extraneous-class": "off",
         "no-case-declarations": "off",
         "no-useless-escape": "off",
         "no-floating-decimal": "error",
@@ -66,6 +68,8 @@ module.exports = {
         "arrow-spacing": ["error", { "before": true, "after": true }],
         "semi-spacing": ["error", { "before": false, "after": true }],
         "no-extra-parens": ["error", "all", { "nestedBinaryExpressions": false, "ternaryOperandBinaryExpressions": false }],
+        "@typescript-eslint/no-array-constructor": "error",
+        "@typescript-eslint/no-useless-constructor": "error",
         "@typescript-eslint/no-for-in-array": "error",
         "@typescript-eslint/no-misused-new": "error",
         "@typescript-eslint/no-misused-promises": "error",

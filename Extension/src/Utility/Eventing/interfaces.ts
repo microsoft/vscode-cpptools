@@ -18,7 +18,7 @@ export interface Descriptor {
 
 export type Unsubscribe = () => void;
 
-export type Callback<TOutput = unknown> = (event: EventData<TOutput>, ...args: any[]) => Promise<TOutput> | Promise<EventStatus> | Promise<undefined> | TOutput | EventStatus | undefined | void | Promise<void>;
+export type Callback<TOutput = unknown> = (event: EventData<TOutput>, ...args: any[]) => Promise<TOutput> | Promise<EventStatus> | Promise<undefined> | TOutput | EventStatus | undefined | Promise<void>;
 
 export type PickByType<T, TKeepType> = {
     [P in keyof T as T[P] extends TKeepType ? P : never]: T[P]

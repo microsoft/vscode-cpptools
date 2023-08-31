@@ -463,12 +463,9 @@ enum SemanticTokenTypes {
 
 enum SemanticTokenModifiers {
     // These are camelCase as the enum names are used directly as strings in our legend.
-    // eslint-disable-next-line no-bitwise
-    static = (1 << 0),
-    // eslint-disable-next-line no-bitwise
-    global = (1 << 1),
-    // eslint-disable-next-line no-bitwise
-    local = (1 << 2)
+    static = 0b001,
+    global = 0b010,
+    local = 0b100
 }
 
 interface IntelliSenseSetup {

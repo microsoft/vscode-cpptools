@@ -39,8 +39,6 @@ interface BuildOptions {
 export class CppBuildTaskProvider implements TaskProvider {
     static CppBuildScriptType: string = 'cppbuild';
 
-    constructor() { }
-
     public async provideTasks(): Promise<CppBuildTask[]> {
         return this.getTasks(false);
     }
@@ -140,7 +138,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 (path.basename(info.path) === "cl.exe") && compiler_condition(info));
             knownCompilers = knownCompilers.filter(info =>
                 (info === cl_to_add) || (path.basename(info.path) !== "cl.exe" && compiler_condition(info)));
-            knownCompilers.map<void>(info => {
+            knownCompilers.forEach(info => {
                 knownCompilerPathsSet.add(info.path);
             });
         }
@@ -222,7 +220,7 @@ export class CppBuildTaskProvider implements TaskProvider {
 
     public async getJsonTasks(): Promise<CppBuildTask[]> {
         const rawJson: any = await this.getRawTasksJson();
-        const rawTasksJson: any = !rawJson.tasks ? new Array() : rawJson.tasks;
+        const rawTasksJson: any = !rawJson.tasks ? [] : rawJson.tasks;
         const buildTasksJson: CppBuildTask[] = rawTasksJson.map((task: any) => {
             if (!task.label || !task.type || task.type !== CppBuildTaskProvider.CppBuildScriptType) {
                 return null;
@@ -261,7 +259,7 @@ export class CppBuildTaskProvider implements TaskProvider {
     public async writeBuildTask(taskLabel: string, workspaceFolder?: WorkspaceFolder, setAsDefault: boolean = false): Promise<void> {
         const rawTasksJson: any = await this.getRawTasksJson(workspaceFolder);
         if (!rawTasksJson.tasks) {
-            rawTasksJson.tasks = new Array();
+            rawTasksJson.tasks = [];
         }
         // Check if the task exists in the user's task.json.
         if (rawTasksJson.tasks.find((task: any) => task.label && task.label === taskLabel)) {
