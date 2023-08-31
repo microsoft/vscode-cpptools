@@ -336,29 +336,18 @@ export async function checkFile(file: string | string[], options: {errMsg?: stri
     }
     return '';
 }
+const quiet = process.argv.includes('--quiet');
 
 export async function checkPrep() {
     let failing = false;
-    if (!await assertAnyFolder('dist/test')) {
-        warn(`The compiled test files are not in place.`);
-        failing = true;
-    }
-    if (!await assertAnyFolder('dist/walkthrough')) {
-        warn(`The walkthrough files are not in place.`);
-        failing = true;
-    }
-    if (!await assertAnyFolder('dist/html')) {
-        warn(`The html files are not in place.`);
-        failing = true;
-    }
-    if (!await assertAnyFolder('dist/schema')) {
-        warn(`The schema files are not in place.`);
-        failing = true;
-    }
-    if (!await assertAnyFile('dist/nls.metadata.json')) {
-        warn(`The extension translation file '${$root}/dist/nls.metadata.json is missing.`);
-        failing = true;
-    }
+
+    failing = !await assertAnyFolder('dist/test') && (quiet || warn(`The compiled test files are not in place.`)) || failing;
+    failing = !await assertAnyFolder('dist/walkthrough') && (quiet || warn(`The walkthrough files are not in place.`)) || failing;
+    failing = !await assertAnyFolder('dist/html') && (quiet || warn(`The html files are not in place.`)) || failing;
+    failing = !await assertAnyFolder('dist/schema') && (quiet || warn(`The schema files are not in place.`)) || failing;
+    failing = !await assertAnyFile('dist/nls.metadata.json') && (quiet || warn(`The extension translation file '${$root}/dist/nls.metadata.json is missing.`)) || failing;
+    failing = await checkDTS() || failing;
+
     if (!failing) {
         verbose('Prep files appear to be in place.');
     }
@@ -367,22 +356,30 @@ export async function checkPrep() {
 
 export async function checkCompiled() {
     let failing = false;
-    if (!await assertAnyFile('dist/src/main.js')) {
-        warn(`The extension entry point '${$root}/dist/src/main.js is missing.`);
-        failing = true;
-    }
+    failing = await checkDTS() || failing;
+    failing = !await assertAnyFile('dist/src/main.js') && (quiet || warn(`The extension entry point '${$root}/dist/src/main.js is missing.`)) || failing;
+
     if (!failing) {
         verbose('Compiled files appear to be in place.');
     }
     return failing;
 }
 
+export async function checkDTS() {
+    let failing = false;
+    failing = !await assertAnyFile('vscode.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.d.ts is missing.`)) || failing;
+    failing = !await assertAnyFile('vscode.proposed.terminalDataWriteEvent.d.ts') && (quiet || warn(`The VSCode import file '${$root}/dist/src/vscode.proposed.terminalDataWriteEvent.d.ts is missing.`)) || failing;
+
+    if (!failing) {
+        verbose('VSCode d.ts files appear to be in place.');
+    }
+    return failing;
+}
+
 export async function checkBinaries() {
     let failing = false;
-    if (!await assertAnyFile(['bin/cpptools.exe', 'bin/cpptools'])) {
-        warn(`The extension entry point '${$root}/dist/src/main.js is missing.`);
-        failing = true;
-    }
+    failing = !await assertAnyFile(['bin/cpptools.exe', 'bin/cpptools']) && (quiet || warn(`The native binary files are not present. You should either build or install the native binaries\n\n.`)) || failing;
+
     if (!failing) {
         verbose('Native binary files appear to be in place.');
     }

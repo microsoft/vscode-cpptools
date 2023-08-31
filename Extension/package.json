@@ -6124,7 +6124,7 @@
         "test": "yarn install && (yarn verify compiled --quiet || yarn build) && yarn verify binaries && ts-node -T .scripts/test.ts",
         "code": "yarn install && yarn verify binaries && ts-node -T .scripts/code.ts",
         "verify": "ts-node -T .scripts/verify.ts",
-        "prep": "npx vscode-dts dev && npx vscode-dts main && yarn copy-walkthrough-media && yarn generate-native-strings && yarn translations-generate",
+        "prep": "yarn prep:dts && yarn copy-walkthrough-media && yarn generate-native-strings && yarn translations-generate",
         "lint": "yarn install && eslint -c .eslintrc.js --report-unused-disable-directives src test ui .scripts",
         "compile": "yarn install && (yarn verify prep --quiet || yarn prep) && yarn build",
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
@@ -6138,7 +6138,8 @@
         "translations-generate": "set NODE_OPTIONS=--no-experimental-fetch && gulp translations-generate",
         "translations-import": "gulp translations-import",
         "import-edge-strings": "ts-node -T ./.scripts/import_edge_strings.ts",
-        "build": "echo compiling TypeScript code && tsc --build tsconfig.json"
+        "prep:dts": "yarn verify dts --quiet || (npx vscode-dts dev && npx vscode-dts main)",
+        "build": "echo [Building TypeScript code] && tsc --build tsconfig.json"
     },
     "devDependencies": {
         "@octokit/rest": "^18.12.0",
