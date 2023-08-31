@@ -292,50 +292,6 @@ export async function assertAnyFile(oneOrMoreFiles: string | string[], errorMess
     }
 }
 
-export async function checkFolder(folder: string | string[], options: {errMsg?: string; warnMsg?: string}){
-    folder = is.array(folder) ? folder : [folder];
-    for (const each of folder) {
-        const result = await filepath.isFolder(each, $root);
-        if (result) {
-            verbose(`Folder ${brightGreen(each)} exists.`);
-            return result;
-        }
-    }
-    if (options.errMsg) {
-        if (!$switches.includes('--quiet')) {
-            error(options.errMsg);
-        }
-        process.exit(1);
-    }
-    if (options.warnMsg) {
-        if (!$switches.includes('--quiet')) {
-            warn(options.warnMsg);
-        }
-    }
-    return false;
-}
-
-export async function checkFile(file: string | string[], options: {errMsg?: string; warnMsg?: string}): Promise<string>{
-    for (const each of is.array(file) ? file : [file]) {
-        const result = await filepath.isFile(each, $root);
-        if (result) {
-            verbose(`File ${brightGreen(each)} exists.`);
-            return result;
-        }
-    }
-    if (options.errMsg) {
-        if (!$switches.includes('--quiet')) {
-            error(options.errMsg);
-        }
-        process.exit(1);
-    }
-    if (options.warnMsg) {
-        if (!$switches.includes('--quiet')) {
-            warn(options.warnMsg);
-        }
-    }
-    return '';
-}
 const quiet = process.argv.includes('--quiet');
 
 export async function checkPrep() {
