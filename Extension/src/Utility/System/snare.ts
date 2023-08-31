@@ -8,7 +8,10 @@ import { ManualPromise } from '../Async/manualPromise';
 import { finalize } from './finalize';
 import { is } from './guards';
 
-// force dispose to be recognized
+// enable typescript disposable types/interfaces
+/// <reference lib="esnext.disposable" />
+
+// polyfill Symbol.dispose
 (Symbol as any).dispose ??= Symbol("Symbol.dispose");
 (Symbol as any).asyncDispose ??= Symbol("Symbol.asyncDispose");
 

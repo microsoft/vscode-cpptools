@@ -1999,7 +1999,7 @@ export class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
-        const onFinished: () => void = () => {
+        const onFinished = () => {
             if (requestFile) {
                 void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
             }
@@ -2032,7 +2032,7 @@ export class DefaultClient implements Client {
 
         const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
         if (!response.candidates || response.candidates.length === 0) {
-        // If we didn't receive any candidates, no configuration is needed.
+            // If we didn't receive any candidates, no configuration is needed.
             onFinished();
             DefaultClient.isStarted.resolve();
             return;

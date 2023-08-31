@@ -90,7 +90,7 @@ module.exports = {
         "@typescript-eslint/method-signature-style": ["error", "method"],
         "@typescript-eslint/space-infix-ops": "error",
         "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
         "@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",
         "arrow-body-style": "error",
         "comma-dangle": "error",

@@ -5,13 +5,11 @@
         "outDir": "dist",
         "lib": [
             "ES2022",
-            "esnext.disposable",
             "dom"
         ],
         "inlineSourceMap": true,
         "rootDir": ".",
         "removeComments": true,
-        "noUnusedLocals": true,
         "strictNullChecks": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true

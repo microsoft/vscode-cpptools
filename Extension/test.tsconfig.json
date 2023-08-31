@@ -10,7 +10,6 @@
         "sourceMap": true,
         "rootDir": ".",
         "removeComments": true,
-        "noUnusedLocals": true,
         "strictNullChecks": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true
