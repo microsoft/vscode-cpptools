@@ -177,7 +177,7 @@ function parseFlags(input: string[], entries: { [key: string]: string }): number
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const next: void | IParsedOption = parser.getopt();
+        const next: IParsedOption | undefined = parser.getopt();
         if (!next) {
             break;
         }

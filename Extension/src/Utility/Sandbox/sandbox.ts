@@ -23,6 +23,7 @@ export function createSandbox(): <T>(code: string, context?: any) => T {
                 sandbox
             );
             for (const key of Object.keys(context)) {
+                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete sandbox[key];
             }
         } else {

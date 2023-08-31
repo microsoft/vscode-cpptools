@@ -49,7 +49,7 @@ export class SettingsTracker {
             }
 
             // Iterate through dotted "sub" settings.
-            const collectSettingsRecursive = (key: string, val: Object, depth: number) => {
+            const collectSettingsRecursive = (key: string, val: Record<string, any>, depth: number) => {
                 if (depth > 4) {
                     // Limit settings recursion to 4 dots (not counting the first one in: `C_Cpp.`)
                     return;
