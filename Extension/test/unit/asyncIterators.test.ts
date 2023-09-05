@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it } from 'mocha';
 import { fail, ok, strictEqual } from 'node:assert';
 import { accumulator } from '../../src/Utility/Async/iterators';

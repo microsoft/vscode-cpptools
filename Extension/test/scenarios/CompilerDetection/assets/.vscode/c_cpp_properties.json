@@ -1,11 +1,13 @@
 {
     "configurations": [
         {
-            // "compiler": "C:\\program files\\microsoft visual studio\\2022\\enterprise\\vc\\tools\\msvc\\14.36.32532\\bin\\hostx64\\x64\\cl.exe",
+            "enableNewIntellisense": true,
             "compiler": "Microsoft Visual C++/19.*/x64/x64",
+            // "compiler": "C:\\program files\\microsoft visual studio\\2022\\enterprise\\vc\\tools\\msvc\\14.36.32532\\bin\\hostx64\\x64\\cl.exe",
             // "compiler": "cl.exe",
             //  "compiler": "C:\\program files\\microsoft visual studio\\2022\\enterprise\\vc\\tools\\msvc\\14.36.32532\\bin\\hostx64\\x64\\cl.exe",
             "name": "newstyle",
+            // "intelliSenseMode": "clang-x64",
             "compilerArgs": [
                 "-Dfoo=bar",
                 "-I${workspaceFolder}/include",

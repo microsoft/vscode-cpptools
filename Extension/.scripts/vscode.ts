@@ -3,6 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+/* eslint-disable @typescript-eslint/no-dynamic-delete */
+
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
 import { fail } from 'assert';
 import { spawnSync } from 'child_process';

@@ -61,7 +61,16 @@ export interface ConfigurationJson {
     enableConfigurationSquiggles?: boolean;
 }
 
-export interface Configuration {
+export interface NewIntelliSense {
+    /** new IntelliSense configuration */
+    intellisense?: IntelliSenseConfiguration;
+    /** select the compiler for new mode (full path, filename of binary in ${env:PATH} or compiler name (supports wildcards) )   */
+    compiler?: string;
+    /** will trigger the use of the new intellisense when the compiler is set. */
+    enableNewIntellisense?: boolean;
+}
+
+export interface Configuration extends NewIntelliSense{
     name: string;
     compilerPathInCppPropertiesJson?: string;
     compilerPath?: string;
@@ -87,14 +96,6 @@ export interface Configuration {
     mergeConfigurations?: boolean;
     browse?: Browse;
     customConfigurationVariables?: { [key: string]: string };
-
-    /** new IntelliSense configuration */
-    intellisense?: IntelliSenseConfiguration;
-    /** select the compiler for new mode (full path, filename of binary in ${env:PATH} or compiler name (supports wildcards) )   */
-    compiler?: string;
-    /** will trigger the use of the new intellisense when the compiler is set. */
-    enableNewIntellisense?: boolean;
-
 }
 
 export interface ConfigurationErrors {

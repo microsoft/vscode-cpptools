@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { strict } from 'assert';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
@@ -113,24 +111,24 @@ export class FastFinder implements AsyncIterable<string> {
                 try {
                     const proc = await ripgrep(...globs.map(each => ['--glob', each]).flat(), '--max-depth', depth, '--null-data', '--no-messages', '-L', '--files', ...location.map(each => each.toString()));
 
-                const process = proc as unknown as Instance<Process>;
-                this.processes.push(process);
-                for await (const line of process.stdio) {
-                    if (this.distinct.has(line)) {
-                        continue;
+                    const process = proc as unknown as Instance<Process>;
+                    this.processes.push(process);
+                    for await (const line of process.stdio) {
+                        if (this.distinct.has(line)) {
+                            continue;
+                        }
+                        this.distinct.add(line);
+                        if (!this.keepOnlyExecutables || await filepath.isExecutable(line)) {
+                            this.#files.add(line);
+                        }
                     }
-                    this.distinct.add(line);
-                    if (!this.keepOnlyExecutables || await filepath.isExecutable(line)) {
-                        this.#files.add(line);
-                    }
-                }
                 } catch (e) {
                     console.log(e);
                 } finally {
-                this.pending--;
-                if (this.readyToComplete && this.pending === 0) {
-                    this.#files.complete();
-                }
+                    this.pending--;
+                    if (this.readyToComplete && this.pending === 0) {
+                        this.#files.complete();
+                    }
                 }
 
             });

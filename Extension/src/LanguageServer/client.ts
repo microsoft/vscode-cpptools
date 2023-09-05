@@ -51,6 +51,7 @@ import {
     removeCodeAnalysisProblems
 } from './codeAnalysis';
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
+import { CompileCommandsConfigurationProvider } from './compileCommandsProvider';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations } from './extension';
@@ -741,7 +742,7 @@ export interface Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void>;
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean, provider?: CustomConfigurationProvider1): Promise<void>;
     logDiagnostics(): Promise<void>;
     rescanFolder(): Promise<void>;
     toggleReferenceResultsView(): void;
@@ -1995,23 +1996,25 @@ export class DefaultClient implements Client {
         return this.languageClient.sendNotification(RescanFolderNotification);
     }
 
-    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> {
+    public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean, provider?: CustomConfigurationProvider1): Promise<void> {
         const onFinished = () => {
             if (requestFile) {
                 void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
             }
         };
-        const providerId: string | undefined = this.configurationProvider;
-        if (!providerId) {
-            onFinished();
-            return;
+        if (!provider) {
+            const providerId: string | undefined = this.configurationProvider;
+            if (!providerId) {
+                onFinished();
+                return;
+            }
+            provider = getCustomConfigProviders().get(providerId);
+            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId });
         }
-        const provider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(providerId);
         if (!provider || !provider.isReady) {
             onFinished();
             return;
         }
-        telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId });
         void this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, onFinished, provider);
     }
 
@@ -2062,38 +2065,52 @@ export class DefaultClient implements Client {
 
             if (configs && configs.length > 0 && configs[0]) {
                 const fileConfiguration: configs.Configuration | undefined = this.configuration.CurrentConfiguration;
-                if (fileConfiguration?.mergeConfigurations) {
-                    configs.forEach(config => {
-                        if (fileConfiguration.includePath) {
-                            fileConfiguration.includePath.forEach(p => {
-                                if (!config.configuration.includePath.includes(p)) {
-                                    config.configuration.includePath.push(p);
-                                }
-                            });
-                        }
 
-                        if (fileConfiguration.defines) {
-                            fileConfiguration.defines.forEach(d => {
-                                if (!config.configuration.defines.includes(d)) {
-                                    config.configuration.defines.push(d);
-                                }
-                            });
-                        }
+                // do we have an actual configuration?
+                if (fileConfiguration) {
 
-                        if (!config.configuration.forcedInclude) {
-                            config.configuration.forcedInclude = [];
-                        }
-
-                        if (fileConfiguration.forcedInclude) {
-                            fileConfiguration.forcedInclude.forEach(i => {
-                                if (config.configuration.forcedInclude) {
-                                    if (!config.configuration.forcedInclude.includes(i)) {
-                                        config.configuration.forcedInclude.push(i);
+                    // if the user has additional (legacy) configuration they want merged, do it here.
+                    if (fileConfiguration.mergeConfigurations) {
+                        configs.forEach(config => {
+                            if (fileConfiguration.includePath) {
+                                fileConfiguration.includePath.forEach(p => {
+                                    if (!config.configuration.includePath.includes(p)) {
+                                        config.configuration.includePath.push(p);
                                     }
-                                }
-                            });
-                        }
-                    });
+                                });
+                            }
+
+                            if (fileConfiguration.defines) {
+                                fileConfiguration.defines.forEach(d => {
+                                    if (!config.configuration.defines.includes(d)) {
+                                        config.configuration.defines.push(d);
+                                    }
+                                });
+                            }
+
+                            if (!config.configuration.forcedInclude) {
+                                config.configuration.forcedInclude = [];
+                            }
+
+                            if (fileConfiguration.forcedInclude) {
+                                fileConfiguration.forcedInclude.forEach(i => {
+                                    if (config.configuration.forcedInclude) {
+                                        if (!config.configuration.forcedInclude.includes(i)) {
+                                            config.configuration.forcedInclude.push(i);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    // check if they wanted new intellisense engine
+                    if (fileConfiguration.enableNewIntellisense) {
+                        // the user has enabled the new intellisense engine
+                        // so we have to patch each file configuration so that it
+                        // uses the new engine here.
+                        await Promise.all(configs.map(async (config) => this.patchConfigurationForNewIntellisense(config.configuration, fileConfiguration.compiler || fileConfiguration.compilerPath)));
+                    }
                 }
                 return configs as SourceFileConfigurationItem[];
             }
@@ -2101,6 +2118,7 @@ export class DefaultClient implements Client {
                 return null;
             }
         };
+
         try {
             const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             if (configs && configs.length > 0) {
@@ -2980,6 +2998,33 @@ export class DefaultClient implements Client {
 
     private doneInitialCustomBrowseConfigurationCheck: boolean = false;
 
+    private async patchConfigurationForNewIntellisense(cfg: configs.Configuration | (util.Mutable<SourceFileConfiguration> & configs.NewIntelliSense), compiler?: string): Promise<void> {
+        // currently, the new IntelliSense requires a compiler for the configuration
+        // we're not going to guess it here.
+        // so either they sent us one, or we look in the configuration for 'compiler' (best), or fallback to 'compilerPath' (ok)
+        compiler = compiler || cfg.compiler || cfg.compilerPath;
+
+        if (cfg.enableNewIntellisense && compiler) {
+            try {
+                using toolset = await identifyToolset(compiler);
+
+                if (toolset) {
+                    const intellisense = await toolset.getIntellisenseConfiguration(cfg.compilerArgs ?? [], is.object(cfg.intellisense) ? cfg.intellisense : {});
+                    cfg.intellisense = toolset.harvestFromConfiguration(cfg, intellisense);
+                }
+                getOutputChannel().appendLine(JSON.stringify(cfg, null, 2));
+                return;
+            } catch (e) {
+                getOutputChannel().appendLine(`Unable to identify toolset from compilerPath: ${cfg.compiler} - ${e}`);
+            }
+        }
+        // not using the new IntelliSense
+        // make sure that the configuration is not marked as newIntellisense
+        cfg.enableNewIntellisense = false;
+        cfg.compiler = undefined;
+        cfg.intellisense = undefined;
+    }
+
     private async onConfigurationsChanged(cppProperties: configs.CppProperties): Promise<void> {
         if (!cppProperties.Configurations) {
             return;
@@ -2994,8 +3039,36 @@ export class DefaultClient implements Client {
         const settings: CppSettings = new CppSettings(this.RootUri);
         // Clone each entry, as we make modifications before sending it, and don't
         // want to add those modifications to the original objects.
-        // configurations.forEach((c) => {
+        params.configurations = await Promise.all(configurations.map(async (c) => {
+            // QQ: Why is this processing all of the configurations?
+            //     does the server need them all? isn't it just using the currentConfiguration?
+            //
+
+            const modifiedConfig: configs.Configuration = structuredClone(c);
+            // Separate compiler path and args before sending to language client
+            const compilerPathAndArgs: util.CompilerPathAndArgs =
+                util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
+            modifiedConfig.compilerPath = compilerPathAndArgs.compilerPath;
+            if (settings.legacyCompilerArgsBehavior) {
+                modifiedConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
+                modifiedConfig.compilerArgs = undefined;
+            } else {
+                modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
+            }
+
+            getOutputChannel().appendLine(`${elapsed()} OnConfigurationsChange`);
+
+            // update the configuration to use the new IntelliSense if it's selected
+            await this.patchConfigurationForNewIntellisense(modifiedConfig);
+
+            return modifiedConfig;
+        }));
+        /* * *
         for (const c of configurations) {
+            // QQ: Why is this processing all of the configurations?
+            //     does the server need them all? isn't it just using the currentConfiguration?
+            //
+
             const modifiedConfig: configs.Configuration = structuredClone(c);
             // Separate compiler path and args before sending to language client
             const compilerPathAndArgs: util.CompilerPathAndArgs =
@@ -3027,9 +3100,10 @@ export class DefaultClient implements Client {
             }
             params.configurations.push(modifiedConfig);
         }
-        getOutputChannel().appendLine(`${elapsed()} ========= SENDING CONFIGS =========`);
-        // otherwise fall back to the orig
+        */
+        getOutputChannel().appendLine(`${elapsed()} ========= SENDING CONFIGS TO THE SERVICE =========`);
         await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
+
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
             if (!this.doneInitialCustomBrowseConfigurationCheck) {
                 // Send the last custom browse configuration we received from this provider.
@@ -3044,6 +3118,7 @@ export class DefaultClient implements Client {
         }
         const configName: string | undefined = configurations[params.currentConfiguration].name ?? "";
         this.model.activeConfigName.setValueIfActive(configName);
+
         const newProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
         if (!isSameProviderExtensionId(newProvider, this.configurationProvider)) {
             if (this.configurationProvider) {
@@ -3072,6 +3147,13 @@ export class DefaultClient implements Client {
     }
 
     private async onCompileCommandsChanged(path: string): Promise<void> {
+        // if we're using new Intellisense, we don't want to send this.
+        // instead, we'd like to send configuration for each file.
+        if (this.configuration.CurrentConfiguration?.enableNewIntellisense) {
+            const provider = new CompileCommandsConfigurationProvider(this, path);
+            return provider.update();
+        }
+
         const params: FileChangedParams = {
             uri: vscode.Uri.file(path).toString(),
             workspaceFolderUri: this.RootUri?.toString()
@@ -3802,7 +3884,7 @@ class NullClient implements Client {
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
-    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean): Promise<void> { return Promise.resolve(); }
+    provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean, provider?: CustomConfigurationProvider1): Promise<void> { return Promise.resolve(); }
     logDiagnostics(): Promise<void> { return Promise.resolve(); }
     rescanFolder(): Promise<void> { return Promise.resolve(); }
     toggleReferenceResultsView(): void { }

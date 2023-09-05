@@ -5,7 +5,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { Configuration } from '../LanguageServer/configurations';
+import { Configuration, NewIntelliSense } from '../LanguageServer/configurations';
 import { MarshalByReference, startRemoting } from '../Utility/System/snare';
 import { CStandard, CppStandard, IntelliSenseConfiguration, Language } from './interfaces';
 import { appendUnique } from './strings';
@@ -13,6 +13,8 @@ import { appendUnique } from './strings';
 import { resolve } from 'path';
 import { SHARE_ENV, Worker, isMainThread } from 'worker_threads';
 
+import { SourceFileConfiguration } from 'vscode-cpptools';
+import { Mutable } from '../common';
 import { getOutputChannel } from '../logger';
 
 // this code must only run in the main thread.
@@ -45,12 +47,12 @@ export class Toolset extends MarshalByReference {
     async getIntellisenseConfiguration(compilerArgs: string[], options?: { baseDirectory?: string; sourceFile?: string; language?: Language; standard?: CppStandard | CStandard; userIntellisenseConfiguration?: IntelliSenseConfiguration }): Promise<IntelliSenseConfiguration> {
         return this.remote.request('Toolset.getIntellisenseConfiguration', this.instance, compilerArgs, options);
     }
-    harvestFromConfiguration(configuration: Configuration, intellisense: IntelliSenseConfiguration) {
+    harvestFromConfiguration(configuration: Configuration | (Mutable<SourceFileConfiguration> & NewIntelliSense), intellisense: IntelliSenseConfiguration) {
         // includePath
         intellisense.include!.paths = appendUnique(intellisense.include!.paths, configuration.includePath);
 
         // macFrameworkPath
-        intellisense.include!.frameworkPaths = appendUnique(intellisense.include!.frameworkPaths, configuration.macFrameworkPath);
+        intellisense.include!.frameworkPaths = appendUnique(intellisense.include!.frameworkPaths, (configuration as any).macFrameworkPath);
 
         // cStandard
         // cppStandard

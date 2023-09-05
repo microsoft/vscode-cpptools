@@ -3,8 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/array-type */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-dynamic-delete */
 
 import { parse as parseJson } from 'comment-json';
 import { readFile } from 'fs/promises';

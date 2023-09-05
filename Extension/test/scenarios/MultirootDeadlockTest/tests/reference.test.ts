@@ -70,7 +70,7 @@ suite(`[Reference test]`, function(): void {
     //     assert.equal(beforeEditResult.length, 3);
     //     assertTextInLocation(document, expectedText, beforeEditResult);
 
-    // eslint-disable-next-line etc/no-commented-out-code
+    //*
     //     // Add another reference to "func1()"
     //     let workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
     //     workspaceEdit.insert(fileUri, new vscode.Position(34, 5), "int y = func1();");

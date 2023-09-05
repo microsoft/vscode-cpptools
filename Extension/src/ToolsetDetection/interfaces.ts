@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/ban-types */
 
 // Deep Partial implementation

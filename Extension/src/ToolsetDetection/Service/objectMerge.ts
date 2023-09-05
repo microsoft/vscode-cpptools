@@ -3,6 +3,8 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+/* eslint-disable @typescript-eslint/no-dynamic-delete */
+
 import { is } from '../../Utility/System/guards';
 import { structuredClone } from '../../Utility/System/structuredClone';
 import { strings } from '../strings';
