@@ -1303,6 +1303,30 @@ export function isValidIdentifier(candidate: string): boolean {
     return true;
 }
 
+export function getCacheStoragePath(): string {
+    let defaultCachePath: string = "";
+    let pathEnvironmentVariable: string | undefined;
+    switch (os.platform()) {
+        case 'win32':
+            defaultCachePath = "Microsoft\\vscode-cpptools\\";
+            pathEnvironmentVariable = process.env["LOCALAPPDATA"];
+            break;
+        case 'darwin':
+            defaultCachePath = "Library/Caches/vscode-cpptools/";
+            pathEnvironmentVariable = os.homedir();
+            break;
+        default: // Linux
+            defaultCachePath = "vscode-cpptools/";
+            pathEnvironmentVariable = process.env["XDG_CACHE_HOME"];
+            if (!pathEnvironmentVariable) {
+                pathEnvironmentVariable = os.homedir();
+            }
+            break;
+    }
+
+    return pathEnvironmentVariable ? path.join(pathEnvironmentVariable, defaultCachePath) : "";
+}
+
 function getUniqueWorkspaceNameHelper(workspaceFolder: vscode.WorkspaceFolder, addSubfolder: boolean): string {
     const workspaceFolderName: string = workspaceFolder ? workspaceFolder.name : "untitled";
     if (!workspaceFolder || workspaceFolder.index < 1) {
