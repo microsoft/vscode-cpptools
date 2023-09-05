@@ -42,7 +42,8 @@ import { localizedStringCount, lookupString } from '../nativeStrings';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
 import {
-    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications,
+    CodeAnalysisDiagnosticIdentifiersAndUri,
+    RegisterCodeAnalysisNotifications,
     RemoveCodeAnalysisProblemsParams,
     removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems
@@ -97,6 +98,7 @@ interface ConfigStateReceived {
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
 let scanForCompilersDone: boolean = false;
+let workspaceHash: string = "";
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -539,7 +541,9 @@ export interface TextDocumentWillSaveParams {
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
-    storagePath: string;
+    cacheStoragePath: string;
+    workspaceStoragePath: string;
+    databaseStoragePath: string;
     freeMemory: number;
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
@@ -821,7 +825,7 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private storagePath: string;
+    private workspaceStoragePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -916,7 +920,7 @@ export class DefaultClient implements Client {
     public get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return {
             workspaceFolderBasename: this.Name,
-            workspaceStorage: this.storagePath,
+            workspaceStorage: this.workspaceStoragePath,
             execPath: process.execPath,
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
         };
@@ -1285,21 +1289,17 @@ export class DefaultClient implements Client {
         this.rootFolder = workspaceFolder;
         this.rootRealPath = this.RootPath ? fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath : "";
 
-        let storagePath: string | undefined;
-        if (util.extensionContext) {
-            const path: string | undefined = util.extensionContext.storageUri?.fsPath;
-            if (path) {
-                storagePath = path;
-            }
+        this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
+        if (this.workspaceStoragePath.length > 0) {
+            workspaceHash = path.basename(path.dirname(this.workspaceStoragePath));
+        } else {
+            this.workspaceStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
-        if (!storagePath) {
-            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
-        }
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
+            this.workspaceStoragePath = path.join(this.workspaceStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
-        this.storagePath = storagePath;
+
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = new SettingsTracker(rootUri);
 
@@ -1622,10 +1622,16 @@ export class DefaultClient implements Client {
             currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
         }
 
+        const cacheStoragePath: string = util.getCacheStoragePath();
+        const databaseStoragePath: string = (cacheStoragePath.length > 0) && (workspaceHash.length > 0) ?
+            path.join(cacheStoragePath, workspaceHash) : "";
+
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
-            storagePath: this.storagePath,
+            databaseStoragePath: databaseStoragePath,
+            workspaceStoragePath: this.workspaceStoragePath,
+            cacheStoragePath: cacheStoragePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
@@ -2029,7 +2035,7 @@ export class DefaultClient implements Client {
 
         const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
         if (!response.candidates || response.candidates.length === 0) {
-        // If we didn't receive any candidates, no configuration is needed.
+            // If we didn't receive any candidates, no configuration is needed.
             onFinished();
             DefaultClient.isStarted.resolve();
             return;
