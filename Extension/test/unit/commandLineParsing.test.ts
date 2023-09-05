@@ -17,7 +17,7 @@ function marker() {
     try {
         throw new Error('Test Marker');
     } catch (E) {
-        if (is.error(E)){
+        if (is.error(E)) {
             return E.stack?.split('\n').filter(each => each.includes('.ts') && each.includes('<anonymous>')).join('\n');
         }
     }
