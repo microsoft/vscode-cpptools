@@ -34,9 +34,12 @@ jobs:
         run: yarn test
         working-directory: Extension
 
-      - name: Run simple vscode unit tests
-        run: yarn test --scenario=SingleRootProject
-        working-directory: Extension
+#      # NOTE : We can't run the test that require the native binary files
+#      #        yet -- there will be an update soon that allows the tester to 
+#      #        acquire them on-the-fly
+#      - name: Run simple vscode unit tests
+#        run: yarn test --scenario=SingleRootProject
+#        working-directory: Extension
 
 #      - name: Run languageServer integration tests
 #        run: yarn run integrationTests

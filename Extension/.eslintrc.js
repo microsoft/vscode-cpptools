@@ -131,6 +131,7 @@ module.exports = {
         "no-unsafe-finally": "error",
         "no-unused-expressions": "error",
         "no-unused-labels": "error",
+        "space-before-blocks": "error",
         "no-var": "error",
         "one-var": [
             "error",

@@ -62,12 +62,12 @@ export interface ConfigurationJson {
 }
 
 export interface NewIntelliSense {
-    /** new IntelliSense configuration */
-    intellisense?: IntelliSenseConfiguration;
-    /** select the compiler for new mode (full path, filename of binary in ${env:PATH} or compiler name (supports wildcards) )   */
-    compiler?: string;
     /** will trigger the use of the new intellisense when the compiler is set. */
     enableNewIntellisense?: boolean;
+    /** select the compiler for new mode (full path, filename of binary in ${env:PATH} or compiler name (supports wildcards) )   */
+    compiler?: string;
+    /** new IntelliSense configuration */
+    intellisense?: IntelliSenseConfiguration;
 }
 
 export interface Configuration extends NewIntelliSense{

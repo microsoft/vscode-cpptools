@@ -5,7 +5,7 @@
 
 import { spawnSync } from 'child_process';
 import { verbose } from '../src/Utility/Text/streams';
-import { $args, $root, $scenario, brightGreen, checkFile, gray, green, pwd } from './common';
+import { $args, $root, $scenario, assertAnyFile, brightGreen, gray, green, pwd } from './common';
 
 import { resolve } from 'path';
 import { getTestInfo } from '../test/common/selectTests';
@@ -25,7 +25,7 @@ export async function main() {
         // we found it
         $args.unshift(ti.workspace);
     }
-    await checkFile('dist/src/main.js', `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    await assertAnyFile('dist/src/main.js', `The extension entry point '${$root}/dist/src/main.js is missing. You should run ${brightGreen("yarn compile")}\n\n`);
 
     const { cli, args } = await install();
 
