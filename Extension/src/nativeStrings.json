@@ -248,13 +248,10 @@
     "memory_limit_shutting_down_intellisense": "Shutting down IntelliSense server: {0}. Memory usage is {1} MB and has exceeded the {2} MB limit.",
     "failed_to_query_for_standard_version": "Failed to query compiler at path \"{0}\" for default standard versions.  Compiler querying is disabled for this compiler.",
     "unrecognized_language_standard_version": "Compiler query returned an unrecognized language standard version.  The latest supported version will be used instead.",
-    "intellisense_process_crash_detected": {
-        "text": "IntelliSense process crash detected.",
-        "hint": "This is an error message to be reported when the IntelliSense process crashes. The string will either end with a period `detected.` or with a colon detailing the feature that caused the crash `dectected: <feature name>."
-    },
+    "intellisense_process_crash_detected": "IntelliSense process crash detected.",
     "intellisense_feature_crash_detected": {
         "text": "IntelliSense process crash detected: {0}",
-        "hint": "This is an error message to be reported when the IntelliSense process crashes due to an IntelliSense feature.`{0}` will be substitued with `<feature name>`."
+        "hint": "`{0}` will be substitued with `<feature name>`."
     },
     "return_values_label": {
         "text": "Return values:",
