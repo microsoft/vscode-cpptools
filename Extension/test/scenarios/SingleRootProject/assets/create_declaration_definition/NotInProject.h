@@ -1,0 +1,4 @@
+class NotInProject
+{
+	void AFunction();
+};

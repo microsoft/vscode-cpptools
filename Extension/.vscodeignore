@@ -15,6 +15,12 @@ src/**
 out/src/**
 out/tools/**
 
+# don't include the local code and tests compiled files
+dist/test/**
+
+# no project scripts
+.scripts/**
+
 # ignore ts files in ui
 ui/*.ts
 
@@ -25,6 +31,7 @@ cgmanifest.json
 # ignore development files
 tsconfig.json
 test.tsconfig.json
+ui.tsconfig.json
 tslint.json
 .eslintrc.js
 webpack.config.js

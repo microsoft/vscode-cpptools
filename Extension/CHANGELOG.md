@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.17.5: August 28, 2023
+### Bug Fixes
+* Fix a language server crash for platforms that don't support the IntelliSense cache (AutoPCH). [#10789](https://github.com/microsoft/vscode-cpptools/issues/10789)
+* Fix markdown in comments when inline/block code is used. [#11322](https://github.com/microsoft/vscode-cpptools/issues/11322)
+* Fix Find All References and Call Hierarchy for C files when the cursor is at the end of a symbol. [#11338](https://github.com/microsoft/vscode-cpptools/issues/11338)
+* Fix usage of the `/Zc:alignedNew-` MSVC compiler option. [#11350](https://github.com/microsoft/vscode-cpptools/issues/11350)
+
 ## Version 1.17.4: August 21, 2023
 ### Bug Fixes
 * Fix crash recovery for the main extension process. [#11335](https://github.com/microsoft/vscode-cpptools/issues/11335)

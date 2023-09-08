@@ -403,7 +403,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.PauseCodeAnalysis', enabled ? onPauseCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResumeCodeAnalysis', enabled ? onResumeCodeAnalysis : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CancelCodeAnalysis', enabled ? onCancelCodeAnalysis : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowParsingCommands', enabled ? onShowParsingCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowActiveCodeAnalysisCommands', enabled ? onShowActiveCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowIdleCodeAnalysisCommands', enabled ? onShowIdleCodeAnalysisCommands : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ShowReferencesProgress', enabled ? onShowReferencesProgress : onDisabledCommand));
@@ -743,10 +742,6 @@ function onCancelCodeAnalysis(): void {
     clients.ActiveClient.CancelCodeAnalysis();
 }
 
-function onShowParsingCommands(): Promise<void> {
-    return clients.ActiveClient.handleShowParsingCommands();
-}
-
 function onShowActiveCodeAnalysisCommands(): Promise<void> {
     return clients.ActiveClient.handleShowActiveCodeAnalysisCommands();
 }
@@ -817,7 +812,7 @@ async function onVcpkgClipboardInstallSuggested(ports?: string[]): Promise<void>
                 portsPromises.push(lookupIncludeInVcpkg(docAndLineNumbers[0], line));
             });
         });
-        ports = ([] as string[]).concat(...(await Promise.all(portsPromises)));
+        ports = ([] as string[]).concat(...await Promise.all(portsPromises));
         if (!ports.length) {
             return;
         }
@@ -1009,8 +1004,8 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     lines.forEach((line: string) => {
         if (!line.includes(".dylib") && !line.includes("???")) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
-            line = line.replace(/std::__1::/g, "std::");  // __1:: is not helpful.
-            data += (line + "\n");
+            line = line.replace(/std::__1::/g, "std::"); // __1:: is not helpful.
+            data += line + "\n";
         }
     });
     data = data.trimRight();

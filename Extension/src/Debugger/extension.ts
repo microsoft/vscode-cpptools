@@ -8,14 +8,14 @@ import * as os from 'os';
 import { Configuration } from 'ssh-config';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { pathAccessible } from '../common';
 import { CppSettings } from '../LanguageServer/settings';
-import { getSshChannel } from '../logger';
+import { BaseNode, addSshTargetCmd, refreshCppSshTargetsViewCmd } from '../SSH/TargetsView/common';
+import { SshTargetsProvider, getActiveSshTarget, initializeSshTargets, selectSshTarget } from '../SSH/TargetsView/sshTargetsProvider';
+import { TargetLeafNode, setActiveSshTarget } from '../SSH/TargetsView/targetNodes';
 import { sshCommandToConfig } from '../SSH/sshCommandToConfig';
 import { getSshConfiguration, getSshConfigurationFiles, parseFailures, writeSshConfiguration } from '../SSH/sshHosts';
-import { addSshTargetCmd, BaseNode, refreshCppSshTargetsViewCmd } from '../SSH/TargetsView/common';
-import { getActiveSshTarget, initializeSshTargets, selectSshTarget, SshTargetsProvider } from '../SSH/TargetsView/sshTargetsProvider';
-import { setActiveSshTarget, TargetLeafNode } from '../SSH/TargetsView/targetNodes';
+import { pathAccessible } from '../common';
+import { getSshChannel } from '../logger';
 import { AttachItemsProvider, AttachPicker, RemoteAttachPicker } from './attachToProcess';
 import { ConfigurationAssetProviderFactory, ConfigurationSnippetProvider, DebugConfigurationProvider, IConfigurationAssetProvider } from './configurationProvider';
 import { DebuggerType } from './configurations';
@@ -42,7 +42,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     const assetProvider: IConfigurationAssetProvider = ConfigurationAssetProviderFactory.getConfigurationProvider();
 
     // Register DebugConfigurationProviders for "Run and Debug" in Debug Panel.
-    // On windows platforms, the cppvsdbg debugger will also be registered for initial configurations.
+    // On Windows platforms, the cppvsdbg debugger will also be registered for initial configurations.
     let cppVsDebugProvider: DebugConfigurationProvider | null = null;
     if (os.platform() === 'win32') {
         cppVsDebugProvider = new DebugConfigurationProvider(assetProvider, DebuggerType.cppvsdbg);
@@ -107,7 +107,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
     disposables.push(sshTargetsProvider);
 
     // Decide if we should show the SSH Targets View.
-    sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
+    sshTargetsViewSetting = new CppSettings().sshTargetsView;
     // Active SSH Target initialized in initializeSshTargets()
     if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
         // Don't wait
@@ -116,7 +116,7 @@ export async function initialize(context: vscode.ExtensionContext): Promise<void
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
         if (e.affectsConfiguration('C_Cpp.sshTargetsView')) {
-            sshTargetsViewSetting = (new CppSettings()).sshTargetsView;
+            sshTargetsViewSetting = new CppSettings().sshTargetsView;
             if (sshTargetsViewSetting === 'enabled' || (sshTargetsViewSetting === 'default' && await getActiveSshTarget(false))) {
                 await enableSshTargetsView();
             } else if (sshTargetsViewSetting === 'disabled') {

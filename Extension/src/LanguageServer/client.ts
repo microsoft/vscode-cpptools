@@ -35,13 +35,15 @@ import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderE
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
+import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
 import {
-    CodeAnalysisDiagnosticIdentifiersAndUri, RegisterCodeAnalysisNotifications,
+    CodeAnalysisDiagnosticIdentifiersAndUri,
+    RegisterCodeAnalysisNotifications,
     RemoveCodeAnalysisProblemsParams,
     removeAllCodeAnalysisProblems,
     removeCodeAnalysisProblems
@@ -96,6 +98,7 @@ interface ConfigStateReceived {
 let displayedSelectCompiler: boolean = false;
 let secondPromptCounter: number = 0;
 let scanForCompilersDone: boolean = false;
+let workspaceHash: string = "";
 
 let workspaceDisposables: vscode.Disposable[] = [];
 export let workspaceReferences: refs.ReferencesManager;
@@ -460,12 +463,9 @@ enum SemanticTokenTypes {
 
 enum SemanticTokenModifiers {
     // These are camelCase as the enum names are used directly as strings in our legend.
-    // eslint-disable-next-line no-bitwise
-    static = (1 << 0),
-    // eslint-disable-next-line no-bitwise
-    global = (1 << 1),
-    // eslint-disable-next-line no-bitwise
-    local = (1 << 2)
+    static = 0b001,
+    global = 0b010,
+    local = 0b100
 }
 
 interface IntelliSenseSetup {
@@ -484,6 +484,7 @@ export interface GenerateDoxygenCommentParams {
     isCodeAction: boolean;
     isCursorAboveSignatureLine: boolean | undefined;
 }
+
 export interface GenerateDoxygenCommentResult {
     contents: string;
     initPosition: Position;
@@ -496,6 +497,7 @@ export interface GenerateDoxygenCommentResult {
 export interface IndexableQuickPickItem extends vscode.QuickPickItem {
     index: number;
 }
+
 export interface UpdateTrustedCompilerPathsResult {
     compilerPath: string;
 }
@@ -539,7 +541,9 @@ export interface TextDocumentWillSaveParams {
 interface InitializationOptions {
     packageVersion: string;
     extensionPath: string;
-    storagePath: string;
+    cacheStoragePath: string;
+    workspaceStoragePath: string;
+    databaseStoragePath: string;
     freeMemory: number;
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
@@ -552,7 +556,6 @@ interface InitializationOptions {
 
 interface TagParseStatus {
     localizeStringParams: LocalizeStringParams;
-    isPausable: boolean;
     isPaused: boolean;
 }
 
@@ -636,7 +639,6 @@ class ClientModel {
     public isInitializingWorkspace: DataBinding<boolean>;
     public isIndexingWorkspace: DataBinding<boolean>;
     public isParsingWorkspace: DataBinding<boolean>;
-    public isParsingWorkspacePausable: DataBinding<boolean>;
     public isParsingWorkspacePaused: DataBinding<boolean>;
     public isParsingFiles: DataBinding<boolean>;
     public isUpdatingIntelliSense: DataBinding<boolean>;
@@ -652,7 +654,6 @@ class ClientModel {
         this.isInitializingWorkspace = new DataBinding<boolean>(false);
         this.isIndexingWorkspace = new DataBinding<boolean>(false);
         this.isParsingWorkspace = new DataBinding<boolean>(false);
-        this.isParsingWorkspacePausable = new DataBinding<boolean>(false);
         this.isParsingWorkspacePaused = new DataBinding<boolean>(false);
         this.isParsingFiles = new DataBinding<boolean>(false);
         this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
@@ -669,7 +670,6 @@ class ClientModel {
         this.isInitializingWorkspace.activate();
         this.isIndexingWorkspace.activate();
         this.isParsingWorkspace.activate();
-        this.isParsingWorkspacePausable.activate();
         this.isParsingWorkspacePaused.activate();
         this.isParsingFiles.activate();
         this.isUpdatingIntelliSense.activate();
@@ -686,7 +686,6 @@ class ClientModel {
         this.isInitializingWorkspace.deactivate();
         this.isIndexingWorkspace.deactivate();
         this.isParsingWorkspace.deactivate();
-        this.isParsingWorkspacePausable.deactivate();
         this.isParsingWorkspacePaused.deactivate();
         this.isParsingFiles.deactivate();
         this.isUpdatingIntelliSense.deactivate();
@@ -703,7 +702,6 @@ class ClientModel {
         this.isInitializingWorkspace.dispose();
         this.isIndexingWorkspace.dispose();
         this.isParsingWorkspace.dispose();
-        this.isParsingWorkspacePausable.dispose();
         this.isParsingWorkspacePaused.dispose();
         this.isParsingFiles.dispose();
         this.isUpdatingIntelliSense.dispose();
@@ -723,7 +721,6 @@ export interface Client {
     InitializingWorkspaceChanged: vscode.Event<boolean>;
     IndexingWorkspaceChanged: vscode.Event<boolean>;
     ParsingWorkspaceChanged: vscode.Event<boolean>;
-    ParsingWorkspacePausableChanged: vscode.Event<boolean>;
     ParsingWorkspacePausedChanged: vscode.Event<boolean>;
     ParsingFilesChanged: vscode.Event<boolean>;
     IntelliSenseParsingChanged: vscode.Event<boolean>;
@@ -778,7 +775,6 @@ export interface Client {
     CancelCodeAnalysis(): void;
     handleConfigurationSelectCommand(): Promise<void>;
     handleConfigurationProviderSelectCommand(): Promise<void>;
-    handleShowParsingCommands(): Promise<void>;
     handleShowActiveCodeAnalysisCommands(): Promise<void>;
     handleShowIdleCodeAnalysisCommands(): Promise<void>;
     handleReferencesIcon(): void;
@@ -829,7 +825,7 @@ export class DefaultClient implements Client {
     private rootPathFileWatcher?: vscode.FileSystemWatcher;
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
-    private storagePath: string;
+    private workspaceStoragePath: string;
     private trackedDocuments = new Set<vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
@@ -846,7 +842,7 @@ export class DefaultClient implements Client {
     private showConfigureIntelliSenseButton: boolean = false;
 
     /** A queue of asynchronous tasks that need to be processed befofe ready is considered active. */
-    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>]|[ManualPromise<unknown>]>();
+    private static queue = new Array<[ManualPromise<unknown>, () => Promise<unknown>] | [ManualPromise<unknown>]>();
 
     /** returns a promise that waits initialization and/or a change to configuration to complete (i.e. language client is ready-to-use) */
     private static readonly isStarted = new ManualSignal<void>(true);
@@ -854,8 +850,8 @@ export class DefaultClient implements Client {
     /**
      * Indicates if the blocking task dispatcher is currently running
      *
-     * This will be in the Set state when the dispatcher is not running (ie, if you await this it will be resolved immediately)
-     * If the dispatcher is running, this will be in the Reset state (ie, if you await this it will be resolved when the dispatcher is done)
+     * This will be in the Set state when the dispatcher is not running (i.e. if you await this it will be resolved immediately)
+     * If the dispatcher is running, this will be in the Reset state (i.e. if you await this it will be resolved when the dispatcher is done)
      */
     private static readonly dispatching = new ManualSignal<void>();
 
@@ -865,7 +861,6 @@ export class DefaultClient implements Client {
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isInitializingWorkspace.ValueChanged; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isIndexingWorkspace.ValueChanged; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspace.ValueChanged; }
-    public get ParsingWorkspacePausableChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspacePausable.ValueChanged; }
     public get ParsingWorkspacePausedChanged(): vscode.Event<boolean> { return this.model.isParsingWorkspacePaused.ValueChanged; }
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.model.isParsingFiles.ValueChanged; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.model.isUpdatingIntelliSense.ValueChanged; }
@@ -884,13 +879,13 @@ export class DefaultClient implements Client {
      * don't use this.rootFolder directly since it can be undefined
      */
     public get RootPath(): string {
-        return (this.rootFolder) ? this.rootFolder.uri.fsPath : "";
+        return this.rootFolder ? this.rootFolder.uri.fsPath : "";
     }
     public get RootRealPath(): string {
         return this.rootRealPath;
     }
     public get RootUri(): vscode.Uri | undefined {
-        return (this.rootFolder) ? this.rootFolder.uri : undefined;
+        return this.rootFolder ? this.rootFolder.uri : undefined;
     }
     public get RootFolder(): vscode.WorkspaceFolder | undefined {
         return this.rootFolder;
@@ -925,7 +920,7 @@ export class DefaultClient implements Client {
     public get AdditionalEnvironment(): { [key: string]: string | string[] } {
         return {
             workspaceFolderBasename: this.Name,
-            workspaceStorage: this.storagePath,
+            workspaceStorage: this.workspaceStoragePath,
             execPath: process.execPath,
             pathSeparator: (os.platform() === 'win32') ? "\\" : "/"
         };
@@ -957,9 +952,9 @@ export class DefaultClient implements Client {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = compilersOnly || !vscode.workspace.workspaceFolders || !this.RootFolder ?
             localize("select.compiler", "Select a compiler to configure for IntelliSense") :
-            (vscode.workspace.workspaceFolders.length > 1 ?
+            vscode.workspace.workspaceFolders.length > 1 ?
                 localize("configure.intelliSense.forFolder", "How would you like to configure IntelliSense for the '{0}' folder?", this.RootFolder.name) :
-                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense for this folder?"));
+                localize("configure.intelliSense.thisFolder", "How would you like to configure IntelliSense for this folder?");
 
         const items: IndexableQuickPickItem[] = [];
         let isCompilerSection: boolean = false;
@@ -985,7 +980,7 @@ export class DefaultClient implements Client {
         }
 
         const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return (selection) ? selection.index : -1;
+        return selection ? selection.index : -1;
     }
 
     public async showPrompt(buttonMessage: string, showSecondPrompt: boolean, sender?: any): Promise<void> {
@@ -1292,23 +1287,19 @@ export class DefaultClient implements Client {
         }
 
         this.rootFolder = workspaceFolder;
-        this.rootRealPath = this.RootPath ? (fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath) : "";
+        this.rootRealPath = this.RootPath ? fs.existsSync(this.RootPath) ? fs.realpathSync(this.RootPath) : this.RootPath : "";
 
-        let storagePath: string | undefined;
-        if (util.extensionContext) {
-            const path: string | undefined = util.extensionContext.storageUri?.fsPath;
-            if (path) {
-                storagePath = path;
-            }
+        this.workspaceStoragePath = util.extensionContext?.storageUri?.fsPath ?? "";
+        if (this.workspaceStoragePath.length > 0) {
+            workspaceHash = path.basename(path.dirname(this.workspaceStoragePath));
+        } else {
+            this.workspaceStoragePath = this.RootPath ? path.join(this.RootPath, ".vscode") : "";
         }
 
-        if (!storagePath) {
-            storagePath = this.RootPath ? path.join(this.RootPath, "/.vscode") : "";
-        }
         if (workspaceFolder && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-            storagePath = path.join(storagePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
+            this.workspaceStoragePath = path.join(this.workspaceStoragePath, util.getUniqueWorkspaceStorageName(workspaceFolder));
         }
-        this.storagePath = storagePath;
+
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = new SettingsTracker(rootUri);
 
@@ -1329,7 +1320,7 @@ export class DefaultClient implements Client {
 
         } catch (errJS) {
             const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
-            this.isSupported = false;   // Running on an OS we don't support yet.
+            this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 let additionalInfo: string;
@@ -1419,7 +1410,7 @@ export class DefaultClient implements Client {
                 });
             }
         } catch (err) {
-            this.isSupported = false;   // Running on an OS we don't support yet.
+            this.isSupported = false; // Running on an OS we don't support yet.
             if (!failureMessageShown) {
                 failureMessageShown = true;
                 void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", String(err)));
@@ -1457,7 +1448,7 @@ export class DefaultClient implements Client {
             clangTidyPath: util.resolveVariables(settings.clangTidyPath, this.AdditionalEnvironment),
             clangTidyConfig: settings.clangTidyConfig,
             clangTidyFallbackConfig: settings.clangTidyFallbackConfig,
-            clangTidyHeaderFilter: (settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null),
+            clangTidyHeaderFilter: settings.clangTidyHeaderFilter !== null ? util.resolveVariables(settings.clangTidyHeaderFilter, this.AdditionalEnvironment) : null,
             clangTidyArgs: util.resolveVariablesArray(settings.clangTidyArgs, this.AdditionalEnvironment),
             clangTidyUseBuildPath: settings.clangTidyUseBuildPath,
             clangTidyFixWarnings: settings.clangTidyFixWarnings,
@@ -1597,13 +1588,27 @@ export class DefaultClient implements Client {
             debug: { command: serverModule, args: [serverName], options: { detached: true } }
         };
 
+        // The IntelliSense process should automatically detect when AutoPCH is
+        // not supportable (on platforms that don't support disabling ASLR/PIE).
+        // We've had reports of issues on arm64 macOS that are addressed by
+        // disabling the IntelliSense cache, suggesting fallback does not
+        // always work as expected. It's actually more efficient to disable
+        // the cache on platforms we know do not support it. We do that here.
         let intelliSenseCacheDisabled: boolean = false;
         if (os.platform() === "darwin") {
-            const releaseParts: string[] = os.release().split(".");
-            if (releaseParts.length >= 1) {
-                // AutoPCH doesn't work for older Mac OS's.
-                intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+            // AutoPCH doesn't work for arm64 macOS.
+            if (os.arch() === "arm64") {
+                intelliSenseCacheDisabled = true;
+            } else {
+                // AutoPCH doesn't work for older x64 macOS's.
+                const releaseParts: string[] = os.release().split(".");
+                if (releaseParts.length >= 1) {
+                    intelliSenseCacheDisabled = parseInt(releaseParts[0]) < 17;
+                }
             }
+        } else {
+            // AutoPCH doesn't work for arm64 Windows.
+            intelliSenseCacheDisabled = os.platform() === "win32" && os.arch() === "arm64";
         }
 
         const localizedStrings: string[] = [];
@@ -1617,10 +1622,16 @@ export class DefaultClient implements Client {
             currentCaseSensitiveFileSupport.Value = workspaceSettings.caseSensitiveFileSupport;
         }
 
+        const cacheStoragePath: string = util.getCacheStoragePath();
+        const databaseStoragePath: string = (cacheStoragePath.length > 0) && (workspaceHash.length > 0) ?
+            path.join(cacheStoragePath, workspaceHash) : "";
+
         const initializationOptions: InitializationOptions = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
-            storagePath: this.storagePath,
+            databaseStoragePath: databaseStoragePath,
+            workspaceStoragePath: this.workspaceStoragePath,
+            cacheStoragePath: cacheStoragePath,
             freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
@@ -2024,7 +2035,7 @@ export class DefaultClient implements Client {
 
         const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
         if (!response.candidates || response.candidates.length === 0) {
-        // If we didn't receive any candidates, no configuration is needed.
+            // If we didn't receive any candidates, no configuration is needed.
             onFinished();
             DefaultClient.isStarted.resolve();
             return;
@@ -2108,7 +2119,7 @@ export class DefaultClient implements Client {
                 return;
             }
             const settings: CppSettings = new CppSettings(this.RootUri);
-            if (settings.configurationWarnings === true && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+            if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                 const dismiss: string = localize("dismiss.button", "Dismiss");
                 const disable: string = localize("diable.warnings.button", "Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
@@ -2179,7 +2190,7 @@ export class DefaultClient implements Client {
 
     public getVcpkgEnabled(): Promise<boolean> {
         const cppSettings: CppSettings = new CppSettings(this.RootUri);
-        return Promise.resolve(cppSettings.vcpkgEnabled === true);
+        return Promise.resolve(!!cppSettings.vcpkgEnabled);
     }
 
     public async getKnownCompilers(): Promise<configs.KnownCompiler[] | undefined> {
@@ -2278,7 +2289,7 @@ export class DefaultClient implements Client {
 
             // pick items up off the queue and run then one at a time until the queue is empty
             const [promise, task] = DefaultClient.queue.shift() ?? [];
-            if (promise) {
+            if (is.promise(promise)) {
                 try {
                     promise.resolve(task ? await task() : undefined);
                 } catch (e) {
@@ -2361,13 +2372,13 @@ export class DefaultClient implements Client {
         if (cppSettings.autoAddFileAssociations) {
             const is_c: boolean = languageStr.startsWith("c;");
             const is_cuda: boolean = languageStr.startsWith("cu;");
-            languageStr = languageStr.substring(is_c ? 2 : (is_cuda ? 3 : 1));
-            this.addFileAssociations(languageStr, is_c ? "c" : (is_cuda ? "cuda-cpp" : "cpp"));
+            languageStr = languageStr.substring(is_c ? 2 : is_cuda ? 3 : 1);
+            this.addFileAssociations(languageStr, is_c ? "c" : is_cuda ? "cuda-cpp" : "cpp");
         }
     }
 
     private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
-        const languageId: string = params.isC ? "c" : (params.isCuda ? "cuda-cpp" : "cpp");
+        const languageId: string = params.isC ? "c" : params.isCuda ? "cuda-cpp" : "cpp";
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
         if (!!document && document.languageId !== languageId) {
             if (document.languageId === "cpp" && languageId === "c") {
@@ -2522,7 +2533,6 @@ export class DefaultClient implements Client {
             this.model.isParsingWorkspace.Value = true;
             this.model.isInitializingWorkspace.Value = false;
             this.model.isIndexingWorkspace.Value = false;
-            this.model.isParsingWorkspacePausable.Value = false;
             const status: IntelliSenseStatus = { status: Status.TagParsingBegun };
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
@@ -2618,7 +2628,6 @@ export class DefaultClient implements Client {
 
     private updateTagParseStatus(tagParseStatus: TagParseStatus): void {
         this.model.parsingWorkspaceStatus.Value = getLocalizedString(tagParseStatus.localizeStringParams);
-        this.model.isParsingWorkspacePausable.Value = tagParseStatus.isPausable;
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
@@ -2701,7 +2710,7 @@ export class DefaultClient implements Client {
         // Handle config providers
         const provider: CustomConfigurationProvider1 | undefined =
             !this.configStateReceived.configProviders ? undefined :
-                (this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0]);
+                this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0];
         let showConfigStatus: boolean = false;
         if (rootFolder && configProviderNotSetAndNoCache && provider && (statusBarIndicatorEnabled || sender === "configProviders")) {
             const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
@@ -3066,13 +3075,13 @@ export class DefaultClient implements Client {
         } else {
             areOptionalsValid = util.isOptionalString(input.configuration.intelliSenseMode) && util.isOptionalString(input.configuration.standard);
         }
-        return (input && (util.isString(input.uri) || util.isUri(input.uri)) &&
+        return input && (util.isString(input.uri) || util.isUri(input.uri)) &&
             input.configuration &&
             areOptionalsValid &&
             util.isArrayOfString(input.configuration.includePath) &&
             util.isArrayOfString(input.configuration.defines) &&
             util.isOptionalArrayOfString(input.configuration.compilerArgs) &&
-            util.isOptionalArrayOfString(input.configuration.forcedInclude));
+            util.isOptionalArrayOfString(input.configuration.forcedInclude);
     }
 
     private sendCustomConfigurations(configs: any, providerVersion: Version): void {
@@ -3296,16 +3305,6 @@ export class DefaultClient implements Client {
         } else {
             void this.clearCustomConfigurations().catch(logAndReturn.undefined);
             void this.clearCustomBrowseConfiguration().catch(logAndReturn.undefined);
-        }
-    }
-
-    public async handleShowParsingCommands(): Promise<void> {
-        await this.ready;
-        const index: number = await ui.showParsingCommands();
-        if (index === 0) {
-            return this.pauseParsing();
-        } else if (index === 1) {
-            return this.resumeParsing();
         }
     }
 
@@ -3767,7 +3766,6 @@ class NullClient implements Client {
     public get InitializingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IndexingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspaceChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
-    public get ParsingWorkspacePausableChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingWorkspacePausedChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get ParsingFilesChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
     public get IntelliSenseParsingChanged(): vscode.Event<boolean> { return this.booleanEvent.event; }
@@ -3821,7 +3819,6 @@ class NullClient implements Client {
     CancelCodeAnalysis(): void { }
     handleConfigurationSelectCommand(): Promise<void> { return Promise.resolve(); }
     handleConfigurationProviderSelectCommand(): Promise<void> { return Promise.resolve(); }
-    handleShowParsingCommands(): Promise<void> { return Promise.resolve(); }
     handleShowActiveCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleShowIdleCodeAnalysisCommands(): Promise<void> { return Promise.resolve(); }
     handleReferencesIcon(): void { }
