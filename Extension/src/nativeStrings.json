@@ -251,7 +251,7 @@
     "intellisense_process_crash_detected": "IntelliSense process crash detected.",
     "intellisense_feature_crash_detected": {
         "text": "IntelliSense process crash detected: {0}",
-        "hint": "`{0}` will be substitued with `<feature name>`."
+        "hint": "`{0}` will be substituted with `<feature name>`."
     },
     "return_values_label": {
         "text": "Return values:",
