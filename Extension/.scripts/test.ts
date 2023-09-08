@@ -14,7 +14,7 @@ import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
 import { getTestInfo } from '../test/common/selectTests';
-import { $args, $root, $scenario, brightGreen, checkFile, checkFolder, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
+import { $args, $root, $scenario, assertAnyFile, assertAnyFolder, brightGreen, checkBinaries, cmdSwitch, cyan, error, gray, green, readJson, red, writeJson } from './common';
 import { install, isolated, options } from './vscode';
 
 export { install, reset } from './vscode';
@@ -73,14 +73,17 @@ function filterStdio() {
 filterStdio();
 
 async function unitTests() {
-    await checkFolder('dist/test/unit', `The folder '${$root}/dist/test/unit is missing. You should run ${brightGreen("yarn compile")}\n\n`);
-    const mocha = await checkFile(["node_modules/.bin/mocha.cmd", "node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
+    await assertAnyFolder('dist/test/unit', `The folder '${$root}/dist/test/unit is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    const mocha = await assertAnyFile(["node_modules/.bin/mocha.cmd", "node_modules/.bin/mocha"], `Can't find the mocha testrunner. You might need to run ${brightGreen("yarn install")}\n\n`);
     const result = spawnSync(mocha, [`${$root}/dist/test/unit/**/*.test.js`, '--timeout', '30000'], { stdio:'inherit'});
     verbose(`\n${green("NOTE:")} If you want to run a scenario test (end-to-end) use ${cmdSwitch('scenario=<NAME>')} \n\n`);
     return result.status;
 }
 
 async function scenarioTests(assets: string, name: string, workspace: string) {
+    if (await checkBinaries()) {
+        process.exit(1);
+    }
     return runTests({
         ...options,
         extensionDevelopmentPath: $root,
@@ -93,7 +96,7 @@ async function scenarioTests(assets: string, name: string, workspace: string) {
 }
 
 export async function main() {
-    await checkFolder('dist/test/', `The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
+    await assertAnyFolder('dist/test/', `The folder '${$root}/dist/test is missing. You should run ${brightGreen("yarn compile")}\n\n`);
     const arg = $args.find(each => !each.startsWith("--"));
     const specifiedScenario = $scenario || env.SCENARIO || await getScenarioFolder(arg);
     const testInfo = await getTestInfo(specifiedScenario);
@@ -114,6 +117,9 @@ export async function main() {
 }
 
 export async function all() {
+    if (await checkBinaries()) {
+        process.exit(1);
+    }
     const finished: string[] = [];
 
     if (await unitTests() !== 0) {
