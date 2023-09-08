@@ -551,7 +551,7 @@ async function installCompiler(sender?: any): Promise<void> {
             break;
         case "darwin": {
             const title = localize('install.compiler.mac.title', 'The clang compiler will now be installed');
-            const detail = localize('install.compiler.mac.detail', 'You may be prompted to type your password in the terminal window that will appear to authorize the installation.');
+            const detail = localize('install.compiler.mac.detail', 'You may be prompted to type your password to authorize the installation in the VS Code terminal window.');
             const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
             if (response === ok) {
                 const terminal = vscode.window.createTerminal('Install C++ Compiler');
@@ -585,7 +585,7 @@ async function installCompiler(sender?: any): Promise<void> {
             })();
             if (installCommand) {
                 const title = localize('install.compiler.linux.title', 'The gcc compiler will now be installed');
-                const detail = localize('install.compiler.linux.detail', 'You may be prompted to type your password in the terminal window that will appear to authorize the installation.');
+                const detail = localize('install.compiler.linux.detail', 'You may be prompted to type your password to authorize the installation in the VS Code terminal window.');
                 const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
                 if (response === ok) {
                     const terminal = vscode.window.createTerminal('Install C++ Compiler');
