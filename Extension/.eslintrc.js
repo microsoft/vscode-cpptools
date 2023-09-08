@@ -1,8 +1,8 @@
 module.exports = {
     "extends": [
         "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended"
-        //"plugin:@typescript-eslint/strict", // I want to enable this. Lots of little changes will happen.
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/strict",
     ],
     "env": {
         "browser": true,
@@ -11,7 +11,7 @@ module.exports = {
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json",
+        "project": ["tsconfig.json", ".scripts/tsconfig.json"],
         "ecmaVersion": 2022,
         "sourceType": "module",
         "warnOnUnsupportedTypeScriptVersion": false,
@@ -59,11 +59,17 @@ module.exports = {
                 }
             }
         ],
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-extraneous-class": "off",
         "no-case-declarations": "off",
         "no-useless-escape": "off",
         "no-floating-decimal": "error",
         "keyword-spacing": ["error", { "before": true, "overrides": { "this": { "before": false } } }],
         "arrow-spacing": ["error", { "before": true, "after": true }],
+        "semi-spacing": ["error", { "before": false, "after": true }],
+        "no-extra-parens": ["error", "all", { "nestedBinaryExpressions": false, "ternaryOperandBinaryExpressions": false }],
+        "@typescript-eslint/no-array-constructor": "error",
+        "@typescript-eslint/no-useless-constructor": "error",
         "@typescript-eslint/no-for-in-array": "error",
         "@typescript-eslint/no-misused-new": "error",
         "@typescript-eslint/no-misused-promises": "error",
@@ -82,6 +88,7 @@ module.exports = {
         "@typescript-eslint/unified-signatures": "error",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/method-signature-style": ["error", "method"],
+        "@typescript-eslint/space-infix-ops": "error",
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
         "@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",
@@ -110,16 +117,19 @@ module.exports = {
         "no-fallthrough": "error",
         "no-invalid-this": "error",
         "no-irregular-whitespace": "error",
+        "rest-spread-spacing": ["error", "never"],
         "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
         "no-new-wrappers": "error",
         "no-return-await": "error",
         "no-sequences": "error",
         "no-sparse-arrays": "error",
         "no-trailing-spaces": "error",
+        "no-multi-spaces": "error",
         "no-undef-init": "error",
         "no-unsafe-finally": "error",
         "no-unused-expressions": "error",
         "no-unused-labels": "error",
+        "space-before-blocks": "error",
         "no-var": "error",
         "one-var": [
             "error",

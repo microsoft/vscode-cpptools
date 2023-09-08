@@ -173,7 +173,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 }
                 if (showClear !== "None") {
                     let showClearAllAvailable: boolean = false;
-                    if ((codeActionDiagnosticInfo.length > 1 || codeAnalysisFileToCodeActions.size > 1)) {
+                    if (codeActionDiagnosticInfo.length > 1 || codeAnalysisFileToCodeActions.size > 1) {
                         showClearAllAvailable = true;
                     }
                     if (!showClearAllAvailable || showClear !== "AllOnly") {

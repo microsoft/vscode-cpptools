@@ -69,13 +69,13 @@ export class TimeTelemetryCollector {
         const startTime: number = timeStamps.firstFile ? timeStamps.firstFile : timeStamps.didOpen;
         let properties: any = {};
         let metrics: any = {
-            "setupTime": (timeStamps.setup - timeStamps.didOpen),
-            "updateRangeTime": (timeStamps.updateRange - timeStamps.setup),
-            "totalTime": (timeStamps.updateRange - startTime)
+            "setupTime": timeStamps.setup - timeStamps.didOpen,
+            "updateRangeTime": timeStamps.updateRange - timeStamps.setup,
+            "totalTime": timeStamps.updateRange - startTime
         };
         if (timeStamps.firstFile) {
             properties = { "coldstart": "true" };
-            metrics = { "activationTime": (timeStamps.didOpen - startTime), ...metrics };
+            metrics = { "activationTime": timeStamps.didOpen - startTime, ...metrics };
         }
         telemetry.logLanguageServerEvent("timeStamps", properties, metrics);
 
