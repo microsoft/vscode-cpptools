@@ -264,7 +264,7 @@ export function getIntelliSenseProgress(): number {
 export function setProgress(progress: number): void {
     if (extensionContext && getProgress() < progress) {
         void extensionContext.globalState.update(installProgressStr, progress);
-        const telemetryProperties: { [key: string]: string } = {};
+        const telemetryProperties: Record<string, string> = {};
         let progressName: string | undefined;
         switch (progress) {
             case 0: progressName = "install started"; break;
@@ -274,7 +274,7 @@ export function setProgress(progress: number): void {
             case progressParseRootSuccess: progressName = "parse root succeeded"; break;
         }
         if (progressName) {
-            telemetryProperties['progress'] = progressName;
+            telemetryProperties.progress = progressName;
         }
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
     }
@@ -283,13 +283,13 @@ export function setProgress(progress: number): void {
 export function setIntelliSenseProgress(progress: number): void {
     if (extensionContext && getIntelliSenseProgress() < progress) {
         void extensionContext.globalState.update(intelliSenseProgressStr, progress);
-        const telemetryProperties: { [key: string]: string } = {};
+        const telemetryProperties: Record<string, string> = {};
         let progressName: string | undefined;
         switch (progress) {
             case progressIntelliSenseNoSquiggles: progressName = "IntelliSense no squiggles"; break;
         }
         if (progressName) {
-            telemetryProperties['progress'] = progressName;
+            telemetryProperties.progress = progressName;
         }
         Telemetry.logDebuggerEvent("progress", telemetryProperties);
     }
@@ -337,7 +337,7 @@ export function isOptionalArrayOfString(input: any): input is string[] | undefin
     return input === undefined || isArrayOfString(input);
 }
 
-export function resolveCachePath(input: string | undefined, additionalEnvironment: { [key: string]: string | string[] }): string {
+export function resolveCachePath(input: string | undefined, additionalEnvironment: Record<string, string | string[]>): string {
     let resolvedPath: string = "";
     if (!input || input.trim() === "") {
         // If no path is set, return empty string to language service process, where it will set the default path as
@@ -368,7 +368,7 @@ export function findExePathInArgs(args: string[]): string | undefined {
 
 // Pass in 'arrayResults' if a string[] result is possible and a delimited string result is undesirable.
 // The string[] result will be copied into 'arrayResults'.
-export function resolveVariables(input: string | undefined, additionalEnvironment?: { [key: string]: string | string[] }, arrayResults?: string[]): string {
+export function resolveVariables(input: string | undefined, additionalEnvironment?: Record<string, string | string[]>, arrayResults?: string[]): string {
     if (!input) {
         return "";
     }
@@ -384,7 +384,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     // Replace environment and configuration variables.
     const regexp: () => RegExp = () => /\$\{((env|config|workspaceFolder|file|fileDirname|fileBasenameNoExtension|execPath|pathSeparator)(\.|:))?(.*?)\}/g;
     let ret: string = input;
-    const cycleCache: Set<string> = new Set();
+    const cycleCache = new Set<string>();
     while (!cycleCache.has(ret)) {
         cycleCache.add(ret);
         ret = ret.replace(regexp(), (match: string, ignored1: string, varType: string, ignored2: string, name: string) => {
@@ -443,7 +443,7 @@ export function resolveVariables(input: string | undefined, additionalEnvironmen
     return resolveHome(ret);
 }
 
-export function resolveVariablesArray(variables: string[] | undefined, additionalEnvironment?: { [key: string]: string | string[] }): string[] {
+export function resolveVariablesArray(variables: string[] | undefined, additionalEnvironment?: Record<string, string | string[]>): string[] {
     let result: string[] = [];
     if (variables) {
         variables.forEach(variable => {
@@ -462,7 +462,7 @@ export function resolveHome(filePath: string): string {
 
 export function asFolder(uri: vscode.Uri): string {
     let result: string = uri.toString();
-    if (result.charAt(result.length - 1) !== '/') {
+    if (!result.endsWith('/')) {
         result += '/';
     }
     return result;
@@ -864,7 +864,7 @@ export function removePotentialPII(str: string): string {
     const words: string[] = str.split(" ");
     let result: string = "";
     for (const word of words) {
-        if (word.indexOf(".") === -1 && word.indexOf("/") === -1 && word.indexOf("\\") === -1 && word.indexOf(":") === -1) {
+        if (!word.includes(".") && !word.includes("/") && !word.includes("\\") && !word.includes(":")) {
             result += word + " ";
         } else {
             result += "? ";
@@ -921,7 +921,7 @@ export function createTempFileWithPostfix(postfix: string): Promise<tmp.FileResu
             if (err) {
                 return reject(err);
             }
-            return resolve(<tmp.FileResult>{ name: path, fd: fd, removeCallback: cleanupCallback });
+            return resolve({ name: path, fd: fd, removeCallback: cleanupCallback } as tmp.FileResult);
         });
     });
 }
@@ -1183,7 +1183,7 @@ export function getSenderType(sender?: any): string {
     } else if (isUri(sender)) {
         return 'contextMenu';
     } else if (sender?.sender) {
-        return sender.sender;   // The walkthrough buttons send an object with a 'sender' property.
+        return sender.sender; // The walkthrough buttons send an object with a 'sender' property.
     }
     return 'commandPalette';
 }
@@ -1310,7 +1310,7 @@ export function getCacheStoragePath(): string {
     switch (os.platform()) {
         case 'win32':
             defaultCachePath = "Microsoft\\vscode-cpptools\\";
-            pathEnvironmentVariable = process.env["LOCALAPPDATA"];
+            pathEnvironmentVariable = process.env.LOCALAPPDATA;
             break;
         case 'darwin':
             defaultCachePath = "Library/Caches/vscode-cpptools/";
@@ -1318,7 +1318,7 @@ export function getCacheStoragePath(): string {
             break;
         default: // Linux
             defaultCachePath = "vscode-cpptools/";
-            pathEnvironmentVariable = process.env["XDG_CACHE_HOME"];
+            pathEnvironmentVariable = process.env.XDG_CACHE_HOME;
             if (!pathEnvironmentVariable) {
                 pathEnvironmentVariable = os.homedir();
             }
@@ -1351,7 +1351,7 @@ export function getUniqueWorkspaceStorageName(workspaceFolder: vscode.WorkspaceF
 }
 
 export function isCodespaces(): boolean {
-    return !!process.env["CODESPACES"];
+    return !!process.env.CODESPACES;
 }
 
 // Sequentially Resolve Promises.

@@ -42,7 +42,7 @@ let intervalTimer: NodeJS.Timer;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
-type VcpkgDatabase = { [key: string]: string[] }; // Stored as <header file entry> -> [<port name>]
+type VcpkgDatabase = Record<string, string[]>; // Stored as <header file entry> -> [<port name>]
 let vcpkgDbPromise: Promise<VcpkgDatabase>;
 async function initVcpkgDatabase(): Promise<VcpkgDatabase> {
     const database: VcpkgDatabase = {};
@@ -98,7 +98,7 @@ async function lookupIncludeInVcpkg(document: vscode.TextDocument, line: number)
     if (!matches || !matches.length || !matches.groups) {
         return [];
     }
-    const missingHeader: string = matches.groups['includeFile'].replace(/\//g, '\\');
+    const missingHeader: string = matches.groups.includeFile.replace(/\//g, '\\');
 
     let portsWithHeader: string[] | undefined;
     const vcpkgDb: VcpkgDatabase = await vcpkgDbPromise;
@@ -117,20 +117,20 @@ function isMissingIncludeDiagnostic(diagnostic: vscode.Diagnostic): boolean {
 }
 
 function sendActivationTelemetry(): void {
-    const activateEvent: { [key: string]: string } = {};
+    const activateEvent: Record<string, string> = {};
     // Don't log telemetry for machineId if it's a special value used by the dev host: someValue.machineid
     if (vscode.env.machineId !== "someValue.machineId") {
         const machineIdPersistentState: PersistentState<string | undefined> = new PersistentState<string | undefined>("CPP.machineId", undefined);
         if (!machineIdPersistentState.Value) {
-            activateEvent["newMachineId"] = vscode.env.machineId;
+            activateEvent.newMachineId = vscode.env.machineId;
         } else if (machineIdPersistentState.Value !== vscode.env.machineId) {
-            activateEvent["newMachineId"] = vscode.env.machineId;
-            activateEvent["oldMachineId"] = machineIdPersistentState.Value;
+            activateEvent.newMachineId = vscode.env.machineId;
+            activateEvent.oldMachineId = machineIdPersistentState.Value;
         }
         machineIdPersistentState.Value = vscode.env.machineId;
     }
     if (vscode.env.uiKind === vscode.UIKind.Web) {
-        activateEvent["WebUI"] = "1";
+        activateEvent.WebUI = "1";
     }
     telemetry.logLanguageServerEvent("Activate", activateEvent);
 }
@@ -258,14 +258,14 @@ export function updateLanguageConfigurations(): void {
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
-        const defaultClient: DefaultClient = <DefaultClient>client;
-        const changedDefaultClientSettings: { [key: string]: string } = await defaultClient.onDidChangeSettings(event);
+        const defaultClient: DefaultClient = client as DefaultClient;
+        const changedDefaultClientSettings: Record<string, string> = await defaultClient.onDidChangeSettings(event);
         clients.forEach(client => {
             if (client !== defaultClient) {
                 void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         });
-        const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
+        const newUpdateChannel: string = changedDefaultClientSettings.updateChannel;
         if (newUpdateChannel || event.affectsConfiguration("extensions.autoUpdate")) {
             UpdateInsidersAccess();
         }
@@ -478,7 +478,7 @@ async function onSwitchHeaderSource(): Promise<void> {
     let targetFileNameReplaced: boolean = false;
     clients.forEach(client => {
         if (!targetFileNameReplaced && client.RootRealPath && client.RootPath !== client.RootRealPath
-            && targetFileName.indexOf(client.RootRealPath) === 0) {
+            && targetFileName.startsWith(client.RootRealPath)) {
             targetFileName = client.RootPath + targetFileName.substring(client.RootRealPath.length);
             targetFileNameReplaced = true;
         }
@@ -551,7 +551,7 @@ async function installCompiler(sender?: any): Promise<void> {
             break;
         case "darwin": {
             const title = localize('install.compiler.mac.title', 'The clang compiler will now be installed');
-            const detail = localize('install.compiler.mac.detail', 'You may need to type your password in the terminal window that will appear to authorize the installation.');
+            const detail = localize('install.compiler.mac.detail', 'You may be prompted to type your password in the terminal window that will appear to authorize the installation.');
             const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
             if (response === ok) {
                 const terminal = vscode.window.createTerminal('Install C++ Compiler');
@@ -585,7 +585,7 @@ async function installCompiler(sender?: any): Promise<void> {
             })();
             if (installCommand) {
                 const title = localize('install.compiler.linux.title', 'The gcc compiler will now be installed');
-                const detail = localize('install.compiler.linux.detail', 'You may need to type your password in the terminal window that will appear to authorize the installation.');
+                const detail = localize('install.compiler.linux.detail', 'You may be prompted to type your password in the terminal window that will appear to authorize the installation.');
                 const response = await vscode.window.showInformationMessage(title, { modal: true, detail }, ok);
                 if (response === ok) {
                     const terminal = vscode.window.createTerminal('Install C++ Compiler');
@@ -733,7 +733,7 @@ async function onDisableAllTypeCodeAnalysisProblems(code: string, identifiersAnd
 
 async function onCopyDeclarationOrDefinition(args?: any): Promise<void> {
     const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
-    const properties: { [key: string]: string } = {
+    const properties: Record<string, string> = {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
@@ -742,7 +742,7 @@ async function onCopyDeclarationOrDefinition(args?: any): Promise<void> {
 
 async function onCreateDeclarationOrDefinition(args?: any): Promise<void> {
     const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
-    const properties: { [key: string]: string } = {
+    const properties: Record<string, string> = {
         sender: util.getSenderType(sender)
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
@@ -936,7 +936,7 @@ function reportMacCrashes(): void {
         const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err) => {
-            const crashObject: { [key: string]: string } = {};
+            const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
                 crashObject["fs.stat: err.code"] = err.code;
@@ -980,12 +980,12 @@ let previousMacCrashData: string;
 let previousMacCrashCount: number = 0;
 
 function logMacCrashTelemetry(data: string): void {
-    const crashObject: { [key: string]: string } = {};
-    const crashCountObject: { [key: string]: number } = {};
-    crashObject["CrashingThreadCallStack"] = data;
+    const crashObject: Record<string, string> = {};
+    const crashCountObject: Record<string, number> = {};
+    crashObject.CrashingThreadCallStack = data;
     previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
     previousMacCrashData = data;
-    crashCountObject["CrashCount"] = previousMacCrashCount;
+    crashCountObject.CrashCount = previousMacCrashCount;
     telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
 }
 
