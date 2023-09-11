@@ -3222,6 +3222,15 @@
                 "command": "C_Cpp.SwitchHeaderSource",
                 "key": "Alt+O",
                 "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+            },
+            {
+                "command": "editor.action.codeAction",
+                "key": "ctrl+shift+r ctrl+i",
+                "args": {
+                    "kind": "refactor.inline.macro",
+                    "apply": "first"
+                },
+                "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
             }
         ],
         "debuggers": [
@@ -6113,6 +6122,20 @@
                     "stringLiteral": [
                         "entity.name.operator.custom-literal.string.cuda-cpp"
                     ]
+                }
+            }
+        ],
+        "codeActions": [
+            {
+                "languages": [
+                    "c",
+                    "cpp",
+                    "cude-cpp"
+                ],
+                "actions": {
+                    "kind": "refactor.inline.macro",
+                    "title": "%c_cpp.codeActions.refactor.inline.macro.title%",
+                    "description": "%c_cpp.codeActions.refactor.inline.macro.description%"
                 }
             }
         ]
