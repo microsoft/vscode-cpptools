@@ -2098,7 +2098,7 @@ export class DefaultClient implements Client {
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
                 const dismiss: string = localize("dismiss.button", "Dismiss");
-                const disable: string = localize("diable.warnings.button", "Disable Warnings");
+                const disable: string = localize("disable.warnings.button", "Disable Warnings");
                 const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
                 if (!configName) {
                     return;
