@@ -68,8 +68,6 @@ export class LanguageStatusUI {
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
     private readonly updatingIntelliSenseText: string = localize("updating.intellisense.text", "IntelliSense: Updating");
     private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
-    private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
-
     // Tag parse language status
     private tagParseStatusItem: vscode.LanguageStatusItem;
     private isParsingWorkspace: boolean = false;
@@ -134,17 +132,7 @@ export class LanguageStatusUI {
 
     private flameTimeout?: NodeJS.Timeout;
     private setIsUpdatingIntelliSense(val: boolean): void {
-        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-
-        if (settings.intelliSenseEngine === "disabled") {
-            this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
-            this.intelliSenseStatusItem.command = {
-                command: "C_Cpp.SelectDefaultCompiler",
-                title: localize("intellisense.select.text", "Select a Compiler"),
-                arguments: commandArguments
-            };
-            return;
-        }
+        //const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
 
         this.intelliSenseStatusItem.busy = val;
 
@@ -499,9 +487,6 @@ export class LanguageStatusUI {
             telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
         }
 
-        if (!await telemetry.showStatusBarIntelliSenseButton()) {
-            return;
-        }
         this.showConfigureIntelliSenseButton = show;
         if (client !== undefined) {
             client.setShowConfigureIntelliSenseButton(show);

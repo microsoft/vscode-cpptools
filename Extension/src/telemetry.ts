@@ -7,7 +7,6 @@
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
-import { CppSettings } from './LanguageServer/settings';
 import { logAndReturn } from './Utility/Async/returns';
 import { is } from './Utility/System/guards';
 
@@ -79,30 +78,12 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
     return initializationPromise;
 }
 
-export async function showLanguageStatusExperiment(): Promise<boolean> {
-    return isExperimentEnabled("ShowLangStatBar");
-}
-
-export async function showStatusBarIntelliSenseButton(): Promise<boolean> {
-    const result: boolean = await isExperimentEnabled("showStatusBarIntelliSenseIndicator");
-    return result;
-}
-
-async function isExperimentEnabled(experimentName: string): Promise<boolean> {
-    if (new CppSettings().experimentalFeatures) {
-        return true;
-    }
-    const experimentationService: IExperimentationService | undefined = await getExperimentationService();
-    const isEnabled: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", experimentName);
-    return isEnabled ?? false;
-}
-
 export async function deactivate(): Promise<void> {
     await initializationPromise?.catch(logAndReturn.undefined);
     await experimentationTelemetry?.dispose().catch(logAndReturn.undefined);
 }
 
-export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
+export function logDebuggerEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
     const sendTelemetry = () => {
         if (experimentationTelemetry) {
             const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
@@ -118,7 +99,7 @@ export function logDebuggerEvent(eventName: string, properties?: { [key: string]
     sendTelemetry();
 }
 
-export function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
+export function logLanguageServerEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
     const sendTelemetry = () => {
         if (experimentationTelemetry) {
             const eventNamePrefix: string = "C_Cpp/LanguageServer/";
