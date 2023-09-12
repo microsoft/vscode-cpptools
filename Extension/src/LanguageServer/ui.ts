@@ -132,8 +132,6 @@ export class LanguageStatusUI {
 
     private flameTimeout?: NodeJS.Timeout;
     private setIsUpdatingIntelliSense(val: boolean): void {
-        //const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-
         this.intelliSenseStatusItem.busy = val;
 
         if (this.flameTimeout) {

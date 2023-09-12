@@ -95,8 +95,6 @@ interface ConfigStateReceived {
     timeout: boolean;
 }
 
-let displayedSelectCompiler: boolean = false;
-let secondPromptCounter: number = 0;
 let scanForCompilersDone: boolean = false;
 let workspaceHash: string = "";
 
@@ -765,7 +763,7 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
-    promptSelectCompiler(command: boolean, sender?: any): Promise<void>;
+    promptSelectCompiler(sender?: any): Promise<void>;
     promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void>;
     rescanCompilers(sender?: any): Promise<void>;
     pauseParsing(): void;
@@ -983,19 +981,8 @@ export class DefaultClient implements Client {
         return selection ? selection.index : -1;
     }
 
-    public async showPrompt(buttonMessage: string, showSecondPrompt: boolean, sender?: any): Promise<void> {
-        if (secondPromptCounter < 1) {
-            const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
-            secondPromptCounter++;
-            if (value === buttonMessage) {
-                return this.handleIntelliSenseConfigurationQuickPick(showSecondPrompt, sender);
-            }
-        }
-    }
-
-    public async handleIntelliSenseConfigurationQuickPick(showSecondPrompt: boolean, sender?: any, compilersOnly?: boolean): Promise<void> {
+    public async handleIntelliSenseConfigurationQuickPick(sender?: any, compilersOnly?: boolean): Promise<void> {
         const settings: CppSettings = new CppSettings(compilersOnly ? undefined : this.RootUri);
-        const selectIntelliSenseConfig: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
         const paths: string[] = [];
         const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
         if (configProviders && configProviders.length > 0) {
@@ -1044,9 +1031,6 @@ export class DefaultClient implements Client {
         try {
             if (index === -1) {
                 action = "escaped";
-                if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
-                    return this.showPrompt(selectIntelliSenseConfig, true, sender);
-                }
                 return;
             }
             if (index === paths.length - 1) {
@@ -1054,9 +1038,6 @@ export class DefaultClient implements Client {
                 settings.defaultCompilerPath = "";
                 await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 configurationSelected = true;
-                if (showSecondPrompt) {
-                    void this.showPrompt(selectIntelliSenseConfig, true, sender);
-                }
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
             if (index === paths.length - 2) {
@@ -1100,9 +1081,6 @@ export class DefaultClient implements Client {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     action = "browse dismissed";
-                    if (showSecondPrompt && !!compilerDefaults && !compilerDefaults.trustedCompilerFound && !fromStatusBarButton) {
-                        return this.showPrompt(selectIntelliSenseConfig, true, sender);
-                    }
                     return;
                 }
                 configurationSelected = true;
@@ -1168,75 +1146,25 @@ export class DefaultClient implements Client {
         compilerDefaults = await this.requestCompiler();
         DefaultClient.updateClientConfigurations();
         if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
-            await this.promptSelectCompiler(true, sender);
+            await this.promptSelectCompiler(sender);
         }
     }
 
-    public async promptSelectCompiler(isCommand: boolean, sender?: any): Promise<void> {
-        secondPromptCounter = 0;
+    public async promptSelectCompiler(sender?: any): Promise<void> {
         if (compilerDefaults === undefined) {
             return;
         }
-        const selectCompiler: string = localize("selectCompiler.string", "Select Compiler");
-        const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
-        let action: string;
-        const settings: CppSettings = new CppSettings();
-        if (isCommand || compilerDefaults.compilerPath !== "") {
-            if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
-                if (value === confirmCompiler) {
-                    settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    await this.addTrustedCompiler(settings.defaultCompilerPath);
-                    DefaultClient.updateClientConfigurations();
-                    action = "confirm compiler";
-                    void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectCompiler");
-                } else if (value === selectCompiler) {
-                    void this.handleIntelliSenseConfigurationQuickPick(true, sender, true);
-                    action = "show quickpick";
-                } else {
-                    void this.showPrompt(selectCompiler, true, sender);
-                    action = "dismissed";
-                }
-                telemetry.logLanguageServerEvent('compilerNotification', { action });
-            } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                return this.showPrompt(selectCompiler, false, sender);
-            } else {
-                return this.handleIntelliSenseConfigurationQuickPick(isCommand, sender, true);
-            }
+        if (compilerDefaults.compilerPath !== "") {
+            return this.handleIntelliSenseConfigurationQuickPick(sender, true);
         }
     }
 
-    async promptSelectIntelliSenseConfiguration(isCommand: boolean, sender?: any): Promise<void> {
-        secondPromptCounter = 0;
+    async promptSelectIntelliSenseConfiguration(sender?: any): Promise<void> {
         if (compilerDefaults === undefined) {
             return;
         }
-        const selectCompiler: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
-        const confirmCompiler: string = localize("confirmCompiler.string", "Yes");
-        let action: string;
-        const settings: CppSettings = new CppSettings();
-        if (isCommand || compilerDefaults.compilerPath !== "") {
-            if (!isCommand && (compilerDefaults.compilerPath !== undefined)) {
-                const value: string | undefined = await vscode.window.showInformationMessage(localize("selectCompiler.message", "The compiler {0} was found. Do you want to configure IntelliSense with this compiler?", compilerDefaults.compilerPath), confirmCompiler, selectCompiler);
-                if (value === confirmCompiler) {
-                    settings.defaultCompilerPath = compilerDefaults.compilerPath;
-                    await this.addTrustedCompiler(settings.defaultCompilerPath);
-                    DefaultClient.updateClientConfigurations();
-                    action = "confirm compiler";
-                    await ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "promptSelectIntelliSense");
-                } else if (value === selectCompiler) {
-                    void this.handleIntelliSenseConfigurationQuickPick(true, sender);
-                    action = "show quickpick";
-                } else {
-                    void this.showPrompt(selectCompiler, true, sender);
-                    action = "dismissed";
-                }
-                telemetry.logLanguageServerEvent('compilerNotification', { action });
-            } else if (!isCommand && (compilerDefaults.compilerPath === undefined)) {
-                return this.showPrompt(selectCompiler, false, sender);
-            } else {
-                return this.handleIntelliSenseConfigurationQuickPick(isCommand, sender);
-            }
+        if (compilerDefaults.compilerPath !== "") {
+            return this.handleIntelliSenseConfigurationQuickPick(sender);
         }
     }
 
@@ -2710,11 +2638,6 @@ export class DefaultClient implements Client {
         const showConfigStatus: boolean = configurationNotSet &&
             !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== "");
 
-        if (showConfigStatus && !displayedSelectCompiler) {
-            await this.promptSelectIntelliSenseConfiguration(false, "notification");
-            displayedSelectCompiler = true;
-        }
-
         const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
         const compilerType: ConfigurationType = this.configuration.CurrentConfiguration?.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
         const configType: ConfigurationType =
@@ -2723,8 +2646,7 @@ export class DefaultClient implements Client {
                     !compilerPathNotSet ? compilerType :
                         ConfigurationType.NotConfigured;
 
-        // It's ok to call this method even when the experiment is not enabled because it checks the experiment state
-        // before enabling the button. This method logs configuration telemetry and we always want that.
+        this.showConfigureIntelliSenseButton = showConfigStatus;
         return ui.ShowConfigureIntelliSenseButton(showConfigStatus, this, configType, "handleConfig");
     }
 
@@ -3711,7 +3633,7 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
+    promptSelectCompiler(sender?: any): Promise<void> { return Promise.resolve(); }
     promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
     rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }

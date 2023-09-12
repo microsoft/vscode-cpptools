@@ -527,7 +527,7 @@ async function onResetDatabase(): Promise<void> {
 
 async function selectDefaultCompiler(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
-    return clients.ActiveClient.promptSelectCompiler(true, sender);
+    return clients.ActiveClient.promptSelectCompiler(sender);
 }
 
 async function onRescanCompilers(sender?: any): Promise<void> {
