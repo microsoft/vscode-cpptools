@@ -609,16 +609,6 @@ export class LanguageStatusUI {
         this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
     }
 
-    public showConfigureCompileCommandsMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
-        setTimeout(() => {
-            this.showConfigurationPrompt(ConfigurationPriority.CompileCommands, prompt, onSkip);
-        }, 5000);
-    }
-
-    public showConfigureCustomProviderMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
-        this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
-    }
-
     private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
         const showPrompt: () => Promise<ConfigurationStatus> = async () => {
             const configured: boolean = await prompt();

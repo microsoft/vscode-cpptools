@@ -7,6 +7,7 @@
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
 import * as util from './common';
+import { CppSettings } from './LanguageServer/settings';
 import { logAndReturn } from './Utility/Async/returns';
 import { is } from './Utility/System/guards';
 
@@ -76,6 +77,16 @@ export function activate(): void {
 
 export function getExperimentationService(): Promise<IExperimentationService> | undefined {
     return initializationPromise;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function isExperimentEnabled(experimentName: string): Promise<boolean> {
+    if (new CppSettings().experimentalFeatures) {
+        return true;
+    }
+    const experimentationService: IExperimentationService | undefined = await getExperimentationService();
+    const isEnabled: boolean | undefined = experimentationService?.getTreatmentVariable<boolean>("vscode", experimentName);
+    return isEnabled ?? false;
 }
 
 export async function deactivate(): Promise<void> {
