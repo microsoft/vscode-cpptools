@@ -6,8 +6,6 @@
 
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { sleep } from '../Utility/Async/sleep';
-import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
@@ -589,38 +587,6 @@ export class LanguageStatusUI {
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return selection ? selection.key : "";
-    }
-
-    public async showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): Promise<void> {
-        await sleep(10000);
-        this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
-    }
-
-    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
-        const showPrompt: () => Promise<ConfigurationStatus> = async () => {
-            const configured: boolean = await prompt();
-            return Promise.resolve({
-                priority: priority,
-                configured: configured
-            });
-        };
-
-        if (is.promise(this.curConfigurationStatus)) {
-            this.curConfigurationStatus = this.curConfigurationStatus.then(result => {
-                if (priority > result.priority) {
-                    return showPrompt();
-                } else if (!result.configured) {
-                    return showPrompt();
-                }
-                onSkip();
-                return Promise.resolve({
-                    priority: result.priority,
-                    configured: true
-                });
-            });
-        } else {
-            this.curConfigurationStatus = showPrompt();
-        }
     }
 
     public bind(client: Client): void {

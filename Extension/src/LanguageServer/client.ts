@@ -34,7 +34,7 @@ import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
 import { CustomConfigurationProvider1, getCustomConfigProviders, isSameProviderExtensionId } from '../LanguageServer/customProviders';
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
-import { logAndReturn, returns } from '../Utility/Async/returns';
+import { logAndReturn } from '../Utility/Async/returns';
 import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
@@ -53,7 +53,7 @@ import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
-import { PersistentFolderState, PersistentState, PersistentWorkspaceState } from './persistentState';
+import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
 import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams, getEditorConfigSettings } from './settings';
@@ -2496,51 +2496,6 @@ export class DefaultClient implements Client {
             testHook.updateStatus(status);
         } else if (message.endsWith("No Squiggles")) {
             util.setIntelliSenseProgress(util.getProgressIntelliSenseNoSquiggles());
-        } else if (message.endsWith("Unresolved Headers")) {
-            if (notificationBody.workspaceFolderUri) {
-                const client: Client = clients.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
-                if (client instanceof DefaultClient) {
-                    const defaultClient: DefaultClient = client as DefaultClient;
-                    if (!defaultClient.configuration.CurrentConfiguration?.configurationProvider) {
-                        const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
-                        if (showIntelliSenseFallbackMessage.Value) {
-                            void ui.showConfigureIncludePathMessage(async () => {
-                                const configJSON: string = localize("configure.json.button", "Configure (JSON)");
-                                const configUI: string = localize("configure.ui.button", "Configure (UI)");
-                                const dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
-                                const fallbackMsg: string = defaultClient.configuration.VcpkgInstalled ?
-                                    localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
-                                    localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
-                                return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then(async (value) => {
-                                    let commands: string[];
-                                    switch (value) {
-                                        case configJSON:
-                                            commands = await vscode.commands.getCommands(true);
-                                            if (commands.includes("workbench.action.problems.focus")) {
-                                                void vscode.commands.executeCommand("workbench.action.problems.focus").then(returns.undefined, logAndReturn.undefined);
-                                            }
-                                            void defaultClient.handleConfigurationEditJSONCommand().catch(logAndReturn.undefined);
-                                            telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
-                                            break;
-                                        case configUI:
-                                            commands = await vscode.commands.getCommands(true);
-                                            if (commands.includes("workbench.action.problems.focus")) {
-                                                void vscode.commands.executeCommand("workbench.action.problems.focus").then(returns.undefined, logAndReturn.undefined);
-                                            }
-                                            void defaultClient.handleConfigurationEditUICommand().catch(logAndReturn.undefined);
-                                            telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
-                                            break;
-                                        case dontShowAgain:
-                                            showIntelliSenseFallbackMessage.Value = false;
-                                            break;
-                                    }
-                                    return true;
-                                });
-                            }, () => showIntelliSenseFallbackMessage.Value = false).catch(logAndReturn.undefined);
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -2645,8 +2600,8 @@ export class DefaultClient implements Client {
         const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
         const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
-        showConfigStatus = showConfigStatus && configurationNotSet &&
-            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== "");
+        showConfigStatus = showConfigStatus || (configurationNotSet &&
+            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
 
         const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
         const compilerType: ConfigurationType = this.configuration.CurrentConfiguration?.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
