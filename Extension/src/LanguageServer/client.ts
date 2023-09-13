@@ -3701,9 +3701,10 @@ export class DefaultClient implements Client {
         let selectionPositionAdjustment: number = 0;
         for (const file in result.edit.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
-            // At most, there will only be two text edits:
-            // 1.) an edit for: #include header file
-            // 2.) an edit for: definition or declaration
+            // At most, there will only be three text edits:
+            // 1.) an insert for: #include header file
+            // 2.) a replace for: the new function call
+            // 3.) an insert for: the new function definition
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
