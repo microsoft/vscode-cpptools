@@ -3016,11 +3016,6 @@
                 "category": "C/C++"
             },
             {
-                "command": "C_Cpp.SelectDefaultCompiler",
-                "title": "%c_cpp.command.selectDefaultCompiler.title%",
-                "category": "C/C++"
-            },
-            {
                 "command": "C_Cpp.SelectIntelliSenseConfiguration",
                 "title": "%c_cpp.command.selectIntelliSenseConfiguration.title%",
                 "category": "C/C++"
@@ -5641,10 +5636,6 @@
                 {
                     "command": "C_Cpp.referencesViewUngroupByType",
                     "when": "cpptools.hasReferencesResults"
-                },
-                {
-                    "command": "C_Cpp.SelectDefaultCompiler",
-                    "when": "never"
                 },
                 {
                     "command": "C_Cpp.RescanCompilers",

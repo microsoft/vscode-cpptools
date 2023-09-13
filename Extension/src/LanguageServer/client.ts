@@ -763,7 +763,6 @@ export interface Client {
     selectionChanged(selection: Range): void;
     resetDatabase(): void;
     deactivate(): void;
-    promptSelectCompiler(sender?: any): Promise<void>;
     promptSelectIntelliSenseConfiguration(sender?: any): Promise<void>;
     rescanCompilers(sender?: any): Promise<void>;
     pauseParsing(): void;
@@ -981,10 +980,10 @@ export class DefaultClient implements Client {
         return selection ? selection.index : -1;
     }
 
-    public async handleIntelliSenseConfigurationQuickPick(sender?: any, compilersOnly?: boolean): Promise<void> {
-        const settings: CppSettings = new CppSettings(compilersOnly ? undefined : this.RootUri);
+    public async handleIntelliSenseConfigurationQuickPick(sender?: any, showCompilersOnly?: boolean): Promise<void> {
+        const settings: CppSettings = new CppSettings(showCompilersOnly ? undefined : this.RootUri);
         const paths: string[] = [];
-        const configProviders: CustomConfigurationProvider1[] | undefined = compilersOnly ? undefined : this.configStateReceived.configProviders;
+        const configProviders: CustomConfigurationProvider1[] | undefined = showCompilersOnly ? undefined : this.configStateReceived.configProviders;
         if (configProviders && configProviders.length > 0) {
             paths.push(DefaultClient.configurationProvidersLabel);
             for (const provider of configProviders) {
@@ -993,7 +992,7 @@ export class DefaultClient implements Client {
         }
         const configProvidersIndex: number = paths.length;
         const configProviderCount: number = configProvidersIndex === 0 ? 0 : configProvidersIndex - 1;
-        if (!compilersOnly && this.compileCommandsPaths.length > 0) {
+        if (!showCompilersOnly && this.compileCommandsPaths.length > 0) {
             paths.push(DefaultClient.compileCommandsLabel);
             for (const compileCommandsPath of this.compileCommandsPaths) {
                 paths.push(localize("use.compileCommands", "Use {0}", compileCommandsPath));
@@ -1024,10 +1023,10 @@ export class DefaultClient implements Client {
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
         paths.push(localize("installCompiler.string", "Help me install a compiler"));
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
-        const index: number = await this.showSelectIntelliSenseConfiguration(paths, compilersOnly);
+        const index: number = await this.showSelectIntelliSenseConfiguration(paths, showCompilersOnly);
         let action: string = "";
         let configurationSelected: boolean = false;
-        const fromStatusBarButton: boolean = !compilersOnly;
+        const fromStatusBarButton: boolean = !showCompilersOnly;
         try {
             if (index === -1) {
                 action = "escaped";
@@ -1115,7 +1114,7 @@ export class DefaultClient implements Client {
             await this.addTrustedCompiler(settings.defaultCompilerPath);
             DefaultClient.updateClientConfigurations();
         } finally {
-            if (compilersOnly) {
+            if (showCompilersOnly) {
                 telemetry.logLanguageServerEvent('compilerSelection', { action, sender: util.getSenderType(sender) },
                     { compilerCount: compilerCount + 3 }); // + 3 is to match what was being incorrectly sent previously
             } else {
@@ -1146,16 +1145,7 @@ export class DefaultClient implements Client {
         compilerDefaults = await this.requestCompiler();
         DefaultClient.updateClientConfigurations();
         if (compilerDefaults.knownCompilers !== undefined && compilerDefaults.knownCompilers.length > 0) {
-            await this.promptSelectCompiler(sender);
-        }
-    }
-
-    public async promptSelectCompiler(sender?: any): Promise<void> {
-        if (compilerDefaults === undefined) {
-            return;
-        }
-        if (compilerDefaults.compilerPath !== "") {
-            return this.handleIntelliSenseConfigurationQuickPick(sender, true);
+            await this.handleIntelliSenseConfigurationQuickPick(sender, true);
         }
     }
 
@@ -1164,7 +1154,8 @@ export class DefaultClient implements Client {
             return;
         }
         if (compilerDefaults.compilerPath !== "") {
-            return this.handleIntelliSenseConfigurationQuickPick(sender);
+            const showCompilersOnly: boolean = util.isString(sender) && sender.toString() === 'walkthrough';
+            return this.handleIntelliSenseConfigurationQuickPick(sender, showCompilersOnly);
         }
     }
 
@@ -1770,7 +1761,7 @@ export class DefaultClient implements Client {
         this.configStateReceived.configProviders.push(provider);
         const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
         if (!selectedProvider || this.showConfigureIntelliSenseButton) {
-            void this.handleConfigStatus();
+            void this.handleConfigStatus("configProviders");
             if (!selectedProvider) {
                 return;
             }
@@ -2618,25 +2609,43 @@ export class DefaultClient implements Client {
 
         client.compileCommandsPaths = params.paths;
         client.configStateReceived.compileCommands = true;
-        await client.handleConfigStatus();
+        await client.handleConfigStatus("compileCommands");
     }
 
-    public async handleConfigStatus(): Promise<void> {
+    public async handleConfigStatus(sender?: string): Promise<void> {
         if (!this.configStateReceived.timeout
             && (!this.configStateReceived.compilers || !this.configStateReceived.compileCommands || !this.configStateReceived.configProviders)) {
             return; // Wait till the config state is recevied or timed out.
         }
 
+        const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         const settings: CppSettings = new CppSettings(this.RootUri);
         const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
             !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
         const configProviderNotSetAndNoCache: boolean = configProviderNotSet && this.lastCustomBrowseConfigurationProviderId?.Value === undefined;
         const compileCommandsNotSet: boolean = !settings.defaultCompileCommands && !this.configuration.CurrentConfiguration?.compileCommands && !this.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson;
 
+        // Handle config providers
+        const provider: CustomConfigurationProvider1 | undefined =
+            !this.configStateReceived.configProviders ? undefined :
+                this.configStateReceived.configProviders.length === 0 ? undefined : this.configStateReceived.configProviders[0];
+        let showConfigStatus: boolean = false;
+        if (rootFolder && configProviderNotSetAndNoCache && provider && (sender === "configProviders")) {
+            const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("Client.registerProvider", true, rootFolder);
+            showConfigStatus = ask.Value;
+        }
+
+        // Handle compile commands
+        if (rootFolder && configProviderNotSetAndNoCache && !this.configStateReceived.configProviders &&
+            compileCommandsNotSet && this.compileCommandsPaths.length > 0 && (sender === "compileCommands")) {
+            const ask: PersistentFolderState<boolean> = new PersistentFolderState<boolean>("CPP.showCompileCommandsSelection", true, rootFolder);
+            showConfigStatus = ask.Value;
+        }
+
         const compilerPathNotSet: boolean = settings.defaultCompilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPath === undefined && this.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson === undefined;
         const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
-        const showConfigStatus: boolean = configurationNotSet &&
+        showConfigStatus = showConfigStatus && configurationNotSet &&
             !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== "");
 
         const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
@@ -3634,7 +3643,6 @@ class NullClient implements Client {
     activate(): void { }
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
-    promptSelectCompiler(sender?: any): Promise<void> { return Promise.resolve(); }
     promptSelectIntelliSenseConfiguration(sender?: any): Promise<void> { return Promise.resolve(); }
     rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
