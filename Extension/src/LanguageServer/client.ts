@@ -560,6 +560,12 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
+interface DidChangeEditorStateParams {
+    activeUri?: string;
+    activeSelectionRange?: Range;
+    visibleRanges?: { [uri: string]: Range[] };
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
@@ -600,6 +606,7 @@ const RescanFolderNotification: NotificationType<void> = new NotificationType<vo
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
+const DidChangeEditorStateNotification: NotificationType<DidChangeEditorStateParams> = new NotificationType<DidChangeEditorStateParams>('cpptools/didChangeEditorState');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1740,6 +1747,83 @@ export class DefaultClient implements Client {
                 editor.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
             }
         }
+    }
+
+    // Handles changes to visible files/ranges, changes to current selection/position,
+    // and changes to the active text editor. Should only be called on the primary client.
+    public async onDidChangeEditorState(): Promise<void> {
+        await this.ready;
+
+        const visibleRanges: { [uri: string]: Range[] } = {};
+        vscode.window.visibleTextEditors.forEach(editor => {
+            if (util.isCpp(editor.document)) {
+                // Use a map, to account for multiple editors for the same file.
+                // First, we just merge all ranges for the same file (opportunistically converting any reversed ranges).
+                const uri: string = editor.document.uri.toString();
+                if (!visibleRanges[uri]) {
+                    visibleRanges[uri] = [];
+                }
+                visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges);
+            }
+        });
+
+        // We may need to merge visible ranges, if there are multiple editors for the same file,
+        // and some of the ranges overlap.
+        Object.keys(visibleRanges).forEach(uri => {
+            const ranges: Range[] = visibleRanges[uri];
+
+            // TODO: Break out into a helper functions to fixed reversed ranges.
+            // Adjust range direction, in case they might be reversed. (Not sure if that happens).
+            ranges.forEach(range => {
+                if (range.end.line === range.start.line) {
+                    if (range.end.character < range.start.character) {
+                        const temp: number = range.end.character;
+                        range.end.character = range.start.character;
+                        range.start.character = temp;
+                    }
+                } else if (range.end.line < range.start.line) {
+                    const temp: number = range.end.line;
+                    range.end.line = range.start.line;
+                    range.start.line = temp;
+                }
+            });
+
+            // TODO: Break out into a helper functions to merge ranges?
+            // Merge overlapping ranges.
+            ranges.sort((a, b) => a.start.line - b.start.line || a.start.character - b.start.character);
+            let lastMergedIndex = 0; // Index to keep track of the last merged range
+            for (let currentIndex = 0; currentIndex < ranges.length; currentIndex++) {
+                const currentRange = ranges[currentIndex]; // No need for a shallow copy, since we're not modifying the ranges we haven't read yet.
+                let nextIndex = currentIndex + 1;
+                while (nextIndex < ranges.length) {
+                    const nextRange = ranges[nextIndex];
+                    // Check for non-overlapping ranges first
+                    if (nextRange.start.line > currentRange.end.line ||
+                        (nextRange.start.line === currentRange.end.line && nextRange.start.character > currentRange.end.character)) {
+                        break;
+                    }
+                    // Otherwise, merge the overlapping ranges
+                    currentRange.end = {
+                        line: Math.max(currentRange.end.line, nextRange.end.line),
+                        character: Math.max(currentRange.end.character, nextRange.end.character)
+                    };
+                    nextIndex++;
+                }
+                // Overwrite the array in-place
+                ranges[lastMergedIndex] = currentRange;
+                lastMergedIndex++;
+                currentIndex = nextIndex - 1; // Skip the merged ranges
+            }
+            ranges.length = lastMergedIndex;
+        });
+
+        const params: DidChangeEditorStateParams = {
+            activeUri: vscode.window.activeTextEditor?.document.uri.toString(),
+            activeSelectionRange: vscode.window.activeTextEditor?.selection,
+            visibleRanges
+        };
+
+        await this.languageClient.sendNotification(DidChangeEditorStateNotification, params);
     }
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
