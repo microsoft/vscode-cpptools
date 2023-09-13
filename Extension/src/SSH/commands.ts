@@ -82,13 +82,13 @@ export function ssh(host: ISshHostInfo, command: string, sshPath?: string, jumpH
 function localForwardToArgs(localForward: ISshLocalForwardInfo): string[] {
     // Do not combine error checking and arg conversion for clarity.
     if (localForward.localSocket && (localForward.bindAddress || localForward.port)) {
-        throw Error(localize('local.forward.local.conflict', '"localSocket" cannot be specifed at the same time with "bindAddress" or "port" in localForwards'));
+        throw Error(localize('local.forward.local.conflict', '"localSocket" cannot be specified at the same time with "bindAddress" or "port" in localForwards'));
     }
     if (!localForward.localSocket && !localForward.port) {
         throw Error(localize('local.forward.local.missing', '"port" or "localSocket" required in localForwards'));
     }
     if (localForward.remoteSocket && (localForward.host || localForward.hostPort)) {
-        throw Error(localize('local.forward.remote.conflict', '"remoteSocket" cannot be specifed at the same time with "host" or "hostPort" in localForwards'));
+        throw Error(localize('local.forward.remote.conflict', '"remoteSocket" cannot be specified at the same time with "host" or "hostPort" in localForwards'));
     }
     if (!localForward.remoteSocket && (!localForward.host || !localForward.hostPort)) {
         throw Error(localize('local.forward.remote.missing', '"host" and "hostPort", or "remoteSocket" required in localForwards'));

@@ -72,7 +72,7 @@ export class ParsedEnvironmentFile {
         // show error message if single lines cannot get parsed
         let warning: string | undefined;
         if (parseErrors.length !== 0) {
-            warning = localize("ignoring.lines.in.envfile", "Ignoring non-parseable lines in {0} {1}: ", "envFile", envFile);
+            warning = localize("ignoring.lines.in.envfile", "Ignoring non-parsable lines in {0} {1}: ", "envFile", envFile);
             parseErrors.forEach(function (value, idx, array): void {
                 warning += "\"" + value + "\"" + ((idx !== array.length - 1) ? ", " : ".");
             });
