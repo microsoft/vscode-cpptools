@@ -1136,7 +1136,7 @@ export class DefaultClient implements Client {
                     ask.Value = false;
                 }
                 if (!configurationSelected) {
-                    await this.handleConfigStatusOrPrompt();
+                    await this.handleConfigStatus();
                 }
             }
         }
@@ -1322,7 +1322,7 @@ export class DefaultClient implements Client {
                     if (client instanceof DefaultClient) {
                         global.setTimeout(() => {
                             client.configStateReceived.timeout = true;
-                            void client.handleConfigStatusOrPrompt();
+                            void client.handleConfigStatus();
                         }, 15000);
                     }
                 });
@@ -1333,7 +1333,7 @@ export class DefaultClient implements Client {
                 clients.forEach(client => {
                     if (client instanceof DefaultClient) {
                         client.configStateReceived.compilers = true;
-                        void client.handleConfigStatusOrPrompt();
+                        void client.handleConfigStatus();
                     }
                 });
             }
@@ -1770,7 +1770,7 @@ export class DefaultClient implements Client {
         this.configStateReceived.configProviders.push(provider);
         const selectedProvider: string | undefined = this.configuration.CurrentConfigurationProvider;
         if (!selectedProvider || this.showConfigureIntelliSenseButton) {
-            void this.handleConfigStatusOrPrompt();
+            void this.handleConfigStatus();
             if (!selectedProvider) {
                 return;
             }
@@ -2618,14 +2618,15 @@ export class DefaultClient implements Client {
 
         client.compileCommandsPaths = params.paths;
         client.configStateReceived.compileCommands = true;
-        await client.handleConfigStatusOrPrompt();
+        await client.handleConfigStatus();
     }
 
-    public async handleConfigStatusOrPrompt(): Promise<void> {
+    public async handleConfigStatus(): Promise<void> {
         if (!this.configStateReceived.timeout
             && (!this.configStateReceived.compilers || !this.configStateReceived.compileCommands || !this.configStateReceived.configProviders)) {
             return; // Wait till the config state is recevied or timed out.
         }
+
         const settings: CppSettings = new CppSettings(this.RootUri);
         const configProviderNotSet: boolean = !settings.defaultConfigurationProvider && !this.configuration.CurrentConfiguration?.configurationProvider &&
             !this.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
