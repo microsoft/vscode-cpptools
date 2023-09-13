@@ -3729,7 +3729,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (newFunctionDefinitionDocument === undefined || newFunctionDefinitionEdit === undefined) {
+        if (newFunctionDefinitionDocument === undefined || newFunctionDefinitionEdit === undefined || replaceRange === undefined) {
             return;
         }
 
@@ -3763,8 +3763,8 @@ export class DefaultClient implements Client {
         };
         const versionBeforeFormatting: number | undefined = openFileVersions.get(newFunctionDefinitionDocument.toString());
 
-        try {
-            if (versionBeforeFormatting === undefined) {
+        await (async () => {
+            if (versionBeforeFormatting === undefined || newFunctionDefinitionDocument === undefined) {
                 return;
             }
             const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", newFunctionDefinitionDocument, formatRange, formatOptions);
@@ -3781,9 +3781,9 @@ export class DefaultClient implements Client {
                 return;
             }
             await vscode.workspace.applyEdit(formatEdits);
-        } finally {
-            await vscode.window.showTextDocument(newFunctionDefinitionDocument, { selection: replaceRange });
-        }
+        })();
+        await vscode.window.showTextDocument(newFunctionDefinitionDocument, { selection: replaceRange });
+        void vscode.commands.executeCommand("editor.action.rename");
     }
 
     public onInterval(): void {
