@@ -3599,8 +3599,7 @@ export class DefaultClient implements Client {
                     selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
-                const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
-                workspaceEdits.insert(uri, position, edit.newText);
+                workspaceEdits.insert(uri, range.start, edit.newText);
             }
             modifiedDocument = uri;
         }
@@ -3714,8 +3713,11 @@ export class DefaultClient implements Client {
                     selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
-                const position: vscode.Position = new vscode.Position(edit.range.start.line, edit.range.start.character);
-                workspaceEdits.insert(uri, position, edit.newText);
+                if (edit.range.start === edit.range.end) {
+                    workspaceEdits.insert(uri, range.start, edit.newText);
+                } else {
+                    workspaceEdits.replace(uri, range, edit.newText);
+                }
             }
             modifiedDocument = uri;
         }
