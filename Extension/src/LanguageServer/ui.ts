@@ -25,18 +25,6 @@ interface KeyedQuickPickItem extends vscode.QuickPickItem {
     key: string;
 }
 
-// Higher numbers mean greater priority.
-enum ConfigurationPriority {
-    IncludePath = 1,
-    CompileCommands = 2,
-    CustomProvider = 3,
-}
-
-interface ConfigurationStatus {
-    configured: boolean;
-    priority: ConfigurationPriority;
-}
-
 enum LanguageStatusPriority {
     First = 0,
     High = 1,
@@ -57,7 +45,6 @@ const commandArguments: string[] = []; // We report the sender of the command
 
 export class LanguageStatusUI {
     private currentClient: Client | undefined;
-    private curConfigurationStatus?: Promise<ConfigurationStatus>;
 
     // Timer for icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
