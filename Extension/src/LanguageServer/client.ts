@@ -37,8 +37,10 @@ import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn } from '../Utility/Async/returns';
 import { is } from '../Utility/System/guards';
 import * as util from '../common';
+import { isWindows } from '../constants';
 import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
+import { SessionState } from '../sessionState';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
 import {
@@ -1021,7 +1023,14 @@ export class DefaultClient implements Client {
         const compilersIndex: number = paths.length;
         const compilerCount: number = compilersIndex === compileCommandsIndex ? 0 : compilersIndex - compileCommandsIndex - 1;
         paths.push(localize("selectAnotherCompiler.string", "Select another compiler on my machine..."));
-        paths.push(localize("installCompiler.string", "Help me install a compiler"));
+        let installShown = true;
+        if (isWindows && util.getSenderType(sender) !== 'walkthrough') {
+            paths.push(localize("installCompiler.string", "Help me install a compiler"));
+        } else if (!isWindows) {
+            paths.push(localize("installCompiler.string.nix", "Install a compiler"));
+        } else {
+            installShown = false;
+        }
         paths.push(localize("noConfig.string", "Do not configure with a compiler (not recommended)"));
         const index: number = await this.showSelectIntelliSenseConfiguration(paths, showCompilersOnly);
         let action: string = "";
@@ -1039,44 +1048,13 @@ export class DefaultClient implements Client {
                 configurationSelected = true;
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
-            if (index === paths.length - 2) {
-                action = "help";
-                // Because we need to conditionally enable/disable steps to alter their contents,
-                // we need to determine which step is actually visible. If the steps change, this
-                // logic will need to change to reflect them.
-                let step: string = "ms-vscode.cpptools#";
-                if (!scanForCompilersDone) {
-                    step = step + "awaiting.activation.";
-                } else if (compilerDefaults?.knownCompilers === undefined || !compilerDefaults.knownCompilers.length) {
-                    step = step + "no.compilers.found.";
-                } else {
-                    step = step + "verify.compiler.";
-                }
-                switch (os.platform()) {
-                    case 'win32':
-                        step = step + "windows";
-                        break;
-                    case 'darwin':
-                        step = step + "mac";
-                        break;
-                    default: // Linux
-                        step = step + "linux";
-                        break;
-                }
-                void vscode.commands.executeCommand(
-                    "workbench.action.openWalkthrough",
-                    { category: 'ms-vscode.cpptools#cppWelcome', step },
-                    false)
-                    // Run it twice for now because of VS Code bug #187958
-                    .then(() => vscode.commands.executeCommand(
-                        "workbench.action.openWalkthrough",
-                        { category: 'ms-vscode.cpptools#cppWelcome', step },
-                        false)
-                    );
+            if (installShown && index === paths.length - 2) {
+                action = "install";
+                void vscode.commands.executeCommand('C_Cpp.InstallCompiler', sender);
                 return;
             }
             const showButtonSender: string = "quickPick";
-            if (index === paths.length - 3) {
+            if (index === paths.length - 3 || (!installShown && index === paths.length - 2)) {
                 const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog();
                 if (result === undefined || result.length === 0) {
                     action = "browse dismissed";
@@ -1086,7 +1064,7 @@ export class DefaultClient implements Client {
                 action = "compiler browsed";
                 settings.defaultCompilerPath = result[0].fsPath;
                 await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
-                void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
+                void SessionState.trustedCompilerFound.set(true);
             } else {
                 configurationSelected = true;
                 if (index < configProvidersIndex && configProviders) {
@@ -1105,7 +1083,7 @@ export class DefaultClient implements Client {
                     action = "select compiler";
                     settings.defaultCompilerPath = util.isCl(paths[index]) ? "cl.exe" : paths[index];
                     await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
-                    void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', true);
+                    void SessionState.trustedCompilerFound.set(true);
                 }
             }
 
@@ -1703,10 +1681,10 @@ export class DefaultClient implements Client {
         if (document.uri.scheme === "file") {
             const uri: string = document.uri.toString();
             openFileVersions.set(uri, document.version);
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(document.uri));
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(document.uri));
+            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(document.uri));
+            void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(document.uri));
         } else {
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', false);
+            void SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
@@ -2631,18 +2609,17 @@ export class DefaultClient implements Client {
             newTrustedCompilerPath: newCompilerPath ?? ""
         };
         const results: configs.CompilerDefaults = await this.languageClient.sendRequest(QueryCompilerDefaultsRequest, params);
-        scanForCompilersDone = true;
-        void vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersDone', true);
-        void vscode.commands.executeCommand('setContext', 'cpptools.scanForCompilersEmpty', results.knownCompilers === undefined || !results.knownCompilers.length);
-        void vscode.commands.executeCommand('setContext', 'cpptools.trustedCompilerFound', results.trustedCompilerFound);
+        void SessionState.scanForCompilersDone.set(true);
+        void SessionState.scanForCompilersEmpty.set(results.knownCompilers === undefined || !results.knownCompilers.length);
+        void SessionState.trustedCompilerFound.set(results.trustedCompilerFound);
         return results;
     }
 
     private updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor && util.isCpp(editor.document)) {
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', util.isCppOrCFile(editor.document.uri));
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isFolderOpen', util.isFolderOpen(editor.document.uri));
+            void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri));
+            void SessionState.buildAndDebugIsFolderOpen.set(util.isFolderOpen(editor.document.uri));
             // If using vcFormat, check for a ".editorconfig" file, and apply those text options to the active document.
             const settings: CppSettings = new CppSettings(this.RootUri);
             if (settings.useVcFormat(editor.document)) {
@@ -2664,7 +2641,7 @@ export class DefaultClient implements Client {
                 }
             }
         } else {
-            void vscode.commands.executeCommand('setContext', 'cpptools.buildAndDebug.isSourceFile', false).then(undefined, logAndReturn.undefined);
+            void SessionState.buildAndDebugIsSourceFile.set(false);
         }
     }
 
