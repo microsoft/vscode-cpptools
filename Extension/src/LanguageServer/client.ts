@@ -764,7 +764,7 @@ export interface Client {
     resetDatabase(): void;
     deactivate(): void;
     promptSelectCompiler(sender?: any): Promise<void>;
-    promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void>;
+    promptSelectIntelliSenseConfiguration(sender?: any): Promise<void>;
     rescanCompilers(sender?: any): Promise<void>;
     pauseParsing(): void;
     resumeParsing(): void;
@@ -3634,7 +3634,7 @@ class NullClient implements Client {
     selectionChanged(selection: Range): void { }
     resetDatabase(): void { }
     promptSelectCompiler(sender?: any): Promise<void> { return Promise.resolve(); }
-    promptSelectIntelliSenseConfiguration(command: boolean, sender?: any): Promise<void> { return Promise.resolve(); }
+    promptSelectIntelliSenseConfiguration(sender?: any): Promise<void> { return Promise.resolve(); }
     rescanCompilers(sender?: any): Promise<void> { return Promise.resolve(); }
     deactivate(): void { }
     pauseParsing(): void { }

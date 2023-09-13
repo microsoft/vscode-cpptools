@@ -580,19 +580,6 @@ export class LanguageStatusUI {
         return selection ? selection.key : undefined;
     }
 
-    public async showCompileCommands(paths: string[]): Promise<number> {
-        const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.compile.commands", "Select a compile_commands.json...");
-
-        const items: IndexableQuickPickItem[] = [];
-        for (let i: number = 0; i < paths.length; i++) {
-            items.push({ label: paths[i], description: "", index: i });
-        }
-
-        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return selection ? selection.index : -1;
-    }
-
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.workspace", "Select a workspace folder...");

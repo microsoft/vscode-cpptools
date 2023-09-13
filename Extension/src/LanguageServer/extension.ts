@@ -537,7 +537,7 @@ async function onRescanCompilers(sender?: any): Promise<void> {
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
-    return clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
+    return clients.ActiveClient.promptSelectIntelliSenseConfiguration(sender);
 }
 
 async function onSelectConfiguration(): Promise<void> {
