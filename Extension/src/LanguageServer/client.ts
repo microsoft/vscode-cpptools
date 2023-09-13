@@ -3681,7 +3681,6 @@ export class DefaultClient implements Client {
         };
 
         const result: WorkspaceEditResult = await this.languageClient.sendRequest(ExtractToFunctionRequest, params);
-        // Create/Copy returned no result.
         if (result.edit === undefined) {
             // The only condition in which result.edit would be undefined is a
             // server-initiated cancellation, in which case the object is actually
@@ -3696,84 +3695,95 @@ export class DefaultClient implements Client {
         }
 
         const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        let modifiedDocument: vscode.Uri | undefined;
-        let lastEdit: vscode.TextEdit | undefined;
+        let newFunctionDefinitionDocument: vscode.Uri | undefined;
+        let newFunctionDefinitionEdit: vscode.TextEdit | undefined;
+        let replaceRange: vscode.Range | undefined;
         let selectionPositionAdjustment: number = 0;
         for (const file in result.edit.changes) {
             const uri: vscode.Uri = vscode.Uri.file(file);
-            // At most, there will only be three text edits:
+            // At most, there will only be four text edits:
             // 1.) an insert for: #include header file
-            // 2.) a replace for: the new function call
-            // 3.) an insert for: the new function definition
+            // 2.) an insert for: the new function definition
+            // 3.) a replace for: the new function call
+            // 4.) an insert for: the new function declaration in the header file
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
-                // Get new lines from an edit for: #include header file.
-                if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
-                    // Destination file is empty.
-                    // The edit positions for #include header file and definition or declaration are the same.
-                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
-                }
-                lastEdit = new vscode.TextEdit(range, edit.newText);
-                if (edit.range.start === edit.range.end) {
+                if (range.isEmpty) {
                     workspaceEdits.insert(uri, range.start, edit.newText);
+                    if (newFunctionDefinitionDocument === undefined) {
+                        if (edit.newText.includes("#include")) {
+                            selectionPositionAdjustment = (edit.newText.match(/\n/g) ?? []).length;
+                        } else {
+                            newFunctionDefinitionDocument = uri;
+                            newFunctionDefinitionEdit = new vscode.TextEdit(range, edit.newText);
+                        }
+                    }
                 } else {
+                    const selectionLine: number = range.start.line + selectionPositionAdjustment;
+                    selectionPositionAdjustment += (edit.newText.match(/\n/g) ?? []).length - (range.end.line - range.start.line);
+                    replaceRange = new vscode.Range(
+                        new vscode.Position(selectionLine, range.start.character),
+                        new vscode.Position(selectionLine, range.start.character + edit.newText.indexOf("(")));
                     workspaceEdits.replace(uri, range, edit.newText);
                 }
             }
-            modifiedDocument = uri;
         }
 
-        if (modifiedDocument === undefined || lastEdit === undefined) {
+        if (newFunctionDefinitionDocument === undefined || newFunctionDefinitionEdit === undefined) {
             return;
         }
 
-        // Apply the create declaration/definition text edits.
+        // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits);
 
-        // Move the cursor to the new declaration/definition edit, accounting for \n or \n\n at the start.
-        let startLine: number = lastEdit.range.start.line;
-        let numNewlines: number = (lastEdit.newText.match(/\n/g) ?? []).length;
-        if (lastEdit.newText.startsWith("\r\n\r\n") || lastEdit.newText.startsWith("\n\n")) {
+        // Move the cursor to the new function definition edit, accounting for \n or \n\n at the start.
+        let startLine: number = newFunctionDefinitionEdit.range.start.line;
+        let numNewlines: number = (newFunctionDefinitionEdit.newText.match(/\n/g) ?? []).length;
+        if (newFunctionDefinitionEdit.newText.startsWith("\r\n\r\n") || newFunctionDefinitionEdit.newText.startsWith("\n\n")) {
             startLine += 2;
             numNewlines -= 2;
-        } else if (lastEdit.newText.startsWith("\r\n") || lastEdit.newText.startsWith("\n")) {
+        } else if (newFunctionDefinitionEdit.newText.startsWith("\r\n") || newFunctionDefinitionEdit.newText.startsWith("\n")) {
             startLine += 1;
             numNewlines -= 1;
         }
-        if (!lastEdit.newText.endsWith("\n")) {
+        if (!newFunctionDefinitionEdit.newText.endsWith("\n")) {
             numNewlines++; // Increase the format range.
         }
 
         const selectionPosition: vscode.Position = new vscode.Position(startLine + selectionPositionAdjustment, 0);
         const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
-        await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
 
         // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
-        const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(modifiedDocument)?.uri);
+        const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(newFunctionDefinitionDocument)?.uri);
         const formatOptions: vscode.FormattingOptions = {
             insertSpaces: settings.editorInsertSpaces ?? true,
             tabSize: settings.editorTabSize ?? 4
         };
-        const versionBeforeFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
-        if (versionBeforeFormatting === undefined) {
-            return;
+        const versionBeforeFormatting: number | undefined = openFileVersions.get(newFunctionDefinitionDocument.toString());
+
+        try {
+            if (versionBeforeFormatting === undefined) {
+                return;
+            }
+            const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", newFunctionDefinitionDocument, formatRange, formatOptions);
+            if (formatTextEdits && formatTextEdits.length > 0) {
+                formatEdits.set(newFunctionDefinitionDocument, formatTextEdits);
+            }
+            if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
+                return;
+            }
+            // Only apply formatting if the document version hasn't changed to prevent
+            // stale formatting results from being applied.
+            const versionAfterFormatting: number | undefined = openFileVersions.get(newFunctionDefinitionDocument.toString());
+            if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
+                return;
+            }
+            await vscode.workspace.applyEdit(formatEdits);
+        } finally {
+            await vscode.window.showTextDocument(newFunctionDefinitionDocument, { selection: replaceRange });
         }
-        const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", modifiedDocument, formatRange, formatOptions);
-        if (formatTextEdits && formatTextEdits.length > 0) {
-            formatEdits.set(modifiedDocument, formatTextEdits);
-        }
-        if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
-            return;
-        }
-        // Only apply formatting if the document version hasn't changed to prevent
-        // stale formatting results from being applied.
-        const versionAfterFormatting: number | undefined = openFileVersions.get(modifiedDocument.toString());
-        if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
-            return;
-        }
-        await vscode.workspace.applyEdit(formatEdits);
     }
 
     public onInterval(): void {
