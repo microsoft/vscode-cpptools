@@ -97,7 +97,6 @@ interface ConfigStateReceived {
     timeout: boolean;
 }
 
-let scanForCompilersDone: boolean = false;
 let workspaceHash: string = "";
 
 let workspaceDisposables: vscode.Disposable[] = [];
