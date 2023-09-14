@@ -1131,7 +1131,7 @@ export class DefaultClient implements Client {
             return;
         }
         if (compilerDefaults.compilerPath !== "") {
-            const showCompilersOnly: boolean = util.isString(sender) && sender.toString() === 'walkthrough';
+            const showCompilersOnly: boolean = util.getSenderType(sender) === 'walkthrough';
             return this.handleIntelliSenseConfigurationQuickPick(sender, showCompilersOnly);
         }
     }
