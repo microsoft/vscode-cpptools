@@ -529,7 +529,11 @@ export interface TextDocumentWillSaveParams {
     reason: vscode.TextDocumentSaveReason;
 }
 
-interface InitializationOptions {
+interface LspInitializationOptions {
+    loggingLevel: number;
+}
+
+interface CppInitializationParams {
     packageVersion: string;
     extensionPath: string;
     cacheStoragePath: string;
@@ -548,11 +552,6 @@ interface InitializationOptions {
 interface TagParseStatus {
     localizeStringParams: LocalizeStringParams;
     isPaused: boolean;
-}
-
-export interface DebugLogParams {
-    content: LocalizeStringParams;
-    level: number;
 }
 
 // Requests
@@ -594,7 +593,7 @@ const PreviewReferencesNotification: NotificationType<void> = new NotificationTy
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
-const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
+const InitializationNotification: NotificationType<CppInitializationParams> = new NotificationType<CppInitializationParams>('cpptools/initialize');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -609,7 +608,7 @@ const LogTelemetryNotification: NotificationType<TelemetryPayload> = new Notific
 const ReportTagParseStatusNotification: NotificationType<TagParseStatus> = new NotificationType<TagParseStatus>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
-const DebugLogNotification: NotificationType<DebugLogParams> = new NotificationType<DebugLogParams>('cpptools/debugLog');
+const DebugLogNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/debugLog');
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
@@ -1598,7 +1597,7 @@ export class DefaultClient implements Client {
         const databaseStoragePath: string = (cacheStoragePath.length > 0) && (workspaceHash.length > 0) ?
             path.join(cacheStoragePath, workspaceHash) : "";
 
-        const initializationOptions: InitializationOptions = {
+        const cppInitializationParams: CppInitializationParams = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
             databaseStoragePath: databaseStoragePath,
@@ -1614,12 +1613,18 @@ export class DefaultClient implements Client {
             settings: this.getAllSettings()
         };
 
+        this.loggingLevel = util.getNumericLoggingLevel(cppInitializationParams.settings.loggingLevel);
+        const lspInitializationOptions: LspInitializationOptions = {
+            loggingLevel: this.loggingLevel
+        };
+
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'c' },
                 { scheme: 'file', language: 'cpp' },
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
+            initializationOptions: lspInitializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
                 error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
@@ -1652,20 +1657,13 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        this.loggingLevel = util.getNumericLoggingLevel(initializationOptions.settings.loggingLevel);
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
-        languageClient.onNotification(DebugLogNotification, (e) => this.debugLog(e));
+        languageClient.onNotification(DebugLogNotification, logLocalized);
         languageClient.registerProposedFeatures();
         await languageClient.start();
         // Move initialization to a separate message, so we can see log output from it.
-        await languageClient.sendNotification(InitializationNotification, initializationOptions);
-    }
-
-    public debugLog(params: DebugLogParams): void {
-        if (params.level <= this.loggingLevel) {
-            logLocalized(params.content);
-        }
+        await languageClient.sendNotification(InitializationNotification, cppInitializationParams);
     }
 
     public async sendDidChangeSettings(): Promise<void> {
