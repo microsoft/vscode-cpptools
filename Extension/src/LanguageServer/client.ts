@@ -117,16 +117,6 @@ function logTelemetry(notificationBody: TelemetryPayload): void {
     telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
 }
 
-/**
- * listen for logging messages from the language server and print them to the Output window
- */
-function setupOutputHandlers(): void {
-    console.assert(languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
-
-    languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
-    languageClient.onNotification(DebugLogNotification, logLocalized);
-}
-
 /** Note: We should not await on the following functions,
  * or any function that returns a promise acquired from them,
  * vscode.window.showInformationMessage, vscode.window.showWarningMessage, vscode.window.showErrorMessage
@@ -560,6 +550,11 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
+export interface DebugLogParams {
+    content: LocalizeStringParams;
+    level: number;
+}
+
 // Requests
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
@@ -614,7 +609,7 @@ const LogTelemetryNotification: NotificationType<TelemetryPayload> = new Notific
 const ReportTagParseStatusNotification: NotificationType<TagParseStatus> = new NotificationType<TagParseStatus>('cpptools/reportTagParseStatus');
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
-const DebugLogNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/debugLog');
+const DebugLogNotification: NotificationType<DebugLogParams> = new NotificationType<DebugLogParams>('cpptools/debugLog');
 const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
@@ -831,7 +826,7 @@ export class DefaultClient implements Client {
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
-    private loggingLevel: string | undefined;
+    private loggingLevel: number = 1;
     private configurationProvider?: string;
 
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
@@ -1657,13 +1652,20 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        this.loggingLevel = initializationOptions.settings.loggingLevel;
+        this.loggingLevel = util.getNumericLoggingLevel(initializationOptions.settings.loggingLevel);
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
-        setupOutputHandlers();
+        languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
+        languageClient.onNotification(DebugLogNotification, (e) => this.debugLog(e));
         languageClient.registerProposedFeatures();
         await languageClient.start();
         // Move initialization to a separate message, so we can see log output from it.
         await languageClient.sendNotification(InitializationNotification, initializationOptions);
+    }
+
+    public debugLog(params: DebugLogParams): void {
+        if (params.level <= this.loggingLevel) {
+            logLocalized(params.content);
+        }
     }
 
     public async sendDidChangeSettings(): Promise<void> {
@@ -1688,9 +1690,9 @@ export class DefaultClient implements Client {
                     updateLanguageConfigurations();
                 }
                 if (changedSettings["loggingLevel"]) {
-                    const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== "None" && this.loggingLevel !== "Error";
+                    const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== 0 && this.loggingLevel !== 1;
                     const newLoggingLevel: string | undefined = changedSettings["loggingLevel"];
-                    this.loggingLevel = newLoggingLevel;
+                    this.loggingLevel = util.getNumericLoggingLevel(newLoggingLevel);
                     const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
                     if (oldLoggingLevelLogged || newLoggingLevelLogged) {
                         const out: Logger = getOutputChannelLogger();
