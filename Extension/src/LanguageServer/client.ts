@@ -555,6 +555,7 @@ interface TagParseStatus {
 }
 
 // Requests
+const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
@@ -593,7 +594,6 @@ const PreviewReferencesNotification: NotificationType<void> = new NotificationTy
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
-const InitializationNotification: NotificationType<CppInitializationParams> = new NotificationType<CppInitializationParams>('cpptools/initialize');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -1662,8 +1662,11 @@ export class DefaultClient implements Client {
         languageClient.onNotification(DebugLogNotification, logLocalized);
         languageClient.registerProposedFeatures();
         await languageClient.start();
+
         // Move initialization to a separate message, so we can see log output from it.
-        await languageClient.sendNotification(InitializationNotification, cppInitializationParams);
+        // A request is used in order to wait for completion and ensure that no subsequent
+        // higher priority message may be processed before the Initialization request.
+        await languageClient.sendRequest(InitializationRequest, cppInitializationParams);
     }
 
     public async sendDidChangeSettings(): Promise<void> {
