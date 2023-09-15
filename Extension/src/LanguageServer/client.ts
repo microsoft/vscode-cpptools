@@ -3734,8 +3734,8 @@ export class DefaultClient implements Client {
                     }
                 }
                 formatUriAndRanges.push({uri, range: new vscode.Range(
-                    new vscode.Position(rangeStartLine, range.start.character),
-                    new vscode.Position(rangeStartLine + nextLineOffset, range.end.character))});
+                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
+                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset), range.end.character))});
                 let rangeStartCharacter: number = 0;
                 if (edit.newText.startsWith("\r\n\r\n")) {
                     rangeStartCharacter = 4;
@@ -3773,9 +3773,11 @@ export class DefaultClient implements Client {
         // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits);
 
+        const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
+        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
+        await vscode.commands.executeCommand("editor.action.rename", firstUri, replaceEditRange.start);
+
         // Format the new text edits.
-        // TODO: Subsequent format and rename operations will fail if a format causes newlines to be
-        // add that cause the previously calculated lines to be incorrect. Usually that should be rare though?
         for (const formatUriAndRange of formatUriAndRanges) {
             const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(formatUriAndRange.uri)?.uri);
@@ -3783,11 +3785,11 @@ export class DefaultClient implements Client {
                 insertSpaces: settings.editorInsertSpaces ?? true,
                 tabSize: settings.editorTabSize ?? 4
             };
-            const versionBeforeFormatting: number | undefined = openFileVersions.get(formatUriAndRange.uri.toString());
 
-            await (async () => {
+            const doFormat = async () => {
+                const versionBeforeFormatting: number | undefined = openFileVersions.get(formatUriAndRange.uri.toString());
                 if (versionBeforeFormatting === undefined) {
-                    return;
+                    return true;
                 }
                 const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
                     "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
@@ -3795,20 +3797,22 @@ export class DefaultClient implements Client {
                     formatEdits.set(formatUriAndRange.uri, formatTextEdits);
                 }
                 if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
-                    return;
+                    return true;
                 }
                 // Only apply formatting if the document version hasn't changed to prevent
                 // stale formatting results from being applied.
                 const versionAfterFormatting: number | undefined = openFileVersions.get(formatUriAndRange.uri.toString());
                 if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
-                    return;
+                    return false;
                 }
                 await vscode.workspace.applyEdit(formatEdits);
-            })();
+                return true;
+            };
+            if (!await doFormat())
+            {
+                await doFormat(); // Try again;
+            }
         }
-        const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
-        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
-        await vscode.commands.executeCommand("editor.action.rename", firstUri, replaceEditRange.start);
     }
 
     public renameDataForExtractToFunction: VsCodeUriAndRange[] = [];
