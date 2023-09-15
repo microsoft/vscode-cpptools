@@ -387,7 +387,6 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.length = 0;
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SwitchHeaderSource', enabled ? onSwitchHeaderSource : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ResetDatabase', enabled ? onResetDatabase : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectDefaultCompiler', enabled ? selectDefaultCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.SelectIntelliSenseConfiguration', enabled ? selectIntelliSenseConfiguration : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.InstallCompiler', enabled ? installCompiler : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ConfigurationSelect', enabled ? onSelectConfiguration : onDisabledCommand));
@@ -527,11 +526,6 @@ async function onResetDatabase(): Promise<void> {
     clients.ActiveClient.resetDatabase();
 }
 
-async function selectDefaultCompiler(sender?: any): Promise<void> {
-    await clients.ActiveClient.ready;
-    return clients.ActiveClient.promptSelectCompiler(true, sender);
-}
-
 async function onRescanCompilers(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
     return clients.ActiveClient.rescanCompilers(sender);
@@ -539,7 +533,7 @@ async function onRescanCompilers(sender?: any): Promise<void> {
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
-    return clients.ActiveClient.promptSelectIntelliSenseConfiguration(true, sender);
+    return clients.ActiveClient.promptSelectIntelliSenseConfiguration(sender);
 }
 
 async function installCompiler(sender?: any): Promise<void> {
