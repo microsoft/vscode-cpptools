@@ -207,6 +207,11 @@ interface SelectionParams {
     range: Range;
 }
 
+export interface RenameDataForExtractToFunction {
+    uri: vscode.Uri;
+    range: vscode.Range;
+}
+
 interface WorkspaceEditResult {
     edit: WorkspaceEdit;
     errorText?: string;
@@ -3695,67 +3700,91 @@ export class DefaultClient implements Client {
         }
 
         const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let replaceEditRange: vscode.Range | undefined;
+        let hasProcessedReplace: boolean = false;
         let newFunctionDefinitionDocument: vscode.Uri | undefined;
-        let newFunctionDefinitionEdit: vscode.TextEdit | undefined;
-        let replaceRange: vscode.Range | undefined;
-        let selectionPositionAdjustment: number = 0;
+        let newFunctionDefinitionEditRange: vscode.Range | undefined;
+        this.renameDataForExtractToFunction = [];
+        let lineOffset: number = 0;
+        let firstFile: boolean = true;
         for (const file in result.edit.changes) {
+            if (hasProcessedReplace) {
+                firstFile = false;
+                lineOffset = 0;
+            }
             const uri: vscode.Uri = vscode.Uri.file(file);
-            // At most, there will only be four text edits:
-            // 1.) an insert for: #include header file
-            // 2.) an insert for: the new function definition
-            // 3.) a replace for: the new function call
-            // 4.) an insert for: the new function declaration in the header file
+            let nextLineOffset: number = 0;
+            // There will be 3-4 text edits:
+            // Add #include for header file (optional)
+            // Add the new function declaration (in the source or header file)
+            // Replace the selected code with the new function call
+            // Add the new function definition (below the selection)
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
-                if (range.isEmpty) {
+                lineOffset += nextLineOffset;
+                nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
+
+                // Find the editType.
+                if (!range.isEmpty) {
+                    hasProcessedReplace = true;
+                    nextLineOffset -= range.end.line - range.start.line;
+                    workspaceEdits.replace(uri, range, edit.newText);
+                } else {
                     workspaceEdits.insert(uri, range.start, edit.newText);
-                    if (newFunctionDefinitionDocument === undefined) {
-                        if (edit.newText.includes("#include")) {
-                            selectionPositionAdjustment = (edit.newText.match(/\n/g) ?? []).length;
-                        } else {
+                    if (firstFile) {
+                        if (hasProcessedReplace) {
                             newFunctionDefinitionDocument = uri;
-                            newFunctionDefinitionEdit = new vscode.TextEdit(range, edit.newText);
+                            newFunctionDefinitionEditRange = new vscode.Range(
+                                new vscode.Position(range.start.line + lineOffset, range.start.character),
+                                new vscode.Position(range.end.line + lineOffset + nextLineOffset, range.end.character));
+                        } else if (edit.newText.includes("#include")) {
+                            continue;
                         }
                     }
-                } else {
-                    const selectionLine: number = range.start.line + selectionPositionAdjustment;
-                    selectionPositionAdjustment += (edit.newText.match(/\n/g) ?? []).length - (range.end.line - range.start.line);
-                    replaceRange = new vscode.Range(
-                        new vscode.Position(selectionLine, range.start.character),
-                        new vscode.Position(selectionLine, range.start.character + edit.newText.indexOf("(")));
-                    workspaceEdits.replace(uri, range, edit.newText);
                 }
+
+                let rangeStartCharacter: number = 0;
+                let rangeStartLine: number = range.start.line + lineOffset;
+                if (edit.newText.startsWith("\r\n\r\n")) {
+                    rangeStartCharacter = 4;
+                    rangeStartLine += 2;
+                } else if (edit.newText.startsWith("\n\n")) {
+                    rangeStartCharacter = 2;
+                    rangeStartLine += 2;
+                } else if (edit.newText.startsWith("\r\n")) {
+                    rangeStartCharacter = 2;
+                    rangeStartLine += 1;
+                } else if (edit.newText.startsWith("\n")) {
+                    rangeStartCharacter = 1;
+                    rangeStartLine += 1;
+                }
+                const newFunctionString: string = "NewFunction";
+                rangeStartCharacter = (rangeStartCharacter === 0 ? range.start.character : 0) +
+                    edit.newText.substring(rangeStartCharacter).indexOf(newFunctionString);
+                if (rangeStartCharacter < 0) {
+                    continue;
+                }
+                const currentEditRange: vscode.Range = new vscode.Range(
+                    new vscode.Position(rangeStartLine, rangeStartCharacter),
+                    new vscode.Position(rangeStartLine, rangeStartCharacter + newFunctionString.length));
+                if (!range.isEmpty) {
+                    replaceEditRange = currentEditRange;
+                }
+                this.renameDataForExtractToFunction.push({ uri, range: currentEditRange });
             }
         }
 
-        if (newFunctionDefinitionDocument === undefined || newFunctionDefinitionEdit === undefined || replaceRange === undefined) {
+        if (newFunctionDefinitionDocument === undefined || replaceEditRange === undefined ||
+            newFunctionDefinitionEditRange === undefined) {
             return;
         }
 
         // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits);
 
-        // Move the cursor to the new function definition edit, accounting for \n or \n\n at the start.
-        let startLine: number = newFunctionDefinitionEdit.range.start.line;
-        let numNewlines: number = (newFunctionDefinitionEdit.newText.match(/\n/g) ?? []).length;
-        if (newFunctionDefinitionEdit.newText.startsWith("\r\n\r\n") || newFunctionDefinitionEdit.newText.startsWith("\n\n")) {
-            startLine += 2;
-            numNewlines -= 2;
-        } else if (newFunctionDefinitionEdit.newText.startsWith("\r\n") || newFunctionDefinitionEdit.newText.startsWith("\n")) {
-            startLine += 1;
-            numNewlines -= 1;
-        }
-        if (!newFunctionDefinitionEdit.newText.endsWith("\n")) {
-            numNewlines++; // Increase the format range.
-        }
-
-        const selectionPosition: vscode.Position = new vscode.Position(startLine + selectionPositionAdjustment, 0);
-        const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
-
         // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        const formatRange: vscode.Range = new vscode.Range(selectionRange.start, new vscode.Position(selectionRange.start.line + numNewlines, 0));
+        const formatRange: vscode.Range = newFunctionDefinitionEditRange;
         const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(newFunctionDefinitionDocument)?.uri);
         const formatOptions: vscode.FormattingOptions = {
             insertSpaces: settings.editorInsertSpaces ?? true,
@@ -3782,9 +3811,11 @@ export class DefaultClient implements Client {
             }
             await vscode.workspace.applyEdit(formatEdits);
         })();
-        await vscode.window.showTextDocument(newFunctionDefinitionDocument, { selection: replaceRange });
-        void vscode.commands.executeCommand("editor.action.rename");
+        await vscode.window.showTextDocument(newFunctionDefinitionDocument, { selection: replaceEditRange });
+        await vscode.commands.executeCommand("editor.action.rename", newFunctionDefinitionDocument, replaceEditRange.start);
     }
+
+    public renameDataForExtractToFunction: RenameDataForExtractToFunction[] = [];
 
     public onInterval(): void {
         // These events can be discarded until the language client is ready.

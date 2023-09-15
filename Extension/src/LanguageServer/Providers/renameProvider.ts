@@ -7,7 +7,7 @@ import { Position, RequestType } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import * as util from '../../common';
 import { DefaultClient, workspaceReferences } from '../client';
-import { CancellationSender, getReferenceItemIconPath, getReferenceTagString, ReferencesParams, ReferencesResult, ReferenceType } from '../references';
+import { CancellationSender, ReferenceType, ReferencesParams, ReferencesResult, getReferenceItemIconPath, getReferenceTagString } from '../references';
 import { CppSettings } from '../settings';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
@@ -24,6 +24,16 @@ export class RenameProvider implements vscode.RenameProvider {
     }
 
     public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, _token: vscode.CancellationToken):   Promise<vscode.WorkspaceEdit | undefined> {
+        // By pass the normal rename processing during Extract to Function,
+        // since we already know the locations of the required edits.
+        if (this.client.renameDataForExtractToFunction.length > 0) {
+            const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            for (const renameData of this.client.renameDataForExtractToFunction) {
+                workspaceEditResult.replace(renameData.uri, renameData.range, newName);
+            }
+            this.client.renameDataForExtractToFunction = [];
+            return workspaceEditResult;
+        }
         await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
