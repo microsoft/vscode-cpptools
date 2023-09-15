@@ -207,7 +207,7 @@ interface SelectionParams {
     range: Range;
 }
 
-export interface RenameDataForExtractToFunction {
+export interface VsCodeUriAndRange {
     uri: vscode.Uri;
     range: vscode.Range;
 }
@@ -3662,8 +3662,6 @@ export class DefaultClient implements Client {
         await vscode.workspace.applyEdit(formatEdits);
     }
 
-    // TODO: This is currently largely identical to handleCreateDeclarationOrDefinition.
-    // I'm not sure yet how this will deviate in the future.
     public async handleExtractToFunction(isMemberFunction: boolean): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor || editor.selection.isEmpty) {
@@ -3702,14 +3700,13 @@ export class DefaultClient implements Client {
         const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let replaceEditRange: vscode.Range | undefined;
         let hasProcessedReplace: boolean = false;
-        let newFunctionDefinitionDocument: vscode.Uri | undefined;
-        let newFunctionDefinitionEditRange: vscode.Range | undefined;
+        const formatUriAndRanges: VsCodeUriAndRange[] = [];
         this.renameDataForExtractToFunction = [];
         let lineOffset: number = 0;
-        let firstFile: boolean = true;
+        let isFirstFile: boolean = true;
         for (const file in result.edit.changes) {
             if (hasProcessedReplace) {
-                firstFile = false;
+                isFirstFile = false;
                 lineOffset = 0;
             }
             const uri: vscode.Uri = vscode.Uri.file(file);
@@ -3723,6 +3720,7 @@ export class DefaultClient implements Client {
                 const range: vscode.Range = makeVscodeRange(edit.range);
                 lineOffset += nextLineOffset;
                 nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
+                let rangeStartLine: number = range.start.line + lineOffset;
 
                 // Find the editType.
                 if (!range.isEmpty) {
@@ -3731,20 +3729,14 @@ export class DefaultClient implements Client {
                     workspaceEdits.replace(uri, range, edit.newText);
                 } else {
                     workspaceEdits.insert(uri, range.start, edit.newText);
-                    if (firstFile) {
-                        if (hasProcessedReplace) {
-                            newFunctionDefinitionDocument = uri;
-                            newFunctionDefinitionEditRange = new vscode.Range(
-                                new vscode.Position(range.start.line + lineOffset, range.start.character),
-                                new vscode.Position(range.end.line + lineOffset + nextLineOffset, range.end.character));
-                        } else if (edit.newText.includes("#include")) {
-                            continue;
-                        }
+                    if (isFirstFile && !hasProcessedReplace && edit.newText.includes("#include")) {
+                        continue;
                     }
                 }
-
+                formatUriAndRanges.push({uri, range: new vscode.Range(
+                    new vscode.Position(rangeStartLine, range.start.character),
+                    new vscode.Position(rangeStartLine + nextLineOffset, range.end.character))});
                 let rangeStartCharacter: number = 0;
-                let rangeStartLine: number = range.start.line + lineOffset;
                 if (edit.newText.startsWith("\r\n\r\n")) {
                     rangeStartCharacter = 4;
                     rangeStartLine += 2;
@@ -3774,8 +3766,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (newFunctionDefinitionDocument === undefined || replaceEditRange === undefined ||
-            newFunctionDefinitionEditRange === undefined) {
+        if (replaceEditRange === undefined || formatUriAndRanges.length === 0) {
             return;
         }
 
@@ -3783,39 +3774,44 @@ export class DefaultClient implements Client {
         await vscode.workspace.applyEdit(workspaceEdits);
 
         // Format the new text edits.
-        const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        const formatRange: vscode.Range = newFunctionDefinitionEditRange;
-        const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(newFunctionDefinitionDocument)?.uri);
-        const formatOptions: vscode.FormattingOptions = {
-            insertSpaces: settings.editorInsertSpaces ?? true,
-            tabSize: settings.editorTabSize ?? 4
-        };
-        const versionBeforeFormatting: number | undefined = openFileVersions.get(newFunctionDefinitionDocument.toString());
+        // TODO: Subsequent format and rename operations will fail if a format causes newlines to be
+        // add that cause the previously calculated lines to be incorrect. Usually that should be rare though?
+        for (const formatUriAndRange of formatUriAndRanges) {
+            const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(formatUriAndRange.uri)?.uri);
+            const formatOptions: vscode.FormattingOptions = {
+                insertSpaces: settings.editorInsertSpaces ?? true,
+                tabSize: settings.editorTabSize ?? 4
+            };
+            const versionBeforeFormatting: number | undefined = openFileVersions.get(formatUriAndRange.uri.toString());
 
-        await (async () => {
-            if (versionBeforeFormatting === undefined || newFunctionDefinitionDocument === undefined) {
-                return;
-            }
-            const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatRangeProvider", newFunctionDefinitionDocument, formatRange, formatOptions);
-            if (formatTextEdits && formatTextEdits.length > 0) {
-                formatEdits.set(newFunctionDefinitionDocument, formatTextEdits);
-            }
-            if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
-                return;
-            }
-            // Only apply formatting if the document version hasn't changed to prevent
-            // stale formatting results from being applied.
-            const versionAfterFormatting: number | undefined = openFileVersions.get(newFunctionDefinitionDocument.toString());
-            if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
-                return;
-            }
-            await vscode.workspace.applyEdit(formatEdits);
-        })();
-        await vscode.window.showTextDocument(newFunctionDefinitionDocument, { selection: replaceEditRange });
-        await vscode.commands.executeCommand("editor.action.rename", newFunctionDefinitionDocument, replaceEditRange.start);
+            await (async () => {
+                if (versionBeforeFormatting === undefined) {
+                    return;
+                }
+                const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
+                    "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
+                if (formatTextEdits && formatTextEdits.length > 0) {
+                    formatEdits.set(formatUriAndRange.uri, formatTextEdits);
+                }
+                if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
+                    return;
+                }
+                // Only apply formatting if the document version hasn't changed to prevent
+                // stale formatting results from being applied.
+                const versionAfterFormatting: number | undefined = openFileVersions.get(formatUriAndRange.uri.toString());
+                if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
+                    return;
+                }
+                await vscode.workspace.applyEdit(formatEdits);
+            })();
+        }
+        const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
+        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
+        await vscode.commands.executeCommand("editor.action.rename", firstUri, replaceEditRange.start);
     }
 
-    public renameDataForExtractToFunction: RenameDataForExtractToFunction[] = [];
+    public renameDataForExtractToFunction: VsCodeUriAndRange[] = [];
 
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
