@@ -1182,8 +1182,6 @@ export function getSenderType(sender?: any): string {
         return sender;
     } else if (isUri(sender)) {
         return 'contextMenu';
-    } else if (sender?.sender) {
-        return sender.sender; // The walkthrough buttons send an object with a 'sender' property.
     }
     return 'commandPalette';
 }
@@ -1520,4 +1518,31 @@ export function hasMsvcEnvironment(): boolean {
         'WindowsSDKVersion'
     ];
     return msvcEnvVars.every((envVarName) => process.env[envVarName] !== undefined && process.env[envVarName] !== '');
+}
+
+function isIntegral(str: string): boolean {
+    const regex = /^-?\d+$/;
+    return regex.test(str);
+}
+
+export function getNumericLoggingLevel(loggingLevel: string | undefined): number {
+    if (!loggingLevel) {
+        return 1;
+    }
+    if (isIntegral(loggingLevel)) {
+        return parseInt(loggingLevel, 10);
+    }
+    const lowerCaseLoggingLevel: string = loggingLevel.toLowerCase();
+    switch (lowerCaseLoggingLevel) {
+        case "error":
+            return 1;
+        case "warning":
+            return 3;
+        case "information":
+            return 5;
+        case "debug":
+            return 6;
+        default:
+            return 0;
+    }
 }
