@@ -1530,7 +1530,7 @@ export function getNumericLoggingLevel(loggingLevel: string | undefined): number
         return 1;
     }
     if (isIntegral(loggingLevel)) {
-      return parseInt(loggingLevel, 10);
+        return parseInt(loggingLevel, 10);
     }
     const lowerCaseLoggingLevel: string = loggingLevel.toLowerCase();
     switch (lowerCaseLoggingLevel) {
