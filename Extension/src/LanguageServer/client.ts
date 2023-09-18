@@ -349,7 +349,7 @@ export interface CreateDeclarationOrDefinitionResult extends WorkspaceEditResult
 }
 
 export interface ExtractToFunctionParams extends SelectionParams {
-    isMemberFunction: boolean;
+    extractAsGlobal: boolean;
 }
 
 interface ShowMessageWindowParams {
@@ -810,7 +810,7 @@ export interface Client {
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void>;
     handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void>;
-    handleExtractToFunction(isMemberFunction: boolean): Promise<void>;
+    handleExtractToFunction(extractAsGlobal: boolean): Promise<void>;
     onInterval(): void;
     dispose(): void;
     addFileAssociations(fileAssociations: string, languageId: string): void;
@@ -3662,7 +3662,7 @@ export class DefaultClient implements Client {
         await vscode.workspace.applyEdit(formatEdits);
     }
 
-    public async handleExtractToFunction(isMemberFunction: boolean): Promise<void> {
+    public async handleExtractToFunction(extractAsGlobal: boolean): Promise<void> {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!editor || editor.selection.isEmpty) {
             return;
@@ -3680,7 +3680,7 @@ export class DefaultClient implements Client {
                     line: editor.selection.end.line
                 }
             },
-            isMemberFunction
+            extractAsGlobal
         };
 
         const result: WorkspaceEditResult = await this.languageClient.sendRequest(ExtractToFunctionRequest, params);
@@ -4003,7 +4003,7 @@ class NullClient implements Client {
     handleFixCodeAnalysisProblems(workspaceEdit: vscode.WorkspaceEdit, refreshSquigglesOnSave: boolean, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleDisableAllTypeCodeAnalysisProblems(code: string, identifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[]): Promise<void> { return Promise.resolve(); }
     handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> { return Promise.resolve(); }
-    handleExtractToFunction(isMemberFunction: boolean): Promise<void> { return Promise.resolve(); }
+    handleExtractToFunction(extractAsGlobal: boolean): Promise<void> { return Promise.resolve(); }
     onInterval(): void { }
     dispose(): void {
         this.booleanEvent.dispose();
