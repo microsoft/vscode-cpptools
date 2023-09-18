@@ -79,15 +79,8 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
     return initializationPromise;
 }
 
-export async function showLanguageStatusExperiment(): Promise<boolean> {
-    return isExperimentEnabled("ShowLangStatBar");
-}
-
-export async function showStatusBarIntelliSenseButton(): Promise<boolean> {
-    const result: boolean = await isExperimentEnabled("showStatusBarIntelliSenseIndicator");
-    return result;
-}
-
+// @ts-expect-error The function isExperimentEnabled will be used for future experiments.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
@@ -102,7 +95,7 @@ export async function deactivate(): Promise<void> {
     await experimentationTelemetry?.dispose().catch(logAndReturn.undefined);
 }
 
-export function logDebuggerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
+export function logDebuggerEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
     const sendTelemetry = () => {
         if (experimentationTelemetry) {
             const eventNamePrefix: string = "cppdbg/VS/Diagnostics/Debugger/";
@@ -118,7 +111,7 @@ export function logDebuggerEvent(eventName: string, properties?: { [key: string]
     sendTelemetry();
 }
 
-export function logLanguageServerEvent(eventName: string, properties?: { [key: string]: string }, metrics?: { [key: string]: number }): void {
+export function logLanguageServerEvent(eventName: string, properties?: Record<string, string>, metrics?: Record<string, number>): void {
     const sendTelemetry = () => {
         if (experimentationTelemetry) {
             const eventNamePrefix: string = "C_Cpp/LanguageServer/";
