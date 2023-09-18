@@ -115,16 +115,6 @@ function logTelemetry(notificationBody: TelemetryPayload): void {
     telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
 }
 
-/**
- * listen for logging messages from the language server and print them to the Output window
- */
-function setupOutputHandlers(): void {
-    console.assert(languageClient !== undefined, "This method must not be called until this.languageClient is set in \"onReady\"");
-
-    languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
-    languageClient.onNotification(DebugLogNotification, logLocalized);
-}
-
 /** Note: We should not await on the following functions,
  * or any function that returns a promise acquired from them,
  * vscode.window.showInformationMessage, vscode.window.showWarningMessage, vscode.window.showErrorMessage
@@ -537,7 +527,11 @@ export interface TextDocumentWillSaveParams {
     reason: vscode.TextDocumentSaveReason;
 }
 
-interface InitializationOptions {
+interface LspInitializationOptions {
+    loggingLevel: number;
+}
+
+interface CppInitializationParams {
     packageVersion: string;
     extensionPath: string;
     cacheStoragePath: string;
@@ -559,6 +553,7 @@ interface TagParseStatus {
 }
 
 // Requests
+const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
@@ -597,7 +592,6 @@ const PreviewReferencesNotification: NotificationType<void> = new NotificationTy
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
-const InitializationNotification: NotificationType<InitializationOptions> = new NotificationType<InitializationOptions>('cpptools/initialize');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -828,7 +822,7 @@ export class DefaultClient implements Client {
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
-    private loggingLevel: string | undefined;
+    private loggingLevel: number = 1;
     private configurationProvider?: string;
 
     public lastCustomBrowseConfiguration: PersistentFolderState<WorkspaceBrowseConfiguration | undefined> | undefined;
@@ -1522,7 +1516,7 @@ export class DefaultClient implements Client {
         const databaseStoragePath: string = (cacheStoragePath.length > 0) && (workspaceHash.length > 0) ?
             path.join(cacheStoragePath, workspaceHash) : "";
 
-        const initializationOptions: InitializationOptions = {
+        const cppInitializationParams: CppInitializationParams = {
             packageVersion: util.packageJson.version,
             extensionPath: util.extensionPath,
             databaseStoragePath: databaseStoragePath,
@@ -1538,12 +1532,18 @@ export class DefaultClient implements Client {
             settings: this.getAllSettings()
         };
 
+        this.loggingLevel = util.getNumericLoggingLevel(cppInitializationParams.settings.loggingLevel);
+        const lspInitializationOptions: LspInitializationOptions = {
+            loggingLevel: this.loggingLevel
+        };
+
         const clientOptions: LanguageClientOptions = {
             documentSelector: [
                 { scheme: 'file', language: 'c' },
                 { scheme: 'file', language: 'cpp' },
                 { scheme: 'file', language: 'cuda-cpp' }
             ],
+            initializationOptions: lspInitializationOptions,
             middleware: createProtocolFilter(),
             errorHandler: {
                 error: (_error, _message, _count) => ({ action: ErrorAction.Continue }),
@@ -1576,13 +1576,16 @@ export class DefaultClient implements Client {
         };
 
         // Create the language client
-        this.loggingLevel = initializationOptions.settings.loggingLevel;
         languageClient = new LanguageClient(`cpptools`, serverOptions, clientOptions);
-        setupOutputHandlers();
+        languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
+        languageClient.onNotification(DebugLogNotification, logLocalized);
         languageClient.registerProposedFeatures();
         await languageClient.start();
+
         // Move initialization to a separate message, so we can see log output from it.
-        await languageClient.sendNotification(InitializationNotification, initializationOptions);
+        // A request is used in order to wait for completion and ensure that no subsequent
+        // higher priority message may be processed before the Initialization request.
+        await languageClient.sendRequest(InitializationRequest, cppInitializationParams);
     }
 
     public async sendDidChangeSettings(): Promise<void> {
@@ -1607,9 +1610,9 @@ export class DefaultClient implements Client {
                     updateLanguageConfigurations();
                 }
                 if (changedSettings.loggingLevel) {
-                    const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== "None" && this.loggingLevel !== "Error";
+                    const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== 0 && this.loggingLevel !== 1;
                     const newLoggingLevel: string | undefined = changedSettings.loggingLevel;
-                    this.loggingLevel = newLoggingLevel;
+                    this.loggingLevel = util.getNumericLoggingLevel(newLoggingLevel);
                     const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
                     if (oldLoggingLevelLogged || newLoggingLevelLogged) {
                         const out: Logger = getOutputChannelLogger();
