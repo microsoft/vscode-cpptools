@@ -11,7 +11,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import * as vscode from 'vscode';
-import { DocumentFilter } from 'vscode-languageclient';
+import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
@@ -1545,4 +1545,42 @@ export function getNumericLoggingLevel(loggingLevel: string | undefined): number
         default:
             return 0;
     }
+}
+
+export function mergeOverlappingRanges(ranges: Range[]): Range[] {
+    // Fix any reversed ranges. Not sure if this is needed, but ensures the input is sanitized.
+    const mergedRanges: Range[] = ranges.map(range => {
+        if (range.start.line > range.end.line || (range.start.line === range.end.line && range.start.character > range.end.character)) {
+            return Range.create(range.end, range.start);
+        }
+        return range;
+    });
+
+    // Merge overlapping ranges.
+    mergedRanges.sort((a, b) => a.start.line - b.start.line || a.start.character - b.start.character);
+    let lastMergedIndex = 0; // Index to keep track of the last merged range
+    for (let currentIndex = 0; currentIndex < ranges.length; currentIndex++) {
+        const currentRange = ranges[currentIndex]; // No need for a shallow copy, since we're not modifying the ranges we haven't read yet.
+        let nextIndex = currentIndex + 1;
+        while (nextIndex < ranges.length) {
+            const nextRange = ranges[nextIndex];
+            // Check for non-overlapping ranges first
+            if (nextRange.start.line > currentRange.end.line ||
+                (nextRange.start.line === currentRange.end.line && nextRange.start.character > currentRange.end.character)) {
+                break;
+            }
+            // Otherwise, merge the overlapping ranges
+            currentRange.end = {
+                line: Math.max(currentRange.end.line, nextRange.end.line),
+                character: Math.max(currentRange.end.character, nextRange.end.character)
+            };
+            nextIndex++;
+        }
+        // Overwrite the array in-place
+        mergedRanges[lastMergedIndex] = currentRange;
+        lastMergedIndex++;
+        currentIndex = nextIndex - 1; // Skip the merged ranges
+    }
+    mergedRanges.length = lastMergedIndex;
+    return mergedRanges;
 }
