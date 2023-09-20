@@ -3774,6 +3774,7 @@ export class DefaultClient implements Client {
                     new vscode.Position(rangeStartLine, rangeStartCharacter + newFunctionString.length));
                 if (isReplace) {
                     replaceEditRange = currentEditRange;
+                    nextLineOffset -= range.end.line - range.start.line;
                 }
                 this.renameDataForExtractToFunction.push({ uri, range: currentEditRange });
             }
