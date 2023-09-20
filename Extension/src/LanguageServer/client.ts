@@ -3718,14 +3718,14 @@ export class DefaultClient implements Client {
             // Add the new function definition (below the selection)
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
+                const isReplace: boolean = !range.isEmpty;
                 lineOffset += nextLineOffset;
                 nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
                 let rangeStartLine: number = range.start.line + lineOffset;
 
                 // Find the editType.
-                if (!range.isEmpty) {
+                if (isReplace) {
                     hasProcessedReplace = true;
-                    nextLineOffset -= range.end.line - range.start.line;
                     workspaceEdits.replace(uri, range, edit.newText);
                 } else {
                     workspaceEdits.insert(uri, range.start, edit.newText);
@@ -3733,9 +3733,6 @@ export class DefaultClient implements Client {
                         continue;
                     }
                 }
-                formatUriAndRanges.push({uri, range: new vscode.Range(
-                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
-                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset), range.end.character))});
                 let rangeStartCharacter: number = 0;
                 if (edit.newText.startsWith("\r\n\r\n")) {
                     rangeStartCharacter = 4;
@@ -3750,16 +3747,32 @@ export class DefaultClient implements Client {
                     rangeStartCharacter = 1;
                     rangeStartLine += 1;
                 }
+                formatUriAndRanges.push({uri, range: new vscode.Range(
+                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
+                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
+                        (isReplace ? range.end.character :
+                            range.end.character + edit.newText.length - rangeStartCharacter)))});
                 const newFunctionString: string = "NewFunction";
+
+                // Handle additional declaration lines added before the new function call.
+                let currentText: string = edit.newText.substring(rangeStartCharacter);
+                let currentTextNextLineStart: number = currentText.indexOf("\n");
+                let currentTextNewFunctionStart: number = currentText.indexOf(newFunctionString);
+                while (currentTextNextLineStart !== -1 && currentTextNextLineStart < currentTextNewFunctionStart) {
+                    ++rangeStartLine;
+                    currentText = currentText.substring(currentTextNextLineStart + 1);
+                    currentTextNextLineStart = currentText.indexOf("\n");
+                    currentTextNewFunctionStart = currentText.indexOf(newFunctionString);
+                }
                 rangeStartCharacter = (rangeStartCharacter === 0 ? range.start.character : 0) +
-                    edit.newText.substring(rangeStartCharacter).indexOf(newFunctionString);
+                    currentTextNewFunctionStart;
                 if (rangeStartCharacter < 0) {
                     continue;
                 }
                 const currentEditRange: vscode.Range = new vscode.Range(
                     new vscode.Position(rangeStartLine, rangeStartCharacter),
                     new vscode.Position(rangeStartLine, rangeStartCharacter + newFunctionString.length));
-                if (!range.isEmpty) {
+                if (isReplace) {
                     replaceEditRange = currentEditRange;
                 }
                 this.renameDataForExtractToFunction.push({ uri, range: currentEditRange });
@@ -3778,8 +3791,8 @@ export class DefaultClient implements Client {
         await vscode.commands.executeCommand("editor.action.rename", firstUri, replaceEditRange.start);
 
         // Format the new text edits.
+        const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         for (const formatUriAndRange of formatUriAndRanges) {
-            const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
             const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(formatUriAndRange.uri)?.uri);
             const formatOptions: vscode.FormattingOptions = {
                 insertSpaces: settings.editorInsertSpaces ?? true,
@@ -3793,10 +3806,7 @@ export class DefaultClient implements Client {
                 }
                 const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
                     "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
-                if (formatTextEdits && formatTextEdits.length > 0) {
-                    formatEdits.set(formatUriAndRange.uri, formatTextEdits);
-                }
-                if (formatEdits.size === 0 || versionBeforeFormatting === undefined) {
+                if (!formatTextEdits || formatTextEdits.length === 0 || versionBeforeFormatting === undefined) {
                     return true;
                 }
                 // Only apply formatting if the document version hasn't changed to prevent
@@ -3805,13 +3815,17 @@ export class DefaultClient implements Client {
                 if (versionAfterFormatting === undefined || versionAfterFormatting > versionBeforeFormatting) {
                     return false;
                 }
-                await vscode.workspace.applyEdit(formatEdits);
+                formatEdits.set(formatUriAndRange.uri, formatTextEdits);
                 return true;
             };
             if (!await doFormat())
             {
                 await doFormat(); // Try again;
             }
+        }
+
+        if (formatEdits.size > 0) {
+            await vscode.workspace.applyEdit(formatEdits);
         }
     }
 
