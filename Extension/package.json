@@ -3050,6 +3050,22 @@
                         "default": false,
                         "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
                         "scope": "application"
+                    },
+                    "C_Cpp.includeHeader": {
+                        "type": "string",
+                        "enum": [
+                            "always",
+                            "ifNeeded",
+                            "never"
+                        ],
+                        "default": "always",
+                        "markdownDescription": "%c_cpp.configuration.includeHeader.markdownDescription%",
+                        "enumDescriptions": [
+                            "%c_cpp.configuration.includeHeader.always.description%",
+                            "%c_cpp.configuration.includeHeader.ifNeeded.description%",
+                            "%c_cpp.configuration.includeHeader.never.description%"
+                        ],
+                        "scope": "resource"
                     }
                 }
             }
