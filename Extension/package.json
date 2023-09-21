@@ -561,6 +561,22 @@
                         "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
                         "scope": "resource"
                     },
+                    "C_Cpp.refactor.includeHeader": {
+                        "type": "string",
+                        "enum": [
+                            "always",
+                            "ifNeeded",
+                            "never"
+                        ],
+                        "default": "always",
+                        "markdownDescription": "%c_cpp.configuration.refactor.includeHeader.markdownDescription%",
+                        "enumDescriptions": [
+                            "%c_cpp.configuration.refactor.includeHeader.always.description%",
+                            "%c_cpp.configuration.refactor.includeHeader.ifNeeded.description%",
+                            "%c_cpp.configuration.refactor.includeHeader.never.description%"
+                        ],
+                        "scope": "resource"
+                    },
                     "C_Cpp.renameRequiresIdentifier": {
                         "type": "boolean",
                         "default": true,
@@ -3050,22 +3066,6 @@
                         "default": false,
                         "markdownDescription": "%c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription%",
                         "scope": "application"
-                    },
-                    "C_Cpp.includeHeader": {
-                        "type": "string",
-                        "enum": [
-                            "always",
-                            "ifNeeded",
-                            "never"
-                        ],
-                        "default": "always",
-                        "markdownDescription": "%c_cpp.configuration.includeHeader.markdownDescription%",
-                        "enumDescriptions": [
-                            "%c_cpp.configuration.includeHeader.always.description%",
-                            "%c_cpp.configuration.includeHeader.ifNeeded.description%",
-                            "%c_cpp.configuration.includeHeader.never.description%"
-                        ],
-                        "scope": "resource"
                     }
                 }
             }

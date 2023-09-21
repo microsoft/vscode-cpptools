@@ -997,8 +997,8 @@
     "c_cpp.walkthrough.customize.debugging.altText": "Image that shows Add Debug Configuration in the drop-down",
     "c_cpp.codeActions.refactor.inline.macro.title": "Inline macro",
     "c_cpp.codeActions.refactor.inline.macro.description": "Replace the macro invocation with the expanded code.",
-    "c_cpp.configuration.includeHeader.markdownDescription": "Controls whether to include the header file of a refactored function/symbol to its corresponding source file when doing a refactoring action, such as create declaration/definition.",
-    "c_cpp.configuration.includeHeader.always.description": "Always include the header file if it is not included explicitly in its source file.",
-    "c_cpp.configuration.includeHeader.ifNeeded.description": "Only include the header file if it is not included explicitly in its source file or through implicit inclusion.",
-    "c_cpp.configuration.includeHeader.never.description": "Never include the header file."
+    "c_cpp.configuration.refactor.includeHeader.markdownDescription": "Controls whether to include the header file of a refactored function/symbol to its corresponding source file when doing a refactoring action, such as create declaration/definition.",
+    "c_cpp.configuration.refactor.includeHeader.always.description": "Always include the header file if it is not included explicitly in its source file.",
+    "c_cpp.configuration.refactor.includeHeader.ifNeeded.description": "Only include the header file if it is not included explicitly in its source file or through implicit inclusion.",
+    "c_cpp.configuration.refactor.includeHeader.never.description": "Never include the header file."
 }
