@@ -13,7 +13,8 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
         this.client = client;
     }
 
-    public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+    public async provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range,
+        options: vscode.FormattingOptions, token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
         const settings: CppSettings = new CppSettings(vscode.workspace.getWorkspaceFolder(document.uri)?.uri);
         if (settings.formattingEngine === "disabled") {
             return [];
@@ -58,4 +59,12 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
             return configCallBack(editorConfigSettings);
         }
     }
+
+    // TODO: This is needed for Extract to Function formatting.
+    /*
+    public async provideDocumentRangesFormattingEdits(_document: vscode.TextDocument, _ranges: vscode.Range[],
+        _options: vscode.FormattingOptions, _token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
+        return [];
+    }
+    */
 }

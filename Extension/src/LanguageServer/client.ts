@@ -3810,6 +3810,9 @@ export class DefaultClient implements Client {
                 if (versionBeforeFormatting === undefined) {
                     return true;
                 }
+
+                // TODO: Somehow invoke multiple range formatting (see https://github.com/microsoft/vscode/issues/193836).
+                // Maybe call DocumentRangeFormattingEditProvider.provideDocumentRangesFormattingEdits directly.
                 const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
                     "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
                 if (!formatTextEdits || formatTextEdits.length === 0 || versionBeforeFormatting === undefined) {
