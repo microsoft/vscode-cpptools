@@ -3693,7 +3693,7 @@ export class DefaultClient implements Client {
 
         // Handle error messaging
         if (result.errorText) {
-            void vscode.window.showInformationMessage(result.errorText);
+            void vscode.window.showErrorMessage(result.errorText);
             return;
         }
 
@@ -3714,7 +3714,9 @@ export class DefaultClient implements Client {
             // There will be 3-4 text edits:
             // Add #include for header file (optional)
             // Add the new function declaration (in the source or header file)
-            // Replace the selected code with the new function call
+            // Replace the selected code with the new function call,
+            //   plus possibly extra declarations beforehand,
+            //   plus possibly extra return value handling afterwards.
             // Add the new function definition (below the selection)
             for (const edit of result.edit.changes[file]) {
                 const range: vscode.Range = makeVscodeRange(edit.range);
@@ -3767,6 +3769,9 @@ export class DefaultClient implements Client {
                 rangeStartCharacter = (rangeStartCharacter === 0 ? range.start.character : 0) +
                     currentTextNewFunctionStart;
                 if (rangeStartCharacter < 0) {
+                    // newFunctionString is missing -- unexpected error.
+                    void vscode.window.showErrorMessage(`${localize("invalid.edit",
+                        "Extract to Function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
                     continue;
                 }
                 const currentEditRange: vscode.Range = new vscode.Range(
