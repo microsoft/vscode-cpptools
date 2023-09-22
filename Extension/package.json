@@ -561,7 +561,7 @@
                         "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
                         "scope": "resource"
                     },
-                    "C_Cpp.refactor.includeHeader": {
+                    "C_Cpp.refactoring.includeHeader": {
                         "type": "string",
                         "enum": [
                             "always",
@@ -569,11 +569,11 @@
                             "never"
                         ],
                         "default": "always",
-                        "markdownDescription": "%c_cpp.configuration.refactor.includeHeader.markdownDescription%",
+                        "markdownDescription": "%c_cpp.configuration.refactoring.includeHeader.markdownDescription%",
                         "enumDescriptions": [
-                            "%c_cpp.configuration.refactor.includeHeader.always.description%",
-                            "%c_cpp.configuration.refactor.includeHeader.ifNeeded.description%",
-                            "%c_cpp.configuration.refactor.includeHeader.never.description%"
+                            "%c_cpp.configuration.refactoring.includeHeader.always.description%",
+                            "%c_cpp.configuration.refactoring.includeHeader.ifNeeded.description%",
+                            "%c_cpp.configuration.refactoring.includeHeader.never.description%"
                         ],
                         "scope": "resource"
                     },

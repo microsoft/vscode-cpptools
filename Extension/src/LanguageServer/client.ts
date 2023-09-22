@@ -1416,7 +1416,7 @@ export class DefaultClient implements Client {
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
             editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled,
-            includeHeader: settings.includeHeader
+            refactoringIncludeHeader: settings.refactoringIncludeHeader
         };
         return result;
     }
