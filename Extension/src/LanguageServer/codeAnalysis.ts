@@ -8,7 +8,7 @@ import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/n
 import * as nls from 'vscode-nls';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
-import { getLocalizedString, LocalizeStringParams } from './localization';
+import { LocalizeStringParams, getLocalizedString } from './localization';
 import { CppSettings } from './settings';
 import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';
 
@@ -74,7 +74,7 @@ interface CodeActionAllInfo {
 interface CodeAnalysisDiagnosticRelatedInformation {
     location: Location;
     message: string;
-    workspaceEdit?: WorkspaceEdit;
+    workspaceEdits?: WorkspaceEdit[];
 }
 
 interface CodeAnalysisDiagnostic {
@@ -83,7 +83,7 @@ interface CodeAnalysisDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: CodeAnalysisDiagnosticRelatedInformation[];
-    workspaceEdit?: WorkspaceEdit;
+    workspaceEdits?: WorkspaceEdit[];
 }
 
 interface CodeAnalysisDiagnosticIdentifier {
@@ -274,18 +274,18 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 kind: vscode.CodeActionKind.QuickFix
             }
         };
-        const workspaceEdit: CodeActionWorkspaceEdit = {};
-        if (d.workspaceEdit) {
-            workspaceEdit.workspaceEdit = new vscode.WorkspaceEdit();
-            for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
-                workspaceEdit.workspaceEdit.set(vscode.Uri.parse(uriStr, true), makeVscodeTextEdits(edits));
+        const codeActionWorkspaceEdit: CodeActionWorkspaceEdit = {};
+        if (d.workspaceEdits) {
+            codeActionWorkspaceEdit.workspaceEdit = new vscode.WorkspaceEdit();
+            for (const workspaceEdit of d.workspaceEdits) {
+                codeActionWorkspaceEdit.workspaceEdit.set(vscode.Uri.parse(workspaceEdit.file, true), makeVscodeTextEdits(workspaceEdit.edits));
             }
             const fixThisCodeAction: vscode.CodeAction = {
                 title: localize("fix_this_problem", "Fix this {0} problem", d.code),
                 command: {
                     title: 'FixThisCodeAnalysisProblem',
                     command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                    arguments: [ nextVersion, workspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ]
+                    arguments: [ nextVersion, codeActionWorkspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             };
@@ -297,19 +297,19 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
         const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [];
         const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
         rootAndRelatedIdentifiersAndUris.push(identifiersAndUri);
-        if (workspaceEdit.workspaceEdit !== undefined) {
-            rootAndRelatedWorkspaceEdits.push(workspaceEdit);
+        if (codeActionWorkspaceEdit.workspaceEdit !== undefined) {
+            rootAndRelatedWorkspaceEdits.push(codeActionWorkspaceEdit);
         }
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
                 diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
-                if (info.workspaceEdit === undefined) {
+                if (info.workspaceEdits === undefined) {
                     continue;
                 }
                 const relatedWorkspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                for (const [uriStr, edits] of Object.entries(info.workspaceEdit.changes)) {
-                    relatedWorkspaceEdit.set(vscode.Uri.parse(uriStr, true), makeVscodeTextEdits(edits));
+                for (const workspaceEdit of info.workspaceEdits) {
+                    relatedWorkspaceEdit.set(vscode.Uri.parse(workspaceEdit.file, true), makeVscodeTextEdits(workspaceEdit.edits));
                 }
                 const relatedIdentifier: CodeAnalysisDiagnosticIdentifier = { range: info.location.range, code: d.code };
                 const relatedIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {

@@ -213,7 +213,7 @@ export interface VsCodeUriAndRange {
 }
 
 interface WorkspaceEditResult {
-    edit: WorkspaceEdit;
+    workspaceEdits: WorkspaceEdit[];
     errorText?: string;
 }
 
@@ -3563,7 +3563,7 @@ export class DefaultClient implements Client {
 
         const result: CreateDeclarationOrDefinitionResult = await this.languageClient.sendRequest(CreateDeclarationOrDefinitionRequest, params);
         // Create/Copy returned no result.
-        if (result.edit === undefined) {
+        if (result.workspaceEdits === undefined) {
             // The only condition in which result.edit would be undefined is a
             // server-initiated cancellation, in which case the object is actually
             // a ResponseError. https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
@@ -3586,25 +3586,32 @@ export class DefaultClient implements Client {
             return vscode.env.clipboard.writeText(result.clipboardText);
         }
 
-        const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let modifiedDocument: vscode.Uri | undefined;
         let lastEdit: vscode.TextEdit | undefined;
-        let selectionPositionAdjustment: number = 0;
-        for (const file in result.edit.changes) {
-            const uri: vscode.Uri = vscode.Uri.file(file);
+        for (const workspaceEdit of result.workspaceEdits) {
+            const uri: vscode.Uri = vscode.Uri.file(workspaceEdit.file);
             // At most, there will only be two text edits:
             // 1.) an edit for: #include header file
             // 2.) an edit for: definition or declaration
-            for (const edit of result.edit.changes[file]) {
-                const range: vscode.Range = makeVscodeRange(edit.range);
+            for (const edit of workspaceEdit.edits) {
+                let range: vscode.Range = makeVscodeRange(edit.range);
                 // Get new lines from an edit for: #include header file.
-                if (lastEdit && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
+                if (lastEdit && lastEdit.newText.length < 300 && lastEdit.newText.includes("#include") && lastEdit.range.isEqual(range)) {
                     // Destination file is empty.
                     // The edit positions for #include header file and definition or declaration are the same.
-                    selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
+                    const selectionPositionAdjustment = (lastEdit.newText.match(/\n/g) ?? []).length;
+                    range = new vscode.Range(new vscode.Position(range.start.line + selectionPositionAdjustment, range.start.character),
+                        new vscode.Position(range.end.line + selectionPositionAdjustment, range.end.character));
                 }
                 lastEdit = new vscode.TextEdit(range, edit.newText);
                 workspaceEdits.insert(uri, range.start, edit.newText);
+                if (edit.newText.length < 300 && edit.newText.includes("#pragma once")) {
+                    // Commit this so that it can be undone separately, to avoid leaving an empty file,
+                    // which causes the next refactor to not add the #pragma once.
+                    await vscode.workspace.applyEdit(workspaceEdits);
+                    workspaceEdits = new vscode.WorkspaceEdit();
+                }
             }
             modifiedDocument = uri;
         }
@@ -3630,7 +3637,7 @@ export class DefaultClient implements Client {
             numNewlines++; // Increase the format range.
         }
 
-        const selectionPosition: vscode.Position = new vscode.Position(startLine + selectionPositionAdjustment, 0);
+        const selectionPosition: vscode.Position = new vscode.Position(startLine, 0);
         const selectionRange: vscode.Range = new vscode.Range(selectionPosition, selectionPosition);
         await vscode.window.showTextDocument(modifiedDocument, { selection: selectionRange });
 
@@ -3684,7 +3691,7 @@ export class DefaultClient implements Client {
         };
 
         const result: WorkspaceEditResult = await this.languageClient.sendRequest(ExtractToFunctionRequest, params);
-        if (result.edit === undefined) {
+        if (result.workspaceEdits === undefined) {
             // The only condition in which result.edit would be undefined is a
             // server-initiated cancellation, in which case the object is actually
             // a ResponseError. https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#responseMessage
@@ -3697,29 +3704,35 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let replaceEditRange: vscode.Range | undefined;
         let hasProcessedReplace: boolean = false;
         const formatUriAndRanges: VsCodeUriAndRange[] = [];
         this.renameDataForExtractToFunction = [];
         let lineOffset: number = 0;
-        let isFirstFile: boolean = true;
-        for (const file in result.edit.changes) {
+        let headerFileLineOffset: number = 0;
+        let isSourceFile: boolean = true;
+        // There will be 4-5 text edits:
+        // - A #pragma once added to a new header file (optional)
+        // - Add #include for header file (optional)
+        // - Add the new function declaration (in the source or header file)
+        // - Replace the selected code with the new function call,
+        //   plus possibly extra declarations beforehand,
+        //   plus possibly extra return value handling afterwards.
+        // - Add the new function definition (below the selection)
+        for (const workspaceEdit of result.workspaceEdits) {
             if (hasProcessedReplace) {
-                isFirstFile = false;
+                isSourceFile = false;
                 lineOffset = 0;
             }
-            const uri: vscode.Uri = vscode.Uri.file(file);
+            const uri: vscode.Uri = vscode.Uri.file(workspaceEdit.file);
             let nextLineOffset: number = 0;
-            // There will be 3-4 text edits:
-            // Add #include for header file (optional)
-            // Add the new function declaration (in the source or header file)
-            // Replace the selected code with the new function call,
-            //   plus possibly extra declarations beforehand,
-            //   plus possibly extra return value handling afterwards.
-            // Add the new function definition (below the selection)
-            for (const edit of result.edit.changes[file]) {
-                const range: vscode.Range = makeVscodeRange(edit.range);
+            for (const edit of workspaceEdit.edits) {
+                let range: vscode.Range = makeVscodeRange(edit.range);
+                if (!isSourceFile && headerFileLineOffset) {
+                    range = new vscode.Range(new vscode.Position(range.start.line + headerFileLineOffset, range.start.character),
+                        new vscode.Position(range.end.line + headerFileLineOffset, range.end.character));
+                }
                 const isReplace: boolean = !range.isEmpty;
                 lineOffset += nextLineOffset;
                 nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
@@ -3731,8 +3744,18 @@ export class DefaultClient implements Client {
                     workspaceEdits.replace(uri, range, edit.newText);
                 } else {
                     workspaceEdits.insert(uri, range.start, edit.newText);
-                    if (isFirstFile && !hasProcessedReplace && edit.newText.includes("#include")) {
-                        continue;
+                    if (edit.newText.length < 300) { // Avoid searching large code edits
+                        if (isSourceFile && !hasProcessedReplace && edit.newText.includes("#include")) {
+                            continue;
+                        }
+                        if (edit.newText.includes("#pragma once")) {
+                            // Commit this so that it can be undone separately, to avoid leaving an empty file,
+                            // which causes the next refactor to not add the #pragma once.
+                            await vscode.workspace.applyEdit(workspaceEdits);
+                            headerFileLineOffset = nextLineOffset;
+                            workspaceEdits = new vscode.WorkspaceEdit();
+                            continue;
+                        }
                     }
                 }
                 let rangeStartCharacter: number = 0;
