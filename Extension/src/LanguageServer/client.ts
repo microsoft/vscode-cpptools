@@ -3794,7 +3794,7 @@ export class DefaultClient implements Client {
                 if (rangeStartCharacter < 0) {
                     // newFunctionString is missing -- unexpected error.
                     void vscode.window.showErrorMessage(`${localize("invalid.edit",
-                        "Extract to Function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
+                        "Extract to function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
                     continue;
                 }
                 const currentEditRange: vscode.Range = new vscode.Range(
