@@ -3545,5 +3545,16 @@
     "<ukazatel na člen>",
     "<bool>",
     "<podobné logické hodnotě>",
-    "<třída>"
+    "<třída>",
+    "auto(<výraz>) a auto{<expr>} jsou funkce C++23.",
+    "Neplatné anonymní sjednocení – deklarace using není povolená.",
+    "Soubor IFC %sq nejde zpracovat.",
+    "Verze IFC %u1.%u2 není podporována.",
+    "Architektura IFC %sq není kompatibilní s aktuální cílovou architekturou.",
+    "Modul %sq1 požaduje index %u nepodporovaného oddílu odpovídajícího %sq2.",
+    "Číslo parametru %d z %n má typ %t, který nelze dokončit.",
+    "Číslo parametru %d z %n má neúplný typ %t.",
+    "Číslo parametru %d z %n má abstraktní typ %t.",
+    "Strukturované vazby jsou funkcí C++17.",
+    "Zachycení strukturovaných vazeb je funkce C++20."
 ]
