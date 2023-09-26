@@ -3545,5 +3545,16 @@
     "<üye işaretçisi>",
     "<bool>",
     "<bool benzeri>",
-    "<sınıf>"
+    "<sınıf>",
+    "auto(<expr>) ve auto{<expr>} bir C++23 özelliğidir",
+    "adsız birleşim geçersiz -- using bildirimine izin verilmiyor",
+    "%sq IFC dosyası işlenemiyor",
+    "%u1.%u2 IFC sürümü desteklenmiyor",
+    "%sq IFC mimarisi geçerli hedef mimariyle uyumsuz",
+    "%sq1 modülü, desteklenmeyen bir bölümün %u dizinini istiyor (%sq2 modülüne karşılık gelir)",
+    "%n üzerindeki %d numaralı parametre %t türünde ve tamamlanamıyor",
+    "%n üzerindeki %d numaralı parametre %t türünde ve tür tamamlanmamış",
+    "%n üzerindeki %d numaralı parametre %t türünde ve bu bir soyut tür",
+    "yapılandırılmış bağlamalar bir C++17 özelliğidir",
+    "yapılandırılmış bağlamaların yakalanması bir C++20 özelliğidir"
 ]
