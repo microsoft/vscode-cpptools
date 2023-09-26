@@ -24,6 +24,16 @@ export class RenameProvider implements vscode.RenameProvider {
     }
 
     public async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string, _token: vscode.CancellationToken): Promise<vscode.WorkspaceEdit | undefined> {
+        // By pass the normal rename processing during Extract to function,
+        // since we already know the locations of the required edits.
+        if (this.client.renameDataForExtractToFunction.length > 0) {
+            const workspaceEditResult: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+            for (const renameData of this.client.renameDataForExtractToFunction) {
+                workspaceEditResult.replace(renameData.uri, renameData.range, newName);
+            }
+            this.client.renameDataForExtractToFunction = [];
+            return workspaceEditResult;
+        }
         await this.client.ready;
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 

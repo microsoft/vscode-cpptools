@@ -49,6 +49,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
     }
 
     private static inlineMacroKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorInline.append("macro");
+    private static extractToFunctionKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorExtract.append("function");
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
@@ -97,6 +98,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let title: string = getLocalizedString(command.localizeStringParams);
             let wsEdit: vscode.WorkspaceEdit | undefined;
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
+            let disabledReason: string | undefined;
             if (command.edit) {
                 // Inline macro feature.
                 codeActionKind = CodeActionProvider.inlineMacroKind;
@@ -214,6 +216,16 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 } else {
                     return;
                 }
+            } else if (command.command === "C_Cpp.ExtractToFunction" ||
+                command.command === "C_Cpp.ExtractToFreeFunction" ||
+                command.command === "C_Cpp.ExtractToMemberFunction") {
+                if (command.arguments && command.arguments.length === 1) {
+                    disabledReason = command.arguments[0];
+                } else {
+                    command.arguments = [];
+                    command.arguments.push('codeAction');
+                }
+                codeActionKind = CodeActionProvider.extractToFunctionKind;
             }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,
@@ -222,8 +234,10 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     command: command.command,
                     arguments: command.arguments
                 },
+                //isPreferred: command.command === "C_Cpp.ExtractToMemberFunction" ? true : undefined,
                 edit: wsEdit,
-                kind: codeActionKind
+                kind: codeActionKind,
+                disabled: disabledReason ? { reason: disabledReason } : undefined
             };
             resultCodeActions.push(vscodeCodeAction);
         };
@@ -238,11 +252,11 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 if (!editor) {
                     return false;
                 }
-                const result: vscode.Hover[] = <vscode.Hover[]>(await vscode.commands.executeCommand('vscode.executeHoverProvider', document.uri, range.start));
+                const result: vscode.Hover[] = (await vscode.commands.executeCommand('vscode.executeHoverProvider', document.uri, range.start)) as vscode.Hover[];
                 if (result.length === 0) {
                     return false;
                 }
-                const hoverResult: vscode.MarkdownString = <vscode.MarkdownString>result[0].contents[0];
+                const hoverResult: vscode.MarkdownString = result[0].contents[0] as vscode.MarkdownString;
                 if (!hoverResult.value.includes(localize("expands.to", "Expands to:"))) {
                     return false;
                 }

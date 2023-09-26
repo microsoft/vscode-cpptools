@@ -3189,6 +3189,16 @@
                 "category": "C/C++"
             },
             {
+                "command": "C_Cpp.ExtractToFreeFunction",
+                "title": "%c_cpp.command.ExtractToFreeFunction.title%",
+                "category": "C/C++"
+            },
+            {
+                "command": "C_Cpp.ExtractToMemberFunction",
+                "title": "%c_cpp.command.ExtractToMemberFunction.title%",
+                "category": "C/C++"
+            },
+            {
                 "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
                 "title": "%c_cpp.command.RunCodeAnalysisOnActiveFile.title%",
                 "category": "C/C++"
@@ -3288,6 +3298,15 @@
                 "key": "ctrl+shift+r ctrl+i",
                 "args": {
                     "kind": "refactor.inline.macro",
+                    "apply": "first"
+                },
+                "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
+            },
+            {
+                "command": "editor.action.codeAction",
+                "key": "ctrl+shift+r ctrl+e",
+                "args": {
+                    "kind": "refactor.extract.function",
                     "apply": "first"
                 },
                 "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && editorTextFocus && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
@@ -5663,6 +5682,14 @@
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && !(config.C_Cpp.intelliSenseEngine =~ /^[dD]isabled$/)"
                 },
                 {
+                    "command": "C_Cpp.ExtractToFreeFunction",
+                    "when": "editorHasSelection && editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
+                },
+                {
+                    "command": "C_Cpp.ExtractToMemberFunction",
+                    "when": "editorHasSelection && editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/ && C_Cpp.isMemberFunction"
+                },
+                {
                     "command": "C_Cpp.RunCodeAnalysisOnActiveFile",
                     "when": "editorLangId =~ /^(c|(cuda-)?cpp)$/ && config.C_Cpp.intelliSenseEngine =~ /^[dD]efault$/"
                 },
@@ -6196,6 +6223,18 @@
                     "kind": "refactor.inline.macro",
                     "title": "%c_cpp.codeActions.refactor.inline.macro.title%",
                     "description": "%c_cpp.codeActions.refactor.inline.macro.description%"
+                }
+            },
+            {
+                "languages": [
+                    "c",
+                    "cpp",
+                    "cude-cpp"
+                ],
+                "actions": {
+                    "kind": "refactor.extract.function",
+                    "title": "%c_cpp.codeActions.refactor.extract.function.title%",
+                    "description": "%c_cpp.codeActions.refactor.extract.function.description%"
                 }
             }
         ]

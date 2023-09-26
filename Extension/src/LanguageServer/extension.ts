@@ -9,6 +9,7 @@ import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
@@ -434,6 +435,10 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, false, sender) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? (sender: string | undefined) => onExtractToFunction(true, false, sender) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, true, sender) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
@@ -741,6 +746,27 @@ async function onCreateDeclarationOrDefinition(args?: any): Promise<void> {
     };
     telemetry.logLanguageServerEvent('CreateDeclDefn', properties);
     return getActiveClient().handleCreateDeclarationOrDefinition(false, args?.range);
+}
+
+async function onExtractToFunction(extractAsGlobal: boolean, extractAsMemberFunction: boolean, sender?: string): Promise<void> {
+    const properties: { [key: string]: string } = {
+        sender: util.getSenderType(sender)
+    };
+    if (extractAsGlobal) {
+        telemetry.logLanguageServerEvent('ExtractToFreeFunction', properties);
+    } else if (extractAsMemberFunction) {
+        telemetry.logLanguageServerEvent('ExtractToMemberFunction', properties);
+    } else {
+        telemetry.logLanguageServerEvent('ExtractToFunction', properties);
+    }
+    return getActiveClient().handleExtractToFunction(extractAsGlobal);
+}
+
+function onExpandSelection(r: Range) {
+    const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+    if (activeTextEditor) {
+        activeTextEditor.selection = new vscode.Selection(new vscode.Position(r.start.line, r.start.character), new vscode.Position(r.end.line, r.end.character));
+    }
 }
 
 function onAddToIncludePath(path: string): void {
