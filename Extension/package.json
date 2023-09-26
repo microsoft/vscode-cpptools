@@ -6217,7 +6217,7 @@
                 "languages": [
                     "c",
                     "cpp",
-                    "cude-cpp"
+                    "cuda-cpp"
                 ],
                 "actions": {
                     "kind": "refactor.inline.macro",
@@ -6229,7 +6229,7 @@
                 "languages": [
                     "c",
                     "cpp",
-                    "cude-cpp"
+                    "cuda-cpp"
                 ],
                 "actions": {
                     "kind": "refactor.extract.function",
