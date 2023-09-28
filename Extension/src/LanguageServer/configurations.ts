@@ -708,6 +708,10 @@ export class CppProperties {
         this.onSelectionChanged();
     }
 
+    private variableHasEnv(value: string): boolean {
+        return value.includes("env:");
+    }
+
     private resolveDefaults(entries: string[], defaultValue?: string[]): string[] {
         let result: string[] = [];
         entries.forEach(entry => {
@@ -762,8 +766,14 @@ export class CppProperties {
         }
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
-            const entries: string[] = util.resolveVariables(entry, env).split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
-            resolvedVariables.push(...entries);
+            const resolvedVariable: string = util.resolveVariables(entry, env);
+            if (this.variableHasEnv(resolvedVariable)) {
+                // Do not futher try to resolve a "${env:VAR}"
+                resolvedVariables.push(resolvedVariable);
+            } else {
+                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+                resolvedVariables.push(...entries);
+            }
         });
         if (!glob) {
             return resolvedVariables;
@@ -1512,7 +1522,7 @@ export class CppProperties {
         }
 
         // Make sure all paths result to an absolute path
-        if (!path.isAbsolute(result) && this.rootUri) {
+        if (!this.variableHasEnv(result) && !path.isAbsolute(result) && this.rootUri) {
             result = path.join(this.rootUri.fsPath, result);
         }
 
