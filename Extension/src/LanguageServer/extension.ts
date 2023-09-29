@@ -436,6 +436,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddMissingInclude', enabled ? onAddMissingInclude : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -529,6 +530,14 @@ async function onResetDatabase(): Promise<void> {
 async function onRescanCompilers(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
     return clients.ActiveClient.rescanCompilers(sender);
+}
+
+async function onAddMissingInclude(args?: any): Promise<void> {
+    const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
+    const properties: Record<string, string> = {
+        sender: util.getSenderType(sender)
+    };
+    telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
 }
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
