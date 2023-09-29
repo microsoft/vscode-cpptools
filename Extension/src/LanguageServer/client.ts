@@ -3559,13 +3559,15 @@ export class DefaultClient implements Client {
                 let currentText: string = edit.newText.substring(rangeStartCharacter);
                 let currentTextNextLineStart: number = currentText.indexOf("\n");
                 let currentTextNewFunctionStart: number = currentText.indexOf(newFunctionString);
+                let currentTextNextLineStartUpdated: boolean = false;
                 while (currentTextNextLineStart !== -1 && currentTextNextLineStart < currentTextNewFunctionStart) {
                     ++rangeStartLine;
                     currentText = currentText.substring(currentTextNextLineStart + 1);
                     currentTextNextLineStart = currentText.indexOf("\n");
                     currentTextNewFunctionStart = currentText.indexOf(newFunctionString);
+                    currentTextNextLineStartUpdated = true;
                 }
-                rangeStartCharacter = (rangeStartCharacter === 0 ? range.start.character : 0) +
+                rangeStartCharacter = (rangeStartCharacter === 0 && !currentTextNextLineStartUpdated ? range.start.character : 0) +
                     currentTextNewFunctionStart;
                 if (rangeStartCharacter < 0) {
                     // newFunctionString is missing -- unexpected error.
