@@ -50,6 +50,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
 
     private static inlineMacroKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorInline.append("macro");
     private static extractToFunctionKind: vscode.CodeActionKind = vscode.CodeActionKind.RefactorExtract.append("function");
+    private static expandSelectionKind: vscode.CodeActionKind = CodeActionProvider.extractToFunctionKind.append("expandSelection");
 
     public async provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection,
         context: vscode.CodeActionContext, token: vscode.CancellationToken): Promise<(vscode.Command | vscode.CodeAction)[]> {
@@ -91,6 +92,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             this.client.configuration.CurrentConfiguration?.compilerPathInCppPropertiesJson !== undefined ||
             !!this.client.configuration.CurrentConfiguration?.compileCommandsInCppPropertiesJson ||
             !!this.client.configuration.CurrentConfiguration?.configurationProviderInCppPropertiesJson;
+        const hasExperimentalFeatures: boolean = new CppSettings().experimentalFeatures ?? false;
 
         // Convert to vscode.CodeAction array
         let hasInlineMacro: boolean = false;
@@ -217,8 +219,10 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     return;
                 }
             } else if (command.command === "C_Cpp.ExtractToFunction" ||
-                command.command === "C_Cpp.ExtractToFreeFunction" ||
                 command.command === "C_Cpp.ExtractToMemberFunction") {
+                if (!hasExperimentalFeatures) {
+                    return;
+                }
                 if (command.arguments && command.arguments.length === 1) {
                     disabledReason = command.arguments[0];
                 } else {
@@ -226,6 +230,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     command.arguments.push('codeAction');
                 }
                 codeActionKind = CodeActionProvider.extractToFunctionKind;
+            } else if (command.command === "C_Cpp.ExtractToFreeFunction") {
+                // TODO: https://github.com/microsoft/vscode-cpptools/issues/11473 needs to be fixed.
+                return;
+            } else if (command.command === "C_Cpp.ExpandSelection") {
+                if (!hasExperimentalFeatures) {
+                    return;
+                }
+                codeActionKind = CodeActionProvider.expandSelectionKind;
             }
             const vscodeCodeAction: vscode.CodeAction = {
                 title: title,
@@ -234,7 +246,6 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                     command: command.command,
                     arguments: command.arguments
                 },
-                //isPreferred: command.command === "C_Cpp.ExtractToMemberFunction" ? true : undefined,
                 edit: wsEdit,
                 kind: codeActionKind,
                 disabled: disabledReason ? { reason: disabledReason } : undefined

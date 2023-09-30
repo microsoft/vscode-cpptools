@@ -3451,6 +3451,11 @@ export class DefaultClient implements Client {
             return;
         }
 
+        // TODO: Show a quick pick to get the name before generating the code.
+        // That would allow the formatting to be done without waiting for the rename.
+        // Also, it's less error prone and eliminates a class of bugs in which the
+        // rename position can be incorrect.
+
         const params: ExtractToFunctionParams = {
             uri: editor.document.uri.toString(),
             range: {

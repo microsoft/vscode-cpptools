@@ -60,7 +60,7 @@ export class DocumentRangeFormattingEditProvider implements vscode.DocumentRange
         }
     }
 
-    // TODO: This is needed for Extract to function formatting.
+    // TODO: This is needed for correct Extract to function formatting.
     /*
     public async provideDocumentRangesFormattingEdits(_document: vscode.TextDocument, _ranges: vscode.Range[],
         _options: vscode.FormattingOptions, _token: vscode.CancellationToken): Promise<vscode.TextEdit[]> {
