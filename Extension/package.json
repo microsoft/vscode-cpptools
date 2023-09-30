@@ -6228,7 +6228,7 @@
         "compile": "yarn install && (yarn verify prep --quiet || yarn prep) && yarn build",
         "watch": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build tsconfig.json --watch",
         "rebuild": "yarn install && yarn clean && yarn prep && yarn build",
-        "vscode:prepublish": "yarn clean && yarn webpack",
+        "vscode:prepublish": "yarn install && yarn clean && yarn webpack",
         "webpack": "yarn install && (yarn verify prep --quiet || yarn prep) && tsc --build ui.tsconfig.json && webpack --mode production --env vscode_nls",
         "generate-native-strings": "ts-node -T ./.scripts/generateNativeStrings.ts",
         "generate-options-schema": "ts-node -T ./.scripts/generateOptionsSchema.ts",
