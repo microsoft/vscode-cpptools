@@ -561,6 +561,22 @@
                         "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
                         "scope": "resource"
                     },
+                    "C_Cpp.refactoring.includeHeader": {
+                        "type": "string",
+                        "enum": [
+                            "always",
+                            "ifNeeded",
+                            "never"
+                        ],
+                        "default": "always",
+                        "markdownDescription": "%c_cpp.configuration.refactoring.includeHeader.markdownDescription%",
+                        "enumDescriptions": [
+                            "%c_cpp.configuration.refactoring.includeHeader.always.description%",
+                            "%c_cpp.configuration.refactoring.includeHeader.ifNeeded.description%",
+                            "%c_cpp.configuration.refactoring.includeHeader.never.description%"
+                        ],
+                        "scope": "resource"
+                    },
                     "C_Cpp.renameRequiresIdentifier": {
                         "type": "boolean",
                         "default": true,
