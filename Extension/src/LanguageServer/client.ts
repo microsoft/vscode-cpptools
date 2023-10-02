@@ -1602,6 +1602,7 @@ export class DefaultClient implements Client {
             void this.sendDidChangeSettings();
         }
         const changedSettings: Record<string, string> = this.settingsTracker.getChangedSettings();
+        this.excludePatterns?.invalidate();
 
         await this.ready;
 
@@ -2289,6 +2290,7 @@ export class DefaultClient implements Client {
     }
 
     private associations_for_did_change?: Set<string>;
+    private excludePatterns?: FileExcludePatterns;
 
     /**
      * listen for file created/deleted events under the ${workspaceFolder} folder
@@ -2304,8 +2306,23 @@ export class DefaultClient implements Client {
                 false /* ignoreChangeEvents */,
                 false /* ignoreDeleteEvents */);
 
+            const isExcluded = (uri: vscode.Uri) => {
+                if (!this.excludePatterns) {
+                    this.excludePatterns = new FileExcludePatterns(this.RootUri);
+                }
+                for (const pattern of this.excludePatterns.getPatterns()) {
+                    // If the glob pattern describes a folder, we need to explicitly exclude everything in that folder.
+                    // Normally that folder wouldn't be enumerated, but since it was we need to include those files in our test.
+                    const patternExtension = pattern + (pattern.endsWith('/') ? '**' : '/**');
+                    if (minimatch(uri.fsPath, pattern, { nocase: true }) || minimatch(uri.fsPath, patternExtension, { nocase: true })) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
             this.rootPathFileWatcher.onDidCreate(async (uri) => {
-                if (uri.scheme !== 'file') {
+                if (uri.scheme !== 'file' || isExcluded(uri)) {
                     return;
                 }
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
@@ -2332,7 +2349,7 @@ export class DefaultClient implements Client {
                 }
             }
             this.rootPathFileWatcher.onDidChange(async (uri) => {
-                if (uri.scheme !== 'file') {
+                if (uri.scheme !== 'file' || isExcluded(uri)) {
                     return;
                 }
                 const dotIndex: number = uri.fsPath.lastIndexOf('.');
@@ -2358,7 +2375,7 @@ export class DefaultClient implements Client {
             });
 
             this.rootPathFileWatcher.onDidDelete((uri) => {
-                if (uri.scheme !== 'file') {
+                if (uri.scheme !== 'file' || isExcluded(uri)) {
                     return;
                 }
                 const fileName: string = path.basename(uri.fsPath).toLowerCase();
@@ -3619,4 +3636,27 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
+}
+
+class FileExcludePatterns {
+    private needsUpdate: boolean = true;
+    private excludePatterns: string[] = [];
+
+    public constructor(private rootUri?: vscode.Uri) {
+    }
+
+    public getPatterns() {
+        if (this.needsUpdate) {
+            this.needsUpdate = false;
+            const filesExclude: any = new OtherSettings().filesExclude ?? {};
+            const cppFilesExclude: any = new CppSettings(this.rootUri).filesExclude ?? {};
+            const excluded = {...filesExclude, ...cppFilesExclude};
+            this.excludePatterns = Object.keys(excluded).filter(pattern => excluded[pattern]);
+        }
+        return this.excludePatterns;
+    }
+
+    public invalidate() {
+        this.needsUpdate = true;
+    }
 }
