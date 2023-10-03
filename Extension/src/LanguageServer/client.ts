@@ -4,6 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -27,7 +28,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CancellationTokenSource, CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -36,14 +37,19 @@ import { identifyToolset } from '../ToolsetDetection/detection';
 import { ManualPromise } from '../Utility/Async/manualPromise';
 import { ManualSignal } from '../Utility/Async/manualSignal';
 import { logAndReturn, returns } from '../Utility/Async/returns';
+import { LastKnownState } from '../Utility/System/equality';
 import { is } from '../Utility/System/guards';
 import { elapsed } from '../Utility/System/performance';
 import { structuredClone } from '../Utility/System/structuredClone';
 import * as util from '../common';
-import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannel, getOutputChannelLogger, logDebugProtocol, logLocalized, showWarning } from '../logger';
+import { DebugProtocolParams, Logger, ShowWarningParams, getDiagnosticsChannel, getOutputChannelLogger, log, logDebugProtocol, logLocalized, showWarning } from '../logger';
 import { localizedStringCount, lookupString } from '../nativeStrings';
 import * as telemetry from '../telemetry';
 import { TestHook, getTestHook } from '../testHook';
+import { CompileCommandsConfiguration } from './Intellisense/compileCommandsConfiguration';
+import { ExtendedBrowseInformation, IntellisenseConfigurationProvider } from './Intellisense/interfaces';
+import { ProviderConfiguration } from './Intellisense/providerConfiguration';
+import { WorkspaceCofigurationProvider } from './Intellisense/workspaceConfiguration';
 import {
     CodeAnalysisDiagnosticIdentifiersAndUri,
     RegisterCodeAnalysisNotifications,
@@ -52,7 +58,6 @@ import {
     removeCodeAnalysisProblems
 } from './codeAnalysis';
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
-import { CompileCommandsConfigurationProvider } from './compileCommandsProvider';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
 import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations } from './extension';
@@ -258,8 +263,11 @@ interface InternalSourceFileConfiguration extends SourceFileConfiguration {
     compilerArgsLegacy?: string[];
 }
 
-interface InternalWorkspaceBrowseConfiguration extends WorkspaceBrowseConfiguration {
+export interface InternalWorkspaceBrowseConfiguration extends WorkspaceBrowseConfiguration {
     compilerArgsLegacy?: string[];
+    systemPath?: string[];
+    userFrameworks?: string[];
+    systemFrameworks?: string[];
 }
 
 // Need to convert vscode.Uri to a string before sending it to the language server.
@@ -934,13 +942,12 @@ export class DefaultClient implements Client {
     public static updateClientConfigurations(): void {
         clients.forEach(client => {
             if (client instanceof DefaultClient) {
-                const defaultClient: DefaultClient = <DefaultClient>client;
                 if (!client.isInitialized() || !compilerDefaults) {
                     // This can randomly get hit when adding/removing workspace folders.
                     return;
                 }
-                defaultClient.configuration.CompilerDefaults = compilerDefaults;
-                defaultClient.configuration.handleConfigurationChange();
+                client.configuration.CompilerDefaults = compilerDefaults;
+                client.configuration.handleConfigurationChange();
             }
         });
     }
@@ -1343,8 +1350,8 @@ export class DefaultClient implements Client {
             const workspaceFolder: vscode.WorkspaceFolder | undefined = this.rootFolder;
             this.innerConfiguration = new configs.CppProperties(this, rootUri, workspaceFolder);
             this.innerConfiguration.ConfigurationsChanged((e) => this.onConfigurationsChanged(e));
-            this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
             this.innerConfiguration.CompileCommandsChanged((e) => this.onCompileCommandsChanged(e));
+            this.innerConfiguration.SelectionChanged((e) => this.onSelectedConfigurationChanged(e));
             this.disposables.push(this.innerConfiguration);
 
             this.innerLanguageClient = languageClient;
@@ -1399,10 +1406,15 @@ export class DefaultClient implements Client {
                         }, 15000);
                     }
                 });
-                // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
-                // The event handlers must be set before this happens.
-                compilerDefaults = await this.requestCompiler();
+
+                // if we're in newIntellisenseMode, we don't want to ask the service for the compiler
+                if (!this.isNewIntellisense) {
+                    // The configurations will not be sent to the language server until the default include paths and frameworks have been set.
+                    // The event handlers must be set before this happens.
+                    compilerDefaults = await this.requestCompiler();
+                }
                 DefaultClient.updateClientConfigurations();
+
                 clients.forEach(client => {
                     if (client instanceof DefaultClient) {
                         client.configStateReceived.compilers = true;
@@ -1858,6 +1870,8 @@ export class DefaultClient implements Client {
     }
 
     public async updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
+        this.ensureNotNewIntellisense();
+
         await this.ready;
 
         if (!this.configurationProvider) {
@@ -1885,6 +1899,8 @@ export class DefaultClient implements Client {
 
     public async updateCustomBrowseConfiguration(requestingProvider?: CustomConfigurationProvider1): Promise<void> {
         await this.ready;
+
+        this.ensureNotNewIntellisense();
 
         if (!this.configurationProvider) {
             return;
@@ -2003,6 +2019,9 @@ export class DefaultClient implements Client {
     }
 
     public async provideCustomConfiguration(docUri: vscode.Uri, requestFile?: string, replaceExisting?: boolean, provider?: CustomConfigurationProvider1): Promise<void> {
+        // in newIntellisenseMode, this should not be getting called (the server shouldn't ask, and we're handling the files ourselves elsewhere.)
+        this.ensureNotNewIntellisense();
+
         const onFinished = () => {
             if (requestFile) {
                 void this.languageClient.sendNotification(FinishedRequestCustomConfig, { uri: requestFile });
@@ -2110,13 +2129,6 @@ export class DefaultClient implements Client {
                         });
                     }
 
-                    // check if they wanted new intellisense engine
-                    if (fileConfiguration.enableNewIntellisense) {
-                        // the user has enabled the new intellisense engine
-                        // so we have to patch each file configuration so that it
-                        // uses the new engine here.
-                        await Promise.all(configs.map(async (config) => this.patchConfigurationForNewIntellisense(config.configuration, fileConfiguration.compiler || fileConfiguration.compilerPath)));
-                    }
                 }
                 return configs as SourceFileConfigurationItem[];
             }
@@ -2127,7 +2139,8 @@ export class DefaultClient implements Client {
 
         try {
             const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
-            if (configs && configs.length > 0) {
+
+            if (configs?.length) {
                 this.sendCustomConfigurations(configs, provider.version);
             }
             onFinished();
@@ -2365,8 +2378,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
-                const defaultClient: DefaultClient = <DefaultClient>client;
-                void defaultClient.handleRequestCustomConfig(requestFile);
+                void client.handleRequestCustomConfig(requestFile);
             }
         });
         this.languageClient.onNotification(PublishIntelliSenseDiagnosticsNotification, publishIntelliSenseDiagnostics);
@@ -2599,8 +2611,7 @@ export class DefaultClient implements Client {
             if (notificationBody.workspaceFolderUri) {
                 const client: Client = clients.getClientFor(vscode.Uri.file(notificationBody.workspaceFolderUri));
                 if (client instanceof DefaultClient) {
-                    const defaultClient: DefaultClient = <DefaultClient>client;
-                    if (!defaultClient.configuration.CurrentConfiguration?.configurationProvider) {
+                    if (!client.configuration.CurrentConfiguration?.configurationProvider) {
                         const showIntelliSenseFallbackMessage: PersistentState<boolean> = new PersistentState<boolean>("CPP.showIntelliSenseFallbackMessage", true);
                         if (showIntelliSenseFallbackMessage.Value
                             && !await telemetry.showStatusBarIntelliSenseButton()) {
@@ -2608,7 +2619,7 @@ export class DefaultClient implements Client {
                                 const configJSON: string = localize("configure.json.button", "Configure (JSON)");
                                 const configUI: string = localize("configure.ui.button", "Configure (UI)");
                                 const dontShowAgain: string = localize("dont.show.again", "Don't Show Again");
-                                const fallbackMsg: string = defaultClient.configuration.VcpkgInstalled ?
+                                const fallbackMsg: string = client.configuration.VcpkgInstalled ?
                                     localize("update.your.intellisense.settings", "Update your IntelliSense settings or use Vcpkg to install libraries to help find missing headers.") :
                                     localize("configure.your.intellisense.settings", "Configure your IntelliSense settings to help find missing headers.");
                                 return vscode.window.showInformationMessage(fallbackMsg, configJSON, configUI, dontShowAgain).then(async (value) => {
@@ -2619,7 +2630,7 @@ export class DefaultClient implements Client {
                                             if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                                 void vscode.commands.executeCommand("workbench.action.problems.focus").then(returns.undefined, logAndReturn.undefined);
                                             }
-                                            void defaultClient.handleConfigurationEditJSONCommand().catch(logAndReturn.undefined);
+                                            void client.handleConfigurationEditJSONCommand().catch(logAndReturn.undefined);
                                             telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "json" }, undefined);
                                             break;
                                         case configUI:
@@ -2627,7 +2638,7 @@ export class DefaultClient implements Client {
                                             if (commands.indexOf("workbench.action.problems.focus") >= 0) {
                                                 void vscode.commands.executeCommand("workbench.action.problems.focus").then(returns.undefined, logAndReturn.undefined);
                                             }
-                                            void defaultClient.handleConfigurationEditUICommand().catch(logAndReturn.undefined);
+                                            void client.handleConfigurationEditUICommand().catch(logAndReturn.undefined);
                                             telemetry.logLanguageServerEvent("SettingsCommand", { "toast": "ui" }, undefined);
                                             break;
                                         case dontShowAgain:
@@ -3010,18 +3021,21 @@ export class DefaultClient implements Client {
         // so either they sent us one, or we look in the configuration for 'compiler' (best), or fallback to 'compilerPath' (ok)
         compiler = compiler || cfg.compiler || cfg.compilerPath;
 
-        if (cfg.enableNewIntellisense && compiler) {
-            try {
-                using toolset = await identifyToolset(compiler);
+        if (cfg.enableNewIntellisense) {
+            (cfg as any).compileCommands = undefined;
+            if (compiler) {
+                try {
+                    using toolset = await identifyToolset(compiler);
 
-                if (toolset) {
-                    const intellisense = await toolset.getIntellisenseConfiguration(cfg.compilerArgs ?? [], is.object(cfg.intellisense) ? cfg.intellisense : {});
-                    cfg.intellisense = toolset.harvestFromConfiguration(cfg, intellisense);
+                    if (toolset) {
+                        const intellisense = await toolset.getIntellisenseConfiguration(cfg.compilerArgs ?? [], { userIntellisenseConfiguration: is.object(cfg.intellisense) ? cfg.intellisense : undefined});
+                        cfg.intellisense = toolset.harvestFromConfiguration(cfg, intellisense);
+                    }
+                    log(JSON.stringify(cfg, null, 2));
+                    return;
+                } catch (e) {
+                    log(`Unable to identify toolset from compilerPath: ${cfg.compiler} - ${e}`);
                 }
-                getOutputChannel().appendLine(JSON.stringify(cfg, null, 2));
-                return;
-            } catch (e) {
-                getOutputChannel().appendLine(`Unable to identify toolset from compilerPath: ${cfg.compiler} - ${e}`);
             }
         }
         // not using the new IntelliSense
@@ -3031,10 +3045,163 @@ export class DefaultClient implements Client {
         cfg.intellisense = undefined;
     }
 
+    // we need to store the last relevant version of these we used so we can tell if they've changed
+    private lastKnownState = new class extends LastKnownState {
+        browseInfo: ExtendedBrowseInformation | null = null;
+        configuration = {} as configs.Configuration;
+        sourceFiles = [] as string[];
+        headerFiles = [] as string[];
+    }();
+
+    private async sendBrowsePath(configuration: configs.Configuration) {
+        const provider = await this.getProvider(configuration);
+
+        const cancelToken = this.updateIntellisenseCancelToken;
+        if (cancelToken.isCancellationRequested) {
+            return;
+        }
+
+        const browseInfo = await provider.getExtendedBrowseInformation(cancelToken);
+        if (this.lastKnownState.unchanged('browseInfo', browseInfo)) {
+            return;
+        }
+
+        // send the custom browse config to the server
+        return this.languageClient.sendNotification(CustomBrowseConfigurationNotification, {
+            workspaceFolderUri: this.RootUri?.toString(),
+            browseConfiguration: browseInfo // we only want to pass in the folders - which ensures the service doesn't 'think' about anything
+        }).catch(logAndReturn.undefined);
+    }
+
+    public get isNewIntellisense() {
+        return !!this.configuration.CurrentConfiguration?.enableNewIntellisense;
+    }
+
+    private ensureNotNewIntellisense() {
+        if (this.isNewIntellisense) {
+            // eslint-disable-next-line no-debugger
+            debugger;
+            throw new Error("This method should not be called when using the new IntelliSense.");
+        }
+    }
+
+    async queueNewIntellisenseConfigurationForFile(files: vscode.Uri[], configuration: SourceFileConfiguration | configs.Configuration) {
+
+    }
+
+    async sendNewIntellisenseConfigurationForFile(fileUri: vscode.Uri) {
+        // this is kind of like provideCustomConfiguration
+        // except that we're going to generate the configuration for the file
+        // and send it (if it hasn't changed from whence last it was sent)
+
+        // ask the provider for the configuration
+        const base = this.configuration.CurrentConfiguration;
+        if (!base) {
+            // this should not happen.
+            // eslint-disable-next-line no-debugger
+            debugger;
+            log("ERROR: ============== No base configuration for new intellisense ====================");
+            return;
+        }
+        const p = await this.getProvider(base);
+        if (p) {
+            const configurationItems = (await p.provideConfigurations([fileUri])).map(each => ({ uri: each.uri.toString(), configuration: each.configuration }));
+
+            void this.languageClient.sendNotification(CustomConfigurationNotification, {
+                configurationItems,
+                workspaceFolderUri: this.RootUri?.toString()
+            }).catch(logAndReturn.undefined);
+        }
+    }
+
+    async getProvider(configuration: configs.Configuration): Promise<IntellisenseConfigurationProvider> {
+        let provider: IntellisenseConfigurationProvider | undefined;
+        if (configuration.compileCommands) {
+            // if they are using compile commands, use the provider for that.
+            provider = await CompileCommandsConfiguration.getProvider(this, configuration.compileCommands, configuration, this.updateIntellisenseCancelToken);
+            if (provider) {
+                log('Provider is a CompileCommandsConfigurationProvider');
+            }
+        }
+
+        if (!provider && configuration.configurationProvider) {
+            // can we get a provider from the configuration provider?
+            provider = await ProviderConfiguration.getProvider(this, getCustomConfigProviders().get(configuration.configurationProvider), configuration);
+            if (provider) {
+                log('Provider is a custom Provider');
+            }
+
+        }
+
+        if (!provider) {
+            // no provider, use the workspace
+            provider = await WorkspaceCofigurationProvider.getProvider(this, configuration);
+            if (provider) {
+                log('Provider is a WorkspaceConfigurationProvider');
+            }
+
+        }
+        return provider;
+    }
+
+    #updateIntellisenseCancelTokenSource: CancellationTokenSource | undefined;
+
+    private get updateIntellisenseCancelToken() {
+        return (this.#updateIntellisenseCancelTokenSource ?? (this.#updateIntellisenseCancelTokenSource = new CancellationTokenSource())).token;
+    }
+
+    private cancelUpdateIntellisense() {
+        if (this.#updateIntellisenseCancelTokenSource) {
+            this.#updateIntellisenseCancelTokenSource.cancel();
+            this.#updateIntellisenseCancelTokenSource = undefined;
+        }
+    }
+
+    private async updateIntellisense(configuration: configs.Configuration, force = false): Promise<void> {
+        log(`${elapsed()} updating (NEW) intellisense for ${configuration.name}`);
+
+        if (this.lastKnownState.unchanged('configuration', configuration) || force) {
+            // if the configuration hasn't changed, we don't need to do anything
+            // todo: if something dependent has changed (like the compile commands, how do we know?)
+            log(`${elapsed()} ========= SKIPPING UPDATE INTELLISENS (config hasn't changed) =========`);
+            return;
+        }
+
+        // if we had a previous update in progress, cancel it.
+        this.cancelUpdateIntellisense();
+
+        const token = this.updateIntellisenseCancelToken;
+
+        // get the provider right away so that if it has to do any work, it can get started
+        const provider = await this.getProvider(configuration);
+
+        log(`${elapsed()} ========= SENDING BASE CONFIG =========`);
+        await this.languageClient.sendRequest(ChangeCppPropertiesRequest, {
+            configurations: [await provider.getBaseConfiguration(token)],
+            currentConfiguration: 0,
+            workspaceFolderUri: this.RootUri?.toString(),
+            isReady: true
+        });
+
+        // and then send the browse path configuration
+        log(`${elapsed()} ========= SENDING BROWSE PATH INFO =========`);
+        await this.sendBrowsePath(configuration);
+
+        log(`${elapsed()} ========= DONE UPDATE INTELLISENSE =========`);
+
+        this.#updateIntellisenseCancelTokenSource = undefined;
+    }
+
     private async onConfigurationsChanged(cppProperties: configs.CppProperties): Promise<void> {
         if (!cppProperties.Configurations) {
             return;
         }
+        // redirct to use new intellisense if that's what's selected
+        const current = this.configuration.CurrentConfiguration ?? cppProperties.Configurations[0];
+        if (current?.enableNewIntellisense) {
+            return this.updateIntellisense(current);
+        }
+
         const configurations: configs.Configuration[] = cppProperties.Configurations;
         const params: CppPropertiesParams = {
             configurations: [],
@@ -3046,10 +3213,6 @@ export class DefaultClient implements Client {
         // Clone each entry, as we make modifications before sending it, and don't
         // want to add those modifications to the original objects.
         params.configurations = await Promise.all(configurations.map(async (c) => {
-            // QQ: Why is this processing all of the configurations?
-            //     does the server need them all? isn't it just using the currentConfiguration?
-            //
-
             const modifiedConfig: configs.Configuration = structuredClone(c);
             // Separate compiler path and args before sending to language client
             const compilerPathAndArgs: util.CompilerPathAndArgs =
@@ -3061,53 +3224,10 @@ export class DefaultClient implements Client {
             } else {
                 modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
             }
-
-            getOutputChannel().appendLine(`${elapsed()} OnConfigurationsChange`);
-
-            // update the configuration to use the new IntelliSense if it's selected
-            await this.patchConfigurationForNewIntellisense(modifiedConfig);
 
             return modifiedConfig;
         }));
-        /* * *
-        for (const c of configurations) {
-            // QQ: Why is this processing all of the configurations?
-            //     does the server need them all? isn't it just using the currentConfiguration?
-            //
 
-            const modifiedConfig: configs.Configuration = structuredClone(c);
-            // Separate compiler path and args before sending to language client
-            const compilerPathAndArgs: util.CompilerPathAndArgs =
-                util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, c.compilerPath, c.compilerArgs);
-            modifiedConfig.compilerPath = compilerPathAndArgs.compilerPath;
-            if (settings.legacyCompilerArgsBehavior) {
-                modifiedConfig.compilerArgsLegacy = compilerPathAndArgs.allCompilerArgs;
-                modifiedConfig.compilerArgs = undefined;
-            } else {
-                modifiedConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
-            }
-
-            getOutputChannel().appendLine(`${elapsed()} OnConfigurationsChange`);
-            // temporary measure -
-            // if there is an `.compiler` member present
-            // then let's ask for the the toolset configuration for that.
-            if (is.string(modifiedConfig.compiler)) {
-                try {
-                    using toolset = await identifyToolset(modifiedConfig.compiler);
-
-                    if (toolset) {
-                        const intellisense = await toolset.getIntellisenseConfiguration(modifiedConfig.compilerArgs ?? [], is.object(modifiedConfig.intellisense) ? modifiedConfig.intellisense : {});
-                        modifiedConfig.intellisense = toolset.harvestFromConfiguration(modifiedConfig, intellisense);
-                    }
-                } catch (e) {
-                    console.log(`Unable to identify toolset from compilerPath: ${modifiedConfig.compiler} - ${e}`);
-                }
-                getOutputChannel().appendLine(JSON.stringify(modifiedConfig, null, 2));
-            }
-            params.configurations.push(modifiedConfig);
-        }
-        */
-        getOutputChannel().appendLine(`${elapsed()} ========= SENDING CONFIGS TO THE SERVICE =========`);
         await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
 
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
@@ -3154,16 +3274,16 @@ export class DefaultClient implements Client {
 
     private async onCompileCommandsChanged(path: string): Promise<void> {
         // if we're using new Intellisense, we don't want to send this.
-        // instead, we'd like to send configuration for each file.
+        // instead, we'd like to let the updateIntellisense method handle it.
         if (this.configuration.CurrentConfiguration?.enableNewIntellisense) {
-            const provider = new CompileCommandsConfigurationProvider(this, path);
-            return provider.update();
+            return this.updateIntellisense(this.configuration.CurrentConfiguration);
         }
 
         const params: FileChangedParams = {
             uri: vscode.Uri.file(path).toString(),
             workspaceFolderUri: this.RootUri?.toString()
         };
+
         await this.ready;
         return this.languageClient.sendNotification(ChangeCompileCommandsNotification, params);
     }
@@ -3186,6 +3306,8 @@ export class DefaultClient implements Client {
     }
 
     private sendCustomConfigurations(configs: any, providerVersion: Version): void {
+        this.ensureNotNewIntellisense();
+
         // configs is marked as 'any' because it is untrusted data coming from a 3rd-party. We need to sanitize it before sending it to the language server.
         if (!configs || !(configs instanceof Array)) {
             console.warn("discarding invalid SourceFileConfigurationItems[]: " + configs);
@@ -3200,6 +3322,7 @@ export class DefaultClient implements Client {
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
         configs.forEach(item => {
             if (this.isSourceFileConfigurationItem(item, providerVersion)) {
+                const itemConfig: util.Mutable<InternalSourceFileConfiguration & configs.NewIntelliSense> = structuredClone(item.configuration);
                 let uri: string;
                 if (util.isString(item.uri) && !item.uri.startsWith("file://")) {
                     // If the uri field is a string, it may actually contain an fsPath.
@@ -3208,15 +3331,16 @@ export class DefaultClient implements Client {
                     uri = item.uri.toString();
                 }
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
-                if (settings.loggingLevel === "Debug") {
-                    out.appendLine(`  uri: ${uri}`);
-                    out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
-                }
+
+                /// if (settings.loggingLevel === "Debug") {
+                ///  out.appendLine(`  uri: ${uri}`);
+                ///  out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
+                /// }
                 if (item.configuration.includePath.some(path => path.endsWith('**'))) {
                     console.warn("custom include paths should not use recursive includes ('**')");
                 }
                 // Separate compiler path and args before sending to language client
-                const itemConfig: util.Mutable<InternalSourceFileConfiguration> = structuredClone(item.configuration);
+
                 if (util.isString(itemConfig.compilerPath)) {
                     const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(
                         providerVersion < Version.v6,
@@ -3233,6 +3357,7 @@ export class DefaultClient implements Client {
                         itemConfig.compilerArgs = compilerPathAndArgs.allCompilerArgs;
                     }
                 }
+
                 sanitized.push({
                     uri,
                     configuration: itemConfig
@@ -3245,11 +3370,8 @@ export class DefaultClient implements Client {
         if (sanitized.length === 0) {
             return;
         }
-
-        const params: CustomConfigurationParams = {
-            configurationItems: sanitized,
-            workspaceFolderUri: this.RootUri?.toString()
-        };
+        const params = { configurationItems: sanitized, workspaceFolderUri: this.RootUri?.toString() };
+        out.appendLine(`${CustomConfigurationNotification}:\n${JSON.stringify(params, null, 2)}`);
 
         void this.languageClient.sendNotification(CustomConfigurationNotification, params).catch(logAndReturn.undefined);
     }
@@ -3266,6 +3388,8 @@ export class DefaultClient implements Client {
     }
 
     private sendCustomBrowseConfiguration(config: any, providerId: string | undefined, providerVersion: Version, timeoutOccured?: boolean): void {
+        this.ensureNotNewIntellisense();
+
         const rootFolder: vscode.WorkspaceFolder | undefined = this.RootFolder;
         if (!rootFolder
             || !this.lastCustomBrowseConfiguration

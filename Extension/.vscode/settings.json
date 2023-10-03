@@ -1,5 +1,7 @@
 // Place your settings in this file to overwrite default and user settings.
 {
+    "window.title": "CppTools <Typescript> ${separator}${activeEditorShort}${separator}${dirty}",
+    "workbench.colorTheme": "Hacker",
     "files.exclude": {
         "out": false // set this to true to hide the "out" folder with the compiled JS files
     },
@@ -69,5 +71,15 @@
     ],
     "[jsonl]": {
         "editor.tabSize": 2,
+    },
+    "workbench.colorCustomizations": {
+        "[Hacker]": {
+            "sideBar.background": "#050a0a",
+            "menu.background": "#050a0a",
+            "editorWidget.background": "#050a0a",
+            "terminal.background": "#030303",
+            "activityBar.background": "#050a0a",
+            "activityBarBadge.foreground": "#eaeaea",
+        }
     },
 }

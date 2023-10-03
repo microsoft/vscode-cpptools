@@ -258,11 +258,10 @@ export function updateLanguageConfigurations(): void {
 async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<void> {
     const client: Client = clients.getDefaultClient();
     if (client instanceof DefaultClient) {
-        const defaultClient: DefaultClient = <DefaultClient>client;
-        const changedDefaultClientSettings: { [key: string]: string } = await defaultClient.onDidChangeSettings(event);
-        clients.forEach(client => {
-            if (client !== defaultClient) {
-                void client.onDidChangeSettings(event).catch(logAndReturn.undefined);
+        const changedDefaultClientSettings: { [key: string]: string } = await client.onDidChangeSettings(event);
+        clients.forEach(each => {
+            if (each !== client) {
+                void each.onDidChangeSettings(event).catch(logAndReturn.undefined);
             }
         });
         const newUpdateChannel: string = changedDefaultClientSettings['updateChannel'];
@@ -342,16 +341,23 @@ export async function processDelayedDidOpen(document: vscode.TextDocument): Prom
             if (!client.TrackedDocuments.has(document)) {
                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
                 client.TrackedDocuments.add(document);
+
                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                     const baseFileName: string = path.basename(document.fileName);
                     const mappingString: string = baseFileName + "@" + document.fileName;
                     client.addFileAssociations(mappingString, "cpp");
-                    client.sendDidChangeSettings();
+                    void client.sendDidChangeSettings();
                     document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
                 }
-                await client.provideCustomConfiguration(document.uri, undefined);
+
+                // if we are in newIntellisense mode, we have to ensure that the configuration for the file is sent asap.
+                if (client instanceof DefaultClient && client.isNewIntellisense) {
+                    await client.sendNewIntellisenseConfigurationForFile(document.uri);
+                } else {
+                    await client.provideCustomConfiguration(document.uri, undefined);
+                }
                 // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                 client.onDidOpenTextDocument(document);
                 await client.takeOwnership(document);

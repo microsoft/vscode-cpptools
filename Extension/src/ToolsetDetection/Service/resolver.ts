@@ -90,6 +90,9 @@ export function createResolver(definition: DefinitionFile, compilerPath: string 
                 break;
 
             default:
+                if (definition.intellisense?.[expression]) {
+                    return definition.intellisense[expression];
+                }
                 return '';
         }
 

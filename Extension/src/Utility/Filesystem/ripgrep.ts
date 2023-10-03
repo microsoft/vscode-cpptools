@@ -10,6 +10,7 @@ import { isWindows } from '../../constants';
 import { accumulator } from '../Async/iterators';
 import { Process } from '../Process/process';
 import { ProcessFunction, Program } from '../Process/program';
+import { is } from '../System/guards';
 import { Instance } from '../System/types';
 import { verbose } from '../Text/streams';
 import { downloadRipgrep } from './downloadRipgrep';
@@ -60,6 +61,29 @@ export async function autoInitializeRipGrep() {
     }
 }
 const initialization = autoInitializeRipGrep();
+
+export async function fastFind(fileGlobs: string | string[], locations: string | string[], depth = 20): Promise<string[]> {
+    depth++;
+    fileGlobs = is.array(fileGlobs) ? fileGlobs : [fileGlobs];
+    locations = is.array(locations) ? locations : [locations];
+
+    fileGlobs.map(glob => glob.includes('**') ? glob : `**/${glob}`);
+    locations = locations.filter(each => existsSync(each.toString()));
+    const results = new Set<string>();
+
+    if (fileGlobs.length && locations.length) {
+        try {
+            const proc = await ripgrep(...fileGlobs.map(each => ['--glob', each]).flat(), '--max-depth', depth, '--null-data', '--no-messages', '-L', '--files', ...locations.map(each => each.toString()));
+            for await (const line of proc.stdio) {
+                results.add(line);
+            }
+        } catch {
+            // ignore
+        }
+    }
+
+    return [...results];
+}
 
 export class FastFinder implements AsyncIterable<string> {
     private keepOnlyExecutables: boolean;

@@ -35,6 +35,25 @@ export async function install(version: string) {
 
 }
 
+export async function installbuild() {
+    //*
+    // cpptools-srv.exe
+    // cpptools-vcpkgsrv.exe
+    // cpptools.exe
+    // vcpkgsrvtest.exe
+    // xobjgen.exe
+
+    // search relative for the vcpkgsrv
+    //
+    // (grep --iglob **/vcpkgsrv/cpptools-vcpkgsrv.exe --max-depth 5 --ignore-case  --files ../../ | Resolve-Path).Path
+
+    // base folder:
+    // ((grep --iglob **/vcpkgsrv/cpptools-vcpkgsrv.exe --max-depth 7 --ignore-case  --files ../../) -replace "designtime.*",'' | Resolve-Path).Path
+    // typical locations for binaries
+    // ../../build/debug
+    //
+}
+
 export async function main() {
     console.log(`use ${green(`yarn binary install ${cyan('[version] [--pre-release]')}`)}`);
 

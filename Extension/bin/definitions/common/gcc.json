@@ -20,7 +20,7 @@
       "-std=(?<std>.+)" :              { "standard":"${std}" },
     },
 
-    "commandLineArguments: # drop these (maybe we don't even care to do this?...)": {
+    "commandLineArguments: PRIORITY=-10 # drop these (maybe we don't even care to do this?...)": {
       "-o;.+":                          { }, // output file
       "-c;.+":                          { }, // input file
       "-param;${keyEqualsValue}":       { }, // compiler parameter
@@ -38,59 +38,60 @@
     },
 
     "commandLineArguments: # " :{
-      "-B(?<prefix>.+)":                { "queryArguments": "-B${prefix}" }, // binary prefix
+      "-B(?<prefix>.+)":                { "queryArgument": "-B${prefix}" }, // binary prefix
 
-      "-fms-extensions" :               { "parserArguments": "--ms_extensions" },
-      "-fno-ms-extensions" :            { "remove:parserArguments": "--ms_extensions" },
+      "-fms-extensions" :               { "parserArgument": "--ms_extensions" },
+      "-fno-ms-extensions" :            { "remove:parserArgument": "--ms_extensions" },
 
-      "-m(?<arch>.+)":                  { "queryArguments" : "-m${arch}" },
+      "-m(?<arch>.+)":                  { "queryArgument" : "-m${arch}" },
       
       "-I-":                            { "splitDir": true},
 
-      "-I(?<path>.+)":                  { "include.paths": "${path}", "queryArguments": "-I${path}" },
-      "-I;(?<path>.+)":                 { "include.paths": "${path}", "queryArguments": "-I${path}"},
-      "-isystem;(?<path>.+)":           { "include.systemPaths": "${path}", "queryArguments": ["-isystem","${path}"] },
-      "-idirafter;(?<path>.+)":         { "include.afterPaths": "${path}", "queryArguments": ["-idirafter","${path}"] },
-      "-iprefix;(?<path>.+)":           { "prefixPath": "${path}", "queryArguments": ["-iprefix","${path}"] },
-      "-iwithprefix;(?<path>.+)":       { "include.afterPaths": "${prefixPath}${path}", "queryArguments": ["-iwithprefix","${path}"] },
-      "-iwithprefixbefore;(?<path>.+)": { "include.paths": "${prefixPath}${path}", "queryArguments": ["-iwithprefixbefore","${path}"] },
-      "-iquote;(?<path>.+)":            { "include.quotePaths": "${path}", "queryArguments": ["-iquote","${path}"] },
+      "-I(?<path>.+)":                  { "path.include": "${path}", "queryArgument": "-I${path}" },
+      "-I;(?<path>.+)":                 { "path.include": "${path}", "queryArgument": "-I${path}"},
+      "-isystem;(?<path>.+)":           { "path.systemInclude": "${path}", "queryArgument": ["-isystem","${path}"] },
+      "-idirafter;(?<path>.+)":         { "path.afterInclude": "${path}", "queryArgument": ["-idirafter","${path}"] },
+      "-iprefix;(?<path>.+)":           { "prefixPath": "${path}", "queryArgument": ["-iprefix","${path}"] },
+      "-iwithprefix;(?<path>.+)":       { "path.afterInclude": "${prefixPath}${path}", "queryArgument": ["-iwithprefix","${path}"] },
+      "-iwithprefixbefore;(?<path>.+)": { "path.include": "${prefixPath}${path}", "queryArgument": ["-iwithprefixbefore","${path}"] },
+      "-iquote;(?<path>.+)":            { "path.quoteInclude": "${path}", "queryArgument": ["-iquote","${path}"] },
 
       "-isysroot;(?<path>.+)":          { "sysroot": "${path}" },
-      "-imultilib;(?<path>.+)":         { "include.multilibpaths": "${path}" },
-      "-F(?<path>.+)":                  { "include.frameworkPaths": "${path}" }, 
+      "-imultilib;(?<path>.+)":         { "path.multilibpaths": "${path}" },
+      "-F(?<path>.+)":                  { "path.framework": "${path}" }, 
 
-      "-D${keyEqualsValue}" :           { "macros": { "${key}": "${value}" } , "queryArguments": ["-D", "${key}=${value}"]},
-      "-D${keyNoValue}" :               { "macros": { "${key}": 1 }, "queryArguments": ["-D", "${key}"]},
-      "-D;${keyEqualsValue}" :          { "macros": { "${key}": "${value}" }, "queryArguments": ["-D", "${key}=${value}"]},
-      "-D;${keyNoValue}" :              { "macros": { "${key}": 1 }, "queryArguments": ["-D", "${key}"]},
-      "-U${keyNoValue}" :               { "macros": { "${key}": null }, "queryArguments": ["-U", "${key}"]},
-      "-U$;{keyNoValue}" :              { "macros": { "${key}": null}, "queryArguments": ["-U", "${key}"]},
+      "-D${keyEqualsValue}" :           { "macro": { "${key}": "${value}" } , "queryArgument": ["-D", "${key}=${value}"]},
+      "-D${keyNoValue}" :               { "macro": { "${key}": 1 }, "queryArgument": ["-D", "${key}"]},
+      "-D;${keyEqualsValue}" :          { "macro": { "${key}": "${value}" }, "queryArgument": ["-D", "${key}=${value}"]},
+      "-D;${keyNoValue}" :              { "macro": { "${key}": 1 }, "queryArgument": ["-D", "${key}"]},
+      "-U${keyNoValue}" :               { "macro": { "${key}": null }, "queryArgument": ["-U", "${key}"]},
+      "-U$;{keyNoValue}" :              { "macro": { "${key}": null}, "queryArgument": ["-U", "${key}"]},
 
-      "-include;(?<path>.+)":           { "forcedIncludeFiles": "${path}" }, // forced include
-      "-fexperimental-library":         { "macros": {"__has_feature(experimental_library)": 1 }},
-      "-undef":                         { "queryArguments": "-undef" },
+      "-include;(?<path>.+)":           { "path.forcedIncludeFile": "${path}" }, // forced include
+      "-fexperimental-library":         { "macro": {"__has_feature(experimental_library)": 1 }},
+      "-undef":                         { "queryArgument": "-undef" },
 
-      "-x;(?<language>.+)":             { "language": "${language}" },
+      "-x;(?<language>.+)":             { "language": "${language}" }
+  
     },
 
     "expressions: # environment variables" : {
-      "${env:CPATH}":                                     { "include.paths": "${env:CPATH}" },
-      "${language}=== 'c' && ${env:C_INCLUDE_PATH}":      { "include.systemPaths": "${env:C_INCLUDE_PATH}" },  
-      "${language}=== 'cpp' && ${env:CPLUS_INCLUDE_PATH}":{ "include.systemPaths": "${env:CPLUS_INCLUDE_PATH}" },  
-      "${language}=== 'objc' && ${env:OBJC_INCLUDE_PATH}":{ "include.systemPaths": "${env:OBJC_INCLUDE_PATH}" },
+      "${env:CPATH}":                                     { "path.include": "${env:CPATH}" },
+      "${language}=== 'c' && ${env:C_INCLUDE_PATH}":      { "path.systemInclude": "${env:C_INCLUDE_PATH}" },  
+      "${language}=== 'cpp' && ${env:CPLUS_INCLUDE_PATH}":{ "path.systemInclude": "${env:CPLUS_INCLUDE_PATH}" },  
+      "${language}=== 'objc' && ${env:OBJC_INCLUDE_PATH}":{ "path.systemInclude": "${env:OBJC_INCLUDE_PATH}" },
     },
 
     // before the sizes are set, we need to query the compiler with the right args to get the macros again 
     // (so we can let things like -m32 or -m64 or -mthumb or other arch changes affect the macros )
     "queries:":{
       // ==== COMMAND LINE IS THE KEY ==== 
-      "-E -dM -v ${queryArguments} ${tmp:c}": {
+      "-E -dM -v ${queryArgument} ${tmp:c}": {
 
         /* regex on output */                                           /* apply this to the intellisense config*/
-        "^#define (?<key>\\S*) ?(?<value>.*)?$":                          { "macros":{ "${key}": "${value}" } },          
-        "#include <...> search starts here:\n(?<path>(?: [^\n]*\n)*)*":   { "include.builtInPaths": "${path}" },        
-        "#include \"...\" search starts here:\n(?<path>(?: [^\n]*\n)*)*": { "include.quotePaths": "${path}" },
+        "^#define (?<key>\\S*) ?(?<value>.*)?$":                          { "macro":{ "${key}": "${value}" } },          
+        "#include <...> search starts here:\n(?<path>(?: [^\n]*\n)*)*":   { "path.builtInInclude": "${path}" },        
+        "#include \"...\" search starts here:\n(?<path>(?: [^\n]*\n)*)*": { "path.quoteInclude": "${path}" },
         "^COLLECT_GCC_OPTIONS=(?<opts>.*)":                               { "gcc.options" : "${opts}" },
         "^Target: (?<target>.*)":                                         { "gcc.target": "${target}" },          
         "^COMPILER_PATH=(?<cp>.*)":                                       { "gcc.compiler.paths": "${cp}" },

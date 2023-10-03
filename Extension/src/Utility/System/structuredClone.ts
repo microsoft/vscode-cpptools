@@ -3,8 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { deserialize, serialize } from 'v8';
-
 /**
  * This performs a structured clone using the built-in serialization and deserialization
  * v8 APIs. This is the fastest thing available.
@@ -19,5 +17,6 @@ import { deserialize, serialize } from 'v8';
  * @returns a copy of the instance
  */
 export function structuredClone<T>(instance: T): T {
-    return instance ? deserialize(serialize(instance)) : instance;
+    /// return instance ? deserialize(serialize(instance)) : instance;
+    return instance ? JSON.parse(JSON.stringify(instance)) : instance;
 }

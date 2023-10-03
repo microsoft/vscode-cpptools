@@ -56,12 +56,11 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     public async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {
-            const defaultClient: DefaultClient = <DefaultClient>client;
             await client.enqueue(() => processDelayedDidOpen(document));
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };
-            const response: GetDocumentSymbolResult = await defaultClient.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
+            const response: GetDocumentSymbolResult = await client.languageClient.sendRequest(GetDocumentSymbolRequest, params, token);
             if (token.isCancellationRequested || response.symbols === undefined) {
                 throw new vscode.CancellationError();
             }

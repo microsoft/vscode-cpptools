@@ -68,7 +68,7 @@ describe('Detect Compilers', async () => {
         console.debug(`Identify ran in ${Date.now() - started}ms`);
 
         if (toolset) {
-            console.debug(`Detected Compiler ${toolset.definition.name}/${toolset.default.version}/TARGET:${toolset.default.architecture}/HOST:${toolset.default.host}/BITS:${toolset.default.bits}/${toolset.compilerPath}`);
+            console.debug(`Detected Compiler ${toolset.definition.name}/${toolset.default.version}/TARGET:${toolset.default.architecture}/HOST:${toolset.default.host}/BITS:${toolset.default.bit}/${toolset.compilerPath}`);
             const isense = await toolset.getIntellisenseConfiguration([]);
             console.debug(`Generated intellisense config in ${Date.now() - started}ms`);
             verbose(JSON.stringify(isense, null, 2));

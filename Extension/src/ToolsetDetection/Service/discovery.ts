@@ -390,7 +390,7 @@ export async function identifyToolset(candidate: string): Promise<Toolset | unde
 async function identify(candidate: string, name?: string): Promise<Toolset | undefined> {
     const bn = basename(candidate);
     for await (const definition of loadCompilerDefinitions(configurationFolders)) {
-        if (!name || definition.name === name){
+        if (!name || definition.name === name) {
             const resolver = createResolver(definition);
             await runConditions(definition, resolver);
 

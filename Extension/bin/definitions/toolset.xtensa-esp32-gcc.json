@@ -1,0 +1,22 @@
+{
+  "name": "GNU C [xtensa-esp32]",
+   "import": [
+    "common/gcc.json",
+    "common/defaults.json"
+  ],
+  "discover": {
+    "binary": "xtensa-esp32-elf-gcc",
+    "locations": [ "${env:IDF_TOOLS_PATH}" ],
+    "match": {
+      "^(?<ver>\\d+[.]\\d+[.]\\d+)(?:-\\S*)?$" : { "version": "${ver}" }
+    }
+   
+  },
+  "intellisense": {
+    "compiler": "gcc",
+    "architecture": "xtensa",
+    "bits": 32,
+    "platform": "none",
+    "parserArgument": []
+  }
+}

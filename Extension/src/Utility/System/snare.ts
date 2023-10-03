@@ -176,7 +176,7 @@ export function ref(instance: any | Promise<any>): number | undefined | Promise<
         return instance.then(ref);
     }
 
-    if (is.object(instance)){
+    if (is.object(instance)) {
         // lookup the instance in the index
         const [identity, refcount] = instanceIndex.get(instance) ?? [++next, 0];
 
@@ -220,7 +220,7 @@ export function unref(identity: number) {
  * thread to release the object and free up resources.
  */
 export class MarshalByReference implements Disposable {
-    constructor(protected remote: RemoteConnection, protected instance: number){
+    constructor(protected remote: RemoteConnection, protected instance: number) {
     }
 
     /**

@@ -7,13 +7,13 @@
   "discover": {
     "binary": "cl",
 
-    // Add the default include paths for the WindowsSDK
+    // Add the default paths.include for the WindowsSDK
     "expression: FOLDER, OPTIONAL": {
-      "${KitsRoot10}/Include/${SDKVer}/um" :        { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/um" },
-      "${KitsRoot10}/Include/${SDKVer}/ucrt" :      { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/ucrt" },
-      "${KitsRoot10}/Include/${SDKVer}/shared" :    { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/shared" },
-      "${KitsRoot10}/Include/${SDKVer}/winrt" :     { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/winrt" },
-      "${KitsRoot10}/Include/${SDKVer}/cppwinrt" :  { "include.builtInPaths": "${KitsRoot10}/Include/${SDKVer}/cppwinrt" }
+      "${KitsRoot10}/Include/${SDKVer}/um" :        { "path.builtInInclude": "${KitsRoot10}/Include/${SDKVer}/um" },
+      "${KitsRoot10}/Include/${SDKVer}/ucrt" :      { "path.builtInInclude": "${KitsRoot10}/Include/${SDKVer}/ucrt" },
+      "${KitsRoot10}/Include/${SDKVer}/shared" :    { "path.builtInInclude": "${KitsRoot10}/Include/${SDKVer}/shared" },
+      "${KitsRoot10}/Include/${SDKVer}/winrt" :     { "path.builtInInclude": "${KitsRoot10}/Include/${SDKVer}/winrt" },
+      "${KitsRoot10}/Include/${SDKVer}/cppwinrt" :  { "path.builtInInclude": "${KitsRoot10}/Include/${SDKVer}/cppwinrt" }
     },
     
     // get the compiler version from the binary itself
@@ -40,20 +40,20 @@
       "\\\\arm64_arm\\\\":                  { "hostArchitecture": "arm64" , "bits": 32, "architecture": "arm"},
     },
  
-    // add the default include paths for the Visual C++ compiler 
+    // add the default paths.include for the Visual C++ compiler 
     "expression: ONEOF,FOLDER # find the base include folder": {
-      "${binary}/../include":                  { "include.builtInPaths": "${binary}/../include"},
-      "${binary}/../../include":               { "include.builtInPaths": "${binary}/../../include"},
-      "${binary}/../../../include":            { "include.builtInPaths": "${binary}/../../../include"},
-      "${binary}/../../../../include":         { "include.builtInPaths": "${binary}/../../../../include" }
+      "${binary}/../include":                  { "path.builtInInclude": "${binary}/../include"},
+      "${binary}/../../include":               { "path.builtInInclude": "${binary}/../../include"},
+      "${binary}/../../../include":            { "path.builtInInclude": "${binary}/../../../include"},
+      "${binary}/../../../../include":         { "path.builtInInclude": "${binary}/../../../../include" }
     },
 
-    // add the atlmfc include paths for the Visual C++ compiler
+    // add the atlmfc paths.include for the Visual C++ compiler
     "expression: ONEOF,OPTIONAL,FOLDER # find the optional atlmfc include folder": {
-      "${binary}/../atlmfc/include":           { "include.builtInPaths": "${binary}/../atlmfc/include" },
-      "${binary}/../../atlmfc/include":        { "include.builtInPaths": "${binary}/../../atlmfc/include" },
-      "${binary}/../../../atlmfc/include":     { "include.builtInPaths": "${binary}/../../../atlmfc/include" },
-      "${binary}/../../../../atlmfc/include":  { "include.builtInPaths": "${binary}/../../../../atlmfc/include" }
+      "${binary}/../atlmfc/include":           { "path.builtInInclude": "${binary}/../atlmfc/include" },
+      "${binary}/../../atlmfc/include":        { "path.builtInInclude": "${binary}/../../atlmfc/include" },
+      "${binary}/../../../atlmfc/include":     { "path.builtInInclude": "${binary}/../../../atlmfc/include" },
+      "${binary}/../../../../atlmfc/include":  { "path.builtInInclude": "${binary}/../../../../atlmfc/include" }
     }
   },
   
@@ -65,7 +65,7 @@
     // set the default SDK version (todo: this should be able to be pulled in from the user's config)
     "SDKVer": "10.0.22000.0",
 
-    "parserArguments": [
+    "parserArgument": [
       "--no_warnings",
       "--rtti",
       "--wchar_t_keyword",

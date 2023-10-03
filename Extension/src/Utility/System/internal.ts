@@ -2,23 +2,8 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import { AsyncFunc, Func, it } from 'mocha';
-import { is } from '../../src/Utility/System/guards';
-
-export function when(prerequisite: boolean | (() => boolean)): {it: Mocha.TestFunction} {
-    if (is.function(prerequisite)) {
-        prerequisite = prerequisite();
-    }
-    if (prerequisite) {
-        return {it};
-    } else {
-        const skip = (title: string, test: AsyncFunc | Func) => it.skip(`Dynamically skipping test: <<${title}>> - prerequisite not met.`, test);
-        return {it:skip as Mocha.TestFunction};
-    }
-}
-
 import { MessagePort } from 'worker_threads';
-import { collectGarbage } from '../../src/Utility/System/garbageCollector';
+import { collectGarbage } from './garbageCollector';
 
 function showActiveHandles() {
     const open = (process as any)._getActiveHandles().filter(
@@ -93,5 +78,3 @@ export function initDevModeChecks() {
 
     process.on('exit', showActiveHandles);
 }
-
-initDevModeChecks();

@@ -69,24 +69,22 @@ export function formatIntelliSenseBlock<T extends DeepPartial<IntelliSenseConfig
     if (!intellisense) {
         return {} as T;
     }
-    const i = intellisense.include = intellisense.include || {};
+    const p = intellisense.path = intellisense.path || {};
 
     // expand out the include paths
-    i.quotePaths = strings(i.quotePaths);
-    i.paths = strings(i.paths);
-    i.systemPaths = strings(i.systemPaths);
-    i.builtInPaths = strings(i.builtInPaths);
-    i.afterPaths = strings(i.afterPaths);
-    i.externalPaths = strings(i.externalPaths);
-    i.frameworkPaths = strings(i.frameworkPaths);
-    i.environmentPaths = strings(i.environmentPaths);
+    p.quoteInclude = strings(p.quoteInclude);
+    p.include = strings(p.include);
+    p.systemInclude = strings(p.systemInclude);
+    p.builtInInclude = strings(p.builtInInclude);
+    p.afterInclude = strings(p.afterInclude);
+    p.externalInclude = strings(p.externalInclude);
+    p.framework = strings(p.framework);
+    p.environmentInclude = strings(p.environmentInclude);
+    p.forcedIncludeFile = strings(p.forcedIncludeFile);
 
-    intellisense.forcedIncludeFiles = strings(intellisense.forcedIncludeFiles);
-
-    intellisense.frameworkPaths = strings(intellisense.frameworkPaths);
-    intellisense.parserArguments = strings(intellisense.parserArguments);
-    intellisense.compilerArgs = strings(intellisense.compilerArgs);
-    intellisense.macros = intellisense.macros || {};
+    intellisense.parserArgument = strings(intellisense.parserArgument);
+    intellisense.compilerArg = strings(intellisense.compilerArg);
+    intellisense.macro = intellisense.macro || {};
 
     for (const [key, value] of Object.entries(intellisense)) {
         if (key.startsWith('message') || key.startsWith('remove')) {

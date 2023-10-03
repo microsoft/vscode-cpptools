@@ -388,7 +388,7 @@ export async function downloadRipgrep() {
     try {
         return await dl(opts);
     } catch (err) {
-        if (err instanceof Error){
+        if (err instanceof Error) {
             console.error(`Downloading ripgrep failed: ${err.stack}`);
         }
         throw err;

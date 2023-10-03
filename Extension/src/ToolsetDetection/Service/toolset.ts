@@ -56,7 +56,8 @@ function trim(key: string, value: any) {
 
 export async function persistToolsetData() {
     // we can only store data if the globalStoragePath is set
-    if (settings.globalStoragePath) {
+    // eslint-disable-next-line no-constant-condition
+    if (1 !== 1 && settings.globalStoragePath) {
 
         // ensure the folder is created
         await mkdir(settings.globalStoragePath);
@@ -150,6 +151,14 @@ export async function loadToolsetData() {
         return true;
     }
 }
+
+type Entries = {
+    action: string;
+    block: Record<string, IntelliSenseConfiguration>;
+    flags: Map<string, string | boolean>;
+    priority: number;
+    comment?: string | undefined;
+}[];
 
 /**
  * The Toolset is the final results of the [discovery+query] process
@@ -271,8 +280,10 @@ export class Toolset {
                 text += await readFile(stderr, 'utf8');
             }
 
-            // remove the temp files
-            tmpFiles.forEach(each => unlinkSync(each));
+            for (const tmp of tmpFiles) {
+                text = text!.replace(new RegExp(tmp, 'g'), '');
+                unlinkSync(tmp);
+            }
 
             this.cachedQueries.set(key, text);
             void persistToolsetData();
@@ -425,78 +436,98 @@ export class Toolset {
         }
     }
 
+    private async process(entries: Entries, compilerArgs: string[], intellisenseConfiguration: IntelliSenseConfiguration) {
+        for (const { action, block, flags } of entries) {
+            // If the flags specifies 'C' and the language is not 'c', then we should skip this section.
+            if (flags.get('c') && !isC(intellisenseConfiguration.lanugage)) {
+                continue;
+            }
+
+            // If the flags specifies 'c++' and the language is not 'c++', then we should skip this section.
+            if (flags.get('cpp') || flags.get('c++') && !isCpp(intellisenseConfiguration.lanugage)) {
+                continue;
+            }
+
+            switch (action) {
+                case 'task':
+                    await this.runTasks(block as unknown as OneOrMore<string>, compilerArgs /* , intellisenseConfiguration */);
+                    break;
+
+                case 'command':
+                    // commandLineArguments
+                    compilerArgs = await this.processComamndLineArgs(block, compilerArgs, intellisenseConfiguration, flags);
+                    break;
+
+                case 'quer':
+                    for (const [command, queries] of Object.entries(block as Record<string, Record<string, DeepPartial<IntelliSenseConfiguration>>>)) {
+                        await this.query(command, queries, intellisenseConfiguration);
+                    }
+                    break;
+
+                case 'expression':
+                    for (const [expr, isense] of Object.entries(block as Record<string, DeepPartial<IntelliSenseConfiguration>>)) {
+                        if (await evaluateExpression(expr, intellisenseConfiguration, this.resolver)) {
+                            await this.applyToConfiguration(intellisenseConfiguration, isense);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return compilerArgs;
+    }
+
     /**
      * Processes the analysis section of the definition file given a command line to work with
      */
     async getIntellisenseConfiguration(compilerArgs: string[], options?: { baseDirectory?: string; sourceFile?: string; language?: Language; standard?: CppStandard | CStandard; userIntellisenseConfiguration?: IntelliSenseConfiguration }): Promise<IntelliSenseConfiguration> {
-        const cacheKey = compilerArgs.join(' ');
-        let intellisenseConfiguration = this.cachedAnalysis.get(cacheKey);
-        if (intellisenseConfiguration) {
-            // after getting the cached results, merge in user settings (which are not cached here)
-            if (options?.userIntellisenseConfiguration) {
-                await this.applyToConfiguration(intellisenseConfiguration, options.userIntellisenseConfiguration);
+        let entries: Entries = [];
+        const userIntellisenseConfiguration = this.postProcessIntellisense(structuredClone(options?.userIntellisenseConfiguration ?? {}));
 
-                // before we go, let's make sure that any *paths are unique, and that they are all absolute
-                await this.ensurePathsAreLegit(intellisenseConfiguration);
-            }
-            return intellisenseConfiguration;
+        // if we have an analysis section, we're going to need to get it ready
+        if (this.definition.analysis) {
+            entries = getActions<Record<string, IntelliSenseConfiguration>>(this.definition.analysis as any, [
+                ['task', ['priority', 'c', 'cpp', 'c++']],
+                ['command', ['priority', 'c', 'cpp', 'c++', 'no_consume']],
+                ['quer', ['priority', 'c', 'cpp', 'c++']],
+                ['expression', ['priority', 'c', 'cpp', 'c++']]
+            ]);
         }
 
-        intellisenseConfiguration = {
+        const early = entries.filter(each => each.priority < 0);
+        let intellisenseConfiguration = {
             ...this.definition.intellisense,
             language: options?.language,
             standard: options?.standard,
             compilerPath: this.compilerPath
         } as IntelliSenseConfiguration;
 
-        // Analysis phase
-        if (this.definition.analysis) {
-            const entries = getActions<Record<string, IntelliSenseConfiguration>>(this.definition.analysis as any, [
-                ['task', ['priority', 'c', 'cpp', 'c++']],
-                ['command', ['priority', 'c', 'cpp', 'c++', 'no_consume']],
-                ['quer', ['priority', 'c', 'cpp', 'c++']],
-                ['expression', ['priority', 'c', 'cpp', 'c++']]
-            ]);
-
-            // process the entries in priority order
-            for (const { action, block, flags } of entries) {
-            // If the flags specifies 'C' and the language is not 'c', then we should skip this section.
-                if (flags.get('c') && !isC(intellisenseConfiguration.lanugage)) {
-                    continue;
-                }
-
-                // If the flags specifies 'c++' and the language is not 'c++', then we should skip this section.
-                if (flags.get('cpp') || flags.get('c++') && !isCpp(intellisenseConfiguration.lanugage)) {
-                    continue;
-                }
-
-                switch (action) {
-                    case 'task':
-                        await this.runTasks(block as unknown as OneOrMore<string>, compilerArgs /* , intellisenseConfiguration */);
-                        break;
-
-                    case 'command':
-                        compilerArgs = await this.processComamndLineArgs(block, compilerArgs, intellisenseConfiguration, flags);
-                        break;
-
-                    case 'quer':
-                        for (const [command, queries] of Object.entries(block as Record<string, Record<string, DeepPartial<IntelliSenseConfiguration>>>)) {
-                            await this.query(command, queries, intellisenseConfiguration);
-                        }
-                        break;
-
-                    case 'expression':
-                        for (const [expr, isense] of Object.entries(block as Record<string, DeepPartial<IntelliSenseConfiguration>>)) {
-                            if (await evaluateExpression(expr, intellisenseConfiguration, this.resolver)) {
-                                await this.applyToConfiguration(intellisenseConfiguration, isense);
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+        // process the 'early' steps before we generate the cache key so that we can filter out useless args
+        if (early.length) {
+            compilerArgs = await this.process(early, compilerArgs, intellisenseConfiguration);
         }
+
+        const late = entries.filter(each => each.priority >= 0);
+
+        const cacheKey = compilerArgs.join(' ');
+        const i = this.cachedAnalysis.get(cacheKey);
+        if (i) {
+            intellisenseConfiguration = structuredClone(i);
+            // after getting the cached results, merge in user settings (which are not cached here)
+            if (options?.userIntellisenseConfiguration) {
+                await this.applyToConfiguration(intellisenseConfiguration, userIntellisenseConfiguration);
+
+                // before we go, let's make sure that any *paths are unique, and that they are all absolute
+                await this.ensurePathsAreLegit(intellisenseConfiguration);
+            }
+
+            return intellisenseConfiguration;
+        }
+
+        // (late) Analysis phase
+        compilerArgs = await this.process(late, compilerArgs, intellisenseConfiguration);
+
         // before we go, let's make sure that any *paths are unique, and that they are all absolute
         await this.ensurePathsAreLegit(intellisenseConfiguration);
 
@@ -508,16 +539,17 @@ export class Toolset {
         void persistToolsetData();
 
         intellisenseConfiguration = structuredClone(intellisenseConfiguration);
+        this.postProcessIntellisense(intellisenseConfiguration);
 
         // after the cached results, merge in user settings (since the user can change those at any time)
         if (options?.userIntellisenseConfiguration) {
-            await this.applyToConfiguration(intellisenseConfiguration, options.userIntellisenseConfiguration);
+            await this.applyToConfiguration(intellisenseConfiguration, userIntellisenseConfiguration);
 
             // before we go, let's make sure that any *paths are unique, and that they are all absolute
             await this.ensurePathsAreLegit(intellisenseConfiguration);
         }
 
-        this.postProcessIntellisense(intellisenseConfiguration);
+        /// this.postProcessIntellisense(intellisenseConfiguration);
 
         return intellisenseConfiguration;
     }
@@ -526,34 +558,38 @@ export class Toolset {
     postProcessIntellisense(intellisense: IntelliSense) {
         const args = [];
         // turn the macros into -D flags
-        if (intellisense.macros) {
-            for (const [name, value] of Object.entries(intellisense.macros)) {
+        if (intellisense.macro) {
+            for (const [name, value] of Object.entries(intellisense.macro)) {
                 args.push(`-D${name}=${value}`);
             }
         }
 
         // generate the two sets of include paths that EDG supports:
         // --inlcude_directory and --sys_include
-        for (const each of intellisense.include?.builtInPaths ?? []) {
-            // alt : args.push('--sys_include', each);
-            args.push(`-I${each}`);
+        for (const each of intellisense.path?.builtInInclude ?? []) {
+            args.push('--sys_include', each);
+            /// args.push(`-I${each}`);
         }
 
-        for (const each of intellisense.include?.systemPaths ?? []) {
+        for (const each of intellisense.path?.systemInclude ?? []) {
             args.push('--sys_include', each);
         }
-        for (const each of intellisense.include?.externalPaths ?? []) {
+        for (const each of intellisense.path?.externalInclude ?? []) {
             args.push('--sys_include', each);
         }
 
-        for (const each of intellisense.include?.paths ?? []) {
+        for (const each of intellisense.path?.include ?? []) {
             args.push('--include_directory', each);
         }
-        for (const each of intellisense.include?.environmentPaths ?? []) {
+
+        for (const each of intellisense.path?.environmentInclude ?? []) {
             args.push('--include_directory', each);
         }
-        if (is.array(intellisense.parserArguments)) {
-            intellisense.parserArguments.push(...args);
-        }
+
+        intellisense.parserArgument = strings(intellisense.parserArgument).concat(args);
+        intellisense.queryArgument = undefined;
+
+        return intellisense;
     }
+
 }

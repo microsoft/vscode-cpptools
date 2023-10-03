@@ -45,3 +45,4 @@ export function entries<TKey, TValue, TKeyOut = TKey, TValueOut = TValue>(map: P
             [...map.entries()].map(([key, value]) => selector(key, value)) : // map the values with a selector
             [...map.entries()]; // return the values
 }
+

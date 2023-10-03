@@ -15,6 +15,9 @@
                 "--disable-workspace-trust",
                 "--extensionDevelopmentPath=${workspaceFolder}",
             ],
+            "env": {
+                "VSCODE_CPP_DEBUG_VSCODE": "c:\\work\\vs\\src\\vc\\.vscode\\launch.json"
+            },
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**"

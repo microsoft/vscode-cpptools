@@ -133,7 +133,7 @@ async function resolveValue(expression: string, context: Record<string, any>, cu
         if (variable !== undefined && variable !== null) { // did we get back an actual value
             // it's a child of a variable
             return joinIfArray(suffix.includes(':') ? // is the suffix another expression?
-                resolveValue(suffix, variable) : // Yeah, resolve it
+                await resolveValue(suffix, variable) : // Yeah, resolve it
                 variable[suffix] ?? await customResolver(prefix, suffix) ?? ''); // No, return the member of the variable, or dynamic, or empty string
         }
 

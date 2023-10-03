@@ -37,7 +37,15 @@ export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerg
     }
 
     if (isMergeble(target) && isMergeble(dataToMerge)) {
+
         for (let [key, value] of Object.entries(dataToMerge)) {
+
+            // as a convenience for the user, we'll allow them to specify key names that are plural (ie, end in 's')
+            // and automatically drop the 's' - so paths.includes becomes path.include
+            // if (key.endsWith('s') && !key.endsWith('is')) {
+            //     key = key.substring(0, key.length - 1);
+            // }
+
             if (key.startsWith('remove:')) {
                 key = key.substring(7);
                 if (target[key]) {

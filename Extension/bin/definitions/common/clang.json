@@ -4,7 +4,7 @@
     /*
   "query": {
       "-E -dM -v ${tmp:c}": {
-        "macros": "^#define (\\S*) ?(.*)?$", // match defines in output 
+        "macro": "^#define (\\S*) ?(.*)?$", // match defines in output 
         "includePaths": "#include <...> search starts here:\n((?: [^\n]*\n)*)*", // match the lines for include folders 
         "target": "^Target: (.*)", // get the target 
         "cStandard": "^#define __STDC_VERSION__\\s*(.*)",

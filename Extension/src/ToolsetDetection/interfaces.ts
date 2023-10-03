@@ -134,15 +134,33 @@ export interface TypeAliases {
     ptrDiffT?: string;
 }
 
-export interface Includes {
-    quotePaths?: OneOrMore<Expression>; // specified `-iquote` paths - Used for ONLY #include "..."
-    paths?: OneOrMore<Expression>; // standard specified include paths (ie, `-I`)
-    systemPaths?: OneOrMore<Expression>; // specified `-isystem` paths
-    builtInPaths?: OneOrMore<Expression>; // Directories specified that are built into the compiler (usually thru interrogation)
-    afterPaths?: OneOrMore<Expression>; // specified `-idirafter` paths
-    externalPaths?: OneOrMore<Expression>; // specified `-external:I` paths (MSVC)
-    frameworkPaths?: OneOrMore<Expression>; // specified `-F` paths (MacOS)
-    environmentPaths?: OneOrMore<Expression>; // paths that are specified via environment variables (ie `INCLUDE`)
+export interface Paths {
+    /** specified `-iquote` paths - Used for ONLY #include "..." */
+    quoteInclude?: OneOrMore<Expression>;
+
+    /** standard specified include paths (ie, `-I`) */
+    include?: OneOrMore<Expression>;
+
+    /** specified `-isystem` paths */
+    systemInclude?: OneOrMore<Expression>;
+
+    /** Directories specified that are built into the compiler (usually thru interrogation) */
+    builtInInclude?: OneOrMore<Expression>;
+
+    /** specified `-idirafter` paths */
+    afterInclude?: OneOrMore<Expression>;
+
+    /** specified `-external:I` paths (MSVC) */
+    externalInclude?: OneOrMore<Expression>;
+
+    /** specified `-F` paths (MacOS) */
+    framework?: OneOrMore<Expression>;
+
+    /** paths that are specified via environment variables (ie `INCLUDE`) */
+    environmentInclude?: OneOrMore<Expression>;
+
+    /** paths that are forcibly #included */
+    forcedIncludeFile?: OneOrMore<Expression>;
 }
 
 /** the Intellisense interface represents the things that a given toolset supports/exposes */
@@ -157,16 +175,10 @@ export interface IntelliSense {
     [key: `${string}`]: any;
 
     /** #define macros that are specified so that the backend understands how to handle the code */
-    macros?: Macros;
+    macro?: Macros;
 
     /** Include folders */
-    include?: Includes;
-
-    /** Framework locations */
-    frameworkPaths?: OneOrMore<Expression>;
-
-    /** paths to files that are forcibly #included */
-    forcedIncludeFiles?: OneOrMore<Expression>;
+    path?: Paths;
 
     /** the C++ standard that this toolset supports */
     cppStandard?: CppStandard | number;
@@ -175,7 +187,7 @@ export interface IntelliSense {
     cStandard?: CStandard | number;
 
     /** refined arguments that are passed to the language parser (edg) */
-    parserArguments?: OneOrMore<string>;
+    parserArgument?: OneOrMore<string>;
 
     /** Well-known compiler variant (currently, just the three) */
     compiler?: CompilerVariant;
@@ -196,7 +208,7 @@ export interface IntelliSense {
     types?: TypeAliases;
 
     /** additional arguments that are being passed to the compiler (unprocessed) */
-    compilerArgs?: OneOrMore<string>; // arguments that are assumed to be passed to the compiler on the command line
+    compilerArg?: OneOrMore<string>; // arguments that are assumed to be passed to the compiler on the command line
 }
 
 export interface IntelliSenseConfiguration extends IntelliSense {

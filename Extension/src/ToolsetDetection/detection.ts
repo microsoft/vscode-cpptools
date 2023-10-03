@@ -14,6 +14,7 @@ import { resolve } from 'path';
 import { SHARE_ENV, Worker, isMainThread } from 'worker_threads';
 
 import { SourceFileConfiguration } from 'vscode-cpptools';
+import { is } from '../Utility/System/guards';
 import { Mutable } from '../common';
 import { getOutputChannel } from '../logger';
 
@@ -35,6 +36,13 @@ export const remote = startRemoting(new Worker(resolve(__dirname.substring(0, __
     }
 });
 
+function coerceIntellisense(intellisense: IntelliSenseConfiguration) {
+    if (intellisense && is.string(intellisense.bits)) {
+        intellisense.bits = parseInt(intellisense.bits);
+    }
+    return intellisense;
+}
+
 /**
  * This is a byref proxy to the toolset.
  *
@@ -45,14 +53,14 @@ export const remote = startRemoting(new Worker(resolve(__dirname.substring(0, __
  */
 export class Toolset extends MarshalByReference {
     async getIntellisenseConfiguration(compilerArgs: string[], options?: { baseDirectory?: string; sourceFile?: string; language?: Language; standard?: CppStandard | CStandard; userIntellisenseConfiguration?: IntelliSenseConfiguration }): Promise<IntelliSenseConfiguration> {
-        return this.remote.request('Toolset.getIntellisenseConfiguration', this.instance, compilerArgs, options);
+        return coerceIntellisense(await this.remote.request('Toolset.getIntellisenseConfiguration', this.instance, compilerArgs, options));
     }
     harvestFromConfiguration(configuration: Configuration | (Mutable<SourceFileConfiguration> & NewIntelliSense), intellisense: IntelliSenseConfiguration) {
         // includePath
-        intellisense.include!.paths = appendUnique(intellisense.include!.paths, configuration.includePath);
+        intellisense.path!.include = appendUnique(intellisense.path!.include, configuration.includePath);
 
         // macFrameworkPath
-        intellisense.include!.frameworkPaths = appendUnique(intellisense.include!.frameworkPaths, (configuration as any).macFrameworkPath);
+        intellisense.path!.framework = appendUnique(intellisense.path!.framework, (configuration as any).macFrameworkPath);
 
         // cStandard
         // cppStandard
@@ -66,9 +74,9 @@ export class Toolset extends MarshalByReference {
         }
 
         // forcedInclude
-        intellisense.forcedIncludeFiles = appendUnique(intellisense.forcedIncludeFiles, configuration.forcedInclude);
+        intellisense.path!.forcedIncludeFile = appendUnique(intellisense.path!.forcedIncludeFile, configuration.forcedInclude);
 
-        return intellisense;
+        return coerceIntellisense(intellisense);
     }
 }
 
@@ -86,11 +94,11 @@ export function identifyToolset(candidate: string): Promise<Toolset | undefined>
 }
 
 /** Makes a remote call to initialize the toolset detection system */
-export async function initialize(configFolders: string[], options?: { quick?: boolean; storagePath?: string }): Promise<void>{
+export async function initialize(configFolders: string[], options?: { quick?: boolean; storagePath?: string }): Promise<void> {
     return remote.request('initialize', configFolders, options);
 }
 
 /** Makes a remote call to get the list of toolsets from the worker thread */
-export async function getToolsets(): Promise<Map<string, string>>{
+export async function getToolsets(): Promise<Map<string, string>> {
     return new Map(await remote.request('getToolsets'));
 }
