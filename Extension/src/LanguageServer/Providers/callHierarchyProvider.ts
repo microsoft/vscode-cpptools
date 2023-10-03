@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import * as Telemetry from '../../telemetry';
 import { DefaultClient, workspaceReferences } from '../client';
-import { processDelayedDidOpen } from '../extension';
 import { CancellationSender } from '../references';
 import { makeVscodeRange } from '../utils';
 
@@ -104,7 +103,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     }
 
     public async prepareCallHierarchy(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.CallHierarchyItem | undefined> {
-        await this.client.enqueue(() => processDelayedDidOpen(document));
+        await this.client.ready;
 
         workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
         workspaceReferences.clearViews();

@@ -541,25 +541,25 @@
                         "type": "boolean",
                         "default": true,
                         "description": "%c_cpp.configuration.dimInactiveRegions.description%",
-                        "scope": "resource"
+                        "scope": "window"
                     },
                     "C_Cpp.inactiveRegionOpacity": {
                         "type:": "number",
                         "default": 0.55,
                         "markdownDescription": "%c_cpp.configuration.inactiveRegionOpacity.markdownDescription%",
-                        "scope": "resource",
+                        "scope": "window",
                         "minimum": 0.1,
                         "maximum": 1
                     },
                     "C_Cpp.inactiveRegionForegroundColor": {
                         "type": "string",
                         "description": "%c_cpp.configuration.inactiveRegionForegroundColor.description%",
-                        "scope": "resource"
+                        "scope": "window"
                     },
                     "C_Cpp.inactiveRegionBackgroundColor": {
                         "type": "string",
                         "description": "%c_cpp.configuration.inactiveRegionBackgroundColor.description%",
-                        "scope": "resource"
+                        "scope": "window"
                     },
                     "C_Cpp.renameRequiresIdentifier": {
                         "type": "boolean",

@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { CppFoldingRange, DefaultClient, FoldingRangeKind, GetFoldingRangesParams, GetFoldingRangesRequest, GetFoldingRangesResult } from '../client';
-import { processDelayedDidOpen } from '../extension';
 import { CppSettings } from '../settings';
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
@@ -24,7 +23,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
             uri: document.uri.toString()
         };
 
-        await this.client.enqueue(() => processDelayedDidOpen(document));
+        await this.client.ready;
 
         const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
         if (token.isCancellationRequested || response.ranges === undefined) {

@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
 import { Client, DefaultClient, GetDocumentSymbolRequest, GetDocumentSymbolRequestParams, GetDocumentSymbolResult, LocalizeDocumentSymbol, SymbolScope } from '../client';
-import { clients, processDelayedDidOpen } from '../extension';
+import { clients } from '../extension';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 import { makeVscodeRange } from '../utils';
 
@@ -57,7 +57,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
         const client: Client = clients.getClientFor(document.uri);
         if (client instanceof DefaultClient) {
             const defaultClient: DefaultClient = <DefaultClient>client;
-            await client.enqueue(() => processDelayedDidOpen(document));
+            await client.ready;
             const params: GetDocumentSymbolRequestParams = {
                 uri: document.uri.toString()
             };

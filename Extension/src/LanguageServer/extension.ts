@@ -24,7 +24,7 @@ import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
-import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp, showInstallCompilerWalkthrough } from './utils';
+import { makeCpptoolsRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -163,6 +163,7 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(onDidChangeTextEditorVisibleRanges));
     disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
     ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
@@ -274,6 +275,13 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
 
+export function onDidChangeTextEditorVisibleRanges(event: vscode.TextEditorVisibleRangesChangeEvent): void {
+    if (util.isCpp(event.textEditor.document)) {
+        console.log("IN onDidChangeTextEditorVisibleRanges");
+        clients.getDefaultClient().onDidChangeFileVisibility();
+    }
+}
+
 export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
@@ -281,11 +289,15 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         return;
     }
 
+    if (editor && util.isCpp(editor.document)) {
+        console.log("IN onDidChangeActiveTextEditor");
+        clients.getDefaultClient().onDidChangeFileVisibility();
+    }
+
     if (noActiveEditorTimeout) {
         clearTimeout(noActiveEditorTimeout);
         noActiveEditorTimeout = undefined;
     }
-
     if (!editor) {
         // When switching between documents, VS Code is setting the active editor to undefined
         // temporarily, so this prevents the C++-related status bar items from flickering off/on.
@@ -319,6 +331,9 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         return;
     }
 
+    console.log("IN onDidChangeTextEditorSelection");
+    clients.getDefaultClient().onDidChangeFileVisibility();
+
     if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
         activeDocument = event.textEditor.document.uri.toString();
@@ -328,50 +343,45 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
 
-export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<boolean> {
-    const client: Client = clients.getClientFor(document.uri);
-    if (client) {
-        // Log warm start.
-        if (clients.checkOwnership(client, document)) {
-            if (!client.isInitialized()) {
-                // This can randomly get hit when adding/removing workspace folders.
-                await client.ready;
-            }
-            // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
-            // to avoid sending redundant didOpen notifications.
-            if (!client.TrackedDocuments.has(document)) {
-                // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-                client.TrackedDocuments.add(document);
-                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-                // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-                if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
-                    const baseFileName: string = path.basename(document.fileName);
-                    const mappingString: string = baseFileName + "@" + document.fileName;
-                    client.addFileAssociations(mappingString, "cpp");
-                    client.sendDidChangeSettings();
-                    document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
-                }
-                await client.provideCustomConfiguration(document.uri, undefined);
-                // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
-                client.onDidOpenTextDocument(document);
-                await client.takeOwnership(document);
-                return true;
-            }
-        }
-    }
-    return false;
-}
+// export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<boolean> {
+//     const client: Client = clients.getClientFor(document.uri);
+//     if (client) {
+//         // Log warm start.
+//         if (clients.checkOwnership(client, document)) {
+//             if (!client.isInitialized()) {
+//                 // This can randomly get hit when adding/removing workspace folders.
+//                 await client.ready;
+//             }
+//             // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
+//             // to avoid sending redundant didOpen notifications.
+//             if (!client.TrackedDocuments.has(document)) {
+//                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
+//                 client.TrackedDocuments.add(document);
+//                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
+//                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
+//                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
+//                     const baseFileName: string = path.basename(document.fileName);
+//                     const mappingString: string = baseFileName + "@" + document.fileName;
+//                     client.addFileAssociations(mappingString, "cpp");
+//                     client.sendDidChangeSettings();
+//                     document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
+//                 }
+//                 await client.provideCustomConfiguration(document.uri, undefined);
+//                 // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
+//                 client.onDidOpenTextDocument(document);
+//                 await client.takeOwnership(document);
+//                 return true;
+//             }
+//         }
+//     }
+//     return false;
+// }
 
 function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
     // Process delayed didOpen for any visible editors we haven't seen before
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    editors.forEach(async (editor) => {
-        if (util.isCpp(editor.document)) {
-            const client: Client = clients.getClientFor(editor.document.uri);
-            await client.enqueue(() => processDelayedDidOpen(editor.document));
-            client.onDidChangeVisibleTextEditor(editor);
-        }
-    });
+    const cppEditors: vscode.TextEditor[] = editors.filter(e => util.isCpp(e.document));
+    clients.getDefaultClient().onDidChangeVisibleTextEditors(cppEditors);
 }
 
 function onInterval(): void {

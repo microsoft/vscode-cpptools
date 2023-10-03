@@ -552,6 +552,17 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
+// interface VisibleTextEditor
+// {
+//     uri: string;
+//     visibleRanges: Range[];
+// }
+
+// interface DidChangeVisibileTextEditorsParams
+// {
+//     visibleEditors: VisibleTextEditor[];
+// }
+
 interface DidChangeFileVisibilityParams {
     activeUri?: string;
     activeSelectionRange?: Range;
@@ -598,7 +609,8 @@ const PreviewReferencesNotification: NotificationType<void> = new NotificationTy
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
-const DidChangeFileVisibilityNotification: NotificationType<DidChangeFileVisibilityParams> = new NotificationType<DidChangeFileVisibilityParams>('cpptools/didChangeFileVisibility');
+//const DidChangeVisibileTextEditors: NotificationType<DidChangeVisibileTextEditorsParams> = new NotificationType<DidChangeVisibileTextEditorsParams>('cpptools/DidChangeVisibileTextEditors');
+//const DidChangeFileVisibilityNotification: NotificationType<DidChangeFileVisibilityParams> = new NotificationType<DidChangeFileVisibilityParams>('cpptools/didChangeFileVisibility');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -740,7 +752,8 @@ export interface Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>>;
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
-    onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void;
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void;
+    onDidChangeFileVisibility(): void;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
@@ -1660,21 +1673,36 @@ export class DefaultClient implements Client {
         return changedSettings;
     }
 
-    public onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void {
-        const settings: CppSettings = new CppSettings(this.RootUri);
-        if (settings.dimInactiveRegions) {
-            // Apply text decorations to inactive regions
-            const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(editor.document.uri.toString());
-            if (valuePair) {
-                editor.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
-            }
-        }
+    public async onDidChangeVisibleTextEditors(_editors: vscode.TextEditor[]): Promise<void> {
+        console.log("IN onDidChangeVisibleTextEditors");
+        clients.getDefaultClient().onDidChangeFileVisibility();
+        // const settings: CppSettings = new CppSettings(this.RootUri);
+        // const visibleEditors: VisibleTextEditor[] = [];
+        // vscode.window.visibleTextEditors.forEach(editor => {
+        //     const visibleEditor: VisibleTextEditor = {
+        //         uri: editor.document.uri.toString(),
+        //         visibleRanges: editor.visibleRanges
+        //     };
+        //     visibleEditors.push({});
+        //     if (settings.dimInactiveRegions) {
+        //         // Apply text decorations to inactive regions
+        //         const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(editor.document.uri.toString());
+        //         if (valuePair) {
+        //             editor.setDecorations(valuePair.decoration, valuePair.ranges); // VSCode clears the decorations when the text editor becomes invisible
+        //         }
+        //     }
+        // }
+
+        // const params: DidChangeVisibleTextEditorsParams = {
+        //     visibleEditors
+        // };
+        // await this.languageClient.sendNotification(DidChangeVisibleTextEditors, params);
     }
 
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
-    public async onDidChangeFileVisibility(): Promise<void> {
-        await this.ready;
+    public onDidChangeFileVisibility(): void {
+        //await this.ready;
 
         const visibleRanges: { [uri: string]: Range[] } = {};
         vscode.window.visibleTextEditors.forEach(editor => {
@@ -1701,7 +1729,10 @@ export class DefaultClient implements Client {
             visibleRanges
         };
 
-        await this.languageClient.sendNotification(DidChangeFileVisibilityNotification, params);
+        console.log(JSON.stringify(params, null, 4));
+
+        // For now, we just log the output.
+        //await this.languageClient.sendNotification(DidChangeFileVisibilityNotification, params);
     }
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
@@ -3593,7 +3624,8 @@ class NullClient implements Client {
     async onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void { }
     onDidCloseTextDocument(document: vscode.TextDocument): void { }
-    onDidChangeVisibleTextEditor(editor: vscode.TextEditor): void { }
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): void { }
+    onDidChangeFileVisibility(): void { }
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void { }
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
