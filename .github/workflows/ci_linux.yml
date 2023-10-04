@@ -7,44 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Use Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install Dependencies
-        run: yarn install
-        working-directory: Extension
-
-      - name: Compile Sources
-        run: yarn run compile
-        working-directory: Extension
-
-      - name: Run Linter
-        run: yarn run lint
-        working-directory: Extension
-
-      - name: Run unit tests
-        run: yarn test
-        working-directory: Extension
-
-#      # NOTE : We can't run the test that require the native binary files
-#      #        yet -- there will be an update soon that allows the tester to 
-#      #        acquire them on-the-fly
-#      - name: Run simple vscode unit tests
-#        uses: GabrielBB/xvfb-action@v1.6
-#        with:
-#          run: yarn test --scenario=SingleRootProject
-#          working-directory: Extension
-
-#      - name: Run languageServer integration tests
-#        uses: GabrielBB/xvfb-action@v1.6
-#        with:
-#          run: yarn run integrationTests
-#          working-directory: Extension
+  build-for-windows:
+    uses: ./.github/workflows/jobs-compile-and-test.yml
+    with:
+      runner-env: ubuntu-22.04
