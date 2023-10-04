@@ -40,21 +40,9 @@ jobs:
         run: yarn test
         working-directory: Extension
 
-      - name: Step test for mac/linux
-        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
-        run: echo 'platform is ${{ inputs.platform  }}'
-
-      - name: Step test for windows
-        if: ${{ inputs.platform == 'windows' }}
-        run: echo 'platform is ${{ inputs.platform }}'
-
-      - if: ${{ inputs.platform == 'windows' }}
-        run: echo 'nameless step  ${{ inputs.platform }}'
-
-#      # NOTE : We can't run the test that require the native binary files
-#      #        yet -- there will be an update soon that allows the tester to 
-#      #        acquire them on-the-fly
-
+# NOTE : We can't run the test that require the native binary files
+#        yet -- there will be an update soon that allows the tester to 
+#        acquire them on-the-fly
 #      - name: Run simple vscode unit tests
 #        if: ${{ inputs.platform == 'windows' }}
 #        run: yarn test --scenario=SingleRootProject
@@ -65,7 +53,7 @@ jobs:
 #        run: yarn run integrationTests
 #        working-directory: Extension
 
-       # NOTE: For mac/linux run the tests with xvfb-action for support UI.
+       # NOTE: For mac/linux run the tests with xvfb-action for UI support.
 #      - name: Run simple vscode unit tests (xvfb)
 #        if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
 #        uses: GabrielBB/xvfb-action@v1.6
@@ -78,4 +66,4 @@ jobs:
 #        uses: GabrielBB/xvfb-action@v1.6
 #        with:
 #          run: yarn run integrationTests
-#          working-directory: Extensiongit
+#          working-directory: Extension
