@@ -11,3 +11,4 @@ jobs:
     uses: ./.github/workflows/job-compile-and-test.yml
     with:
       runner-env: windows-2022
+      platform: windows
