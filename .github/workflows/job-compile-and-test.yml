@@ -8,6 +8,8 @@ on:
         required: true
         type: string
       platform:
+        # Expects 'mac', 'linux', or 'windows'
+        required: true
         type: string
       yarn-args:
         type: string
