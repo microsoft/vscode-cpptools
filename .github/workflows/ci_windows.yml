@@ -7,6 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  uses: ./.github/workflows/jobs-compile-and-test.yml
-  with:
-    runner-env: windows-2022
+  job:
+    uses: ./.github/workflows/job-compile-and-test.yml
+    with:
+      runner-env: windows-2022

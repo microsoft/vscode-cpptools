@@ -7,7 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-    uses: ./.github/workflows/jobs-compile-and-test.yml
+  job:
+    uses: ./.github/workflows/job-compile-and-test.yml
     with:
       runner-env: macos-12
       yarn-args: --network-timeout 100000
