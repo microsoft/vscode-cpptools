@@ -278,6 +278,7 @@ let noActiveEditorTimeout: NodeJS.Timeout | undefined;
 export function onDidChangeTextEditorVisibleRanges(event: vscode.TextEditorVisibleRangesChangeEvent): void {
     if (util.isCpp(event.textEditor.document)) {
         console.log("IN onDidChangeTextEditorVisibleRanges");
+        //TODO: filter to just cpp files
         clients.getDefaultClient().onDidChangeFileVisibility();
     }
 }
@@ -287,11 +288,6 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     console.assert(clients !== undefined, "client should be available before active editor is changed");
     if (clients === undefined) {
         return;
-    }
-
-    if (editor && util.isCpp(editor.document)) {
-        console.log("IN onDidChangeActiveTextEditor");
-        clients.getDefaultClient().onDidChangeFileVisibility();
     }
 
     if (noActiveEditorTimeout) {
@@ -330,9 +326,6 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         !util.isCpp(event.textEditor.document)) {
         return;
     }
-
-    console.log("IN onDidChangeTextEditorSelection");
-    clients.getDefaultClient().onDidChangeFileVisibility();
 
     if (activeDocument !== event.textEditor.document.uri.toString()) {
         // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
@@ -381,7 +374,7 @@ function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): v
     // Process delayed didOpen for any visible editors we haven't seen before
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const cppEditors: vscode.TextEditor[] = editors.filter(e => util.isCpp(e.document));
-    clients.getDefaultClient().onDidChangeVisibleTextEditors(cppEditors);
+    clients.getDefaultClient().onDidChangeFileVisibility(cppEditors);
 }
 
 function onInterval(): void {

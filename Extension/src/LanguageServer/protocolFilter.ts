@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import { Middleware } from 'vscode-languageclient';
 import * as util from '../common';
 import { Client } from './client';
-import { clients, onDidChangeActiveTextEditor } from './extension';
+import { clients } from './extension';
 import { shouldChangeFromCToCpp } from './utils';
 
 export function createProtocolFilter(): Middleware {
@@ -24,9 +24,6 @@ export function createProtocolFilter(): Middleware {
             if (util.isCpp(document)) {
                 util.setWorkspaceIsCpp();
             }
-
-            console.log("IN didOpen handler");
-            clients.getDefaultClient().onDidChangeFileVisibility();
 
             const client: Client = clients.getClientFor(document.uri);
             if (clients.checkOwnership(client, document)) {
@@ -78,29 +75,26 @@ export function createProtocolFilter(): Middleware {
             //     }
             // }
 
-            const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
-            if (editor) {
-                // If the file was visible editor when we were activated, we will not get a call to
-                // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
-                // Otherwise, we defer opening the file until it's actually visible.
-                await clients.ActiveClient.ready;
-                if (editor && editor === vscode.window.activeTextEditor) {
-                    onDidChangeActiveTextEditor(editor);
-                }
-            } else {
-                // NO-OP
-                // If the file is not opened into an editor (such as in response for a control-hover),
-                // we do not actually load a translation unit for it.  When we receive a didOpen, the file
-                // may not yet be visible.  So, we defer creation of the translation until we receive a
-                // call to onDidChangeVisibleTextEditors(), in extension.ts.  A file is only loaded when
-                // it is actually opened in the editor (not in response to control-hover, which sends a
-                // didOpen), and first becomes visible.
-            }
+            // const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
+            // if (editor) {
+            //     // If the file was visible editor when we were activated, we will not get a call to
+            //     // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
+            //     // Otherwise, we defer opening the file until it's actually visible.
+            //     await clients.ActiveClient.ready;
+            //     if (editor && editor === vscode.window.activeTextEditor) {
+            //         onDidChangeActiveTextEditor(editor);
+            //     }
+            // } else {
+            //     // NO-OP
+            //     // If the file is not opened into an editor (such as in response for a control-hover),
+            //     // we do not actually load a translation unit for it.  When we receive a didOpen, the file
+            //     // may not yet be visible.  So, we defer creation of the translation until we receive a
+            //     // call to onDidChangeVisibleTextEditors(), in extension.ts.  A file is only loaded when
+            //     // it is actually opened in the editor (not in response to control-hover, which sends a
+            //     // didOpen), and first becomes visible.
+            // }
         },
         didChange: async (textDocumentChangeEvent, sendMessage) => clients.ActiveClient.enqueue(async () => {
-            console.log("IN didChange handler");
-            clients.getDefaultClient().onDidChangeFileVisibility();
-
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
             me.onDidChangeTextDocument(textDocumentChangeEvent);
             await sendMessage(textDocumentChangeEvent);
@@ -118,10 +112,6 @@ export function createProtocolFilter(): Middleware {
         },
         didSave: invoke1,
         didClose: async (document, sendMessage) => clients.ActiveClient.enqueue(async () => {
-
-            console.log("IN didClose handler");
-            clients.getDefaultClient().onDidChangeFileVisibility();
-
             const me: Client = clients.getClientFor(document.uri);
             if (me.TrackedDocuments.has(document)) {
                 me.onDidCloseTextDocument(document);
