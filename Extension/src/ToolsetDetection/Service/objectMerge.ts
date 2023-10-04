@@ -29,8 +29,9 @@ function expandArray(value: any): any {
     return is.array(value) ? value.map(each => expandArray(each)).flat() : is.string(value) && value.includes('\u0007') ? value.split('\u0007') : value;
 }
 
-export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerge: Record<string, any>): T {
+export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerge: Record<string, any>, options?: {uniqueArrays?: boolean}): T {
     const target: any = input;
+    const uniqueArrays = options?.uniqueArrays ?? false;
 
     if (is.promise(input) || is.promise(dataToMerge)) {
         throw new Error('Should not get promises here!');
@@ -96,6 +97,9 @@ export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerg
                     } else {
                         target[key].push(...value);
                     }
+                    if (uniqueArrays) {
+                        target[key] = [...new Set(target[key])];
+                    }
                 } else if (is.string(target[key])) {
                     // strings are converted to arrays
                     target[key] = [value, ...value];
@@ -105,7 +109,7 @@ export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerg
 
             // if the source value is an object, we're going to merge that with the target
             if (isMergeble(value)) {
-                mergeObjects(target[key], value);
+                mergeObjects(target[key], value, { uniqueArrays : key === 'path' });
                 continue;
             }
 
