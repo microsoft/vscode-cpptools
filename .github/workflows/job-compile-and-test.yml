@@ -55,7 +55,7 @@ jobs:
       #   run: 'yarn test --scenario=MultirootDeadlockTest'
       #   working-directory: Extension
 
-       # NOTE: For mac/linux run the tests with xvfb-action for UI support.
+      # NOTE: For mac/linux run the tests with xvfb-action for UI support.
       # - name: Run simple vscode unit tests (xvfb)
       #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
       #   uses: GabrielBB/xvfb-action@v1.6
