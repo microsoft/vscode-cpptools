@@ -762,8 +762,14 @@ export class CppProperties {
         }
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
-            const entries: string[] = util.resolveVariables(entry, env).split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
-            resolvedVariables.push(...entries);
+            const resolvedVariable: string = util.resolveVariables(entry, env);
+            if (resolvedVariable.includes("env:")) {
+                // Do not futher try to resolve a "${env:VAR}"
+                resolvedVariables.push(resolvedVariable);
+            } else {
+                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+                resolvedVariables.push(...entries);
+            }
         });
         if (!glob) {
             return resolvedVariables;
@@ -1487,7 +1493,7 @@ export class CppProperties {
         return success;
     }
 
-    public resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
+    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1511,8 +1517,9 @@ export class CppProperties {
             result = result.replace(/\*/g, "");
         }
 
-        // Make sure all paths result to an absolute path
-        if (!path.isAbsolute(result) && this.rootUri) {
+        // Make sure all paths result to an absolute path.
+        // Do not add the root path to an unresolved env variable.
+        if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
             result = path.join(this.rootUri.fsPath, result);
         }
 
