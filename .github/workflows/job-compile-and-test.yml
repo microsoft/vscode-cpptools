@@ -45,12 +45,12 @@ jobs:
       # NOTE : We can't run the test that require the native binary files
       #        yet -- there will be an update soon that allows the tester to 
       #        acquire them on-the-fly
-      # - name: Run simple vscode unit tests
+      # - name: Run languageServer integration tests
       #   if: ${{ inputs.platform == 'windows' }}
       #   run: yarn test --scenario=SingleRootProject
       #   working-directory: Extension
 
-      # - name: Run languageServer integration tests
+      # - name: Run E2E IntelliSense features tests
       #   if: ${{ inputs.platform == 'windows' }}
       #   run: 'yarn test --scenario=MultirootDeadlockTest'
       #   working-directory: Extension
@@ -58,14 +58,14 @@ jobs:
       # NOTE: For mac/linux run the tests with xvfb-action for UI support.
       # Another way to start xvfb https://github.com/microsoft/vscode-test/blob/master/sample/azure-pipelines.yml
 
-      # - name: Run simple vscode unit tests (xvfb)
+      # - name: Run languageServer integration tests (xvfb)
       #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
       #   uses: coactions/setup-xvfb@v1
       #   with:
       #     run: yarn test --scenario=SingleRootProject
       #     working-directory: Extension
 
-      # - name: Run languageServer integration tests (xvfb)
+      # - name: Run E2E IntelliSense features tests (xvfb)
       #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
       #   uses: coactions/setup-xvfb@v1
       #   with:
