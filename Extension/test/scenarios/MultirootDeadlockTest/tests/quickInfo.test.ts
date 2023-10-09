@@ -36,6 +36,8 @@ suite("[Quick info test]", function(): void {
                 if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     console.log(`IntelliSense for '${result.filename}' is ready`);
                     resolve();
+                } else {
+                    console.log(`IntelliSense status is '${result.status}'`);
                 }
             }));
         });
@@ -43,7 +45,7 @@ suite("[Quick info test]", function(): void {
         // Start language server
         console.log("Open file: " + fileUri.toString());
         await vscode.commands.executeCommand("vscode.open", fileUri);
-        await timeout(5000, getIntelliSenseStatus);
+        await timeout(10000, getIntelliSenseStatus);
 
     });
 

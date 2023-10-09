@@ -55,6 +55,8 @@ suite("[Inlay hints test]", function(): void {
                 if (result.filename === "inlay_hints.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     console.log(`IntelliSense for '${result.filename}' is ready`);
                     resolve();
+                } else {
+                    console.log(`IntelliSense status is '${result.status}'`);
                 }
             }));
         });
@@ -63,7 +65,7 @@ suite("[Inlay hints test]", function(): void {
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await timeout(5000, getIntelliSenseStatus);
+        await timeout(10000, getIntelliSenseStatus);
         saveOriginalSettings();
         await useDefaultSettings();
     });
