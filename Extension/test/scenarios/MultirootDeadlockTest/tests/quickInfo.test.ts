@@ -36,8 +36,14 @@ suite("[Quick info test]", function(): void {
                 if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     console.log(`IntelliSense for '${result.filename}' is ready`);
                     resolve();
-                } else {
-                    console.log(`IntelliSense status is '${result.status}'`);
+                } else if (result.status === apit.Status.TagParsingBegun) {
+                    console.log(`IntelliSense status is TagParsingBegun, filename is '${result.filename}'`);
+                } else if (result.status === apit.Status.TagParsingDone) {
+                    console.log(`IntelliSense status is TagParsingDone, filename is '${result.filename}'`);
+                } else if (result.status === apit.Status.IntelliSenseCompiling) {
+                    console.log(`IntelliSense status is IntelliSenseCompiling, filename is '${result.filename}'`);
+                } else if (result.status === apit.Status.IntelliSenseReady) {
+                    console.log(`IntelliSense status is IntelliSenseReady, filename is '${result.filename}'`);
                 }
             }));
         });
