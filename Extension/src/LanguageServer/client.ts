@@ -552,15 +552,13 @@ interface TagParseStatus {
     isPaused: boolean;
 }
 
-interface DidChangeVisibleTextEditorsParams
-{
+interface DidChangeVisibleTextEditorsParams {
     visibleRanges?: { [uri: string]: Range[] };
 }
 
-interface DidChangeFileVisibilityParams {
-    activeUri?: string;
-    activeSelectionRange?: Range;
-    visibleRanges?: { [uri: string]: Range[] };
+interface DidChangeTextEditorVisibleRangesParams {
+    uri: string;
+    visibleRanges: readonly Range[];
 }
 
 // Requests
@@ -603,7 +601,8 @@ const PreviewReferencesNotification: NotificationType<void> = new NotificationTy
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
-const DidChangeFileVisibilityNotification: NotificationType<DidChangeFileVisibilityParams> = new NotificationType<DidChangeFileVisibilityParams>('cpptools/didChangeFileVisibility');
+const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
+const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
 
 const CodeAnalysisNotification: NotificationType<CodeAnalysisParams> = new NotificationType<CodeAnalysisParams>('cpptools/runCodeAnalysis');
 const PauseCodeAnalysisNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseCodeAnalysis');
@@ -745,7 +744,8 @@ export interface Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>>;
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
-    onDidChangeFileVisibility(): Promise<void>;
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void>;
+    onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void>;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void>;
@@ -1669,15 +1669,13 @@ export class DefaultClient implements Client {
     private prepareVisibleRanges(editors: readonly vscode.TextEditor[]): { [uri: string]: Range[] } {
         const visibleRanges: { [uri: string]: Range[] } = {};
         editors.forEach(editor => {
-            if (util.isCpp(editor.document)) {
-                // Use a map, to account for multiple editors for the same file.
-                // First, we just concat all ranges for the same file.
-                const uri: string = editor.document.uri.toString();
-                if (!visibleRanges[uri]) {
-                    visibleRanges[uri] = [];
-                }
-                visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges);
+            // Use a map, to account for multiple editors for the same file.
+            // First, we just concat all ranges for the same file.
+            const uri: string = editor.document.uri.toString();
+            if (!visibleRanges[uri]) {
+                visibleRanges[uri] = [];
             }
+            visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges);
         });
 
         // We may need to merge visible ranges, if there are multiple editors for the same file,
@@ -1691,16 +1689,34 @@ export class DefaultClient implements Client {
 
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
-    public async onDidChangeFileVisibility(editors: vscode.TextEditor[]): Promise<void> {
-        const params: DidChangeFileVisibilityParams = {
-            // activeUri: vscode.window.activeTextEditor?.document.uri.toString(),
-            // activeSelectionRange: vscode.window.activeTextEditor?.selection,
+    public async onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void> {
+        const params: DidChangeVisibleTextEditorsParams = {
             visibleRanges: this.prepareVisibleRanges(editors)
         };
+        await this.languageClient.sendNotification(DidChangeVisibleTextEditorsNotification, params);
+    }
 
-        console.log(JSON.stringify(params, null, 4));
+    public async onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void> {
+        // VS Code will notify us of a particular editor, but same file may be open in
+        // multiple editors, so we coalesc those visible ranges.
+        const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(editor => editor.document.uri === uri);
 
-        await this.languageClient.sendNotification(DidChangeFileVisibilityNotification, params);
+        let visibleRanges: readonly Range[] = [];
+        if (editors.length === 1) {
+            visibleRanges = editors[0].visibleRanges;
+        } else {
+            editors.forEach(editor => {
+                // Use a map, to account for multiple editors for the same file.
+                // First, we just concat all ranges for the same file.
+                visibleRanges = visibleRanges.concat(editor.visibleRanges);
+            });
+        }
+
+        const params: DidChangeTextEditorVisibleRangesParams = {
+            uri: uri.toString(),
+            visibleRanges
+        };
+        await this.languageClient.sendNotification(DidChangeTextEditorVisibleRangesNotification, params);
     }
 
     public onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void {
@@ -3595,7 +3611,8 @@ class NullClient implements Client {
     async onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void { }
     onDidCloseTextDocument(document: vscode.TextDocument): void { }
-    onDidChangeFileVisibility(): Promise<void> { return Promise.resolve(); }
+    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void> { return Promise.resolve(); }
+    onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void> { return Promise.resolve(); }
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void { }
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
     updateCustomConfigurations(requestingProvider?: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
