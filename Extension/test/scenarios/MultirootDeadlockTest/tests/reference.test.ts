@@ -47,7 +47,7 @@ suite(`[Reference test]`, function(): void {
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await timeout(10000, getIntelliSenseStatus);
+        await timeout(20000, getIntelliSenseStatus);
     });
 
     test("[Find confirmed references of a symbol]", async () => {
