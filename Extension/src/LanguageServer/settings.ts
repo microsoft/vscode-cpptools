@@ -132,6 +132,7 @@ export interface WorkspaceFolderSettingsParams {
     editorAutoClosingBrackets: string | undefined;
     editorInlayHintsEnabled: boolean | undefined;
     editorParameterHintsEnabled: boolean | undefined;
+    refactoringIncludeHeader: string | undefined;
 }
 
 export interface SettingsParams {
@@ -368,6 +369,7 @@ export class CppSettings extends Settings {
     public get workspaceParsingPriority(): string | undefined { return super.Section.get<string>("workspaceParsingPriority"); }
     public get workspaceSymbols(): string | undefined { return super.Section.get<string>("workspaceSymbols"); }
     public get exclusionPolicy(): string | undefined { return super.Section.get<string>("exclusionPolicy"); }
+    public get refactoringIncludeHeader(): string | undefined { return super.Section.get<string>("refactoring.includeHeader"); }
     public get simplifyStructuredComments(): boolean | undefined { return super.Section.get<boolean>("simplifyStructuredComments"); }
     public get doxygenGeneratedCommentStyle(): string | undefined { return super.Section.get<string>("doxygen.generatedStyle"); }
     public get doxygenGenerateOnType(): boolean | undefined { return super.Section.get<boolean>("doxygen.generateOnType"); }

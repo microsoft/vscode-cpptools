@@ -389,4 +389,5 @@ class SettingsApp {
     }
 }
 
-export const app: SettingsApp = new SettingsApp();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const app: SettingsApp = new SettingsApp();
