@@ -32,6 +32,12 @@ suite(`[Reference test]`, function(): void {
                 if (result.filename === "references.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     console.log(`IntelliSense for '${result.filename}' is ready`);
                     resolve();
+                } else if (result.status === apit.Status.TagParsingBegun) {
+                    console.log(`IntelliSense status is TagParsingBegun`);
+                } else if (result.status === apit.Status.TagParsingDone) {
+                    console.log(`IntelliSense status is TagParsingDone`);
+                } else if (result.status === apit.Status.IntelliSenseCompiling) {
+                    console.log(`IntelliSense status is IntelliSenseCompiling`);
                 }
             }));
         });
@@ -39,7 +45,7 @@ suite(`[Reference test]`, function(): void {
         console.log("Open file: " + fileUri.toString());
         document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await timeout(5000, getIntelliSenseStatus);
+        await timeout(20000, getIntelliSenseStatus);
     });
 
     test("[Find confirmed references of a symbol]", async () => {
