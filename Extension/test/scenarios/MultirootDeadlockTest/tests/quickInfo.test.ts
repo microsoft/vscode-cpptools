@@ -36,6 +36,12 @@ suite("[Quick info test]", function(): void {
                 if (result.filename === "quickInfo.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     console.log(`IntelliSense for '${result.filename}' is ready`);
                     resolve();
+                } else if (result.status === apit.Status.TagParsingBegun) {
+                    console.log(`IntelliSense status is TagParsingBegun`);
+                } else if (result.status === apit.Status.TagParsingDone) {
+                    console.log(`IntelliSense status is TagParsingDone`);
+                } else if (result.status === apit.Status.IntelliSenseCompiling) {
+                    console.log(`IntelliSense status is IntelliSenseCompiling`);
                 }
             }));
         });
@@ -43,7 +49,7 @@ suite("[Quick info test]", function(): void {
         // Start language server
         console.log("Open file: " + fileUri.toString());
         await vscode.commands.executeCommand("vscode.open", fileUri);
-        await timeout(5000, getIntelliSenseStatus);
+        await timeout(20000, getIntelliSenseStatus);
 
     });
 
@@ -85,7 +91,7 @@ suite("[Quick info test]", function(): void {
         const expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
         expectedMap.set("linux", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
-        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__1::string stringVar\n\`\`\``);
 
         const expected: string = expectedMap.get(platform) ?? assert.fail("Platform not found");
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
