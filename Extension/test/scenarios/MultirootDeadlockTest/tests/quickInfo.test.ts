@@ -93,7 +93,7 @@ suite("[Quick info test]", function(): void {
         const expectedMap: Map<string, string> = new Map<string, string>();
         expectedMap.set("win32", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
         expectedMap.set("linux", `\`\`\`cpp\nstd::string stringVar\n\`\`\``);
-        expectedMap.set("darwin", `\`\`\`cpp\nstd::__cxx11::string stringVar\n\`\`\``);
+        expectedMap.set("darwin", `\`\`\`cpp\nstd::__1::string stringVar\n\`\`\``);
 
         const expected: string = expectedMap.get(platform) ?? assert.fail("Platform not found");
         const actual: string = (<vscode.MarkdownString>result[0].contents[0]).value;
