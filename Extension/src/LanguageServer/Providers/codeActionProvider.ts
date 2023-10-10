@@ -34,11 +34,6 @@ interface GetCodeActionsResult {
     commands: CodeActionCommand[];
 }
 
-export interface CreateDeclDefnCommandArguments {
-    sender: string;
-    range: Range;
-}
-
 export const GetCodeActionsRequest: RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void> =
     new RequestType<GetCodeActionsRequestParams, GetCodeActionsResult, void>('cpptools/getCodeActions');
 
@@ -196,12 +191,8 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 return;
             } else if ((command.command === 'C_Cpp.CreateDeclarationOrDefinition' || command.command === 'C_Cpp.CopyDeclarationOrDefinition')
                 && (command.arguments ?? []).length === 0 && command.range !== undefined) {
-                const args: CreateDeclDefnCommandArguments = {
-                    sender: 'codeAction',
-                    range: command.range
-                };
                 command.arguments = [];
-                command.arguments.push(args);
+                command.arguments.push({ sender: 'codeAction', range: command.range });
             } else if (command.command === "C_Cpp.SelectIntelliSenseConfiguration") {
                 command.arguments = ['codeAction'];
                 hasSelectIntelliSenseConfiguration = true;
