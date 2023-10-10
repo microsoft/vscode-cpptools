@@ -518,10 +518,6 @@ interface FinishedRequestCustomConfigParams {
     uri: string;
 }
 
-interface IntervalTimerParams {
-    freeMemory: number;
-}
-
 export interface TextDocumentWillSaveParams {
     textDocument: TextDocumentIdentifier;
     reason: vscode.TextDocumentSaveReason;
@@ -537,7 +533,6 @@ interface CppInitializationParams {
     cacheStoragePath: string;
     workspaceStoragePath: string;
     databaseStoragePath: string;
-    freeMemory: number;
     vcpkgRoot: string;
     intelliSenseCacheDisabled: boolean;
     caseSensitiveFileSupport: boolean;
@@ -559,6 +554,10 @@ interface DidChangeVisibleTextEditorsParams {
 interface DidChangeTextEditorVisibleRangesParams {
     uri: string;
     visibleRanges: readonly Range[];
+}
+
+interface ActiveDocumentChangeParams {
+    uri: string;
 }
 
 // Requests
@@ -587,12 +586,12 @@ const FileDeletedNotification: NotificationType<FileChangedParams> = new Notific
 const ResetDatabaseNotification: NotificationType<void> = new NotificationType<void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
-const ActiveDocumentChangeNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/activeDocumentChange');
+const ActiveDocumentChangeNotification: NotificationType<ActiveDocumentChangeParams> = new NotificationType<ActiveDocumentChangeParams>('cpptools/activeDocumentChange');
 const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
 const TextEditorSelectionChangeNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/textEditorSelectionChange');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
-const IntervalTimerNotification: NotificationType<IntervalTimerParams> = new NotificationType<IntervalTimerParams>('cpptools/onIntervalTimer');
+const IntervalTimerNotification: NotificationType<void> = new NotificationType<void>('cpptools/onIntervalTimer');
 const CustomConfigurationNotification: NotificationType<CustomConfigurationParams> = new NotificationType<CustomConfigurationParams>('cpptools/didChangeCustomConfiguration');
 const CustomBrowseConfigurationNotification: NotificationType<CustomBrowseConfigurationParams> = new NotificationType<CustomBrowseConfigurationParams>('cpptools/didChangeCustomBrowseConfiguration');
 const ClearCustomConfigurationsNotification: NotificationType<WorkspaceFolderParams> = new NotificationType<WorkspaceFolderParams>('cpptools/clearCustomConfigurations');
@@ -764,7 +763,7 @@ export interface Client {
     takeOwnership(document: vscode.TextDocument): Promise<void>;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
-    activeDocumentChanged(document: vscode.TextDocument): Promise<void>;
+    activeDocumentChanged(document?: vscode.TextDocument): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
@@ -1535,7 +1534,6 @@ export class DefaultClient implements Client {
             databaseStoragePath: databaseStoragePath,
             workspaceStoragePath: this.workspaceStoragePath,
             cacheStoragePath: cacheStoragePath,
-            freeMemory: Math.floor(os.freemem() / 1048576),
             vcpkgRoot: util.getVcpkgRoot(),
             intelliSenseCacheDisabled: intelliSenseCacheDisabled,
             caseSensitiveFileSupport: workspaceSettings.caseSensitiveFileSupport,
@@ -1690,13 +1688,21 @@ export class DefaultClient implements Client {
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
     public async onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void> {
+        await this.ready;
         const params: DidChangeVisibleTextEditorsParams = {
             visibleRanges: this.prepareVisibleRanges(editors)
         };
+
+        console.log("onDidChangeVisibleTextEditors\n" + JSON.stringify(params, null, 4));
+        console.log("active text document\n" + vscode.window.activeTextEditor?.document.uri.toString());
+        console.log("selection\n" + JSON.stringify(vscode.window.activeTextEditor?.selection, null, 4));
+
         await this.languageClient.sendNotification(DidChangeVisibleTextEditorsNotification, params);
     }
 
     public async onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void> {
+        await this.ready;
+
         // VS Code will notify us of a particular editor, but same file may be open in
         // multiple editors, so we coalesc those visible ranges.
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(editor => editor.document.uri === uri);
@@ -1716,6 +1722,9 @@ export class DefaultClient implements Client {
             uri: uri.toString(),
             visibleRanges
         };
+
+        console.log("onDidChangeTextEditorVisibleRanges\n" + JSON.stringify(params, null, 4));
+
         await this.languageClient.sendNotification(DidChangeTextEditorVisibleRangesNotification, params);
     }
 
@@ -2708,13 +2717,20 @@ export class DefaultClient implements Client {
     /**
      * notifications to the language server
      */
-    public async activeDocumentChanged(document: vscode.TextDocument): Promise<void> {
+    public async activeDocumentChanged(document?: vscode.TextDocument): Promise<void> {
+        await this.ready;
         this.updateActiveDocumentTextOptions();
-        if (!util.isCpp(document)) {
+        if (!!document && !util.isCpp(document)) {
             return;
         }
-        await this.ready;
-        return this.languageClient.sendNotification(ActiveDocumentChangeNotification, this.languageClient.code2ProtocolConverter.asTextDocumentIdentifier(document)).catch(logAndReturn.undefined);
+
+        const params: ActiveDocumentChangeParams = {
+            uri: document ? document.uri.toString() : ""
+        };
+
+        console.log("activeDocumentChanged\n" + JSON.stringify(params, null, 4));
+
+        return this.languageClient.sendNotification(ActiveDocumentChangeNotification, params).catch(logAndReturn.undefined);
     }
 
     /**
@@ -2735,6 +2751,9 @@ export class DefaultClient implements Client {
 
     public async selectionChanged(selection: Range): Promise<void> {
         await this.ready;
+
+        console.log("selectionChanged\n" + JSON.stringify(selection, null, 4));
+
         return this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
     }
 
@@ -3483,10 +3502,7 @@ export class DefaultClient implements Client {
         // These events can be discarded until the language client is ready.
         // Don't queue them up with this.notifyWhenLanguageClientReady calls.
         if (this.innerLanguageClient !== undefined && this.configuration !== undefined) {
-            const params: IntervalTimerParams = {
-                freeMemory: Math.floor(os.freemem() / 1048576)
-            };
-            void this.languageClient.sendNotification(IntervalTimerNotification, params).catch(logAndReturn.undefined);
+            void this.languageClient.sendNotification(IntervalTimerNotification).catch(logAndReturn.undefined);
             this.configuration.checkCppProperties();
             this.configuration.checkCompileCommands();
         }

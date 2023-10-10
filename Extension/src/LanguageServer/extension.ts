@@ -33,7 +33,7 @@ export const configPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
 export let clients: ClientCollection;
-let activeDocument: string;
+let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
 const disposables: vscode.Disposable[] = [];
 const commandDisposables: vscode.Disposable[] = [];
@@ -299,24 +299,25 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         // When switching between documents, VS Code is setting the active editor to undefined
         // temporarily, so this prevents the C++-related status bar items from flickering off/on.
         noActiveEditorTimeout = setTimeout(() => {
-            activeDocument = "";
+            activeDocument = undefined;
             ui.activeDocumentChanged();
             noActiveEditorTimeout = undefined;
+            clients.activeDocumentChanged(undefined).catch(logAndReturn.undefined);
         }, 100);
         return;
     }
 
     if (util.isCppOrRelated(editor.document)) {
-        // This is required for the UI to update correctly.
-        void clients.activeDocumentChanged(editor.document).catch(logAndReturn.undefined);
+
         if (util.isCpp(editor.document)) {
-            activeDocument = editor.document.uri.toString();
-            clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+            activeDocument = editor.document;
         } else {
-            activeDocument = "";
+            activeDocument = undefined;
         }
+        void clients.activeDocumentChanged(activeDocument).catch(logAndReturn.undefined);
+        //clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
     } else {
-        activeDocument = "";
+        activeDocument = undefined;
     }
     getUI().activeDocumentChanged();
 }
@@ -328,9 +329,9 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
         return;
     }
 
-    if (activeDocument !== event.textEditor.document.uri.toString()) {
+    if (activeDocument !== event.textEditor.document) {
         // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
-        activeDocument = event.textEditor.document.uri.toString();
+        activeDocument = event.textEditor.document;
         void clients.activeDocumentChanged(event.textEditor.document).catch(logAndReturn.undefined);
         ui.activeDocumentChanged();
     }
@@ -660,7 +661,7 @@ async function onGoToPrevDirectiveInGroup(): Promise<void> {
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
-    if (activeDocument !== "") {
+    if (activeDocument) {
         await vscode.commands.executeCommand("workbench.action.files.saveAll");
         return getActiveClient().handleRunCodeAnalysisOnActiveFile();
     }
