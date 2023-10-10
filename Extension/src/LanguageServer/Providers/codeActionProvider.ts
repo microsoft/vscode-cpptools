@@ -28,6 +28,7 @@ interface CodeActionCommand {
     edit?: TextEdit;
     uri?: string;
     range?: Range;
+    disabledReason?: string;
 }
 
 interface GetCodeActionsResult {
@@ -100,7 +101,6 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let title: string = getLocalizedString(command.localizeStringParams);
             let wsEdit: vscode.WorkspaceEdit | undefined;
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
-            let disabledReason: string | undefined;
             if (command.edit) {
                 // Inline macro feature.
                 codeActionKind = CodeActionProvider.inlineMacroKind;
@@ -223,9 +223,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 if (!hasExperimentalFeatures) {
                     return;
                 }
-                if (command.arguments && command.arguments.length === 1) {
-                    disabledReason = command.arguments[0];
-                } else {
+                if (command.disabledReason !== undefined) {
                     command.arguments = [];
                     command.arguments.push('codeAction');
                 }
@@ -248,7 +246,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 },
                 edit: wsEdit,
                 kind: codeActionKind,
-                disabled: disabledReason ? { reason: disabledReason } : undefined
+                disabled: command.disabledReason ? { reason: command.disabledReason } : undefined
             };
             resultCodeActions.push(vscodeCodeAction);
         };
