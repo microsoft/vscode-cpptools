@@ -435,12 +435,12 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RestartIntelliSenseForFile', enabled ? onRestartIntelliSenseForFile : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.GenerateDoxygenComment', enabled ? onGenerateDoxygenComment : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, false, sender) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? (sender: string | undefined) => onExtractToFunction(true, false, sender) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, true, sender) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
 }
 
 function onDisabledCommand() {
