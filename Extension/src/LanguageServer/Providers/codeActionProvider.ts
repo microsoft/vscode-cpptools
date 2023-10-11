@@ -97,13 +97,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let title: string = getLocalizedString(command.localizeStringParams);
             let wsEdit: vscode.WorkspaceEdit | undefined;
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
-            if (command.edit && command.command !== "C_Cpp.AddMissingInclude" ) {
+            if (command.edit && command.command !== "C_Cpp.AddMissingInclude") {
                 // Inline macro feature.
                 codeActionKind = CodeActionProvider.inlineMacroKind;
                 wsEdit = new vscode.WorkspaceEdit();
                 wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
                 hasInlineMacro = true;
-            } else if ( command.edit && command.command === "C_Cpp.AddMissingInclude") {
+            }
+            else if (command.edit && command.command === "C_Cpp.AddMissingInclude") {
                 wsEdit = new vscode.WorkspaceEdit();
                 wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
             }
