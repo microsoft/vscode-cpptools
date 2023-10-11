@@ -20,7 +20,7 @@ export function createProtocolFilter(): Middleware {
     const invoke4 = (a: any, b: any, c: any, d: any, next: (a: any, b: any, c: any, d: any) => any): any => clients.ActiveClient.enqueue(() => next(a, b, c, d));
 
     return {
-        didOpen: async (document, sendMessage) => {
+        didOpen: async (document, sendMessage) => clients.ActiveClient.enqueue(async () => {
             if (util.isCpp(document)) {
                 util.setWorkspaceIsCpp();
             }
@@ -93,7 +93,7 @@ export function createProtocolFilter(): Middleware {
             //     // it is actually opened in the editor (not in response to control-hover, which sends a
             //     // didOpen), and first becomes visible.
             // }
-        },
+        }),
         didChange: async (textDocumentChangeEvent, sendMessage) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
             me.onDidChangeTextDocument(textDocumentChangeEvent);

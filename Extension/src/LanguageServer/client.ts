@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CloseAction, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -548,6 +548,8 @@ interface TagParseStatus {
 }
 
 interface DidChangeVisibleTextEditorsParams {
+    activeUri?: string;
+    activeSelection?: Range;
     visibleRanges?: { [uri: string]: Range[] };
 }
 
@@ -556,8 +558,9 @@ interface DidChangeTextEditorVisibleRangesParams {
     visibleRanges: readonly Range[];
 }
 
-interface ActiveDocumentChangeParams {
-    uri: string;
+interface DidChangeActiveDocumentParams {
+    uri?: string;
+    selection?: Range;
 }
 
 // Requests
@@ -579,14 +582,14 @@ const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, G
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 
 // Notifications to the server
-const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
+// const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileDeleted');
 const ResetDatabaseNotification: NotificationType<void> = new NotificationType<void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
-const ActiveDocumentChangeNotification: NotificationType<ActiveDocumentChangeParams> = new NotificationType<ActiveDocumentChangeParams>('cpptools/activeDocumentChange');
+const DidChangeActiveDocumentNotification: NotificationType<DidChangeActiveDocumentParams> = new NotificationType<DidChangeActiveDocumentParams>('cpptools/didChangeActiveDocument');
 const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
 const TextEditorSelectionChangeNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/textEditorSelectionChange');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
@@ -761,9 +764,9 @@ export interface Client {
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
     takeOwnership(document: vscode.TextDocument): Promise<void>;
-    sendDidOpen(document: vscode.TextDocument): Promise<void>;
+    // sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
-    activeDocumentChanged(document?: vscode.TextDocument): Promise<void>;
+    didChangeActiveDocument(document?: vscode.TextDocument, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
@@ -1688,21 +1691,22 @@ export class DefaultClient implements Client {
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
     public async onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void> {
-        await this.ready;
         const params: DidChangeVisibleTextEditorsParams = {
             visibleRanges: this.prepareVisibleRanges(editors)
         };
+        if (vscode.window.activeTextEditor) {
+            if (util.isCpp(vscode.window.activeTextEditor.document)) {
+                params.activeUri = vscode.window.activeTextEditor.document.uri.toString();
+                params.activeSelection = vscode.window.activeTextEditor.selection;
+            }
+        }
 
         console.log("onDidChangeVisibleTextEditors\n" + JSON.stringify(params, null, 4));
-        console.log("active text document\n" + vscode.window.activeTextEditor?.document.uri.toString());
-        console.log("selection\n" + JSON.stringify(vscode.window.activeTextEditor?.selection, null, 4));
 
         await this.languageClient.sendNotification(DidChangeVisibleTextEditorsNotification, params);
     }
 
     public async onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void> {
-        await this.ready;
-
         // VS Code will notify us of a particular editor, but same file may be open in
         // multiple editors, so we coalesc those visible ranges.
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(editor => editor.document.uri === uri);
@@ -2169,23 +2173,23 @@ export class DefaultClient implements Client {
      */
     public async takeOwnership(document: vscode.TextDocument): Promise<void> {
         this.trackedDocuments.add(document);
-        this.updateActiveDocumentTextOptions();
+        //this.updateActiveDocumentTextOptions();
         // in case the client is recreated, wait for the isStarted to finish.
         await DefaultClient.isStarted;
-        return this.sendDidOpen(document);
+        //return this.sendDidOpen(document);
     }
 
-    public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
-        const params: DidOpenTextDocumentParams = {
-            textDocument: {
-                uri: document.uri.toString(),
-                languageId: document.languageId,
-                version: document.version,
-                text: document.getText()
-            }
-        };
-        await this.languageClient.sendNotification(DidOpenNotification, params);
-    }
+    // public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
+    //     const params: DidOpenTextDocumentParams = {
+    //         textDocument: {
+    //             uri: document.uri.toString(),
+    //             languageId: document.languageId,
+    //             version: document.version,
+    //             text: document.getText()
+    //         }
+    //     };
+    //     await this.languageClient.sendNotification(DidOpenNotification, params);
+    // }
 
     /**
      * a Promise that can be awaited to know when it's ok to proceed.
@@ -2717,20 +2721,20 @@ export class DefaultClient implements Client {
     /**
      * notifications to the language server
      */
-    public async activeDocumentChanged(document?: vscode.TextDocument): Promise<void> {
-        await this.ready;
+    public async didChangeActiveDocument(document?: vscode.TextDocument, selection?: Range): Promise<void> {
         this.updateActiveDocumentTextOptions();
         if (!!document && !util.isCpp(document)) {
             return;
         }
 
-        const params: ActiveDocumentChangeParams = {
-            uri: document ? document.uri.toString() : ""
+        const params: DidChangeActiveDocumentParams = {
+            uri: document?.uri.toString(),
+            selection
         };
 
-        console.log("activeDocumentChanged\n" + JSON.stringify(params, null, 4));
+        console.log("didChangeActiveDocument\n" + JSON.stringify(params, null, 4));
 
-        return this.languageClient.sendNotification(ActiveDocumentChangeNotification, params).catch(logAndReturn.undefined);
+        return this.languageClient.sendNotification(DidChangeActiveDocumentNotification, params).catch(logAndReturn.undefined);
     }
 
     /**
@@ -2750,8 +2754,6 @@ export class DefaultClient implements Client {
     }
 
     public async selectionChanged(selection: Range): Promise<void> {
-        await this.ready;
-
         console.log("selectionChanged\n" + JSON.stringify(selection, null, 4));
 
         return this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
@@ -3645,9 +3647,9 @@ class NullClient implements Client {
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
     takeOwnership(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    // sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    activeDocumentChanged(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    didChangeActiveDocument(document: vscode.TextDocument, selection?: Range): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }

@@ -163,11 +163,11 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges(onDidChangeTextEditorVisibleRanges));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
+    ui.didChangeActiveDocument(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
 
     updateLanguageConfigurations();
 
@@ -300,41 +300,42 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         // temporarily, so this prevents the C++-related status bar items from flickering off/on.
         noActiveEditorTimeout = setTimeout(() => {
             activeDocument = undefined;
-            ui.activeDocumentChanged();
+            ui.didChangeActiveDocument();
             noActiveEditorTimeout = undefined;
-            clients.activeDocumentChanged(undefined).catch(logAndReturn.undefined);
         }, 100);
-        return;
-    }
-
-    if (util.isCppOrRelated(editor.document)) {
-
-        if (util.isCpp(editor.document)) {
-            activeDocument = editor.document;
+        void clients.didChangeActiveDocument(undefined, undefined).catch(logAndReturn.undefined);
+    } else {
+        ui.didChangeActiveDocument();
+        if (util.isCppOrRelated(editor.document)) {
+            if (util.isCpp(editor.document)) {
+                activeDocument = editor.document;
+            } else {
+                activeDocument = undefined;
+            }
+            void clients.didChangeActiveDocument(activeDocument, editor.selection).catch(logAndReturn.undefined);
+            //clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
         } else {
             activeDocument = undefined;
         }
-        void clients.activeDocumentChanged(activeDocument).catch(logAndReturn.undefined);
-        //clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
-    } else {
-        activeDocument = undefined;
     }
-    getUI().activeDocumentChanged();
 }
 
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
-    /* need to notify the affected client(s) */
-    if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
-        !util.isCpp(event.textEditor.document)) {
+    // /* need to notify the affected client(s) */
+    // if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
+    //     !util.isCpp(event.textEditor.document)) {
+    //     return;
+    // }
+    if (!util.isCpp(event.textEditor.document)) {
         return;
     }
 
-    if (activeDocument !== event.textEditor.document) {
-        // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
-        activeDocument = event.textEditor.document;
-        void clients.activeDocumentChanged(event.textEditor.document).catch(logAndReturn.undefined);
-        ui.activeDocumentChanged();
-    }
+    // if (activeDocument !== event.textEditor.document) {
+    //     // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
+    //     activeDocument = event.textEditor.document;
+    //     void clients.didChangeActiveDocument(event.textEditor.document).catch(logAndReturn.undefined);
+    //     ui.didChangeActiveDocument();
+    // }
     clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
 }
 
