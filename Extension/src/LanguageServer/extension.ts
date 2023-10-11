@@ -437,9 +437,9 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, false, sender) : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? (sender: string | undefined) => onExtractToFunction(true, false, sender) : onDisabledCommand));
-    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? (sender: string | undefined) => onExtractToFunction(false, true, sender) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFunction', enabled ? () => onExtractToFunction(false, false) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
 }
 
@@ -748,16 +748,13 @@ async function onCreateDeclarationOrDefinition(args?: any): Promise<void> {
     return getActiveClient().handleCreateDeclarationOrDefinition(false, args?.range);
 }
 
-async function onExtractToFunction(extractAsGlobal: boolean, extractAsMemberFunction: boolean, sender?: string): Promise<void> {
-    const properties: { [key: string]: string } = {
-        sender: util.getSenderType(sender)
-    };
+async function onExtractToFunction(extractAsGlobal: boolean, extractAsMemberFunction: boolean): Promise<void> {
     if (extractAsGlobal) {
-        telemetry.logLanguageServerEvent('ExtractToFreeFunction', properties);
+        telemetry.logLanguageServerEvent('ExtractToFreeFunction');
     } else if (extractAsMemberFunction) {
-        telemetry.logLanguageServerEvent('ExtractToMemberFunction', properties);
+        telemetry.logLanguageServerEvent('ExtractToMemberFunction');
     } else {
-        telemetry.logLanguageServerEvent('ExtractToFunction', properties);
+        telemetry.logLanguageServerEvent('ExtractToFunction');
     }
     return getActiveClient().handleExtractToFunction(extractAsGlobal);
 }

@@ -214,10 +214,6 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
                 if (!hasExperimentalFeatures) {
                     return;
                 }
-                if (command.disabledReason !== undefined) {
-                    command.arguments = [];
-                    command.arguments.push('codeAction');
-                }
                 codeActionKind = CodeActionProvider.extractToFunctionKind;
             } else if (command.command === "C_Cpp.ExtractToFreeFunction") {
                 // TODO: https://github.com/microsoft/vscode-cpptools/issues/11473 needs to be fixed.
