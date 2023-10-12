@@ -8,7 +8,7 @@
 
 ### Enhancements
 * Add setting `C_Cpp.refactoring.includeHeader` to customize whether or not to add an include header when doing a refactoring code action. [#11271](https://github.com/microsoft/vscode-cpptools/issues/11271) 
-* Update clang-format and clang-tidy to 17.0.2. [#11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
+* Update clang-format and clang-tidy to 17.0.2. [pr #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
 
 ### Bug Fixes
 * Fix the debugger truncating long strings when inspecting values. [#1786](https://github.com/microsoft/vscode-cpptools/issues/1786)
