@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2022",
+        "outDir": "dist",
+        "lib": [
+            "ES2022",
+            "dom"
+        ],
+        "sourceMap": true,
+        "rootDir": ".",
+        "removeComments": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": [
+        "ui/**/*.ts",
+        "./vscode*.d.ts",
+        "src/types/*.d.ts"
+    ],
+    "exclude": [
+        "node_modules/@types/eslint-scope/node_modules/@types/eslint/index.d.ts",
+        "node_modules/**"
+    ]
+}

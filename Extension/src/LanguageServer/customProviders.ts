@@ -172,7 +172,7 @@ export class CustomConfigurationProviderCollection {
         let exists: boolean = false;
         const existing: CustomProviderWrapper | undefined = this.providers.get(wrapper.extensionId);
         if (existing) {
-            exists = (existing.version === Version.v0 && wrapper.version === Version.v0);
+            exists = existing.version === Version.v0 && wrapper.version === Version.v0;
         }
 
         if (!exists) {
