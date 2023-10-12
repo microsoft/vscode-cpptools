@@ -17,5 +17,6 @@ export interface TextEdit {
 }
 
 export interface WorkspaceEdit {
-    changes: { [uri: string]: TextEdit[] };
+    file: string;
+    edits: TextEdit[];
 }
