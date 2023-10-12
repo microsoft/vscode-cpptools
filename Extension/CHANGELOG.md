@@ -1,7 +1,7 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.18.0: October 12, 2023
-### New Feature
+### New Features
 * Add an 'Extract to Function' (or Member Function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
   * Currently, it's only enabled when `C_Cpp.experimentFeatures` is `true`. Also, 'Extract to Free Function' is disabled.
 * Add a command to install a compiler that is accessible through the walkthrough. [PR #11286](https://github.com/microsoft/vscode-cpptools/pull/11286)
