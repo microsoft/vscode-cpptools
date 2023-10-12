@@ -1415,7 +1415,8 @@ export class DefaultClient implements Client {
             searchExclude: otherSettings.searchExclude,
             editorAutoClosingBrackets: otherSettings.editorAutoClosingBrackets,
             editorInlayHintsEnabled: otherSettings.editorInlayHintsEnabled,
-            editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled
+            editorParameterHintsEnabled: otherSettings.editorParameterHintsEnabled,
+            refactoringIncludeHeader: settings.refactoringIncludeHeader
         };
         return result;
     }
@@ -2436,9 +2437,12 @@ export class DefaultClient implements Client {
             testHook.updateStatus(status);
         } else if (message.endsWith("Initializing")) {
             this.model.isInitializingWorkspace.Value = true;
+            this.model.isIndexingWorkspace.Value = false;
+            this.model.isParsingWorkspace.Value = false;
         } else if (message.endsWith("Indexing")) {
             this.model.isIndexingWorkspace.Value = true;
             this.model.isInitializingWorkspace.Value = false;
+            this.model.isParsingWorkspace.Value = false;
         } else if (message.endsWith("files")) {
             this.model.isParsingFiles.Value = true;
         } else if (message.endsWith("IntelliSense")) {

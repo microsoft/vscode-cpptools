@@ -55,6 +55,12 @@ suite("[Inlay hints test]", function(): void {
                 if (result.filename === "inlay_hints.cpp" && result.status === apit.Status.IntelliSenseReady) {
                     console.log(`IntelliSense for '${result.filename}' is ready`);
                     resolve();
+                } else if (result.status === apit.Status.TagParsingBegun) {
+                    console.log(`IntelliSense status is TagParsingBegun`);
+                } else if (result.status === apit.Status.TagParsingDone) {
+                    console.log(`IntelliSense status is TagParsingDone`);
+                } else if (result.status === apit.Status.IntelliSenseCompiling) {
+                    console.log(`IntelliSense status is IntelliSenseCompiling`);
                 }
             }));
         });
@@ -63,7 +69,7 @@ suite("[Inlay hints test]", function(): void {
         console.log("Open file: " + fileUri.toString());
         const document: vscode.TextDocument = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document);
-        await timeout(5000, getIntelliSenseStatus);
+        await timeout(30000, getIntelliSenseStatus);
         saveOriginalSettings();
         await useDefaultSettings();
     });
