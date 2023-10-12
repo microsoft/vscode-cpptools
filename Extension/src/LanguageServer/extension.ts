@@ -532,12 +532,8 @@ async function onRescanCompilers(sender?: any): Promise<void> {
     return clients.ActiveClient.rescanCompilers(sender);
 }
 
-async function onAddMissingInclude(args?: any): Promise<void> {
-    const sender: any | undefined = util.isString(args?.sender) ? args.sender : args;
-    const properties: Record<string, string> = {
-        sender: util.getSenderType(sender)
-    };
-    telemetry.logLanguageServerEvent('CopyDeclDefn', properties);
+async function onAddMissingInclude(): Promise<void> {
+    telemetry.logLanguageServerEvent('AddMissingInclude');
 }
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
