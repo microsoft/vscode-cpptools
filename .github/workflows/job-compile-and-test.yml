@@ -1,0 +1,73 @@
+# Reuable workflow for compiling and testing extension.
+name: Compile and test extension
+
+on:
+  workflow_call:
+    inputs:
+      runner-env:
+        required: true
+        type: string
+      platform:
+        # Expects 'mac', 'linux', or 'windows'
+        required: true
+        type: string
+      yarn-args:
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner-env }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn install ${{ inputs.yarn-args }}
+        working-directory: Extension
+
+      - name: Compile Sources
+        run: yarn run compile
+        working-directory: Extension
+
+      - name: Run Linter
+        run: yarn run lint
+        working-directory: Extension
+
+      - name: Run unit tests
+        run: yarn test
+        working-directory: Extension
+
+      # NOTE : We can't run the test that require the native binary files
+      #        yet -- there will be an update soon that allows the tester to 
+      #        acquire them on-the-fly
+      # - name: Run languageServer integration tests
+      #   if: ${{ inputs.platform == 'windows' }}
+      #   run: yarn test --scenario=SingleRootProject
+      #   working-directory: Extension
+
+      # - name: Run E2E IntelliSense features tests
+      #   if: ${{ inputs.platform == 'windows' }}
+      #   run: yarn test --scenario=MultirootDeadlockTest
+      #   working-directory: Extension
+
+      # NOTE: For mac/linux run the tests with xvfb-action for UI support.
+      # Another way to start xvfb https://github.com/microsoft/vscode-test/blob/master/sample/azure-pipelines.yml
+
+      # - name: Run languageServer integration tests (xvfb)
+      #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
+      #   uses: coactions/setup-xvfb@v1
+      #   with:
+      #     run: yarn test --scenario=SingleRootProject
+      #     working-directory: Extension
+
+      # - name: Run E2E IntelliSense features tests (xvfb)
+      #   if: ${{ inputs.platform == 'mac' || inputs.platform == 'linux' }}
+      #   uses: coactions/setup-xvfb@v1
+      #   with:
+      #     run: yarn test --scenario=MultirootDeadlockTest
+      #     working-directory: Extension
