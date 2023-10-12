@@ -12,6 +12,8 @@ import { Client } from './client';
 import { clients } from './extension';
 import { shouldChangeFromCToCpp } from './utils';
 
+let anyFileOpened: boolean = false;
+
 export function createProtocolFilter(): Middleware {
     // Disabling lint for invoke handlers
     const invoke1 = (a: any, next: (a: any) => any): any => clients.ActiveClient.enqueue(() => next(a));
@@ -42,6 +44,16 @@ export function createProtocolFilter(): Middleware {
                     client.onDidOpenTextDocument(document);
                     await client.takeOwnership(document);
                     await sendMessage(document);
+
+                    // For a file already open when we active, sometimes we don't get any notifications about visible
+                    // or active text editors, visible ranges, or text selection. As a workaround, we trigger
+                    // onDidChangeVisibleTextEditors here, only for the first file opened.
+                    if (!anyFileOpened)
+                    {
+                        anyFileOpened = true;
+                        const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
+                        await client.onDidChangeVisibleTextEditors(cppEditors);
+                    }
                 }
             }
 

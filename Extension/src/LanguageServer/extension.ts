@@ -309,10 +309,11 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         if (util.isCppOrRelated(editor.document)) {
             if (util.isCpp(editor.document)) {
                 activeDocument = editor.document;
+                void clients.didChangeActiveDocument(activeDocument, editor.selection).catch(logAndReturn.undefined);
             } else {
                 activeDocument = undefined;
+                void clients.didChangeActiveDocument(undefined, undefined).catch(logAndReturn.undefined);
             }
-            void clients.didChangeActiveDocument(activeDocument, editor.selection).catch(logAndReturn.undefined);
             //clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
         } else {
             activeDocument = undefined;
