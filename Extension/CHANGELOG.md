@@ -4,11 +4,11 @@
 ### New Features
 * Add an 'Extract to Function' (or Member Function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
   * Currently, it's only enabled when `C_Cpp.experimentFeatures` is `true`. Also, 'Extract to Free Function' is disabled.
-* Add a command to install a compiler that is accessible through the walkthrough. [PR #11286](https://github.com/microsoft/vscode-cpptools/pull/11286)
+* Add an option to install a compiler that is accessible through the walkthrough. [PR #11286](https://github.com/microsoft/vscode-cpptools/pull/11286)
 
 ### Enhancements
 * Add setting `C_Cpp.refactoring.includeHeader` to customize whether or not to add an include header when doing a refactoring code action. [#11271](https://github.com/microsoft/vscode-cpptools/issues/11271) 
-* Update clang-format and clang-tidy to 17.0.2. [pr #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
+* Update clang-format and clang-tidy to 17.0.2. [PR #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
 
 ### Bug Fixes
 * Fix the debugger truncating long strings when inspecting values. [#1786](https://github.com/microsoft/vscode-cpptools/issues/1786)
