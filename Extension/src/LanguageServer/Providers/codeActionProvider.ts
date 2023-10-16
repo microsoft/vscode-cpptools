@@ -98,7 +98,9 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
             if (command.edit) {
                 wsEdit = new vscode.WorkspaceEdit();
-                command.edit.newText = command.edit.newText + "\r\n";
+                if (command.command === 'C_Cpp.AddMissingInclude'){
+                    command.edit.newText = command.edit.newText + "\r\n";
+                }
                 wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
                 if (command.command === "edit") {
                     // Inline macro feature.
