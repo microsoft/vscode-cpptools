@@ -98,14 +98,14 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             let codeActionKind: vscode.CodeActionKind = vscode.CodeActionKind.QuickFix;
             if (command.edit) {
                 wsEdit = new vscode.WorkspaceEdit();
+                command.edit.newText = command.edit.newText + "\r\n";
                 wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
                 if (command.command === "edit") {
                     // Inline macro feature.
                     codeActionKind = CodeActionProvider.inlineMacroKind;
                     hasInlineMacro = true;
                 }
-            }
-            else if (command.command === "C_Cpp.RemoveAllCodeAnalysisProblems" && command.uri !== undefined) {
+            } else if (command.command === "C_Cpp.RemoveAllCodeAnalysisProblems" && command.uri !== undefined) {
                 // The "RemoveAll" message is sent for all code analysis squiggles.
                 const vsCodeRange: vscode.Range = makeVscodeRange(r);
                 const codeActionDiagnosticInfo: CodeActionDiagnosticInfo[] | undefined = codeAnalysisFileToCodeActions.get(command.uri);
