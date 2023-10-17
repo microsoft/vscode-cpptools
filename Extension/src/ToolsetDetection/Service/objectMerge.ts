@@ -40,12 +40,9 @@ export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerg
     if (isMergeble(target) && isMergeble(dataToMerge)) {
 
         for (let [key, value] of Object.entries(dataToMerge)) {
-
-            // as a convenience for the user, we'll allow them to specify key names that are plural (ie, end in 's')
-            // and automatically drop the 's' - so paths.includes becomes path.include
-            // if (key.endsWith('s') && !key.endsWith('is')) {
-            //     key = key.substring(0, key.length - 1);
-            // }
+            if (key === '') {
+                continue;
+            }
 
             if (key.startsWith('remove:')) {
                 key = key.substring(7);
@@ -73,13 +70,18 @@ export function mergeObjects<T extends Record<string, any>>(input: T, dataToMerg
                 continue;
             }
 
+            if (target[key] === value) {
+                //* console.log(`Same Same -> '${key}' => '${value}'`);
+                continue;
+            }
+
             // if the source value is null, we're going to delete the target value
             if (value === null) {
                 delete target[key];
                 continue;
             }
 
-            // if the source value is undefined, we're going to leave the target value as is
+            // if the source value is empty/undefined, we're going to leave the target value as is
             if (value === undefined) {
                 continue;
             }

@@ -32,7 +32,7 @@ export class TargetLeafNode extends LabelLeafNode {
         super(name);
     }
 
-    async getTreeItem(): Promise<TreeItem> {
+    override async getTreeItem(): Promise<TreeItem> {
         const item: TreeItem = await super.getTreeItem();
         const removable: boolean = await isWritable(this.sshConfigHostInfo.file);
         if (_activeTarget === this.name) {

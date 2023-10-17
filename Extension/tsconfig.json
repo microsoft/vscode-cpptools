@@ -12,7 +12,8 @@
         "removeComments": true,
         "strictNullChecks": true,
         "strict": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitOverride": true
     },
     "include": [
         "test/**/*.ts",

@@ -243,7 +243,12 @@ export async function render(templateString: string | string[], context: Record<
     let result = '';
     for (let index = 0; index < template.length; ++index) {
         const each = template[index];
-        result = `${result}${stabilize(await resolveValue(expressions[index - 1], context, customResolver))}${each}`;
+        if (index) {
+            const v = await resolveValue(expressions[index - 1], context, customResolver);
+            result = `${result}${stabilize(v)}${each}`;
+        } else {
+            result = `${each}`;
+        }
     }
 
     // if the result isn't the same as the original, but still has template strings, resolve any additional ones we can.
@@ -257,6 +262,7 @@ export async function evaluateExpression(expression: string, context: Record<str
 
 export async function recursiveRender<T extends Record<string, any>>(obj: T, context: Record<string, any>, customResolver = async (_prefix: string, _expression: string) => ''): Promise<T> {
     const result = (is.array(obj) ? [] : {}) as Record<string, any>;
+
     for (const [key, value] of Object.entries(obj)) {
         const newKey = is.string(key) && key.includes('${') ? await render(key, context, customResolver) : key;
 

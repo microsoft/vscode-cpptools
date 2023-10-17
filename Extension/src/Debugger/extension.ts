@@ -215,7 +215,7 @@ async function addSshTargetImpl(): Promise<string> {
 async function removeSshTargetImpl(node: TargetLeafNode): Promise<boolean> {
     const labelYes: string = localize('yes', 'Yes');
     const labelNo: string = localize('no', 'No');
-    const confirm: string | undefined = await vscode.window.showInformationMessage(localize('ssh.target.delete.confirmation', 'Are you sure you want to permanamtly delete "{0}"?', node.name), labelYes, labelNo);
+    const confirm: string | undefined = await vscode.window.showInformationMessage(localize('ssh.target.delete.confirmation', 'Are you sure you want to permanently delete "{0}"?', node.name), labelYes, labelNo);
     if (!confirm || confirm === labelNo) {
         return false;
     }

@@ -1,18 +1,18 @@
 {
-    "c_cpp.subheaders.intelliSense.title" : "IntelliSense",
-    "c_cpp.subheaders.formatting.title" : "Formatting",
-    "c_cpp.subheaders.codeDocumentation.title" : "Code Documentation",
-    "c_cpp.subheaders.codeAnalysis.title" : "Code Analysis",
-    "c_cpp.subheaders.debugging.title" : "Debugging",
-    "c_cpp.subheaders.resourceManagement.title" : "Resource Management",
-    "c_cpp.subheaders.miscellaneous.title" : "Miscellaneous",
+    "c_cpp.subheaders.intelliSense.title": "IntelliSense",
+    "c_cpp.subheaders.formatting.title": "Formatting",
+    "c_cpp.subheaders.codeDocumentation.title": "Code Documentation",
+    "c_cpp.subheaders.codeAnalysis.title": "Code Analysis",
+    "c_cpp.subheaders.debugging.title": "Debugging",
+    "c_cpp.subheaders.resourceManagement.title": "Resource Management",
+    "c_cpp.subheaders.miscellaneous.title": "Miscellaneous",
     "c_cpp.capabilities.untrustedWorkspaces.description": "Multiple settings can cause processes local to the workspace to be executed, e.g. C_Cpp.clang_format_path, C_Cpp.codeAnalysis.clangTidy.path, C_Cpp.addNodeAddonIncludePaths, C_Cpp.default.compilerPath, C_Cpp.default.configurationProvider, and C_Cpp.default.compileCommands, and the equivalent properties in c_cpp_properties.json.",
     "c_cpp.command.configurationSelect.title": "Select a Configuration...",
     "c_cpp.command.configurationProviderSelect.title": "Change Configuration Provider...",
     "c_cpp.command.configurationEditJSON.title": "Edit Configurations (JSON)",
     "c_cpp.command.configurationEditUI.title": "Edit Configurations (UI)",
-    "c_cpp.command.selectDefaultCompiler.title": "Select Default Compiler...",
     "c_cpp.command.selectIntelliSenseConfiguration.title": "Select IntelliSense Configuration...",
+    "c_cpp.command.installCompiler.title": "Install a C++ Compiler",
     "c_cpp.command.rescanCompilers.title": "Rescan for Compilers",
     "c_cpp.command.switchHeaderSource.title": "Switch Header/Source",
     "c_cpp.command.enableErrorSquiggles.title": "Enable Error Squiggles",
@@ -48,66 +48,301 @@
     "c_cpp.command.activeSshTarget.title": "Get the active SSH target",
     "c_cpp.command.refreshCppSshTargetsView.title": "Refresh",
     "c_cpp.command.sshTerminal.title": "Connect to this SSH target in a new terminal",
-    "c_cpp.configuration.maxConcurrentThreads.markdownDescription": { "message": "The maximum number of concurrent threads to use for language service processing. The value is a hint and may not always be used. The default of `null` (empty) uses the number of logical processors available.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.maxCachedProcesses.markdownDescription": { "message": "The maximum number of cached processes to use for language service processing. The default of `null` (empty) uses twice the number of logical processors available.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.maxMemory.markdownDescription": { "message": "The maximum memory (in MB) available for language service processing. Fewer processes will be cached and run concurrently after this memory usage is exceeded. The default of `null` (empty) uses the system's free memory.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.intelliSense.maxCachedProcesses.markdownDescription": { "message": "The maximum number of IntelliSense processes to keep running. The default of `null` (empty) uses value inherited from `#C_Cpp.maxCachedProcesses#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.intelliSense.maxMemory.markdownDescription": { "message": "Older IntelliSense processes will shut down before new processes are created after this memory usage (in MB) is exceeded. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxMemory#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.references.maxConcurrentThreads.markdownDescription": { "message": "The maximum number of concurrent threads to use for 'Find All References' and 'Rename'. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxConcurrentThreads#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.references.maxCachedProcesses.markdownDescription": { "message": "The maximum number of processes to keep in memory for 'Find All References' and 'Rename'. The default of `0` disables this feature. The value of `null` (empty) uses the value inherited from `#C_Cpp.maxCachedProcesses#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.references.maxMemory.markdownDescription": { "message": "Fewer 'Find All References' and 'Rename' processes will be cached and run concurrently after this memory usage (in MB) is exceeded. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxMemory#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.maxConcurrentThreads.markdownDescription": { "message": "The maximum number of concurrent threads to use for code analysis. The default of `null` (empty) uses half the value inherited from `#C_Cpp.maxConcurrentThreads#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.maxMemory.markdownDescription": { "message": "Fewer code analysis processes will run concurrently after this memory usage (in MB) is exceeded. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxMemory#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.updateDelay.markdownDescription": { "message": "Controls the delay in milliseconds before code analysis starts processing after a save is triggered from an edit when `#files.autoSave#` is `afterDelay` and `#C_Cpp.codeAnalysis.runAutomatically#` is `true`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.exclude.markdownDescription": { "message": "Configure glob patterns for excluding folders and files for code analysis. Files not under the workspace folder are always excluded. Inherits values from `#files.exclude#` and `#C_Cpp.files.exclude#`. Read more about glob patterns [here](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.excludeBoolean.markdownDescription": { "message": "The glob pattern to match file paths against. Set to `true` or `false` to enable or disable the pattern.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.excludeWhen.markdownDescription": { "message": "Additional check on the siblings of a matching file. Use `$(basename)` as variable for the matching file name.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.runAutomatically.markdownDescription": { "message":  "If `true`, code analysis will run automatically on a file after it is opened or saved.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDisable.markdownDescription": { "message": "If `true`, the 'Disable' code action will be shown when available (the next time code analysis is run). When the 'Disable' code action is used, it adds the warning code to the `C_Cpp.codeAnalysis.clangTidy.checks.disabled` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDocumentation.markdownDescription": { "message": "If `true`, the 'Show Documentation for' code action will be shown when available (the next time code analysis is run).", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.maxConcurrentThreads.markdownDescription": {
+        "message": "The maximum number of concurrent threads to use for language service processing. The value is a hint and may not always be used. The default of `null` (empty) uses the number of logical processors available.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.maxCachedProcesses.markdownDescription": {
+        "message": "The maximum number of cached processes to use for language service processing. The default of `null` (empty) uses twice the number of logical processors available.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.maxMemory.markdownDescription": {
+        "message": "The maximum memory (in MB) available for language service processing. Fewer processes will be cached and run concurrently after this memory usage is exceeded. The default of `null` (empty) uses the system's free memory.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.intelliSense.maxCachedProcesses.markdownDescription": {
+        "message": "The maximum number of IntelliSense processes to keep running. The default of `null` (empty) uses value inherited from `#C_Cpp.maxCachedProcesses#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.intelliSense.maxMemory.markdownDescription": {
+        "message": "Older IntelliSense processes will shut down before new processes are created after this memory usage (in MB) is exceeded. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxMemory#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.references.maxConcurrentThreads.markdownDescription": {
+        "message": "The maximum number of concurrent threads to use for 'Find All References' and 'Rename'. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxConcurrentThreads#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.references.maxCachedProcesses.markdownDescription": {
+        "message": "The maximum number of processes to keep in memory for 'Find All References' and 'Rename'. The default of `0` disables this feature. The value of `null` (empty) uses the value inherited from `#C_Cpp.maxCachedProcesses#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.references.maxMemory.markdownDescription": {
+        "message": "Fewer 'Find All References' and 'Rename' processes will be cached and run concurrently after this memory usage (in MB) is exceeded. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxMemory#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.maxConcurrentThreads.markdownDescription": {
+        "message": "The maximum number of concurrent threads to use for code analysis. The default of `null` (empty) uses half the value inherited from `#C_Cpp.maxConcurrentThreads#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.maxMemory.markdownDescription": {
+        "message": "Fewer code analysis processes will run concurrently after this memory usage (in MB) is exceeded. The default of `null` (empty) uses the value inherited from `#C_Cpp.maxMemory#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.updateDelay.markdownDescription": {
+        "message": "Controls the delay in milliseconds before code analysis starts processing after a save is triggered from an edit when `#files.autoSave#` is `afterDelay` and `#C_Cpp.codeAnalysis.runAutomatically#` is `true`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.exclude.markdownDescription": {
+        "message": "Configure glob patterns for excluding folders and files for code analysis. Files not under the workspace folder are always excluded. Inherits values from `#files.exclude#` and `#C_Cpp.files.exclude#`. Read more about glob patterns [here](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.excludeBoolean.markdownDescription": {
+        "message": "The glob pattern to match file paths against. Set to `true` or `false` to enable or disable the pattern.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.excludeWhen.markdownDescription": {
+        "message": "Additional check on the siblings of a matching file. Use `$(basename)` as variable for the matching file name.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.runAutomatically.markdownDescription": {
+        "message": "If `true`, code analysis will run automatically on a file after it is opened or saved.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDisable.markdownDescription": {
+        "message": "If `true`, the 'Disable' code action will be shown when available (the next time code analysis is run). When the 'Disable' code action is used, it adds the warning code to the `C_Cpp.codeAnalysis.clangTidy.checks.disabled` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showDocumentation.markdownDescription": {
+        "message": "If `true`, the 'Show Documentation for' code action will be shown when available (the next time code analysis is run).",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.description": "Controls which 'Clear' code analysis problem code action options are available. Changing the setting to show more options may require re-running code analysis.",
     "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.None.description": "Show no 'Clear' code actions.",
     "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllOnly.description": "Show only the 'Clear all' code action (or 'Clear all <type>' if there is only one type or 'Clear this' if there is only one problem).",
     "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllType.description": "Show the 'Clear all' code action (if there are multiple problem types) and the 'Clear all <type>' code action (or 'Clear this' if there is only one problem for the <type>)",
     "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.showClear.AllAndAllTypeAndThis.description": "Show the 'Clear all' (if there are multiple problem types), 'Clear all <type>' (if there are multiple problems for the <type>), and 'Clear this' code actions",
-    "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription": { "message": "If `true`, formatting will be run on the lines changed by 'Fix' code actions.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": { "message": "If `true`, code analysis using `clang-tidy` will be enabled and will run after a file is opened or saved if `#C_Cpp.codeAnalysis.runAutomatically#` is `true` (the default).", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": { "message": "The full path of the `clang-tidy` executable. If not specified, and `clang-tidy` is available in the environment path, that is used. If not found in the environment path, the `clang-tidy` bundled with the extension will be used.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription": { "message": "Specifies a `clang-tidy` configuration in YAML/JSON format: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`. When the value is empty, `clang-tidy` will attempt to find a file named `.clang-tidy` for each source file in its parent directories.", "comment": [ "Words 'key' and 'value' in '{key: value, ...}' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription": { "message": "Specifies a `clang-tidy` configuration in YAML/JSON format to be used as a fallback when `#C_Cpp.codeAnalysis.clangTidy.config#` is not set and no `.clang-tidy` file is found: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`.", "comment": [ "Words 'key' and 'value' in '{key: value, ...}' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription": { "message": "A POSIX extended regular expression (ERE) matching the names of the headers to output diagnostics from. Diagnostics from the main file of each translation unit are always displayed. The `${workspaceFolder}` variable is supported (and is used as the default fallback value if no `.clang-tidy` file exists). If this option is not `null` (empty), it overrides the `HeaderFilterRegex` option in a `.clang-tidy` file, if any.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription": { "message": "Additional command line arguments to pass to `clang-tidy`. These take precedence over the equivalent `C_Cpp.codeAnalysis.clangTidy.*` settings.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription": { "message": "If `true` and `compileCommands` is set, the `-p=<build-path>` argument is passed to `clang-tidy` instead of build arguments being passed after `--`. This may not work if environment variables aren't set so that system includes can be found.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": { "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it is explicitly disabled.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.codeAnalysis.clangTidy.checks.disabled.markdownDescription": { "message": "List of disabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.codeAnalysis.clangTidy.codeAction.formatFixes.markdownDescription": {
+        "message": "If `true`, formatting will be run on the lines changed by 'Fix' code actions.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.enabled.markdownDescription": {
+        "message": "If `true`, code analysis using `clang-tidy` will be enabled and will run after a file is opened or saved if `#C_Cpp.codeAnalysis.runAutomatically#` is `true` (the default).",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.path.markdownDescription": {
+        "message": "The full path of the `clang-tidy` executable. If not specified, and `clang-tidy` is available in the environment path, that is used. If not found in the environment path, the `clang-tidy` bundled with the extension will be used.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.config.markdownDescription": {
+        "message": "Specifies a `clang-tidy` configuration in YAML/JSON format: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`. When the value is empty, `clang-tidy` will attempt to find a file named `.clang-tidy` for each source file in its parent directories.",
+        "comment": [
+            "Words 'key' and 'value' in '{key: value, ...}' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.fallbackConfig.markdownDescription": {
+        "message": "Specifies a `clang-tidy` configuration in YAML/JSON format to be used as a fallback when `#C_Cpp.codeAnalysis.clangTidy.config#` is not set and no `.clang-tidy` file is found: `{Checks: '-*,clang-analyzer-*', CheckOptions: [{key: x, value: y}]}`.",
+        "comment": [
+            "Words 'key' and 'value' in '{key: value, ...}' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.headerFilter.markdownDescription": {
+        "message": "A POSIX extended regular expression (ERE) matching the names of the headers to output diagnostics from. Diagnostics from the main file of each translation unit are always displayed. The `${workspaceFolder}` variable is supported (and is used as the default fallback value if no `.clang-tidy` file exists). If this option is not `null` (empty), it overrides the `HeaderFilterRegex` option in a `.clang-tidy` file, if any.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.args.markdownDescription": {
+        "message": "Additional command line arguments to pass to `clang-tidy`. These take precedence over the equivalent `C_Cpp.codeAnalysis.clangTidy.*` settings.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.useBuildPath.markdownDescription": {
+        "message": "If `true` and `compileCommands` is set, the `-p=<build-path>` argument is passed to `clang-tidy` instead of build arguments being passed after `--`. This may not work if environment variables aren't set so that system includes can be found.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.checks.enabled.markdownDescription": {
+        "message": "List of enabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any. The default check `clang-analyzer-*` is always used unless it is explicitly disabled.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.codeAnalysis.clangTidy.checks.disabled.markdownDescription": {
+        "message": "List of disabled `clang-tidy` checks. The values are appended to the `Checks` in a `.clang-tidy` file or `#C_Cpp.codeAnalysis.clangTidy.config#`, if any.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.formatting.description": "Configures the formatting engine.",
-    "c_cpp.configuration.formatting.clangFormat.markdownDescription": { "message": "`clang-format` will be used to format code.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.formatting.vcFormat.markdownDescription": { "message": "The Visual C++ formatting engine will be used to format code.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.formatting.Default.markdownDescription": { "message": "By default, `clang-format` will be used to format the code. However, the Visual C++ formatting engine will be used if an `.editorconfig` file with relevant settings is found nearer to the code being formatted and `#C_Cpp.clang_format_style#` is the default value: `file`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.formatting.Disabled.markdownDescription": { "message": "Code formatting will be disabled.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.braces.markdownDescription": { "message": "Braces are indented by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.formatting.clangFormat.markdownDescription": {
+        "message": "`clang-format` will be used to format code.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.formatting.vcFormat.markdownDescription": {
+        "message": "The Visual C++ formatting engine will be used to format code.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.formatting.Default.markdownDescription": {
+        "message": "By default, `clang-format` will be used to format the code. However, the Visual C++ formatting engine will be used if an `.editorconfig` file with relevant settings is found nearer to the code being formatted and `#C_Cpp.clang_format_style#` is the default value: `file`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.formatting.Disabled.markdownDescription": {
+        "message": "Code formatting will be disabled.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.braces.markdownDescription": {
+        "message": "Braces are indented by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.description": "Determines what new line indentation is relative to.",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.outermostParenthesis.description": "Indent new line relative to the outermost open parenthesis.",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.innermostParenthesis.description": "Indent new line relative to the innermost open parenthesis.",
     "c_cpp.configuration.vcFormat.indent.multiLineRelativeTo.statementBegin.description": "Indent new line relative to the beginning of the current statement.",
-    "c_cpp.configuration.vcFormat.indent.withinParentheses.markdownDescription": { "message": "When a new line is typed, it is aligned under the opening parenthesis or based on `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.markdownDescription": { "message": "New line is aligned under the opening parenthesis.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription": { "message": "New line is indented based on `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcFormat.indent.withinParentheses.markdownDescription": {
+        "message": "When a new line is typed, it is aligned under the opening parenthesis or based on `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.withinParentheses.alignToParenthesis.markdownDescription": {
+        "message": "New line is aligned under the opening parenthesis.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.withinParentheses.indent.markdownDescription": {
+        "message": "New line is indented based on `#C_Cpp.vcFormat.indent.multiLineRelativeTo#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcFormat.indent.preserveWithinParentheses.description": "In existing code, preserve the existing indent alignment of new lines within parentheses.",
-    "c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription": { "message": "Labels are indented relative to switch statements by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": { "message": "Code inside a `case` block is indented relative to its label by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription": { "message": "Indent braces following a case statement by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription": { "message": "Indent braces of lambdas used as function parameters relative to the start of the statement by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcFormat.indent.caseLabels.markdownDescription": {
+        "message": "Labels are indented relative to switch statements by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.caseContents.markdownDescription": {
+        "message": "Code inside a `case` block is indented relative to its label by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.caseContentsWhenBlock.markdownDescription": {
+        "message": "Indent braces following a case statement by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.lambdaBracesWhenParameter.markdownDescription": {
+        "message": "Indent braces of lambdas used as function parameters relative to the start of the statement by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcFormat.indent.gotoLabels.description": "The position of goto labels.",
-    "c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.markdownDescription": { "message": "Position goto labels to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.markdownDescription": { "message": "Position goto labels at the leftmost edge of the code.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.gotoLabels.none.markdownDescription": { "message": "Goto labels will not be formatted.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcFormat.indent.gotoLabels.oneLeft.markdownDescription": {
+        "message": "Position goto labels to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.gotoLabels.leftmostColumn.markdownDescription": {
+        "message": "Position goto labels at the leftmost edge of the code.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.gotoLabels.none.markdownDescription": {
+        "message": "Goto labels will not be formatted.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcFormat.indent.preprocessor.description": "The position of preprocessor directives.",
-    "c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.markdownDescription": { "message": "Preprocessor directives are positioned to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.markdownDescription": { "message": "Preprocessor directives are positioned at the leftmost edge of the code.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.preprocessor.none.markdownDescription": { "message": "Preprocessor directives will not be formatted.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.accessSpecifiers.markdownDescription": { "message": "Access specifiers are indented relative to class or struct definitions by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.indent.namespaceContents.markdownDescription": { "message": "Code is indented relative to its enclosing namespace by the amount specified in the `#editor.tabSize#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcFormat.indent.preprocessor.oneLeft.markdownDescription": {
+        "message": "Preprocessor directives are positioned to the left of the current code indentation, by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.preprocessor.leftmostColumn.markdownDescription": {
+        "message": "Preprocessor directives are positioned at the leftmost edge of the code.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.preprocessor.none.markdownDescription": {
+        "message": "Preprocessor directives will not be formatted.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.accessSpecifiers.markdownDescription": {
+        "message": "Access specifiers are indented relative to class or struct definitions by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.indent.namespaceContents.markdownDescription": {
+        "message": "Code is indented relative to its enclosing namespace by the amount specified in the `#editor.tabSize#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcFormat.indent.preserveComments.description": "Indentation of comments is not changed during formatting operations.",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.namespace.description": "The position of opening braces for namespaces.",
     "c_cpp.configuration.vcFormat.newLine.beforeOpenBrace.type.description": "The position of opening braces for type definitions.",
@@ -120,9 +355,24 @@
     "c_cpp.configuration.vcFormat.newLine.scopeBracesOnSeparateLines.description": "Place opening and closing braces for scopes on separate lines.",
     "c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyType.description": "For empty types, move closing braces to the same line as opening braces.",
     "c_cpp.configuration.vcFormat.newLine.closeBraceSameLine.emptyFunction.description": "For empty function bodies, move closing braces to the same line as opening braces.",
-    "c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription": { "message": "Place `catch` and similar keywords on a new line.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.newLine.beforeElse.markdownDescription": { "message": "Place `else` on a new line.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription": { "message": "Place `while` in a `do`-`while` loop on a new line.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcFormat.newLine.beforeCatch.markdownDescription": {
+        "message": "Place `catch` and similar keywords on a new line.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.newLine.beforeElse.markdownDescription": {
+        "message": "Place `else` on a new line.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.newLine.beforeWhileInDoWhile.markdownDescription": {
+        "message": "Place `while` in a `do`-`while` loop on a new line.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.description": "Spacing between function names and opening parentheses of argument lists.",
     "c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.insert.description": "Add a space before the opening parenthesis of a function.",
     "c_cpp.configuration.vcFormat.space.beforeFunctionOpenParenthesis.remove.description": "Spaces before opening parenthesis of a function are removed.",
@@ -167,100 +417,410 @@
     "c_cpp.configuration.vcFormat.space.aroundOperators.remove.description": "Spaces before and after the operator are removed.",
     "c_cpp.configuration.vcFormat.space.aroundOperators.ignore.description": "Spaces are left as entered.",
     "c_cpp.configuration.vcFormat.wrap.preserveBlocks.description": "Wrapping options for blocks.",
-    "c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.markdownDescription": { "message": "A complete code block that is entered on one line is kept on one line, regardless of the values of any of the `C_Cpp.vcFormat.newLine.*` settings.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription": { "message": "Any code where the opening and closing brace is entered on one line is kept on one line, regardless of the values of any of the `C_Cpp.vcFormat.newLine.*` settings.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription": { "message": "Code blocks are always formatted based on the values of the `C_Cpp.vcFormat.newLine.*` settings.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.clang_format_path.markdownDescription": { "message": "The full path of the `clang-format` executable. If not specified, and `clang-format` is available in the environment path, that is used. If not found in the environment path, the `clang-format` bundled with the extension will be used.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.clang_format_style.markdownDescription": { "message": "Coding style, currently supports: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`. Use `file` to load the style from a `.clang-format` file in the current or parent directory, or use `file:<path>/.clang-format` to reference a specific path. Use `{key: value, ...}` to set specific parameters. For example, the `Visual Studio` style is similar to: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`.", "comment": [ "Words 'key' and 'value' in '{key: value, ...}' and the word 'path' in 'file:<path>/.clang-format' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.clang_format_fallbackStyle.markdownDescription": { "message": "Name of the predefined style used as a fallback in case `clang-format` is invoked with style `file` but the `.clang-format` file is not found. Possible values are `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`, `none`, or use `{key: value, ...}` to set specific parameters. For example, the `Visual Studio` style is similar to: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`.", "comment": [ "Words 'key' and 'value' in '{key: value, ...}' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.clang_format_sortIncludes.markdownDescription": { "message": "If set, overrides the include sorting behavior determined by the `SortIncludes` parameter.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcFormat.wrap.preserveBlocks.oneLiners.markdownDescription": {
+        "message": "A complete code block that is entered on one line is kept on one line, regardless of the values of any of the `C_Cpp.vcFormat.newLine.*` settings.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.wrap.preserveBlocks.allOneLineScopes.markdownDescription": {
+        "message": "Any code where the opening and closing brace is entered on one line is kept on one line, regardless of the values of any of the `C_Cpp.vcFormat.newLine.*` settings.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.vcFormat.wrap.preserveBlocks.never.markdownDescription": {
+        "message": "Code blocks are always formatted based on the values of the `C_Cpp.vcFormat.newLine.*` settings.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.clang_format_path.markdownDescription": {
+        "message": "The full path of the `clang-format` executable. If not specified, and `clang-format` is available in the environment path, that is used. If not found in the environment path, the `clang-format` bundled with the extension will be used.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.clang_format_style.markdownDescription": {
+        "message": "Coding style, currently supports: `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`. Use `file` to load the style from a `.clang-format` file in the current or parent directory, or use `file:<path>/.clang-format` to reference a specific path. Use `{key: value, ...}` to set specific parameters. For example, the `Visual Studio` style is similar to: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
+        "comment": [
+            "Words 'key' and 'value' in '{key: value, ...}' and the word 'path' in 'file:<path>/.clang-format' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.clang_format_fallbackStyle.markdownDescription": {
+        "message": "Name of the predefined style used as a fallback in case `clang-format` is invoked with style `file` but the `.clang-format` file is not found. Possible values are `Visual Studio`, `LLVM`, `Google`, `Chromium`, `Mozilla`, `WebKit`, `Microsoft`, `GNU`, `none`, or use `{key: value, ...}` to set specific parameters. For example, the `Visual Studio` style is similar to: `{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }`.",
+        "comment": [
+            "Words 'key' and 'value' in '{key: value, ...}' should be translated, but all other markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.clang_format_sortIncludes.markdownDescription": {
+        "message": "If set, overrides the include sorting behavior determined by the `SortIncludes` parameter.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.intelliSenseEngine.description": "Controls the IntelliSense provider.",
     "c_cpp.configuration.intelliSenseEngine.default.description": "Provides context-aware results via a separate IntelliSense process.",
     "c_cpp.configuration.intelliSenseEngine.tagParser.description": "Provides \"fuzzy\" results that are not context-aware.",
     "c_cpp.configuration.intelliSenseEngine.disabled.description": "Turns off C/C++ language service features.",
-    "c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": { "message": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing `#include` errors.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.autocomplete.markdownDescription": { "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (and similarly for `c` and `cuda-cpp` languages).", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": {
+        "message": "Controls whether the IntelliSense engine will automatically switch to the Tag Parser for translation units containing `#include` errors.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.autocomplete.markdownDescription": {
+        "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (and similarly for `c` and `cuda-cpp` languages).",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
     "c_cpp.configuration.autocomplete.disabled.description": "Uses the word-based completion provided by Visual Studio Code.",
     "c_cpp.configuration.errorSquiggles.description": "Controls whether suspected compile errors detected by the IntelliSense engine will be reported back to the editor. It also controls whether code analysis warnings are reported if includes can't be found. This setting is ignored by the Tag Parser engine.",
     "c_cpp.configuration.dimInactiveRegions.description": "Controls whether inactive preprocessor blocks are colored differently than active code. This setting has no effect if IntelliSense is disabled or if using the Default High Contrast theme.",
-    "c_cpp.configuration.inactiveRegionOpacity.markdownDescription": { "message": "Controls the opacity of inactive preprocessor blocks. Scales between `0.1` and `1.0`. This setting only applies when inactive region dimming is enabled.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.inactiveRegionOpacity.markdownDescription": {
+        "message": "Controls the opacity of inactive preprocessor blocks. Scales between `0.1` and `1.0`. This setting only applies when inactive region dimming is enabled.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.inactiveRegionForegroundColor.description": "Controls the font coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to the syntax coloring scheme of the editor. This setting only applies when inactive region dimming is enabled.",
     "c_cpp.configuration.inactiveRegionBackgroundColor.description": "Controls the background coloring of inactive preprocessor blocks. Input is in the form a hexadecimal color code or a valid Theme Color. If not set, this defaults to transparent. This setting only applies when inactive region dimming is enabled.",
-    "c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription": { "message": "Display inlay hints for deduced type when `auto` is used in a declaration:\n```cpp \n\n auto index /* : int */ = 0;\n```", "comment": [ "Markdown text between `` and the text inside ``` block is code and should not be localized." ] },
-    "c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription": { "message": "Display inlay hints for deduced type when `auto` is used in a declaration on the left of the identifier:\n```cpp \n\n auto /* int */ index = 0;\n```", "comment": [ "Markdown text between `` and the text inside ``` block is code and should not be localized." ] },
-    "c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription": { "message": "Display inlay hints for parameter names:\n```cpp \n\n int a = getArea(/* width: */ x, /* height: */ y);\n```", "comment": [ "Markdown text between `` and the text inside ``` block is code and should not be localized." ] },
-    "c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription": { "message": "Hide leading `_` in parameter name hints.", "comment": [ "Markdown text between `` is code and should not be localized." ] },
-    "c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription": { "message": "Suppress parameter name hints when the argument text or inline comment contains the parameter name:\n```cpp \n\n int a = getArea(width, /* height: */ y);\n```", "comment": [ "Markdown text between `` and the text inside ``` block is code and should not be localized." ] },
-    "c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription": { "message": "Display the inlay hint reference operator `&` for parameters passed by non-const reference:\n```cpp \n\n swap(/* &first: */ str1, /* &last: */ str2);\n```", "comment": [ "Markdown text between `` and the text inside ``` block is code and should not be localized." ] },
-    "c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription": { "message": "Controls whether a space is shown after `&` for parameters passed by non-const reference:\n```cpp \n\n swap(/* & first: */ str1, /* & last: */ str2);\n```", "comment": [ "Markdown text between `` and the text inside ``` block is code and should not be localized." ] },
-    "c_cpp.configuration.loggingLevel.markdownDescription": { "message": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: `None` < `Error` < `Warning` < `Information` < `Debug`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.autoAddFileAssociations.markdownDescription": { "message": "Controls whether files are automatically added to `#files.associations#` when they are the target of a navigation operation from a C/C++ file.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.workspaceParsingPriority.markdownDescription": { "message": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values `highest`/`high`/`medium`/`low` correspond to approximately 100/75/50/25% CPU usage.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.workspaceSymbols.description": { "message": "The symbols to include in the query results when 'Go to Symbol in Workspace' is invoked.", "comment": [ "Text in '' is a command and should be translated in the same way that VS Code itself translates it." ] },
-    "c_cpp.configuration.exclusionPolicy.markdownDescription": { "message": "Instructs the extension when to use the `#files.exclude#` (and `#C_Cpp.files.exclude#`) setting when determining which files should be added to the code navigation database while traversing through the paths in the `browse.path` array. If your `#files.exclude#` setting only contains folders, then `checkFolders` is the best choice and will increase the speed at which the extension can initialize the code navigation database.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.inlayHints.autoDeclarationTypes.enabled.markdownDescription": {
+        "message": "Display inlay hints for deduced type when `auto` is used in a declaration:\n```cpp \n\n auto index /* : int */ = 0;\n```",
+        "comment": [
+            "Markdown text between `` and the text inside ``` block is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.inlayHints.autoDeclarationTypes.showOnLeft.markdownDescription": {
+        "message": "Display inlay hints for deduced type when `auto` is used in a declaration on the left of the identifier:\n```cpp \n\n auto /* int */ index = 0;\n```",
+        "comment": [
+            "Markdown text between `` and the text inside ``` block is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.inlayHints.parameterNames.enabled.markdownDescription": {
+        "message": "Display inlay hints for parameter names:\n```cpp \n\n int a = getArea(/* width: */ x, /* height: */ y);\n```",
+        "comment": [
+            "Markdown text between `` and the text inside ``` block is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.inlayHints.parameterNames.hideLeadingUnderscores.markdownDescription": {
+        "message": "Hide leading `_` in parameter name hints.",
+        "comment": [
+            "Markdown text between `` is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.inlayHints.parameterNames.suppressWhenArgumentContainsName.markdownDescription": {
+        "message": "Suppress parameter name hints when the argument text or inline comment contains the parameter name:\n```cpp \n\n int a = getArea(width, /* height: */ y);\n```",
+        "comment": [
+            "Markdown text between `` and the text inside ``` block is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.inlayHints.referenceOperator.enabled.markdownDescription": {
+        "message": "Display the inlay hint reference operator `&` for parameters passed by non-const reference:\n```cpp \n\n swap(/* &first: */ str1, /* &last: */ str2);\n```",
+        "comment": [
+            "Markdown text between `` and the text inside ``` block is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.inlayHints.referenceOperator.showSpace.markdownDescription": {
+        "message": "Controls whether a space is shown after `&` for parameters passed by non-const reference:\n```cpp \n\n swap(/* & first: */ str1, /* & last: */ str2);\n```",
+        "comment": [
+            "Markdown text between `` and the text inside ``` block is code and should not be localized."
+        ]
+    },
+    "c_cpp.configuration.loggingLevel.markdownDescription": {
+        "message": "The verbosity of logging in the Output Panel. The order of levels from least verbose to most verbose is: `None` < `Error` < `Warning` < `Information` < `Debug`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.autoAddFileAssociations.markdownDescription": {
+        "message": "Controls whether files are automatically added to `#files.associations#` when they are the target of a navigation operation from a C/C++ file.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.workspaceParsingPriority.markdownDescription": {
+        "message": "Controls whether parsing of the non-active workspace files uses sleeps to avoid using 100% CPU. The values `highest`/`high`/`medium`/`low` correspond to approximately 100/75/50/25% CPU usage.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.workspaceSymbols.description": {
+        "message": "The symbols to include in the query results when 'Go to Symbol in Workspace' is invoked.",
+        "comment": [
+            "Text in '' is a command and should be translated in the same way that VS Code itself translates it."
+        ]
+    },
+    "c_cpp.configuration.exclusionPolicy.markdownDescription": {
+        "message": "Instructs the extension when to use the `#files.exclude#` (and `#C_Cpp.files.exclude#`) setting when determining which files should be added to the code navigation database while traversing through the paths in the `browse.path` array. If your `#files.exclude#` setting only contains folders, then `checkFolders` is the best choice and will increase the speed at which the extension can initialize the code navigation database.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.exclusionPolicy.checkFolders.description": "The exclusion filters will only be evaluated once per folder (individual files are not checked).",
     "c_cpp.configuration.exclusionPolicy.checkFilesAndFolders.description": "The exclusion filters will be evaluated against every file and folder encountered.",
-    "c_cpp.configuration.preferredPathSeparator.markdownDescription": { "message": "The character used as a path separator for `#include` auto-completion results.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.simplifyStructuredComments.markdownDescription": { "message": "If `true`, tooltips of hover and auto-complete will only display certain labels of structured comments. Otherwise, all comments are displayed.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.doxygen.generateOnType.description":  "Controls whether to automatically insert the Doxygen comment after typing the chosen comment style.",
+    "c_cpp.configuration.preferredPathSeparator.markdownDescription": {
+        "message": "The character used as a path separator for `#include` auto-completion results.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.simplifyStructuredComments.markdownDescription": {
+        "message": "If `true`, tooltips of hover and auto-complete will only display certain labels of structured comments. Otherwise, all comments are displayed.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.doxygen.generateOnType.description": "Controls whether to automatically insert the Doxygen comment after typing the chosen comment style.",
     "c_cpp.configuration.doxygen.generatedStyle.description": "The string of characters used as the starting line of the Doxygen comment.",
     "c_cpp.configuration.doxygen.sectionTags.description": "Select the Doxygen section tags that you would like to appear on hover in the tooltip area when the 'Simplify Structured Comments' setting is enabled. ",
-    "c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": { "message": "The pattern that begins a multiline or single line comment block. The continuation pattern defaults to ` * ` for multiline comment blocks or this string for single line comment blocks.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.commentContinuationPatterns.items.anyof.string.markdownDescription": {
+        "message": "The pattern that begins a multiline or single line comment block. The continuation pattern defaults to ` * ` for multiline comment blocks or this string for single line comment blocks.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.commentContinuationPatterns.items.anyof.object.begin.description": "The pattern that begins a multiline or single line comment block.",
     "c_cpp.configuration.commentContinuationPatterns.items.anyof.object.continue.description": "The text that will be inserted on the next line when Enter is pressed inside a multiline or single line comment block.",
     "c_cpp.configuration.commentContinuationPatterns.description": "Defines the editor behavior for when the Enter key is pressed inside a multiline or single line comment block.",
     "c_cpp.configuration.configurationWarnings.description": "Determines whether pop up notifications will be shown when a configuration provider extension is unable to provide a configuration for a source file.",
-    "c_cpp.configuration.intelliSenseCachePath.markdownDescription": { "message": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is `%LocalAppData%/Microsoft/vscode-cpptools` on Windows, `$XDG_CACHE_HOME/vscode-cpptools/` on Linux (or `$HOME/.cache/vscode-cpptools/` if `XDG_CACHE_HOME` is not defined), and `$HOME/Library/Caches/vscode-cpptools/` on macOS. The default path will be used if no path is specified or if a specified path is invalid.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.intelliSenseCacheSize.markdownDescription": { "message": "Maximum size of the per-workspace hard drive space in megabytes (MB) for cached precompiled headers; the actual usage may fluctuate around this value. The default size is `5120` MB. Precompiled header caching is disabled when the size is `0`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.intelliSenseMemoryLimit.markdownDescription": { "message": "Memory usage limit in megabytes (MB) of an IntelliSense process. The default is `4096` and the maximum is `16384`. The extension will shutdown and restart an IntelliSense process when it exceeds the limit.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.intelliSenseCachePath.markdownDescription": {
+        "message": "Defines the folder path for cached precompiled headers used by IntelliSense. The default cache path is `%LocalAppData%/Microsoft/vscode-cpptools` on Windows, `$XDG_CACHE_HOME/vscode-cpptools/` on Linux (or `$HOME/.cache/vscode-cpptools/` if `XDG_CACHE_HOME` is not defined), and `$HOME/Library/Caches/vscode-cpptools/` on macOS. The default path will be used if no path is specified or if a specified path is invalid.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.intelliSenseCacheSize.markdownDescription": {
+        "message": "Maximum size of the per-workspace hard drive space in megabytes (MB) for cached precompiled headers; the actual usage may fluctuate around this value. The default size is `5120` MB. Precompiled header caching is disabled when the size is `0`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.intelliSenseMemoryLimit.markdownDescription": {
+        "message": "Memory usage limit in megabytes (MB) of an IntelliSense process. The default is `4096` and the maximum is `16384`. The extension will shutdown and restart an IntelliSense process when it exceeds the limit.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.intelliSenseUpdateDelay.description": "Controls the delay in milliseconds before IntelliSense starts updating after a modification.",
-    "c_cpp.configuration.default.includePath.markdownDescription": { "message": "The value to use in a configuration if `includePath` is not specified in `c_cpp_properties.json`. If `includePath` is specified, add `${default}` to the array to insert the values from this setting. Usually, this should not include system includes; instead, set `#C_Cpp.default.compilerPath#`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.defines.markdownDescription": { "message": "The value to use in a configuration if `defines` is not specified, or the values to insert if `${default}` is present in `defines`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.macFrameworkPath.markdownDescription": { "message": "The value to use in a configuration if `macFrameworkPath` is not specified, or the values to insert if `${default}` is present in `macFrameworkPath`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.windowsSdkVersion.markdownDescription": { "message": "Version of the Windows SDK include path to use on Windows, e.g. `10.0.17134.0`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.compileCommands.markdownDescription": { "message": "The value to use in a configuration if `compileCommands` is either not specified, or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.forcedInclude.markdownDescription": { "message": "The value to use in a configuration if `forcedInclude` is not specified, or the values to insert if `${default}` is present in `forcedInclude`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.intelliSenseMode.markdownDescription": { "message": "The value to use in a configuration if `intelliSenseMode` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.compilerPath.markdownDescription": { "message": "The value to use in a configuration if `compilerPath` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.compilerArgs.markdownDescription": { "message": "The value to use in configuration if `compilerArgs` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.cStandard.markdownDescription": { "message": "The value to use in a configuration if `cStandard` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.cppStandard.markdownDescription": { "message": "The value to use in a configuration if `cppStandard` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.configurationProvider.markdownDescription": { "message": "The value to use in a configuration if `configurationProvider` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.mergeConfigurations.markdownDescription": { "message": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.browse.path.markdownDescription": { "message": "The value to use in a configuration if `browse.path` is not specified, or the values to insert if `${default}` is present in `browse.path`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.browse.databaseFilename.markdownDescription": { "message": "The value to use in a configuration if `browse.databaseFilename` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.markdownDescription": { "message": "The value to use in a configuration if `browse.limitSymbolsToIncludedHeaders` is either not specified or set to `${default}`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.systemIncludePath.markdownDescription": { "message": "The value to use for the system include path. If set, it overrides the system include path acquired via `compilerPath` and `compileCommands` settings.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": { "message": "Controls whether the extension will report errors detected in `c_cpp_properties.json`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.default.customConfigurationVariables.markdownDescription": { "message": "The value to use in a configuration if `customConfigurationVariables` is not set, or the values to insert if `${default}` is present as a key in `customConfigurationVariables`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.updateChannel.markdownDescription": { "message": "Set to `Insiders` to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.default.includePath.markdownDescription": {
+        "message": "The value to use in a configuration if `includePath` is not specified in `c_cpp_properties.json`. If `includePath` is specified, add `${default}` to the array to insert the values from this setting. Usually, this should not include system includes; instead, set `#C_Cpp.default.compilerPath#`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.defines.markdownDescription": {
+        "message": "The value to use in a configuration if `defines` is not specified, or the values to insert if `${default}` is present in `defines`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.macFrameworkPath.markdownDescription": {
+        "message": "The value to use in a configuration if `macFrameworkPath` is not specified, or the values to insert if `${default}` is present in `macFrameworkPath`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.windowsSdkVersion.markdownDescription": {
+        "message": "Version of the Windows SDK include path to use on Windows, e.g. `10.0.17134.0`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.compileCommands.markdownDescription": {
+        "message": "The value to use in a configuration if `compileCommands` is either not specified, or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.forcedInclude.markdownDescription": {
+        "message": "The value to use in a configuration if `forcedInclude` is not specified, or the values to insert if `${default}` is present in `forcedInclude`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.intelliSenseMode.markdownDescription": {
+        "message": "The value to use in a configuration if `intelliSenseMode` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.compilerPath.markdownDescription": {
+        "message": "The value to use in a configuration if `compilerPath` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.compilerArgs.markdownDescription": {
+        "message": "The value to use in configuration if `compilerArgs` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.cStandard.markdownDescription": {
+        "message": "The value to use in a configuration if `cStandard` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.cppStandard.markdownDescription": {
+        "message": "The value to use in a configuration if `cppStandard` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.configurationProvider.markdownDescription": {
+        "message": "The value to use in a configuration if `configurationProvider` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.mergeConfigurations.markdownDescription": {
+        "message": "Set to `true` to merge include paths, defines, and forced includes with those from a configuration provider.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.browse.path.markdownDescription": {
+        "message": "The value to use in a configuration if `browse.path` is not specified, or the values to insert if `${default}` is present in `browse.path`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.browse.databaseFilename.markdownDescription": {
+        "message": "The value to use in a configuration if `browse.databaseFilename` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.browse.limitSymbolsToIncludedHeaders.markdownDescription": {
+        "message": "The value to use in a configuration if `browse.limitSymbolsToIncludedHeaders` is either not specified or set to `${default}`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.systemIncludePath.markdownDescription": {
+        "message": "The value to use for the system include path. If set, it overrides the system include path acquired via `compilerPath` and `compileCommands` settings.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.enableConfigurationSquiggles.markdownDescription": {
+        "message": "Controls whether the extension will report errors detected in `c_cpp_properties.json`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.default.customConfigurationVariables.markdownDescription": {
+        "message": "The value to use in a configuration if `customConfigurationVariables` is not set, or the values to insert if `${default}` is present as a key in `customConfigurationVariables`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.updateChannel.markdownDescription": {
+        "message": "Set to `Insiders` to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.updateChannel.deprecationMessage": "This setting is deprecated. Pre-release extensions are now available via the Marketplace.",
-    "c_cpp.configuration.default.dotConfig.markdownDescription": { "message": "The value to use in a configuration if `dotConfig` is not specified, or the value to insert if `${default}` is present in `dotConfig`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.default.dotConfig.markdownDescription": {
+        "message": "The value to use in a configuration if `dotConfig` is not specified, or the value to insert if `${default}` is present in `dotConfig`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.experimentalFeatures.description": "Controls whether \"experimental\" features are usable.",
-    "c_cpp.configuration.suggestSnippets.markdownDescription": { "message": "If `true`, snippets are provided by the language server.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": { "message": "If set to `default`, the file system of the workspace is assumed to be case insensitive on Windows and case sensitive on macOS or Linux. If set to `enabled`, the file system of the workspace is assumed to be case sensitive on Windows.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.enhancedColorization.markdownDescription": { "message": "If enabled, code is colorized based on IntelliSense. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.suggestSnippets.markdownDescription": {
+        "message": "If `true`, snippets are provided by the language server.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": {
+        "message": "If set to `default`, the file system of the workspace is assumed to be case insensitive on Windows and case sensitive on macOS or Linux. If set to `enabled`, the file system of the workspace is assumed to be case sensitive on Windows.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.enhancedColorization.markdownDescription": {
+        "message": "If enabled, code is colorized based on IntelliSense. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.codeFolding.description": "If enabled, code folding ranges are provided by the language server.",
     "c_cpp.configuration.markdownInComments.description": "Select whether markdown will be available in the hover tooltip. By default, only a subset of markdown will be applied to comments in the hover tooltip.",
     "c_cpp.configuration.markdownInComments.subsetEnabled.description": "Enable all markdown features in the hover tooltip except those that include the '_' and '*' characters.",
     "c_cpp.configuration.markdownInComments.enabled.description": "Enable all markdown features in the hover tooltip.",
     "c_cpp.configuration.markdownInComments.disabled.description": "Disable all markdown features in the hover tooltip.",
     "c_cpp.configuration.hover.description": "If disabled, hover details are no longer provided by the language server.",
-    "c_cpp.configuration.vcpkg.enabled.markdownDescription": { "message": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).", "comment": [ "Markdown text between () should not be altered: https://en.wikipedia.org/wiki/Markdown" ] },
-    "c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": { "message": "Add include paths from `nan` and `node-addon-api` when they are dependencies.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.renameRequiresIdentifier.markdownDescription": { "message": "If `true`, 'Rename Symbol' will require a valid C/C++ identifier.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.autocompleteAddParentheses.markdownDescription": { "message": "If `true`, autocomplete will automatically add `(` after function calls, in which case `)` may also be added, depending on the value of the `#editor.autoClosingBrackets#` setting.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.filesExclude.markdownDescription": { "message": "Configure glob patterns for excluding folders (and files if `#C_Cpp.exclusionPolicy#` is changed). These are specific to the C/C++ extension and are in addition to `#files.exclude#`, but unlike `#files.exclude#` they also apply to paths outside the current workspace folder and are not removed from the Explorer view. Read more about glob patterns [here](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).", "comment": [ "Markdown text between `` and [) should not be translated and the capitalization, spacing, and punctuation (including the ``) should not be altered: https://en.wikipedia.org/wiki/Markdown" ] },
-    "c_cpp.configuration.filesExcludeBoolean.markdownDescription": { "message": "The glob pattern to match file paths against. Set to `true` or `false` to enable or disable the pattern.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.filesExcludeWhen.markdownDescription": { "message": "Additional check on the siblings of a matching file. Use `$(basename)` as variable for the matching file name.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
-    "c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription": { "message": "If `true`, debugger shell command substitution will use obsolete backtick ``(`)``.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.configuration.vcpkg.enabled.markdownDescription": {
+        "message": "Enable integration services for the [vcpkg dependency manager](https://aka.ms/vcpkg/).",
+        "comment": [
+            "Markdown text between () should not be altered: https://en.wikipedia.org/wiki/Markdown"
+        ]
+    },
+    "c_cpp.configuration.addNodeAddonIncludePaths.markdownDescription": {
+        "message": "Add include paths from `nan` and `node-addon-api` when they are dependencies.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.renameRequiresIdentifier.markdownDescription": {
+        "message": "If `true`, 'Rename Symbol' will require a valid C/C++ identifier.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.autocompleteAddParentheses.markdownDescription": {
+        "message": "If `true`, autocomplete will automatically add `(` after function calls, in which case `)` may also be added, depending on the value of the `#editor.autoClosingBrackets#` setting.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.filesExclude.markdownDescription": {
+        "message": "Configure glob patterns for excluding folders (and files if `#C_Cpp.exclusionPolicy#` is changed). These are specific to the C/C++ extension and are in addition to `#files.exclude#`, but unlike `#files.exclude#` they also apply to paths outside the current workspace folder and are not removed from the Explorer view. Read more about glob patterns [here](https://code.visualstudio.com/docs/editor/codebasics#_advanced-search-options).",
+        "comment": [
+            "Markdown text between `` and [) should not be translated and the capitalization, spacing, and punctuation (including the ``) should not be altered: https://en.wikipedia.org/wiki/Markdown"
+        ]
+    },
+    "c_cpp.configuration.filesExcludeBoolean.markdownDescription": {
+        "message": "The glob pattern to match file paths against. Set to `true` or `false` to enable or disable the pattern.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.filesExcludeWhen.markdownDescription": {
+        "message": "Additional check on the siblings of a matching file. Use `$(basename)` as variable for the matching file name.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
+    "c_cpp.configuration.debugger.useBacktickCommandSubstitution.markdownDescription": {
+        "message": "If `true`, debugger shell command substitution will use obsolete backtick ``(`)``.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.legacyCompilerArgsBehavior.markdownDescription": "Enable pre-v1.10.0 behavior for how shell escaping is handled in compiler arg settings. Shell escaping is no longer expected or supported by default in arg arrays starting in v1.10.0.",
     "c_cpp.configuration.legacyCompilerArgsBehavior.deprecationMessage": "This setting is temporary to support transitioning to corrected behavior in v1.10.0.",
     "c_cpp.configuration.sshTargetsView.description": "Controls whether the SSH Targets view is visible. By default, enable the view when an SSH command is invoked.",
     "c_cpp.contributes.views.cppReferencesView.title": "C/C++: Other references results",
-    "c_cpp.contributes.views.sshTargetsView.title": { "message": "Cpptools: SSH targets", "comment": [ "Do not localize `Cpptools`." ]  },
-    "c_cpp.contributes.viewsWelcome.contents": { "message": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).", "comment": [ "Markdown text between () should not be altered: https://en.wikipedia.org/wiki/Markdown" ] },
+    "c_cpp.contributes.views.sshTargetsView.title": {
+        "message": "Cpptools: SSH targets",
+        "comment": [
+            "Do not localize `Cpptools`."
+        ]
+    },
+    "c_cpp.contributes.viewsWelcome.contents": {
+        "message": "To learn more about launch.json, see [Configuring C/C++ debugging](https://code.visualstudio.com/docs/cpp/launch-json-reference).",
+        "comment": [
+            "Markdown text between () should not be altered: https://en.wikipedia.org/wiki/Markdown"
+        ]
+    },
     "c_cpp.configuration.debugShortcut.description": "Show the \"Run and Debug\" play button and \"Add Debug Configuration\" gear in the editor title bar for C++ files.",
     "c_cpp.debuggers.pipeTransport.description": "When present, this tells the debugger to connect to a remote computer using another executable as a pipe that will relay standard input/output between VS Code and the MI-enabled debugger backend executable (such as gdb).",
     "c_cpp.debuggers.pipeTransport.default.pipeProgram": "enter the fully qualified path for the pipe program name, for example '/usr/bin/ssh'.",
@@ -396,7 +956,12 @@
     "c_cpp.semanticTokenTypes.templateType.description": "Style for C++ template types.",
     "c_cpp.semanticTokenTypes.operatorOverload.description": "Style for C++ overloaded operators.",
     "c_cpp.semanticTokenTypes.memberOperatorOverload.description": "Style for C++ overloaded operator member functions.",
-    "c_cpp.semanticTokenTypes.newOperator.description": { "message": "Style for C++ `new` or `delete` operators.", "comment": [ "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered." ] },
+    "c_cpp.semanticTokenTypes.newOperator.description": {
+        "message": "Style for C++ `new` or `delete` operators.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.semanticTokenTypes.customLiteral.description": "Style for C++ user-defined literals.",
     "c_cpp.semanticTokenTypes.numberLiteral.description": "Style for C++ user-defined literal numbers.",
     "c_cpp.semanticTokenTypes.stringLiteral.description": "Style for C++ user-defined literal strings.",
@@ -411,8 +976,9 @@
     "c_cpp.walkthrough.description": "Dive into VS Code's rich C++ development experience.",
     "c_cpp.walkthrough.set.up.title": "Set up your C++ Environment",
     "c_cpp.walkthrough.activating.description": "Activating the C++ extension to determine whether your C++ Environment has been set up.\nActivating Extension...",
-    "c_cpp.walkthrough.no.compilers.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%7B%22sender%22%3A%22walkthrough%22%7D)",
-    "c_cpp.walkthrough.compilers.found.description": "The C++ extension works with a C++ compiler. Select one from those already on your machine by clicking the button below.\n[Select my Default Compiler](command:C_Cpp.SelectDefaultCompiler?%7B%22sender%22%3A%22walkthrough%22%7D)",
+    "c_cpp.walkthrough.no.compilers.windows.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
+    "c_cpp.walkthrough.no.compilers.description": "We could not find a C++ compiler on your machine, which is required to use the C++ extension. Either select “Install a C++ Compiler” to have a compiler installed for you or follow the instructions on the right to install one, then click “Find my new Compiler” below.\n[Install a C++ Compiler](command:C_Cpp.InstallCompiler?%22walkthrough%22)\n[Find my new Compiler](command:C_Cpp.RescanCompilers?%22walkthrough%22)",
+    "c_cpp.walkthrough.compilers.found.description": "The C++ extension works with a C++ compiler. Select one from those already on your machine by clicking the button below.\n[Select my Default Compiler](command:C_Cpp.SelectIntelliSenseConfiguration?%22walkthrough%22)",
     "c_cpp.walkthrough.compilers.found.altText": "Image showing the select a default compiler quickpick and the list of compilers found on the users machine, one of which is selected.",
     "c_cpp.walkthrough.create.cpp.file.title": "Create a C++ file",
     "c_cpp.walkthrough.create.cpp.file.description": "[Open](command:toSide:workbench.action.files.openFile) or [create](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D) a C++ file. Be sure to save it with the \".cpp\" extension, such as \"helloworld.cpp\". \n[Create a C++ File](command:toSide:workbench.action.files.newUntitledFile?%7B%22languageId%22%3A%22cpp%22%7D)",
@@ -428,5 +994,11 @@
     "c_cpp.walkthrough.customize.debugging.mac.description": "You can customize your debug configuration (e.g. to pass arguments to your program at run time) by selecting \"Add Debug Configuration\" to the right of the play button. The custom debug configuration is saved in your project's launch.json file. \n[Learn More](https://code.visualstudio.com/docs/cpp/config-linux#_debug-helloworldcpp)",
     "c_cpp.walkthrough.customize.debugging.linux.description": "You can customize your debug configuration (e.g. to pass arguments to your program at run time) by selecting \"Add Debug Configuration\" to the right of the play button. The custom debug configuration is saved in your project's launch.json file. \n[Learn More](https://code.visualstudio.com/docs/cpp/config-msvc#_debug-helloworldcpp)",
     "c_cpp.walkthrough.customize.debugging.windows.description": "You can customize your debug configuration (e.g. to pass arguments to your program at run time) by selecting \"Add Debug Configuration\" to the right of the play button. The custom debug configuration is saved in your project's launch.json file. \n[Learn More](https://code.visualstudio.com/docs/cpp/config-clang-mac#_debug-helloworldcpp)",
-    "c_cpp.walkthrough.customize.debugging.altText": "Image that shows Add Debug Configuration in the drop-down"
+    "c_cpp.walkthrough.customize.debugging.altText": "Image that shows Add Debug Configuration in the drop-down",
+    "c_cpp.codeActions.refactor.inline.macro.title": "Inline macro",
+    "c_cpp.codeActions.refactor.inline.macro.description": "Replace the macro invocation with the expanded code.",
+    "c_cpp.configuration.refactoring.includeHeader.markdownDescription": "Controls whether to include the header file of a refactored function/symbol to its corresponding source file when doing a refactoring action, such as create declaration/definition.",
+    "c_cpp.configuration.refactoring.includeHeader.always.description": "Always include the header file if it is not included explicitly in its source file.",
+    "c_cpp.configuration.refactoring.includeHeader.ifNeeded.description": "Only include the header file if it is not included explicitly in its source file or through implicit inclusion.",
+    "c_cpp.configuration.refactoring.includeHeader.never.description": "Never include the header file."
 }

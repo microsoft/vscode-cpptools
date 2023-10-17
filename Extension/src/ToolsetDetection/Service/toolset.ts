@@ -16,6 +16,7 @@ import { CustomResolver, evaluateExpression, recursiveRender, render } from '../
 import { formatIntelliSenseBlock } from './definition';
 
 import { parse } from 'comment-json';
+import { sleep } from '../../Utility/Async/sleep';
 import { Cache, isExpired, isLater } from '../../Utility/System/cache';
 import { structuredClone } from '../../Utility/System/structuredClone';
 import { CStandard, CppStandard, DeepPartial, DefinitionFile, IntelliSense, IntelliSenseConfiguration, Language, OneOrMore } from '../interfaces';
@@ -218,6 +219,7 @@ export class Toolset {
                         return '[\\-\\/]';
 
                     case 'key':
+                    case 'keynovalue':
                         return '(?<key>[^=]+)';
 
                     case 'value':
@@ -477,27 +479,40 @@ export class Toolset {
         }
         return compilerArgs;
     }
+    current: Promise<IntelliSenseConfiguration> | undefined;
+    async _getIntellisenseConfiguration(compilerArgs: string[], options?: { baseDirectory?: string; sourceFile?: string; language?: Language; standard?: CppStandard | CStandard; userIntellisenseConfiguration?: IntelliSenseConfiguration }): Promise<IntelliSenseConfiguration> {
+        while (this.current) {
+            await this.current;
+            await sleep(10);
+        }
+
+        this.current = this._getIntellisenseConfiguration(compilerArgs, options);
+        const result = await this.current;
+        this.current = undefined;
+
+        return result;
+    }
 
     /**
      * Processes the analysis section of the definition file given a command line to work with
      */
     async getIntellisenseConfiguration(compilerArgs: string[], options?: { baseDirectory?: string; sourceFile?: string; language?: Language; standard?: CppStandard | CStandard; userIntellisenseConfiguration?: IntelliSenseConfiguration }): Promise<IntelliSenseConfiguration> {
         let entries: Entries = [];
-        const userIntellisenseConfiguration = this.postProcessIntellisense(structuredClone(options?.userIntellisenseConfiguration ?? {}));
+        const userIntellisenseConfiguration = options?.userIntellisenseConfiguration ? structuredClone(options.userIntellisenseConfiguration) : {};
 
         // if we have an analysis section, we're going to need to get it ready
         if (this.definition.analysis) {
             entries = getActions<Record<string, IntelliSenseConfiguration>>(this.definition.analysis as any, [
-                ['task', ['priority', 'c', 'cpp', 'c++']],
-                ['command', ['priority', 'c', 'cpp', 'c++', 'no_consume']],
-                ['quer', ['priority', 'c', 'cpp', 'c++']],
-                ['expression', ['priority', 'c', 'cpp', 'c++']]
+                ['task', ['priority', 'c', 'cpp', 'c++', 'once']],
+                ['command', ['priority', 'c', 'cpp', 'c++', 'no_consume', 'once']],
+                ['quer', ['priority', 'c', 'cpp', 'c++', 'once']],
+                ['expression', ['priority', 'c', 'cpp', 'c++', 'once']]
             ]);
         }
 
         const early = entries.filter(each => each.priority < 0);
         let intellisenseConfiguration = {
-            ...this.definition.intellisense,
+            ...structuredClone(this.definition.intellisense),
             language: options?.language,
             standard: options?.standard,
             compilerPath: this.compilerPath
@@ -522,6 +537,8 @@ export class Toolset {
                 await this.ensurePathsAreLegit(intellisenseConfiguration);
             }
 
+            this.postProcessIntellisense(intellisenseConfiguration);
+
             return intellisenseConfiguration;
         }
 
@@ -539,7 +556,6 @@ export class Toolset {
         void persistToolsetData();
 
         intellisenseConfiguration = structuredClone(intellisenseConfiguration);
-        this.postProcessIntellisense(intellisenseConfiguration);
 
         // after the cached results, merge in user settings (since the user can change those at any time)
         if (options?.userIntellisenseConfiguration) {
@@ -548,6 +564,8 @@ export class Toolset {
             // before we go, let's make sure that any *paths are unique, and that they are all absolute
             await this.ensurePathsAreLegit(intellisenseConfiguration);
         }
+
+        this.postProcessIntellisense(intellisenseConfiguration);
 
         /// this.postProcessIntellisense(intellisenseConfiguration);
 
@@ -588,6 +606,14 @@ export class Toolset {
 
         intellisense.parserArgument = strings(intellisense.parserArgument).concat(args);
         intellisense.queryArgument = undefined;
+        intellisense.parserArgument.unshift('cpfe', "--no_warnings", "--edge", "--error_limit", "25000", "-D_EDG_COMPILER");
+
+        for (let i = 0; i < intellisense.parserArgument.length; i++) {
+            const arg = intellisense.parserArgument[i];
+            if (arg.startsWith('--c') && arg.length > 5) {
+                intellisense.parserArgument[i] = '--c' + arg.substring(5, 7);
+            }
+        }
 
         return intellisense;
     }

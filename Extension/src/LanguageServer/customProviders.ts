@@ -19,18 +19,6 @@ export interface CustomConfigurationProvider1 extends CustomConfigurationProvide
     readonly version: Version;
 }
 
-export interface CustomConfigurationProvider7 extends CustomConfigurationProvider1 {
-    // source files, aka 'translation units'
-    getSourceFiles(): Promise<vscode.Uri[]>;
-
-    // header files, aka 'include'd files'
-    getHeaderFiles(): Promise<vscode.Uri[]>;
-}
-
-export function isV7(provider: CustomConfigurationProvider1 | undefined): provider is CustomConfigurationProvider7 {
-    return !!provider && provider.version >= 7;
-}
-
 export function isInternalWorkspaceBrowseConfiguration(config: WorkspaceBrowseConfiguration | null | undefined): config is InternalWorkspaceBrowseConfiguration {
     return !!config && ('systemPath' in config || 'userFrameworks' in config || 'systemFrameworks' in config);
 }

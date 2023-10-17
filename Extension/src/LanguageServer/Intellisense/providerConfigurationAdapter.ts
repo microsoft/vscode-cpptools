@@ -7,39 +7,42 @@ import { dirname } from 'path';
 import { CancellationToken, Uri } from 'vscode';
 import { SourceFileConfigurationItem, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { getOrAdd } from '../../Utility/System/map';
-import { add } from '../../Utility/System/set';
+import { addNormalizedPath } from '../../Utility/System/set';
 import { DefaultClient, InternalWorkspaceBrowseConfiguration } from '../client';
 import { Configuration } from '../configurations';
-import { CustomConfigurationProvider1, isV7 } from '../customProviders';
-import { IntellisenseConfiguration } from './intellisenseConfiguration';
-import { ExtendedBrowseInformation, IntellisenseConfigurationProvider } from './interfaces';
+import { CustomConfigurationProvider1 } from '../customProviders';
+import { ConfigurationAdapter } from './configurationAdapter';
+import { ExtendedBrowseInformation, IntellisenseConfigurationAdapter } from './interfaces';
 
-export class ProviderConfiguration extends IntellisenseConfiguration implements IntellisenseConfigurationProvider {
+export class ProviderConfigurationAdapter extends ConfigurationAdapter implements IntellisenseConfigurationAdapter {
     private constructor(client: DefaultClient, private provider: CustomConfigurationProvider1, configuration: Configuration) {
         super(client, configuration);
     }
-    static instances = new Map<CustomConfigurationProvider1, ProviderConfiguration>();
+    static instances = new Map<CustomConfigurationProvider1, ProviderConfigurationAdapter>();
 
-    static async getProvider(client: DefaultClient, provider: CustomConfigurationProvider1 | undefined, configuration: Configuration): Promise<IntellisenseConfigurationProvider | undefined> {
+    static async getProvider(client: DefaultClient, provider: CustomConfigurationProvider1 | undefined, configuration: Configuration): Promise<IntellisenseConfigurationAdapter | undefined> {
         if (!provider) {
             return undefined;
         }
 
-        return getOrAdd(this.instances, provider, () => new ProviderConfiguration(client, provider, configuration));
+        return getOrAdd(this.instances, provider, () => new ProviderConfigurationAdapter(client, provider, configuration));
     }
 
     async getSourceFiles(): Promise<Uri[]> {
-        if (isV7(this.provider)) {
-            return this.provider.getSourceFiles();
+        if ('getSourceFiles' in this.provider) {
+            return (this.provider as any).getSourceFiles();
         }
-        // if we don't have a v7+ provider, we have to find the files ourselves.
+        // if we don't have a provider that has 'getSourceFiles', we have to find the files ourselves.
 
         return [];
     }
     async getHeaderFiles(): Promise<Uri[]> {
-        if (isV7(this.provider)) {
-            return this.provider.getHeaderFiles();
+        if ('getHeaderFiles' in this.provider) {
+            return (this.provider as any).getHeaderFiles();
         }
+
+        // if we don't have a provider that has 'getSourceFiles', we have to find the files ourselves.
+
         return [];
     }
 
@@ -70,49 +73,39 @@ export class ProviderConfiguration extends IntellisenseConfiguration implements 
     dispose() {
         this.provider.dispose();
     }
-    async getExtendedBrowseInformation(token: CancellationToken): Promise<ExtendedBrowseInformation> {
+    override async getExtendedBrowseInformation(token: CancellationToken): Promise<ExtendedBrowseInformation> {
         const browseConfig = await this.provideBrowseConfiguration();
-
-        const browsePaths = new Set<string>();
-        const systemPaths = new Set<string>();
-        const userFrameworks = new Set<string>();
-        const systemFrameworks = new Set<string>();
 
         if (browseConfig) {
             // got a browse config
 
             // we expanded the kinds of paths to include the system, user frameworks, etc.
             // so a very enlightened provider give us all the information we need
-            add(browsePaths, browseConfig.browsePath);
-            add(systemPaths, (browseConfig as InternalWorkspaceBrowseConfiguration).systemPath);
-            add(userFrameworks, (browseConfig as InternalWorkspaceBrowseConfiguration).userFrameworks);
-            add(systemFrameworks, (browseConfig as InternalWorkspaceBrowseConfiguration).systemFrameworks);
+            addNormalizedPath(this.browseInfo.browsePaths, browseConfig.browsePath);
+            addNormalizedPath(this.browseInfo.systemPaths, (browseConfig as InternalWorkspaceBrowseConfiguration).systemPath);
+            addNormalizedPath(this.browseInfo.userFrameworks, (browseConfig as InternalWorkspaceBrowseConfiguration).userFrameworks);
+            addNormalizedPath(this.browseInfo.systemFrameworks, (browseConfig as InternalWorkspaceBrowseConfiguration).systemFrameworks);
 
             // if we have a compilerPath, we can use that to find the system paths.
-            await this.probeForBrowseInfo({ browsePaths, systemPaths, userFrameworks, systemFrameworks }, browseConfig.compilerPath, browseConfig.compilerArgs);
+            await this.probeForBrowseInfo(browseConfig.compilerPath, browseConfig.compilerArgs);
         }
 
         // if we are not given any browsePaths, we have to find the browse paths ourselves.
-        if (browsePaths.size === 0) {
+        if (this.browseInfo.browsePaths.size === 0) {
             // we assume that any folders that source files are in are part of the browse path.
             const sourceFiles = await this.getSourceFiles();
-            sourceFiles.map(each => browsePaths.add(dirname(each.fsPath)));
+            sourceFiles.map(each => addNormalizedPath(this.browseInfo.browsePaths, dirname(each.fsPath)));
 
             // if we can get a compiler for the source files, we can use that to query for system paths.
             const configurations = await this.provideConfigurations(sourceFiles, token);
 
             // todo: I don't like this. we could have hundreds or even thousands of source files.
             // todo: and add in cancellation support for this too.
-            await Promise.all(configurations.map(config => this.probeForBrowseInfo({ browsePaths, systemPaths, userFrameworks, systemFrameworks }, config.configuration.compilerPath, config.configuration.compilerArgs)));
+            await Promise.all(configurations.map(config => this.probeForBrowseInfo(config.configuration.compilerPath, config.configuration.compilerArgs)));
         }
 
         // we have to find the system/frameworks/etc paths ourselves.
 
-        return {
-            browsePath: [...browsePaths],
-            systemPath: [...systemPaths],
-            userFrameworks: [...userFrameworks],
-            systemFrameworks: [...systemFrameworks]
-        };
+        return super.getExtendedBrowseInformation(token);
     }
 }

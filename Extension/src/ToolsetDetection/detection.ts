@@ -7,7 +7,7 @@
 
 import { Configuration, NewIntelliSense } from '../LanguageServer/configurations';
 import { MarshalByReference, startRemoting } from '../Utility/System/snare';
-import { CStandard, CppStandard, IntelliSenseConfiguration, Language } from './interfaces';
+import { CStandard, CppStandard, IntelliSenseConfiguration, Language, SizeOf } from './interfaces';
 import { appendUnique } from './strings';
 
 import { resolve } from 'path';
@@ -37,8 +37,15 @@ export const remote = startRemoting(new Worker(resolve(__dirname.substring(0, __
 });
 
 function coerceIntellisense(intellisense: IntelliSenseConfiguration) {
-    if (intellisense && is.string(intellisense.bits)) {
-        intellisense.bits = parseInt(intellisense.bits);
+    if (intellisense) {
+        if (is.string(intellisense.bits)) {
+            intellisense.bits = parseInt(intellisense.bits);
+        }
+        if (is.object(intellisense.sizes)) {
+            for (const [key, value] of Object.entries(intellisense.sizes) as [keyof SizeOf, any][]) {
+                intellisense.sizes[key] = parseInt(value);
+            }
+        }
     }
     return intellisense;
 }

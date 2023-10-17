@@ -51,7 +51,7 @@ export function showPasswordInputBox(
     prompt?: string,
     cancelToken?: vscode.CancellationToken
 ): Promise<string | undefined> {
-    const msg: string = user ? localize('ssh.enter.password.for.user', 'Enter password for user "{0}"', user) : localize('ssh_message_enterPassword', 'Enter password');
+    const msg: string = user ? localize('ssh.enter.password.for.user', 'Enter password for user "{0}"', user) : localize('ssh.message.enter.password', 'Enter password');
     return showInputBox(msg, prompt, cancelToken);
 }
 

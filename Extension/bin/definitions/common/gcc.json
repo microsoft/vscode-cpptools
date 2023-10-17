@@ -34,7 +34,9 @@
       "-z;.+":                          { }, // pass to linker
       "-Xpreprocessor;.+":              { }, // pass to preprocessor
       "-Xassembler;.+":                 { }, // pass to assembler
-      "-Wa,.+":                         { }, // pass to assembler
+      "-Wa,.+":                         { }, // pass to assembler,
+      "-fmacro-prefix-map=.*":          { }, // macro prefix map
+      "-fdebug-prefix-map=.*":          { }, // debug prefix map
     },
 
     "commandLineArguments: # " :{
@@ -98,6 +100,20 @@
         "^LIBRARY_PATH=(?<lp>.*)":                                        { "gcc.library.paths": "${lp}" },
         "^#define __STDC_VERSION__\\s*(?<ver>.*)":                        { "cStandard": "${ver}" },      
         "^#define __cplusplus\\s*(?<ver>.*)":                             { "cppStandard": "${ver}" },    
+      }
+    },
+
+    "expressions: ONCE # get parts of gcc version" : {
+      "${macro:__GNUC__}" : {
+        "MAJOR": "${macro:__GNUC__} >= 10 ? ${macro:__GNUC__} : '0'+${macro:__GNUC__}",
+        "MINOR": "${macro:__GNUC_MINOR__} >= 10 ? ${macro:__GNUC_MINOR__} : '0'+${macro:__GNUC_MINOR__}",
+        "PATCH": "${macro:__GNUC_PATCHLEVEL__} >= 10 ? ${macro:__GNUC_PATCHLEVEL__} : '0'+${macro:__GNUC_PATCHLEVEL__}"
+      }
+    },
+
+    "expressions: ONCE # gnu_version" : {
+      "${macro:__GNUC__}" : {
+        "parserArgument": [ "--gcc", "--gnu_version=${MAJOR}${MINOR}${PATCH}" ]
       }
     },
   }

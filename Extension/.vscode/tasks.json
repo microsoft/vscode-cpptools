@@ -22,7 +22,7 @@
                 "isDefault": true
             },
             "isBackground": true,
-            "problemMatcher": "$tsc-watch",
+            "problemMatcher": "$tsc-watch"
         }
     ]
 }

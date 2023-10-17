@@ -9,18 +9,23 @@ import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 
 import { CancellationToken, Uri } from 'vscode';
-import { SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
+import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { CancellationTokenSource } from 'vscode-languageclient';
 import { identifyToolset } from '../../ToolsetDetection/detection';
 import { IntelliSenseConfiguration } from '../../ToolsetDetection/interfaces';
+import { PriorityQueue } from '../../Utility/Async/priorityQueue';
+import { returns } from '../../Utility/Async/returns';
 import { filepath } from '../../Utility/Filesystem/filepath';
 import { extractArgs } from '../../Utility/Process/commandLine';
 import { is } from '../../Utility/System/guards';
 import { getOrAdd } from '../../Utility/System/map';
+import { elapsed } from '../../Utility/System/performance';
+import { addNormalizedPath } from '../../Utility/System/set';
+import { log } from '../../logger';
 import { DefaultClient } from '../client';
 import { Configuration } from '../configurations';
-import { IntellisenseConfiguration } from './intellisenseConfiguration';
-import { ExtendedBrowseInformation, IntellisenseConfigurationProvider } from './interfaces';
+import { ConfigurationAdapter } from './configurationAdapter';
+import { ExtendedBrowseInformation, IntellisenseConfigurationAdapter } from './interfaces';
 
 type CompileCommand = CommentObject & {
     directory: string;
@@ -35,12 +40,10 @@ const cts = new CancellationTokenSource();
 cts.cancel();
 const cancelled = cts.token;
 
-export class CompileCommandsConfiguration extends IntellisenseConfiguration implements IntellisenseConfigurationProvider {
-    private intellisenseConfigurations = new Map<string, IntelliSenseConfiguration>();
-    private browsePaths = new Set<string>();
-    private systemPaths = new Set<string>();
-    private userFrameworks = new Set<string>();
-    private systemFrameworks = new Set<string>();
+export class CompileCommandsConfigurationAdapter extends ConfigurationAdapter implements IntellisenseConfigurationAdapter {
+    private intellisenseConfigurations = new PriorityQueue<IntelliSenseConfiguration>();
+
+    private sourceFiles: Uri[] = [];
 
     isReady = true;
     isValid = true;
@@ -49,15 +52,16 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
     get name() { return "CompileCommandsProvider"; }
     get extensionId() { return "built-in.compile-commands"; }
 
-    private updating: Promise<void> | undefined;
+    private parsing: Promise<void> | undefined;
 
     private constructor(client: DefaultClient, private path: string, configuration: Configuration, private token?: CancellationToken) {
         super(client, configuration);
+        log('CREATING CompileCommandsConfiguration');
     }
 
     async getSourceFiles(): Promise<Uri[]> {
-        await this.updating;
-        return [...this.intellisenseConfigurations.keys()].map(key => Uri.file(key));
+        await this.parsing;
+        return [...this.sourceFiles];
     }
 
     async getHeaderFiles(): Promise<Uri[]> {
@@ -65,13 +69,13 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
     }
 
     // we store a static map of instances that are tied to the filename+timestamp
-    static instances = new Map<string, CompileCommandsConfiguration>();
+    static instances = new Map<string, CompileCommandsConfigurationAdapter>();
 
-    static async getProvider(client: DefaultClient, path: string, configuration: Configuration, token: CancellationToken): Promise<IntellisenseConfigurationProvider | undefined> {
+    static async getProvider(client: DefaultClient, path: string, configuration: Configuration, token: CancellationToken): Promise<IntellisenseConfigurationAdapter | undefined> {
         const [jsonfile, stats] = await filepath.stats(path);
         if (stats) {
             const key = jsonfile + stats.mtime;
-            const result = getOrAdd(this.instances, key, () => new CompileCommandsConfiguration(client, jsonfile, configuration, token));
+            const result = getOrAdd(this.instances, key, () => new CompileCommandsConfigurationAdapter(client, jsonfile, configuration, token));
 
             // delete old instances that have the same path
             for (const [k, v] of this.instances) {
@@ -91,7 +95,7 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
     }
 
     update() {
-        return this.updating ?? (this.updating = this.updateAsync());
+        return this.parsing ?? (this.parsing = this.updateAsync());
     }
 
     private async updateAsync() {
@@ -105,7 +109,29 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
 
         const userIntellisenseConfiguration = this.client.configuration?.CurrentConfiguration?.intellisense;
 
-        const done = [] as Promise<void>[];
+        console.log(`${elapsed()} =>> Begin parsing compile_commands.json...`);
+
+        this.intellisenseConfigurations.once('item', (key, value) => {
+            // if we don't have a toolset selected in the configuration, let's
+            // steal the one from the first file we find.
+            if (!this.compiler) {
+                this.compiler = value.compilerPath;
+                if (!this.compilerArgs) {
+                    this.compilerArgs = value.compilerArgs;
+                }
+            }
+            this.initialized.resolve();
+        });
+
+        this.intellisenseConfigurations.on('item', (key, value) => {
+            // propogate the event
+            this.emit('configuration', key, value);
+        });
+
+        this.intellisenseConfigurations.on('empty', () => {
+            this.emit('done');
+            this.intellisenseConfigurations.removeAllListeners();
+        });
 
         for (const cmd of data as CommentArray<CompileCommand>) {
             if (this.token?.isCancellationRequested) {
@@ -117,7 +143,7 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
             const uri = Uri.file(cmd.file);
             cmd.file = uri.fsPath;
 
-            const args = is.array(cmd.arguments) ? cmd.arguments : is.string(cmd.command) ? extractArgs(cmd.command) : undefined;
+            const args = is.array(cmd.arguments) ? cmd.arguments : is.string(cmd.command) ? extractArgs(cmd.command) : [];
             if (!args) {
                 continue;
             }
@@ -127,60 +153,80 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
             if (!tool) {
                 continue;
             }
+            // we have a tool and some args,
+            this.sourceFiles.push(uri);
 
-            // get the toolset
-            const toolset = await identifyToolset(tool);
-            if (!toolset) {
-                continue;
-            }
+            // add the source directory to the browse path
+            addNormalizedPath(this.browseInfo.browsePaths, dirname(cmd.file));
 
-            // get the intellisense configuration
-            done.push(toolset.getIntellisenseConfiguration(args, {baseDirectory: cmd.directory, sourceFile : cmd.file, userIntellisenseConfiguration }).then(isense => {
-                this.intellisenseConfigurations.set(cmd.file, isense);
-                this.browsePaths.add(dirname(cmd.file));
-                this.mergeBrowseInfo({ browsePaths: this.browsePaths, systemPaths: this.systemPaths, userFrameworks: this.userFrameworks, systemFrameworks: this.systemFrameworks }, isense);
+            // start it processing
+            void this.intellisenseConfigurations.enqueue(cmd.file, async () => {
+                const toolset = await identifyToolset(tool);
+                if (!toolset) {
+                    throw new Error("Unable to identify toolset");
+                }
 
-                // if the configuration has changed since the last time we saw it, store it and tell the client that we have a custom config for it.
-                //if (! deepEqual(isense, CompileCommandsConfigurationProvider.intellisenseConfigurations[cmd.file])) {
-                // this.intellisenseConfigurations[cmd.file] = isense;
-                // return this.client.sendNewIntellisenseConfigurationForFile(uri);
-                //}
-            }));
+                const isense = await toolset.getIntellisenseConfiguration(args, {baseDirectory: cmd.directory, sourceFile : cmd.file, userIntellisenseConfiguration });
+
+                if ((isense.parserArgument?.length || 0) < 10) {
+                    console.log("ouch");
+                }
+
+                // update the browse paths with info from the intellisense
+                this.mergeBrowseInfo(isense);
+
+                return isense;
+            });
         }
-        // wait for the work to complete
-        await Promise.all(done);
+
+        console.log(`${elapsed()} =>> Completed parsing compile_commands.json...`);
     }
 
     async canProvideConfiguration(uri: Uri, token?: CancellationToken | undefined): Promise<boolean> {
-        await this.updating;
+        await this.parsing;
 
         if (this.token?.isCancellationRequested || token?.isCancellationRequested) {
             return false;
         }
 
-        return !!this.intellisenseConfigurations.get(uri.fsPath);
+        return this.intellisenseConfigurations.has(uri.fsPath);
     }
 
     async provideConfigurations(uris: Uri[], token?: CancellationToken | undefined): Promise<SourceFileConfigurationItem[]> {
-        await this.updating;
+        await this.parsing;
 
         if (this.token?.isCancellationRequested || token?.isCancellationRequested) {
             return [];
         }
 
-        return uris.map(uri => ({
-            uri,
-            configuration: {
-                includePath: [],
-                defines: [],
-                intellisense: this.intellisenseConfigurations.get(uri.fsPath),
-                enableNewIntellisense: true
+        // if they pass in a zero length array, assume they mean 'all that are ready'
+        if (uris.length === 0) {
+            uris = this.intellisenseConfigurations.completedKeys.map(each => Uri.file(each));
+        }
+
+        const result = [] as SourceFileConfigurationItem[];
+        for (const uri of uris) {
+            const intellisense = await this.intellisenseConfigurations.get(uri.fsPath).catch(returns.undefined);
+            if (intellisense) {
+                // trim stuff not needed.
+                //* delete intellisense.path;
+                delete intellisense.macro;
+                result.push({
+                    uri,
+                    configuration: {
+                        includePath: [],
+                        defines: [],
+                        intellisense,
+                        enableNewIntellisense: true
+                    } as SourceFileConfiguration
+                });
             }
-        }));
+        }
+        return result;
     }
 
     async canProvideBrowseConfiguration(token?: CancellationToken | undefined): Promise<boolean> {
-        await this.updating;
+        await this.parsing;
 
         if (this.token?.isCancellationRequested || token?.isCancellationRequested) {
             return false;
@@ -190,13 +236,13 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
     }
 
     async provideBrowseConfiguration(token?: CancellationToken | undefined): Promise<WorkspaceBrowseConfiguration | null> {
-        await this.updating;
+        await this.parsing;
 
         if (this.token?.isCancellationRequested || token?.isCancellationRequested) {
             return null;
         }
 
-        return { browsePath: [...this.browsePaths] };
+        return { browsePath: [...this.browseInfo.browsePaths] };
     }
 
     async canProvideBrowseConfigurationsPerFolder(token?: CancellationToken | undefined): Promise<boolean> {
@@ -211,18 +257,12 @@ export class CompileCommandsConfiguration extends IntellisenseConfiguration impl
 
     dispose() {
         this.token = cancelled;
-        CompileCommandsConfiguration.instances.delete(this.path);
+        CompileCommandsConfigurationAdapter.instances.delete(this.path);
     }
 
-    async getExtendedBrowseInformation(token: CancellationToken): Promise<ExtendedBrowseInformation> {
-        await this.updating;
-
-        return {
-            browsePath: [...this.browsePaths],
-            systemPath: [...this.systemPaths],
-            userFrameworks: [...this.userFrameworks],
-            systemFrameworks: [...this.systemFrameworks]
-        };
+    override async getExtendedBrowseInformation(token: CancellationToken): Promise<ExtendedBrowseInformation> {
+        await this.parsing;
+        return super.getExtendedBrowseInformation(token);
     }
 }
 

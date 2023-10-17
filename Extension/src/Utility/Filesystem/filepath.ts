@@ -56,6 +56,10 @@ export interface Folder extends Entry {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export class filepath {
+    static normalize(path: string) {
+        return normalize(path);
+    }
+
     static async stats(name: string | undefined | Promise<string | undefined>, baseFolder?: string): Promise<[string, Stats | undefined] | [undefined, undefined]> {
         if (is.promise(name)) {
             name = await name;
@@ -67,7 +71,7 @@ export class filepath {
         }
 
         // if we've been given a baseFolder, expand that, otherwise just normalize the value.
-        name = baseFolder ? resolve(baseFolder, name) : normalize(name);
+        name = baseFolder ? resolve(baseFolder, name) : filepath.normalize(name);
 
         return [name, await stat(name).catch(returns.undefined)];
     }
@@ -133,7 +137,7 @@ export class filepath {
     static parent(name: Promise<string | undefined>): Promise<string | undefined>;
     static parent(name: string | undefined): string | undefined;
     static parent(name: string | undefined | Promise<string | undefined>): string | undefined | Promise<string | undefined> {
-        return is.promise(name) ? name.then(filepath.parent) : name ? normalize(resolve(name, '..')) : undefined;
+        return is.promise(name) ? name.then(filepath.parent) : name ? filepath.normalize(resolve(name, '..')) : undefined;
     }
 }
 

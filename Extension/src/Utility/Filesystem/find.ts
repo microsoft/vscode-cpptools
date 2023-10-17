@@ -14,7 +14,7 @@ import { accumulator, foreach } from '../Async/iterators';
 import { ManualPromise } from '../Async/manualPromise';
 import { returns } from '../Async/returns';
 import { is } from '../System/guards';
-import { File, Folder, normalize } from './filepath';
+import { File, Folder, filepath } from './filepath';
 
 interface FolderWithChildren extends Folder {
     children?: Map<string, File | FolderWithChildren>;
@@ -137,7 +137,7 @@ export async function scanFolder(folder: string, scanDepth: number, filePredicat
     }
 
     // normalize the folder
-    folder = normalize(folder);
+    folder = filepath.normalize(folder);
 
     // if we have already visited this folder, return
     await foreach(readDirectory(folder), async ([_name, entry]) => {

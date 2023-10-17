@@ -6,8 +6,6 @@
 
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
-import { sleep } from '../Utility/Async/sleep';
-import { is } from '../Utility/System/guards';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import { Client } from './client';
@@ -25,18 +23,6 @@ interface IndexableQuickPickItem extends vscode.QuickPickItem {
 }
 interface KeyedQuickPickItem extends vscode.QuickPickItem {
     key: string;
-}
-
-// Higher numbers mean greater priority.
-enum ConfigurationPriority {
-    IncludePath = 1,
-    CompileCommands = 2,
-    CustomProvider = 3,
-}
-
-interface ConfigurationStatus {
-    configured: boolean;
-    priority: ConfigurationPriority;
 }
 
 enum LanguageStatusPriority {
@@ -59,7 +45,6 @@ const commandArguments: string[] = []; // We report the sender of the command
 
 export class LanguageStatusUI {
     private currentClient: Client | undefined;
-    private curConfigurationStatus?: Promise<ConfigurationStatus>;
 
     // Timer for icons from appearing too often and for too short of a time.
     private readonly iconDelayTime: number = 1000;
@@ -68,8 +53,6 @@ export class LanguageStatusUI {
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
     private readonly updatingIntelliSenseText: string = localize("updating.intellisense.text", "IntelliSense: Updating");
     private readonly idleIntelliSenseText: string = localize("idle.intellisense.text", "IntelliSense: Ready");
-    private readonly missingIntelliSenseText: string = localize("absent.intellisense.text", "IntelliSense: Not configured");
-
     // Tag parse language status
     private tagParseStatusItem: vscode.LanguageStatusItem;
     private isParsingWorkspace: boolean = false;
@@ -134,18 +117,6 @@ export class LanguageStatusUI {
 
     private flameTimeout?: NodeJS.Timeout;
     private setIsUpdatingIntelliSense(val: boolean): void {
-        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
-
-        if (settings.intelliSenseEngine === "disabled") {
-            this.intelliSenseStatusItem.text = this.missingIntelliSenseText;
-            this.intelliSenseStatusItem.command = {
-                command: "C_Cpp.SelectDefaultCompiler",
-                title: localize("intellisense.select.text", "Select a Compiler"),
-                arguments: commandArguments
-            };
-            return;
-        }
-
         this.intelliSenseStatusItem.busy = val;
 
         if (this.flameTimeout) {
@@ -499,9 +470,6 @@ export class LanguageStatusUI {
             telemetry.logLanguageServerEvent('showConfigureIntelliSenseButton', { configurationType, sender, showButton });
         }
 
-        if (!await telemetry.showStatusBarIntelliSenseButton()) {
-            return;
-        }
         this.showConfigureIntelliSenseButton = show;
         if (client !== undefined) {
             client.setShowConfigureIntelliSenseButton(show);
@@ -597,19 +565,6 @@ export class LanguageStatusUI {
         return selection ? selection.key : undefined;
     }
 
-    public async showCompileCommands(paths: string[]): Promise<number> {
-        const options: vscode.QuickPickOptions = {};
-        options.placeHolder = localize("select.compile.commands", "Select a compile_commands.json...");
-
-        const items: IndexableQuickPickItem[] = [];
-        for (let i: number = 0; i < paths.length; i++) {
-            items.push({ label: paths[i], description: "", index: i });
-        }
-
-        const selection: IndexableQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
-        return selection ? selection.index : -1;
-    }
-
     public async showWorkspaces(workspaceNames: { name: string; key: string }[]): Promise<string> {
         const options: vscode.QuickPickOptions = {};
         options.placeHolder = localize("select.workspace", "Select a workspace folder...");
@@ -619,48 +574,6 @@ export class LanguageStatusUI {
 
         const selection: KeyedQuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
         return selection ? selection.key : "";
-    }
-
-    public async showConfigureIncludePathMessage(prompt: () => Promise<boolean>, onSkip: () => void): Promise<void> {
-        await sleep(10000);
-        this.showConfigurationPrompt(ConfigurationPriority.IncludePath, prompt, onSkip);
-    }
-
-    public showConfigureCompileCommandsMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
-        setTimeout(() => {
-            this.showConfigurationPrompt(ConfigurationPriority.CompileCommands, prompt, onSkip);
-        }, 5000);
-    }
-
-    public showConfigureCustomProviderMessage(prompt: () => Promise<boolean>, onSkip: () => void): void {
-        this.showConfigurationPrompt(ConfigurationPriority.CustomProvider, prompt, onSkip);
-    }
-
-    private showConfigurationPrompt(priority: ConfigurationPriority, prompt: () => Thenable<boolean>, onSkip: () => void): void {
-        const showPrompt: () => Promise<ConfigurationStatus> = async () => {
-            const configured: boolean = await prompt();
-            return Promise.resolve({
-                priority: priority,
-                configured: configured
-            });
-        };
-
-        if (is.promise(this.curConfigurationStatus)) {
-            this.curConfigurationStatus = this.curConfigurationStatus.then(result => {
-                if (priority > result.priority) {
-                    return showPrompt();
-                } else if (!result.configured) {
-                    return showPrompt();
-                }
-                onSkip();
-                return Promise.resolve({
-                    priority: result.priority,
-                    configured: true
-                });
-            });
-        } else {
-            this.curConfigurationStatus = showPrompt();
-        }
     }
 
     public bind(client: Client): void {

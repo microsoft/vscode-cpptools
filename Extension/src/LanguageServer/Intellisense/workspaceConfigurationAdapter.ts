@@ -12,11 +12,11 @@ import { getOrAdd } from "../../Utility/System/map";
 import { sources } from '../../constants';
 import { DefaultClient } from "../client";
 import { Configuration } from '../configurations';
-import { IntellisenseConfiguration } from './intellisenseConfiguration';
-import { ExtendedBrowseInformation, IntellisenseConfigurationProvider } from './interfaces';
+import { ConfigurationAdapter } from './configurationAdapter';
+import { ExtendedBrowseInformation, IntellisenseConfigurationAdapter } from './interfaces';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-export class WorkspaceCofigurationProvider extends IntellisenseConfiguration implements IntellisenseConfigurationProvider {
+export class WorkspaceCofigurationAdapter extends ConfigurationAdapter implements IntellisenseConfigurationAdapter {
     private sourceFiles!: Uri[];
     private browsePath!: string[];
 
@@ -26,10 +26,10 @@ export class WorkspaceCofigurationProvider extends IntellisenseConfiguration imp
         super(client, configuration);
         this.ready = this.init();
     }
-    static instances = new Map<DefaultClient, WorkspaceCofigurationProvider>();
+    static instances = new Map<DefaultClient, WorkspaceCofigurationAdapter>();
 
-    static async getProvider(client: DefaultClient, configuration: Configuration): Promise<IntellisenseConfigurationProvider> {
-        const provider = getOrAdd(this.instances, client, () => new WorkspaceCofigurationProvider(client, configuration));
+    static async getProvider(client: DefaultClient, configuration: Configuration): Promise<IntellisenseConfigurationAdapter> {
+        const provider = getOrAdd(this.instances, client, () => new WorkspaceCofigurationAdapter(client, configuration));
         // ensure that if we've changed the configuration that we update this.
         provider.configuration = configuration;
         return provider;
@@ -103,12 +103,7 @@ export class WorkspaceCofigurationProvider extends IntellisenseConfiguration imp
 
     dispose() {
     }
-    async getExtendedBrowseInformation(token: CancellationToken): Promise<ExtendedBrowseInformation> {
-        return {
-            browsePath: this.browsePath,
-            systemPath: [],
-            userFrameworks: [],
-            systemFrameworks: []
-        };
+    override async getExtendedBrowseInformation(token: CancellationToken): Promise<ExtendedBrowseInformation> {
+        return super.getExtendedBrowseInformation(token);
     }
 }

@@ -13,10 +13,11 @@
                 "--skip-welcome",
                 "--skip-release-notes",
                 "--disable-workspace-trust",
+                "--disable-extensions",
                 "--extensionDevelopmentPath=${workspaceFolder}",
             ],
             "env": {
-                "VSCODE_CPP_DEBUG_VSCODE": "c:\\work\\vs\\src\\vc\\.vscode\\launch.json"
+                //"VSCODE_CPP_DEBUG_VSCODE": "c:\\work\\vs\\src\\vc\\.vscode\\launch.json"
             },
             "sourceMaps": true,
             "outFiles": [

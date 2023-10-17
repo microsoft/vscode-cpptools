@@ -15,53 +15,53 @@
     "expressions: PRIORITY=90 # things inferred from macros": {
       /* if this is truthy */               /* then apply this to the intellisense configuration */
 
-      "${macros:_X86_}":                                                { "architecture": "x86", "bits" : 32 },
-      "${macros:_x86_64_}":                                             { "architecture": "x64", "bits" : 64 },
-      "${macros:__aarch64__}":                                          { "architecture": "arm64", "bits" : 64 },
-      "${macros:__arm__}":                                              { "architecture": "arm", "bits" : 32 },
-      "${macros:__AVR__}":                                              { "architecture": "avr", "bits": 16 },
+      "${macro:_X86_}":                                                { "architecture": "x86", "bits" : 32 },
+      "${macro:_x86_64_}":                                             { "architecture": "x64", "bits" : 64 },
+      "${macro:__aarch64__}":                                          { "architecture": "arm64", "bits" : 64 },
+      "${macro:__arm__}":                                              { "architecture": "arm", "bits" : 32 },
+      "${macro:__AVR__}":                                              { "architecture": "avr", "bits": 16 },
 
-      "${macros:winnt}":                                                { "platform": "windows" },
-      "${macros:_WIN32}":                                               { "platform": "windows" },
-      "${macros:_WIN64}":                                               { "platform": "windows", "bits": 64, "architecture": "x64" },
-      "${macros:__linux__}":                                            { "platform": "linux" },
-      "${macros:__APPLE__}":                                            { "platform": "macos" },
+      "${macro:winnt}":                                                { "platform": "windows" },
+      "${macro:_WIN32}":                                               { "platform": "windows" },
+      "${macro:_WIN64}":                                               { "platform": "windows", "bits": 64, "architecture": "x64" },
+      "${macro:__linux__}":                                            { "platform": "linux" },
+      "${macro:__APPLE__}":                                            { "platform": "macos" },
 
-      "${macros:__INTPTR_WIDTH__}":                                     { "bits": "${macros:.__INTPTR_WIDTH__}" },
+      "${macro:__INTPTR_WIDTH__}":                                     { "bits": "${macro:.__INTPTR_WIDTH__}" },
 
-      "!${sizes.char} && ${macros:__CHAR_SIZE__}" :                     { "sizes.char": "${macros:__CHAR_SIZE__}" },
+      "!${sizes.char} && ${macro:__CHAR_SIZE__}" :                     { "sizes.char": "${macro:__CHAR_SIZE__}" },
       
-      "!${sizes.short} && ${macros:__SIZEOF_SHORT__}":                  { "sizes.short": "${macros:__SIZEOF_SHORT__}"},
-      "!${sizes.short} && ${macros:__SHORT_SIZE__}":                    { "sizes.short": "${macros:__SHORT_SIZE__}"},
+      "!${sizes.short} && ${macro:__SIZEOF_SHORT__}":                  { "sizes.short": "${macro:__SIZEOF_SHORT__}"},
+      "!${sizes.short} && ${macro:__SHORT_SIZE__}":                    { "sizes.short": "${macro:__SHORT_SIZE__}"},
 
-      "!${sizes.int} && ${macros:__SIZEOF_INT__}":                      { "sizes.int": "${macros:__SIZEOF_INT__}"},
-      "!${sizes.int} && ${macros:__INT_SIZE__}":                        { "sizes.int": "${macros:__INT_SIZE__}"},
+      "!${sizes.int} && ${macro:__SIZEOF_INT__}":                      { "sizes.int": "${macro:__SIZEOF_INT__}"},
+      "!${sizes.int} && ${macro:__INT_SIZE__}":                        { "sizes.int": "${macro:__INT_SIZE__}"},
 
-      "!${sizes.long} && ${macros:__SIZEOF_LONG__}" :                   { "sizes.long": "${macros:__SIZEOF_LONG__}" },
-      "!${sizes.long} && ${macros:__LONG_SIZE__}" :                     { "sizes.long": "${macros:__LONG_SIZE__}" },
+      "!${sizes.long} && ${macro:__SIZEOF_LONG__}" :                   { "sizes.long": "${macro:__SIZEOF_LONG__}" },
+      "!${sizes.long} && ${macro:__LONG_SIZE__}" :                     { "sizes.long": "${macro:__LONG_SIZE__}" },
 
-      "!${sizes.longDouble} && ${macros:__SIZEOF_LONG_DOUBLE__}" :      { "sizes.longDouble": "${macros:__SIZEOF_LONG_DOUBLE__}" },
-      "!${sizes.longDouble} && ${macros:__LONG_DOUBLE_SIZE__}" :        { "sizes.longDouble": "${macros:__LONG_DOUBLE_SIZE__}" },
+      "!${sizes.longDouble} && ${macro:__SIZEOF_LONG_DOUBLE__}" :      { "sizes.longDouble": "${macro:__SIZEOF_LONG_DOUBLE__}" },
+      "!${sizes.longDouble} && ${macro:__LONG_DOUBLE_SIZE__}" :        { "sizes.longDouble": "${macro:__LONG_DOUBLE_SIZE__}" },
 
-      "!${sizes.float} && ${macros:__SIZEOF_FLOAT__}":                  { "sizes.float": "${macros:__SIZEOF_FLOAT__}"},
-      "!${sizes.float} && ${macros:__FLOAT_SIZE__}":                    { "sizes.float": "${macros:__FLOAT_SIZE__}"},
+      "!${sizes.float} && ${macro:__SIZEOF_FLOAT__}":                  { "sizes.float": "${macro:__SIZEOF_FLOAT__}"},
+      "!${sizes.float} && ${macro:__FLOAT_SIZE__}":                    { "sizes.float": "${macro:__FLOAT_SIZE__}"},
 
-      "!${sizes.double} && ${macros:__SIZEOF_DOUBLE__}":                { "sizes.double": "${macros:__SIZEOF_DOUBLE__}"},
-      "!${sizes.double} && ${macros:__DOUBLE_SIZE__}":                  { "sizes.double": "${macros:__DOUBLE_SIZE__}"},
+      "!${sizes.double} && ${macro:__SIZEOF_DOUBLE__}":                { "sizes.double": "${macro:__SIZEOF_DOUBLE__}"},
+      "!${sizes.double} && ${macro:__DOUBLE_SIZE__}":                  { "sizes.double": "${macro:__DOUBLE_SIZE__}"},
 
-      "!${sizes.pointer} && ${macros:__SIZEOF_POINTER__}":              { "sizes.pointer": "${macros:__SIZEOF_POINTER__}"},
-      "!${sizes.pointer} && ${macros:__DEF_PTR_SIZE__}":                { "sizes.pointer": "${macros:__DEF_PTR_SIZE__}"},
+      "!${sizes.pointer} && ${macro:__SIZEOF_POINTER__}":              { "sizes.pointer": "${macro:__SIZEOF_POINTER__}"},
+      "!${sizes.pointer} && ${macro:__DEF_PTR_SIZE__}":                { "sizes.pointer": "${macro:__DEF_PTR_SIZE__}"},
 
-      "!${sizes.digitsInLongMantissa} && ${macros:__LDBL_MANT_DIG__}":  { "sizes.digitsInLongMantissa": "${macros:__LDBL_MANT_DIG__}"},
+      "!${sizes.digitsInLongMantissa} && ${macro:__LDBL_MANT_DIG__}":  { "sizes.digitsInLongMantissa": "${macro:__LDBL_MANT_DIG__}"},
 
-      "!${types.wcharT} && ${macros:__WCHAR_TYPE__}":                   { "types.wcharT":"${macros:__WCHAR_TYPE__}"},
-      "!${types.wcharT} && ${macros:__WCHAR_T_TYPE__}":                 { "types.wcharT":"${macros:__WCHAR_T_TYPE__}"},
+      "!${types.wcharT} && ${macro:__WCHAR_TYPE__}":                   { "types.wcharT":"${macro:__WCHAR_TYPE__}"},
+      "!${types.wcharT} && ${macro:__WCHAR_T_TYPE__}":                 { "types.wcharT":"${macro:__WCHAR_T_TYPE__}"},
 
-      "!${types.sizeT} && ${macros:__SIZE_TYPE__}":                     { "types.sizeT":"${macros:__SIZE_TYPE__}"},
-      "!${types.sizeT} && ${macros:__SIZE_T_TYPE__}":                   { "types.sizeT":"${macros:__SIZE_T_TYPE__}"},
+      "!${types.sizeT} && ${macro:__SIZE_TYPE__}":                     { "types.sizeT":"${macro:__SIZE_TYPE__}"},
+      "!${types.sizeT} && ${macro:__SIZE_T_TYPE__}":                   { "types.sizeT":"${macro:__SIZE_T_TYPE__}"},
 
-      "!${types.ptrDiffT} && ${macros:__PTRDIFF_TYPE__}":               { "types.ptrDiffT":"${macros:__PTRDIFF_TYPE__}"},
-      "!${types.ptrDiffT} && ${macros:__PTRDIFF_T_TYPE__}":             { "types.ptrDiffT":"${macros:__PTRDIFF_T_TYPE__}"},
+      "!${types.ptrDiffT} && ${macro:__PTRDIFF_TYPE__}":               { "types.ptrDiffT":"${macro:__PTRDIFF_TYPE__}"},
+      "!${types.ptrDiffT} && ${macro:__PTRDIFF_T_TYPE__}":             { "types.ptrDiffT":"${macro:__PTRDIFF_T_TYPE__}"},
     },
 
     // when setting priority, it forces it to be higher or lower depending on the value.
@@ -81,5 +81,6 @@
       "!${sizes.defaultNewAlignment}":      { "sizes.defaultNewAlignment": "${bits} === 64 ? 16 : 8" }, 
     }
   }
+
 
 }

@@ -17,6 +17,6 @@
     "architecture": "xtensa",
     "bits": 32,
     "platform": "none",
-    "parserArgument": []
+    "parserArgument": [],
   }
 }

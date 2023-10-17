@@ -86,4 +86,18 @@ export class is {
     static error(instance: any): instance is Error {
         return instance instanceof Error;
     }
+    static empty(instance: any): boolean {
+        // if the thing is undefined or an empty array
+        if (instance === undefined || (is.array(instance) && instance.length === 0)) {
+            return true;
+        }
+
+        // if it's an object, check if it's empty
+        if (is.object(instance)) {
+            // objects can be 'empty' if all the children are empty
+            return !!Object.entries(instance).find(([,value]) => !is.empty(value));
+        }
+
+        return false;
+    }
 }

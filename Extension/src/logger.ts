@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { CppSourceStr } from './LanguageServer/extension';
 import { getLocalizedString, LocalizeStringParams } from './LanguageServer/localization';
+import { is } from './Utility/System/guards';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -130,13 +131,37 @@ export interface DebugProtocolParams {
     params?: any;
 }
 
-export function logDebugProtocol(output: DebugProtocolParams): void {
-    if (!debugChannel) {
-        debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`);
+export function logDebugProtocol(output: DebugProtocolParams | string): void {
+    try {
+        if (!output) {
+            return;
+        }
+        if (is.string(output)) {
+            if (output.startsWith("Content")) {
+                output = output.substring(output.indexOf("{"), output.length);
+            }
+            output = JSON.parse(output) as DebugProtocolParams;
+        }
+
+        if (!debugChannel) {
+            debugChannel = vscode.window.createOutputChannel(`${localize("c.cpp.debug.protocol", "C/C++ Debug Protocol")}`, 'javascript');
+            debugChannel.appendLine("const msgs = {};");
+            debugChannel.appendLine("const results = {};");
+        }
+        if ('result' in output) {
+            debugChannel.appendLine("");
+            debugChannel.appendLine("// ************************************************************************************************************************");
+            debugChannel.append(`results["${(output as any).id}"]= ${JSON.stringify((output as any).result, null, 2)};`);
+            return;
+        }
+        if (!["cpptools/debugProtocol", "cpptools/debugLog", "cpptools/onIntervalTimer", "cpptools/logTelemetry" ].includes(output.method)) {
+            debugChannel.appendLine("");
+            debugChannel.appendLine("// ************************************************************************************************************************");
+            debugChannel.append(`msgs["${output.method}"]= ${JSON.stringify(output.params, null, 2)};`);
+        }
+    } catch (e) {
+        console.log(e);
     }
-    debugChannel.appendLine("");
-    debugChannel.appendLine("************************************************************************************************************************");
-    debugChannel.append(`${output}`);
 }
 
 export interface ShowWarningParams {

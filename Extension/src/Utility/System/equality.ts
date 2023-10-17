@@ -50,11 +50,7 @@ export function deepEqual(a: any, b: any) {
  */
 export class LastKnownState {
     changed<T extends keyof this, V extends this[T] >(k: T, content: V): boolean {
-        if (!(k in this)) {
-            return false;
-        }
-
-        if (equal(content, this[k])) {
+        if ((k in this) && equal(content, this[k])) {
             return false;
         }
         this[k] = content;
@@ -62,15 +58,6 @@ export class LastKnownState {
     }
 
     unchanged<T extends keyof this, V extends this[T] >(k: T, content: V): boolean {
-        if (!(k in this)) {
-            return true;
-        }
-
-        if (equal(content, this[k])) {
-            return true;
-        }
-
-        this[k] = content;
-        return false;
+        return !this.changed(k, content);
     }
 }
