@@ -2,7 +2,6 @@
  * Copyright (c) Microsoft Corporation. All Rights Reserved.
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-import * as os from 'os';
 import * as vscode from 'vscode';
 import { Position, Range, RequestType, TextEdit } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
@@ -100,11 +99,7 @@ export class CodeActionProvider implements vscode.CodeActionProvider {
             if (command.edit) {
                 wsEdit = new vscode.WorkspaceEdit();
                 if (command.command === 'C_Cpp.AddMissingInclude') {
-                    if (os.platform() === 'win32') {
-                        command.edit.newText = command.edit.newText + "\r\n";
-                    } else {
-                        command.edit.newText = command.edit.newText + "\n";
-                    }
+                    command.edit.newText += "\n";
                 }
                 wsEdit.replace(document.uri, makeVscodeRange(command.edit.range), command.edit.newText);
                 if (command.command === "edit") {
