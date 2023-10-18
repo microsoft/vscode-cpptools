@@ -1,5 +1,27 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.18.0: October 12, 2023
+### New Features
+* Add an 'Extract to Function' (or Member Function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
+  * Currently, it's only enabled when `C_Cpp.experimentFeatures` is `true`. Also, 'Extract to Free Function' is disabled.
+* Compiler acquisition improvements. [#10525](https://github.com/microsoft/vscode-cpptools/issues/10525)
+
+### Enhancements
+* Add setting `C_Cpp.refactoring.includeHeader` to customize whether or not to add an include header when doing a refactoring code action. [#11271](https://github.com/microsoft/vscode-cpptools/issues/11271) 
+* Update clang-format and clang-tidy to 17.0.2. [PR #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
+
+### Bug Fixes
+* Fix the debugger truncating long strings when inspecting values. [#1786](https://github.com/microsoft/vscode-cpptools/issues/1786)
+* Switch to using `XDG_CACHE_HOME` on Linux for the default database path. [#10191](https://github.com/microsoft/vscode-cpptools/issues/10191)
+* Fix incorrect status and commands with the tag parsing language status UI. [#10749](https://github.com/microsoft/vscode-cpptools/issues/10749)
+* Fix an empty (`""`) `compilerPath` in a base configuration overriding the compiler specified by a custom configuration provider or a `compile_commands.json`. [#11373](https://github.com/microsoft/vscode-cpptools/issues/11373)
+* Fix a startup crash when reading values from JSON (settings) that are not the type expected. [#11375](https://github.com/microsoft/vscode-cpptools/issues/11375)
+* Fix a crash detected by crash telemetry. [#11401](https://github.com/microsoft/vscode-cpptools/issues/11401)
+* Fix handling of an undefined `env` variable on Linux and macOS. [#11447](https://github.com/microsoft/vscode-cpptools/issues/11447)
+* Fix multiple issues with querying `nvcc` (CUDA) as a compiler. [#11454](https://github.com/microsoft/vscode-cpptools/issues/11454)
+* Fix an issue that could cause a C language standard to be applied to a C++ file, or vice versa.
+* Remove `cpp` and `clang-cpp` preprocessors from the list of detectable compilers.
+
 ## Version 1.17.5: August 28, 2023
 ### Bug Fixes
 * Fix a language server crash for platforms that don't support the IntelliSense cache (AutoPCH). [#10789](https://github.com/microsoft/vscode-cpptools/issues/10789)
