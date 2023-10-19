@@ -61,7 +61,7 @@ import * as refs from './references';
 import { CppSettings, OtherSettings, SettingsParams, WorkspaceFolderSettingsParams, getEditorConfigSettings } from './settings';
 import { SettingsTracker } from './settingsTracker';
 import { ConfigurationType, LanguageStatusUI, getUI } from './ui';
-import { handleChangedFromCppToC, makeVscodeLocation, makeVscodeRange } from './utils';
+import { handleChangedFromCppToC, makeLspRange, makeVscodeLocation, makeVscodeRange } from './utils';
 import minimatch = require("minimatch");
 
 function deepCopy(obj: any) {
@@ -1691,7 +1691,7 @@ export class DefaultClient implements Client {
             if (!visibleRanges[uri]) {
                 visibleRanges[uri] = [];
             }
-            visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges);
+            visibleRanges[uri] = visibleRanges[uri].concat(editor.visibleRanges.map(makeLspRange));
         });
 
         // We may need to merge visible ranges, if there are multiple editors for the same file,
@@ -1728,7 +1728,7 @@ export class DefaultClient implements Client {
 
         let visibleRanges: readonly Range[] = [];
         if (editors.length === 1) {
-            visibleRanges = editors[0].visibleRanges;
+            visibleRanges = editors[0].visibleRanges.map(makeLspRange);
         } else {
             editors.forEach(editor => {
                 // Use a map, to account for multiple editors for the same file.

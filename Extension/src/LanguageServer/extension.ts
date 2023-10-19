@@ -25,7 +25,7 @@ import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
-import { makeCpptoolsRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
+import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -315,7 +315,7 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
                 activeDocument = undefined;
                 void clients.didChangeActiveDocument(undefined, undefined).catch(logAndReturn.undefined);
             }
-            //clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
+            //clients.ActiveClient.selectionChanged(makeLspRange(editor.selection));
         } else {
             activeDocument = undefined;
         }
@@ -338,7 +338,7 @@ function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeE
     //     void clients.didChangeActiveDocument(event.textEditor.document).catch(logAndReturn.undefined);
     //     ui.didChangeActiveDocument();
     // }
-    clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
+    clients.ActiveClient.selectionChanged(makeLspRange(event.selections[0]));
 }
 
 // export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<boolean> {
