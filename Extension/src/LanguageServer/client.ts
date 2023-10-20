@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CloseAction, ErrorAction, InlayHintKind, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -436,6 +436,26 @@ export interface GetSemanticTokensResult {
     tokens: SemanticToken[];
 }
 
+interface CppInlayHint {
+    position: Position;
+    label: string;
+    inlayHintKind: InlayHintKind;
+    isValueRef: boolean;
+    hasParamName: boolean;
+    leftPadding: boolean;
+    rightPadding: boolean;
+    identifierLength: number;
+}
+
+export interface IntelliSenseResult {
+    uri: string;
+    fileVersion: number;
+    diagnostics: IntelliSenseDiagnostic;
+    inactiveRegions: InputRegion[];
+    semanticTokens: SemanticToken[];
+    inlayHints: CppInlayHint[];
+}
+
 enum SemanticTokenTypes {
     // These are camelCase as the enum names are used directly as strings in our legend.
     macro = 0,
@@ -644,7 +664,7 @@ const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDi
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string> = new NotificationType<string>('cpptools/reportTextDocumentLanguage');
-const SemanticTokensChanged: NotificationType<string> = new NotificationType<string>('cpptools/semanticTokensChanged');
+//const SemanticTokensChanged: NotificationType<string> = new NotificationType<string>('cpptools/semanticTokensChanged');
 const InlayHintsChanged: NotificationType<string> = new NotificationType<string>('cpptools/inlayHintsChanged');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup> = new NotificationType<IntelliSenseSetup>('cpptools/IntelliSenseSetup');
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams> = new NotificationType<SetTemporaryTextDocumentLanguageParams>('cpptools/setTemporaryTextDocumentLanguage');
@@ -1775,12 +1795,12 @@ export class DefaultClient implements Client {
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
         const uri: string = document.uri.toString();
-        if (this.semanticTokensProvider) {
-            this.semanticTokensProvider.invalidateFile(uri);
-        }
-        if (this.inlayHintsProvider) {
-            this.inlayHintsProvider.invalidateFile(uri);
-        }
+        // if (this.semanticTokensProvider) {
+        //     this.semanticTokensProvider.invalidateFile(uri);
+        // }
+        // if (this.inlayHintsProvider) {
+        //     this.inlayHintsProvider.invalidateFile(uri);
+        // }
         openFileVersions.delete(uri);
     }
 
@@ -2339,7 +2359,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
-        this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
+        //this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
         this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => void this.setTemporaryTextDocumentLanguage(e));
