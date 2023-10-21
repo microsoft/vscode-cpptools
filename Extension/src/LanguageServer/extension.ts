@@ -1124,7 +1124,7 @@ export function getActiveClient(): Client {
     return clients.ActiveClient;
 }
 
-export function UpdateInsidersAccess(): void {
+export async function UpdateInsidersAccess(): Promise<void> {
     let installPrerelease: boolean = false;
 
     // Only move them to the new prerelease mechanism if using updateChannel of Insiders.
@@ -1155,6 +1155,40 @@ export function UpdateInsidersAccess(): void {
                 }
             }
             insidersMitigationDone.Value = true;
+        }
+    }
+
+    // First we need to make sure the user isn't already on a pre-release version
+    if (!util.packageJson.__metadata?.preRelease === true) {
+    // Get the info on the latest version from the marketplace to check if there is a pre-release version available 
+        const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery', {
+            method: 'POST',
+            headers: {
+                Accept : 'application/json; api-version=3.0-preview',
+                'Content-Type' : 'application/json',
+            }, 
+            body: '{"filters": [{"criteria": [{"filterType": 7, "value": "ms-vscode.cmake-tools"}]}], "flags": 529}'
+        });
+        
+        const data = await response.json();
+        const preReleaseAvailable = data.results[0].extensions[0].versions[0].properties.some((e: Object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
+
+        // If the user isn't on the pre-release version, but one is available, prompt them to install it.
+        if (preReleaseAvailable) {
+            const message: string = localize('prerelease.message', "Would you like to install the latest pre-release version of the C/C++ extension?");
+            const yes: string = localize("yes.button", "Yes");
+            const no: string = localize("no.button", "No");
+            vscode.window.showInformationMessage(message, yes, no).then((selection) => {
+                switch (selection) {
+                    case yes:
+                        installPrerelease = true;
+                        break;
+                    case no:
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
     }
 
