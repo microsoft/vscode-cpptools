@@ -1165,8 +1165,10 @@ export function UpdateInsidersAccess(): void {
 }
 
 export async function preReleaseCheck(): Promise<void> {
-    // First we need to make sure the user isn't already on a pre-release version.
-    if (util.getCppToolsTargetPopulation() === TargetPopulation.Public) {
+    const displayedPreReleasePrompt: PersistentState<boolean> = new PersistentState<boolean>("CPP.displayedPreReleasePrompt", false);
+
+    // First we need to make sure the user isn't already on a pre-release version and hasn't dismissed this prompt before.
+    if (!displayedPreReleasePrompt.Value && util.getCppToolsTargetPopulation() === TargetPopulation.Public) {
         // Get the info on the latest version from the marketplace to check if there is a pre-release version available.
         const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery', {
             method: 'POST',
@@ -1182,6 +1184,7 @@ export async function preReleaseCheck(): Promise<void> {
 
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {
+            displayedPreReleasePrompt.Value = true;
             const message: string = localize("prerelease.message", "There is a new pre-release version of the C/C++ extension, would you like to install it?");
             const yes: string = localize("yes.button", "Yes");
             const no: string = localize("no.button", "No");
