@@ -11,6 +11,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
+import { TargetPopulation } from 'vscode-tas-client';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { PlatformInformation } from '../platform';
@@ -1163,36 +1164,30 @@ export function UpdateInsidersAccess(): void {
     }
 }
 
-export async function PreReleaseCheck(): Promise<void> {
+export async function preReleaseCheck(): Promise<void> {
     // First we need to make sure the user isn't already on a pre-release version.
-    if (!util.packageJson.__metadata?.preRelease === true) {
+    if (util.getCppToolsTargetPopulation() === TargetPopulation.Public) {
         // Get the info on the latest version from the marketplace to check if there is a pre-release version available.
         const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery', {
             method: 'POST',
             headers: {
                 Accept : 'application/json; api-version=3.0-preview',
-                'Content-Type' : 'application/json',
-            }, 
-            body: '{"filters": [{"criteria": [{"filterType": 7, "value": "ms-vscode.cmake-tools"}]}], "flags": 529}'
+                'Content-Type' : 'application/json'
+            },
+            body: '{"filters": [{"criteria": [{"filterType": 7, "value": "ms-vscode.cpptools"}]}], "flags": 529}'
         });
-        
+
         const data = await response.json();
-        const preReleaseAvailable = data.results[0].extensions[0].versions[0].properties.some((e: Object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
+        const preReleaseAvailable = data.results[0].extensions[0].versions[0].properties.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
 
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {
             const message: string = localize("prerelease.message", "There is a new pre-release version of the C/C++ extension, would you like to install it?");
             const yes: string = localize("yes.button", "Yes");
             const no: string = localize("no.button", "No");
-            vscode.window.showInformationMessage(message, yes, no).then((selection) => {
-                switch (selection) {
-                    case yes:
-                        void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
-                        break;
-                    case no:
-                        break;
-                    default:
-                        break;
+            void vscode.window.showInformationMessage(message, yes, no).then((selection) => {
+                if (selection === yes) {
+                    void vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-vscode.cpptools", { installPreReleaseVersion: true }).then(undefined, logAndReturn.undefined);
                 }
             });
         }
