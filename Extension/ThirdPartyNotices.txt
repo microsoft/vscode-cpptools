@@ -17,7 +17,7 @@ required to debug changes to any libraries licensed under the GNU Lesser General
 
 ---------------------------------------------------------
 
-lldb-tools/lldb-mi 2388bd74133bc21eac59b2e2bf97f2a30770a315 - Apache-2.0 WITH LLVM-exception
+lldb-tools/lldb-mi 4fe9c663edce2447e114c71851694d8c529b982d - Apache-2.0 WITH LLVM-exception
 
 
 Copyright (c) 2010 Apple Inc.
