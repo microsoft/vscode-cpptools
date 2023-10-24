@@ -1185,7 +1185,7 @@ export async function preReleaseCheck(): Promise<void> {
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {
             displayedPreReleasePrompt.Value = true;
-            const message: string = localize("prerelease.message", "There is a new pre-release version of the C/C++ extension, would you like to install it?");
+            const message: string = localize("prerelease.message", "There is a new pre-release version of the C/C++ extension. Would you like to install it?");
             const yes: string = localize("yes.button", "Yes");
             const no: string = localize("no.button", "No");
             void vscode.window.showInformationMessage(message, yes, no).then((selection) => {
