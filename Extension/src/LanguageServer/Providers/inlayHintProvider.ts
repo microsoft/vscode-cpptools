@@ -76,7 +76,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
     }
 
-    public invalidateFile(uri: string): void {
+    public removeFile(uri: string): void {
         this.cache.delete(uri);
         this.onDidChangeInlayHintsEvent.fire();
     }

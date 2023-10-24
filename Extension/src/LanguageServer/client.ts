@@ -18,7 +18,7 @@ import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
 import { InlayHintsProvider } from './Providers/inlayHintProvider';
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { RenameProvider } from './Providers/renameProvider';
-import { SemanticTokensProvider } from './Providers/semanticTokensProvider';
+import { SemanticToken, SemanticTokensProvider } from './Providers/semanticTokensProvider';
 import { WorkspaceSymbolProvider } from './Providers/workspaceSymbolProvider';
 // End provider imports
 
@@ -137,34 +137,6 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
     }
 }
 
-function publishIntelliSenseDiagnostics(params: PublishIntelliSenseDiagnosticsParams): void {
-    if (!diagnosticsCollectionIntelliSense) {
-        diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(configPrefix + "IntelliSense");
-    }
-
-    // Convert from our Diagnostic objects to vscode Diagnostic objects
-    const diagnosticsIntelliSense: vscode.Diagnostic[] = [];
-    params.diagnostics.forEach((d) => {
-        const message: string = getLocalizedString(d.localizeStringParams);
-        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
-        diagnostic.code = d.code;
-        diagnostic.source = CppSourceStr;
-        if (d.relatedInformation) {
-            diagnostic.relatedInformation = [];
-            for (const info of d.relatedInformation) {
-                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
-            }
-        }
-
-        diagnosticsIntelliSense.push(diagnostic);
-    });
-
-    const realUri: vscode.Uri = vscode.Uri.parse(params.uri);
-    diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
-
-    clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
-}
-
 function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
     if (!diagnosticsCollectionRefactor) {
         diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(configPrefix + "Refactor");
@@ -251,11 +223,11 @@ interface DecorationRangesPair {
     ranges: vscode.Range[];
 }
 
-interface InactiveRegionParams {
-    uri: string;
-    fileVersion: number;
-    regions: InputRegion[];
-}
+// interface InactiveRegionParams {
+//     uri: string;
+//     fileVersion: number;
+//     regions: InputRegion[];
+// }
 
 interface InternalSourceFileConfiguration extends SourceFileConfiguration {
     compilerArgsLegacy?: string[];
@@ -322,10 +294,10 @@ interface RefactorDiagnostic {
     relatedInformation?: RefactorDiagnosticRelatedInformation[];
 }
 
-interface PublishIntelliSenseDiagnosticsParams {
-    uri: string;
-    diagnostics: IntelliSenseDiagnostic[];
-}
+// interface PublishIntelliSenseDiagnosticsParams {
+//     uri: string;
+//     diagnostics: IntelliSenseDiagnostic[];
+// }
 
 interface PublishRefactorDiagnosticsParams {
     uri: string;
@@ -419,22 +391,14 @@ export interface GetFoldingRangesResult {
     ranges: CppFoldingRange[];
 }
 
-export interface GetSemanticTokensParams {
-    uri: string;
-}
+// export interface GetSemanticTokensParams {
+//     uri: string;
+// }
 
-interface SemanticToken {
-    line: number;
-    character: number;
-    length: number;
-    type: number;
-    modifiers?: number;
-}
-
-export interface GetSemanticTokensResult {
-    fileVersion: number;
-    tokens: SemanticToken[];
-}
+// export interface GetSemanticTokensResult {
+//     fileVersion: number;
+//     tokens: SemanticToken[];
+// }
 
 interface CppInlayHint {
     position: Position;
@@ -450,7 +414,8 @@ interface CppInlayHint {
 export interface IntelliSenseResult {
     uri: string;
     fileVersion: number;
-    diagnostics: IntelliSenseDiagnostic;
+    startNewSet: boolean;
+    diagnostics: IntelliSenseDiagnostic[];
     inactiveRegions: InputRegion[];
     semanticTokens: SemanticToken[];
     inlayHints: CppInlayHint[];
@@ -605,7 +570,7 @@ const GetDiagnosticsRequest: RequestType<void, GetDiagnosticsResult, void> = new
 export const GetDocumentSymbolRequest: RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void> = new RequestType<GetDocumentSymbolRequestParams, GetDocumentSymbolResult, void>('cpptools/getDocumentSymbols');
 export const GetSymbolInfoRequest: RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void> = new RequestType<WorkspaceSymbolParams, LocalizeSymbolInformation[], void>('cpptools/getWorkspaceSymbols');
 export const GetFoldingRangesRequest: RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void> = new RequestType<GetFoldingRangesParams, GetFoldingRangesResult, void>('cpptools/getFoldingRanges');
-export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void>('cpptools/getSemanticTokens');
+//export const GetSemanticTokensRequest: RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void> = new RequestType<GetSemanticTokensParams, GetSemanticTokensResult, void>('cpptools/getSemanticTokens');
 export const FormatDocumentRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatDocument');
 export const FormatRangeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatRange');
 export const FormatOnTypeRequest: RequestType<FormatParams, FormatResult, void> = new RequestType<FormatParams, FormatResult, void>('cpptools/formatOnType');
@@ -654,24 +619,25 @@ const ReportTagParseStatusNotification: NotificationType<TagParseStatus> = new N
 const ReportStatusNotification: NotificationType<ReportStatusNotificationBody> = new NotificationType<ReportStatusNotificationBody>('cpptools/reportStatus');
 const DebugProtocolNotification: NotificationType<DebugProtocolParams> = new NotificationType<DebugProtocolParams>('cpptools/debugProtocol');
 const DebugLogNotification: NotificationType<LocalizeStringParams> = new NotificationType<LocalizeStringParams>('cpptools/debugLog');
-const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
+//const InactiveRegionNotification: NotificationType<InactiveRegionParams> = new NotificationType<InactiveRegionParams>('cpptools/inactiveRegions');
 const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> = new NotificationType<CompileCommandsPaths>('cpptools/compileCommandsPaths');
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
-const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
+//const PublishIntelliSenseDiagnosticsNotification: NotificationType<PublishIntelliSenseDiagnosticsParams> = new NotificationType<PublishIntelliSenseDiagnosticsParams>('cpptools/publishIntelliSenseDiagnostics');
 const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
 const ReportTextDocumentLanguage: NotificationType<string> = new NotificationType<string>('cpptools/reportTextDocumentLanguage');
 //const SemanticTokensChanged: NotificationType<string> = new NotificationType<string>('cpptools/semanticTokensChanged');
-const InlayHintsChanged: NotificationType<string> = new NotificationType<string>('cpptools/inlayHintsChanged');
+//const InlayHintsChanged: NotificationType<string> = new NotificationType<string>('cpptools/inlayHintsChanged');
 const IntelliSenseSetupNotification: NotificationType<IntelliSenseSetup> = new NotificationType<IntelliSenseSetup>('cpptools/IntelliSenseSetup');
 const SetTemporaryTextDocumentLanguageNotification: NotificationType<SetTemporaryTextDocumentLanguageParams> = new NotificationType<SetTemporaryTextDocumentLanguageParams>('cpptools/setTemporaryTextDocumentLanguage');
 const ReportCodeAnalysisProcessedNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisProcessed');
 const ReportCodeAnalysisTotalNotification: NotificationType<number> = new NotificationType<number>('cpptools/reportCodeAnalysisTotal');
 const DoxygenCommentGeneratedNotification: NotificationType<GenerateDoxygenCommentResult> = new NotificationType<GenerateDoxygenCommentResult>('cpptools/insertDoxygenComment');
 const CanceledReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/canceledReferences');
+const IntelliSenseResultNotification: NotificationType<IntelliSenseResult> = new NotificationType<IntelliSenseResult>('cpptools/intelliSenseResult');
 
 let failureMessageShown: boolean = false;
 
@@ -1316,12 +1282,14 @@ export class DefaultClient implements Client {
 
                 const settings: CppSettings = new CppSettings();
                 if (settings.enhancedColorization && semanticTokensLegend) {
-                    this.semanticTokensProvider = new SemanticTokensProvider(this);
+                    this.semanticTokensProvider = new SemanticTokensProvider();
                     this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                 }
+
                 // Listen for messages from the language server.
                 this.registerNotifications();
             }
+
             // update all client configurations
             this.configuration.setupConfigurations();
             initializedClientCount++;
@@ -1671,7 +1639,7 @@ export class DefaultClient implements Client {
                 const settings: CppSettings = new CppSettings();
                 if (changedSettings.enhancedColorization) {
                     if (settings.enhancedColorization && semanticTokensLegend) {
-                        this.semanticTokensProvider = new SemanticTokensProvider(this);
+                        this.semanticTokensProvider = new SemanticTokensProvider();
                         this.semanticTokensProviderDisposable = vscode.languages.registerDocumentSemanticTokensProvider(util.documentSelector, this.semanticTokensProvider, semanticTokensLegend);
                     } else if (this.semanticTokensProviderDisposable) {
                         this.semanticTokensProviderDisposable.dispose();
@@ -1795,11 +1763,11 @@ export class DefaultClient implements Client {
 
     public onDidCloseTextDocument(document: vscode.TextDocument): void {
         const uri: string = document.uri.toString();
-        // if (this.semanticTokensProvider) {
-        //     this.semanticTokensProvider.invalidateFile(uri);
-        // }
+        if (this.semanticTokensProvider) {
+            this.semanticTokensProvider.removeFile(uri);
+        }
         // if (this.inlayHintsProvider) {
-        //     this.inlayHintsProvider.invalidateFile(uri);
+        //     this.inlayHintsProvider.removeFile(uri);
         // }
         openFileVersions.delete(uri);
     }
@@ -2342,7 +2310,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
         this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
-        this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
+        //this.languageClient.onNotification(InactiveRegionNotification, (e) => this.updateInactiveRegions(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
@@ -2353,20 +2321,74 @@ export class DefaultClient implements Client {
                 void defaultClient.handleRequestCustomConfig(requestFile);
             }
         });
-        this.languageClient.onNotification(PublishIntelliSenseDiagnosticsNotification, publishIntelliSenseDiagnostics);
+        this.languageClient.onNotification(IntelliSenseResultNotification, (e) => this.handleIntelliSenseResult(e));
         this.languageClient.onNotification(PublishRefactorDiagnosticsNotification, publishRefactorDiagnostics);
         RegisterCodeAnalysisNotifications(this.languageClient);
         this.languageClient.onNotification(ShowMessageWindowNotification, showMessageWindow);
         this.languageClient.onNotification(ShowWarningNotification, showWarning);
         this.languageClient.onNotification(ReportTextDocumentLanguage, (e) => this.setTextDocumentLanguage(e));
         //this.languageClient.onNotification(SemanticTokensChanged, (e) => this.semanticTokensProvider?.invalidateFile(e));
-        this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
+        //this.languageClient.onNotification(InlayHintsChanged, (e) => this.inlayHintsProvider?.invalidateFile(e));
         this.languageClient.onNotification(IntelliSenseSetupNotification, (e) => this.logIntelliSenseSetupTime(e));
         this.languageClient.onNotification(SetTemporaryTextDocumentLanguageNotification, (e) => void this.setTemporaryTextDocumentLanguage(e));
         this.languageClient.onNotification(ReportCodeAnalysisProcessedNotification, (e) => this.updateCodeAnalysisProcessed(e));
         this.languageClient.onNotification(ReportCodeAnalysisTotalNotification, (e) => this.updateCodeAnalysisTotal(e));
         this.languageClient.onNotification(DoxygenCommentGeneratedNotification, (e) => void this.insertDoxygenComment(e));
         this.languageClient.onNotification(CanceledReferencesNotification, this.serverCanceledReferences);
+    }
+
+    private handleIntelliSenseResult(intelliseSenseResult: IntelliSenseResult): void {
+        const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === intelliseSenseResult.uri);
+        if (!editor) {
+            return;
+        }
+
+        if (this.semanticTokensProvider) {
+            this.semanticTokensProvider.deliverTokens(intelliseSenseResult.uri, intelliseSenseResult.semanticTokens, intelliseSenseResult.startNewSet);
+        }
+        // if (this.inlayHintProvider) {
+        //     this.inlayHintProvider.deliverInlayHints(params.uri, params.inlayHints, params.startNewSet);
+        // }
+
+        this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.startNewSet);
+        this.updateSquiggles(intelliseSenseResult.uri, intelliseSenseResult.diagnostics, intelliseSenseResult.startNewSet);
+    }
+
+    private updateSquiggles(uriString: string, diagnostics: IntelliSenseDiagnostic[], startNewSet: boolean): void {
+
+        if (!diagnosticsCollectionIntelliSense) {
+            diagnosticsCollectionIntelliSense = vscode.languages.createDiagnosticCollection(configPrefix + "IntelliSense");
+        }
+
+        // Convert from our Diagnostic objects to vscode Diagnostic objects
+
+        const diagnosticsIntelliSense: vscode.Diagnostic[] = [];
+        diagnostics.forEach((d) => {
+            const message: string = getLocalizedString(d.localizeStringParams);
+            const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
+            diagnostic.code = d.code;
+            diagnostic.source = CppSourceStr;
+            if (d.relatedInformation) {
+                diagnostic.relatedInformation = [];
+                for (const info of d.relatedInformation) {
+                    diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
+                }
+            }
+
+            diagnosticsIntelliSense.push(diagnostic);
+        });
+
+        const realUri: vscode.Uri = vscode.Uri.parse(uriString);
+        if (!startNewSet) {
+            const existingDiagnostics: readonly vscode.Diagnostic[] | undefined = diagnosticsCollectionIntelliSense.get(realUri);
+            if (existingDiagnostics) {
+                // Note: The spread operator puts every element on the stack, so it should be avoided for large arrays.
+                Array.prototype.push.apply(diagnosticsIntelliSense, existingDiagnostics as any[]);
+            }
+        }
+        diagnosticsCollectionIntelliSense.set(realUri, diagnosticsIntelliSense);
+
+        clients.timeTelemetryCollector.setUpdateRangeTime(realUri);
     }
 
     private setTextDocumentLanguage(languageStr: string): void {
@@ -2590,41 +2612,52 @@ export class DefaultClient implements Client {
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
-    private updateInactiveRegions(params: InactiveRegionParams): void {
-        const settings: CppSettings = new CppSettings(this.RootUri);
-        const opacity: number | undefined = settings.inactiveRegionOpacity;
-        if (opacity !== null && opacity !== undefined) {
-            const decoration: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
-                opacity: opacity.toString(),
-                backgroundColor: settings.inactiveRegionBackgroundColor,
-                color: settings.inactiveRegionForegroundColor,
-                rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
-            });
-            // We must convert to vscode.Ranges in order to make use of the API's
-            const ranges: vscode.Range[] = params.regions.map(element => new vscode.Range(element.startLine, 0, element.endLine, 0));
-            // Find entry for cached file and act accordingly
-            const valuePair: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(params.uri);
-            if (valuePair) {
-                // Disposing of and resetting the decoration will undo previously applied text decorations
-                valuePair.decoration.dispose();
-                valuePair.decoration = decoration;
-                // As vscode.TextEditor.setDecorations only applies to visible editors, we must cache the range for when another editor becomes visible
-                valuePair.ranges = ranges;
-            } else { // The entry does not exist. Make a new one
-                const toInsert: DecorationRangesPair = {
-                    decoration: decoration,
-                    ranges: ranges
-                };
-                this.inactiveRegionsDecorations.set(params.uri, toInsert);
-            }
-            if (settings.dimInactiveRegions && params.fileVersion === openFileVersions.get(params.uri)) {
-                // Apply the decorations to all *visible* text editors
-                const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === params.uri);
-                for (const e of editors) {
-                    e.setDecorations(decoration, ranges);
-                }
-            }
+    public inactiveRegionDecorationType: vscode.TextEditorDecorationType | undefined;
+
+    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean): void {
+        const client: Client = clients.getClientFor(vscode.Uri.parse(uriString));
+        if (!(client instanceof DefaultClient)) {
+            return;
         }
+        const settings: CppSettings = new CppSettings(client.RootUri);
+        if (client.inactiveRegionDecorationType === undefined) {
+            return; // Should never happen. It will be initialized before the constructor exits.
+        }
+        const dimInactiveRegions: boolean = settings.dimInactiveRegions;
+        let currentSet: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(uriString);
+        if (startNewSet || !dimInactiveRegions) {
+            if (currentSet) {
+                currentSet.decoration.dispose();
+                this.inactiveRegionsDecorations.delete(uriString);
+            }
+            if (!dimInactiveRegions) {
+                return;
+            }
+            currentSet = undefined;
+        }
+        if (currentSet === undefined) {
+            const opacity: number | undefined = settings.inactiveRegionOpacity;
+            currentSet = {
+                decoration: vscode.window.createTextEditorDecorationType({
+                    opacity: (opacity === undefined) ? "0.55" : opacity.toString(),
+                    backgroundColor: settings.inactiveRegionBackgroundColor,
+                    color: settings.inactiveRegionForegroundColor,
+                    rangeBehavior: vscode.DecorationRangeBehavior.OpenOpen
+                }),
+                ranges: []
+            };
+            this.inactiveRegionsDecorations.set(uriString, currentSet);
+        }
+
+        Array.prototype.push.apply(currentSet.ranges, inactiveRegions.map(element => new vscode.Range(element.startLine, 0, element.endLine, 0)));
+
+        // Apply the decorations to all *visible* text editors
+        const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uriString);
+        for (const e of editors) {
+            e.setDecorations(currentSet.decoration, currentSet.ranges);
+        }
+
+        // TODO: Find a better place for this. Every IntelliSense update does not need to trigger a code folding refresh.
         if (this.codeFoldingProvider) {
             this.codeFoldingProvider.refresh();
         }
