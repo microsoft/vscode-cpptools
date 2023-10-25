@@ -15,7 +15,7 @@ import { DocumentRangeFormattingEditProvider } from './Providers/documentRangeFo
 import { DocumentSymbolProvider } from './Providers/documentSymbolProvider';
 import { FindAllReferencesProvider } from './Providers/findAllReferencesProvider';
 import { FoldingRangeProvider } from './Providers/foldingRangeProvider';
-import { InlayHintsProvider } from './Providers/inlayHintProvider';
+import { CppInlayHint, InlayHintsProvider } from './Providers/inlayHintProvider';
 import { OnTypeFormattingEditProvider } from './Providers/onTypeFormattingEditProvider';
 import { RenameProvider } from './Providers/renameProvider';
 import { SemanticToken, SemanticTokensProvider } from './Providers/semanticTokensProvider';
@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, ErrorAction, InlayHintKind, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CloseAction, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -400,17 +400,6 @@ export interface GetFoldingRangesResult {
 //     tokens: SemanticToken[];
 // }
 
-interface CppInlayHint {
-    position: Position;
-    label: string;
-    inlayHintKind: InlayHintKind;
-    isValueRef: boolean;
-    hasParamName: boolean;
-    leftPadding: boolean;
-    rightPadding: boolean;
-    identifierLength: number;
-}
-
 export interface IntelliSenseResult {
     uri: string;
     fileVersion: number;
@@ -590,7 +579,7 @@ const PauseParsingNotification: NotificationType<void> = new NotificationType<vo
 const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
 const DidChangeActiveDocumentNotification: NotificationType<DidChangeActiveDocumentParams> = new NotificationType<DidChangeActiveDocumentParams>('cpptools/didChangeActiveDocument');
 const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
-const TextEditorSelectionChangeNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/textEditorSelectionChange');
+const DidChangeTextEditorSelectionNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/didChangeTextEditorSelection');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
 const ChangeSelectedSettingNotification: NotificationType<FolderSelectedSettingParams> = new NotificationType<FolderSelectedSettingParams>('cpptools/didChangeSelectedSetting');
 const IntervalTimerNotification: NotificationType<void> = new NotificationType<void>('cpptools/onIntervalTimer');
@@ -1261,7 +1250,7 @@ export class DefaultClient implements Client {
                 // e.g. prevents empty c_cpp_properties.json from generation.
                 this.registerFileWatcher();
                 initializedClientCount = 0;
-                this.inlayHintsProvider = new InlayHintsProvider(this);
+                this.inlayHintsProvider = new InlayHintsProvider();
 
                 this.disposables.push(vscode.languages.registerInlayHintsProvider(util.documentSelector, this.inlayHintsProvider));
                 this.disposables.push(vscode.languages.registerRenameProvider(util.documentSelector, new RenameProvider(this)));
@@ -2346,9 +2335,9 @@ export class DefaultClient implements Client {
         if (this.semanticTokensProvider) {
             this.semanticTokensProvider.deliverTokens(intelliseSenseResult.uri, intelliseSenseResult.semanticTokens, intelliseSenseResult.startNewSet);
         }
-        // if (this.inlayHintProvider) {
-        //     this.inlayHintProvider.deliverInlayHints(params.uri, params.inlayHints, params.startNewSet);
-        // }
+        if (this.inlayHintsProvider) {
+            this.inlayHintsProvider.deliverInlayHints(intelliseSenseResult.uri, intelliseSenseResult.inlayHints, intelliseSenseResult.startNewSet);
+        }
 
         this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.startNewSet);
         this.updateSquiggles(intelliseSenseResult.uri, intelliseSenseResult.diagnostics, intelliseSenseResult.startNewSet);
@@ -2824,7 +2813,7 @@ export class DefaultClient implements Client {
     public async selectionChanged(selection: Range): Promise<void> {
         console.log("selectionChanged\n" + JSON.stringify(selection, null, 4));
 
-        return this.languageClient.sendNotification(TextEditorSelectionChangeNotification, selection);
+        return this.languageClient.sendNotification(DidChangeTextEditorSelectionNotification, selection);
     }
 
     public async resetDatabase(): Promise<void> {
