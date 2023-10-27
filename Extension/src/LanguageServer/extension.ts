@@ -438,6 +438,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CreateDeclarationOrDefinition', enabled ? onCreateDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.CopyDeclarationOrDefinition', enabled ? onCopyDeclarationOrDefinition : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.RescanCompilers', enabled ? onRescanCompilers : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.AddMissingInclude', enabled ? onAddMissingInclude : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFunction', enabled ? () => onExtractToFunction(false, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
@@ -535,6 +536,10 @@ async function onResetDatabase(): Promise<void> {
 async function onRescanCompilers(sender?: any): Promise<void> {
     await clients.ActiveClient.ready;
     return clients.ActiveClient.rescanCompilers(sender);
+}
+
+async function onAddMissingInclude(): Promise<void> {
+    telemetry.logLanguageServerEvent('AddMissingInclude');
 }
 
 async function selectIntelliSenseConfiguration(sender?: any): Promise<void> {
