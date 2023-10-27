@@ -3454,7 +3454,7 @@ export class DefaultClient implements Client {
         }
 
         let functionName: string | undefined = await vscode.window.showInputBox({
-            title: localize('handle.extract.name', 'Extract to Function: Name'),
+            title: localize('handle.extract.name', 'Name the extracted function'),
             placeHolder: localize('handle.extract.new.function', 'NewFunction')
         });
 
@@ -3521,7 +3521,7 @@ export class DefaultClient implements Client {
                     range = new vscode.Range(new vscode.Position(range.start.line + headerFileLineOffset, range.start.character),
                         new vscode.Position(range.end.line + headerFileLineOffset, range.end.character));
                 }
-                const isReplace: boolean = !range.isEmpty;
+                const isReplace: boolean = !range.isEmpty && isSourceFile;
                 lineOffset += nextLineOffset;
                 nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
                 let rangeStartLine: number = range.start.line + lineOffset;
