@@ -3601,8 +3601,8 @@ export class DefaultClient implements Client {
         // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits);
 
-        //const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
-        //await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
+        const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
+        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
 
         // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
