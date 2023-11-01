@@ -3610,7 +3610,8 @@ export class DefaultClient implements Client {
             const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(formatUriAndRange.uri)?.uri);
             const formatOptions: vscode.FormattingOptions = {
                 insertSpaces: settings.editorInsertSpaces ?? true,
-                tabSize: settings.editorTabSize ?? 4
+                tabSize: settings.editorTabSize ?? 4,
+                onChanges: true
             };
 
             const doFormat = async () => {
@@ -3619,10 +3620,8 @@ export class DefaultClient implements Client {
                     return true;
                 }
 
-                // TODO: Somehow invoke multiple range formatting (see https://github.com/microsoft/vscode/issues/193836).
-                // Maybe call DocumentRangeFormattingEditProvider.provideDocumentRangesFormattingEdits directly.
                 const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
-                    "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
+                    "vscode.executeFormatDocumentProvider", formatUriAndRange.uri, formatOptions);
                 if (!formatTextEdits || formatTextEdits.length === 0 || versionBeforeFormatting === undefined) {
                     return true;
                 }
