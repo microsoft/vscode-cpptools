@@ -403,7 +403,10 @@ export interface GetFoldingRangesResult {
 export interface IntelliSenseResult {
     uri: string;
     fileVersion: number;
-    startNewSet: boolean;
+    clearExistingDiagnostics: boolean;
+    clearExistingInactiveRegions: boolean;
+    clearExistingSemanticTokens: boolean;
+    clearExistingInlayHint: boolean;
     diagnostics: IntelliSenseDiagnostic[];
     inactiveRegions: InputRegion[];
     semanticTokens: SemanticToken[];
@@ -2337,14 +2340,14 @@ export class DefaultClient implements Client {
         }
 
         if (this.semanticTokensProvider) {
-            this.semanticTokensProvider.deliverTokens(intelliseSenseResult.uri, intelliseSenseResult.semanticTokens, intelliseSenseResult.startNewSet);
+            this.semanticTokensProvider.deliverTokens(intelliseSenseResult.uri, intelliseSenseResult.semanticTokens, intelliseSenseResult.clearExistingSemanticTokens);
         }
         if (this.inlayHintsProvider) {
-            this.inlayHintsProvider.deliverInlayHints(intelliseSenseResult.uri, intelliseSenseResult.inlayHints, intelliseSenseResult.startNewSet);
+            this.inlayHintsProvider.deliverInlayHints(intelliseSenseResult.uri, intelliseSenseResult.inlayHints, intelliseSenseResult.clearExistingInlayHint);
         }
 
-        this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.startNewSet);
-        this.updateSquiggles(intelliseSenseResult.uri, intelliseSenseResult.diagnostics, intelliseSenseResult.startNewSet);
+        this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.clearExistingInactiveRegions);
+        this.updateSquiggles(intelliseSenseResult.uri, intelliseSenseResult.diagnostics, intelliseSenseResult.clearExistingDiagnostics);
     }
 
     private updateSquiggles(uriString: string, diagnostics: IntelliSenseDiagnostic[], startNewSet: boolean): void {
