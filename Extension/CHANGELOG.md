@@ -1,10 +1,25 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.18.1: November 2, 2023
+### New Feature
+* Add `#include` code action suggestions for some IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
+  * Since C code doesn't give an error for an undefined symbol, it usually won't be available for C.
+
+### Enhancements
+* Improve the walkthrough wording. [#11320](https://github.com/microsoft/vscode-cpptools/issues/11320)
+* Change 'Extract to Function' to prompt for the name instead of doing a rename afterwards. [#11531](https://github.com/microsoft/vscode-cpptools/issues/11531)
+* Add a pre-release available notification. [PR #11569](https://github.com/microsoft/vscode-cpptools/pull/11569)
+
+### Bug Fixes
+* Fix no error message getting shown if 'Extract to Function' creation fails. [#11567](https://github.com/microsoft/vscode-cpptools/issues/11567)
+* Fix an autocomplete crash bug (primarily on Mac).
+* Fix an IntelliSense crash when selecting code.
+
 ## Version 1.18.0: October 12, 2023
 ### New Features
 * Add an 'Extract to Function' (or Member Function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
-  * Currently, it's only enabled when `C_Cpp.experimentFeatures` is `true`. Also, 'Extract to Free Function' is disabled.
-* Add the option to install a compiler, accessible through the walkthrough. [PR #11286](https://github.com/microsoft/vscode-cpptools/pull/11286)
+  * Currently, it's only enabled when `C_Cpp.experimentFeatures` is set to `enabled`. Also, 'Extract to Free Function' is disabled.
+* Compiler acquisition improvements. [#10525](https://github.com/microsoft/vscode-cpptools/issues/10525)
 
 ### Enhancements
 * Add setting `C_Cpp.refactoring.includeHeader` to customize whether or not to add an include header when doing a refactoring code action. [#11271](https://github.com/microsoft/vscode-cpptools/issues/11271) 
@@ -13,6 +28,7 @@
 ### Bug Fixes
 * Fix the debugger truncating long strings when inspecting values. [#1786](https://github.com/microsoft/vscode-cpptools/issues/1786)
 * Switch to using `XDG_CACHE_HOME` on Linux for the default database path. [#10191](https://github.com/microsoft/vscode-cpptools/issues/10191)
+* Fix an IntelliSense error with std::is_trivially_copyable_v. [#10712](https://github.com/microsoft/vscode-cpptools/issues/10712)
 * Fix incorrect status and commands with the tag parsing language status UI. [#10749](https://github.com/microsoft/vscode-cpptools/issues/10749)
 * Fix an empty (`""`) `compilerPath` in a base configuration overriding the compiler specified by a custom configuration provider or a `compile_commands.json`. [#11373](https://github.com/microsoft/vscode-cpptools/issues/11373)
 * Fix a startup crash when reading values from JSON (settings) that are not the type expected. [#11375](https://github.com/microsoft/vscode-cpptools/issues/11375)

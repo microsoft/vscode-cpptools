@@ -3,6 +3,10 @@
     "include_not_found_in_browse_path": "Include file not found in browse.path.",
     "update_browse_path": "Edit \"browse.path\" setting",
     "add_to_include_path": "Add to \"includePath\": {0}",
+    "add_missing_include_path": {
+        "text": "Add '{0}'",
+        "hint": "{0} is C++ code to add, such as '#include <string>'"
+    },
     "edit_include_path": "Edit \"includePath\" setting",
     "disable_error_squiggles": "Disable error squiggles",
     "enable_error_squiggles": "Enable all error squiggles",
