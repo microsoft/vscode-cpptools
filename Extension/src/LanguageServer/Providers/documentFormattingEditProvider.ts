@@ -23,10 +23,9 @@ export class DocumentFormattingEditProvider implements vscode.DocumentFormatting
         if (options.onChanges) {
             let insertSpacesSet: boolean = false;
             let tabSizeSet: boolean = false;
-            const preserveFocus: boolean = options.preserveFocus as boolean;
             // Even when preserveFocus is true, VS Code is making the document active (when we don't want that).
             // The workaround is for the code invoking the formatting to call showTextDocument again afterwards on the previously active document.
-            const editor: vscode.TextEditor = await vscode.window.showTextDocument(document, { preserveFocus });
+            const editor: vscode.TextEditor = await vscode.window.showTextDocument(document, { preserveFocus: options.preserveFocus as boolean });
             if (editor.options.insertSpaces && typeof editor.options.insertSpaces === "boolean") {
                 options.insertSpaces = editor.options.insertSpaces;
                 insertSpacesSet = true;
