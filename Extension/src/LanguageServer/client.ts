@@ -3497,7 +3497,8 @@ export class DefaultClient implements Client {
         let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let replaceEditRange: vscode.Range | undefined;
         let hasProcessedReplace: boolean = false;
-        const formatUriAndRanges: VsCodeUriAndRange[] = [];
+        const sourceFormatUriAndRanges: VsCodeUriAndRange[] = [];
+        const headerFormatUriAndRanges: VsCodeUriAndRange[] = [];
         let lineOffset: number = 0;
         let headerFileLineOffset: number = 0;
         let isSourceFile: boolean = true;
@@ -3561,11 +3562,16 @@ export class DefaultClient implements Client {
                     rangeStartCharacter = 1;
                     rangeStartLine += 1;
                 }
-                formatUriAndRanges.push({uri, range: new vscode.Range(
+                const newRange: vscode.Range = new vscode.Range(
                     new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
                     new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
                         isReplace ? range.end.character :
-                            range.end.character + edit.newText.length - rangeStartCharacter))});
+                            range.end.character + edit.newText.length - rangeStartCharacter));
+                if (isSourceFile) {
+                    sourceFormatUriAndRanges.push({uri, range: newRange});
+                } else {
+                    headerFormatUriAndRanges.push({uri, range: newRange});
+                }
                 if (isReplace) {
                     // Handle additional declaration lines added before the new function call.
                     let currentText: string = edit.newText.substring(rangeStartCharacter);
@@ -3595,34 +3601,45 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (replaceEditRange === undefined || formatUriAndRanges.length === 0) {
+        if (replaceEditRange === undefined || sourceFormatUriAndRanges.length === 0) {
             return;
         }
 
         // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
 
-        const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
+        // Select the replaced code.
+        await vscode.window.showTextDocument(sourceFormatUriAndRanges[0].uri, { selection: replaceEditRange, preserveFocus: false });
 
         // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        for (const formatUriAndRange of formatUriAndRanges) {
+        const formatRanges = async (formatUriAndRanges: VsCodeUriAndRange[]) => {
+            if (formatUriAndRanges.length === 0) {
+                return;
+            }
+            const formatUriAndRange: VsCodeUriAndRange = formatUriAndRanges[0];
+            const isMultipleFormatRanges: boolean = formatUriAndRanges.length > 1;
             const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(formatUriAndRange.uri)?.uri);
             const formatOptions: vscode.FormattingOptions = {
                 insertSpaces: settings.editorInsertSpaces ?? true,
                 tabSize: settings.editorTabSize ?? 4,
-                onChanges: true,
+                onChanges: isMultipleFormatRanges,
                 preserveFocus: true
             };
 
-            const doFormat = async () => {
+            const tryFormat = async () => {
                 const versionBeforeFormatting: number | undefined = openFileVersions.get(formatUriAndRange.uri.toString());
                 if (versionBeforeFormatting === undefined) {
                     return true;
                 }
 
-                const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
-                    "vscode.executeFormatDocumentProvider", formatUriAndRange.uri, formatOptions);
+                // Only use document (onChange) formatting when there are multiple ranges.
+                const formatTextEdits: vscode.TextEdit[] | undefined = isMultipleFormatRanges ?
+                    await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
+                        "vscode.executeFormatDocumentProvider", formatUriAndRange.uri, formatOptions) :
+                    await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
+                        "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
+
                 if (!formatTextEdits || formatTextEdits.length === 0 || versionBeforeFormatting === undefined) {
                     return true;
                 }
@@ -3635,19 +3652,17 @@ export class DefaultClient implements Client {
                 formatEdits.set(formatUriAndRange.uri, formatTextEdits);
                 return true;
             };
-            if (!await doFormat())
+            if (!await tryFormat())
             {
-                await doFormat(); // Try again;
+                await tryFormat(); // Try again;
             }
-        }
+        };
 
+        await formatRanges(headerFormatUriAndRanges);
+        await formatRanges(sourceFormatUriAndRanges);
         if (formatEdits.size > 0) {
             await vscode.workspace.applyEdit(formatEdits, { isRefactoring: true });
         }
-
-        // This is required to be done after the formatting is done, because that can trigger the
-        // active document to switch to the wrong file (the header).
-        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange, preserveFocus: false });
     }
 
     public onInterval(): void {
