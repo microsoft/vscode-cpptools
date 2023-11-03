@@ -3257,7 +3257,8 @@ export class DefaultClient implements Client {
                 }
                 const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 for (const uri of editedFiles) {
-                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatDocumentProvider", uri, { onChanges: true });
+                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
+                        "vscode.executeFormatDocumentProvider", uri, { onChanges: true, preserveFocus: false });
                     if (formatTextEdits && formatTextEdits.length > 0) {
                         formatEdits.set(uri, formatTextEdits);
                     }
@@ -3539,7 +3540,7 @@ export class DefaultClient implements Client {
                         if (edit.newText.includes("#pragma once")) {
                             // Commit this so that it can be undone separately, to avoid leaving an empty file,
                             // which causes the next refactor to not add the #pragma once.
-                            await vscode.workspace.applyEdit(workspaceEdits);
+                            await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
                             headerFileLineOffset = nextLineOffset;
                             workspaceEdits = new vscode.WorkspaceEdit();
                             continue;
@@ -3599,10 +3600,9 @@ export class DefaultClient implements Client {
         }
 
         // Apply the extract to function text edits.
-        await vscode.workspace.applyEdit(workspaceEdits);
+        await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
 
         const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
-        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
 
         // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -3611,7 +3611,8 @@ export class DefaultClient implements Client {
             const formatOptions: vscode.FormattingOptions = {
                 insertSpaces: settings.editorInsertSpaces ?? true,
                 tabSize: settings.editorTabSize ?? 4,
-                onChanges: true
+                onChanges: true,
+                preserveFocus: true
             };
 
             const doFormat = async () => {
@@ -3641,8 +3642,12 @@ export class DefaultClient implements Client {
         }
 
         if (formatEdits.size > 0) {
-            await vscode.workspace.applyEdit(formatEdits);
+            await vscode.workspace.applyEdit(formatEdits, { isRefactoring: true });
         }
+
+        // This is required to be done after the formatting is done, because that can trigger the
+        // active document to switch to the wrong file (the header).
+        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange, preserveFocus: false });
     }
 
     public onInterval(): void {
