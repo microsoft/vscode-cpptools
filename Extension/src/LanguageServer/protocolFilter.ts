@@ -42,7 +42,7 @@ export function createProtocolFilter(): Middleware {
                     await client.provideCustomConfiguration(document.uri, undefined);
                     // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
                     client.onDidOpenTextDocument(document);
-                    await client.takeOwnership(document);
+                    client.takeOwnership(document);
                     await sendMessage(document);
 
                     // For a file already open when we active, sometimes we don't get any notifications about visible

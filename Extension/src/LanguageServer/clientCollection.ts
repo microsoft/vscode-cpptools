@@ -5,7 +5,6 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import * as telemetry from '../telemetry';
 import * as cpptools from './client';
@@ -122,7 +121,10 @@ export class ClientCollection {
             const client: cpptools.Client = pair[1];
 
             const newClient: cpptools.Client = this.createClient(client.RootFolder, true);
-            client.TrackedDocuments.forEach(document => void this.transferOwnership(document, client).catch(logAndReturn.undefined));
+            client.TrackedDocuments.forEach(document => {
+                this.transferOwnership(document, client);
+                void client.sendDidOpen(document);
+            });
 
             if (this.activeClient === client) {
                 // It cannot be undefined. If there is an active document, we activate it later.
@@ -158,8 +160,7 @@ export class ClientCollection {
                     this.languageClients.delete(path); // Do this first so that we don't iterate on it during the ownership transfer process.
 
                     // Transfer ownership of the client's documents to another client.
-                    // (this includes calling textDocument/didOpen on the new client so that the server knows it's open too)
-                    client.TrackedDocuments.forEach(document => void this.transferOwnership(document, client).catch(logAndReturn.undefined));
+                    client.TrackedDocuments.forEach(document => this.transferOwnership(document, client));
 
                     if (this.activeClient === client) {
                         this.activeClient.deactivate();
@@ -206,10 +207,10 @@ export class ClientCollection {
         }
     }
 
-    private async transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): Promise<void> {
+    private transferOwnership(document: vscode.TextDocument, oldOwner: cpptools.Client): void {
         const newOwner: cpptools.Client = this.getClientFor(document.uri);
         if (newOwner !== oldOwner) {
-            return newOwner.takeOwnership(document);
+            newOwner.takeOwnership(document);
         }
     }
 

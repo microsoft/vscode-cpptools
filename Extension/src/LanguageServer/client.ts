@@ -27,7 +27,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { SourceFileConfiguration, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
 import { IntelliSenseStatus, Status } from 'vscode-cpptools/out/testApi';
-import { CloseAction, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
+import { CloseAction, DidOpenTextDocumentParams, ErrorAction, LanguageClientOptions, NotificationType, Position, Range, RequestType, TextDocumentIdentifier } from 'vscode-languageclient';
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node';
 import * as nls from 'vscode-nls';
 import { DebugConfigurationProvider } from '../Debugger/configurationProvider';
@@ -575,7 +575,7 @@ const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, G
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
 
 // Notifications to the server
-// const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
+const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
 const FileCreatedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileCreated');
 const FileChangedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileChanged');
 const FileDeletedNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/fileDeleted');
@@ -757,8 +757,8 @@ export interface Client {
     getVcpkgEnabled(): Thenable<boolean>;
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined>;
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined>;
-    takeOwnership(document: vscode.TextDocument): Promise<void>;
-    // sendDidOpen(document: vscode.TextDocument): Promise<void>;
+    takeOwnership(document: vscode.TextDocument): void;
+    sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
     didChangeActiveDocument(document?: vscode.TextDocument, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
@@ -2170,25 +2170,26 @@ export class DefaultClient implements Client {
      * that it knows about the file, as well as adding it to this client's set of
      * tracked documents.
      */
-    public async takeOwnership(document: vscode.TextDocument): Promise<void> {
+    public takeOwnership(document: vscode.TextDocument): void {
         this.trackedDocuments.add(document);
         //this.updateActiveDocumentTextOptions();
         // in case the client is recreated, wait for the isStarted to finish.
-        await DefaultClient.isStarted;
+        //await DefaultClient.isStarted;
         //return this.sendDidOpen(document);
     }
 
-    // public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
-    //     const params: DidOpenTextDocumentParams = {
-    //         textDocument: {
-    //             uri: document.uri.toString(),
-    //             languageId: document.languageId,
-    //             version: document.version,
-    //             text: document.getText()
-    //         }
-    //     };
-    //     await this.languageClient.sendNotification(DidOpenNotification, params);
-    // }
+    // Only used in crash recovery. Otherwise, VS Code sends didOpen directly to native process (through the protocolFilter).
+    public async sendDidOpen(document: vscode.TextDocument): Promise<void> {
+        const params: DidOpenTextDocumentParams = {
+            textDocument: {
+                uri: document.uri.toString(),
+                languageId: document.languageId,
+                version: document.version,
+                text: document.getText()
+            }
+        };
+        await this.languageClient.sendNotification(DidOpenNotification, params);
+    }
 
     /**
      * a Promise that can be awaited to know when it's ok to proceed.
@@ -3917,8 +3918,8 @@ class NullClient implements Client {
     getVcpkgEnabled(): Thenable<boolean> { return Promise.resolve(false); }
     getCurrentCompilerPathAndArgs(): Thenable<util.CompilerPathAndArgs | undefined> { return Promise.resolve(undefined); }
     getKnownCompilers(): Thenable<configs.KnownCompiler[] | undefined> { return Promise.resolve([]); }
-    takeOwnership(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
-    // sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
+    takeOwnership(document: vscode.TextDocument): void { }
+    sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
     didChangeActiveDocument(document: vscode.TextDocument, selection?: Range): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
