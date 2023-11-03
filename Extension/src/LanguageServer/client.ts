@@ -314,6 +314,7 @@ export interface CreateDeclarationOrDefinitionResult extends WorkspaceEditResult
 
 export interface ExtractToFunctionParams extends SelectionParams {
     extractAsGlobal: boolean;
+    name: string;
 }
 
 interface ShowMessageWindowParams {
@@ -3381,7 +3382,8 @@ export class DefaultClient implements Client {
                 }
                 const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
                 for (const uri of editedFiles) {
-                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>("vscode.executeFormatDocumentProvider", uri, { onChanges: true });
+                    const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
+                        "vscode.executeFormatDocumentProvider", uri, { onChanges: true, preserveFocus: false });
                     if (formatTextEdits && formatTextEdits.length > 0) {
                         formatEdits.set(uri, formatTextEdits);
                     }
@@ -3577,10 +3579,14 @@ export class DefaultClient implements Client {
             return;
         }
 
-        // TODO: Show a quick pick to get the name before generating the code.
-        // That would allow the formatting to be done without waiting for the rename.
-        // Also, it's less error prone and eliminates a class of bugs in which the
-        // rename position can be incorrect.
+        let functionName: string | undefined = await vscode.window.showInputBox({
+            title: localize('handle.extract.name', 'Name the extracted function'),
+            placeHolder: localize('handle.extract.new.function', 'NewFunction')
+        });
+
+        if (functionName === undefined || functionName === "") {
+            functionName = "NewFunction";
+        }
 
         const params: ExtractToFunctionParams = {
             uri: editor.document.uri.toString(),
@@ -3594,7 +3600,8 @@ export class DefaultClient implements Client {
                     line: editor.selection.end.line
                 }
             },
-            extractAsGlobal
+            extractAsGlobal,
+            name: functionName
         };
 
         const result: WorkspaceEditResult = await this.languageClient.sendRequest(ExtractToFunctionRequest, params);
@@ -3607,7 +3614,8 @@ export class DefaultClient implements Client {
 
         // Handle error messaging
         if (result.errorText) {
-            void vscode.window.showErrorMessage(result.errorText);
+            void vscode.window.showErrorMessage(`${localize("handle.extract.error",
+                "Extract to function failed: {0}", result.errorText)}`);
             return;
         }
 
@@ -3615,7 +3623,6 @@ export class DefaultClient implements Client {
         let replaceEditRange: vscode.Range | undefined;
         let hasProcessedReplace: boolean = false;
         const formatUriAndRanges: VsCodeUriAndRange[] = [];
-        this.renameDataForExtractToFunction = [];
         let lineOffset: number = 0;
         let headerFileLineOffset: number = 0;
         let isSourceFile: boolean = true;
@@ -3640,7 +3647,7 @@ export class DefaultClient implements Client {
                     range = new vscode.Range(new vscode.Position(range.start.line + headerFileLineOffset, range.start.character),
                         new vscode.Position(range.end.line + headerFileLineOffset, range.end.character));
                 }
-                const isReplace: boolean = !range.isEmpty;
+                const isReplace: boolean = !range.isEmpty && isSourceFile;
                 lineOffset += nextLineOffset;
                 nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
                 let rangeStartLine: number = range.start.line + lineOffset;
@@ -3658,7 +3665,7 @@ export class DefaultClient implements Client {
                         if (edit.newText.includes("#pragma once")) {
                             // Commit this so that it can be undone separately, to avoid leaving an empty file,
                             // which causes the next refactor to not add the #pragma once.
-                            await vscode.workspace.applyEdit(workspaceEdits);
+                            await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
                             headerFileLineOffset = nextLineOffset;
                             workspaceEdits = new vscode.WorkspaceEdit();
                             continue;
@@ -3684,36 +3691,32 @@ export class DefaultClient implements Client {
                     new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
                         isReplace ? range.end.character :
                             range.end.character + edit.newText.length - rangeStartCharacter))});
-                const newFunctionString: string = "NewFunction";
-
-                // Handle additional declaration lines added before the new function call.
-                let currentText: string = edit.newText.substring(rangeStartCharacter);
-                let currentTextNextLineStart: number = currentText.indexOf("\n");
-                let currentTextNewFunctionStart: number = currentText.indexOf(newFunctionString);
-                let currentTextNextLineStartUpdated: boolean = false;
-                while (currentTextNextLineStart !== -1 && currentTextNextLineStart < currentTextNewFunctionStart) {
-                    ++rangeStartLine;
-                    currentText = currentText.substring(currentTextNextLineStart + 1);
-                    currentTextNextLineStart = currentText.indexOf("\n");
-                    currentTextNewFunctionStart = currentText.indexOf(newFunctionString);
-                    currentTextNextLineStartUpdated = true;
-                }
-                rangeStartCharacter = (rangeStartCharacter === 0 && !currentTextNextLineStartUpdated ? range.start.character : 0) +
-                    currentTextNewFunctionStart;
-                if (rangeStartCharacter < 0) {
-                    // newFunctionString is missing -- unexpected error.
-                    void vscode.window.showErrorMessage(`${localize("invalid.edit",
-                        "Extract to function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
-                    continue;
-                }
-                const currentEditRange: vscode.Range = new vscode.Range(
-                    new vscode.Position(rangeStartLine, rangeStartCharacter),
-                    new vscode.Position(rangeStartLine, rangeStartCharacter + newFunctionString.length));
                 if (isReplace) {
-                    replaceEditRange = currentEditRange;
+                    // Handle additional declaration lines added before the new function call.
+                    let currentText: string = edit.newText.substring(rangeStartCharacter);
+                    let currentTextNextLineStart: number = currentText.indexOf("\n");
+                    let currentTextNewFunctionStart: number = currentText.indexOf(functionName);
+                    let currentTextNextLineStartUpdated: boolean = false;
+                    while (currentTextNextLineStart !== -1 && currentTextNextLineStart < currentTextNewFunctionStart) {
+                        ++rangeStartLine;
+                        currentText = currentText.substring(currentTextNextLineStart + 1);
+                        currentTextNextLineStart = currentText.indexOf("\n");
+                        currentTextNewFunctionStart = currentText.indexOf(functionName);
+                        currentTextNextLineStartUpdated = true;
+                    }
+                    rangeStartCharacter = (rangeStartCharacter === 0 && !currentTextNextLineStartUpdated ? range.start.character : 0) +
+                        currentTextNewFunctionStart;
+                    if (rangeStartCharacter < 0) {
+                        // functionName is missing -- unexpected error.
+                        void vscode.window.showErrorMessage(`${localize("invalid.edit",
+                            "Extract to function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
+                        continue;
+                    }
+                    replaceEditRange = new vscode.Range(
+                        new vscode.Position(rangeStartLine, rangeStartCharacter),
+                        new vscode.Position(rangeStartLine, rangeStartCharacter + functionName.length));
                     nextLineOffset -= range.end.line - range.start.line;
                 }
-                this.renameDataForExtractToFunction.push({ uri, range: currentEditRange });
             }
         }
 
@@ -3722,11 +3725,9 @@ export class DefaultClient implements Client {
         }
 
         // Apply the extract to function text edits.
-        await vscode.workspace.applyEdit(workspaceEdits);
+        await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
 
         const firstUri: vscode.Uri = formatUriAndRanges[0].uri;
-        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange });
-        await vscode.commands.executeCommand("editor.action.rename", firstUri, replaceEditRange.start);
 
         // Format the new text edits.
         const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
@@ -3734,7 +3735,9 @@ export class DefaultClient implements Client {
             const settings: OtherSettings = new OtherSettings(vscode.workspace.getWorkspaceFolder(formatUriAndRange.uri)?.uri);
             const formatOptions: vscode.FormattingOptions = {
                 insertSpaces: settings.editorInsertSpaces ?? true,
-                tabSize: settings.editorTabSize ?? 4
+                tabSize: settings.editorTabSize ?? 4,
+                onChanges: true,
+                preserveFocus: true
             };
 
             const doFormat = async () => {
@@ -3743,10 +3746,8 @@ export class DefaultClient implements Client {
                     return true;
                 }
 
-                // TODO: Somehow invoke multiple range formatting (see https://github.com/microsoft/vscode/issues/193836).
-                // Maybe call DocumentRangeFormattingEditProvider.provideDocumentRangesFormattingEdits directly.
                 const formatTextEdits: vscode.TextEdit[] | undefined = await vscode.commands.executeCommand<vscode.TextEdit[] | undefined>(
-                    "vscode.executeFormatRangeProvider", formatUriAndRange.uri, formatUriAndRange.range, formatOptions);
+                    "vscode.executeFormatDocumentProvider", formatUriAndRange.uri, formatOptions);
                 if (!formatTextEdits || formatTextEdits.length === 0 || versionBeforeFormatting === undefined) {
                     return true;
                 }
@@ -3766,11 +3767,13 @@ export class DefaultClient implements Client {
         }
 
         if (formatEdits.size > 0) {
-            await vscode.workspace.applyEdit(formatEdits);
+            await vscode.workspace.applyEdit(formatEdits, { isRefactoring: true });
         }
-    }
 
-    public renameDataForExtractToFunction: VsCodeUriAndRange[] = [];
+        // This is required to be done after the formatting is done, because that can trigger the
+        // active document to switch to the wrong file (the header).
+        await vscode.window.showTextDocument(firstUri, { selection: replaceEditRange, preserveFocus: false });
+    }
 
     public onInterval(): void {
         // These events can be discarded until the language client is ready.
