@@ -1171,9 +1171,15 @@ export function UpdateInsidersAccess(): void {
 
 export async function preReleaseCheck(): Promise<void> {
     const displayedPreReleasePrompt: PersistentState<boolean> = new PersistentState<boolean>("CPP.displayedPreReleasePrompt", false);
+    const isOnPreRelease: PersistentState<boolean> = new PersistentState<boolean>("CPP.isOnPreRelease", false);
+
+    if (util.getCppToolsTargetPopulation() === TargetPopulation.Insiders) {
+        isOnPreRelease.Value = true;
+        return;
+    }
 
     // First we need to make sure the user isn't already on a pre-release version and hasn't dismissed this prompt before.
-    if (!displayedPreReleasePrompt.Value && util.getCppToolsTargetPopulation() === TargetPopulation.Public) {
+    if (!isOnPreRelease.Value && !displayedPreReleasePrompt.Value && util.getCppToolsTargetPopulation() === TargetPopulation.Public) {
         // Get the info on the latest version from the marketplace to check if there is a pre-release version available.
         const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery', {
             method: 'POST',
@@ -1182,10 +1188,11 @@ export async function preReleaseCheck(): Promise<void> {
                 'Content-Type' : 'application/json'
             },
             body: '{"filters": [{"criteria": [{"filterType": 7, "value": "ms-vscode.cpptools"}]}], "flags": 529}'
-        });
+        }).catch(logAndReturn.undefined);
 
-        const data = await response.json();
-        const preReleaseAvailable = data.results[0].extensions[0].versions[0].properties.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
+        const data = await response?.json().catch(logAndReturn.undefined);
+
+        const preReleaseAvailable = data?.results[0].extensions[0].versions[0].properties.some((e: object) => Object.values(e).includes("Microsoft.VisualStudio.Code.PreRelease"));
 
         // If the user isn't on the pre-release version, but one is available, prompt them to install it.
         if (preReleaseAvailable) {
