@@ -3497,6 +3497,9 @@ export class DefaultClient implements Client {
         let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         let replaceEditRange: vscode.Range | undefined;
         let hasProcessedReplace: boolean = false;
+        // NOTE: References to source/header are in reference to the more common case when it's
+        // invoked on the source file (alternatively named the first file). When invoked on the header file,
+        // the header file operates as if it were the source file (isSourceFile stays true).
         const sourceFormatUriAndRanges: VsCodeUriAndRange[] = [];
         const headerFormatUriAndRanges: VsCodeUriAndRange[] = [];
         let lineOffset: number = 0;
