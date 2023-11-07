@@ -14,5 +14,5 @@
 	"select.ssh.config.file": "Vyberte konfigurační soubor SSH.",
 	"yes": "Ano",
 	"no": "Ne",
-	"ssh.target.delete.confirmation": "Opravdu chcete„{0}“ trvale odstranit?"
+	"ssh.target.delete.confirmation": "Opravdu chcete trvale odstranit soubor {0}?"
 }
