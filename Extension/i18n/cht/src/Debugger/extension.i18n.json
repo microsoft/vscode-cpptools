@@ -14,5 +14,5 @@
 	"select.ssh.config.file": "選取 SSH 設定檔",
 	"yes": "是",
 	"no": "否",
-	"ssh.target.delete.confirmation": "確定要永久刪除 \"{0}\" 嗎?"
+	"ssh.target.delete.confirmation": "您確定要永久刪除 \"{0}\" 嗎?"
 }

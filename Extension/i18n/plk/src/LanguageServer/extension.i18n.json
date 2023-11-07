@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "Skopiuj polecenie vcpkg, aby zainstalować element „{0}” w schowku",
 	"on.disabled.command": "Nie można wykonywać poleceń związanych z funkcją IntelliSense, gdy właściwość `C_Cpp.intelliSenseEngine` ma wartość `disabled`.",
 	"client.not.found": "nie znaleziono klienta",
+	"ok": "OK",
+	"install.compiler.mac.title": "Kompilator clang zostanie teraz zainstalowany",
+	"install.compiler.mac.detail": "Może zostać wyświetlony monit o wpisanie hasła w oknie terminala VS Code w celu autoryzacji instalacji.",
+	"install.compiler.linux.title": "Kompilator gcc zostanie teraz zainstalowany",
+	"install.compiler.linux.detail": "Może zostać wyświetlony monit o wpisanie hasła w oknie terminala VS Code w celu autoryzacji instalacji.",
 	"configuration.select.first": "Najpierw otwórz folder, aby wybrać konfigurację.",
 	"configuration.provider.select.first": "Najpierw otwórz folder, aby wybrać dostawcę konfiguracji.",
 	"edit.configurations.open.first": "Otwórz najpierw folder, aby edytować konfiguracje",
-	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony."
+	"code.action.aborted": "Nie można rozwiązać problemu z analizą kodu, ponieważ dokument został zmieniony.",
+	"prerelease.message": "Dostępna jest wersja wstępna rozszerzenia C/C++. Czy chcesz się na nią przełączyć?",
+	"yes.button": "Tak",
+	"no.button": "Nie"
 }

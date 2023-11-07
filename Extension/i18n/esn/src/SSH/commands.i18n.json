@@ -6,6 +6,6 @@
 {
 	"local.forward.local.conflict": "\"localSocket\" no se puede especificar al mismo tiempo con \"bindAddress\" o \"port\" en localForwards",
 	"local.forward.local.missing": "Se requiere \"port\" o \"localSocket\" en localForwards",
-	"local.forward.remote.conflict": "\"remoteSocket\" no se puede especificar al mismo tiempo con \"host\" o \"hostPort\" en localForwards",
+	"local.forward.remote.conflict": "No se puede especificar \"remoteSocket\" al mismo tiempo con \"host\" o \"hostPort\" en localForwards",
 	"local.forward.remote.missing": "Se requiere \"host\" y \"hostPort\" o \"remoteSocket\" en localForwards"
 }

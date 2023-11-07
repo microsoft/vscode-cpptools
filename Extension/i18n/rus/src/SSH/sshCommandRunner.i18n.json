@@ -7,7 +7,7 @@
 	"ssh.canceled": "Команда SSH отменена",
 	"ssh.passphrase.input.box": "Введите парольную фразу для ключа SSH {0}",
 	"ssh.enter.password.for.user": "Введите пароль для пользователя \"{0}\"",
-	"ssh_message_enterPassword": "Введите пароль",
+	"ssh.message.enter.password": "Введите пароль",
 	"ssh.continue.confirmation.placeholder": "Вы действительно хотите продолжить?",
 	"ssh.host.key.confirmation.title": "«{0}» имеет отпечаток «{1}».",
 	"continue": "Продолжить",

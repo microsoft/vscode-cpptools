@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "'{0}' yükleme vcpkg komutunu panoya kopyalayın",
 	"on.disabled.command": "`C_Cpp.intelliSenseEngine` `disabled` olarak ayarlandığında IntelliSense ile ilgili komutlar yürütülemez.",
 	"client.not.found": "istemci bulunamadı",
+	"ok": "Tamam",
+	"install.compiler.mac.title": "Clang derleyicisi şimdi kurulacak",
+	"install.compiler.mac.detail": "Kurulumu yetkilendirmek için VS Code terminal penceresine şifrenizi yazmanız istenebilir.",
+	"install.compiler.linux.title": "Gcc derleyicisi şimdi kurulacak",
+	"install.compiler.linux.detail": "Kurulumu yetkilendirmek için VS Code terminal penceresine şifrenizi yazmanız istenebilir.",
 	"configuration.select.first": "Yapılandırma seçmek için önce bir klasör açın.",
 	"configuration.provider.select.first": "Yapılandırma sağlayıcısı seçmek için önce bir klasör açın.",
 	"edit.configurations.open.first": "Yapılandırmaları düzenlemek için önce bir klasör açın",
-	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı."
+	"code.action.aborted": "Belge değiştiğinden kod analizi düzeltmesi uygulanamadı.",
+	"prerelease.message": "C/C++ uzantısının yayın öncesi bir sürümü var. Buna geçmek ister misiniz?",
+	"yes.button": "Evet",
+	"no.button": "Hayır"
 }
