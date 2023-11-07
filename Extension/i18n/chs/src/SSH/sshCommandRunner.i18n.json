@@ -7,7 +7,7 @@
 	"ssh.canceled": "已取消 SSH 命令",
 	"ssh.passphrase.input.box": "输入 ssh 密钥的密码{0}",
 	"ssh.enter.password.for.user": "输入用户 \"{0}\" 的密码",
-	"ssh_message_enterPassword": "输入密码",
+	"ssh.message.enter.password": "输入密码",
 	"ssh.continue.confirmation.placeholder": "您确定要继续吗?",
 	"ssh.host.key.confirmation.title": "\"{0}\" 具有指纹 \"{1}\"。",
 	"continue": "继续",

@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "Zkopírovat příkaz vcpkg pro instalaci {0} do schránky",
 	"on.disabled.command": "Příkazy související s IntelliSense se nedají spustit, když je `C_Cpp.intelliSenseEngine` nastavené na `disabled`.",
 	"client.not.found": "klient se nenašel",
+	"ok": "OK",
+	"install.compiler.mac.title": "Kompilátor clang se teď nainstaluje.",
+	"install.compiler.mac.detail": "Může se zobrazit výzva k zadání hesla do okna terminálu VS Code, abyste instalaci autorizovali.",
+	"install.compiler.linux.title": "Kompilátor gcc se teď nainstaluje",
+	"install.compiler.linux.detail": "Může se zobrazit výzva k zadání hesla do okna terminálu VS Code, abyste instalaci autorizovali.",
 	"configuration.select.first": "Pokud chcete vybrat konfiguraci, otevřete nejdříve složku.",
 	"configuration.provider.select.first": "Pokud chcete vybrat poskytovatele konfigurace, otevřete nejdříve složku.",
 	"edit.configurations.open.first": "Pokud chcete upravit konfigurace, otevřete nejdříve složku.",
-	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn."
+	"code.action.aborted": "Opravu analýzy kódu nelze použít, protože dokument byl změněn.",
+	"prerelease.message": "K dispozici je předběžná verze rozšíření C/C++. Chcete na ni přepnout?",
+	"yes.button": "Ano",
+	"no.button": "Ne"
 }

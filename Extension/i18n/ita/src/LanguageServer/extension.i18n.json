@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "Copiare il comando vcpkg per installare '{0}' negli Appunti",
 	"on.disabled.command": "Non è possibile eseguire comandi correlati a IntelliSense quando `C_Cpp.intelliSenseEngine` è impostato su `disabled`.",
 	"client.not.found": "client non trovato",
+	"ok": "OK",
+	"install.compiler.mac.title": "Il compilatore clang verrà ora installato",
+	"install.compiler.mac.detail": "Potrebbe essere richiesto di digitare la password nella finestra del terminale VS Code per autorizzare l'installazione.",
+	"install.compiler.linux.title": "Il compilatore gcc verrà ora installato",
+	"install.compiler.linux.detail": "Potrebbe essere richiesto di digitare la password nella finestra del terminale VS Code per autorizzare l'installazione.",
 	"configuration.select.first": "Apri prima una cartella per selezionare una configurazione.",
 	"configuration.provider.select.first": "Apri prima una cartella per selezionare un provider di configurazione.",
 	"edit.configurations.open.first": "Aprire prima una cartella per modificare le configurazioni",
-	"code.action.aborted": "Impossibile applicare la correzione di Code Analysis perché il documento è stato modificato."
+	"code.action.aborted": "Impossibile applicare la correzione di Code Analysis perché il documento è stato modificato.",
+	"prerelease.message": "È disponibile una versione non definitiva dell'estensione C/C++. Passare a questa versione?",
+	"yes.button": "Sì",
+	"no.button": "No"
 }
