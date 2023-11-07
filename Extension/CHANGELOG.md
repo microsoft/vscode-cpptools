@@ -1,5 +1,12 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.18.2: November 7, 2023
+### Bug Fixes
+* Fix an IntelliSense crash when hovering over an invalid array index expression. [#11510](https://github.com/microsoft/vscode-cpptools/issues/11510)
+* Fix 'Add #include' code actions not appearing for "is not a template" errors. [#11543](https://github.com/microsoft/vscode-cpptools/issues/11543)
+* Fix 'Extract to function' bugs with formatting and selection. [#11614](https://github.com/microsoft/vscode-cpptools/issues/11614), [#11619](https://github.com/microsoft/vscode-cpptools/issues/11619)
+* Fix 'Add #include' code actions being available for system headers that are already included. [#11618](https://github.com/microsoft/vscode-cpptools/issues/11618)
+
 ## Version 1.18.1: November 2, 2023
 ### New Feature
 * Add `#include` code action suggestions for some IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
