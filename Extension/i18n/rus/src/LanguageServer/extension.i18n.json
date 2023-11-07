@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "Копировать команду vcpkg для установки \"{0}\" в буфер обмена",
 	"on.disabled.command": "Команды, связанные с IntelliSense, не могут быть выполнены, если для `C_Cpp.intelliSenseEngine` установлено значение `disabled`.",
 	"client.not.found": "Клиент не найден.",
+	"ok": "ОК",
+	"install.compiler.mac.title": "Будет установлен компилятор clang",
+	"install.compiler.mac.detail": "Возможно, вам будет предложено ввести пароль в окне терминала VS Code для авторизации установки.",
+	"install.compiler.linux.title": "Будет установлен компилятор gcc",
+	"install.compiler.linux.detail": "Возможно, вам будет предложено ввести пароль в окне терминала VS Code для авторизации установки.",
 	"configuration.select.first": "Сначала откройте папку, чтобы выбрать конфигурацию.",
 	"configuration.provider.select.first": "Сначала откройте папку, чтобы выбрать поставщика конфигурации.",
 	"edit.configurations.open.first": "Сначала откройте папку для изменения конфигураций",
-	"code.action.aborted": "Не удалось применить исправление анализа кода, так как документ был изменен."
+	"code.action.aborted": "Не удалось применить исправление анализа кода, так как документ был изменен.",
+	"prerelease.message": "Доступна предварительная версия расширения C/C++. Переключиться на нее?",
+	"yes.button": "Да",
+	"no.button": "Нет"
 }
