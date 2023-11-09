@@ -7,7 +7,7 @@
 	"ssh.canceled": "SSH コマンドが取り消されました",
 	"ssh.passphrase.input.box": "SSH キー {0} のパスフレーズを入力してください",
 	"ssh.enter.password.for.user": "ユーザー \"{0}\" のパスワードを入力します。",
-	"ssh_message_enterPassword": "パスワードを入力してください",
+	"ssh.message.enter.password": "パスワードを入力してください",
 	"ssh.continue.confirmation.placeholder": "続行しますか?",
 	"ssh.host.key.confirmation.title": "\"{0}\" のフィンガープリントは \"{1}\" です。",
 	"continue": "続行",

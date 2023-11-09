@@ -7,7 +7,7 @@
 	"ssh.canceled": "Comando SSH cancelado",
 	"ssh.passphrase.input.box": "Escriba la frase de contraseña para la clave SSH {0}",
 	"ssh.enter.password.for.user": "Escriba la contraseña del usuario \"{0}\"",
-	"ssh_message_enterPassword": "Escribir contraseña",
+	"ssh.message.enter.password": "Escribir contraseña",
 	"ssh.continue.confirmation.placeholder": "¿Está seguro de que desea continuar?",
 	"ssh.host.key.confirmation.title": "\"{0}\" tiene la huella digital \"{1}\".",
 	"continue": "Continuar",

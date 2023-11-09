@@ -1,5 +1,19 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.18.2: November 8, 2023
+### Enhancement
+* 'Extract to function' is enabled without `C_Cpp.experimentalFeatures` being set to `"enabled"`.
+
+### Bug Fixes
+* Fix 'Extract to function' for functions in a header file . [#11466](https://github.com/microsoft/vscode-cpptools/issues/11466)
+* Fix 'Extract to function' for functions in an anonymous namespace. [#11474](https://github.com/microsoft/vscode-cpptools/issues/11474)
+* Fix 'Extract to function' for C code with typedefs or structs. [#11475](https://github.com/microsoft/vscode-cpptools/issues/11475)
+* Fix an IntelliSense crash when hovering over an invalid array index expression. [#11510](https://github.com/microsoft/vscode-cpptools/issues/11510)
+* Fix 'Add #include' code actions not appearing for "is not a template" errors. [#11543](https://github.com/microsoft/vscode-cpptools/issues/11543)
+* Fix 'Extract to function' bugs with formatting and selection. [#11614](https://github.com/microsoft/vscode-cpptools/issues/11614), [#11619](https://github.com/microsoft/vscode-cpptools/issues/11619)
+* Fix 'Add #include' code actions being available for system headers that are already included. [#11618](https://github.com/microsoft/vscode-cpptools/issues/11618)
+* Fix an IntelliSense crash when selecting code.
+
 ## Version 1.18.1: November 2, 2023
 ### New Feature
 * Add `#include` code action suggestions for some IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
@@ -13,7 +27,6 @@
 ### Bug Fixes
 * Fix no error message getting shown if 'Extract to Function' creation fails. [#11567](https://github.com/microsoft/vscode-cpptools/issues/11567)
 * Fix an autocomplete crash bug (primarily on Mac).
-* Fix an IntelliSense crash when selecting code.
 
 ## Version 1.18.0: October 12, 2023
 ### New Features

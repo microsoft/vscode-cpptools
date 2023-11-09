@@ -7,7 +7,7 @@
 	"ssh.canceled": "Příkaz SSH je zrušený",
 	"ssh.passphrase.input.box": "Zadejte heslo pro klíč SSH {0}",
 	"ssh.enter.password.for.user": "Zadejte heslo pro uživatele{0}",
-	"ssh_message_enterPassword": "Zadejte heslo",
+	"ssh.message.enter.password": "Zadejte heslo",
 	"ssh.continue.confirmation.placeholder": "Opravdu chcete pokračovat?",
 	"ssh.host.key.confirmation.title": "{0} má otisk prstu {1}.",
 	"continue": "Pokračovat",
