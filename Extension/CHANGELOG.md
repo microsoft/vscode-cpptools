@@ -2,7 +2,7 @@
 
 ## Version 1.18.3: November 13, 2023
 ### New Features
-* Show `Add '#include'` code action suggestions for IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
+* Provide `Add '#include'` code action suggestions for IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
 * Add an 'Extract to function' (or member function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
 * Compiler acquisition improvements. [#10525](https://github.com/microsoft/vscode-cpptools/issues/10525)
 
