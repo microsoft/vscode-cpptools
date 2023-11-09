@@ -1,42 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.18.2: November 8, 2023
-### Enhancement
-* 'Extract to function' is enabled without `C_Cpp.experimentalFeatures` being set to `"enabled"`.
-
-### Bug Fixes
-* Fix 'Extract to function' for functions in a header file . [#11466](https://github.com/microsoft/vscode-cpptools/issues/11466)
-* Fix 'Extract to function' for functions in an anonymous namespace. [#11474](https://github.com/microsoft/vscode-cpptools/issues/11474)
-* Fix 'Extract to function' for C code with typedefs or structs. [#11475](https://github.com/microsoft/vscode-cpptools/issues/11475)
-* Fix an IntelliSense crash when hovering over an invalid array index expression. [#11510](https://github.com/microsoft/vscode-cpptools/issues/11510)
-* Fix 'Add #include' code actions not appearing for "is not a template" errors. [#11543](https://github.com/microsoft/vscode-cpptools/issues/11543)
-* Fix 'Extract to function' bugs with formatting and selection. [#11614](https://github.com/microsoft/vscode-cpptools/issues/11614), [#11619](https://github.com/microsoft/vscode-cpptools/issues/11619)
-* Fix 'Add #include' code actions being available for system headers that are already included. [#11618](https://github.com/microsoft/vscode-cpptools/issues/11618)
-* Fix an IntelliSense crash when selecting code.
-
-## Version 1.18.1: November 2, 2023
-### New Feature
-* Add `#include` code action suggestions for some IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
-  * Since C code doesn't give an error for an undefined symbol, it usually won't be available for C.
-
-### Enhancements
-* Improve the walkthrough wording. [#11320](https://github.com/microsoft/vscode-cpptools/issues/11320)
-* Change 'Extract to Function' to prompt for the name instead of doing a rename afterwards. [#11531](https://github.com/microsoft/vscode-cpptools/issues/11531)
-* Add a pre-release available notification. [PR #11569](https://github.com/microsoft/vscode-cpptools/pull/11569)
-
-### Bug Fixes
-* Fix no error message getting shown if 'Extract to Function' creation fails. [#11567](https://github.com/microsoft/vscode-cpptools/issues/11567)
-* Fix an autocomplete crash bug (primarily on Mac).
-
-## Version 1.18.0: October 12, 2023
+## Version 1.18.3: November 13, 2023
 ### New Features
-* Add an 'Extract to Function' (or Member Function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
-  * Currently, it's only enabled when `C_Cpp.experimentFeatures` is set to `enabled`. Also, 'Extract to Free Function' is disabled.
+* Show `Add '#include'` code action suggestions for IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
+* Add an 'Extract to function' (or member function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
 * Compiler acquisition improvements. [#10525](https://github.com/microsoft/vscode-cpptools/issues/10525)
 
 ### Enhancements
+* Add keyboard support for 'Inline Macro'. [#11260](https://github.com/microsoft/vscode-cpptools/issues/11260)
 * Add setting `C_Cpp.refactoring.includeHeader` to customize whether or not to add an include header when doing a refactoring code action. [#11271](https://github.com/microsoft/vscode-cpptools/issues/11271) 
-* Update clang-format and clang-tidy to 17.0.2. [PR #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
+* Improve the walkthrough wording. [#11320](https://github.com/microsoft/vscode-cpptools/issues/11320)
+* Update clang-format and clang-tidy to 17. [PR #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
+* Add a pre-release available notification. [PR #11569](https://github.com/microsoft/vscode-cpptools/pull/11569)
 
 ### Bug Fixes
 * Fix the debugger truncating long strings when inspecting values. [#1786](https://github.com/microsoft/vscode-cpptools/issues/1786)
@@ -48,8 +23,10 @@
 * Fix a crash detected by crash telemetry. [#11401](https://github.com/microsoft/vscode-cpptools/issues/11401)
 * Fix handling of an undefined `env` variable on Linux and macOS. [#11447](https://github.com/microsoft/vscode-cpptools/issues/11447)
 * Fix multiple issues with querying `nvcc` (CUDA) as a compiler. [#11454](https://github.com/microsoft/vscode-cpptools/issues/11454)
+* Fix an IntelliSense crash when hovering over an invalid array index expression. [#11510](https://github.com/microsoft/vscode-cpptools/issues/11510)
 * Fix an issue that could cause a C language standard to be applied to a C++ file, or vice versa.
 * Remove `cpp` and `clang-cpp` preprocessors from the list of detectable compilers.
+* Fix an autocomplete crash bug (primarily on Mac).
 
 ## Version 1.17.5: August 28, 2023
 ### Bug Fixes
