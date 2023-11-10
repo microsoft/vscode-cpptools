@@ -7,7 +7,7 @@
 	"ssh.canceled": "SSH komutu iptal edildi",
 	"ssh.passphrase.input.box": "SSH anahtarı {0} için parolayı girin",
 	"ssh.enter.password.for.user": "\"{0}\" adlı kullanıcı için parola girin",
-	"ssh_message_enterPassword": "Parolayı girin",
+	"ssh.message.enter.password": "Parolayı girin",
 	"ssh.continue.confirmation.placeholder": "Devam etmek istediğinizden emin misiniz?",
 	"ssh.host.key.confirmation.title": "\"{0}\", \"{1}\" parmak izine sahip.",
 	"continue": "Devam et",

@@ -1,5 +1,33 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.18.3: November 13, 2023
+### New Features
+* Add an 'Extract to function' (or member function) code action after selecting code. [#1162](https://github.com/microsoft/vscode-cpptools/issues/1162)
+* Compiler acquisition improvements. [#10525](https://github.com/microsoft/vscode-cpptools/issues/10525)
+* Provide `Add '#include'` code action suggestions for IntelliSense errors related to symbols not being found. [#10791](https://github.com/microsoft/vscode-cpptools/issues/10791)
+
+### Enhancements
+* Add keyboard support for 'Inline Macro'. [#11260](https://github.com/microsoft/vscode-cpptools/issues/11260)
+* Add setting `C_Cpp.refactoring.includeHeader` to customize whether or not to add an include header when doing a refactoring code action. [#11271](https://github.com/microsoft/vscode-cpptools/issues/11271) 
+* Improve the walkthrough wording. [#11320](https://github.com/microsoft/vscode-cpptools/issues/11320)
+* Update clang-format and clang-tidy to 17. [PR #11491](https://github.com/microsoft/vscode-cpptools/pull/11491)
+* Add a pre-release available notification. [PR #11569](https://github.com/microsoft/vscode-cpptools/pull/11569)
+
+### Bug Fixes
+* Fix the debugger truncating long strings when inspecting values. [#1786](https://github.com/microsoft/vscode-cpptools/issues/1786)
+* Switch to using `XDG_CACHE_HOME` on Linux for the default database path. [#10191](https://github.com/microsoft/vscode-cpptools/issues/10191)
+* Fix an IntelliSense error with std::is_trivially_copyable_v. [#10712](https://github.com/microsoft/vscode-cpptools/issues/10712)
+* Fix incorrect status and commands with the tag parsing language status UI. [#10749](https://github.com/microsoft/vscode-cpptools/issues/10749)
+* Fix an empty (`""`) `compilerPath` in a base configuration overriding the compiler specified by a custom configuration provider or a `compile_commands.json`. [#11373](https://github.com/microsoft/vscode-cpptools/issues/11373)
+* Fix a startup crash when reading values from JSON (settings) that are not the type expected. [#11375](https://github.com/microsoft/vscode-cpptools/issues/11375)
+* Fix a crash detected by crash telemetry. [#11401](https://github.com/microsoft/vscode-cpptools/issues/11401)
+* Fix handling of an undefined `env` variable on Linux and macOS. [#11447](https://github.com/microsoft/vscode-cpptools/issues/11447)
+* Fix multiple issues with querying `nvcc` (CUDA) as a compiler. [#11454](https://github.com/microsoft/vscode-cpptools/issues/11454)
+* Fix an IntelliSense crash when hovering over an invalid array index expression. [#11510](https://github.com/microsoft/vscode-cpptools/issues/11510)
+* Fix an issue that could cause a C language standard to be applied to a C++ file, or vice versa.
+* Remove `cpp` and `clang-cpp` preprocessors from the list of detectable compilers.
+* Fix an autocomplete crash bug (primarily on Mac).
+
 ## Version 1.17.5: August 28, 2023
 ### Bug Fixes
 * Fix a language server crash for platforms that don't support the IntelliSense cache (AutoPCH). [#10789](https://github.com/microsoft/vscode-cpptools/issues/10789)

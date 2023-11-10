@@ -14,5 +14,5 @@
 	"select.ssh.config.file": "Selección de un archivo de configuración SSH",
 	"yes": "Sí",
 	"no": "No",
-	"ssh.target.delete.confirmation": "¿Está seguro de que desea eliminar \"{0}\" de forma permanente?"
+	"ssh.target.delete.confirmation": "¿Está seguro de que desea eliminar permanentemente \"{0}\"?"
 }

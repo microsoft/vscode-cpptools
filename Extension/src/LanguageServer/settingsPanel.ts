@@ -123,7 +123,7 @@ export class SettingsPanel {
                 localResourceRoots: [
                     vscode.Uri.file(util.extensionPath),
                     vscode.Uri.file(path.join(util.extensionPath, 'ui')),
-                    vscode.Uri.file(path.join(util.extensionPath, 'out', 'ui'))]
+                    vscode.Uri.file(path.join(util.extensionPath, 'dist', 'ui'))]
             }
         );
 
@@ -229,7 +229,7 @@ export class SettingsPanel {
 
     private updateWebview(configSelection: string[], configuration: config.Configuration, errors: config.ConfigurationErrors | null): void {
         this.configValues = deepCopy(configuration); // Copy configuration values
-        this.isIntelliSenseModeDefined = (this.configValues.intelliSenseMode !== undefined);
+        this.isIntelliSenseModeDefined = this.configValues.intelliSenseMode !== undefined;
         if (this.panel && this.initialized) {
             void this.panel.webview.postMessage({ command: 'setKnownCompilers', compilers: this.compilerPaths });
             void this.panel.webview.postMessage({ command: 'updateConfigSelection', selections: configSelection, selectedIndex: this.configIndexSelected });
@@ -389,7 +389,7 @@ export class SettingsPanel {
             content = content.replace(
                 /{{cpp_image_uri}}/g,
                 cppImageUri.toString());
-            const settingsJsUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'out/ui/settings.js')));
+            const settingsJsUri: vscode.Uri = this.panel.webview.asWebviewUri(vscode.Uri.file(path.join(util.extensionPath, 'dist/ui/settings.js')));
             content = content.replace(
                 /{{settings_js_uri}}/g,
                 settingsJsUri.toString());

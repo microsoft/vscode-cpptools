@@ -3545,5 +3545,16 @@
   "<pointer-to-member>",
   "<bool>",
   "<bool-like>",
-  "<class>"
+  "<class>",
+  "auto(<expr>) e auto{<expr>} sono funzionalità di C++23",
+  "unione anonima non valida: la dichiarazione using non è consentita",
+  "Non è possibile elaborare il file IFC %sq",
+  "la versione IFC %u1.%u2 non è supportata",
+  "l'architettura IFC %sq non è compatibile con l'architettura di destinazione corrente",
+  "il modulo %sq1 richiede l'indice %u di una partizione non supportata corrispondente a %sq2",
+  "il numero di parametro %d di %n ha il tipo %t che non può essere completato",
+  "il numero di parametro %d di %n ha il tipo incompleto %t",
+  "il numero di parametro %d di %n ha il tipo astratto %t",
+  "i binding strutturati sono una funzionalità di C++17",
+  "l'acquisizione di binding strutturati è una funzionalità di C++20"
 ]

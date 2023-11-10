@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // Register a protocol handler to serve localized versions of the schema for c_cpp_properties.json
     class SchemaProvider implements vscode.TextDocumentContentProvider {
         public async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-            console.assert(uri.path[0] === '/', "A preceeding slash is expected on schema uri path");
+            console.assert(uri.path[0] === '/', "A preceding slash is expected on schema uri path");
             const fileName: string = uri.path.substring(1);
             const locale: string = getLocaleId();
             let localizedFilePath: string = util.getExtensionFilePath(path.join("dist/schema/", locale, fileName));
@@ -70,6 +70,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     util.checkDistro(info);
     await checkVsixCompatibility();
     LanguageServer.UpdateInsidersAccess();
+    await LanguageServer.preReleaseCheck();
 
     const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
     let isOldMacOs: boolean = false;
@@ -84,7 +85,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<CppToo
     // to ensure there is no potential race condition. LanguageServer.activate() is called near the end of this
     // function, to allow any further setup to occur here, prior to activation.
     const isIntelliSenseEngineDisabled: boolean = settings.intelliSenseEngine === "disabled";
-    const shouldActivateLanguageServer: boolean = (!isIntelliSenseEngineDisabled && !isOldMacOs);
+    const shouldActivateLanguageServer: boolean = !isIntelliSenseEngineDisabled && !isOldMacOs;
 
     if (isOldMacOs) {
         languageServiceDisabled = true;

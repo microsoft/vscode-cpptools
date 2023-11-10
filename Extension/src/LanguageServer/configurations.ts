@@ -494,7 +494,7 @@ export class CppProperties {
                 for (const [dep, execCmd] of nodeAddonMap) {
                     if (dep in packageJson.dependencies) {
                         try {
-                            let stdout: string | void = await util.execChildProcess(execCmd, rootPath);
+                            let stdout: string = await util.execChildProcess(execCmd, rootPath);
                             if (!stdout) {
                                 continue;
                             }
@@ -595,10 +595,10 @@ export class CppProperties {
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
 
-        const isValid: boolean = ((compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe" || compilerPathAndArgs.compilerName.toLowerCase() === "cl") === configuration.intelliSenseMode.includes("msvc")
+        const isValid: boolean = (compilerPathAndArgs.compilerName.toLowerCase() === "cl.exe" || compilerPathAndArgs.compilerName.toLowerCase() === "cl") === configuration.intelliSenseMode.includes("msvc")
             // We can't necessarily determine what host compiler nvcc will use, without parsing command line args (i.e. for -ccbin)
             // to determine if the user has set it to something other than the default. So, we don't squiggle IntelliSenseMode when using nvcc.
-            || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc.exe") || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc"));
+            || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc.exe") || (compilerPathAndArgs.compilerName.toLowerCase() === "nvcc");
         if (isValid) {
             return "";
         } else {
@@ -762,8 +762,14 @@ export class CppProperties {
         }
         paths = this.resolveDefaults(paths, defaultValue);
         paths.forEach(entry => {
-            const entries: string[] = util.resolveVariables(entry, env).split(util.envDelimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
-            resolvedVariables.push(...entries);
+            const resolvedVariable: string = util.resolveVariables(entry, env);
+            if (resolvedVariable.includes("env:")) {
+                // Do not futher try to resolve a "${env:VAR}"
+                resolvedVariables.push(resolvedVariable);
+            } else {
+                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+                resolvedVariables.push(...entries);
+            }
         });
         if (!glob) {
             return resolvedVariables;
@@ -1314,7 +1320,7 @@ export class CppProperties {
         }
 
         if (!this.configurationJson) {
-            this.resetToDefaultSettings(true);  // I don't think there's a case where this will be hit anymore.
+            this.resetToDefaultSettings(true); // I don't think there's a case where this will be hit anymore.
         }
 
         void this.applyDefaultIncludePathsAndFrameworks().catch(logAndReturn.undefined);
@@ -1413,12 +1419,12 @@ export class CppProperties {
 
             // Remove disallowed variable overrides
             if (this.configurationJson.env) {
-                delete this.configurationJson.env['workspaceRoot'];
-                delete this.configurationJson.env['workspaceFolder'];
-                delete this.configurationJson.env['workspaceFolderBasename'];
-                delete this.configurationJson.env['execPath'];
-                delete this.configurationJson.env['pathSeparator'];
-                delete this.configurationJson.env['default'];
+                delete this.configurationJson.env.workspaceRoot;
+                delete this.configurationJson.env.workspaceFolder;
+                delete this.configurationJson.env.workspaceFolderBasename;
+                delete this.configurationJson.env.execPath;
+                delete this.configurationJson.env.pathSeparator;
+                delete this.configurationJson.env.default;
             }
 
             // Warning: There is a chance that this is incorrect in the event that the c_cpp_properties.json file was created before
@@ -1487,7 +1493,7 @@ export class CppProperties {
         return success;
     }
 
-    public resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
+    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1511,8 +1517,9 @@ export class CppProperties {
             result = result.replace(/\*/g, "");
         }
 
-        // Make sure all paths result to an absolute path
-        if (!path.isAbsolute(result) && this.rootUri) {
+        // Make sure all paths result to an absolute path.
+        // Do not add the root path to an unresolved env variable.
+        if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
             result = path.join(this.rootUri.fsPath, result);
         }
 
@@ -1604,7 +1611,7 @@ export class CppProperties {
         errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, skipRelativePaths: true});
         errors.compileCommands = this.validatePath(config.compileCommands, {isDirectory: false});
         errors.dotConfig = this.validatePath(config.dotConfig, {isDirectory: false});
-        errors.databaseFilename = this.validatePath((config.browse ? config.browse.databaseFilename : undefined), {isDirectory: false});
+        errors.databaseFilename = this.validatePath(config.browse ? config.browse.databaseFilename : undefined, {isDirectory: false});
 
         // Validate intelliSenseMode
         if (isWindows) {
@@ -1833,7 +1840,7 @@ export class CppProperties {
         // Check for path-related squiggles.
         let paths: string[] = [];
         let compilerPath: string | undefined;
-        for (const pathArray of [ (currentConfiguration.browse ? currentConfiguration.browse.path : undefined),
+        for (const pathArray of [ currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
             currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
             if (pathArray) {
                 for (const curPath of pathArray) {

@@ -1,0 +1,12 @@
+
+library MyTypeLibrary
+{
+	[
+		uuid(5B98C2C0-CD7B-11d0-92DF-00A0C9138C45),
+		helpstring(myLibStr)
+	]
+	coclass MyPackage
+	{
+		[default] interface IMyPackage;
+	};
+};

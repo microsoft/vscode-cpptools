@@ -32,7 +32,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.1",
     "mocha": "^10.0.0",
-    "mongodb": "^4.8.1",
+    "mongodb": "^4.17.0",
     "nock": "^13.2.9",
     "prettier": "2.7.1",
     "ts-node": "^10.9.1",

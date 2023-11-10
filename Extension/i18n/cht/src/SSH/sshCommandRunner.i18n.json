@@ -7,7 +7,7 @@
 	"ssh.canceled": "SSH 命令已取消",
 	"ssh.passphrase.input.box": "輸入 ssh 金鑰 {0} 的複雜密碼",
 	"ssh.enter.password.for.user": "輸入使用者 \"{0}\" 的密碼",
-	"ssh_message_enterPassword": "輸入密碼",
+	"ssh.message.enter.password": "輸入密碼",
 	"ssh.continue.confirmation.placeholder": "您確定要繼續嗎?",
 	"ssh.host.key.confirmation.title": "「{0}」具有指紋「{1}」。",
 	"continue": "繼續",

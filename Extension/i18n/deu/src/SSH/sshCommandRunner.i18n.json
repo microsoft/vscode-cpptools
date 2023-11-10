@@ -7,7 +7,7 @@
 	"ssh.canceled": "Der SSH-Befehl wurde abgebrochen.",
 	"ssh.passphrase.input.box": "Passphrase für SSH-Schlüssel eingeben {0}",
 	"ssh.enter.password.for.user": "Geben Sie das Kennwort für Benutzer „{0}“ ein.",
-	"ssh_message_enterPassword": "Kennwort eingeben",
+	"ssh.message.enter.password": "Kennwort eingeben",
 	"ssh.continue.confirmation.placeholder": "Möchten Sie wirklich fortfahren?",
 	"ssh.host.key.confirmation.title": "\"{0}\" hat Fingerabdruck \"{1}\".",
 	"continue": "Weiter",

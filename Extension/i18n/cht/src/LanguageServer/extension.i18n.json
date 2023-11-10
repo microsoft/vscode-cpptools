@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "將用於安裝 '{0}' 的 vcpkg 命令複製到剪貼簿",
 	"on.disabled.command": "當 `C_Cpp.intelliSenseEngine` 設為 `disabled` 時，無法執行IntelliSense 的相關命令。",
 	"client.not.found": "找不到用戶端",
+	"ok": "確定",
+	"install.compiler.mac.title": "現在將安裝 clang 編譯器",
+	"install.compiler.mac.detail": "系統可能會提示您在 VS Code 終端機視窗中輸入密碼以授權安裝。",
+	"install.compiler.linux.title": "現在將安裝 GCC 編譯器",
+	"install.compiler.linux.detail": "系統可能會提示您在 VS Code 終端機視窗中輸入密碼以授權安裝。",
 	"configuration.select.first": "先開啟資料夾以選取設定。",
 	"configuration.provider.select.first": "先開啟資料夾以選取設定提供者。",
 	"edit.configurations.open.first": "先開啟資料夾以編輯組態",
-	"code.action.aborted": "無法套用程式碼分析修正，因為文件已變更。"
+	"code.action.aborted": "無法套用程式碼分析修正，因為文件已變更。",
+	"prerelease.message": "已可使用 C/C++ 延伸模組的發行前版本。您要切換到此版本嗎?",
+	"yes.button": "是",
+	"no.button": "否"
 }
