@@ -3545,5 +3545,16 @@
   "<pointer-to-member>",
   "<bool>",
   "<bool-like>",
-  "<class>"
+  "<class>",
+  "auto(<expr>) und auto{<expr>} sind C++23-Features.",
+  "Ungültige anonyme Union; using-Deklaration ist nicht zulässig.",
+  "IFC-Datei %sq kann nicht verarbeitet werden",
+  "IFC-Version %u1.%u2 wird nicht unterstützt",
+  "Die IFC-Architektur \"%sq\" ist nicht mit der aktuellen Zielarchitektur kompatibel",
+  "Das Modul %sq1 fordert den Index %u einer nicht unterstützten Partition an, die %sq2 entspricht",
+  "Die Parameternummer %d von %n weist den Typ %t auf, der nicht abgeschlossen werden kann",
+  "Die Parameternummer %d von %n weist den unvollständigen Typ %t auf",
+  "Die Parameternummer %d von %n weist den abstrakten Typ %t auf",
+  "Strukturierte Bindungen sind ein C++17-Feature",
+  "Das Erfassen strukturierter Bindungen ist ein C++20-Feature"
 ]

@@ -7,37 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Use Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install Dependencies
-        run: yarn install
-        working-directory: Extension
-
-      - name: Compile Sources
-        run: yarn run compile
-        working-directory: Extension
-
-      - name: Run Linter
-        run: yarn run lint
-        working-directory: Extension
-
-      - name: Compile Test Sources
-        run: yarn run pretest
-        working-directory: Extension
-
-      - name: Run unit tests
-        run: yarn run unitTests
-        working-directory: Extension
-
-#      - name: Run languageServer integration tests
-#        run: yarn run integrationTests
-#        working-directory: Extension
+  job:
+    uses: ./.github/workflows/job-compile-and-test.yml
+    with:
+      runner-env: windows-2022
+      platform: windows

@@ -3,6 +3,10 @@
     "include_not_found_in_browse_path": "Include file not found in browse.path.",
     "update_browse_path": "Edit \"browse.path\" setting",
     "add_to_include_path": "Add to \"includePath\": {0}",
+    "add_missing_include_path": {
+        "text": "Add '{0}'",
+        "hint": "{0} is C++ code to add, such as '#include <string>'"
+    },
     "edit_include_path": "Edit \"includePath\" setting",
     "disable_error_squiggles": "Disable error squiggles",
     "enable_error_squiggles": "Enable all error squiggles",
@@ -249,6 +253,10 @@
     "failed_to_query_for_standard_version": "Failed to query compiler at path \"{0}\" for default standard versions.  Compiler querying is disabled for this compiler.",
     "unrecognized_language_standard_version": "Compiler query returned an unrecognized language standard version.  The latest supported version will be used instead.",
     "intellisense_process_crash_detected": "IntelliSense process crash detected.",
+    "intellisense_feature_crash_detected": {
+        "text": "IntelliSense process crash detected: {0}",
+        "hint": "`{0}` will be substituted with `<feature name>`."
+    },
     "return_values_label": {
         "text": "Return values:",
         "hint": "This label is for the return values description for a function. Usage example: 'Return values: 1 if key is found. 2 if input can't be read. 3 if input is empty.'"
@@ -447,5 +455,27 @@
     "refactor_copy_declaration_definition_failed": {
         "text": "Copying Declaration / Definition to clipboard failed: %s",
         "hint": "The operation 'Copy Declaration / Definition' on a function was not successful. %s is the error info that has a period at the end of the string."
-    }
+    },
+    "refactor_extract_to_function": "Extract to function",
+    "refactor_extract_to_free_function": "Extract to free function",
+    "refactor_extract_to_member_function_in": {
+        "text": "Extract to member function in '{0}'",
+        "hint": "{0} is the name of the struct or class the member function belongs to, e.g. 'class Foo'."
+    },
+    "refactor_extract_outsidefunc": "The selected text is not inside a function.",
+    "refactor_extract_multifunc": "The selected text cannot span different functions.",
+    "refactor_extract_variable": "Variable '%s' is declared in the selected region and then used below it.",
+    "refactor_extract_macro": "Preprocessor macro '%s' is used below the selected region.",
+    "refactor_extract_inactive": "The selected region spans an inactive preprocessor block.",
+    "refactor_extract_no_il": "The selected region does not contain any code that can be extracted.",
+    "refactor_extract_entirefunc": "The selected region is not entirely within the function's body.",
+    "refactor_extract_errors_selection": "The selection contains IntelliSense errors.",
+    "refactor_extract_reference_c_code": {
+        "text": "'%s' is not declared within the selected code, but is being modified. C code cannot pass arguments by reference.",
+        "hint": "%s is the name of a variable."
+    },
+    "refactor_extract_reference_return_c_code": "The function would have to return a value by reference. C code cannot return references.",
+    "refactor_extract_xborder_jump": "Jumps between the selected code and the surrounding code are present.",
+    "refactor_extract_missing_return": "In the selected code, some control paths exit without setting the return value. This is supported only for scalar, numeric, and pointer return types.",
+    "expand_selection": "Expand selection (to enable 'Extract to function')"
 }

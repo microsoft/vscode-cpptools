@@ -27,7 +27,7 @@
 	"specify.a.compiler": "指定编译器路径或从下拉列表中选择检测到的编译器路径。",
 	"no.compiler.paths.detected": "(未检测到编译器路径)",
 	"compiler.args": "编译器参数",
-	"compiler.arguments": "用于修改所使用的包含或定义的编译器参数，例如 {0}、{1} 等。采用其他空格分隔参数的参数应在数组中作为为单独的参数输入，例如，对于 {2} 使用 {3}。",
+	"compiler.arguments": "用于修改所使用的包含或定义的编译器参数，例如 {0}、{1} 等。采用其他空格分隔参数的参数应在数组中作为单独的参数输入，例如，对于 {2} 使用 {3}。",
 	"one.argument.per.line": "每行一个参数。",
 	"intellisense.mode": "IntelliSense 模式",
 	"intellisense.mode.description": "要使用的 IntelliSense 模式，该模式映射到 MSVC、gcc 或 Clang 的平台和体系结构变体。如果未设置或设置为 {0}，则扩展将选择该平台的默认值。Windows 默认为 {1}，Linux 默认为 {2}，macOS 默认为 {3}。选择特定 IntelliSense 模式以替代 {4} 模式。仅指定 {5} 变体(例如 {6})的 IntelliSense 模式是旧模式，它们会根据主机平台自动转换为 {7} 变体。",

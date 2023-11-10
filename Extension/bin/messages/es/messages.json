@@ -3545,5 +3545,16 @@
   "<puntero a miembro>",
   "<bool>",
   "<tipo bool>",
-  "<clase>"
+  "<clase>",
+  "auto(<expr>) y auto{<expr>} son una característica de C++23",
+  "unión anónima no válida: no se permite usar la declaración",
+  "no se puede procesar la %sq del archivo IFC",
+  "no se admite la versión IFC %u1.%u2",
+  "la arquitectura IFC %sq no es compatible con la arquitectura de destino actual",
+  "el módulo %sq1 solicita el índice %u de una partición no admitida correspondiente a %sq2",
+  "el número de parámetro %d de %n tiene un tipo %t que no se puede completar",
+  "el número de parámetro %d de %n tiene el tipo incompleto %t",
+  "el número de parámetro %d de %n tiene el tipo abstracto %t",
+  "los enlaces estructurados son una característica de C++17",
+  "la captura de enlaces estructurados es una característica de C++20"
 ]

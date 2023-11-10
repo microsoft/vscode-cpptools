@@ -14,5 +14,5 @@
 	"select.ssh.config.file": "SSH 구성 파일 선택",
 	"yes": "예",
 	"no": "아니요",
-	"ssh.target.delete.confirmation": "\"{0}\"을(를) 영구적으로 삭제하시겠습니까?"
+	"ssh.target.delete.confirmation": "\"{0}\"을(를) 영구 삭제할까요?"
 }

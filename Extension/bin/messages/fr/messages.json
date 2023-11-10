@@ -3545,5 +3545,16 @@
   "<pointer-to-member>",
   "<bool>",
   "<bool-like>",
-  "<class>"
+  "<class>",
+  "auto(<expr>) et auto{<expr>} sont une fonctionnalité C++23",
+  "union anonyme non valide -- l’utilisation de la déclaration n’est pas autorisée",
+  "Le fichier IFC %sq ne peut pas être traité",
+  "La version IFC %u1.%u2 n'est pas prise en charge",
+  "L'architecture IFC %sq est incompatible avec l'architecture cible actuelle",
+  "le module %sq1 demande l'index %u d'une partition non prise en charge correspondant à %sq2",
+  "le paramètre numéro %d de %n a un type %t qui ne peut pas être complété",
+  "le numéro de paramètre %d de %n a un type incomplet %t",
+  "le numéro de paramètre %d de %n a un type abstrait %t",
+  "les liaisons structurées sont une fonctionnalité C++17",
+  "la capture de liaisons structurées est une fonctionnalité C++20"
 ]

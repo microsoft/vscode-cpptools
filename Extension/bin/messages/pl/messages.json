@@ -3545,5 +3545,16 @@
   "<wskaźnik do składowej>",
   "<wartość logiczna>",
   "<podobne do wartości logicznej>",
-  "<klasa>"
+  "<klasa>",
+  "auto(<wyrażenie>) i automatyczne{<wyrażenie>} są funkcją języka C++23",
+  "nieprawidłowa suma anonimowa — deklaracja using jest niedozwolona",
+  "Nie można przetworzyć pliku IFC %sq",
+  "Wersja IFC %u1.%u2 nie jest obsługiwana",
+  "Architektura IFC %sq jest niezgodna z bieżącą architekturą docelową",
+  "moduł %sq1 żąda indeksu %u nieobsługiwanych partycji odpowiadającej %sq2",
+  "numer parametru %d z %n ma typ %t, którego nie można ukończyć",
+  "numer parametru %d z %n ma niekompletny typ %t",
+  "numer parametru %d z %n ma typ abstrakcyjny %t",
+  "powiązania strukturalne są funkcją języka C++17",
+  "przechwytywanie powiązań strukturalnych jest funkcją języka C++20"
 ]

@@ -8,7 +8,7 @@ import { LanguageClient, NotificationType, Range } from 'vscode-languageclient/n
 import * as nls from 'vscode-nls';
 import { Location, WorkspaceEdit } from './commonTypes';
 import { CppSourceStr } from './extension';
-import { getLocalizedString, LocalizeStringParams } from './localization';
+import { LocalizeStringParams, getLocalizedString } from './localization';
 import { CppSettings } from './settings';
 import { makeVscodeLocation, makeVscodeRange, makeVscodeTextEdits, rangeEquals } from './utils';
 
@@ -74,7 +74,7 @@ interface CodeActionAllInfo {
 interface CodeAnalysisDiagnosticRelatedInformation {
     location: Location;
     message: string;
-    workspaceEdit?: WorkspaceEdit;
+    workspaceEdits?: WorkspaceEdit[];
 }
 
 interface CodeAnalysisDiagnostic {
@@ -83,7 +83,7 @@ interface CodeAnalysisDiagnostic {
     severity: vscode.DiagnosticSeverity;
     localizeStringParams: LocalizeStringParams;
     relatedInformation?: CodeAnalysisDiagnosticRelatedInformation[];
-    workspaceEdit?: WorkspaceEdit;
+    workspaceEdits?: WorkspaceEdit[];
 }
 
 interface CodeAnalysisDiagnosticIdentifier {
@@ -118,7 +118,7 @@ export const codeAnalysisCodeToFixes: Map<string, CodeActionCodeInfo> = new Map<
 export const codeAnalysisAllFixes: CodeActionAllInfo = {
     version: 0,
     fixAllCodeAction: {
-        title: localize("fix_all_code_analysis_problems", "Fix all code analysis problems"),
+        title: localize("fix.all.code.analysis.problems", "Fix all code analysis problems"),
         command: {
             title: 'FixAllCodeAnalysisProblems',
             command: 'C_Cpp.FixAllCodeAnalysisProblems',
@@ -127,7 +127,7 @@ export const codeAnalysisAllFixes: CodeActionAllInfo = {
         kind: vscode.CodeActionKind.QuickFix
     },
     removeAllCodeAction: {
-        title: localize("clear_all_code_analysis_problems", "Clear all code analysis problems"),
+        title: localize("clear.all.code.analysis.problems", "Clear all code analysis problems"),
         command: { title: "RemoveAllCodeAnalysisProblems", command: "C_Cpp.RemoveAllCodeAnalysisProblems" },
         kind: vscode.CodeActionKind.QuickFix
     }
@@ -175,7 +175,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
             }
             ++numFixTypes;
             codeToFixes[1].fixAllTypeCodeAction = {
-                title: localize("fix_all_type_problems", "Fix all {0} problems", codeToFixes[0]),
+                title: localize("fix.all.type.problems", "Fix all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'FixAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.FixAllTypeCodeAnalysisProblems',
@@ -187,7 +187,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
 
         if (new CppSettings().clangTidyCodeActionShowDisable) {
             codeToFixes[1].disableAllTypeCodeAction = {
-                title: localize("disable_all_type_problems", "Disable all {0} problems",  codeToFixes[0]),
+                title: localize("disable.all.type.problems", "Disable all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'DisableAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.DisableAllTypeCodeAnalysisProblems',
@@ -201,7 +201,7 @@ function rebuildCodeAnalysisCodeAndAllFixes(): void {
 
         if (new CppSettings().clangTidyCodeActionShowClear !== "None") {
             codeToFixes[1].removeAllTypeCodeAction = {
-                title: localize("clear_all_type_problems", "Clear all {0} problems", codeToFixes[0]),
+                title: localize("clear.all.type.problems", "Clear all {0} problems", codeToFixes[0]),
                 command: {
                     title: 'RemoveAllTypeCodeAnalysisProblems',
                     command: 'C_Cpp.RemoveCodeAnalysisProblems',
@@ -265,7 +265,7 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
             range: makeVscodeRange(identifier.range),
             code: identifier.code,
             removeCodeAction: {
-                title: localize("clear_this_problem", "Clear this {0} problem", d.code),
+                title: localize("clear.this.problem", "Clear this {0} problem", d.code),
                 command: {
                     title: 'RemoveCodeAnalysisProblems',
                     command: 'C_Cpp.RemoveCodeAnalysisProblems',
@@ -274,18 +274,18 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                 kind: vscode.CodeActionKind.QuickFix
             }
         };
-        const workspaceEdit: CodeActionWorkspaceEdit = {};
-        if (d.workspaceEdit) {
-            workspaceEdit.workspaceEdit = new vscode.WorkspaceEdit();
-            for (const [uriStr, edits] of Object.entries(d.workspaceEdit.changes)) {
-                workspaceEdit.workspaceEdit.set(vscode.Uri.parse(uriStr, true), makeVscodeTextEdits(edits));
+        const codeActionWorkspaceEdit: CodeActionWorkspaceEdit = {};
+        if (d.workspaceEdits) {
+            codeActionWorkspaceEdit.workspaceEdit = new vscode.WorkspaceEdit();
+            for (const workspaceEdit of d.workspaceEdits) {
+                codeActionWorkspaceEdit.workspaceEdit.set(vscode.Uri.parse(workspaceEdit.file, true), makeVscodeTextEdits(workspaceEdit.edits));
             }
             const fixThisCodeAction: vscode.CodeAction = {
-                title: localize("fix_this_problem", "Fix this {0} problem", d.code),
+                title: localize("fix.this.problem", "Fix this {0} problem", d.code),
                 command: {
                     title: 'FixThisCodeAnalysisProblem',
                     command: 'C_Cpp.FixThisCodeAnalysisProblem',
-                    arguments: [ nextVersion, workspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ]
+                    arguments: [ nextVersion, codeActionWorkspaceEdit.workspaceEdit, true, [ identifiersAndUri ] ]
                 },
                 kind: vscode.CodeActionKind.QuickFix
             };
@@ -297,25 +297,25 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
         const rootAndRelatedWorkspaceEdits: CodeActionWorkspaceEdit[] = [];
         const rootAndRelatedIdentifiersAndUris: CodeAnalysisDiagnosticIdentifiersAndUri[] = [];
         rootAndRelatedIdentifiersAndUris.push(identifiersAndUri);
-        if (workspaceEdit.workspaceEdit !== undefined) {
-            rootAndRelatedWorkspaceEdits.push(workspaceEdit);
+        if (codeActionWorkspaceEdit.workspaceEdit !== undefined) {
+            rootAndRelatedWorkspaceEdits.push(codeActionWorkspaceEdit);
         }
         if (d.relatedInformation) {
             diagnostic.relatedInformation = [];
             for (const info of d.relatedInformation) {
                 diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
-                if (info.workspaceEdit === undefined) {
+                if (info.workspaceEdits === undefined) {
                     continue;
                 }
                 const relatedWorkspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-                for (const [uriStr, edits] of Object.entries(info.workspaceEdit.changes)) {
-                    relatedWorkspaceEdit.set(vscode.Uri.parse(uriStr, true), makeVscodeTextEdits(edits));
+                for (const workspaceEdit of info.workspaceEdits) {
+                    relatedWorkspaceEdit.set(vscode.Uri.parse(workspaceEdit.file, true), makeVscodeTextEdits(workspaceEdit.edits));
                 }
                 const relatedIdentifier: CodeAnalysisDiagnosticIdentifier = { range: info.location.range, code: d.code };
                 const relatedIdentifiersAndUri: CodeAnalysisDiagnosticIdentifiersAndUri = {
                     uri: info.location.uri, identifiers: [ relatedIdentifier ] };
                 const relatedCodeAction: vscode.CodeAction = {
-                    title: localize("fix_this_problem", "Fix this {0} problem", d.code),
+                    title: localize("fix.this.problem", "Fix this {0} problem", d.code),
                     command: {
                         title: 'FixThisCodeAnalysisProblem',
                         command: 'C_Cpp.FixThisCodeAnalysisProblem',
@@ -378,13 +378,13 @@ export function publishCodeAnalysisDiagnostics(params: PublishCodeAnalysisDiagno
                     docPage = `checks${checksGroup}/${checksPage}.html`;
                 }
                 // TODO: This should be checking the clang-tidy version used to better support usage of older versions.
-                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/16.0.0/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
+                const primaryDocUri: vscode.Uri = vscode.Uri.parse(`https://releases.llvm.org/17.0.1/tools/clang/tools/extra/docs/clang-tidy/${docPage}`);
                 diagnostic.code = { value: identifier.code, target: primaryDocUri };
 
                 if (new CppSettings().clangTidyCodeActionShowDocumentation) {
                     if (codeActionCodeInfo.docCodeAction === undefined) {
                         codeActionCodeInfo.docCodeAction = {
-                            title: localize("show_documentation_for", "Show documentation for {0}", primaryCode),
+                            title: localize("show.documentation.for", "Show documentation for {0}", primaryCode),
                             command: {
                                 title: 'ShowDocumentation',
                                 command: 'C_Cpp.ShowCodeAnalysisDocumentation',
@@ -512,8 +512,8 @@ export function removeCodeAnalysisProblems(identifiersAndUris: CodeAnalysisDiagn
         const newDiagnostics: vscode.Diagnostic[] = [];
         for (const diagnostic of diagnostics) {
             const code: string = typeof diagnostic.code === "string" ? diagnostic.code :
-                (typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
-                    diagnostic.code.value : "");
+                typeof diagnostic.code === "object" && typeof diagnostic.code.value === "string" ?
+                    diagnostic.code.value : "";
             let removed: boolean = false;
             for (const identifier of identifiersAndUri.identifiers) {
                 if (code !== identifier.code || !rangeEquals(diagnostic.range, identifier.range)) {

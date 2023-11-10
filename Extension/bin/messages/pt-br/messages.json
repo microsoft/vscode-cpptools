@@ -3545,5 +3545,16 @@
   "<pointer-to-member>",
   "<bool>",
   "<bool-like>",
-  "<class>"
+  "<class>",
+  "auto(<expr>) e auto{<expr>} são um recurso do C++23",
+  "união anônima inválida — a declaração using não é permitida",
+  "O arquivo IFC %sq não pode ser processado",
+  "A versão IFC %u1.%u2 não tem suporte",
+  "A arquitetura IFC %sq é incompatível com a arquitetura de destino atual",
+  "o módulo %sq1 índice de solicitações %u de uma partição sem suporte correspondente %sq2",
+  "o número de parâmetro %d de %n tem tipo %t que não pode ser concluído",
+  "o número de parâmetro %d de %n tem o tipo incompleto %t",
+  "o número de parâmetro %d de %n tem tipo o abstrato %t",
+  "associações estruturadas são um recurso do C++17",
+  "capturar associações estruturadas é um recurso do C++20"
 ]

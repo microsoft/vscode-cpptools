@@ -8,8 +8,16 @@
 	"copy.vcpkg.command": "'{0}' をインストールするための vcpkg コマンドをクリップボードにコピーする",
 	"on.disabled.command": "`C_Cpp.intelliSenseEngine` が `disabled` に設定されている場合、IntelliSense 関連のコマンドは実行できません。",
 	"client.not.found": "クライアントが見つかりませんでした",
+	"ok": "OK",
+	"install.compiler.mac.title": "clang コンパイラがインストールされます",
+	"install.compiler.mac.detail": "インストールを承認するために、VS Code ターミナル ウィンドウにパスワードの入力を求められる場合があります。",
+	"install.compiler.linux.title": "gcc コンパイラがインストールされます",
+	"install.compiler.linux.detail": "インストールを承認するために、VS Code ターミナル ウィンドウにパスワードの入力を求められる場合があります。",
 	"configuration.select.first": "構成を選択するには、まずフォルダーを開いてください。",
 	"configuration.provider.select.first": "構成プロバイダーを選択するには、まずフォルダーを開いてください。",
 	"edit.configurations.open.first": "構成を編集するには、まずフォルダーを開いてください",
-	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。"
+	"code.action.aborted": "ドキュメントが変更されたため、コード分析修正プログラムを適用できませんでした。",
+	"prerelease.message": "C/C++ 拡張機能のプレリリース版が利用可能です。切り替えますか?",
+	"yes.button": "はい",
+	"no.button": "いいえ"
 }
