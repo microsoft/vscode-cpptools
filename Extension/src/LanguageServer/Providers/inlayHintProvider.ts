@@ -92,7 +92,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
         return currentPromise;
 
-
         // await this.client.ready;
         // const uriString: string = document.uri.toString();
 
@@ -115,6 +114,10 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     }
 
     public deliverInlayHints(uriString: string, cppInlayHints: CppInlayHint[], startNewSet: boolean): void {
+        if (!startNewSet && cppInlayHints.length === 0) {
+            return;
+        }
+
         const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
         if (!editor) {
             this.allFileData.get(uriString)?.promise.resolve([]);
@@ -147,6 +150,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 inlayHints: inlayHints
             };
             this.allFileData.set(uriString, fileData);
+        } else if (fileData) {
+            fileData.inlayHints = inlayHints;
         }
 
         const typeHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Type);
@@ -163,6 +168,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         }
 
         fileData?.promise.resolve(inlayHints);
+        if (needsNewPromise) {
+            this.onDidChangeInlayHintsEvent.fire();
+        }
     }
 
     public removeFile(uriString: string): void {

@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import { Position } from 'vscode-languageclient';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 
 interface FileData
@@ -13,8 +14,7 @@ interface FileData
 }
 
 export interface SemanticToken {
-    line: number;
-    character: number;
+    position: Position;
     length: number;
     type: number;
     modifiers?: number;
@@ -66,6 +66,10 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     }
 
     public deliverTokens(uriString: string, semanticTokens: SemanticToken[], startNewSet: boolean): void {
+        if (!startNewSet && semanticTokens.length === 0) {
+            return;
+        }
+
         const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
         if (!editor) {
             const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder();
@@ -100,13 +104,18 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
                 tokenBuilder: tokenBuilder
             };
             this.allFileData.set(uriString, fileData);
+        } else if (fileData) {
+            fileData.tokenBuilder = tokenBuilder;
         }
 
         semanticTokens.forEach((semanticToken) => {
-            tokenBuilder?.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
+            tokenBuilder?.push(semanticToken.position.line, semanticToken.position.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
         });
 
         fileData?.promise.resolve(tokenBuilder.build());
+        if (needsNewPromise) {
+            this.onDidChangeSemanticTokensEvent.fire();
+        }
     }
 
     public removeFile(uriString: string): void {

@@ -2610,17 +2610,12 @@ export class DefaultClient implements Client {
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
-    public inactiveRegionDecorationType: vscode.TextEditorDecorationType | undefined;
-
     private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean): void {
         const client: Client = clients.getClientFor(vscode.Uri.parse(uriString));
-        if (!(client instanceof DefaultClient)) {
+        if (!(client instanceof DefaultClient) || (!startNewSet && inactiveRegions.length === 0)) {
             return;
         }
         const settings: CppSettings = new CppSettings(client.RootUri);
-        if (client.inactiveRegionDecorationType === undefined) {
-            return; // Should never happen. It will be initialized before the constructor exits.
-        }
         const dimInactiveRegions: boolean = settings.dimInactiveRegions;
         let currentSet: DecorationRangesPair | undefined = this.inactiveRegionsDecorations.get(uriString);
         if (startNewSet || !dimInactiveRegions) {
