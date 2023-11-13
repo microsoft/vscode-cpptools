@@ -6369,7 +6369,7 @@
         "vscode-cpptools": "^6.1.0",
         "vscode-languageclient": "^8.1.0-next.4",
         "vscode-nls": "^5.0.0",
-        "vscode-tas-client": "^0.1.27",
+        "vscode-tas-client": "^0.1.75",
         "which": "^2.0.2"
     },
     "resolutions": {
