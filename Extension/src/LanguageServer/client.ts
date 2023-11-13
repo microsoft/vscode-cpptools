@@ -3612,7 +3612,7 @@ export class DefaultClient implements Client {
             // The header needs to be open and shown or the formatting will fail
             // (due to issues/requirements in the cpptools process).
             // It also seems strange and undesirable to have the header modified
-            // without being opened because user may otherwise users may not realize that
+            // without being opened because otherwise users may not realize that
             // the header had changed (unless they view source control differences).
             await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, { preserveFocus: true });
         }
