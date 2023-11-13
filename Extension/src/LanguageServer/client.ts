@@ -3608,6 +3608,15 @@ export class DefaultClient implements Client {
             return;
         }
 
+        if (headerFormatUriAndRanges.length > 0) {
+            // The header needs to be open and shown or the formatting will fail
+            // (due to issues/requirements in the cpptools process).
+            // It also seems strange and undesirable to have the header modified
+            // without being opened because user may otherwise users may not realize that
+            // the header had changed (unless they view source control differences).
+            await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, { preserveFocus: true });
+        }
+
         // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
 
