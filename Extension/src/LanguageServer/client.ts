@@ -3495,11 +3495,13 @@ export class DefaultClient implements Client {
         }
 
         let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-        let replaceEditRange: vscode.Range | undefined;
-        let hasProcessedReplace: boolean = false;
+
         // NOTE: References to source/header are in reference to the more common case when it's
         // invoked on the source file (alternatively named the first file). When invoked on the header file,
         // the header file operates as if it were the source file (isSourceFile stays true).
+        let sourceReplaceEditRange: vscode.Range | undefined;
+        let headerReplaceEditRange: vscode.Range | undefined;
+        let hasProcessedReplace: boolean = false;
         const sourceFormatUriAndRanges: VsCodeUriAndRange[] = [];
         const headerFormatUriAndRanges: VsCodeUriAndRange[] = [];
         let lineOffset: number = 0;
@@ -3575,7 +3577,7 @@ export class DefaultClient implements Client {
                 } else {
                     headerFormatUriAndRanges.push({uri, range: newRange});
                 }
-                if (isReplace) {
+                if (isReplace || !isSourceFile) {
                     // Handle additional declaration lines added before the new function call.
                     let currentText: string = edit.newText.substring(rangeStartCharacter);
                     let currentTextNextLineStart: number = currentText.indexOf("\n");
@@ -3596,35 +3598,38 @@ export class DefaultClient implements Client {
                             "Extract to function failed. An invalid edit was generated: '{0}'", edit.newText)}`);
                         continue;
                     }
-                    replaceEditRange = new vscode.Range(
+                    const replaceEditRange = new vscode.Range(
                         new vscode.Position(rangeStartLine, rangeStartCharacter),
                         new vscode.Position(rangeStartLine, rangeStartCharacter + functionName.length));
+                    if (isSourceFile) {
+                        sourceReplaceEditRange = replaceEditRange;
+                    } else {
+                        headerReplaceEditRange = replaceEditRange;
+                    }
                     nextLineOffset -= range.end.line - range.start.line;
                 }
             }
         }
 
-        if (replaceEditRange === undefined || sourceFormatUriAndRanges.length === 0) {
+        if (sourceReplaceEditRange === undefined || sourceFormatUriAndRanges.length === 0) {
             return;
-        }
-
-        if (headerFormatUriAndRanges.length > 0) {
-            // The header needs to be open and shown or the formatting will fail
-            // (due to issues/requirements in the cpptools process).
-            // It also seems strange and undesirable to have the header modified
-            // without being opened because otherwise users may not realize that
-            // the header had changed (unless they view source control differences).
-            await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, { preserveFocus: true });
         }
 
         // Apply the extract to function text edits.
         await vscode.workspace.applyEdit(workspaceEdits, { isRefactoring: true });
 
-        // Select the replaced code.
-        await vscode.window.showTextDocument(sourceFormatUriAndRanges[0].uri, { selection: replaceEditRange, preserveFocus: false });
+        if (headerFormatUriAndRanges.length > 0 && headerReplaceEditRange !== undefined) {
+            // The header needs to be open and shown or the formatting will fail
+            // (due to issues/requirements in the cpptools process).
+            // It also seems strange and undesirable to have the header modified
+            // without being opened because otherwise users may not realize that
+            // the header had changed (unless they view source control differences).
+            await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, {
+                selection: headerReplaceEditRange, preserveFocus: false });
+        }
 
         // Format the new text edits.
-        const formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
+        let formatEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
         const formatRanges = async (formatUriAndRanges: VsCodeUriAndRange[]) => {
             if (formatUriAndRanges.length === 0) {
                 return;
@@ -3670,7 +3675,22 @@ export class DefaultClient implements Client {
             }
         };
 
-        await formatRanges(headerFormatUriAndRanges);
+        if (headerFormatUriAndRanges.length > 0 && headerReplaceEditRange !== undefined) {
+            await formatRanges(headerFormatUriAndRanges);
+            if (formatEdits.size > 0) {
+                // This showTextDocument is required in order to get the selection to be
+                // correct after the formatting edit is applied. It could be a VS Code bug.
+                await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, {
+                    selection: headerReplaceEditRange, preserveFocus: false });
+                await vscode.workspace.applyEdit(formatEdits, { isRefactoring: true });
+                formatEdits = new vscode.WorkspaceEdit();
+            }
+        }
+
+        // Select the replaced code.
+        await vscode.window.showTextDocument(sourceFormatUriAndRanges[0].uri, {
+            selection: sourceReplaceEditRange, preserveFocus: false });
+
         await formatRanges(sourceFormatUriAndRanges);
         if (formatEdits.size > 0) {
             await vscode.workspace.applyEdit(formatEdits, { isRefactoring: true });
