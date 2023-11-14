@@ -1181,6 +1181,8 @@ export async function preReleaseCheck(): Promise<void> {
     // First we need to make sure the user isn't already on a pre-release version and hasn't dismissed this prompt before.
     if (!isOnPreRelease.Value && !displayedPreReleasePrompt.Value && util.getCppToolsTargetPopulation() === TargetPopulation.Public) {
         // Get the info on the latest version from the marketplace to check if there is a pre-release version available.
+        const nodeFetch = await import('node-fetch'); // dynamic import is required
+        const fetch = nodeFetch.default; // Node.js 18 fetch isn't available until VS 1.82.
         const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery', {
             method: 'POST',
             headers: {
