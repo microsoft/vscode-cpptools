@@ -1,7 +1,8 @@
 # C/C++ for Visual Studio Code Changelog
 
 ## Version 1.18.4: November 14, 2023
-### Bug Fix:
+### Bug Fixes:
+* Fix 'Extract to function' not scrolling to and selecting the added header declaration. [#11676](https://github.com/microsoft/vscode-cpptools/issues/11676)
 * Fix the extension sometimes failing to activate with VS Code versions less than 1.18. [#11680](https://github.com/microsoft/vscode-cpptools/issues/11680)
 
 ## Version 1.18.3: November 13, 2023
