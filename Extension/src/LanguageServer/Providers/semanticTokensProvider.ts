@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { Position } from 'vscode-languageclient';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 
 interface FileData
@@ -14,7 +13,8 @@ interface FileData
 }
 
 export interface SemanticToken {
-    position: Position;
+    line: number;
+    character: number;
     length: number;
     type: number;
     modifiers?: number;
@@ -109,7 +109,7 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
         }
 
         semanticTokens.forEach((semanticToken) => {
-            tokenBuilder?.push(semanticToken.position.line, semanticToken.position.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
+            tokenBuilder?.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
         });
 
         fileData?.promise.resolve(tokenBuilder.build());

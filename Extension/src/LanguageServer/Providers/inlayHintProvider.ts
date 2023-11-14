@@ -3,7 +3,6 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { Position } from 'vscode-languageclient';
 import { ManualPromise } from '../../Utility/Async/manualPromise';
 import { CppSettings } from '../settings';
 
@@ -15,7 +14,8 @@ interface FileData
 }
 
 export interface CppInlayHint {
-    position: Position;
+    line: number;
+    character: number;
     label: string;
     inlayHintKind: InlayHintKind;
     isValueRef: boolean;
@@ -190,7 +190,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         for (const hint of hints) {
             const showOnLeft: boolean = settings.inlayHintsAutoDeclarationTypesShowOnLeft && hint.identifierLength > 0;
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                new vscode.Position(hint.position.line, hint.position.character +
+                new vscode.Position(hint.line, hint.character +
                     (showOnLeft ? 0 : hint.identifierLength)),
                 showOnLeft ? hint.label : ": " + hint.label,
                 vscode.InlayHintKind.Type);
@@ -231,7 +231,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             }
 
             const inlayHint: vscode.InlayHint = new vscode.InlayHint(
-                new vscode.Position(hint.position.line, hint.position.character),
+                new vscode.Position(hint.line, hint.character),
                 refOperatorString + paramHintLabel + ":",
                 vscode.InlayHintKind.Parameter);
             inlayHint.paddingRight = true;
