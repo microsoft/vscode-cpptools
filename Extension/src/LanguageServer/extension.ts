@@ -6,7 +6,7 @@
 
 import * as fs from 'fs';
 // Node.js 18 fetch isn't available until VS 1.82.
-import fetch from 'node-fetch';
+//import fetch from 'node-fetch';
 import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
@@ -1186,8 +1186,9 @@ export async function preReleaseCheck(): Promise<void> {
         const response = await fetch('https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery', {
             method: 'POST',
             headers: {
-                Accept : 'application/json; api-version=3.0-preview',
-                'Content-Type' : 'application/json'
+                Accept: 'application/json; api-version=3.0-preview',
+                'Content-Type': 'application/json',
+                'User-Agent': 'vscode-cpptools'
             },
             body: '{"filters": [{"criteria": [{"filterType": 7, "value": "ms-vscode.cpptools"}]}], "flags": 529}'
         }).catch(logAndReturn.undefined);
