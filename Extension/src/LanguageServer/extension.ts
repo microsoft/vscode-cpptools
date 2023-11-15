@@ -6,7 +6,7 @@
 
 import * as fs from 'fs';
 // Node.js 18 fetch isn't available until VS 1.82.
-//import fetch from 'node-fetch';
+import fetch from 'node-fetch';
 import * as StreamZip from 'node-stream-zip';
 import * as os from 'os';
 import * as path from 'path';
