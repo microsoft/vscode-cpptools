@@ -6360,6 +6360,7 @@
         "glob": "^7.1.6",
         "minimatch": "^3.0.5",
         "mkdirp": "^0.5.5",
+        "node-fetch": "^2.6.9",
         "node-loader": "^2.0.0",
         "node-stream-zip": "^1.15.0",
         "plist": "^3.0.5",
