@@ -1,9 +1,18 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.0: November 15, 2023
+### Bug Fixes
+* Fix IntelliSense bug with type deduction using concepts. [#8132](https://github.com/microsoft/vscode-cpptools/issues/8132)
+* Fix insert mode sometimes doing a replace for completion. [#10613](https://github.com/microsoft/vscode-cpptools/issues/10613)
+* Fix indentation missing in markdown fenced code blocks. [#11379](https://github.com/microsoft/vscode-cpptools/issues/11379)
+* Fix the parent path of the source file in compile_commands.json not being added to the browse.path. [#11631](https://github.com/microsoft/vscode-cpptools/issues/11631)
+* Fix the database not getting updated in certain cases when switching conf. [#11649](https://github.com/microsoft/vscode-cpptools/issues/11649)
+* Fix a crash with certain projects. [#11674](https://github.com/microsoft/vscode-cpptools/issues/11674)
+
 ## Version 1.18.4: November 14, 2023
 ### Bug Fixes:
 * Fix 'Extract to function' not scrolling to and selecting the added header declaration. [#11676](https://github.com/microsoft/vscode-cpptools/issues/11676)
-* Fix the extension sometimes failing to activate with VS Code versions less than 1.18. [#11680](https://github.com/microsoft/vscode-cpptools/issues/11680)
+* Fix the extension sometimes failing to activate with VS Code versions less than 1.85. [#11680](https://github.com/microsoft/vscode-cpptools/issues/11680)
 
 ## Version 1.18.3: November 13, 2023
 ### New Features
