@@ -13,9 +13,9 @@
     "@actions/core": "^1.9.1",
     "@actions/github": "^5.0.3",
     "@octokit/rest": "^19.0.3",
-    "@slack/web-api": "^6.7.2",
+    "@slack/web-api": "^6.9.1",
     "applicationinsights": "^2.5.1",
-    "axios": "^0.27.2",
+    "axios": "^1.6.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
