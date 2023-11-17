@@ -10,6 +10,10 @@
 * Fix the database not getting updated in certain cases when switching configurations. [#11649](https://github.com/microsoft/vscode-cpptools/issues/11649)
 * Fix a cpptools crash with certain projects. [#11674](https://github.com/microsoft/vscode-cpptools/issues/11674)
 
+## Version 1.18.5: November 16, 2023
+### Bug Fix
+* Fix `~/vscode-cpptools` being used as the cache folder instead of `~/.cache/vscode-cpptools` on Linux. [#11693](https://github.com/microsoft/vscode-cpptools/issues/11693)
+
 ## Version 1.18.4: November 14, 2023
 ### Bug Fixes:
 * Fix 'Extract to function' not scrolling to and selecting the added header declaration. [#11676](https://github.com/microsoft/vscode-cpptools/issues/11676)
