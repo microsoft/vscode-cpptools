@@ -1178,6 +1178,8 @@ export async function preReleaseCheck(): Promise<void> {
     if (util.getCppToolsTargetPopulation() === TargetPopulation.Insiders) {
         isOnPreRelease.Value = true;
         return;
+    } else {
+        isOnPreRelease.Value = false;
     }
 
     // First we need to make sure the user isn't already on a pre-release version and hasn't dismissed this prompt before.
