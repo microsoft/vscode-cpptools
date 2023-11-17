@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.18.5: November 16, 2023
+### Bug Fix
+* Fix `~/vscode-cpptools` being used as the cache folder instead of `~/.cache/vscode-cpptools` on Linux. [#11693](https://github.com/microsoft/vscode-cpptools/issues/11693)
+
 ## Version 1.18.4: November 14, 2023
 ### Bug Fixes:
 * Fix 'Extract to function' not scrolling to and selecting the added header declaration. [#11676](https://github.com/microsoft/vscode-cpptools/issues/11676)
