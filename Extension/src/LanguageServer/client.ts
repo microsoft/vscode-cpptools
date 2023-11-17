@@ -1700,8 +1700,6 @@ export class DefaultClient implements Client {
             }
         }
 
-        console.log("onDidChangeVisibleTextEditors\n" + JSON.stringify(params, null, 4));
-
         await this.languageClient.sendNotification(DidChangeVisibleTextEditorsNotification, params);
     }
 
@@ -1726,8 +1724,6 @@ export class DefaultClient implements Client {
             activeVisibleRanges: vscode.window.activeTextEditor?.document.uri === uri ? vscode.window.activeTextEditor.visibleRanges.map(makeLspRange) : undefined,
             visibleRanges
         };
-
-        console.log("onDidChangeTextEditorVisibleRanges\n" + JSON.stringify(params, null, 4));
 
         await this.languageClient.sendNotification(DidChangeTextEditorVisibleRangesNotification, params);
     }
@@ -2792,8 +2788,6 @@ export class DefaultClient implements Client {
             uri: document?.uri.toString(),
             selection
         };
-
-        console.log("didChangeActiveDocument\n" + JSON.stringify(params, null, 4));
 
         return this.languageClient.sendNotification(DidChangeActiveDocumentNotification, params).catch(logAndReturn.undefined);
     }

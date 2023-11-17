@@ -326,57 +326,11 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
 }
 
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
-    // /* need to notify the affected client(s) */
-    // if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
-    //     !util.isCpp(event.textEditor.document)) {
-    //     return;
-    // }
     if (!util.isCpp(event.textEditor.document)) {
         return;
     }
-
-    // if (activeDocument !== event.textEditor.document) {
-    //     // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
-    //     activeDocument = event.textEditor.document;
-    //     void clients.didChangeActiveDocument(event.textEditor.document).catch(logAndReturn.undefined);
-    //     ui.didChangeActiveDocument();
-    // }
     clients.ActiveClient.selectionChanged(makeLspRange(event.selections[0]));
 }
-
-// export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<boolean> {
-//     const client: Client = clients.getClientFor(document.uri);
-//     if (client) {
-//         // Log warm start.
-//         if (clients.checkOwnership(client, document)) {
-//             if (!client.isInitialized()) {
-//                 // This can randomly get hit when adding/removing workspace folders.
-//                 await client.ready;
-//             }
-//             // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
-//             // to avoid sending redundant didOpen notifications.
-//             if (!client.TrackedDocuments.has(document)) {
-//                 // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-//                 client.TrackedDocuments.add(document);
-//                 clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-//                 // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-//                 if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
-//                     const baseFileName: string = path.basename(document.fileName);
-//                     const mappingString: string = baseFileName + "@" + document.fileName;
-//                     client.addFileAssociations(mappingString, "cpp");
-//                     client.sendDidChangeSettings();
-//                     document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
-//                 }
-//                 await client.provideCustomConfiguration(document.uri, undefined);
-//                 // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
-//                 client.onDidOpenTextDocument(document);
-//                 await client.takeOwnership(document);
-//                 return true;
-//             }
-//         }
-//     }
-//     return false;
-// }
 
 async function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
     const cppEditors: vscode.TextEditor[] = editors.filter(e => util.isCpp(e.document));

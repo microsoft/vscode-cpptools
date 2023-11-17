@@ -56,55 +56,6 @@ export function createProtocolFilter(): Middleware {
                     }
                 }
             }
-
-            // const client: Client = clients.getClientFor(document.uri);
-            // if (client) {
-            //     // Log warm start.
-            //     if (clients.checkOwnership(client, document)) {
-            //         if (!client.isInitialized()) {
-            //             // This can randomly get hit when adding/removing workspace folders.
-            //             await client.ready;
-            //         }
-            //         // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
-            //         // to avoid sending redundant didOpen notifications.
-            //         if (!client.TrackedDocuments.has(document)) {
-            //             // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-            //             client.TrackedDocuments.add(document);
-            //             clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-            //             // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-            //             if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
-            //                 const baseFileName: string = path.basename(document.fileName);
-            //                 const mappingString: string = baseFileName + "@" + document.fileName;
-            //                 client.addFileAssociations(mappingString, "cpp");
-            //                 client.sendDidChangeSettings();
-            //                 document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
-            //             }
-            //             await client.provideCustomConfiguration(document.uri, undefined);
-            //             // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
-            //             client.onDidOpenTextDocument(document);
-            //             await client.takeOwnership(document);
-            //         }
-            //     }
-            // }
-
-            // const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document === document);
-            // if (editor) {
-            //     // If the file was visible editor when we were activated, we will not get a call to
-            //     // onDidChangeVisibleTextEditors, so immediately open any file that is visible when we receive didOpen.
-            //     // Otherwise, we defer opening the file until it's actually visible.
-            //     await clients.ActiveClient.ready;
-            //     if (editor && editor === vscode.window.activeTextEditor) {
-            //         onDidChangeActiveTextEditor(editor);
-            //     }
-            // } else {
-            //     // NO-OP
-            //     // If the file is not opened into an editor (such as in response for a control-hover),
-            //     // we do not actually load a translation unit for it.  When we receive a didOpen, the file
-            //     // may not yet be visible.  So, we defer creation of the translation until we receive a
-            //     // call to onDidChangeVisibleTextEditors(), in extension.ts.  A file is only loaded when
-            //     // it is actually opened in the editor (not in response to control-hover, which sends a
-            //     // didOpen), and first becomes visible.
-            // }
         }),
         didChange: async (textDocumentChangeEvent, sendMessage) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(textDocumentChangeEvent.document.uri);
