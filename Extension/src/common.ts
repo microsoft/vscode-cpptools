@@ -1318,7 +1318,7 @@ export function getCacheStoragePath(): string {
             defaultCachePath = "vscode-cpptools/";
             pathEnvironmentVariable = process.env.XDG_CACHE_HOME;
             if (!pathEnvironmentVariable) {
-                pathEnvironmentVariable = os.homedir();
+                pathEnvironmentVariable = path.join(os.homedir(), ".cache");
             }
             break;
     }
