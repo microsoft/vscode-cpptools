@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.1: November 21, 2023
+### Bug Fixes
+* Fix `Add '#include'` code actions for Mac frameworks. [#11579](https://github.com/microsoft/vscode-cpptools/issues/11579)
+* Fix snippet and include completion. [#11715](https://github.com/microsoft/vscode-cpptools/issues/11715), [#11720](https://github.com/microsoft/vscode-cpptools/issues/11720)
+
 ## Version 1.19.0: November 16, 2023
 ### Bug Fixes
 * Fix IntelliSense bug with type deduction using concepts. [#8132](https://github.com/microsoft/vscode-cpptools/issues/8132)
