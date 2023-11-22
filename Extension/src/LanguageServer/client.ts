@@ -551,8 +551,9 @@ interface DidChangeTextEditorVisibleRangesParams {
     visibleRanges: Range[];
 }
 
-interface DidChangeActiveDocumentParams {
+interface DidChangeActiveEditorParams {
     uri?: string;
+    activeVisibleRanges?: Range[];
     selection?: Range;
 }
 
@@ -583,7 +584,7 @@ const FileDeletedNotification: NotificationType<FileChangedParams> = new Notific
 const ResetDatabaseNotification: NotificationType<void> = new NotificationType<void>('cpptools/resetDatabase');
 const PauseParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/pauseParsing');
 const ResumeParsingNotification: NotificationType<void> = new NotificationType<void>('cpptools/resumeParsing');
-const DidChangeActiveDocumentNotification: NotificationType<DidChangeActiveDocumentParams> = new NotificationType<DidChangeActiveDocumentParams>('cpptools/didChangeActiveDocument');
+const DidChangeActiveEditorNotification: NotificationType<DidChangeActiveEditorParams> = new NotificationType<DidChangeActiveEditorParams>('cpptools/didChangeActiveEditor');
 const RestartIntelliSenseForFileNotification: NotificationType<TextDocumentIdentifier> = new NotificationType<TextDocumentIdentifier>('cpptools/restartIntelliSenseForFile');
 const DidChangeTextEditorSelectionNotification: NotificationType<Range> = new NotificationType<Range>('cpptools/didChangeTextEditorSelection');
 const ChangeCompileCommandsNotification: NotificationType<FileChangedParams> = new NotificationType<FileChangedParams>('cpptools/didChangeCompileCommands');
@@ -761,7 +762,8 @@ export interface Client {
     takeOwnership(document: vscode.TextDocument): void;
     sendDidOpen(document: vscode.TextDocument): Promise<void>;
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string>;
-    didChangeActiveDocument(document?: vscode.TextDocument, selection?: Range): Promise<void>;
+    updateActiveDocumentTextOptions(): void;
+    didChangeActiveEditor(editor?: vscode.TextEditor, selection?: Range): Promise<void>;
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void>;
     activate(): void;
     selectionChanged(selection: Range): void;
@@ -2169,10 +2171,6 @@ export class DefaultClient implements Client {
      */
     public takeOwnership(document: vscode.TextDocument): void {
         this.trackedDocuments.add(document);
-        //this.updateActiveDocumentTextOptions();
-        // in case the client is recreated, wait for the isStarted to finish.
-        //await DefaultClient.isStarted;
-        //return this.sendDidOpen(document);
     }
 
     // Only used in crash recovery. Otherwise, VS Code sends didOpen directly to native process (through the protocolFilter).
@@ -2745,7 +2743,7 @@ export class DefaultClient implements Client {
         return results;
     }
 
-    private updateActiveDocumentTextOptions(): void {
+    public updateActiveDocumentTextOptions(): void {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor && util.isCpp(editor.document)) {
             void SessionState.buildAndDebugIsSourceFile.set(util.isCppOrCFile(editor.document.uri));
@@ -2778,18 +2776,18 @@ export class DefaultClient implements Client {
     /**
      * notifications to the language server
      */
-    public async didChangeActiveDocument(document?: vscode.TextDocument, selection?: Range): Promise<void> {
-        this.updateActiveDocumentTextOptions();
-        if (!!document && !util.isCpp(document)) {
+    public async didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> {
+        if (!!editor?.document && !util.isCpp(editor?.document)) {
             return;
         }
 
-        const params: DidChangeActiveDocumentParams = {
-            uri: document?.uri.toString(),
-            selection
+        const params: DidChangeActiveEditorParams = {
+            uri: editor?.document?.uri.toString(),
+            activeVisibleRanges: editor?.visibleRanges.map(makeLspRange),
+            selection: editor?.selection
         };
 
-        return this.languageClient.sendNotification(DidChangeActiveDocumentNotification, params).catch(logAndReturn.undefined);
+        return this.languageClient.sendNotification(DidChangeActiveEditorNotification, params).catch(logAndReturn.undefined);
     }
 
     /**
@@ -3960,7 +3958,8 @@ class NullClient implements Client {
     takeOwnership(document: vscode.TextDocument): void { }
     sendDidOpen(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     requestSwitchHeaderSource(rootUri: vscode.Uri, fileName: string): Thenable<string> { return Promise.resolve(""); }
-    didChangeActiveDocument(document: vscode.TextDocument, selection?: Range): Promise<void> { return Promise.resolve(); }
+    updateActiveDocumentTextOptions(): void { }
+    didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> { return Promise.resolve(); }
     restartIntelliSenseForFile(document: vscode.TextDocument): Promise<void> { return Promise.resolve(); }
     activate(): void { }
     selectionChanged(selection: Range): void { }

@@ -66,13 +66,13 @@ export class ClientCollection {
         this.disposables.push(vscode.workspace.onDidChangeWorkspaceFolders(e => this.onDidChangeWorkspaceFolders(e)));
     }
 
-    public async didChangeActiveDocument(document?: vscode.TextDocument, selection?: vscode.Range): Promise<void> {
-        this.activeDocument = document;
+    public async didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> {
+        this.activeDocument = editor?.document;
 
         // Notify the active client that the document has changed.
         // If there is no active document, switch to the default client.
-        const activeClient: cpptools.Client = !document ? this.defaultClient : this.getClientFor(document.uri);
-        await activeClient.didChangeActiveDocument(document, selection);
+        const activeClient: cpptools.Client = !editor ? this.defaultClient : this.getClientFor(editor.document.uri);
+        await activeClient.didChangeActiveEditor(editor);
 
         // If the active client changed, resume the new client and tell the currently active client to deactivate.
         if (activeClient !== this.activeClient) {
@@ -140,7 +140,7 @@ export class ClientCollection {
 
         if (this.activeDocument) {
             this.activeClient = this.getClientFor(this.activeDocument.uri);
-            await this.activeClient.didChangeActiveDocument(this.activeDocument);
+            this.activeClient.updateActiveDocumentTextOptions();
             this.activeClient.activate();
         }
     }
@@ -200,7 +200,7 @@ export class ClientCollection {
                     // Redundant deactivate should be OK.
                     this.activeClient.deactivate();
                     this.activeClient = newActiveClient;
-                    await this.activeClient.didChangeActiveDocument(this.activeDocument);
+                    this.activeClient.updateActiveDocumentTextOptions();
                     this.activeClient.activate();
                 }
             }

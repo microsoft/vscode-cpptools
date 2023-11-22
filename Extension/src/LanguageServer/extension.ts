@@ -169,7 +169,7 @@ export async function activate(): Promise<void> {
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
     disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
     disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
-    ui.didChangeActiveDocument(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
     disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
     disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
 
@@ -304,19 +304,18 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         // temporarily, so this prevents the C++-related status bar items from flickering off/on.
         noActiveEditorTimeout = setTimeout(() => {
             activeDocument = undefined;
-            ui.didChangeActiveDocument();
+            ui.didChangeActiveEditor();
             noActiveEditorTimeout = undefined;
         }, 100);
-        void clients.didChangeActiveDocument(undefined, undefined).catch(logAndReturn.undefined);
+        void clients.didChangeActiveEditor(undefined).catch(logAndReturn.undefined);
     } else {
-        ui.didChangeActiveDocument();
+        ui.didChangeActiveEditor();
         if (util.isCppOrRelated(editor.document)) {
             if (util.isCpp(editor.document)) {
-                activeDocument = editor.document;
-                void clients.didChangeActiveDocument(activeDocument, editor.selection).catch(logAndReturn.undefined);
+                void clients.didChangeActiveEditor(editor).catch(logAndReturn.undefined);
             } else {
                 activeDocument = undefined;
-                void clients.didChangeActiveDocument(undefined, undefined).catch(logAndReturn.undefined);
+                void clients.didChangeActiveEditor(undefined).catch(logAndReturn.undefined);
             }
             //clients.ActiveClient.selectionChanged(makeLspRange(editor.selection));
         } else {
