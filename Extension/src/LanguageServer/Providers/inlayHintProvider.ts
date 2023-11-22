@@ -25,28 +25,10 @@ export interface CppInlayHint {
     identifierLength: number;
 }
 
-// interface GetInlayHintsParams {
-//     uri: string;
-// }
-
 enum InlayHintKind {
     Type = 0,
     Parameter = 1,
 }
-
-// interface GetInlayHintsResult {
-//     fileVersion: number;
-//     inlayHints: CppInlayHint[];
-// }
-
-// type InlayHintsCacheEntry = {
-//     FileVersion: number;
-//     TypeHints: CppInlayHint[];
-//     ParameterHints: CppInlayHint[];
-// };
-
-// const GetInlayHintsRequest: RequestType<GetInlayHintsParams, GetInlayHintsResult, void> =
-//     new RequestType<GetInlayHintsParams, GetInlayHintsResult, void>('cpptools/getInlayHints');
 
 export class InlayHintsProvider implements vscode.InlayHintsProvider {
     public onDidChangeInlayHintsEvent = new vscode.EventEmitter<void>();
@@ -91,26 +73,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         });
 
         return currentPromise;
-
-        // await this.client.ready;
-        // const uriString: string = document.uri.toString();
-
-        // // Get results from cache if available.
-        // let cacheEntry: InlayHintsCacheEntry | undefined = this.cache.get(uriString);
-        // if (cacheEntry?.FileVersion === document.version) {
-        //     return this.buildVSCodeHints(document.uri, cacheEntry);
-        // }
-
-        // // Get new results from the language server
-        // const params: GetInlayHintsParams = { uri: uriString };
-        // const inlayHintsResult: GetInlayHintsResult = await this.client.languageClient.sendRequest(GetInlayHintsRequest, params, token);
-        // if (token.isCancellationRequested || inlayHintsResult.inlayHints === undefined || inlayHintsResult.fileVersion !== openFileVersions.get(uriString)) {
-        //     throw new vscode.CancellationError();
-        // }
-
-        // cacheEntry = this.createCacheEntry(inlayHintsResult);
-        // this.cache.set(uriString, cacheEntry);
-        // return this.buildVSCodeHints(document.uri, cacheEntry);
     }
 
     public deliverInlayHints(uriString: string, cppInlayHints: CppInlayHint[], startNewSet: boolean): void {
@@ -182,7 +144,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             fileData.promise.reject(new vscode.CancellationError());
         }
         this.allFileData.delete(uriString);
-        this.onDidChangeInlayHintsEvent.fire();
     }
 
     private resolveTypeHints(settings: CppSettings, hints: CppInlayHint[]): vscode.InlayHint[] {

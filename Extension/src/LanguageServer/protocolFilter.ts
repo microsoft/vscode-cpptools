@@ -45,7 +45,7 @@ export function createProtocolFilter(): Middleware {
                     client.takeOwnership(document);
                     await sendMessage(document);
 
-                    // For a file already open when we active, sometimes we don't get any notifications about visible
+                    // For a file already open when we activate, sometimes we don't get any notifications about visible
                     // or active text editors, visible ranges, or text selection. As a workaround, we trigger
                     // onDidChangeVisibleTextEditors here, only for the first file opened.
                     if (!anyFileOpened)

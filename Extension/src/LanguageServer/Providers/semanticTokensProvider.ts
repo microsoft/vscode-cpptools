@@ -127,6 +127,5 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
             fileData.promise.reject(new vscode.CancellationError());
         }
         this.allFileData.delete(uriString);
-        this.onDidChangeSemanticTokensEvent.fire();
     }
 }
