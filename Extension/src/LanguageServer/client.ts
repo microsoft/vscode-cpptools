@@ -1672,7 +1672,7 @@ export class DefaultClient implements Client {
         if (vscode.window.activeTextEditor) {
             if (util.isCpp(vscode.window.activeTextEditor.document)) {
                 params.activeUri = vscode.window.activeTextEditor.document.uri.toString();
-                params.activeSelection = vscode.window.activeTextEditor.selection;
+                params.activeSelection = makeLspRange(vscode.window.activeTextEditor.selection);
                 params.activeVisibleRanges = vscode.window.activeTextEditor.visibleRanges.map(makeLspRange);
             }
         }
@@ -1692,7 +1692,7 @@ export class DefaultClient implements Client {
             editors.forEach(editor => {
                 // Use a map, to account for multiple editors for the same file.
                 // First, we just concat all ranges for the same file.
-                visibleRanges = visibleRanges.concat(editor.visibleRanges);
+                visibleRanges = visibleRanges.concat(editor.visibleRanges.map(makeLspRange));
             });
         }
 
@@ -2758,7 +2758,7 @@ export class DefaultClient implements Client {
         const params: DidChangeActiveEditorParams = {
             uri: editor?.document?.uri.toString(),
             activeVisibleRanges: editor?.visibleRanges.map(makeLspRange),
-            selection: editor?.selection
+            selection: editor ? makeLspRange(editor.selection) : undefined
         };
 
         return this.languageClient.sendNotification(DidChangeActiveEditorNotification, params).catch(logAndReturn.undefined);

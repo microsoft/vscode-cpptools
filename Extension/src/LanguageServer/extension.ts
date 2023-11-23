@@ -312,6 +312,7 @@ function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         ui.didChangeActiveEditor();
         if (util.isCppOrRelated(editor.document)) {
             if (util.isCpp(editor.document)) {
+                activeDocument = editor.document;
                 void clients.didChangeActiveEditor(editor).catch(logAndReturn.undefined);
             } else {
                 activeDocument = undefined;
