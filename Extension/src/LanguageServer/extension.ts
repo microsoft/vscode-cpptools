@@ -245,6 +245,7 @@ export async function activate(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (activeEditor) {
         clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
+        activeDocument = activeEditor.document;
     }
 }
 

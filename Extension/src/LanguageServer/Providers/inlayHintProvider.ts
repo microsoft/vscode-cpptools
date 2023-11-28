@@ -3,13 +3,11 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { ManualPromise } from '../../Utility/Async/manualPromise';
 import { CppSettings } from '../settings';
 
 interface FileData
 {
     version: number;
-    promise: ManualPromise<vscode.InlayHint[]>;
     inlayHints: vscode.InlayHint[];
 }
 
@@ -35,44 +33,19 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     public onDidChangeInlayHints?: vscode.Event<void> = this.onDidChangeInlayHintsEvent.event;
     private allFileData: Map<string, FileData> = new Map<string, FileData>();
 
-    public async provideInlayHints(document: vscode.TextDocument, range: vscode.Range, token: vscode.CancellationToken): Promise<vscode.InlayHint[]> {
+    public async provideInlayHints(document: vscode.TextDocument, _range: vscode.Range, _token: vscode.CancellationToken): Promise<vscode.InlayHint[]> {
         const uri: vscode.Uri = document.uri;
         const uriString: string = uri.toString();
         let fileData: FileData | undefined = this.allFileData.get(uriString);
-        if (fileData) {
-            if (fileData.promise.isCompleted) {
-                // Make sure file hasn't been changed since the last set of results.
-                // If a complete promise is present, there should also be a cache.
-                if (fileData.version === document.version) {
-                    return fileData.promise;
-                }
-                this.allFileData.delete(uriString);
-            } else {
-                // A new request requires a new ManualPromise, as each promise returned needs
-                // to be associated with the cancellation token provided at the time.
-                fileData.promise.reject(new vscode.CancellationError());
-            }
+        if (!fileData || fileData.version !== document.version) {
+            fileData = {
+                version: document.version,
+                inlayHints: []
+            };
+            this.allFileData.set(uriString, fileData);
         }
-        fileData = {
-            version: document.version,
-            promise: new ManualPromise<vscode.InlayHint[]>(),
-            inlayHints: []
-        };
-        this.allFileData.set(uriString, fileData);
 
-        // Capture a local variable instead of referring to the member variable directly,
-        // to avoid race conditions where the member variable is changed before the
-        // cancallation token is triggered.
-        const currentPromise = fileData.promise;
-        token.onCancellationRequested(() => {
-            const fileData: FileData | undefined = this.allFileData.get(uriString);
-            if (fileData && currentPromise === fileData.promise) {
-                this.allFileData.delete(uriString);
-                currentPromise.reject(new vscode.CancellationError());
-            }
-        });
-
-        return currentPromise;
+        return fileData.inlayHints;
     }
 
     public deliverInlayHints(uriString: string, cppInlayHints: CppInlayHint[], startNewSet: boolean): void {
@@ -82,38 +55,18 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
 
         const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
         if (!editor) {
-            this.allFileData.get(uriString)?.promise.resolve([]);
             return;
         }
 
         // No need to check the file version here, as the caller has already ensured it's current.
 
         let fileData: FileData | undefined = this.allFileData.get(uriString);
-        let needsNewPromise: boolean = false;
-        let inlayHints: vscode.InlayHint[] | undefined;
         if (!fileData) {
-            needsNewPromise = true;
-        } else {
-            if (!fileData.promise.isPending) {
-                needsNewPromise = true;
-            }
-            if (!startNewSet) {
-                inlayHints = fileData.inlayHints;
-            }
-        }
-        if (!inlayHints) {
-            inlayHints = [];
-        }
-
-        if (needsNewPromise) {
             fileData = {
                 version: editor.document.version,
-                promise: new ManualPromise<vscode.InlayHint[]>(),
-                inlayHints: inlayHints
+                inlayHints: []
             };
             this.allFileData.set(uriString, fileData);
-        } else if (fileData) {
-            fileData.inlayHints = inlayHints;
         }
 
         const typeHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Type);
@@ -122,26 +75,20 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         const settings: CppSettings = new CppSettings(vscode.Uri.parse(uriString));
         if (settings.inlayHintsAutoDeclarationTypes) {
             const resolvedTypeHints: vscode.InlayHint[] = this.resolveTypeHints(settings, typeHints);
-            Array.prototype.push.apply(inlayHints, resolvedTypeHints);
+            Array.prototype.push.apply(fileData.inlayHints, resolvedTypeHints);
         }
         if (settings.inlayHintsParameterNames || settings.inlayHintsReferenceOperator) {
             const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(settings, paramHints);
-            Array.prototype.push.apply(inlayHints, resolvedParameterHints);
+            Array.prototype.push.apply(fileData.inlayHints, resolvedParameterHints);
         }
 
-        fileData?.promise.resolve(inlayHints);
-        if (needsNewPromise) {
-            this.onDidChangeInlayHintsEvent.fire();
-        }
+        this.onDidChangeInlayHintsEvent.fire();
     }
 
     public removeFile(uriString: string): void {
         const fileData: FileData | undefined = this.allFileData.get(uriString);
         if (!fileData) {
             return;
-        }
-        if (fileData.promise.isPending) {
-            fileData.promise.reject(new vscode.CancellationError());
         }
         this.allFileData.delete(uriString);
     }

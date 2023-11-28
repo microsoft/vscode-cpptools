@@ -3,12 +3,10 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
-import { ManualPromise } from '../../Utility/Async/manualPromise';
 
 interface FileData
 {
     version: number;
-    promise: ManualPromise<vscode.SemanticTokens>;
     tokenBuilder: vscode.SemanticTokensBuilder;
 }
 
@@ -25,44 +23,22 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
     public onDidChangeSemanticTokens?: vscode.Event<void> = this.onDidChangeSemanticTokensEvent.event;
     private allFileData: Map<string, FileData> = new Map<string, FileData>();
 
-    public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+    public async provideDocumentSemanticTokens(document: vscode.TextDocument, _token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
         const uri: vscode.Uri = document.uri;
         const uriString: string = uri.toString();
+
+        // If we have some data, provide it immediately. Otherwise, complete with nothing.
+        // We don't want to leave this request open, as that causes VS Code to delay sending us didClose.
+
         let fileData: FileData | undefined = this.allFileData.get(uriString);
-        if (fileData) {
-            if (fileData.promise.isCompleted) {
-                // Make sure file hasn't been changed since the last set of results.
-                // If a complete promise is present, there should also be a cache.
-                if (fileData.version === document.version) {
-                    return fileData.promise;
-                }
-                this.allFileData.delete(uriString);
-            } else {
-                // A new request requires a new ManualPromise, as each promise returned needs
-                // to be associated with the cancellation token provided at the time.
-                fileData.promise.reject(new vscode.CancellationError());
-            }
+        if (!fileData || fileData.version !== document.version) {
+            fileData = {
+                version: document.version,
+                tokenBuilder: new vscode.SemanticTokensBuilder()
+            };
+            this.allFileData.set(uriString, fileData);
         }
-        fileData = {
-            version: document.version,
-            promise: new ManualPromise<vscode.SemanticTokens>(),
-            tokenBuilder: new vscode.SemanticTokensBuilder()
-        };
-        this.allFileData.set(uriString, fileData);
-
-        // Capture a local variable instead of referring to the member variable directly,
-        // to avoid race conditions where the member variable is changed before the
-        // cancallation token is triggered.
-        const currentPromise = fileData.promise;
-        token.onCancellationRequested(() => {
-            const fileData: FileData | undefined = this.allFileData.get(uriString);
-            if (fileData && currentPromise === fileData.promise) {
-                this.allFileData.delete(uriString);
-                currentPromise.reject(new vscode.CancellationError());
-            }
-        });
-
-        return currentPromise;
+        return fileData.tokenBuilder.build();
     }
 
     public deliverTokens(uriString: string, semanticTokens: SemanticToken[], startNewSet: boolean): void {
@@ -72,59 +48,29 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
 
         const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
         if (!editor) {
-            const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder();
-            const tokens: vscode.SemanticTokens = builder.build();
-            this.allFileData.get(uriString)?.promise.resolve(tokens);
             return;
         }
 
         // No need to check the file version here, as the caller has already ensured it's current.
-
         let fileData: FileData | undefined = this.allFileData.get(uriString);
-        let needsNewPromise: boolean = false;
-        let tokenBuilder: vscode.SemanticTokensBuilder | undefined;
         if (!fileData) {
-            needsNewPromise = true;
-        } else {
-            if (!fileData.promise.isPending) {
-                needsNewPromise = true;
-            }
-            if (!startNewSet) {
-                tokenBuilder = fileData.tokenBuilder;
-            }
-        }
-        if (!tokenBuilder) {
-            tokenBuilder = new vscode.SemanticTokensBuilder();
-        }
-
-        if (needsNewPromise) {
             fileData = {
                 version: editor.document.version,
-                promise: new ManualPromise<vscode.SemanticTokens>(),
-                tokenBuilder: tokenBuilder
+                tokenBuilder: new vscode.SemanticTokensBuilder()
             };
             this.allFileData.set(uriString, fileData);
-        } else if (fileData) {
-            fileData.tokenBuilder = tokenBuilder;
         }
-
         semanticTokens.forEach((semanticToken) => {
-            tokenBuilder?.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
+            fileData?.tokenBuilder?.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
         });
 
-        fileData?.promise.resolve(tokenBuilder.build());
-        if (needsNewPromise) {
-            this.onDidChangeSemanticTokensEvent.fire();
-        }
+        this.onDidChangeSemanticTokensEvent.fire();
     }
 
     public removeFile(uriString: string): void {
         const fileData: FileData | undefined = this.allFileData.get(uriString);
         if (!fileData) {
             return;
-        }
-        if (fileData.promise.isPending) {
-            fileData.promise.reject(new vscode.CancellationError());
         }
         this.allFileData.delete(uriString);
     }

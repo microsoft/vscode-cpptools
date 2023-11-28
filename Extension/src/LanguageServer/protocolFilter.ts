@@ -23,14 +23,15 @@ export function createProtocolFilter(): Middleware {
 
     return {
         didOpen: async (document, sendMessage) => clients.ActiveClient.enqueue(async () => {
-            if (util.isCpp(document)) {
-                util.setWorkspaceIsCpp();
+            if (!util.isCpp(document)) {
+                return;
             }
-
+            util.setWorkspaceIsCpp();
             const client: Client = clients.getClientFor(document.uri);
             if (clients.checkOwnership(client, document)) {
-                if (!client.TrackedDocuments.has(document)) {
-                    client.TrackedDocuments.add(document);
+                const uriString: string = document.uri.toString();
+                if (!client.TrackedDocuments.has(uriString)) {
+                    client.TrackedDocuments.set(uriString, document);
                     // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
                     if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
                         const baseFileName: string = path.basename(document.fileName);
@@ -68,7 +69,7 @@ export function createProtocolFilter(): Middleware {
             // Don't use awaitUntilLanguageClientReady.
             // Otherwise, the message can be delayed too long.
             const me: Client = clients.getClientFor(event.document.uri);
-            if (me.TrackedDocuments.has(event.document)) {
+            if (me.TrackedDocuments.has(event.document.uri.toString())) {
                 return sendMessage(event);
             }
             return [];
@@ -76,9 +77,10 @@ export function createProtocolFilter(): Middleware {
         didSave: invoke1,
         didClose: async (document, sendMessage) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(document.uri);
-            if (me.TrackedDocuments.has(document)) {
+            const uriString: string = document.uri.toString();
+            if (me.TrackedDocuments.has(uriString)) {
                 me.onDidCloseTextDocument(document);
-                me.TrackedDocuments.delete(document);
+                me.TrackedDocuments.delete(uriString);
                 await sendMessage(document);
             }
         }),
@@ -86,7 +88,7 @@ export function createProtocolFilter(): Middleware {
         resolveCompletionItem: invoke2,
         provideHover: async (document, position, token, next: (document: any, position: any, token: any) => any) => clients.ActiveClient.enqueue(async () => {
             const me: Client = clients.getClientFor(document.uri);
-            if (me.TrackedDocuments.has(document)) {
+            if (me.TrackedDocuments.has(document.uri.toString())) {
                 return next(document, position, token);
             }
             return null;

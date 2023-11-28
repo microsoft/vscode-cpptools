@@ -469,7 +469,7 @@ export interface DoxygenCodeActionCommandArguments {
 }
 
 interface SetTemporaryTextDocumentLanguageParams {
-    path: string;
+    uri: string;
     isC: boolean;
     isCuda: boolean;
 }
@@ -713,7 +713,7 @@ export interface Client {
     RootUri?: vscode.Uri;
     RootFolder?: vscode.WorkspaceFolder;
     Name: string;
-    TrackedDocuments: Set<vscode.TextDocument>;
+    TrackedDocuments: Map<string, vscode.TextDocument>;
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>>;
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
@@ -805,7 +805,7 @@ export class DefaultClient implements Client {
     private rootFolder?: vscode.WorkspaceFolder;
     private rootRealPath: string;
     private workspaceStoragePath: string;
-    private trackedDocuments = new Set<vscode.TextDocument>();
+    private trackedDocuments = new Map<string, vscode.TextDocument>();
     private isSupported: boolean = true;
     private inactiveRegionsDecorations = new Map<string, DecorationRangesPair>();
     private settingsTracker: SettingsTracker;
@@ -872,7 +872,7 @@ export class DefaultClient implements Client {
     public get Name(): string {
         return this.getName(this.rootFolder);
     }
-    public get TrackedDocuments(): Set<vscode.TextDocument> {
+    public get TrackedDocuments(): Map<string, vscode.TextDocument> {
         return this.trackedDocuments;
     }
     public get IsTagParsing(): boolean {
@@ -1740,7 +1740,9 @@ export class DefaultClient implements Client {
             this.inlayHintsProvider.removeFile(uri);
         }
         this.inactiveRegionsDecorations.delete(uri);
-        diagnosticsCollectionIntelliSense.delete(document.uri);
+        if (diagnosticsCollectionIntelliSense) {
+            diagnosticsCollectionIntelliSense.delete(document.uri);
+        }
         openFileVersions.delete(uri);
     }
 
@@ -1820,7 +1822,7 @@ export class DefaultClient implements Client {
             this.clearCustomConfigurations(),
             this.handleRemoveAllCodeAnalysisProblems()]);
         await Promise.all([
-            ...[...this.trackedDocuments].map(document => this.provideCustomConfiguration(document.uri, undefined, true))
+            ...[...this.trackedDocuments].map(([_uri, document]) => this.provideCustomConfiguration(document.uri, undefined, true))
         ]);
     }
 
@@ -2147,7 +2149,7 @@ export class DefaultClient implements Client {
      * tracked documents.
      */
     public takeOwnership(document: vscode.TextDocument): void {
-        this.trackedDocuments.add(document);
+        this.trackedDocuments.set(document.uri.toString(), document);
     }
 
     // Only used in crash recovery. Otherwise, VS Code sends didOpen directly to native process (through the protocolFilter).
@@ -2369,7 +2371,9 @@ export class DefaultClient implements Client {
 
     private async setTemporaryTextDocumentLanguage(params: SetTemporaryTextDocumentLanguageParams): Promise<void> {
         const languageId: string = params.isC ? "c" : params.isCuda ? "cuda-cpp" : "cpp";
-        const document: vscode.TextDocument = await vscode.workspace.openTextDocument(params.path);
+        const uri: vscode.Uri = vscode.Uri.parse(params.uri);
+        const client: Client = clients.getClientFor(uri);
+        const document: vscode.TextDocument | undefined = client.TrackedDocuments.get(params.uri);
         if (!!document && document.languageId !== languageId) {
             if (document.languageId === "cpp" && languageId === "c") {
                 handleChangedFromCppToC(document);
@@ -2755,6 +2759,8 @@ export class DefaultClient implements Client {
             return;
         }
 
+        this.updateActiveDocumentTextOptions();
+
         const params: DidChangeActiveEditorParams = {
             uri: editor?.document?.uri.toString(),
             activeVisibleRanges: editor?.visibleRanges.map(makeLspRange),
@@ -2781,8 +2787,6 @@ export class DefaultClient implements Client {
     }
 
     public async selectionChanged(selection: Range): Promise<void> {
-        console.log("selectionChanged\n" + JSON.stringify(selection, null, 4));
-
         return this.languageClient.sendNotification(DidChangeTextEditorSelectionNotification, selection);
     }
 
@@ -3908,7 +3912,7 @@ class NullClient implements Client {
     RootRealPath: string = "/";
     RootUri?: vscode.Uri = vscode.Uri.file("/");
     Name: string = "(empty)";
-    TrackedDocuments = new Set<vscode.TextDocument>();
+    TrackedDocuments = new Map<string, vscode.TextDocument>();
     async onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void { }
     onDidCloseTextDocument(document: vscode.TextDocument): void { }
