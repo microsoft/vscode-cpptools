@@ -1363,34 +1363,34 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 export function quoteArgument(argument: string): string {
     // If the argument doesn't contain any special characters, return it as is.
     if (!argument.length || !/[\s\t\n\v\"]/.test(argument)) {
-      return argument;
+        return argument;
     }
-  
+
     let quotedArgument = '"';
     let backslashCount = 0;
-  
+
     // Iterate over each character in the argument.
     for (const char of argument) {
-      if (char === '\\') {
-        // Count consecutive backslashes.
-        backslashCount++;
-      } else {
-        if (char === '"') {
-          // Escape all backslashes and the quote.
-          quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+        if (char === '\\') {
+            // Count consecutive backslashes.
+            backslashCount++;
         } else {
-          // Only backslashes need to be escaped here.
-          quotedArgument += '\\'.repeat(backslashCount);
+            if (char === '"') {
+                // Escape all backslashes and the quote.
+                quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+            } else {
+                // Only backslashes need to be escaped here.
+                quotedArgument += '\\'.repeat(backslashCount);
+            }
+            quotedArgument += char;
+            backslashCount = 0; // Reset backslash count.
         }
-        quotedArgument += char;
-        backslashCount = 0; // Reset backslash count.
-      }
     }
-  
+
     // Escape any trailing backslashes before closing quote.
     quotedArgument += '\\'.repeat(backslashCount * 2);
     quotedArgument += '"';
-    
+
     return quotedArgument;
 }
 
