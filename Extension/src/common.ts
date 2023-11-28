@@ -1361,8 +1361,8 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 }
 
 export function quoteArgument(argument: string): string {
-    // If the argument doesn't contain any special characters, return it as is.
-    if (!argument.length || !/[\s\t\n\v\"]/.test(argument)) {
+    // If the argument doesn't contain any special characters that need quoting, return it as is.
+    if (!argument.length || !/[\s\t\n\v\"\\&%^]/.test(argument)) {
         return argument;
     }
 

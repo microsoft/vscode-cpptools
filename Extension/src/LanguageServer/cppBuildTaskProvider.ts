@@ -170,11 +170,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const compilerPathBase: string = path.basename(compilerPath);
         const isCl: boolean = compilerPathBase.toLowerCase() === "cl.exe";
         const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
-        // Double-quote the command if it is not already double-quoted.
+        // Double-quote the command if needed.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
-        if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
-            resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
-        }
+        resolvedcompilerPath = util.quoteArgument(resolvedcompilerPath);
 
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
