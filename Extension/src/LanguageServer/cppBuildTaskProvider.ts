@@ -395,8 +395,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         this.args.forEach((value, index) => {
             if (os.platform() === 'win32') {
                 value = util.quoteArgumentWindows(util.resolveVariables(value));
-            } 
-            else 
+            }
+            else
             {
                 value = util.quoteArgumentUnix(util.resolveVariables(value));
             }
