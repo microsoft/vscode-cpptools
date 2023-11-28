@@ -172,7 +172,12 @@ export class CppBuildTaskProvider implements TaskProvider {
         const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
         // Double-quote the command if needed.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
-        resolvedcompilerPath = util.quoteArgument(resolvedcompilerPath);
+        if (os.platform() === 'win32') {
+            resolvedcompilerPath = util.quoteArgumentWindows(resolvedcompilerPath);
+        }
+        else {
+            resolvedcompilerPath = util.quoteArgumentUnix(resolvedcompilerPath);
+        }
 
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
@@ -388,7 +393,13 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         util.createDirIfNotExistsSync(exePath);
 
         this.args.forEach((value, index) => {
-            value = util.quoteArgument(util.resolveVariables(value));
+            if (os.platform() === 'win32') {
+                value = util.quoteArgumentWindows(util.resolveVariables(value));
+            } 
+            else 
+            {
+                value = util.quoteArgumentUnix(util.resolveVariables(value));
+            }
             activeCommand = activeCommand + " " + value;
             this.args[index] = value;
         });

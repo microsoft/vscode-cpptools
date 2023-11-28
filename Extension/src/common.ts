@@ -1359,8 +1359,34 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
         return promiseBuilder(nextItem);
     }, Promise.resolve());
 }
+export function quoteArgumentUnix(argument: string): string {
+    // Check if the argument is empty or doesn't contain special characters
+    if (!argument || !/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
+      return argument;
+    }
+  
+    // Start with a single quote
+    let quotedArgument = '\'';
+  
+    // Iterate over each character in the argument
+    for (const c of argument) {
+      if (c === '\'') {
+        // Handle single quotes in the argument
+        quotedArgument += '\'\'';
+      } else {
+        // Add the character to the quoted argument
+        quotedArgument += c;
+      }
+    }
+  
+    // End with a single quote
+    quotedArgument += '\'';
+  
+    // Return the quoted argument
+    return quotedArgument;
+}
 
-export function quoteArgument(argument: string): string {
+export function quoteArgumentWindows(argument: string): string {
     // If the argument doesn't contain any special characters that need quoting, return it as is.
     if (!argument.length || !/[\s\t\n\v\"\\&%^]/.test(argument)) {
         return argument;

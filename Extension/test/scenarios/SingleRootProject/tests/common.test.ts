@@ -6,7 +6,7 @@ import * as assert from "assert";
 import { suite } from 'mocha';
 import * as os from "os";
 import { delimiter } from 'path';
-import { escapeForSquiggles, quoteArgument, resolveVariables } from "../../../../src/common";
+import { escapeForSquiggles, quoteArgumentWindows, resolveVariables } from "../../../../src/common";
 
 suite("resolveVariables", () => {
     const success: string = "success";
@@ -221,7 +221,7 @@ suite("resolveVariables", () => {
 
     test("quoteArgument:", () => {
         const testQuoteArgumentScenario: any = (input: string, expectedOutput: string) => {
-            const result: string = quoteArgument(input);
+            const result: string = quoteArgumentWindows(input);
             if (result !== expectedOutput) {
                 throw new Error(`quoteArgument failure: for \"${input}\", \"${result}\" !== \"${expectedOutput}\"`);
             }
