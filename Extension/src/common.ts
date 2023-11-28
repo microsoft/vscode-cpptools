@@ -1362,28 +1362,28 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
 export function quoteArgumentUnix(argument: string): string {
     // Return the argument as is if it's empty or doesn't contain shell-special characters
     if (!argument || !/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
-      return argument;
+        return argument;
     }
-  
+
     // Initialize a variable for the quoted argument, starting with a single quote
     let quotedArgument = '\'';
-  
+
     // Iterate over each character in the argument
     for (const c of argument) {
-      // If a single quote is found, escape it properly for shell usage
-      if (c === '\'') {
-        quotedArgument += '\'\\\'\'';
-      } else {
-        // Otherwise, add the character to the quoted argument as is
-        quotedArgument += c;
-      }
+        // If a single quote is found, escape it properly for shell usage
+        if (c === '\'') {
+            quotedArgument += '\'\\\'\'';
+        } else {
+            // Otherwise, add the character to the quoted argument as is
+            quotedArgument += c;
+        }
     }
-  
+
     // Close the quoted argument with a single quote and return it
     quotedArgument += '\'';
-  
+
     return quotedArgument;
-  }
+}
 
 export function quoteArgumentWindows(argument: string): string {
     // If the argument doesn't contain any special characters that need quoting, return it as is.
