@@ -6,7 +6,6 @@
 import * as cp from "child_process";
 import * as os from 'os';
 import * as path from 'path';
-import * as parse from "shell-quote";
 import { CustomExecution, Disposable, Event, EventEmitter, ProcessExecution, Pseudoterminal, ShellExecution, Task, TaskDefinition, TaskEndEvent, TaskExecution, TaskGroup, TaskProvider, tasks, TaskScope, TerminalDimensions, TextEditor, window, workspace, WorkspaceFolder } from 'vscode';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
@@ -391,7 +390,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         util.createDirIfNotExistsSync(exePath);
 
         this.args.forEach((value, index) => {
-            value = util.normalizeArg(util.resolveVariables(value));
+            value = util.quoteArgument(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
             this.args[index] = value;
         });
@@ -436,10 +435,6 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
         let child: cp.ChildProcess | undefined;
         try {
-            // Add shell quoting for command line arguments.
-            for (let i = 0; i < this.args.length; i++) {
-                this.args[i] = parse.quote([this.args[i]]);
-            }
             child = cp.spawn(command, this.args, this.options ? this.options : {});
             let error: string = "";
             let stdout: string = "";

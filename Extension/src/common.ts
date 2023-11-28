@@ -1360,26 +1360,38 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
     }, Promise.resolve());
 }
 
-export function normalizeArg(arg: string): string {
-    arg = arg.trim();
-    // Check if the arg is enclosed in backtick,
-    // or includes unescaped double-quotes (or single-quotes on Windows),
-    // or includes unescaped single-quotes on mac and linux.
-    if (/^`.*`$/g.test(arg) || /.*[^\\]".*/g.test(arg) ||
-        (process.platform.includes("win") && /.*[^\\]'.*/g.test(arg)) ||
-        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
-        return arg;
+export function quoteArgument(argument: string): string {
+    // If the argument doesn't contain any special characters, return it as is.
+    if (!argument.length || !/[\s\t\n\v\"]/.test(argument)) {
+      return argument;
     }
-    // The special character double-quote is already escaped in the arg.
-    const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
-    if (!unescapedSpaces && !process.platform.includes("win")) {
-        return arg;
-    } else if (arg.includes(" ")) {
-        arg = arg.replace(/\\\s/g, " ");
-        return "\"" + arg + "\"";
-    } else {
-        return arg;
+  
+    let quotedArgument = '"';
+    let backslashCount = 0;
+  
+    // Iterate over each character in the argument.
+    for (const char of argument) {
+      if (char === '\\') {
+        // Count consecutive backslashes.
+        backslashCount++;
+      } else {
+        if (char === '"') {
+          // Escape all backslashes and the quote.
+          quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+        } else {
+          // Only backslashes need to be escaped here.
+          quotedArgument += '\\'.repeat(backslashCount);
+        }
+        quotedArgument += char;
+        backslashCount = 0; // Reset backslash count.
+      }
     }
+  
+    // Escape any trailing backslashes before closing quote.
+    quotedArgument += '\\'.repeat(backslashCount * 2);
+    quotedArgument += '"';
+    
+    return quotedArgument;
 }
 
 /**
