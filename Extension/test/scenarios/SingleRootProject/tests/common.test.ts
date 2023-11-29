@@ -6,7 +6,7 @@ import * as assert from "assert";
 import { suite } from 'mocha';
 import * as os from "os";
 import { delimiter } from 'path';
-import { escapeForSquiggles, quoteArgumentWindows, resolveVariables } from "../../../../src/common";
+import { escapeForSquiggles, quoteArgument, resolveVariables } from "../../../../src/common";
 
 suite("resolveVariables", () => {
     const success: string = "success";
@@ -221,22 +221,22 @@ suite("resolveVariables", () => {
 
     test("quoteArgument:", () => {
         const testQuoteArgumentScenario: any = (input: string, expectedOutput: string) => {
-            const result: string = quoteArgumentWindows(input);
+            const result: string = quoteArgument(input);
             if (result !== expectedOutput) {
                 throw new Error(`quoteArgument failure: for \"${input}\", \"${result}\" !== \"${expectedOutput}\"`);
             }
         };
-            /*
-            this is how the args from tasks.json will be sent to the chilprocess.spawn:
-            "args":[
-                "-DTEST1=TEST1 TEST1",          // "-DTEST1=TEST1 TEST1"
-                "-DTEST2=\"TEST2 TEST2\"",      // -DTEST2="TEST2 TEST2"
-                "-DTEST3=\\\"TEST3 TEST3\\\"",  // "-DTEST3=\"TEST3 TEST3\""
-                "-DTEST4=TEST4\\ TEST4",        // "-DTEST4=TEST4 TEST4"
-                "-DTEST5='TEST5 TEST5'",        // -DTEST5='TEST5 TEST5'
-                "-DTEST6=TEST6\\ TEST6 Test6",  // "-DTEST6=TEST6 TEST6 Test6"
-            ]
-            */
+        /*
+        this is how the args from tasks.json will be sent to the chilprocess.spawn:
+        "args":[
+            "-DTEST1=TEST1 TEST1",          // "-DTEST1=TEST1 TEST1"
+            "-DTEST2=\"TEST2 TEST2\"",      // -DTEST2="TEST2 TEST2"
+            "-DTEST3=\\\"TEST3 TEST3\\\"",  // "-DTEST3=\"TEST3 TEST3\""
+            "-DTEST4=TEST4\\ TEST4",        // "-DTEST4=TEST4 TEST4"
+            "-DTEST5='TEST5 TEST5'",        // -DTEST5='TEST5 TEST5'
+            "-DTEST6=TEST6\\ TEST6 Test6",  // "-DTEST6=TEST6 TEST6 Test6"
+        ]
+        */
         testQuoteArgumentScenario("-DTEST1=TEST1 TEST1", "\"-DTEST1=TEST1 TEST1\"");
         testQuoteArgumentScenario("-DTEST2=\"TEST2 TEST2\"", "-DTEST2=\"TEST2 TEST2\"");
         testQuoteArgumentScenario("-DTEST3=\\\"TEST3 TEST3\\\"", "\"-DTEST3=\\\"TEST3 TEST3\\\"\"");
@@ -248,7 +248,7 @@ suite("resolveVariables", () => {
     });
 
     interface ResolveTestFlowEnvironment {
-        withEnvironment(additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert;
+        withEnvironment(additionalEnvironment: { [key: string]: string | string[] }): ResolveTestFlowAssert;
         shouldLookupSymbol(key: string): void;
     }
     interface ResolveTestFlowAssert {
@@ -257,9 +257,9 @@ suite("resolveVariables", () => {
 
     function resolveVariablesWithInput(input: string): ResolveTestFlowEnvironment {
         return {
-            withEnvironment: (additionalEnvironment: {[key: string]: string | string[]}) => inputAndEnvironment(input, additionalEnvironment),
+            withEnvironment: (additionalEnvironment: { [key: string]: string | string[] }) => inputAndEnvironment(input, additionalEnvironment),
             shouldLookupSymbol: (symbol: string) => {
-                const environment: {[key: string]: string | string[]} = {};
+                const environment: { [key: string]: string | string[] } = {};
                 environment[symbol] = success;
                 return inputAndEnvironment(input, environment)
                     .shouldResolveTo(success);
@@ -267,7 +267,7 @@ suite("resolveVariables", () => {
         };
     }
 
-    function inputAndEnvironment(input: string, additionalEnvironment: {[key: string]: string | string[]}): ResolveTestFlowAssert {
+    function inputAndEnvironment(input: string, additionalEnvironment: { [key: string]: string | string[] }): ResolveTestFlowAssert {
         return {
             shouldResolveTo: (expected: string) => {
                 const actual: string = resolveVariables(input, additionalEnvironment);

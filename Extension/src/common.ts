@@ -1359,64 +1359,57 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
         return promiseBuilder(nextItem);
     }, Promise.resolve());
 }
-export function quoteArgumentUnix(argument: string): string {
-    // Return the argument as is if it's empty or doesn't contain shell-special characters
-    if (!argument || !/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
+
+export function quoteArgument(argument: string): string {
+    // Return the argument as is if it's empty
+    if (!argument) {
         return argument;
     }
 
-    // Initialize a variable for the quoted argument, starting with a single quote
-    let quotedArgument = '\'';
-
-    // Iterate over each character in the argument
-    for (const c of argument) {
-        // If a single quote is found, escape it properly for shell usage
-        if (c === '\'') {
-            quotedArgument += '\'\\\'\'';
-        } else {
-            // Otherwise, add the character to the quoted argument as is
-            quotedArgument += c;
+    if (os.platform() === "win32") {
+        // Windows-style quoting logic
+        if (!/[\s\t\n\v\"\\&%^]/.test(argument)) {
+            return argument;
         }
-    }
 
-    // Close the quoted argument with a single quote and return it
-    quotedArgument += '\'';
+        let quotedArgument = '"';
+        let backslashCount = 0;
 
-    return quotedArgument;
-}
-
-export function quoteArgumentWindows(argument: string): string {
-    // If the argument doesn't contain any special characters that need quoting, return it as is.
-    if (!argument.length || !/[\s\t\n\v\"\\&%^]/.test(argument)) {
-        return argument;
-    }
-
-    let quotedArgument = '"';
-    let backslashCount = 0;
-
-    // Iterate over each character in the argument.
-    for (const char of argument) {
-        if (char === '\\') {
-            // Count consecutive backslashes.
-            backslashCount++;
-        } else {
-            if (char === '"') {
-                // Escape all backslashes and the quote.
-                quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+        for (const char of argument) {
+            if (char === '\\') {
+                backslashCount++;
             } else {
-                // Only backslashes need to be escaped here.
-                quotedArgument += '\\'.repeat(backslashCount);
+                if (char === '"') {
+                    quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+                } else {
+                    quotedArgument += '\\'.repeat(backslashCount);
+                }
+                quotedArgument += char;
+                backslashCount = 0;
             }
-            quotedArgument += char;
-            backslashCount = 0; // Reset backslash count.
         }
+
+        quotedArgument += '\\'.repeat(backslashCount * 2);
+        quotedArgument += '"';
+        return quotedArgument;
+    } else {
+        // Unix-style quoting logic
+        if (!/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = "'";
+        for (const c of argument) {
+            if (c === "'") {
+                quotedArgument += "'\\''";
+            } else {
+                quotedArgument += c;
+            }
+        }
+
+        quotedArgument += "'";
+        return quotedArgument;
     }
-
-    // Escape any trailing backslashes before closing quote.
-    quotedArgument += '\\'.repeat(backslashCount * 2);
-    quotedArgument += '"';
-
-    return quotedArgument;
 }
 
 /**
