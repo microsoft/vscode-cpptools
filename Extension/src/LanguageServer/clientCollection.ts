@@ -121,10 +121,10 @@ export class ClientCollection {
             const client: cpptools.Client = pair[1];
 
             const newClient: cpptools.Client = this.createClient(client.RootFolder, true);
-            client.TrackedDocuments.forEach((document) => {
+            for (const document of client.TrackedDocuments.values()) {
                 this.transferOwnership(document, client);
-                void client.sendDidOpen(document);
-            });
+                await newClient.sendDidOpen(document);
+            }
 
             if (this.activeClient === client) {
                 // It cannot be undefined. If there is an active document, we activate it later.
@@ -142,7 +142,9 @@ export class ClientCollection {
             this.activeClient = this.getClientFor(this.activeDocument.uri);
             this.activeClient.updateActiveDocumentTextOptions();
             this.activeClient.activate();
+            await this.activeClient.didChangeActiveEditor(vscode.window.activeTextEditor);
         }
+        await this.defaultClient.onDidChangeVisibleTextEditors(vscode.window.visibleTextEditors);
     }
 
     private async onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): Promise<void> {

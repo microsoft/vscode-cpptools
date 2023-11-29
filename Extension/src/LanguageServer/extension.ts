@@ -282,10 +282,7 @@ let noActiveEditorTimeout: NodeJS.Timeout | undefined;
 
 async function onDidChangeTextEditorVisibleRanges(event: vscode.TextEditorVisibleRangesChangeEvent): Promise<void> {
     if (util.isCpp(event.textEditor.document)) {
-        console.log("IN onDidChangeTextEditorVisibleRanges");
-        if (util.isCpp(event.textEditor.document)) {
-            await clients.getDefaultClient().onDidChangeTextEditorVisibleRanges(event.textEditor.document.uri);
-        }
+        await clients.getDefaultClient().onDidChangeTextEditorVisibleRanges(event.textEditor.document.uri);
     }
 }
 

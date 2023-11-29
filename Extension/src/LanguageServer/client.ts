@@ -717,7 +717,7 @@ export interface Client {
     onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>>;
     onDidOpenTextDocument(document: vscode.TextDocument): void;
     onDidCloseTextDocument(document: vscode.TextDocument): void;
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void>;
+    onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void>;
     onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void>;
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void;
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void>;
@@ -1665,7 +1665,7 @@ export class DefaultClient implements Client {
 
     // Handles changes to visible files/ranges, changes to current selection/position,
     // and changes to the active text editor. Should only be called on the primary client.
-    public async onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void> {
+    public async onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
         const params: DidChangeVisibleTextEditorsParams = {
             visibleRanges: this.prepareVisibleRanges(editors)
         };
@@ -2162,6 +2162,7 @@ export class DefaultClient implements Client {
                 text: document.getText()
             }
         };
+        await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
     }
 
@@ -2755,7 +2756,15 @@ export class DefaultClient implements Client {
      * notifications to the language server
      */
     public async didChangeActiveEditor(editor?: vscode.TextEditor): Promise<void> {
-        if (!!editor?.document && !util.isCpp(editor?.document)) {
+        // For now, we ignore deactivation events.
+        // VS will refresh IntelliSense on activation, as a catch-all for file changes in
+        // other applications. But VS Code will deactivate the document when focus is moved
+        // to another control, such as the Output window. So, to avoid costly updates, we
+        // only trigger that update when focus moves from one C++ document to another.
+        // Fortunately, VS Code generates file-change notifications for all files
+        // in the workspace, so we should trigger appropriate updates for most changes
+        // made in other applications.
+        if (!editor || !util.isCpp(editor.document)) {
             return;
         }
 
@@ -3916,7 +3925,7 @@ class NullClient implements Client {
     async onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Promise<Record<string, string>> { return {}; }
     onDidOpenTextDocument(document: vscode.TextDocument): void { }
     onDidCloseTextDocument(document: vscode.TextDocument): void { }
-    onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]): Promise<void> { return Promise.resolve(); }
+    onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> { return Promise.resolve(); }
     onDidChangeTextEditorVisibleRanges(uri: vscode.Uri): Promise<void> { return Promise.resolve(); }
     onDidChangeTextDocument(textDocumentChangeEvent: vscode.TextDocumentChangeEvent): void { }
     onRegisterCustomConfigurationProvider(provider: CustomConfigurationProvider1): Thenable<void> { return Promise.resolve(); }
