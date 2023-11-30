@@ -1360,25 +1360,55 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
     }, Promise.resolve());
 }
 
-export function normalizeArg(arg: string): string {
-    arg = arg.trim();
-    // Check if the arg is enclosed in backtick,
-    // or includes unescaped double-quotes (or single-quotes on Windows),
-    // or includes unescaped single-quotes on mac and linux.
-    if (/^`.*`$/g.test(arg) || /.*[^\\]".*/g.test(arg) ||
-        (process.platform.includes("win") && /.*[^\\]'.*/g.test(arg)) ||
-        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
-        return arg;
+export function quoteArgument(argument: string): string {
+    // Return the argument as is if it's empty
+    if (!argument) {
+        return argument;
     }
-    // The special character double-quote is already escaped in the arg.
-    const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
-    if (!unescapedSpaces && !process.platform.includes("win")) {
-        return arg;
-    } else if (arg.includes(" ")) {
-        arg = arg.replace(/\\\s/g, " ");
-        return "\"" + arg + "\"";
+
+    if (os.platform() === "win32") {
+        // Windows-style quoting logic
+        if (!/[\s\t\n\v\"\\&%^]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = '"';
+        let backslashCount = 0;
+
+        for (const char of argument) {
+            if (char === '\\') {
+                backslashCount++;
+            } else {
+                if (char === '"') {
+                    quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+                } else {
+                    quotedArgument += '\\'.repeat(backslashCount);
+                }
+                quotedArgument += char;
+                backslashCount = 0;
+            }
+        }
+
+        quotedArgument += '\\'.repeat(backslashCount * 2);
+        quotedArgument += '"';
+        return quotedArgument;
     } else {
-        return arg;
+        // Unix-style quoting logic
+        if (!/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = "'";
+        for (const c of argument) {
+            if (c === "'") {
+                quotedArgument += "'\\''";
+            } else {
+                quotedArgument += c;
+            }
+        }
+
+        quotedArgument += "'";
+        return quotedArgument;
     }
 }
 
