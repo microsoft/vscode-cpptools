@@ -521,19 +521,16 @@ interface TagParseStatus {
 interface DidChangeVisibleTextEditorsParams {
     activeUri?: string;
     activeSelection?: Range;
-    activeVisibleRanges?: Range[];
     visibleRanges?: { [uri: string]: Range[] };
 }
 
 interface DidChangeTextEditorVisibleRangesParams {
     uri: string;
-    activeVisibleRanges?: Range[];
     visibleRanges: Range[];
 }
 
 interface DidChangeActiveEditorParams {
     uri?: string;
-    activeVisibleRanges?: Range[];
     selection?: Range;
 }
 
@@ -1673,7 +1670,6 @@ export class DefaultClient implements Client {
             if (util.isCpp(vscode.window.activeTextEditor.document)) {
                 params.activeUri = vscode.window.activeTextEditor.document.uri.toString();
                 params.activeSelection = makeLspRange(vscode.window.activeTextEditor.selection);
-                params.activeVisibleRanges = vscode.window.activeTextEditor.visibleRanges.map(makeLspRange);
             }
         }
 
@@ -1698,7 +1694,6 @@ export class DefaultClient implements Client {
 
         const params: DidChangeTextEditorVisibleRangesParams = {
             uri: uri.toString(),
-            activeVisibleRanges: vscode.window.activeTextEditor?.document.uri === uri ? vscode.window.activeTextEditor.visibleRanges.map(makeLspRange) : undefined,
             visibleRanges
         };
 
@@ -2772,7 +2767,6 @@ export class DefaultClient implements Client {
 
         const params: DidChangeActiveEditorParams = {
             uri: editor?.document?.uri.toString(),
-            activeVisibleRanges: editor?.visibleRanges.map(makeLspRange),
             selection: editor ? makeLspRange(editor.selection) : undefined
         };
 
