@@ -144,7 +144,8 @@ export class ClientCollection {
             this.activeClient.activate();
             await this.activeClient.didChangeActiveEditor(vscode.window.activeTextEditor);
         }
-        await this.defaultClient.onDidChangeVisibleTextEditors(vscode.window.visibleTextEditors);
+        const cppEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => util.isCpp(e.document));
+        await this.defaultClient.onDidChangeVisibleTextEditors(cppEditors);
     }
 
     private async onDidChangeWorkspaceFolders(e?: vscode.WorkspaceFoldersChangeEvent): Promise<void> {
