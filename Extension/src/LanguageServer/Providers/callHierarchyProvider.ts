@@ -150,7 +150,6 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
     public async provideCallHierarchyIncomingCalls(item: vscode.CallHierarchyItem, token: vscode.CancellationToken):
     Promise<vscode.CallHierarchyIncomingCall[] | undefined> {
         await this.client.ready;
-        workspaceReferences.cancelCurrentReferenceRequest(CancellationSender.NewRequest);
 
         const CallHierarchyCallsToEvent: string = "CallHierarchyCallsTo";
         if (item === undefined) {
@@ -187,7 +186,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         requestCanceledListener.dispose();
 
         // Process the result.
-        if (cancelSource.token.isCancellationRequested || response.calls === undefined || requestCanceled !== undefined) {
+        if (response.calls === undefined || requestCanceled !== undefined) {
             const requestStatus: CallHierarchyRequestStatus = requestCanceled === CancellationSender.User ?
                 CallHierarchyRequestStatus.CanceledByUser : CallHierarchyRequestStatus.Canceled;
             this.logTelemetry(CallHierarchyCallsToEvent, requestStatus, progressBarDuration);
@@ -217,7 +216,7 @@ export class CallHierarchyProvider implements vscode.CallHierarchyProvider {
         };
         const response: CallHierarchyCallsItemResult = await this.client.languageClient.sendRequest(CallHierarchyCallsFromRequest, params, token);
 
-        if (token.isCancellationRequested || response.calls === undefined) {
+        if (response.calls === undefined) {
             this.logTelemetry(CallHierarchyCallsFromEvent, CallHierarchyRequestStatus.Canceled);
             throw new vscode.CancellationError();
         } else if (response.calls.length !== 0) {
