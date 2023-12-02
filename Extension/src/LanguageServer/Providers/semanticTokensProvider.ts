@@ -36,7 +36,6 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
                 if (fileData.version === document.version) {
                     return fileData.promise;
                 }
-                this.allFileData.delete(uriString);
             } else {
                 // A new request requires a new ManualPromise, as each promise returned needs
                 // to be associated with the cancellation token provided at the time.
@@ -78,41 +77,38 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
             return;
         }
 
-        // No need to check the file version here, as the caller has already ensured it's current.
-
-        let fileData: FileData | undefined = this.allFileData.get(uriString);
-        let needsNewPromise: boolean = false;
-        let tokenBuilder: vscode.SemanticTokensBuilder | undefined;
-        if (!fileData) {
-            needsNewPromise = true;
-        } else {
-            if (!fileData.promise.isPending) {
-                needsNewPromise = true;
+        // Use a lambda to remove ambiguity about whether fileData may be undefined.
+        const [fileData, wasNewPromiseCreated]: [FileData, boolean] = (() => {
+            let fileData = this.allFileData.get(uriString);
+            let newPromiseCreated = false;
+            if (!fileData) {
+                fileData = {
+                    version: editor.document.version,
+                    promise: new ManualPromise<vscode.SemanticTokens>(),
+                    tokenBuilder: new vscode.SemanticTokensBuilder()
+                };
+                newPromiseCreated = true;
+                this.allFileData.set(uriString, fileData);
+            } else {
+                if (!fileData.promise.isPending) {
+                    fileData.promise.reject(new vscode.CancellationError());
+                    fileData.promise = new ManualPromise<vscode.SemanticTokens>();
+                    newPromiseCreated = true;
+                }
+                if (fileData.version !== editor.document.version) {
+                    fileData.version = editor.document.version;
+                    fileData.tokenBuilder = new vscode.SemanticTokensBuilder();
+                }
             }
-            if (!startNewSet) {
-                tokenBuilder = fileData.tokenBuilder;
-            }
-        }
-        if (!tokenBuilder) {
-            tokenBuilder = new vscode.SemanticTokensBuilder();
-        }
+            return [fileData, newPromiseCreated];
+        })();
 
-        if (needsNewPromise) {
-            fileData = {
-                version: editor.document.version,
-                promise: new ManualPromise<vscode.SemanticTokens>(),
-                tokenBuilder: tokenBuilder
-            };
-            this.allFileData.set(uriString, fileData);
-        } else if (fileData) {
-            fileData.tokenBuilder = tokenBuilder;
-        }
         semanticTokens.forEach((semanticToken) => {
-            tokenBuilder?.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
+            fileData.tokenBuilder.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);
         });
 
-        fileData?.promise.resolve(tokenBuilder.build());
-        if (needsNewPromise) {
+        fileData?.promise.resolve(fileData.tokenBuilder.build());
+        if (wasNewPromiseCreated) {
             this.onDidChangeSemanticTokensEvent.fire();
         }
     }
