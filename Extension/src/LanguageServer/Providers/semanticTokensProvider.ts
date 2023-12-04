@@ -102,6 +102,9 @@ export class SemanticTokensProvider implements vscode.DocumentSemanticTokensProv
             }
             return [fileData, newPromiseCreated];
         })();
+        if (startNewSet) {
+            fileData.tokenBuilder = new vscode.SemanticTokensBuilder();
+        }
 
         semanticTokens.forEach((semanticToken) => {
             fileData.tokenBuilder.push(semanticToken.line, semanticToken.character, semanticToken.length, semanticToken.type, semanticToken.modifiers);

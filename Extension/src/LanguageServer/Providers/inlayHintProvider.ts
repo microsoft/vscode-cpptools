@@ -71,7 +71,6 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 currentPromise.reject(new vscode.CancellationError());
             }
         });
-
         return currentPromise;
     }
 
@@ -111,6 +110,9 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
             }
             return [fileData, newPromiseCreated];
         })();
+        if (startNewSet) {
+            fileData.inlayHints = [];
+        }
 
         const typeHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Type);
         const paramHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Parameter);
