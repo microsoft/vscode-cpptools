@@ -138,30 +138,28 @@ function showMessageWindow(params: ShowMessageWindowParams): void {
 }
 
 function publishRefactorDiagnostics(params: PublishRefactorDiagnosticsParams): void {
-    if (params.diagnostics.length > 0) {
-        if (!diagnosticsCollectionRefactor) {
-            diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(configPrefix + "Refactor");
+    if (!diagnosticsCollectionRefactor) {
+        diagnosticsCollectionRefactor = vscode.languages.createDiagnosticCollection(configPrefix + "Refactor");
+    }
+
+    const newDiagnostics: vscode.Diagnostic[] = [];
+    params.diagnostics.forEach((d) => {
+        const message: string = getLocalizedString(d.localizeStringParams);
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
+        diagnostic.code = d.code;
+        diagnostic.source = CppSourceStr;
+        if (d.relatedInformation) {
+            diagnostic.relatedInformation = [];
+            for (const info of d.relatedInformation) {
+                diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
+            }
         }
 
-        const newDiagnostics: vscode.Diagnostic[] = [];
-        params.diagnostics.forEach((d) => {
-            const message: string = getLocalizedString(d.localizeStringParams);
-            const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(makeVscodeRange(d.range), message, d.severity);
-            diagnostic.code = d.code;
-            diagnostic.source = CppSourceStr;
-            if (d.relatedInformation) {
-                diagnostic.relatedInformation = [];
-                for (const info of d.relatedInformation) {
-                    diagnostic.relatedInformation.push(new vscode.DiagnosticRelatedInformation(makeVscodeLocation(info.location), info.message));
-                }
-            }
+        newDiagnostics.push(diagnostic);
+    });
 
-            newDiagnostics.push(diagnostic);
-        });
-
-        const fileUri: vscode.Uri = vscode.Uri.parse(params.uri);
-        diagnosticsCollectionRefactor.set(fileUri, newDiagnostics);
-    }
+    const fileUri: vscode.Uri = vscode.Uri.parse(params.uri);
+    diagnosticsCollectionRefactor.set(fileUri, newDiagnostics);
 }
 
 interface WorkspaceFolderParams {
