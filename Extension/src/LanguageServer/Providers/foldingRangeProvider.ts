@@ -10,11 +10,14 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     private client: DefaultClient;
     public onDidChangeFoldingRangesEvent = new vscode.EventEmitter<void>();
     public onDidChangeFoldingRanges?: vscode.Event<void>;
+    private requestPending: boolean = false;
     constructor(client: DefaultClient) {
         this.client = client;
         this.onDidChangeFoldingRanges = this.onDidChangeFoldingRangesEvent.event;
     }
     async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[] | undefined> {
+        await this.client.ready;
+        this.requestPending = false;
         const settings: CppSettings = new CppSettings();
         if (!settings.codeFolding) {
             return [];
@@ -22,8 +25,6 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         const params: GetFoldingRangesParams = {
             uri: document.uri.toString()
         };
-
-        await this.client.ready;
 
         const response: GetFoldingRangesResult = await this.client.languageClient.sendRequest(GetFoldingRangesRequest, params, token);
         if (token.isCancellationRequested || response.ranges === undefined) {
@@ -54,6 +55,10 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
     }
 
     public refresh(): void {
-        this.onDidChangeFoldingRangesEvent.fire();
+        // Work around a possible bug where redundant requests are sent.
+        if (!this.requestPending) {
+            this.requestPending = true;
+            this.onDidChangeFoldingRangesEvent.fire();
+        }
     }
 }

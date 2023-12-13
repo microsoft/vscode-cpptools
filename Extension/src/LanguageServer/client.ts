@@ -384,14 +384,15 @@ export interface GetFoldingRangesResult {
 export interface IntelliSenseResult {
     uri: string;
     fileVersion: number;
-    clearExistingDiagnostics: boolean;
-    clearExistingInactiveRegions: boolean;
-    clearExistingSemanticTokens: boolean;
-    clearExistingInlayHint: boolean;
     diagnostics: IntelliSenseDiagnostic[];
     inactiveRegions: InputRegion[];
     semanticTokens: SemanticToken[];
     inlayHints: CppInlayHint[];
+    clearExistingDiagnostics: boolean;
+    clearExistingInactiveRegions: boolean;
+    clearExistingSemanticTokens: boolean;
+    clearExistingInlayHint: boolean;
+    isCompletePass: boolean;
 }
 
 enum SemanticTokenTypes {
@@ -2314,7 +2315,7 @@ export class DefaultClient implements Client {
             this.inlayHintsProvider.deliverInlayHints(intelliseSenseResult.uri, intelliseSenseResult.inlayHints, intelliseSenseResult.clearExistingInlayHint);
         }
 
-        this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.clearExistingInactiveRegions);
+        this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.clearExistingInactiveRegions, intelliseSenseResult.isCompletePass);
         this.updateSquiggles(intelliseSenseResult.uri, intelliseSenseResult.diagnostics, intelliseSenseResult.clearExistingDiagnostics);
     }
 
@@ -2578,7 +2579,11 @@ export class DefaultClient implements Client {
         this.model.isParsingWorkspacePaused.Value = tagParseStatus.isPaused;
     }
 
-    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean): void {
+    private updateInactiveRegions(uriString: string, inactiveRegions: InputRegion[], startNewSet: boolean, updateFoldingRanges: boolean): void {
+        if (this.codeFoldingProvider && updateFoldingRanges) {
+            this.codeFoldingProvider.refresh();
+        }
+
         const client: Client = clients.getClientFor(vscode.Uri.parse(uriString));
         if (!(client instanceof DefaultClient) || (!startNewSet && inactiveRegions.length === 0)) {
             return;
@@ -2616,11 +2621,6 @@ export class DefaultClient implements Client {
         const editors: vscode.TextEditor[] = vscode.window.visibleTextEditors.filter(e => e.document.uri.toString() === uriString);
         for (const e of editors) {
             e.setDecorations(currentSet.decoration, currentSet.ranges);
-        }
-
-        // TODO: Find a better place for this. Every IntelliSense update does not need to trigger a code folding refresh.
-        if (this.codeFoldingProvider) {
-            this.codeFoldingProvider.refresh();
         }
     }
 
