@@ -2303,8 +2303,8 @@ export class DefaultClient implements Client {
     }
 
     private handleIntelliSenseResult(intelliseSenseResult: IntelliSenseResult): void {
-        const editor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === intelliseSenseResult.uri);
-        if (!editor || editor.document.version !== intelliseSenseResult.fileVersion) {
+        const fileVersion: number | undefined = openFileVersions.get(intelliseSenseResult.uri);
+        if (fileVersion !== undefined && fileVersion !== intelliseSenseResult.fileVersion) {
             return;
         }
 
