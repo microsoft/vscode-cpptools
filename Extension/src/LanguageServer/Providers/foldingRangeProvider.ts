@@ -52,7 +52,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
                 foldingRangeRequestInfo.promise?.resolve(promise);
             }, () => {
                 foldingRangeRequestInfo.promise?.reject(new vscode.CancellationError());
-            })
+            });
         }
         return promise;
     }
@@ -96,7 +96,7 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
         const oldPendingRequests: Map<string, FoldingRangeRequestInfo> = this.pendingRequests;
         this.pendingRequests = new Map<string, FoldingRangeRequestInfo>();
         this.onDidChangeFoldingRangesEvent.fire();
-        oldPendingRequests.forEach((value: FoldingRangeRequestInfo | undefined, key: string) => {
+        oldPendingRequests.forEach((value: FoldingRangeRequestInfo | undefined, _key: string) => {
             if (value !== undefined && value.promise !== undefined) {
                 value.promise.reject(new vscode.CancellationError());
             }
