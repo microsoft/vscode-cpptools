@@ -3643,7 +3643,7 @@ export class DefaultClient implements Client {
                         }
                     }
                 }
-                let formatRangeStartLine: number = range.start.line + lineOffset;
+                const formatRangeStartLine: number = range.start.line + lineOffset;
                 let rangeStartLine: number = formatRangeStartLine;
                 let rangeStartCharacter: number = 0;
                 if (edit.newText.startsWith("\r\n\r\n")) {
