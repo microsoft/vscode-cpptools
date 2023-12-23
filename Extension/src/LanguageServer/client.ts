@@ -3622,7 +3622,6 @@ export class DefaultClient implements Client {
                 const isReplace: boolean = !range.isEmpty && isSourceFile;
                 lineOffset += nextLineOffset;
                 nextLineOffset = (edit.newText.match(/\n/g) ?? []).length;
-                let rangeStartLine: number = range.start.line + lineOffset;
 
                 // Find the editType.
                 if (isReplace) {
@@ -3644,6 +3643,8 @@ export class DefaultClient implements Client {
                         }
                     }
                 }
+                let formatRangeStartLine: number = range.start.line + lineOffset;
+                let rangeStartLine: number = formatRangeStartLine;
                 let rangeStartCharacter: number = 0;
                 if (edit.newText.startsWith("\r\n\r\n")) {
                     rangeStartCharacter = 4;
@@ -3658,15 +3659,15 @@ export class DefaultClient implements Client {
                     rangeStartCharacter = 1;
                     rangeStartLine += 1;
                 }
-                const newRange: vscode.Range = new vscode.Range(
-                    new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
+                const newFormatRange: vscode.Range = new vscode.Range(
+                    new vscode.Position(formatRangeStartLine + (nextLineOffset < 0 ? nextLineOffset : 0), range.start.character),
                     new vscode.Position(rangeStartLine + (nextLineOffset < 0 ? 0 : nextLineOffset),
                         isReplace ? range.end.character :
                             range.end.character + edit.newText.length - rangeStartCharacter));
                 if (isSourceFile) {
-                    sourceFormatUriAndRanges.push({uri, range: newRange});
+                    sourceFormatUriAndRanges.push({uri, range: newFormatRange});
                 } else {
-                    headerFormatUriAndRanges.push({uri, range: newRange});
+                    headerFormatUriAndRanges.push({uri, range: newFormatRange});
                 }
                 if (isReplace || !isSourceFile) {
                     // Handle additional declaration lines added before the new function call.
