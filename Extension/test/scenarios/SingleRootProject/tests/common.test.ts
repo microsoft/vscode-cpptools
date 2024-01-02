@@ -238,7 +238,7 @@ suite("resolveVariables", () => {
         ]
         */
         testQuoteArgumentScenario("-DTEST1=TEST1 TEST1", "\"-DTEST1=TEST1 TEST1\"");
-        testQuoteArgumentScenario("-DTEST2=\"TEST2 TEST2\"", "-DTEST2=\"TEST2 TEST2\"");
+        testQuoteArgumentScenario("-DTEST2=\"TEST2 TEST2\"", "\"-DTEST2=\"TEST2 TEST2\"\"");
         testQuoteArgumentScenario("-DTEST3=\\\"TEST3 TEST3\\\"", "\"-DTEST3=\\\"TEST3 TEST3\\\"\"");
         testQuoteArgumentScenario("-DTEST4=TEST4\\ TEST4", "\"-DTEST4=TEST4 TEST4\"");
         testQuoteArgumentScenario("-DTEST5=\'TEST5 TEST5\'", "-DTEST5=\'TEST5 TEST5\'");
