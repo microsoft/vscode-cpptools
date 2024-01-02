@@ -470,9 +470,9 @@
         ]
     },
     "c_cpp.configuration.autocomplete.markdownDescription": {
-        "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` (and similarly for `c` and `cuda-cpp` languages).",
+        "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
-            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered -- except for text \"value\", which is a placeholder that should be translated."
         ]
     },
     "c_cpp.configuration.autocomplete.default.description": "Uses the active IntelliSense engine.",
