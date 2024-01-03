@@ -3390,6 +3390,38 @@ export class DefaultClient implements Client {
         return this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
+    public formatText(text:string, insertSpaces: boolean, tabSize: number): string {
+        const indentationUnit: string = insertSpaces ? ' '.repeat(tabSize) : '\t';
+        
+        let indentLevel: number = 0;
+
+        const lines: string[] = text.split('\n');
+
+        // Process each line to adjust indentation
+        const formattedLines: string[] = lines.map((line: string): string => {
+            // Trim the line to check for opening and closing braces
+            const trimmedLine: string = line.trim();
+
+            // If the line contains a closing brace, decrease the indent level before applying indentation
+            if (trimmedLine.startsWith('}')) {
+            indentLevel = Math.max(indentLevel - 1, 0);
+            }
+
+            // Apply indentation to the line
+            let indentedLine: string = indentationUnit.repeat(indentLevel) + trimmedLine;
+
+            // If the line contains an opening brace, increase the indent level after applying indentation
+            if (trimmedLine.endsWith('{')) {
+            indentLevel++;
+            }
+
+            return indentedLine;
+        });
+
+        // Join the lines back together
+        return formattedLines.join('\n');
+    }
+
     public async handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
@@ -3451,9 +3483,14 @@ export class DefaultClient implements Client {
             return;
         }
 
-        // Handle copy to clipboard.
         if (result.clipboardText && params.copyToClipboard) {
-            return vscode.env.clipboard.writeText(result.clipboardText);
+            const settings: OtherSettings = new OtherSettings(uri);
+            const formatOptions: vscode.FormattingOptions = {
+                insertSpaces: settings.editorInsertSpaces ?? true,
+                tabSize: settings.editorTabSize ?? 4
+            };
+
+            return vscode.env.clipboard.writeText(this.formatText(result.clipboardText, formatOptions.insertSpaces, formatOptions.tabSize));
         }
 
         let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
