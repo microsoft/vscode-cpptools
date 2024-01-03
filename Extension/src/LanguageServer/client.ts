@@ -3390,9 +3390,9 @@ export class DefaultClient implements Client {
         return this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public formatText(text:string, insertSpaces: boolean, tabSize: number): string {
+    public formatText(text: string, insertSpaces: boolean, tabSize: number): string {
         const indentationUnit: string = insertSpaces ? ' '.repeat(tabSize) : '\t';
-        
+
         let indentLevel: number = 0;
 
         const lines: string[] = text.split('\n');
@@ -3404,15 +3404,15 @@ export class DefaultClient implements Client {
 
             // If the line contains a closing brace, decrease the indent level before applying indentation
             if (trimmedLine.startsWith('}')) {
-            indentLevel = Math.max(indentLevel - 1, 0);
+                indentLevel = Math.max(indentLevel - 1, 0);
             }
 
             // Apply indentation to the line
-            let indentedLine: string = indentationUnit.repeat(indentLevel) + trimmedLine;
+            const indentedLine: string = indentationUnit.repeat(indentLevel) + trimmedLine;
 
             // If the line contains an opening brace, increase the indent level after applying indentation
             if (trimmedLine.endsWith('{')) {
-            indentLevel++;
+                indentLevel++;
             }
 
             return indentedLine;
