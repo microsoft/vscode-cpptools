@@ -1,5 +1,7 @@
 # C/C++ for Visual Studio Code Changelog
 
+* Fix appending `-std=gnu++14` every time when using clang complier on Mac by detecting C++ standard args in `tasks.json`. [#11828](https://github.com/microsoft/vscode-cpptools/issues/11828)
+
 ## Version 1.19.1: November 21, 2023
 ### Bug Fixes
 * Fix `Add '#include'` code actions for Mac frameworks. [#11579](https://github.com/microsoft/vscode-cpptools/issues/11579)
