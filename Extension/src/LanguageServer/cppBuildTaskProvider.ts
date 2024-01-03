@@ -365,7 +365,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         }
 
         // TODO: Remove when compiler query work goes in and we can determine the standard version from TypeScript
-        if (this.buildOptions.taskUsesActiveFile && window.activeTextEditor?.document.languageId === 'cpp' && this.buildOptions.insertStd) {
+        if (this.buildOptions.taskUsesActiveFile && window.activeTextEditor?.document.languageId === 'cpp' && this.buildOptions.insertStd && !this.args.some((arg) => arg.includes('-std='))) {
             this.args.unshift('-std=gnu++14');
         }
         telemetry.logLanguageServerEvent("cppBuildTaskStarted");
