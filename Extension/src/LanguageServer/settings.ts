@@ -279,7 +279,7 @@ export class CppSettings extends Settings {
                 let clangVersion: string;
                 try {
                     const exePath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string[] = execSync(`${quote([exePath])} --version`).toString().split(" ");
+                    const output: string[] = execSync(quote([exePath, '--version'])).toString().split(" ");
                     if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || !semver.valid(output[2])) {
                         if (output.length === 3) {
                             return path;
