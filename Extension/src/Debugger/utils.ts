@@ -12,7 +12,7 @@ export class ArchitectureReplacer {
     public static checkAndReplaceWSLPipeProgram(pipeProgramStr: string, expectedArch: ArchType): string | undefined {
         let replacedPipeProgram: string | undefined;
         const winDir: string | undefined = process.env.WINDIR ? process.env.WINDIR.toLowerCase() : undefined;
-        const winDirAltDirSep: string | undefined = process.env.WINDIR ? process.env.WINDIR.replace('\\', '/').toLowerCase() : undefined;
+        const winDirAltDirSep: string | undefined = process.env.WINDIR ? process.env.WINDIR.replace(/\\/g, '/').toLowerCase() : undefined;
         const winDirEnv: string = "${env:windir}";
 
         if (winDir && winDirAltDirSep && (pipeProgramStr.indexOf(winDir) === 0 || pipeProgramStr.indexOf(winDirAltDirSep) === 0 || pipeProgramStr.indexOf(winDirEnv) === 0)) {
