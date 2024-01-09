@@ -12,7 +12,7 @@ import { isIdentifierPart, isIdentifierStart } from './characterCodes';
 
 /** simple dynamic tagged literal implementation */
 export function taggedLiteral(templateString: string, templateVars: Record<string, any>): string {
-    return safeEval(`\`${templateString.replace('\\', '\\\\').replace(/`/, '\`')}\`;`, templateVars) as string;
+    return safeEval(`\`${templateString.replace(/\\/g, '\\\\').replace(/`/g, '\`')}\`;`, templateVars) as string;
 }
 
 function parseTaggedLiteral(templateString: string) {
