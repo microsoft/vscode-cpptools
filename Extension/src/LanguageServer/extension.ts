@@ -14,6 +14,7 @@ import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
+import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { PlatformInformation } from '../platform';
@@ -959,17 +960,69 @@ function reportMacCrashes(): void {
     }
 }
 
-let previousMacCrashData: string;
-let previousMacCrashCount: number = 0;
+export function watchForCrashes(crashDirectory: string): void {
+    if (process.platform !== "win32") {
+        prevCrashFile = "";
+        fs.stat(crashDirectory, (err) => {
+            const crashObject: Record<string, string> = {};
+            if (err?.code) {
+                // If the directory isn't there, we have a problem...
+                crashObject["fs.stat: err.code"] = err.code;
+                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+                return;
+            }
 
-function logMacCrashTelemetry(data: string): void {
+            // vscode.workspace.createFileSystemWatcher only works in workspace folders.
+            try {
+                fs.watch(crashDirectory, (event, filename) => {
+                    if (event !== "rename") {
+                        return;
+                    }
+                    if (!filename || filename === prevCrashFile) {
+                        return;
+                    }
+                    prevCrashFile = filename;
+                    if (!filename.startsWith("cpptools")) {
+                        return;
+                    }
+                    // Wait 5 seconds to allow time for the crash log to finish being written.
+                    setTimeout(() => {
+                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                            if (err) {
+                                // Try again?
+                                fs.readFile(path.resolve(crashDirectory, filename), 'utf8', handleCrashFileRead);
+                                return;
+                            }
+                            handleCrashFileRead(err, data);
+                        });
+                    }, 5000);
+                });
+            } catch (e) {
+                // The file watcher limit is hit (may not be possible on Mac, but just in case).
+            }
+        });
+    }
+}
+
+let previousCrashData: string;
+let previousCrashCount: number = 0;
+
+function logCrashTelemetry(data: string, type: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
-    previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
-    previousMacCrashData = data;
-    crashCountObject.CrashCount = previousMacCrashCount;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
+    previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
+    previousCrashData = data;
+    crashCountObject.CrashCount = previousCrashCount;
+    telemetry.logLanguageServerEvent(type, crashObject, crashCountObject);
+}
+
+function logMacCrashTelemetry(data: string): void {
+    logCrashTelemetry(data, "MacCrash");
+}
+
+function logCppCrashTelemetry(data: string): void {
+    logCrashTelemetry(data, "CppCrash");
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1060,6 +1113,47 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     }
 
     logMacCrashTelemetry(data);
+}
+
+async function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+    if (err) {
+        return logCppCrashTelemetry("readFile: " + err.code);
+    }
+
+    const lines: string[] = data.split("\n");
+    data = "";
+    const filtPath: string | null = which.sync("c++filt", { nothrow: true });
+    const cpptoolStartStr: string = "cpptools(";
+    for (let line of lines)
+    {
+        if (filtPath) {
+            const cpptoolsStart: number = line.indexOf(cpptoolStartStr);
+            if (cpptoolsStart === -1)
+                continue; // missing cpptools(, i.e. system code
+            line = line.substring(cpptoolsStart + cpptoolStartStr.length);
+            if (line.length < 3)
+                continue; // too short, unexpected
+            if (line.startsWith("+0x"))
+                continue; // no info
+            const addressStartOffset: number = line.lastIndexOf("+0x");
+            if (addressStartOffset === -1)
+                continue; // missing +0x, unexpected
+            const addressEndOffset: number = line.lastIndexOf(")");
+            if (addressEndOffset === -1 || addressStartOffset >= addressEndOffset)
+                continue; // missing ), unexpected
+            const addressStr: string = line.substring(addressStartOffset, addressEndOffset);
+            line = line.substring(0, addressStartOffset);
+            line = (await util.spawnChildProcess(filtPath, [line])).output + addressStr;
+            line = line.replace(/std::(?:__1|__cxx11|basic_)/g, "std::"); // simplify std stuff.
+        }
+        data += line + "\n";
+    }
+
+    if (data.length > 8192) { // The API has an 8k limit.
+        data = data.substring(0, 8189) + "...";
+    }
+
+    logCppCrashTelemetry(data);
 }
 
 export function deactivate(): Thenable<void> {
