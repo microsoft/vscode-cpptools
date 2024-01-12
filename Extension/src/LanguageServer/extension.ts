@@ -988,7 +988,7 @@ export function watchForCrashes(crashDirectory: string): void {
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
-                            void handleCrashFileRead(err, data);
+                            void handleCrashFileRead(crashDirectory, filename, err, data);
                         });
                     }, 5000);
                 });
@@ -1110,16 +1110,20 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
-async function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
+        if (err.code === "ENOENT") {
+            return; // ignore known issue
+        }
         return logCppCrashTelemetry("readFile: " + err.code);
     }
 
     const lines: string[] = data.split("\n");
-    data = "";
+    data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     for (let line of lines)
     {
+        line = line.trim();
         if (filtPath && line.startsWith("_")) {
             line = (await util.spawnChildProcess(filtPath, [line])).output;
             line = line.replace(/std::(?:__1|__cxx11|basic_)/g, "std::"); // simplify std stuff.
@@ -1132,6 +1136,9 @@ async function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null
     }
 
     logCppCrashTelemetry(data);
+
+    await util.deleteFile(path.resolve(crashDirectory, crashFile));
+    void util.deleteDirectory(crashDirectory);
 }
 
 export function deactivate(): Thenable<void> {

@@ -677,6 +677,22 @@ export function deleteFile(filePath: string): Promise<void> {
     });
 }
 
+export function deleteDirectory(directoryPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        if (fs.existsSync(directoryPath)) {
+            fs.rmdir(directoryPath, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
+}
+
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
     const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
