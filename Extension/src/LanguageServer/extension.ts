@@ -923,8 +923,8 @@ function reportMacCrashes(): void {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["fs.stat: err.code"] = err.code;
-                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+                crashObject["stat: errCode"] = err.code;
+                telemetry.logLanguageServerEvent("MacCrash", crashObject);
                 return;
             }
 
@@ -967,8 +967,8 @@ export function watchForCrashes(crashDirectory: string): void {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["fs.stat: err.code"] = err.code;
-                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+                crashObject["stat: errCode"] = err.code;
+                telemetry.logLanguageServerEvent("CppCrash", crashObject);
                 return;
             }
 
@@ -1008,7 +1008,7 @@ function logCrashTelemetry(data: string, type: string): void {
     crashObject.CrashingThreadCallStack = data;
     previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
     previousCrashData = data;
-    crashCountObject.CrashCount = previousCrashCount;
+    crashCountObject.CrashCount = previousCrashCount + 1;
     telemetry.logLanguageServerEvent(type, crashObject, crashCountObject);
 }
 
@@ -1144,13 +1144,16 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
         if (filtPath) {
-            funcStr = (await util.spawnChildProcess(filtPath, [funcStr])).output;
-            funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
-            funcStr = funcStr.replace(/std::basic_/g, "std::");
-            funcStr = funcStr.replace(/ >/g, ">");
-            funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
-            funcStr = funcStr.replace(/<char>/g, "");
-            funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+            const ret = await util.spawnChildProcess(filtPath, [funcStr]).catch(logAndReturn.undefined);
+            if (ret !== undefined) {
+                funcStr = ret.output;
+                funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+                funcStr = funcStr.replace(/std::basic_/g, "std::");
+                funcStr = funcStr.replace(/ >/g, ">");
+                funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+                funcStr = funcStr.replace(/<char>/g, "");
+                funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+            }
         }
         data += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
@@ -1173,8 +1176,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     console.log(data);
     logCppCrashTelemetry(data);
 
-    await util.deleteFile(path.resolve(crashDirectory, crashFile));
-    void util.deleteDirectory(crashDirectory);
+    await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
+    void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
 }
 
 export function deactivate(): Thenable<void> {
