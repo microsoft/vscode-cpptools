@@ -988,12 +988,7 @@ export function watchForCrashes(crashDirectory: string): void {
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
-                            if (err) {
-                                // Try again?
-                                fs.readFile(path.resolve(crashDirectory, filename), 'utf8', handleCrashFileRead);
-                                return;
-                            }
-                            handleCrashFileRead(err, data);
+                            void handleCrashFileRead(err, data);
                         });
                     }, 5000);
                 });
