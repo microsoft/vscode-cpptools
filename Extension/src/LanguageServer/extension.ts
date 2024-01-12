@@ -1123,27 +1123,10 @@ async function handleCrashFileRead(err: NodeJS.ErrnoException | undefined | null
     const lines: string[] = data.split("\n");
     data = "";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
-    const cpptoolStartStr: string = "cpptools(";
     for (let line of lines)
     {
-        if (filtPath) {
-            const cpptoolsStart: number = line.indexOf(cpptoolStartStr);
-            if (cpptoolsStart === -1)
-                continue; // missing cpptools(, i.e. system code
-            line = line.substring(cpptoolsStart + cpptoolStartStr.length);
-            if (line.length < 3)
-                continue; // too short, unexpected
-            if (line.startsWith("+0x"))
-                continue; // no info
-            const addressStartOffset: number = line.lastIndexOf("+0x");
-            if (addressStartOffset === -1)
-                continue; // missing +0x, unexpected
-            const addressEndOffset: number = line.lastIndexOf(")");
-            if (addressEndOffset === -1 || addressStartOffset >= addressEndOffset)
-                continue; // missing ), unexpected
-            const addressStr: string = line.substring(addressStartOffset, addressEndOffset);
-            line = line.substring(0, addressStartOffset);
-            line = (await util.spawnChildProcess(filtPath, [line])).output + addressStr;
+        if (filtPath && line.startsWith("_")) {
+            line = (await util.spawnChildProcess(filtPath, [line])).output;
             line = line.replace(/std::(?:__1|__cxx11|basic_)/g, "std::"); // simplify std stuff.
         }
         data += line + "\n";
