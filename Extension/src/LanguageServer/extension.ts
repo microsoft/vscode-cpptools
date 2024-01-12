@@ -1118,23 +1118,59 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         return logCppCrashTelemetry("readFile: " + err.code);
     }
 
+    console.log("processing crash log");
     const lines: string[] = data.split("\n");
     data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
-    for (let line of lines)
-    {
-        line = line.trim();
-        if (filtPath && line.startsWith("_")) {
-            line = (await util.spawnChildProcess(filtPath, [line])).output;
-            line = line.replace(/std::(?:__1|__cxx11|basic_)/g, "std::"); // simplify std stuff.
+    const isMac: boolean = process.platform === "darwin";
+    const startStr: string = isMac ? " _" : "(_";
+    const offsetStr: string = isMac ? " + " : "+0x";
+    const dotStr: string = "…";
+    for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
+        if (lineNum > 2) {
+            data += "\n";
         }
-        data += line + "\n";
+        const line: string = lines[lineNum];
+        const startPos: number = line.indexOf(startStr);
+        if (startPos === -1) {
+            data += dotStr;
+            continue; // expected
+        }
+        const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
+        if (offsetPos === -1) {
+            data += `missing "${offsetStr}"`;
+            continue; // unexpected
+        }
+        const startPos2: number = startPos + 1;
+        let funcStr: string = line.substring(startPos2, offsetPos);
+        if (filtPath) {
+            funcStr = (await util.spawnChildProcess(filtPath, [funcStr])).output;
+            funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+            funcStr = funcStr.replace(/std::basic_/g, "std::");
+            funcStr = funcStr.replace(/ >/g, ">");
+            funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+            funcStr = funcStr.replace(/<char>/g, "");
+            funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+        }
+        data += funcStr + offsetStr;
+        const offsetPos2: number = offsetPos + offsetStr.length;
+        if (isMac) {
+            data += line.substring(offsetPos2);
+        } else {
+            const endPos: number = line.indexOf(")", offsetPos2);
+            if (endPos === -1) {
+                data += "missing )";
+                continue; // unexpected
+            }
+            data += line.substring(offsetPos2, endPos);
+        }
     }
 
     if (data.length > 8192) { // The API has an 8k limit.
-        data = data.substring(0, 8189) + "...";
+        data = data.substring(0, 8191) + "…";
     }
 
+    console.log(data);
     logCppCrashTelemetry(data);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile));
