@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
+import { quote } from 'shell-quote';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as which from 'which';
@@ -278,7 +279,7 @@ export class CppSettings extends Settings {
                 let clangVersion: string;
                 try {
                     const exePath: string = getExtensionFilePath(`./LLVM/bin/${clangName}`);
-                    const output: string[] = execSync(`${exePath} --version`).toString().split(" ");
+                    const output: string[] = execSync(quote([exePath, '--version'])).toString().split(" ");
                     if (output.length < 3 || output[0] !== clangStr || output[1] !== "version" || !semver.valid(output[2])) {
                         if (output.length === 3) {
                             return path;
