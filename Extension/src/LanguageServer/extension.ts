@@ -1144,7 +1144,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
         if (filtPath) {
-            const ret = await util.spawnChildProcess(filtPath, [funcStr]).catch(logAndReturn.undefined);
+            const ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
             if (ret !== undefined) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
