@@ -13,8 +13,8 @@
 * Fix document symbol requests not checking for cancellation. [#11750](https://github.com/microsoft/vscode-cpptools/issues/11750)
 * Fix code analysis results getting cleared after there's a configuration update. [#11790](https://github.com/microsoft/vscode-cpptools/issues/11790)
 * Fix an exception getting thrown if IntelliSense is disabled but a configuration provider is registered. [#11795](https://github.com/microsoft/vscode-cpptools/issues/11795)
-* Fix German code analysis translations.
-  * Thank you for the contribution @Sir2B [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
+* Fix German code analysis translations. [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
+  * Thank you for the contribution [@Sir2B (Tobias Obermayer)](https://github.com/Sir2B)
 * Fix an EACCES error when using include wildcards with system includes. [#11833](https://github.com/microsoft/vscode-cpptools/issues/11833)
 * Fix a call hierarchy bug leading to use of header-only TU's unnecessarily.
 * Fix a bug that could lead to missing TU source file candidates.
