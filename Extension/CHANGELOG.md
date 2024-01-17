@@ -4,6 +4,9 @@
 ### Enhancements
 * Implement progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
 * Improve the types supported for the 'Add #include' code action.
+* Trigger an IntelliSense update to clear squiggles after the use of the 'Add #include' code action. [#11549](https://github.com/microsoft/vscode-cpptools/issues/11549)
+* Use file buffer for token parsing in the 'Add #include' feature. [#11515](https://github.com/microsoft/vscode-cpptools/issues/11515)
+* Fix build command ignoring puncuation in source path. [#11422](https://github.com/microsoft/vscode-cpptools/issues/11422)
 * Various performance improvements.
 
 ### Bug Fixes
