@@ -1172,6 +1172,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 array-timsort 1.0.3 - MIT
 https://github.com/kaelzhang/node-array-timsort
 
+Copyright (c) 2015 Marco Ziccardi
 
 The MIT License
 
@@ -1788,7 +1789,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-follow-redirects 1.15.3 - MIT
+follow-redirects 1.15.4 - MIT
 https://github.com/follow-redirects/follow-redirects
 
 Copyright 2014-present Olivier Lalonde <olalonde@gmail.com> , James Talmage <james@talmage.io> , Ruben Verborgh
