@@ -923,7 +923,7 @@ function reportMacCrashes(): void {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["stat: errCode"] = err.code;
+                crashObject["errCode"] = err.code;
                 telemetry.logLanguageServerEvent("MacCrash", crashObject);
                 return;
             }
@@ -967,7 +967,7 @@ export function watchForCrashes(crashDirectory: string): void {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["stat: errCode"] = err.code;
+                crashObject["errCode"] = err.code;
                 telemetry.logLanguageServerEvent("CppCrash", crashObject);
                 return;
             }
