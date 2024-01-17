@@ -806,7 +806,7 @@ export class CppProperties {
             if (isGlobPattern) {
                 // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only.
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
+                    fastGlob.sync(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
             } else {
                 resolvedGlob.push(normalized + suffix);
