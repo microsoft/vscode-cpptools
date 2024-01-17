@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.19.2: January 17, 2023
+## Version 1.19.2: January 17, 2024
 ### Enhancements
 * Implemented progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
 * Improve the types supported for the 'Add #include' code actions.
