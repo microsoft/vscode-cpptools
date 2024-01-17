@@ -1,5 +1,20 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.2: January 17, 2023
+### Enhancements
+* Implemented progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
+
+### Bug Fixes
+* Fix shell escaping for `cppbuild` task command line arguments. [#11422](https://github.com/microsoft/vscode-cpptools/issues/11422)
+* Fix IntelliSense not updating when a `#include` is added from a refactor command. [#11549](https://github.com/microsoft/vscode-cpptools/issues/11549)
+* Fix formatting not working in headers after using 'Extract to Function'. [#11729](https://github.com/microsoft/vscode-cpptools/issues/11729)
+* Fix document symbol requests not checking for cancellation. [#11750](https://github.com/microsoft/vscode-cpptools/issues/11750)
+* Fix code analysis results getting cleared after there's a configuration update. [#11790](https://github.com/microsoft/vscode-cpptools/issues/11790)
+* Fix an exception getting thrown if IntelliSense is disabled but a configuration provider is registered. [#11795](https://github.com/microsoft/vscode-cpptools/issues/11795)
+* Fix German code analysis translations.
+  * Thank you for the contribution @Sir2B [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
+* Fix a "random" IntelliSense crash during completion.
+
 ## Version 1.19.1: November 21, 2023
 ### Bug Fixes
 * Fix `Add '#include'` code actions for Mac frameworks. [#11579](https://github.com/microsoft/vscode-cpptools/issues/11579)
