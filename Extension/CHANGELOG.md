@@ -3,6 +3,7 @@
 ## Version 1.19.2: January 17, 2023
 ### Enhancements
 * Implemented progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
+* Improvements to the supported types for 'Add #include' code actions.
 
 ### Bug Fixes
 * Fix shell escaping for `cppbuild` task command line arguments. [#11422](https://github.com/microsoft/vscode-cpptools/issues/11422)
