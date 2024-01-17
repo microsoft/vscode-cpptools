@@ -3,7 +3,8 @@
 ## Version 1.19.2: January 17, 2023
 ### Enhancements
 * Implemented progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
-* Improvements to the supported types for 'Add #include' code actions.
+* Improve the types supported for the 'Add #include' code actions.
+* Various performance improvements.
 
 ### Bug Fixes
 * Fix shell escaping for `cppbuild` task command line arguments. [#11422](https://github.com/microsoft/vscode-cpptools/issues/11422)
@@ -14,7 +15,12 @@
 * Fix an exception getting thrown if IntelliSense is disabled but a configuration provider is registered. [#11795](https://github.com/microsoft/vscode-cpptools/issues/11795)
 * Fix German code analysis translations.
   * Thank you for the contribution @Sir2B [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
+* Fix an EACCES error when using include wildcards with system includes. [#11833](https://github.com/microsoft/vscode-cpptools/issues/11833)
+* Fix a call hierarchy bug leading to use of header-only TU's unnecessarily.
+* Fix a bug that could lead to missing TU source file candidates.
 * Fix a "random" IntelliSense crash during completion.
+* Fix a crash if access to `/dev/urandom` is restricted.
+* Lots of other minor fixes.
 
 ## Version 1.19.1: November 21, 2023
 ### Bug Fixes
