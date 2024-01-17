@@ -357,6 +357,11 @@ export interface FormatParams extends SelectionParams {
     onChanges: boolean;
 }
 
+export interface EditorParams {
+    insertSpaces: boolean;
+    tabSize: number;
+}
+
 export interface FormatResult {
     edits: TextEdit[];
 }
@@ -490,6 +495,11 @@ interface FinishedRequestCustomConfigParams {
     uri: string;
 }
 
+interface FinishedFetchEditorParams {
+    insertSpaces: boolean;
+    tabSize: number;
+}
+
 export interface TextDocumentWillSaveParams {
     textDocument: TextDocumentIdentifier;
     reason: vscode.TextDocumentSaveReason;
@@ -574,6 +584,7 @@ const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFold
 const PreviewReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/previewReferences');
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
+const FinishedFetchEditorSettings: NotificationType<FinishedFetchEditorParams> = new NotificationType<FinishedFetchEditorParams>('cpptools/finishedFetchEditorSettings');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
@@ -596,6 +607,7 @@ const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> =
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
+const FetchEditorFormatSettings: NotificationType<EditorParams> = new NotificationType<EditorParams>('cpptools/fetchEditorFormatSettings');
 const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
@@ -2081,6 +2093,25 @@ export class DefaultClient implements Client {
 
     }
 
+    private async fetchEditorFormatSettings(params: FinishedFetchEditorParams){
+        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+        let uri = editor.document.uri;
+        const settings: OtherSettings = new OtherSettings(uri);
+
+        if (settings.editorTabSize)
+        {
+            params.tabSize = settings.editorTabSize;
+        }
+        if (settings.editorInsertSpaces)
+        {
+            params.insertSpaces = settings.editorInsertSpaces
+        }
+
+        void this.languageClient.sendNotification(FinishedFetchEditorSettings, params);
+    }
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
         await this.provideCustomConfiguration(vscode.Uri.file(requestFile), requestFile);
     }
@@ -2279,6 +2310,7 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
+        this.languageClient.onNotification(FetchEditorFormatSettings, (e) => this.fetchEditorFormatSettings(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
