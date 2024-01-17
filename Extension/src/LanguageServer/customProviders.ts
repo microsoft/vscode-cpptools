@@ -6,7 +6,6 @@
 
 import * as vscode from 'vscode';
 import { CustomConfigurationProvider, SourceFileConfigurationItem, Version, WorkspaceBrowseConfiguration } from 'vscode-cpptools';
-import * as ext from './extension';
 import { CppSettings } from './settings';
 
 /**
@@ -158,7 +157,8 @@ export class CustomConfigurationProviderCollection {
     }
 
     public add(provider: CustomConfigurationProvider, version: Version): boolean {
-        if (new CppSettings(ext.getActiveClient().RootUri).intelliSenseEngine === "disabled") {
+        const settings: CppSettings = new CppSettings((vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ? vscode.workspace.workspaceFolders[0]?.uri : undefined);
+        if (settings.intelliSenseEngine === "disabled") {
             console.warn("Language service is disabled. Provider will not be registered.");
             return false;
         }
