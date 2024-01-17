@@ -11,6 +11,8 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v2

@@ -11,7 +11,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import * as vscode from 'vscode';
-import { DocumentFilter } from 'vscode-languageclient';
+import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
@@ -1360,25 +1360,55 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
     }, Promise.resolve());
 }
 
-export function normalizeArg(arg: string): string {
-    arg = arg.trim();
-    // Check if the arg is enclosed in backtick,
-    // or includes unescaped double-quotes (or single-quotes on Windows),
-    // or includes unescaped single-quotes on mac and linux.
-    if (/^`.*`$/g.test(arg) || /.*[^\\]".*/g.test(arg) ||
-        (process.platform.includes("win") && /.*[^\\]'.*/g.test(arg)) ||
-        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
-        return arg;
+export function quoteArgument(argument: string): string {
+    // Return the argument as is if it's empty
+    if (!argument) {
+        return argument;
     }
-    // The special character double-quote is already escaped in the arg.
-    const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
-    if (!unescapedSpaces && !process.platform.includes("win")) {
-        return arg;
-    } else if (arg.includes(" ")) {
-        arg = arg.replace(/\\\s/g, " ");
-        return "\"" + arg + "\"";
+
+    if (os.platform() === "win32") {
+        // Windows-style quoting logic
+        if (!/[\s\t\n\v\"\\&%^]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = '"';
+        let backslashCount = 0;
+
+        for (const char of argument) {
+            if (char === '\\') {
+                backslashCount++;
+            } else {
+                if (char === '"') {
+                    quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+                } else {
+                    quotedArgument += '\\'.repeat(backslashCount);
+                }
+                quotedArgument += char;
+                backslashCount = 0;
+            }
+        }
+
+        quotedArgument += '\\'.repeat(backslashCount * 2);
+        quotedArgument += '"';
+        return quotedArgument;
     } else {
-        return arg;
+        // Unix-style quoting logic
+        if (!/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = "'";
+        for (const c of argument) {
+            if (c === "'") {
+                quotedArgument += "'\\''";
+            } else {
+                quotedArgument += c;
+            }
+        }
+
+        quotedArgument += "'";
+        return quotedArgument;
     }
 }
 
@@ -1545,4 +1575,42 @@ export function getNumericLoggingLevel(loggingLevel: string | undefined): number
         default:
             return 0;
     }
+}
+
+export function mergeOverlappingRanges(ranges: Range[]): Range[] {
+    // Fix any reversed ranges. Not sure if this is needed, but ensures the input is sanitized.
+    const mergedRanges: Range[] = ranges.map(range => {
+        if (range.start.line > range.end.line || (range.start.line === range.end.line && range.start.character > range.end.character)) {
+            return Range.create(range.end, range.start);
+        }
+        return range;
+    });
+
+    // Merge overlapping ranges.
+    mergedRanges.sort((a, b) => a.start.line - b.start.line || a.start.character - b.start.character);
+    let lastMergedIndex = 0; // Index to keep track of the last merged range
+    for (let currentIndex = 0; currentIndex < ranges.length; currentIndex++) {
+        const currentRange = ranges[currentIndex]; // No need for a shallow copy, since we're not modifying the ranges we haven't read yet.
+        let nextIndex = currentIndex + 1;
+        while (nextIndex < ranges.length) {
+            const nextRange = ranges[nextIndex];
+            // Check for non-overlapping ranges first
+            if (nextRange.start.line > currentRange.end.line ||
+                (nextRange.start.line === currentRange.end.line && nextRange.start.character > currentRange.end.character)) {
+                break;
+            }
+            // Otherwise, merge the overlapping ranges
+            currentRange.end = {
+                line: Math.max(currentRange.end.line, nextRange.end.line),
+                character: Math.max(currentRange.end.character, nextRange.end.character)
+            };
+            nextIndex++;
+        }
+        // Overwrite the array in-place
+        mergedRanges[lastMergedIndex] = currentRange;
+        lastMergedIndex++;
+        currentIndex = nextIndex - 1; // Skip the merged ranges
+    }
+    mergedRanges.length = lastMergedIndex;
+    return mergedRanges;
 }

@@ -495,7 +495,7 @@ export class LanguageStatusUI {
         }
     }
 
-    public activeDocumentChanged(): void {
+    public didChangeActiveEditor(): void {
         const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (!activeEditor) {
             this.ShowConfiguration = false;

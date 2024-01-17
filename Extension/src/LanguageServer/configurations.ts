@@ -806,7 +806,7 @@ export class CppProperties {
             if (isGlobPattern) {
                 // fastGlob silently strips non-found paths. Limit that behavior to dynamic paths only.
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
-                    fastGlob.sync(normalized, { onlyDirectories: true, cwd }) : [res];
+                    fastGlob.sync(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
             } else {
                 resolvedGlob.push(normalized + suffix);
@@ -1993,7 +1993,7 @@ export class CppProperties {
 
             // Escape the path string for literal use in a regular expression
             // Need to escape any quotes to match the original text
-            let escapedPath: string = curPath.replace(/\"/g, '\\\"');
+            let escapedPath: string = curPath.replace(/"/g, '\\"');
             escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
             // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
