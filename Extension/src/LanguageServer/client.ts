@@ -1437,7 +1437,7 @@ export class DefaultClient implements Client {
             workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
             workspaceSymbols: workspaceSettings.workspaceSymbols,
             simplifyStructuredComments: workspaceSettings.simplifyStructuredComments,
-            intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay || (4 - Math.min(4, os.cpus().length)) * 250 + 250,
+            intelliSenseUpdateDelay: workspaceSettings.intelliSenseUpdateDelay,
             experimentalFeatures: workspaceSettings.experimentalFeatures,
             enhancedColorization: workspaceSettings.enhancedColorization,
             intellisenseMaxCachedProcesses: workspaceSettings.intelliSenseMaxCachedProcesses,
@@ -2241,7 +2241,7 @@ export class DefaultClient implements Client {
     }
 
     private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
-        let timer: NodeJS.Timer;
+        let timer: NodeJS.Timeout;
 
         // Create a promise that rejects in <ms> milliseconds
         const timeout: () => Promise<T> = () => new Promise<T>((resolve, reject) => {

@@ -458,7 +458,7 @@
                     },
                     "C_Cpp.intelliSenseUpdateDelay": {
                         "type": "number",
-                        "default": 0,
+                        "default": 2000,
                         "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
                         "scope": "application",
                         "minimum": 50,
@@ -6311,7 +6311,7 @@
         "@types/minimatch": "^3.0.5",
         "@types/mkdirp": "^0.5.2",
         "@types/mocha": "^10.0.1",
-        "@types/node": "^18.11.9",
+        "@types/node": "^18.15.0",
         "@types/node-fetch": "^2.6.9",
         "@types/plist": "^3.0.2",
         "@types/semver": "^7.1.0",

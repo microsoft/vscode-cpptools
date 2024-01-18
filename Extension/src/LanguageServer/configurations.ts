@@ -1105,7 +1105,7 @@ export class CppProperties {
         }
     }
 
-    private compileCommandsFileWatcherTimer?: NodeJS.Timer;
+    private compileCommandsFileWatcherTimer?: NodeJS.Timeout;
     private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
