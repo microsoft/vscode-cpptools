@@ -461,8 +461,8 @@
                         "default": 2000,
                         "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
                         "scope": "application",
-                        "minimum": 50,
-                        "maximum": 1000
+                        "minimum": 500,
+                        "maximum": 3000
                     },
                     "C_Cpp.codeFolding": {
                         "type": "string",

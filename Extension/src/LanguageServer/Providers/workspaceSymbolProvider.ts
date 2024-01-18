@@ -15,6 +15,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
     }
 
     public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
+        // if the query is empty, then return as quickly as possible
         if (!query) {
             return [];
         }
