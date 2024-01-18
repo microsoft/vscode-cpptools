@@ -79,7 +79,6 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
     return initializationPromise;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
