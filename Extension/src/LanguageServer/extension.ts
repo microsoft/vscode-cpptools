@@ -1173,7 +1173,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         data = data.substring(0, 8191) + "…";
     }
 
-    console.log(data);
+    console.log(`Crash call stack:\n${data}`);
     logCppCrashTelemetry(data);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
