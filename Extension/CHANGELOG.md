@@ -16,7 +16,7 @@
 * Fix German code analysis translations. [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
   * Thank you for the contribution [@Sir2B (Tobias Obermayer)](https://github.com/Sir2B)
 * Fix an EACCES error when using include wildcards with system includes. [#11833](https://github.com/microsoft/vscode-cpptools/issues/11833)
-* Fix IntelliSense passes occuring while a user is typing, not honoring the `C_Cpp.intelliSenseUpdateDelay` setting.
+* Fix IntelliSense passes occurring while a user is typing, not honoring the `C_Cpp.intelliSenseUpdateDelay` setting.
 * Fix a call hierarchy bug leading to use of header-only TU's unnecessarily.
 * Fix a bug that could lead to missing TU source file candidates.
 * Fix a "random" IntelliSense crash during completion.
