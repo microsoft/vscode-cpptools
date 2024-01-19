@@ -3,6 +3,7 @@
 ## Version 1.19.2: January 17, 2024
 ### Enhancements
 * Implement progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
+* Improve memory efficiency by using token parsing in the 'Add #include' feature. [#11515](https://github.com/microsoft/vscode-cpptools/issues/11515)
 * Improve the types supported for the 'Add #include' code action.
 * Various performance improvements.
 
