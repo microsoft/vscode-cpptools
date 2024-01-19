@@ -1118,7 +1118,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         return logCppCrashTelemetry("readFile: " + err.code);
     }
 
-    console.log("processing crash log");
     const lines: string[] = data.split("\n");
     data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
