@@ -788,7 +788,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
 
     // Do not use CppSettings to avoid circular require()
     const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: string | undefined = (skipLogging === undefined || !skipLogging) ? "None" : settings.get<string>("loggingLevel");
+    const loggingLevel: string | undefined = (skipLogging === undefined || !skipLogging) ? settings.get<string>("loggingLevel") : "None";
 
     let proc: child_process.ChildProcess;
     if (await isExecutable(program)) {
