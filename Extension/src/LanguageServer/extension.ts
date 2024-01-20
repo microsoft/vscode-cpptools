@@ -14,6 +14,7 @@ import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
+import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { PlatformInformation } from '../platform';
@@ -922,8 +923,8 @@ function reportMacCrashes(): void {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["fs.stat: err.code"] = err.code;
-                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+                crashObject["errCode"] = err.code;
+                telemetry.logLanguageServerEvent("MacCrash", crashObject);
                 return;
             }
 
@@ -959,17 +960,64 @@ function reportMacCrashes(): void {
     }
 }
 
-let previousMacCrashData: string;
-let previousMacCrashCount: number = 0;
+export function watchForCrashes(crashDirectory: string): void {
+    if (process.platform !== "win32") {
+        prevCrashFile = "";
+        fs.stat(crashDirectory, (err) => {
+            const crashObject: Record<string, string> = {};
+            if (err?.code) {
+                // If the directory isn't there, we have a problem...
+                crashObject["errCode"] = err.code;
+                telemetry.logLanguageServerEvent("CppCrash", crashObject);
+                return;
+            }
 
-function logMacCrashTelemetry(data: string): void {
+            // vscode.workspace.createFileSystemWatcher only works in workspace folders.
+            try {
+                fs.watch(crashDirectory, (event, filename) => {
+                    if (event !== "rename") {
+                        return;
+                    }
+                    if (!filename || filename === prevCrashFile) {
+                        return;
+                    }
+                    prevCrashFile = filename;
+                    if (!filename.startsWith("cpptools")) {
+                        return;
+                    }
+                    // Wait 5 seconds to allow time for the crash log to finish being written.
+                    setTimeout(() => {
+                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                            void handleCrashFileRead(crashDirectory, filename, err, data);
+                        });
+                    }, 5000);
+                });
+            } catch (e) {
+                // The file watcher limit is hit (may not be possible on Mac, but just in case).
+            }
+        });
+    }
+}
+
+let previousCrashData: string;
+let previousCrashCount: number = 0;
+
+function logCrashTelemetry(data: string, type: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
-    previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
-    previousMacCrashData = data;
-    crashCountObject.CrashCount = previousMacCrashCount;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
+    previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
+    previousCrashData = data;
+    crashCountObject.CrashCount = previousCrashCount + 1;
+    telemetry.logLanguageServerEvent(type, crashObject, crashCountObject);
+}
+
+function logMacCrashTelemetry(data: string): void {
+    logCrashTelemetry(data, "MacCrash");
+}
+
+function logCppCrashTelemetry(data: string): void {
+    logCrashTelemetry(data, "CppCrash");
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1060,6 +1108,75 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     }
 
     logMacCrashTelemetry(data);
+}
+
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+    if (err) {
+        if (err.code === "ENOENT") {
+            return; // ignore known issue
+        }
+        return logCppCrashTelemetry("readFile: " + err.code);
+    }
+
+    const lines: string[] = data.split("\n");
+    data = crashFile + "\n";
+    const filtPath: string | null = which.sync("c++filt", { nothrow: true });
+    const isMac: boolean = process.platform === "darwin";
+    const startStr: string = isMac ? " _" : "(_";
+    const offsetStr: string = isMac ? " + " : "+0x";
+    const dotStr: string = "…";
+    for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
+        if (lineNum > 2) {
+            data += "\n";
+        }
+        const line: string = lines[lineNum];
+        const startPos: number = line.indexOf(startStr);
+        if (startPos === -1) {
+            data += dotStr;
+            continue; // expected
+        }
+        const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
+        if (offsetPos === -1) {
+            data += `missing "${offsetStr}"`;
+            continue; // unexpected
+        }
+        const startPos2: number = startPos + 1;
+        let funcStr: string = line.substring(startPos2, offsetPos);
+        if (filtPath) {
+            const ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            if (ret !== undefined) {
+                funcStr = ret.output;
+                funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+                funcStr = funcStr.replace(/std::basic_/g, "std::");
+                funcStr = funcStr.replace(/ >/g, ">");
+                funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+                funcStr = funcStr.replace(/<char>/g, "");
+                funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+            }
+        }
+        data += funcStr + offsetStr;
+        const offsetPos2: number = offsetPos + offsetStr.length;
+        if (isMac) {
+            data += line.substring(offsetPos2);
+        } else {
+            const endPos: number = line.indexOf(")", offsetPos2);
+            if (endPos === -1) {
+                data += "missing )";
+                continue; // unexpected
+            }
+            data += line.substring(offsetPos2, endPos);
+        }
+    }
+
+    if (data.length > 8192) { // The API has an 8k limit.
+        data = data.substring(0, 8191) + "…";
+    }
+
+    console.log(`Crash call stack:\n${data}`);
+    logCppCrashTelemetry(data);
+
+    await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
+    void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
 }
 
 export function deactivate(): Thenable<void> {
