@@ -360,6 +360,7 @@ export interface FormatParams extends SelectionParams {
 export interface EditorParams {
     insertSpaces: boolean;
     tabSize: number;
+    useVcFormat: boolean;
 }
 
 export interface FormatResult {
@@ -498,6 +499,7 @@ interface FinishedRequestCustomConfigParams {
 interface FinishedFetchEditorParams {
     insertSpaces: boolean;
     tabSize: number;
+    useVcFormat: boolean;
 }
 
 export interface TextDocumentWillSaveParams {
@@ -2100,6 +2102,7 @@ export class DefaultClient implements Client {
         }
         let uri = editor.document.uri;
         const settings: OtherSettings = new OtherSettings(uri);
+        const cppSettings: CppSettings = new CppSettings(uri);
 
         if (settings.editorTabSize)
         {
@@ -2108,6 +2111,10 @@ export class DefaultClient implements Client {
         if (settings.editorInsertSpaces)
         {
             params.insertSpaces = settings.editorInsertSpaces
+        }
+        if (cppSettings.useVcFormat)
+        {
+            params.useVcFormat = cppSettings.useVcFormat(editor.document);
         }
 
         void this.languageClient.sendNotification(FinishedFetchEditorSettings, params);
