@@ -1125,15 +1125,26 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     const startStr: string = isMac ? " _" : "(_";
     const offsetStr: string = isMac ? " + " : "+0x";
     const dotStr: string = "…";
-    for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        if (lineNum > 2) {
+    for (let lineNum: number = 1; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
+        if (lineNum > 1) {
             data += "\n";
         }
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1) {
-            data += dotStr;
-            continue; // expected
+            if (isMac) {
+                const startAddressPos: number = line.indexOf("0x");
+                if (startAddressPos === -1) {
+                    // unexpected
+                    data += "Missing 0x";
+                } else {
+                    // expected
+                    data += line.substring(startAddressPos);
+                }
+            } else {
+                data += dotStr; // expected
+            }
+            continue;
         }
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
@@ -1158,10 +1169,17 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             data += line.substring(offsetPos2);
+            const startAddressPos: number = line.indexOf("0x");
+            if (startAddressPos === -1 || startAddressPos >= startPos) {
+                // unexpected
+                data += "\nMissing 0x";
+                continue;
+            }
+            data += ` ${line.substring(startAddressPos, startPos)}`; // the address
         } else {
             const endPos: number = line.indexOf(")", offsetPos2);
             if (endPos === -1) {
-                data += "missing )";
+                data += "\nmissing )";
                 continue; // unexpected
             }
             data += line.substring(offsetPos2, endPos);
