@@ -1122,6 +1122,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     }
 
     const lines: string[] = data.split("\n");
+    console.log(`Original data:${data}`); // TEMP REMOVE LATER
     let addressData: string = "\n";
     data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
@@ -1141,7 +1142,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         if (startPos === -1 || line[startPos + 1] === "+") {
             data += dotStr;
             const startAddressPos: number = line.indexOf("0x");
-            const endAddressPos: number = line.indexOf(endOffsetStr);
+            const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
                 addressData += "Unexpected offset";
             } else {
@@ -1178,7 +1179,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
                 data += "<Missing 0x>";
                 continue;
             }
-            data += ` ${line.substring(startAddressPos, startPos)}`; // the address
+            addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
             const endPos: number = line.indexOf(")", offsetPos2);
             if (endPos === -1) {
