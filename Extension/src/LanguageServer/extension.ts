@@ -1122,8 +1122,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     }
 
     const lines: string[] = data.split("\n");
-    console.log(`Original data:${data}`); // TEMP REMOVE LATER
-    let addressData: string = "\n";
+    let addressData: string = ".\n.";
     data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
@@ -1195,7 +1194,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     }
 
     console.log(`Crash call stack:\n${data}`);
-    console.log(`Temp address data:\n${addressData}`); // TEMP REMOVE LATER
     logCppCrashTelemetry(data, addressData);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
