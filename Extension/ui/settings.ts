@@ -233,7 +233,7 @@ class SettingsApp {
         if (this.updating) {
             return;
         }
-        let el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+        const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
 
         if (id === elementId.includePath) {
             this.vsCodeApi.postMessage({
@@ -397,5 +397,5 @@ class SettingsApp {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const app: SettingsApp = new SettingsApp();

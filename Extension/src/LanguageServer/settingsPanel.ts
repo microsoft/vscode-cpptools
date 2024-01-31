@@ -83,7 +83,7 @@ export class SettingsPanel {
     private disposablesPanel?: vscode.Disposable;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = localize("c.cpp.configurations", 'C/C++ Configurations');
-    private rootUri: vscode.Uri | undefined
+    private rootUri: vscode.Uri | undefined;
 
     // Used to workaround a VS Code 1.56 regression in which webViewPanel.onDidChangeViewState
     // gets called before the SettingsApp constructor is finished running.
@@ -255,7 +255,7 @@ export class SettingsPanel {
     }
 
     private validatePaths(message: any): void {
-        let trimmedPaths = [];
+        const trimmedPaths = [];
         for (const value of message.value.split("\n")) {
             if (fs.existsSync(this.rootUri?.fsPath + path.sep + value.trim())) {
                 trimmedPaths.push(value.trim());
@@ -277,7 +277,7 @@ export class SettingsPanel {
         switch (message.command) {
             case 'validate':
                 this.validatePaths(message);
-                break
+                break;
             case 'change':
                 this.updateConfig(message);
                 break;
