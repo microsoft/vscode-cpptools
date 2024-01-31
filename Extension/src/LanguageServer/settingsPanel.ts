@@ -83,6 +83,7 @@ export class SettingsPanel {
     private disposablesPanel?: vscode.Disposable;
     private static readonly viewType: string = 'settingsPanel';
     private static readonly title: string = localize("c.cpp.configurations", 'C/C++ Configurations');
+    private rootUri: vscode.Uri | undefined
 
     // Used to workaround a VS Code 1.56 regression in which webViewPanel.onDidChangeViewState
     // gets called before the SettingsApp constructor is finished running.
@@ -99,7 +100,7 @@ export class SettingsPanel {
         );
     }
 
-    public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, errors: config.ConfigurationErrors, viewColumn?: vscode.ViewColumn): void {
+    public createOrShow(configSelection: string[], activeConfiguration: config.Configuration, rootUri: vscode.Uri | undefined, errors: config.ConfigurationErrors, viewColumn?: vscode.ViewColumn): void {
         const column: vscode.ViewColumn | undefined = viewColumn ?? vscode.window.activeTextEditor?.viewColumn;
 
         // Show existing panel
@@ -108,6 +109,7 @@ export class SettingsPanel {
             return;
         }
 
+        this.rootUri = rootUri;
         this.initialized = false;
 
         // Create new panel
@@ -252,11 +254,30 @@ export class SettingsPanel {
         }
     }
 
+    private validatePaths(message: any): void {
+        let trimmedPaths = [];
+        for (const value of message.value.split("\n")) {
+            if (fs.existsSync(this.rootUri?.fsPath + path.sep + value.trim())) {
+                trimmedPaths.push(value.trim());
+            } else {
+                trimmedPaths.push(value);
+            }
+        }
+        this.updateConfig({
+            command: "change",
+            key: message.key,
+            value: trimmedPaths.join("\n")
+        });
+    }
+
     private onMessageReceived(message: any): void {
         if (message === null || message === undefined) {
             return;
         }
         switch (message.command) {
+            case 'validate':
+                this.validatePaths(message);
+                break
             case 'change':
                 this.updateConfig(message);
                 break;
@@ -369,6 +390,9 @@ export class SettingsPanel {
         }
 
         this.configValuesChanged.fire();
+        if (this.panel && this.initialized) {
+            void this.panel.webview.postMessage({ command: 'updateConfig', config: this.configValues });
+        }
         this.logTelemetryForElement(message.key);
     }
 

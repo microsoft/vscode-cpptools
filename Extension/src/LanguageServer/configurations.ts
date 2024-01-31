@@ -808,6 +808,9 @@ export class CppProperties {
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
+                if (resolvedGlob.length === 0) {
+                    resolvedGlob.push(normalized);
+                }
             } else {
                 resolvedGlob.push(normalized + suffix);
             }
@@ -1208,7 +1211,7 @@ export class CppProperties {
                         // Use the active configuration as the default selected configuration to load on UI editor
                         this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         this.settingsPanel.createOrShow(configNames,
-                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex], this.rootUri,
                             this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex),
                             viewColumn);
                     }
