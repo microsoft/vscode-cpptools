@@ -1536,9 +1536,15 @@ export class CppProperties {
 
         // Check if config name is unique.
         errors.name = this.isConfigNameUnique(config.name);
-
+        let resolvedCompilerPath: string | undefined;
         // Validate compilerPath
-        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath);
+        if (config.compilerPath) {
+            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true }) ?? undefined;
+        }
+
+        if (resolvedCompilerPath === undefined) {
+            resolvedCompilerPath = this.resolvePath(config.compilerPath);
+        }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath
