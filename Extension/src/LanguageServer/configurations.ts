@@ -1545,7 +1545,6 @@ export class CppProperties {
         if (resolvedCompilerPath === undefined) {
             resolvedCompilerPath = this.resolvePath(config.compilerPath);
         }
-        
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath
