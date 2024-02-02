@@ -1,8 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.19.2: January 17, 2024
+## Version 1.19.2: January 22, 2024
 ### Enhancements
 * Implement progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
+* Improve memory efficiency by using token parsing in the 'Add #include' feature. [#11515](https://github.com/microsoft/vscode-cpptools/issues/11515)
 * Improve the types supported for the 'Add #include' code action.
 * Various performance improvements.
 
@@ -16,6 +17,7 @@
 * Fix German code analysis translations. [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
   * Thank you for the contribution [@Sir2B (Tobias Obermayer)](https://github.com/Sir2B)
 * Fix an EACCES error when using include wildcards with system includes. [#11833](https://github.com/microsoft/vscode-cpptools/issues/11833)
+* Fix IntelliSense passes occurring while a user is typing, not honoring the `C_Cpp.intelliSenseUpdateDelay` setting.
 * Fix a call hierarchy bug leading to use of header-only TU's unnecessarily.
 * Fix a bug that could lead to missing TU source file candidates.
 * Fix a "random" IntelliSense crash during completion.

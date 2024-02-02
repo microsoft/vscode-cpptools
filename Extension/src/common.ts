@@ -677,6 +677,22 @@ export function deleteFile(filePath: string): Promise<void> {
     });
 }
 
+export function deleteDirectory(directoryPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        if (fs.existsSync(directoryPath)) {
+            fs.rmdir(directoryPath, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
+}
+
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
     const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
@@ -736,14 +752,16 @@ export interface ProcessReturnType {
     output: string;
 }
 
-export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     // Do not use CppSettings to avoid circular require()
-    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
-    if (loggingLevel === "Information" || loggingLevel === "Debug") {
-        getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
+    if (skipLogging === undefined || !skipLogging) {
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+        if (loggingLevel === "Information" || loggingLevel === "Debug") {
+            getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
+        }
     }
-    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
+    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     if (programOutput.exitCode) {
         return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
@@ -765,12 +783,12 @@ interface ProcessOutput {
     stderr: string;
 }
 
-async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
+async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
     const result = new ManualPromise<ProcessOutput>();
 
     // Do not use CppSettings to avoid circular require()
     const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    const loggingLevel: string | undefined = (skipLogging === undefined || !skipLogging) ? settings.get<string>("loggingLevel") : "None";
 
     let proc: child_process.ChildProcess;
     if (await isExecutable(program)) {
