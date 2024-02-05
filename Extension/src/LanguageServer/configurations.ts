@@ -1258,7 +1258,7 @@ export class CppProperties {
 
     private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
         if (paths === undefined) {
-            return undefined
+            return undefined;
         }
         const trimmedPaths = [];
         for (const value of paths) {

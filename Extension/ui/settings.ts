@@ -233,7 +233,7 @@ class SettingsApp {
         if (this.updating) {
             return;
         }
-        
+
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
         this.vsCodeApi.postMessage({
             command: "change",
