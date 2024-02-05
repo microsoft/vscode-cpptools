@@ -1211,7 +1211,7 @@ export class CppProperties {
                         // Use the active configuration as the default selected configuration to load on UI editor
                         this.settingsPanel.selectedConfigIndex = this.CurrentConfigurationIndex;
                         this.settingsPanel.createOrShow(configNames,
-                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex], this.rootUri,
+                            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex],
                             this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex),
                             viewColumn);
                     }
@@ -1256,11 +1256,27 @@ export class CppProperties {
         }
     }
 
+    private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
+        const trimmedPaths = [];
+        if (paths !== undefined) {
+            for (let value of paths) {
+                let fullPath = this.resolvePath(value);
+                if (fs.existsSync(fullPath.trim())) {
+                    trimmedPaths.push(value.trim());
+                } else {
+                    trimmedPaths.push(value);
+                }
+            }
+            return trimmedPaths;
+        }
+    }
+
     private saveConfigurationUI(): void {
         this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         if (this.settingsPanel && this.configurationJson) {
             const config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath = this.trimPathWhitespace(this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath);
             this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
             this.writeToJson();
         }

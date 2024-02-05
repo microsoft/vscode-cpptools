@@ -235,19 +235,11 @@ class SettingsApp {
         }
         const el: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
 
-        if (id === elementId.includePath) {
-            this.vsCodeApi.postMessage({
-                command: "validate",
-                key: id,
-                value: el.value
-            });
-        } else {
-            this.vsCodeApi.postMessage({
-                command: "change",
-                key: id,
-                value: el.value
-            });
-        }
+        this.vsCodeApi.postMessage({
+            command: "change",
+            key: id,
+            value: el.value
+        });
     }
 
     private onMessageReceived(e: MessageEvent): void {
