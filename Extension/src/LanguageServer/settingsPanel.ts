@@ -109,7 +109,7 @@ export class SettingsPanel {
         }
 
         this.initialized = false;
-        
+
         // Create new panel
         this.panel = vscode.window.createWebviewPanel(
             SettingsPanel.viewType,

@@ -1259,8 +1259,8 @@ export class CppProperties {
     private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
         const trimmedPaths = [];
         if (paths !== undefined) {
-            for (let value of paths) {
-                let fullPath = this.resolvePath(value);
+            for (const value of paths) {
+                const fullPath = this.resolvePath(value);
                 if (fs.existsSync(fullPath.trim())) {
                     trimmedPaths.push(value.trim());
                 } else {
