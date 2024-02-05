@@ -1257,18 +1257,19 @@ export class CppProperties {
     }
 
     private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
-        const trimmedPaths = [];
-        if (paths !== undefined) {
-            for (const value of paths) {
-                const fullPath = this.resolvePath(value);
-                if (fs.existsSync(fullPath.trim())) {
-                    trimmedPaths.push(value.trim());
-                } else {
-                    trimmedPaths.push(value);
-                }
-            }
-            return trimmedPaths;
+        if (paths === undefined) {
+            return undefined
         }
+        const trimmedPaths = [];
+        for (const value of paths) {
+            const fullPath = this.resolvePath(value);
+            if (fs.existsSync(fullPath.trim()) && !fs.existsSync(fullPath)) {
+                trimmedPaths.push(value.trim());
+            } else {
+                trimmedPaths.push(value);
+            }
+        }
+        return trimmedPaths;
     }
 
     private saveConfigurationUI(): void {
