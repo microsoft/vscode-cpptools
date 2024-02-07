@@ -552,6 +552,7 @@ const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEd
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
+const DirectlyReferencedHeadersRequest: RequestType<void, string[], void> = new RequestType<void, string[], void>('cpptools/directlyReferencedHeaders');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -777,6 +778,7 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
+    getDirectlyReferencedHeaders(): Promise<string[]>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2158,6 +2160,11 @@ export class DefaultClient implements Client {
         };
         await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
+    }
+
+    public async getDirectlyReferencedHeaders(): Promise<string[]> {
+        await this.ready;
+        return this.languageClient.sendRequest(DirectlyReferencedHeadersRequest, null);
     }
 
     /**
@@ -3983,4 +3990,5 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
+    getDirectlyReferencedHeaders(): Promise<string[]> { return Promise.resolve([]); }
 }

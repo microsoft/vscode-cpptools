@@ -131,4 +131,8 @@ export class CppTools implements CppToolsTestApi {
     public getTestHook(): CppToolsTestHook {
         return test.getTestHook();
     }
+
+    public async getDirectlyReferencedHeaders(): Promise<string[]> {
+        return LanguageServer.getActiveClient().getDirectlyReferencedHeaders();
+    }
 }
