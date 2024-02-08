@@ -458,7 +458,7 @@
                     },
                     "C_Cpp.intelliSenseUpdateDelay": {
                         "type": "number",
-                        "default": 2000,
+                        "default": 1000,
                         "description": "%c_cpp.configuration.intelliSenseUpdateDelay.description%",
                         "scope": "application",
                         "minimum": 500,
