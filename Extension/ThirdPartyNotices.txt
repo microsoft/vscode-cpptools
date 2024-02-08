@@ -944,7 +944,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/1ds-core-js 3.2.12 - MIT
+@microsoft/1ds-core-js 3.2.15 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 copyright Microsoft 2018
@@ -979,7 +979,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/1ds-post-js 3.2.12 - MIT
+@microsoft/1ds-post-js 3.2.15 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 copyright Microsoft 2018
@@ -1016,7 +1016,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-core-js 2.8.14 - MIT
+@microsoft/applicationinsights-core-js 2.8.16 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
@@ -1082,11 +1082,15 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/dynamicproto-js 1.1.9 - MIT
+@microsoft/dynamicproto-js 1.1.10 - MIT
 https://github.com/microsoft/DynamicProto-JS#readme
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
+Copyright jQuery Foundation and other contributors
+Copyright 2013 jQuery Foundation, Inc. and other contributors
+Copyright 2005, 2014 jQuery Foundation, Inc. and other contributors
+Copyright 2006 Google Inc. https://code.google.com/p/google-diff-match-patch
 
 The MIT License (MIT)
 
@@ -1149,7 +1153,7 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@xmldom/xmldom 0.8.8 - MIT
+@xmldom/xmldom 0.8.10 - MIT
 https://github.com/xmldom/xmldom
 
 Copyright 2012 - 2017 jindw <jindw@xidea.org> and other contributors
@@ -1233,10 +1237,10 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-axios 1.6.1 - MIT
+axios 1.6.5 - MIT
 https://axios-http.com/
 
-Copyright (c) 2023 Matt Zabriskie and contributors
+Copyright (c) 2024 Matt Zabriskie and contributors
 Copyright (c) 2014-present Matt Zabriskie & Collaborators
 
 # Copyright (c) 2014-present Matt Zabriskie & Collaborators
@@ -1789,7 +1793,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-follow-redirects 1.15.4 - MIT
+follow-redirects 1.15.5 - MIT
 https://github.com/follow-redirects/follow-redirects
 
 Copyright 2014-present Olivier Lalonde <olalonde@gmail.com> , James Talmage <james@talmage.io> , Ruben Verborgh
@@ -1848,7 +1852,7 @@ Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
 
 ---------------------------------------------------------
 
-fsevents 2.3.2 - MIT
+fsevents 2.3.3 - MIT
 https://github.com/fsevents/fsevents
 
 (c) 2020 by Philipp Dunkel, Ben Noordhuis, Elan Shankar, Paul Miller
@@ -2223,7 +2227,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-nanoid 3.3.6 - MIT
+nanoid 3.3.7 - MIT
 https://github.com/ai/nanoid#readme
 
 Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>
@@ -2670,7 +2674,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---------------------------------------------------------
 
-ssh-config 4.2.1 - MIT
+ssh-config 4.4.1 - MIT
 https://github.com/cyjake/ssh-config#readme
 
 Copyright (c) 2017 Chen Yangjian
