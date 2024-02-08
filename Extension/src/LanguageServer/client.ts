@@ -317,6 +317,7 @@ export interface GetDocumentSymbolRequestParams {
 
 export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
     query: string;
+    experimentEnabled: boolean;
 }
 
 export enum SymbolScope {
@@ -2240,7 +2241,7 @@ export class DefaultClient implements Client {
     }
 
     private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
-        let timer: NodeJS.Timer;
+        let timer: NodeJS.Timeout;
 
         // Create a promise that rejects in <ms> milliseconds
         const timeout: () => Promise<T> = () => new Promise<T>((resolve, reject) => {

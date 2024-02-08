@@ -3,6 +3,7 @@
  * See 'LICENSE' in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as vscode from 'vscode';
+import { isExperimentEnabled } from '../../telemetry';
 import { DefaultClient, GetSymbolInfoRequest, LocalizeSymbolInformation, SymbolScope, WorkspaceSymbolParams } from '../client';
 import { getLocalizedString, getLocalizedSymbolScope } from '../localization';
 import { makeVscodeLocation } from '../utils';
@@ -14,8 +15,14 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
     }
 
     public async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
+        // if the query is empty, then return as quickly as possible
+        if (!query) {
+            return [];
+        }
+
         const params: WorkspaceSymbolParams = {
-            query: query
+            query: query,
+            experimentEnabled: await isExperimentEnabled('CppTools1')
         };
 
         const symbols: LocalizeSymbolInformation[] = await this.client.languageClient.sendRequest(GetSymbolInfoRequest, params, token);
