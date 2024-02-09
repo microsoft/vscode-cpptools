@@ -1,5 +1,28 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.3: February 12, 2024
+### Enhancements
+ * Enable support for fuzzy symbol seaches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
+ * Improve performance of symbol searches. [#7908](https://github.com/microsoft/vscode-cpptools/issues/7908), [#7914](https://github.com/microsoft/vscode-cpptools/issues/7914), [#11557](https://github.com/microsoft/vscode-cpptools/issues/11557)
+ * Change the default setting value for `C_Cpp.intelliSenseUpdateDelay` from 2s to 1s. [#11932](https://github.com/microsoft/vscode-cpptools/pull/11932)
+
+### Bug Fixes
+ * Trim trailing spaces from include paths in the configuration UI. [#11862](https://github.com/microsoft/vscode-cpptools/issues/11862)
+ * Fix comma delimited lists in `@param` Doxygen parameters. [#11868](https://github.com/microsoft/vscode-cpptools/issues/11868)
+ * Fix incorrect errors for `compilerPath` in the configuration UI for compilers that can be found in PATH. [#11903](https://github.com/microsoft/vscode-cpptools/issues/11903)
+ * Fix an issue with include sorting when formatting with clang-format. [#11914](https://github.com/microsoft/vscode-cpptools/issues/11914)
+ * Fix issues related to support for C++ modules and parsing of related compiler arguments.
+ * Remove the requirement that a file be open in the editor from various LSP requests.
+ * Fix an issue that could result in the Outline pane not being populated.
+ * Fix an issue where use of an explicit `compilerPath` to override the compiler in a `compile_commands.json` with also throw out the compiler arguments.
+ * Fix some crashes reported by crash telemetry.
+ * Address multiple issues with compiler querying of clang-cl.
+ * Fix issues with the tag parsing status sometimes not being accurately reflected in the UI.
+ * Fix an issue with configuring IntelliSense for a header file after having chosen an associated source file in which inclusion of the header is disabled or removed.
+ * Fix a potential crash when using 'Find All References'.
+ * Fix an issue in which the directory specified in a `compile_commands.json` was not being used as the current directory when querying the specified compiler path.
+ * Fix document and workspace symbol requests being blocked by an IntelliSense request.
+
 ## Version 1.19.2: January 22, 2024
 ### Enhancements
 * Implement progressive population of IntelliSense results. [#7759](https://github.com/microsoft/vscode-cpptools/issues/7759)
@@ -15,7 +38,7 @@
 * Fix code analysis results getting cleared after there's a configuration update. [#11790](https://github.com/microsoft/vscode-cpptools/issues/11790)
 * Fix an exception getting thrown if IntelliSense is disabled but a configuration provider is registered. [#11795](https://github.com/microsoft/vscode-cpptools/issues/11795)
 * Fix German code analysis translations. [PR #11845](https://github.com/microsoft/vscode-cpptools/pull/11845)
-  * Thank you for the contribution [@Sir2B (Tobias Obermayer)](https://github.com/Sir2B)
+  * Thank you for the contribution. [@Sir2B (Tobias Obermayer)](https://github.com/Sir2B)
 * Fix an EACCES error when using include wildcards with system includes. [#11833](https://github.com/microsoft/vscode-cpptools/issues/11833)
 * Fix IntelliSense passes occurring while a user is typing, not honoring the `C_Cpp.intelliSenseUpdateDelay` setting.
 * Fix a call hierarchy bug leading to use of header-only TU's unnecessarily.
