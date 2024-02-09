@@ -808,6 +808,9 @@ export class CppProperties {
                 const matches: string[] = fastGlob.isDynamicPattern(normalized) ?
                     fastGlob.sync(normalized, { onlyDirectories: true, cwd, suppressErrors: true, deep: 15 }) : [res];
                 resolvedGlob.push(...matches.map(s => s + suffix));
+                if (resolvedGlob.length === 0) {
+                    resolvedGlob.push(normalized);
+                }
             } else {
                 resolvedGlob.push(normalized + suffix);
             }
@@ -1105,7 +1108,7 @@ export class CppProperties {
         }
     }
 
-    private compileCommandsFileWatcherTimer?: NodeJS.Timer;
+    private compileCommandsFileWatcherTimer?: NodeJS.Timeout;
     private compileCommandsFileWatcherFiles: Set<string> = new Set<string>();
 
     // Dispose existing and loop through cpp and populate with each file (exists or not) as you go.
@@ -1253,11 +1256,28 @@ export class CppProperties {
         }
     }
 
+    private trimPathWhitespace(paths: string[] | undefined): string[] | undefined {
+        if (paths === undefined) {
+            return undefined;
+        }
+        const trimmedPaths = [];
+        for (const value of paths) {
+            const fullPath = this.resolvePath(value);
+            if (fs.existsSync(fullPath.trim()) && !fs.existsSync(fullPath)) {
+                trimmedPaths.push(value.trim());
+            } else {
+                trimmedPaths.push(value);
+            }
+        }
+        return trimmedPaths;
+    }
+
     private saveConfigurationUI(): void {
         this.parsePropertiesFile(); // Clear out any modifications we may have made internally.
         if (this.settingsPanel && this.configurationJson) {
             const config: Configuration = this.settingsPanel.getLastValuesFromConfigUI();
             this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex] = config;
+            this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath = this.trimPathWhitespace(this.configurationJson.configurations[this.settingsPanel.selectedConfigIndex].includePath);
             this.settingsPanel.updateErrors(this.getErrorsForConfigUI(this.settingsPanel.selectedConfigIndex));
             this.writeToJson();
         }
@@ -1536,9 +1556,15 @@ export class CppProperties {
 
         // Check if config name is unique.
         errors.name = this.isConfigNameUnique(config.name);
-
+        let resolvedCompilerPath: string | undefined;
         // Validate compilerPath
-        let resolvedCompilerPath: string | undefined = this.resolvePath(config.compilerPath);
+        if (config.compilerPath) {
+            resolvedCompilerPath = which.sync(config.compilerPath, { nothrow: true }) ?? undefined;
+        }
+
+        if (resolvedCompilerPath === undefined) {
+            resolvedCompilerPath = this.resolvePath(config.compilerPath);
+        }
         const settings: CppSettings = new CppSettings(this.rootUri);
         const compilerPathAndArgs: util.CompilerPathAndArgs = util.extractCompilerPathAndArgs(!!settings.legacyCompilerArgsBehavior, resolvedCompilerPath);
         if (resolvedCompilerPath

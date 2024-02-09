@@ -79,9 +79,7 @@ export function getExperimentationService(): Promise<IExperimentationService> | 
     return initializationPromise;
 }
 
-// @ts-expect-error The function isExperimentEnabled will be used for future experiments.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function isExperimentEnabled(experimentName: string): Promise<boolean> {
+export async function isExperimentEnabled(experimentName: string): Promise<boolean> {
     if (new CppSettings().experimentalFeatures) {
         return true;
     }

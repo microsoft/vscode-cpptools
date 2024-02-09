@@ -43,7 +43,7 @@ let ui: LanguageStatusUI;
 const disposables: vscode.Disposable[] = [];
 const commandDisposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
-let intervalTimer: NodeJS.Timer;
+let intervalTimer: NodeJS.Timeout;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
@@ -1002,10 +1002,13 @@ export function watchForCrashes(crashDirectory: string): void {
 let previousCrashData: string;
 let previousCrashCount: number = 0;
 
-function logCrashTelemetry(data: string, type: string): void {
+function logCrashTelemetry(data: string, type: string, offsetData?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
+    if (offsetData !== undefined) {
+        crashObject.CrashingThreadCallStackOffsets = offsetData;
+    }
     previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
     previousCrashData = data;
     crashCountObject.CrashCount = previousCrashCount + 1;
@@ -1016,8 +1019,8 @@ function logMacCrashTelemetry(data: string): void {
     logCrashTelemetry(data, "MacCrash");
 }
 
-function logCppCrashTelemetry(data: string): void {
-    logCrashTelemetry(data, "CppCrash");
+function logCppCrashTelemetry(data: string, offsetData?: string): void {
+    logCrashTelemetry(data, "CppCrash", offsetData);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1119,31 +1122,42 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     }
 
     const lines: string[] = data.split("\n");
+    let addressData: string = ".\n.";
     data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
-    const startStr: string = isMac ? " _" : "(_";
+    const startStr: string = isMac ? " _" : "(";
     const offsetStr: string = isMac ? " + " : "+0x";
+    const endOffsetStr: string = isMac ? " " : ")";
     const dotStr: string = "…";
+    data += lines[0]; // signal type
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        if (lineNum > 2) {
+        if (lineNum > 1) {
             data += "\n";
+            addressData += "\n";
         }
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
-        if (startPos === -1) {
+        if (startPos === -1 || line[startPos + 1] === "+") {
             data += dotStr;
-            continue; // expected
+            const startAddressPos: number = line.indexOf("0x");
+            const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
+            if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
+                addressData += "Unexpected offset";
+            } else {
+                addressData += line.substring(startAddressPos, endAddressPos);
+            }
+            continue;
         }
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
-            data += `missing "${offsetStr}"`;
+            data += "Missing offsetStr";
             continue; // unexpected
         }
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
         if (filtPath) {
-            const ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            const ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
             if (ret !== undefined) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
@@ -1158,10 +1172,17 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
             data += line.substring(offsetPos2);
+            const startAddressPos: number = line.indexOf("0x");
+            if (startAddressPos === -1 || startAddressPos >= startPos) {
+                // unexpected
+                data += "<Missing 0x>";
+                continue;
+            }
+            addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
             const endPos: number = line.indexOf(")", offsetPos2);
             if (endPos === -1) {
-                data += "missing )";
+                data += "<Missing )>";
                 continue; // unexpected
             }
             data += line.substring(offsetPos2, endPos);
@@ -1173,7 +1194,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     }
 
     console.log(`Crash call stack:\n${data}`);
-    logCppCrashTelemetry(data);
+    logCppCrashTelemetry(data, addressData);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
