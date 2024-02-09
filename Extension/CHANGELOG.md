@@ -2,7 +2,8 @@
 
 ## Version 1.19.3: February 12, 2024
 ### Enhancements
- * Improve performance of workspace symbol searches. [#7908](https://github.com/microsoft/vscode-cpptools/issues/7908), [#7914](https://github.com/microsoft/vscode-cpptools/issues/7914), [#11557](https://github.com/microsoft/vscode-cpptools/issues/11557)
+ * Enable support for fuzzy symbol seaches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
+ * Improve performance of symbol searches. [#7908](https://github.com/microsoft/vscode-cpptools/issues/7908), [#7914](https://github.com/microsoft/vscode-cpptools/issues/7914), [#11557](https://github.com/microsoft/vscode-cpptools/issues/11557)
  * Change the default setting value for `C_Cpp.intelliSenseUpdateDelay` from 2s to 1s. [#11932](https://github.com/microsoft/vscode-cpptools/pull/11932)
 
 ### Bug Fixes
