@@ -14,5 +14,5 @@
 	"walkthrough.windows.choose.build.active.file": "選擇 {0}。",
 	"walkthrough.windows.build.and.debug.active.file": "建置及偵錯使用中的檔案",
 	"walkthrough.windows.after.running": "第一次執行並偵錯您的 C++ 檔案之後，您會注意到專案 {0} 資料夾中有兩個新檔案: {1} 及 {2}。",
-	"walkthrough.windows.for.more.complex": "如需更複雜的組建和偵錯案例，您可以在 {0} 及 {1} 中自訂群組建工作和偵錯設定。例如，如果您在從命令列組建時，通常會將引數傳遞給編譯器，可以使用 {3} 屬性在 {2} 中指定這些引數。類似地，您可以定義要傳遞給程式的引數，以便在 {4} 進行偵錯。"
+	"walkthrough.windows.for.more.complex": "如需更複雜的組建和偵錯案例，您可以在 {0} 及 {1} 中自訂群組建工作和偵錯組態。例如，如果您在從命令列組建時，通常會將引數傳遞給編譯器，可以在 {2} 中使用 {3} 屬性來指定這些引數。類似地，您可以定義要傳遞給程式的引數，以便在 {4} 進行偵錯。"
 }
