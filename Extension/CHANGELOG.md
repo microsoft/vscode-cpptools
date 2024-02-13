@@ -3,9 +3,9 @@
 ## Version 1.19.3: February 12, 2024
 ### Enhancements
  * Enable support for fuzzy symbol seaches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
-   * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `enabled`.
+   * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `"enabled"`.
  * Improve performance of symbol searches. [#7908](https://github.com/microsoft/vscode-cpptools/issues/7908), [#7914](https://github.com/microsoft/vscode-cpptools/issues/7914), [#11557](https://github.com/microsoft/vscode-cpptools/issues/11557)
-   * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `enabled`.
+   * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `"enabled"`.
  * Change the default setting value for `C_Cpp.intelliSenseUpdateDelay` from 2s to 1s. [#11932](https://github.com/microsoft/vscode-cpptools/pull/11932)
 
 ### Bug Fixes
@@ -280,7 +280,7 @@
 ### New Features
 * Add recursive macro expansion on hover. [#3579](https://github.com/microsoft/vscode-cpptools/issues/3579)
 * Move status bar items to the language status UI. [#8405](https://github.com/microsoft/vscode-cpptools/issues/8405)
-  * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `enabled`.
+  * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `"enabled"`.
 * Add the 'Select Default Compiler' command that lets you choose a default compiler to configure IntelliSense. [#10027](https://github.com/microsoft/vscode-cpptools/issues/10027)
 
 ### Enhancements
@@ -551,7 +551,7 @@
 
 ## Version 1.9.8: April 20, 2022
 ### Bug Fixes
-* Fix an issue with extension activation failing if `C_Cpp.intelliSenseEngine` was set to `Disabled`. [#9083](https://github.com/microsoft/vscode-cpptools/issues/9083)
+* Fix an issue with extension activation failing if `C_Cpp.intelliSenseEngine` was set to `"Disabled"`. [#9083](https://github.com/microsoft/vscode-cpptools/issues/9083)
 
 ## Version 1.9.7: March 23, 2022
 ### New Features
@@ -725,7 +725,7 @@
 
 ### Enhancements
 * Debugger now runs on .NET 5 [#7858](https://github.com/microsoft/vscode-cpptools/pull/7858)
-* When using the `Default` setting for `C_Cpp.formatting`, vcFormat will now be selected if a `.editorconfig` file is found with vcFormat entries and no `.clang-format` file was found with nearer proximity to the source file. [#7929](https://github.com/microsoft/vscode-cpptools/issues/7929)
+* When using the `"Default"` setting for `C_Cpp.formatting`, vcFormat will now be selected if a `.editorconfig` file is found with vcFormat entries and no `.clang-format` file was found with nearer proximity to the source file. [#7929](https://github.com/microsoft/vscode-cpptools/issues/7929)
 
 ### Bug Fixes
 * Fix incorrect sizeof for packed structs (gcc/clang) [#5267](https://github.com/microsoft/vscode-cpptools/issues/5267)
@@ -1526,13 +1526,13 @@
 * Enable flag `/permissive-` as an argument to `compilerPath` with `cl.exe`. [#1589](https://github.com/Microsoft/vscode-cpptools/issues/1589), [#3446](https://github.com/Microsoft/vscode-cpptools/issues/3446)
 * Configuration squiggles for `c_cpp_properties.json` now validates if the setting values of `compilerPath` and `intelliSenseMode` match on Windows. [#2983](https://github.com/Microsoft/vscode-cpptools/issues/2983)
 * Enable `-fms-extensions` to be used as an argument to `compilerPath` on Linux/Mac. [#3063](https://github.com/Microsoft/vscode-cpptools/issues/3063)
-* Change the default value of `C_Cpp.intelliSenseEngineFallback` setting to `Disabled`. [#3165](https://github.com/Microsoft/vscode-cpptools/issues/3165)
+* Change the default value of `C_Cpp.intelliSenseEngineFallback` setting to `"Disabled"`. [#3165](https://github.com/Microsoft/vscode-cpptools/issues/3165)
 * Add squiggle when `compilerPath` uses spaces and arguments without `"`. [#3357](https://github.com/Microsoft/vscode-cpptools/issues/3357)
-* Change the `Disabled` value for `C_Cpp.errorSquiggles` to stop showing missing header squiggles. [#3361](https://github.com/Microsoft/vscode-cpptools/issues/3361)
+* Change the `"Disabled"` value for `C_Cpp.errorSquiggles` to stop showing missing header squiggles. [#3361](https://github.com/Microsoft/vscode-cpptools/issues/3361)
 * Add `enableConfigurationSquiggles` setting to allow squiggles to be disabled for `c_cpp_properties.json`. [#3403](https://github.com/Microsoft/vscode-cpptools/issues/3403)
 * Switch to using the `installExtension` command for offline/insider vsix installing (to reduce install failures). [#3408](https://github.com/Microsoft/vscode-cpptools/issues/3408)
 * Add a better example to the description of `C_Cpp.clang_format_style` and `C_Cpp.clang_format_fallback_style`. [#3419](https://github.com/Microsoft/vscode-cpptools/issues/3419)
-* Add a new (default) value of `EnabledIfIncludesResolve` to `C_Cpp.errorSquiggles`, which only shows error squiggles if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
+* Add a new (default) value of `"EnabledIfIncludesResolve"` to `C_Cpp.errorSquiggles`, which only shows error squiggles if include headers are successfully resolved. [PR #3421](https://github.com/Microsoft/vscode-cpptools/pull/3421)
 * Disable debug heap by default with cppvsdbg. [#3484](https://github.com/Microsoft/vscode-cpptools/issues/3484)
   * Reported by Djoulihen (@Djoulihen)
 * Enable configuration squiggles for paths delimited by semicolons. [PR #3517](https://github.com/Microsoft/vscode-cpptools/pull/3517)
@@ -1678,7 +1678,7 @@
 * Fix IntelliSense-based `Go to Definition` on the identifier of a definition with no declaration. [#2573](https://github.com/Microsoft/vscode-cpptools/issues/2573)
 * Fix IntelliSense-based `Go to Definition` not falling back to the declaration (in certain cases). [#2574](https://github.com/Microsoft/vscode-cpptools/issues/2574)
 * Fix IntelliSense-based `Go to Definition` going to the wrong location after edits are made. [#2579](https://github.com/Microsoft/vscode-cpptools/issues/2579)
-* Fix `Go to Definition` when the `intelliSenseEngineFallback` is `Disabled` and `#include`s are missing. [#2583](https://github.com/Microsoft/vscode-cpptools/issues/2583)
+* Fix `Go to Definition` when the `intelliSenseEngineFallback` is `"Disabled"` and `#include`s are missing. [#2583](https://github.com/Microsoft/vscode-cpptools/issues/2583)
 * Fix empty `C_Cpp.default.*` settings not being used. [#2584](https://github.com/Microsoft/vscode-cpptools/issues/2584)
 * Fix quoting around `ssh`'s command (for the debugger). [#2585](https://github.com/Microsoft/vscode-cpptools/issues/2585)
 * Fix crash on hover (and `Go to Definition`) when using the `Tag Parser`. [#2586](https://github.com/Microsoft/vscode-cpptools/issues/2586)
@@ -1686,7 +1686,7 @@
 * Fix `-isystem` without a space after getting ignored in `compile_comamands.json`. [#2629](https://github.com/Microsoft/vscode-cpptools/issues/2629)
 * Fix Insiders update channel installation bugs. [#2636](https://github.com/Microsoft/vscode-cpptools/issues/2636), [#2685](https://github.com/Microsoft/vscode-cpptools/issues/2685)
 * Fix IntelliSense-based `Go to Declaration` falling back to the Tag Parser if the definition is also in the TU. [#2642](https://github.com/Microsoft/vscode-cpptools/issues/2642)
-* Fix the `Disabled` `intelliSenseEngine` setting not working with custom configuration providers. [#2656](https://github.com/Microsoft/vscode-cpptools/issues/2656)
+* Fix the `"Disabled"` `intelliSenseEngine` setting not working with custom configuration providers. [#2656](https://github.com/Microsoft/vscode-cpptools/issues/2656)
 
 ## Version 0.19.0: September 27, 2018
 * Change the symbol database to update without needing to save. [#202](https://github.com/Microsoft/vscode-cpptools/issues/202)
@@ -1710,7 +1710,7 @@
 
 ## Version 0.18.0: August 17, 2018
 ### New Features
-* Add the `C_Cpp.intelliSenseEngine` setting value of `Disabled` (for users who only use the debugger). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
+* Add the `C_Cpp.intelliSenseEngine` setting value of `"Disabled"` (for users who only use the debugger). [#785](https://github.com/Microsoft/vscode-cpptools/issues/785)
 * Add `C_Cpp.workspaceSymbols` setting with default `Just My Code` to filter out system header symbols. [#1119](https://github.com/Microsoft/vscode-cpptools/issues/1119), [#2320](https://github.com/Microsoft/vscode-cpptools/issues/2320)
 * Add `C_Cpp.inactiveRegionForegroundColor` and `C_Cpp.inactiveRegionBackgroundColor` settings. [#1620](https://github.com/Microsoft/vscode-cpptools/issues/1620), [#2212](https://github.com/Microsoft/vscode-cpptools/issues/2212)
   * John Patterson (@john-patterson) [PR #2308](https://github.com/Microsoft/vscode-cpptools/pull/2308)

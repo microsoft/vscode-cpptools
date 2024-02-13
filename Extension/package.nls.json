@@ -470,7 +470,7 @@
         ]
     },
     "c_cpp.configuration.autocomplete.markdownDescription": {
-        "message": "Controls the auto-completion provider. If `disabled` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
+        "message": "Controls the auto-completion provider. If `\"disabled\"` and you want word-based completion, you will also need to set `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` (and similarly for `c` and `cuda-cpp` languages).",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered -- except for text \"value\", which is a placeholder that should be translated."
         ]
@@ -720,7 +720,7 @@
         ]
     },
     "c_cpp.configuration.updateChannel.markdownDescription": {
-        "message": "Set to `Insiders` to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
+        "message": "Set to `\"Insiders\"` to automatically download and install the latest Insiders builds of the extension, which include upcoming features and bug fixes.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
@@ -740,13 +740,13 @@
         ]
     },
     "c_cpp.configuration.caseSensitiveFileSupport.markdownDescription": {
-        "message": "If set to `default`, the file system of the workspace is assumed to be case insensitive on Windows and case sensitive on macOS or Linux. If set to `enabled`, the file system of the workspace is assumed to be case sensitive on Windows.",
+        "message": "If set to `\"default\"`, the file system of the workspace is assumed to be case insensitive on Windows and case sensitive on macOS or Linux. If set to `\"enabled\"`, the file system of the workspace is assumed to be case sensitive on Windows.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
     "c_cpp.configuration.enhancedColorization.markdownDescription": {
-        "message": "If enabled, code is colorized based on IntelliSense. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `default`.",
+        "message": "If enabled, code is colorized based on IntelliSense. This setting only applies if `#C_Cpp.intelliSenseEngine#` is set to `\"default\"`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
