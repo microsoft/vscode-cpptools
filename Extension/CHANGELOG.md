@@ -6,7 +6,7 @@
    * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `"enabled"`.
  * Improve performance of symbol searches. [#7908](https://github.com/microsoft/vscode-cpptools/issues/7908), [#7914](https://github.com/microsoft/vscode-cpptools/issues/7914), [#11557](https://github.com/microsoft/vscode-cpptools/issues/11557)
    * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `"enabled"`.
- * Change the default setting value for `C_Cpp.intelliSenseUpdateDelay` from 2s to 1s. [#11932](https://github.com/microsoft/vscode-cpptools/pull/11932)
+ * Change the default setting value for `C_Cpp.intelliSenseUpdateDelay` from 2s to 1s. [PR #11932](https://github.com/microsoft/vscode-cpptools/pull/11932)
 
 ### Bug Fixes
  * Trim trailing spaces from include paths in the configuration UI. [#11862](https://github.com/microsoft/vscode-cpptools/issues/11862)
