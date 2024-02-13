@@ -237,13 +237,16 @@ suite("resolveVariables", () => {
             "-DTEST6=TEST6\\ TEST6 Test6",  // "-DTEST6=TEST6 TEST6 Test6"
         ]
         */
-        testQuoteArgumentScenario("-DTEST1=TEST1 TEST1", "\"-DTEST1=TEST1 TEST1\"");
-        testQuoteArgumentScenario("-DTEST2=\"TEST2 TEST2\"", "\"-DTEST2=\\\"TEST2 TEST2\\\"\"");
-        testQuoteArgumentScenario("-DTEST3=\\\"TEST3 TEST3\\\"", "\"-DTEST3=\\\"TEST3 TEST3\\\"\"");
-        testQuoteArgumentScenario("-DTEST4=TEST4\\ TEST4", "\"-DTEST4=TEST4 TEST4\"");
-        testQuoteArgumentScenario("-DTEST5=\'TEST5 TEST5\'", "-DTEST5=\'TEST5 TEST5\'");
-        testQuoteArgumentScenario("-DTEST4=TEST4\\ TEST4", "-DTEST4=TEST4\\ TEST4");
-        testQuoteArgumentScenario("-DTEST5='TEST5 TEST5'", "-DTEST5='TEST5 TEST5'");
+        testQuoteArgumentScenario(`-DTEST1=TEST1 TEST1`, `"-DTEST1=TEST1 TEST1"`);
+        testQuoteArgumentScenario(`-DTEST2="TEST2 TEST2"`, `"-DTEST2=\"TEST2 TEST2\""`);
+        testQuoteArgumentScenario(`-DTEST3=\\"TEST3 TEST3\\"`, `"-DTEST3=\\\\\\"TEST3 TEST3\\\\\\""`);
+        if (process.platform.includes("win")) {
+            testQuoteArgumentScenario("-DTEST4=TEST4\\ TEST4", "\"-DTEST4=TEST4 TEST4\"");
+            testQuoteArgumentScenario("-DTEST5=\'TEST5 TEST5\'", "-DTEST5=\'TEST5 TEST5\'");
+        } else {
+            testQuoteArgumentScenario("-DTEST4=TEST4\\ TEST4", "-DTEST4=TEST4\\ TEST4");
+            testQuoteArgumentScenario("-DTEST5='TEST5 TEST5'", "-DTEST5='TEST5 TEST5'");
+        }
         testQuoteArgumentScenario("-DTEST6=TEST6\\ TEST6 Test6", "\"-DTEST6=TEST6 TEST6 Test6\"");
     });
 
