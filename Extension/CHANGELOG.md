@@ -2,7 +2,7 @@
 
 ## Version 1.19.3: February 12, 2024
 ### Enhancements
- * Enable support for fuzzy symbol seaches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
+ * Enable support for fuzzy symbol searches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
    * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `enabled`.
  * Improve performance of symbol searches. [#7908](https://github.com/microsoft/vscode-cpptools/issues/7908), [#7914](https://github.com/microsoft/vscode-cpptools/issues/7914), [#11557](https://github.com/microsoft/vscode-cpptools/issues/11557)
    * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `enabled`.
