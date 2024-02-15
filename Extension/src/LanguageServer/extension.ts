@@ -145,7 +145,6 @@ function sendActivationTelemetry(): void {
  */
 export async function activate(): Promise<void> {
 
-    console.log("activating extension");
     sendActivationTelemetry();
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
@@ -157,7 +156,6 @@ export async function activate(): Promise<void> {
         }
     }
 
-    console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
 
@@ -1202,7 +1200,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
 
 export function deactivate(): Thenable<void> {
     clients.timeTelemetryCollector.clear();
-    console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     commandDisposables.forEach(d => d.dispose());
