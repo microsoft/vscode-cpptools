@@ -961,6 +961,14 @@ export class DefaultClient implements Client {
         return selection ? selection.index : -1;
     }
 
+    public async showPrompt(sender?: any): Promise<void> {
+        const buttonMessage: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
+        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
+        if (value === buttonMessage) {
+            return this.handleIntelliSenseConfigurationQuickPick(sender);
+        }
+    }
+
     public async handleIntelliSenseConfigurationQuickPick(sender?: any, showCompilersOnly?: boolean): Promise<void> {
         const settings: CppSettings = new CppSettings(showCompilersOnly ? undefined : this.RootUri);
         const paths: string[] = [];
@@ -1025,6 +1033,7 @@ export class DefaultClient implements Client {
                 settings.defaultCompilerPath = "";
                 await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 configurationSelected = true;
+                await this.showPrompt(sender);
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
             if (installShown && index === paths.length - 2) {
