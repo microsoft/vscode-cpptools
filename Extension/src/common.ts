@@ -11,7 +11,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as tmp from 'tmp';
 import * as vscode from 'vscode';
-import { DocumentFilter } from 'vscode-languageclient';
+import { DocumentFilter, Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
 import * as which from "which";
@@ -677,6 +677,22 @@ export function deleteFile(filePath: string): Promise<void> {
     });
 }
 
+export function deleteDirectory(directoryPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        if (fs.existsSync(directoryPath)) {
+            fs.rmdir(directoryPath, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
+}
+
 export function getReadmeMessage(): string {
     const readmePath: string = getExtensionFilePath("README.md");
     const readmeMessage: string = localize("refer.read.me", "Please refer to {0} for troubleshooting information. Issues can be created at {1}", readmePath, "https://github.com/Microsoft/vscode-cpptools/issues");
@@ -736,14 +752,16 @@ export interface ProcessReturnType {
     output: string;
 }
 
-export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
+export async function spawnChildProcess(program: string, args: string[] = [], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessReturnType> {
     // Do not use CppSettings to avoid circular require()
-    const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
-    if (loggingLevel === "Information" || loggingLevel === "Debug") {
-        getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
+    if (skipLogging === undefined || !skipLogging) {
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+        if (loggingLevel === "Information" || loggingLevel === "Debug") {
+            getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
+        }
     }
-    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, cancellationToken);
+    const programOutput: ProcessOutput = await spawnChildProcessImpl(program, args, continueOn, skipLogging, cancellationToken);
     const exitCode: number | NodeJS.Signals | undefined = programOutput.exitCode;
     if (programOutput.exitCode) {
         return { succeeded: false, exitCode, output: programOutput.stderr || programOutput.stdout || localize('process.exited', 'Process exited with code {0}', exitCode) };
@@ -765,12 +783,12 @@ interface ProcessOutput {
     stderr: string;
 }
 
-async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
+async function spawnChildProcessImpl(program: string, args: string[], continueOn?: string, skipLogging?: boolean, cancellationToken?: vscode.CancellationToken): Promise<ProcessOutput> {
     const result = new ManualPromise<ProcessOutput>();
 
     // Do not use CppSettings to avoid circular require()
     const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
+    const loggingLevel: string | undefined = (skipLogging === undefined || !skipLogging) ? settings.get<string>("loggingLevel") : "None";
 
     let proc: child_process.ChildProcess;
     if (await isExecutable(program)) {
@@ -1360,25 +1378,55 @@ export function sequentialResolve<T>(items: T[], promiseBuilder: (item: T) => Pr
     }, Promise.resolve());
 }
 
-export function normalizeArg(arg: string): string {
-    arg = arg.trim();
-    // Check if the arg is enclosed in backtick,
-    // or includes unescaped double-quotes (or single-quotes on Windows),
-    // or includes unescaped single-quotes on mac and linux.
-    if (/^`.*`$/g.test(arg) || /.*[^\\]".*/g.test(arg) ||
-        (process.platform.includes("win") && /.*[^\\]'.*/g.test(arg)) ||
-        (!process.platform.includes("win") && /.*[^\\]'.*/g.test(arg))) {
-        return arg;
+export function quoteArgument(argument: string): string {
+    // Return the argument as is if it's empty
+    if (!argument) {
+        return argument;
     }
-    // The special character double-quote is already escaped in the arg.
-    const unescapedSpaces: string | undefined = arg.split('').find((char, index) => index > 0 && char === " " && arg[index - 1] !== "\\");
-    if (!unescapedSpaces && !process.platform.includes("win")) {
-        return arg;
-    } else if (arg.includes(" ")) {
-        arg = arg.replace(/\\\s/g, " ");
-        return "\"" + arg + "\"";
+
+    if (os.platform() === "win32") {
+        // Windows-style quoting logic
+        if (!/[\s\t\n\v\"\\&%^]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = '"';
+        let backslashCount = 0;
+
+        for (const char of argument) {
+            if (char === '\\') {
+                backslashCount++;
+            } else {
+                if (char === '"') {
+                    quotedArgument += '\\'.repeat(backslashCount * 2 + 1);
+                } else {
+                    quotedArgument += '\\'.repeat(backslashCount);
+                }
+                quotedArgument += char;
+                backslashCount = 0;
+            }
+        }
+
+        quotedArgument += '\\'.repeat(backslashCount * 2);
+        quotedArgument += '"';
+        return quotedArgument;
     } else {
-        return arg;
+        // Unix-style quoting logic
+        if (!/[\s\t\n\v\"'\\$`|;&(){}<>*?!\[\]~^#%]/.test(argument)) {
+            return argument;
+        }
+
+        let quotedArgument = "'";
+        for (const c of argument) {
+            if (c === "'") {
+                quotedArgument += "'\\''";
+            } else {
+                quotedArgument += c;
+            }
+        }
+
+        quotedArgument += "'";
+        return quotedArgument;
     }
 }
 
@@ -1545,4 +1593,42 @@ export function getNumericLoggingLevel(loggingLevel: string | undefined): number
         default:
             return 0;
     }
+}
+
+export function mergeOverlappingRanges(ranges: Range[]): Range[] {
+    // Fix any reversed ranges. Not sure if this is needed, but ensures the input is sanitized.
+    const mergedRanges: Range[] = ranges.map(range => {
+        if (range.start.line > range.end.line || (range.start.line === range.end.line && range.start.character > range.end.character)) {
+            return Range.create(range.end, range.start);
+        }
+        return range;
+    });
+
+    // Merge overlapping ranges.
+    mergedRanges.sort((a, b) => a.start.line - b.start.line || a.start.character - b.start.character);
+    let lastMergedIndex = 0; // Index to keep track of the last merged range
+    for (let currentIndex = 0; currentIndex < ranges.length; currentIndex++) {
+        const currentRange = ranges[currentIndex]; // No need for a shallow copy, since we're not modifying the ranges we haven't read yet.
+        let nextIndex = currentIndex + 1;
+        while (nextIndex < ranges.length) {
+            const nextRange = ranges[nextIndex];
+            // Check for non-overlapping ranges first
+            if (nextRange.start.line > currentRange.end.line ||
+                (nextRange.start.line === currentRange.end.line && nextRange.start.character > currentRange.end.character)) {
+                break;
+            }
+            // Otherwise, merge the overlapping ranges
+            currentRange.end = {
+                line: Math.max(currentRange.end.line, nextRange.end.line),
+                character: Math.max(currentRange.end.character, nextRange.end.character)
+            };
+            nextIndex++;
+        }
+        // Overwrite the array in-place
+        mergedRanges[lastMergedIndex] = currentRange;
+        lastMergedIndex++;
+        currentIndex = nextIndex - 1; // Skip the merged ranges
+    }
+    mergedRanges.length = lastMergedIndex;
+    return mergedRanges;
 }

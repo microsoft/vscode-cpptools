@@ -170,11 +170,9 @@ export class CppBuildTaskProvider implements TaskProvider {
         const compilerPathBase: string = path.basename(compilerPath);
         const isCl: boolean = compilerPathBase.toLowerCase() === "cl.exe";
         const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
-        // Double-quote the command if it is not already double-quoted.
+        // Double-quote the command if needed.
         let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
-        if (resolvedcompilerPath && !resolvedcompilerPath.startsWith("\"") && resolvedcompilerPath.includes(" ")) {
-            resolvedcompilerPath = "\"" + resolvedcompilerPath + "\"";
-        }
+        resolvedcompilerPath = util.quoteArgument(resolvedcompilerPath);
 
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
@@ -209,7 +207,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const task: CppBuildTask = new Task(definition, scope, definition.label, ext.CppSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, {taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin'})
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, { taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin' })
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -390,7 +388,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         util.createDirIfNotExistsSync(exePath);
 
         this.args.forEach((value, index) => {
-            value = util.normalizeArg(util.resolveVariables(value));
+            value = util.quoteArgument(util.resolveVariables(value));
             activeCommand = activeCommand + " " + value;
             this.args[index] = value;
         });

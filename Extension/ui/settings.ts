@@ -321,7 +321,7 @@ class SettingsApp {
     private showErrorWithInfo(elementID: string, errorInfo: string): void {
         this.showElement(elementID, errorInfo ? true : false);
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        document.getElementById(elementID)!.innerHTML = errorInfo ? errorInfo : "";
+        document.getElementById(elementID)!.textContent = errorInfo ? errorInfo : "";
     }
 
     private updateConfigSelection(message: any): void {

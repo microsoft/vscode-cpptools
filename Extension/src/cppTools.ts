@@ -20,7 +20,7 @@ export class CppTools implements CppToolsTestApi {
     private version: Version;
     private providers: CustomConfigurationProvider1[] = [];
     private failedRegistrations: CustomConfigurationProvider[] = [];
-    private timers = new Map<string, NodeJS.Timer>();
+    private timers = new Map<string, NodeJS.Timeout>();
 
     constructor(version: Version) {
         if (version > Version.latest) {
@@ -34,7 +34,7 @@ export class CppTools implements CppToolsTestApi {
     private addNotifyReadyTimer(provider: CustomConfigurationProvider1): void {
         if (this.version >= Version.v2) {
             const timeout: number = 30;
-            const timer: NodeJS.Timer = global.setTimeout(() => {
+            const timer: NodeJS.Timeout = global.setTimeout(() => {
                 console.warn(`registered provider ${provider.extensionId} did not call 'notifyReady' within ${timeout} seconds`);
             }, timeout * 1000);
             this.timers.set(provider.extensionId, timer);
@@ -43,7 +43,7 @@ export class CppTools implements CppToolsTestApi {
 
     private removeNotifyReadyTimer(provider: CustomConfigurationProvider1): void {
         if (this.version >= Version.v2) {
-            const timer: NodeJS.Timer | undefined = this.timers.get(provider.extensionId);
+            const timer: NodeJS.Timeout | undefined = this.timers.get(provider.extensionId);
             if (timer) {
                 this.timers.delete(provider.extensionId);
                 clearTimeout(timer);

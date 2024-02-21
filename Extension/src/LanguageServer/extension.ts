@@ -14,6 +14,7 @@ import * as vscode from 'vscode';
 import { Range } from 'vscode-languageclient';
 import * as nls from 'vscode-nls';
 import { TargetPopulation } from 'vscode-tas-client';
+import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
 import { PlatformInformation } from '../platform';
@@ -28,7 +29,7 @@ import { PersistentState } from './persistentState';
 import { NodeType, TreeNode } from './referencesModel';
 import { CppSettings } from './settings';
 import { LanguageStatusUI, getUI } from './ui';
-import { makeCpptoolsRange, rangeEquals, shouldChangeFromCToCpp, showInstallCompilerWalkthrough } from './utils';
+import { makeLspRange, rangeEquals, showInstallCompilerWalkthrough } from './utils';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
@@ -37,12 +38,12 @@ export const configPrefix: string = "C/C++: ";
 
 let prevCrashFile: string;
 export let clients: ClientCollection;
-let activeDocument: string;
+let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
 const disposables: vscode.Disposable[] = [];
 const commandDisposables: vscode.Disposable[] = [];
 let languageConfigurations: vscode.Disposable[] = [];
-let intervalTimer: NodeJS.Timer;
+let intervalTimer: NodeJS.Timeout;
 let codeActionProvider: vscode.Disposable;
 export const intelliSenseDisabledError: string = "Do not activate the extension when IntelliSense is disabled.";
 
@@ -144,7 +145,6 @@ function sendActivationTelemetry(): void {
  */
 export async function activate(): Promise<void> {
 
-    console.log("activating extension");
     sendActivationTelemetry();
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
@@ -156,7 +156,6 @@ export async function activate(): Promise<void> {
         }
     }
 
-    console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
 
@@ -167,10 +166,11 @@ export async function activate(): Promise<void> {
     });
 
     disposables.push(vscode.workspace.onDidChangeConfiguration(onDidChangeSettings));
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor));
-    ui.activeDocumentChanged(); // Handle already active documents (for non-cpp files that we don't register didOpen).
-    disposables.push(vscode.window.onDidChangeTextEditorSelection(onDidChangeTextEditorSelection));
-    disposables.push(vscode.window.onDidChangeVisibleTextEditors(onDidChangeVisibleTextEditors));
+    disposables.push(vscode.window.onDidChangeTextEditorVisibleRanges((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorVisibleRanges(e))));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor((e) => clients.ActiveClient.enqueue(async () => onDidChangeActiveTextEditor(e))));
+    ui.didChangeActiveEditor(); // Handle already active documents (for non-cpp files that we don't register didOpen).
+    disposables.push(vscode.window.onDidChangeTextEditorSelection((e) => clients.ActiveClient.enqueue(async () => onDidChangeTextEditorSelection(e))));
+    disposables.push(vscode.window.onDidChangeVisibleTextEditors((e) => clients.ActiveClient.enqueue(async () => onDidChangeVisibleTextEditors(e))));
 
     updateLanguageConfigurations();
 
@@ -244,6 +244,7 @@ export async function activate(): Promise<void> {
     const activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
     if (activeEditor) {
         clients.timeTelemetryCollector.setFirstFile(activeEditor.document.uri);
+        activeDocument = activeEditor.document;
     }
 }
 
@@ -278,7 +279,13 @@ async function onDidChangeSettings(event: vscode.ConfigurationChangeEvent): Prom
 
 let noActiveEditorTimeout: NodeJS.Timeout | undefined;
 
-export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
+async function onDidChangeTextEditorVisibleRanges(event: vscode.TextEditorVisibleRangesChangeEvent): Promise<void> {
+    if (util.isCpp(event.textEditor.document)) {
+        await clients.getDefaultClient().onDidChangeTextEditorVisibleRanges(event.textEditor.document.uri);
+    }
+}
+
+function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
     /* need to notify the affected client(s) */
     console.assert(clients !== undefined, "client should be available before active editor is changed");
     if (clients === undefined) {
@@ -289,93 +296,42 @@ export function onDidChangeActiveTextEditor(editor?: vscode.TextEditor): void {
         clearTimeout(noActiveEditorTimeout);
         noActiveEditorTimeout = undefined;
     }
-
     if (!editor) {
         // When switching between documents, VS Code is setting the active editor to undefined
         // temporarily, so this prevents the C++-related status bar items from flickering off/on.
         noActiveEditorTimeout = setTimeout(() => {
-            activeDocument = "";
-            ui.activeDocumentChanged();
+            activeDocument = undefined;
+            ui.didChangeActiveEditor();
             noActiveEditorTimeout = undefined;
         }, 100);
-        return;
-    }
-
-    if (util.isCppOrRelated(editor.document)) {
-        // This is required for the UI to update correctly.
-        void clients.activeDocumentChanged(editor.document).catch(logAndReturn.undefined);
-        if (util.isCpp(editor.document)) {
-            activeDocument = editor.document.uri.toString();
-            clients.ActiveClient.selectionChanged(makeCpptoolsRange(editor.selection));
-        } else {
-            activeDocument = "";
-        }
+        void clients.didChangeActiveEditor(undefined).catch(logAndReturn.undefined);
     } else {
-        activeDocument = "";
+        ui.didChangeActiveEditor();
+        if (util.isCppOrRelated(editor.document)) {
+            if (util.isCpp(editor.document)) {
+                activeDocument = editor.document;
+                void clients.didChangeActiveEditor(editor).catch(logAndReturn.undefined);
+            } else {
+                activeDocument = undefined;
+                void clients.didChangeActiveEditor(undefined).catch(logAndReturn.undefined);
+            }
+            //clients.ActiveClient.selectionChanged(makeLspRange(editor.selection));
+        } else {
+            activeDocument = undefined;
+        }
     }
-    getUI().activeDocumentChanged();
 }
 
 function onDidChangeTextEditorSelection(event: vscode.TextEditorSelectionChangeEvent): void {
-    /* need to notify the affected client(s) */
-    if (!event.textEditor || !vscode.window.activeTextEditor || event.textEditor.document.uri !== vscode.window.activeTextEditor.document.uri ||
-        !util.isCpp(event.textEditor.document)) {
+    if (!util.isCpp(event.textEditor.document)) {
         return;
     }
-
-    if (activeDocument !== event.textEditor.document.uri.toString()) {
-        // For some unknown reason we don't reliably get onDidChangeActiveTextEditor callbacks.
-        activeDocument = event.textEditor.document.uri.toString();
-        void clients.activeDocumentChanged(event.textEditor.document).catch(logAndReturn.undefined);
-        ui.activeDocumentChanged();
-    }
-    clients.ActiveClient.selectionChanged(makeCpptoolsRange(event.selections[0]));
+    clients.ActiveClient.selectionChanged(makeLspRange(event.selections[0]));
 }
 
-export async function processDelayedDidOpen(document: vscode.TextDocument): Promise<boolean> {
-    const client: Client = clients.getClientFor(document.uri);
-    if (client) {
-        // Log warm start.
-        if (clients.checkOwnership(client, document)) {
-            if (!client.isInitialized()) {
-                // This can randomly get hit when adding/removing workspace folders.
-                await client.ready;
-            }
-            // Do not call await between TrackedDocuments.has() and TrackedDocuments.add(),
-            // to avoid sending redundant didOpen notifications.
-            if (!client.TrackedDocuments.has(document)) {
-                // If not yet tracked, process as a newly opened file.  (didOpen is sent to server in client.takeOwnership()).
-                client.TrackedDocuments.add(document);
-                clients.timeTelemetryCollector.setDidOpenTime(document.uri);
-                // Work around vscode treating ".C" or ".H" as c, by adding this file name to file associations as cpp
-                if (document.languageId === "c" && shouldChangeFromCToCpp(document)) {
-                    const baseFileName: string = path.basename(document.fileName);
-                    const mappingString: string = baseFileName + "@" + document.fileName;
-                    client.addFileAssociations(mappingString, "cpp");
-                    client.sendDidChangeSettings();
-                    document = await vscode.languages.setTextDocumentLanguage(document, "cpp");
-                }
-                await client.provideCustomConfiguration(document.uri, undefined);
-                // client.takeOwnership() will call client.TrackedDocuments.add() again, but that's ok. It's a Set.
-                client.onDidOpenTextDocument(document);
-                await client.takeOwnership(document);
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): void {
-    // Process delayed didOpen for any visible editors we haven't seen before
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    editors.forEach(async (editor) => {
-        if (util.isCpp(editor.document)) {
-            const client: Client = clients.getClientFor(editor.document.uri);
-            await client.enqueue(() => processDelayedDidOpen(editor.document));
-            client.onDidChangeVisibleTextEditor(editor);
-        }
-    });
+async function onDidChangeVisibleTextEditors(editors: readonly vscode.TextEditor[]): Promise<void> {
+    const cppEditors: vscode.TextEditor[] = editors.filter(e => util.isCpp(e.document));
+    await clients.getDefaultClient().onDidChangeVisibleTextEditors(cppEditors);
 }
 
 function onInterval(): void {
@@ -671,7 +627,7 @@ async function onGoToPrevDirectiveInGroup(): Promise<void> {
 }
 
 async function onRunCodeAnalysisOnActiveFile(): Promise<void> {
-    if (activeDocument !== "") {
+    if (activeDocument) {
         await vscode.commands.executeCommand("workbench.action.files.saveAll");
         return getActiveClient().handleRunCodeAnalysisOnActiveFile();
     }
@@ -965,8 +921,8 @@ function reportMacCrashes(): void {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
                 // If the directory isn't there, we have a problem...
-                crashObject["fs.stat: err.code"] = err.code;
-                telemetry.logLanguageServerEvent("MacCrash", crashObject, undefined);
+                crashObject["errCode"] = err.code;
+                telemetry.logLanguageServerEvent("MacCrash", crashObject);
                 return;
             }
 
@@ -1002,17 +958,67 @@ function reportMacCrashes(): void {
     }
 }
 
-let previousMacCrashData: string;
-let previousMacCrashCount: number = 0;
+export function watchForCrashes(crashDirectory: string): void {
+    if (process.platform !== "win32") {
+        prevCrashFile = "";
+        fs.stat(crashDirectory, (err) => {
+            const crashObject: Record<string, string> = {};
+            if (err?.code) {
+                // If the directory isn't there, we have a problem...
+                crashObject["errCode"] = err.code;
+                telemetry.logLanguageServerEvent("CppCrash", crashObject);
+                return;
+            }
 
-function logMacCrashTelemetry(data: string): void {
+            // vscode.workspace.createFileSystemWatcher only works in workspace folders.
+            try {
+                fs.watch(crashDirectory, (event, filename) => {
+                    if (event !== "rename") {
+                        return;
+                    }
+                    if (!filename || filename === prevCrashFile) {
+                        return;
+                    }
+                    prevCrashFile = filename;
+                    if (!filename.startsWith("cpptools")) {
+                        return;
+                    }
+                    // Wait 5 seconds to allow time for the crash log to finish being written.
+                    setTimeout(() => {
+                        fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
+                            void handleCrashFileRead(crashDirectory, filename, err, data);
+                        });
+                    }, 5000);
+                });
+            } catch (e) {
+                // The file watcher limit is hit (may not be possible on Mac, but just in case).
+            }
+        });
+    }
+}
+
+let previousCrashData: string;
+let previousCrashCount: number = 0;
+
+function logCrashTelemetry(data: string, type: string, offsetData?: string): void {
     const crashObject: Record<string, string> = {};
     const crashCountObject: Record<string, number> = {};
     crashObject.CrashingThreadCallStack = data;
-    previousMacCrashCount = data === previousMacCrashData ? previousMacCrashCount + 1 : 0;
-    previousMacCrashData = data;
-    crashCountObject.CrashCount = previousMacCrashCount;
-    telemetry.logLanguageServerEvent("MacCrash", crashObject, crashCountObject);
+    if (offsetData !== undefined) {
+        crashObject.CrashingThreadCallStackOffsets = offsetData;
+    }
+    previousCrashCount = data === previousCrashData ? previousCrashCount + 1 : 0;
+    previousCrashData = data;
+    crashCountObject.CrashCount = previousCrashCount + 1;
+    telemetry.logLanguageServerEvent(type, crashObject, crashCountObject);
+}
+
+function logMacCrashTelemetry(data: string): void {
+    logCrashTelemetry(data, "MacCrash");
+}
+
+function logCppCrashTelemetry(data: string, offsetData?: string): void {
+    logCrashTelemetry(data, "CppCrash", offsetData);
 }
 
 function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, data: string): void {
@@ -1105,9 +1111,95 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+    if (err) {
+        if (err.code === "ENOENT") {
+            return; // ignore known issue
+        }
+        return logCppCrashTelemetry("readFile: " + err.code);
+    }
+
+    const lines: string[] = data.split("\n");
+    let addressData: string = ".\n.";
+    data = crashFile + "\n";
+    const filtPath: string | null = which.sync("c++filt", { nothrow: true });
+    const isMac: boolean = process.platform === "darwin";
+    const startStr: string = isMac ? " _" : "(";
+    const offsetStr: string = isMac ? " + " : "+0x";
+    const endOffsetStr: string = isMac ? " " : ")";
+    const dotStr: string = "…";
+    data += lines[0]; // signal type
+    for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
+        if (lineNum > 1) {
+            data += "\n";
+            addressData += "\n";
+        }
+        const line: string = lines[lineNum];
+        const startPos: number = line.indexOf(startStr);
+        if (startPos === -1 || line[startPos + 1] === "+") {
+            data += dotStr;
+            const startAddressPos: number = line.indexOf("0x");
+            const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
+            if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
+                addressData += "Unexpected offset";
+            } else {
+                addressData += line.substring(startAddressPos, endAddressPos);
+            }
+            continue;
+        }
+        const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
+        if (offsetPos === -1) {
+            data += "Missing offsetStr";
+            continue; // unexpected
+        }
+        const startPos2: number = startPos + 1;
+        let funcStr: string = line.substring(startPos2, offsetPos);
+        if (filtPath) {
+            const ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            if (ret !== undefined) {
+                funcStr = ret.output;
+                funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
+                funcStr = funcStr.replace(/std::basic_/g, "std::");
+                funcStr = funcStr.replace(/ >/g, ">");
+                funcStr = funcStr.replace(/, std::(?:allocator|char_traits)<char>/g, "");
+                funcStr = funcStr.replace(/<char>/g, "");
+                funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
+            }
+        }
+        data += funcStr + offsetStr;
+        const offsetPos2: number = offsetPos + offsetStr.length;
+        if (isMac) {
+            data += line.substring(offsetPos2);
+            const startAddressPos: number = line.indexOf("0x");
+            if (startAddressPos === -1 || startAddressPos >= startPos) {
+                // unexpected
+                data += "<Missing 0x>";
+                continue;
+            }
+            addressData += `${line.substring(startAddressPos, startPos)}`;
+        } else {
+            const endPos: number = line.indexOf(")", offsetPos2);
+            if (endPos === -1) {
+                data += "<Missing )>";
+                continue; // unexpected
+            }
+            data += line.substring(offsetPos2, endPos);
+        }
+    }
+
+    if (data.length > 8192) { // The API has an 8k limit.
+        data = data.substring(0, 8191) + "…";
+    }
+
+    console.log(`Crash call stack:\n${data}`);
+    logCppCrashTelemetry(data, addressData);
+
+    await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
+    void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
+}
+
 export function deactivate(): Thenable<void> {
     clients.timeTelemetryCollector.clear();
-    console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     commandDisposables.forEach(d => d.dispose());

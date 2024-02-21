@@ -368,6 +368,10 @@ export class ReferencesManager {
         this.referencesProgressBarStartTime = Date.now();
         this.clearViews();
 
+        if (this.referencesDelayProgress) {
+            clearInterval(this.referencesDelayProgress);
+        }
+
         this.referencesDelayProgress = setInterval(() => {
             const progressTitle: string = referencesCommandModeToString(this.client.ReferencesCommandMode);
             this.referencesProgressOptions = { location: vscode.ProgressLocation.Notification, title: progressTitle, cancellable: true };

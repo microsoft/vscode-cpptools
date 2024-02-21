@@ -184,7 +184,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "\"유사\" 결과를 제공합니다. 컨텍스트를 인식하지 않는 결과입니다.",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "C/C++ 언어 서비스 기능을 해제합니다.",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "IntelliSense 엔진이 `#include` 오류를 포함하는 변환 단위에 대해 태그 파서로 자동으로 전환되는지 여부를 제어합니다.",
-	"c_cpp.configuration.autocomplete.markdownDescription": "자동 완성 공급자를 제어합니다. `disabled`에서 단어 기반 완성을 원할 경우 `\"[cpp]\": {\"editor.wordBasedSuggestions\": true}`를 설정해야 합니다(`c`와 `cuda-cpp` 언어도 동일).",
+	"c_cpp.configuration.autocomplete.markdownDescription": "자동 완성 공급자를 제어합니다. `disabled`에서 단어 기반 완성을 원할 경우 `\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}`를 설정해야 합니다(`c`와 `cuda-cpp` 언어도 동일).",
 	"c_cpp.configuration.autocomplete.default.description": "활성 IntelliSense 엔진을 사용합니다.",
 	"c_cpp.configuration.autocomplete.disabled.description": "Visual Studio Code에서 제공하는 단어 기반 완성을 사용합니다.",
 	"c_cpp.configuration.errorSquiggles.description": "IntelliSense 엔진에서 감지한 의심스러운 컴파일 오류를 편집기에 다시 보고할지 여부를 제어합니다. 또한 포함 사항을 찾을 수 없는 경우 코드 분석 경고가 보고되는지 여부를 제어합니다. 이 설정은 태그 파서 엔진에서 무시됩니다.",

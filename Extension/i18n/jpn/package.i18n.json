@@ -184,7 +184,7 @@
 	"c_cpp.configuration.intelliSenseEngine.tagParser.description": "コンテキストを認識しない\"あいまいな\"結果を提供します。 ",
 	"c_cpp.configuration.intelliSenseEngine.disabled.description": "C/C++ 言語サービス機能をオフにします。",
 	"c_cpp.configuration.intelliSenseEngineFallback.markdownDescription": "`#include` エラーを含む翻訳単位に対して、IntelliSense エンジンをタグ パーサーに自動的に切り替えるかどうかを制御します。",
-	"c_cpp.configuration.autocomplete.markdownDescription": "オートコンプリート プロバイダーを制御します。`disabled` になっていて、単語ベースの補完が必要な場合には、`\"[cpp]\": {\"editor.wordBasedSuggestions\": true}` を設定する必要があります (`c` および `cuda-cpp` 言語でも同様です)。",
+	"c_cpp.configuration.autocomplete.markdownDescription": "オートコンプリート プロバイダーを制御します。`disabled` になっていて、単語ベースの補完が必要な場合には、`\"[cpp]\": {\"editor.wordBasedSuggestions\": <value>}` を設定する必要があります (`c` および `cuda-cpp` 言語でも同様です)。",
 	"c_cpp.configuration.autocomplete.default.description": "アクティブな IntelliSense エンジンを使用します。",
 	"c_cpp.configuration.autocomplete.disabled.description": "Visual Studio Code によって提供される単語ベースの補完機能を使用します。",
 	"c_cpp.configuration.errorSquiggles.description": "IntelliSense エンジンによって検出されたコンパイル エラーの疑いをエディターに報告するかどうかを制御します。また、インクルードが見つからない場合にコード分析の警告を報告するかどうかを制御します。この設定は、タグ パーサー エンジンによって無視されます。",
