@@ -53,7 +53,7 @@ import {
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
-import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations } from './extension';
+import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
@@ -317,6 +317,7 @@ export interface GetDocumentSymbolRequestParams {
 
 export interface WorkspaceSymbolParams extends WorkspaceFolderParams {
     query: string;
+    experimentEnabled: boolean;
 }
 
 export enum SymbolScope {
@@ -548,7 +549,7 @@ interface DidChangeActiveEditorParams {
 }
 
 // Requests
-const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
+const InitializationRequest: RequestType<CppInitializationParams, string, void> = new RequestType<CppInitializationParams, string, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
@@ -974,6 +975,14 @@ export class DefaultClient implements Client {
         return selection ? selection.index : -1;
     }
 
+    public async showPrompt(sender?: any): Promise<void> {
+        const buttonMessage: string = localize("selectIntelliSenseConfiguration.string", "Select IntelliSense Configuration...");
+        const value: string | undefined = await vscode.window.showInformationMessage(localize("setCompiler.message", "You do not have IntelliSense configured. Unless you set your own configurations, IntelliSense may not be functional."), buttonMessage);
+        if (value === buttonMessage) {
+            return this.handleIntelliSenseConfigurationQuickPick(sender);
+        }
+    }
+
     public async handleIntelliSenseConfigurationQuickPick(sender?: any, showCompilersOnly?: boolean): Promise<void> {
         const settings: CppSettings = new CppSettings(showCompilersOnly ? undefined : this.RootUri);
         const paths: string[] = [];
@@ -1038,6 +1047,7 @@ export class DefaultClient implements Client {
                 settings.defaultCompilerPath = "";
                 await this.configuration.updateCompilerPathIfSet(settings.defaultCompilerPath);
                 configurationSelected = true;
+                await this.showPrompt(sender);
                 return ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.CompilerPath, "disablePrompt");
             }
             if (installShown && index === paths.length - 2) {
@@ -1586,7 +1596,7 @@ export class DefaultClient implements Client {
         // Move initialization to a separate message, so we can see log output from it.
         // A request is used in order to wait for completion and ensure that no subsequent
         // higher priority message may be processed before the Initialization request.
-        await languageClient.sendRequest(InitializationRequest, cppInitializationParams);
+        watchForCrashes(await languageClient.sendRequest(InitializationRequest, cppInitializationParams));
     }
 
     public async sendDidChangeSettings(): Promise<void> {
@@ -1840,7 +1850,7 @@ export class DefaultClient implements Client {
         if (!this.configurationProvider) {
             return;
         }
-        console.log("updateCustomBrowseConfiguration");
+
         const currentProvider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(this.configurationProvider);
         if (!currentProvider || !currentProvider.isReady || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
             return;
@@ -1977,7 +1987,6 @@ export class DefaultClient implements Client {
         DefaultClient.isStarted.reset();
 
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        console.log("provideCustomConfiguration");
 
         const params: QueryTranslationUnitSourceParams = {
             uri: docUri.toString(),
@@ -2278,7 +2287,7 @@ export class DefaultClient implements Client {
     }
 
     private callTaskWithTimeout<T>(task: () => Thenable<T>, ms: number, cancelToken?: vscode.CancellationTokenSource): Promise<T> {
-        let timer: NodeJS.Timer;
+        let timer: NodeJS.Timeout;
 
         // Create a promise that rejects in <ms> milliseconds
         const timeout: () => Promise<T> = () => new Promise<T>((resolve, reject) => {
@@ -3109,10 +3118,8 @@ export class DefaultClient implements Client {
                     if (sanitized.browsePath.length === 0) {
                         sanitized.browsePath = ["${workspaceFolder}/**"];
                     }
-                    console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
-                console.log("No browse configuration is available.");
                 return;
             }
 
@@ -3126,7 +3133,6 @@ export class DefaultClient implements Client {
                     if (sanitized.browsePath.length === 0) {
                         sanitized.browsePath = ["${workspaceFolder}/**"];
                     }
-                    console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
                 return;
