@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.19.4: February 20, 2024
+## Version 1.19.4: February 21, 2024
 ### Enhancements
  * Enable support for fuzzy symbol searches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
    * This may not be enabled for all users unless `C_Cpp.experimentalFeatures` is `enabled`.
