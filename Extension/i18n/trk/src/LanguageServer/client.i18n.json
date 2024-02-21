@@ -11,6 +11,8 @@
 	"use.compiler": "{0} kullan",
 	"configuration.providers": "yapılandırma sağlayıcıları",
 	"compilers": "derleyiciler",
+	"selectIntelliSenseConfiguration.string": "IntelliSense Yapılandırmasını Seç...",
+	"setCompiler.message": "Yapılandırılmış IntelliSense’niz yok. Kendi yapılandırmalarınızı ayarlamazsanız IntelliSense çalışmayabilir.",
 	"use.provider": "{0} kullan",
 	"use.compileCommands": "{0} kullan",
 	"selectAnotherCompiler.string": "Makinem üzerinde başka bir derleyici seç...",
