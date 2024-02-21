@@ -38,6 +38,8 @@
 * Fix comma delimited lists in `@param` Doxygen parameters. [#11868](https://github.com/microsoft/vscode-cpptools/issues/11868)
 * Fix incorrect errors for `compilerPath` in the configuration UI for compilers that can be found in PATH. [#11903](https://github.com/microsoft/vscode-cpptools/issues/11903)
 * Fix an issue with include sorting when formatting with clang-format. [#11914](https://github.com/microsoft/vscode-cpptools/issues/11914)
+* Fix the `-include` arg of `-Xarg_<arg1>` getting filtered out, leading to a failed compiler query. [#11965](https://github.com/microsoft/vscode-cpptools/issues/11965)
+* Fix the `-arch` flag overwriting the `-target` flag's value when it shouldn't. [#11971](https://github.com/microsoft/vscode-cpptools/issues/11971)
 * Fix an issue in which the directory specified in a `compile_commands.json` was not being used as the current directory when querying the specified compiler path.
 * Fix an issue with configuring IntelliSense for a header file after having chosen an associated source file in which inclusion of the header is disabled or removed.
 * Fix an issue where use of an explicit `compilerPath` to override the compiler in a `compile_commands.json` will also throw out the compiler arguments.
