@@ -394,7 +394,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         const exePath: string | undefined = util.resolveVariables(util.findExePathInArgs(this.args));
         util.createDirIfNotExistsSync(exePath);
 
-        if (this.fragments.length > 0 && this.args.length == 0) {
+        if (this.fragments.length > 0 && this.args.length === 0) {
             this.args = this.fragments;
             this.args.forEach((value) => {
                 activeCommand = activeCommand + " " + value;
@@ -410,7 +410,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
                 activeCommand = activeCommand + " " + value;
             });
             this.args.push(...this.fragments);
-        } else if (this.args.length > 0 && this.fragments.length == 0) {
+        } else if (this.args.length > 0 && this.fragments.length === 0) {
             this.args.forEach((value, index) => {
                 value = util.quoteArgument(util.resolveVariables(value));
                 activeCommand = activeCommand + " " + value;
