@@ -11,6 +11,8 @@
 	"use.compiler": "使用 {0}",
 	"configuration.providers": "配置提供程序",
 	"compilers": "编译器",
+	"selectIntelliSenseConfiguration.string": "选择 IntelliSense 配置...",
+	"setCompiler.message": "未配置编译器。除非设置自己的配置，否则 IntelliSense 可能无法正常工作。",
 	"use.provider": "使用 {0}",
 	"use.compileCommands": "使用 {0}",
 	"selectAnotherCompiler.string": "在我的计算机上选择另一个编译器...",
