@@ -48,7 +48,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const execution: ProcessExecution | ShellExecution | CustomExecution | undefined = _task.execution;
         if (!execution) {
             const definition: CppBuildTaskDefinition = <any>_task.definition;
-            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail);
+            _task = this.getTask(definition.command, false, definition.args ? definition.args : [], definition, _task.detail, definition.fragments);
             return _task;
         }
         return undefined;
@@ -166,7 +166,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         return result;
     }
 
-    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
+    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string, commandFragments?: string[]) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string, commandFragments?: string[]) => {
         const compilerPathBase: string = path.basename(compilerPath);
         const isCl: boolean = compilerPathBase.toLowerCase() === "cl.exe";
         const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
@@ -188,6 +188,11 @@ export class CppBuildTaskProvider implements TaskProvider {
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
+
+            let fragments: string[] = [];
+            if (commandFragments && commandFragments.length > 0) {
+                fragments = args.concat(commandFragments);
+            }
             const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
             const options: cp.ExecOptions | cp.SpawnOptions | undefined = { cwd: cwd };
             definition = {
@@ -195,6 +200,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 label: taskLabel,
                 command: isCl ? compilerPathBase : compilerPath,
                 args: args,
+                fragments: fragments,
                 options: options
             };
         }
@@ -207,7 +213,7 @@ export class CppBuildTaskProvider implements TaskProvider {
         const task: CppBuildTask = new Task(definition, scope, definition.label, ext.CppSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, { taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin' })
+                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.fragments, resolvedDefinition.options, { taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin' })
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
@@ -228,6 +234,7 @@ export class CppBuildTaskProvider implements TaskProvider {
                 label: task.label,
                 command: task.command,
                 args: task.args,
+                fragments: task.fragments,
                 options: task.options
             };
             const cppBuildTask: CppBuildTask = new Task(definition, TaskScope.Workspace, task.label, ext.CppSourceStr);
@@ -354,7 +361,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
     private endOfLine: string = "\r\n";
 
-    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private buildOptions: BuildOptions) {
+    constructor(private command: string, private args: string[], private fragments: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private buildOptions: BuildOptions) {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
@@ -387,11 +394,29 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
         const exePath: string | undefined = util.resolveVariables(util.findExePathInArgs(this.args));
         util.createDirIfNotExistsSync(exePath);
 
-        this.args.forEach((value, index) => {
-            value = util.quoteArgument(util.resolveVariables(value));
-            activeCommand = activeCommand + " " + value;
-            this.args[index] = value;
-        });
+        if (this.fragments.length > 0 && this.args.length == 0) {
+            this.args = this.fragments;
+            this.args.forEach((value) => {
+                activeCommand = activeCommand + " " + value;
+            });
+        } else if (this.fragments.length > 0 && this.args.length > 0) {
+            this.args.forEach((value, index) => {
+                value = util.quoteArgument(util.resolveVariables(value));
+                activeCommand = activeCommand + " " + value;
+                this.args[index] = value;
+            });
+
+            this.fragments.forEach((value) => {
+                activeCommand = activeCommand + " " + value;
+            });
+            this.args.push(...this.fragments);
+        } else if (this.args.length > 0 && this.fragments.length == 0) {
+            this.args.forEach((value, index) => {
+                value = util.quoteArgument(util.resolveVariables(value));
+                activeCommand = activeCommand + " " + value;
+                this.args[index] = value;
+            });
+        }
         if (this.options) {
             this.options.shell = true;
         } else {

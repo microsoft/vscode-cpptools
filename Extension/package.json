@@ -320,6 +320,10 @@
                         "type": "array",
                         "description": "%c_cpp.taskDefinitions.args.description%"
                     },
+                    "fragments": {
+                        "type": "array",
+                        "description": "%c_cpp.taskDefinitions.fragments.description%"
+                    },
                     "options": {
                         "type": "object",
                         "description": "%c_cpp.taskDefinitions.options.description%",
