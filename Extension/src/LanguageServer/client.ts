@@ -2688,7 +2688,7 @@ export class DefaultClient implements Client {
         const configurationNotSet: boolean = configProviderNotSetAndNoCache && compileCommandsNotSet && compilerPathNotSet;
 
         showConfigStatus = showConfigStatus || (configurationNotSet &&
-            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && trustedCompilerPaths && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
+            !!compilerDefaults && !compilerDefaults.trustedCompilerFound && (trustedCompilerPaths.length !== 1 || trustedCompilerPaths[0] !== ""));
 
         const configProviderType: ConfigurationType = this.configuration.ConfigProviderAutoSelected ? ConfigurationType.AutoConfigProvider : ConfigurationType.ConfigProvider;
         const compilerType: ConfigurationType = this.configuration.CurrentConfiguration?.compilerPathIsExplicit ? ConfigurationType.CompilerPath : ConfigurationType.AutoCompilerPath;
@@ -2904,6 +2904,11 @@ export class DefaultClient implements Client {
 
             params.configurations.push(modifiedConfig);
         });
+
+        const trusted_compiler_path: string | undefined = params.configurations[params.currentConfiguration].compilerPath;
+        if (trusted_compiler_path) {
+            void this.addTrustedCompiler(trusted_compiler_path).catch(logAndReturn.undefined);
+        }
 
         await this.languageClient.sendRequest(ChangeCppPropertiesRequest, params);
         if (!!this.lastCustomBrowseConfigurationProviderId && !!this.lastCustomBrowseConfiguration && !!this.lastCustomBrowseConfigurationProviderVersion) {
@@ -3870,13 +3875,11 @@ export class DefaultClient implements Client {
         if (path === null || path === undefined) {
             return;
         }
-        if (trustedCompilerPaths.includes(path)) {
-            DebugConfigurationProvider.ClearDetectedBuildTasks();
-            return;
+        if (!trustedCompilerPaths.includes(path)) {
+            trustedCompilerPaths.push(path);
         }
-        trustedCompilerPaths.push(path);
-        compilerDefaults = await this.requestCompiler(path);
         DebugConfigurationProvider.ClearDetectedBuildTasks();
+        compilerDefaults = await this.requestCompiler(path);
     }
 }
 

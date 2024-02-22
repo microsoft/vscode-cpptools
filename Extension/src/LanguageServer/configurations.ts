@@ -976,11 +976,6 @@ export class CppProperties {
                             configuration.macFrameworkPath = this.defaultFrameworks;
                         }
                     }
-                } else {
-                    // add compiler to list of trusted compilers
-                    if (i === this.CurrentConfigurationIndex) {
-                        void this.client.addTrustedCompiler(configuration.compilerPath).catch(logAndReturn.undefined);
-                    }
                 }
             } else {
                 // However, if compileCommands are used and compilerPath is explicitly set, it's still necessary to resolve variables in it.
