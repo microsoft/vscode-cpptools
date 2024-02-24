@@ -10,7 +10,17 @@ interface FileData
 {
     version: number;
     promise: ManualPromise<vscode.InlayHint[]>;
+    typeHints: CppInlayHint[];
+    parameterHints: CppInlayHint[];
     inlayHints: vscode.InlayHint[];
+
+    inlayHintsAutoDeclarationTypes?: boolean;
+    inlayHintsAutoDeclarationTypesShowOnLeft?: boolean;
+    inlayHintsParameterNames?: boolean;
+    inlayHintsParameterNamesHideLeadingUnderscores?: boolean;
+    inlayHintsParameterNamesSuppressName?: boolean;
+    inlayHintsReferenceOperator?: boolean;
+    inlayHintsReferenceOperatorShowSpace?: boolean;
 }
 
 export interface CppInlayHint {
@@ -44,6 +54,35 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 // Make sure file hasn't been changed since the last set of results.
                 // If a complete promise is present, there should also be a cache.
                 if (fileData.version === document.version) {
+                    const settings: CppSettings = new CppSettings(vscode.Uri.parse(uriString));
+                    // Check if any of the settings changed.
+                    if (fileData.inlayHintsAutoDeclarationTypes === settings.inlayHintsAutoDeclarationTypes &&
+                        fileData.inlayHintsAutoDeclarationTypesShowOnLeft === settings.inlayHintsAutoDeclarationTypesShowOnLeft &&
+                        fileData.inlayHintsParameterNames === settings.inlayHintsParameterNames &&
+                        fileData.inlayHintsParameterNamesHideLeadingUnderscores === settings.inlayHintsParameterNamesHideLeadingUnderscores &&
+                        fileData.inlayHintsParameterNamesSuppressName === settings.inlayHintsParameterNamesSuppressName &&
+                        fileData.inlayHintsReferenceOperator === settings.inlayHintsReferenceOperator &&
+                        fileData.inlayHintsReferenceOperatorShowSpace === settings.inlayHintsReferenceOperatorShowSpace) {
+                        return fileData.promise;
+                    }
+                    fileData.inlayHints = [];
+                    fileData.inlayHintsAutoDeclarationTypes = settings.inlayHintsAutoDeclarationTypes;
+                    fileData.inlayHintsAutoDeclarationTypesShowOnLeft = settings.inlayHintsAutoDeclarationTypesShowOnLeft;
+                    fileData.inlayHintsParameterNames = settings.inlayHintsParameterNames;
+                    fileData.inlayHintsParameterNamesHideLeadingUnderscores = settings.inlayHintsParameterNamesHideLeadingUnderscores;
+                    fileData.inlayHintsParameterNamesSuppressName = settings.inlayHintsParameterNamesSuppressName;
+                    fileData.inlayHintsReferenceOperator = settings.inlayHintsReferenceOperator;
+                    fileData.inlayHintsReferenceOperatorShowSpace = settings.inlayHintsReferenceOperatorShowSpace;
+                    if (settings.inlayHintsAutoDeclarationTypes) {
+                        const resolvedTypeHints: vscode.InlayHint[] = this.resolveTypeHints(settings, fileData.typeHints);
+                        Array.prototype.push.apply(fileData.inlayHints, resolvedTypeHints);
+                    }
+                    if (settings.inlayHintsParameterNames || settings.inlayHintsReferenceOperator) {
+                        const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(settings, fileData.parameterHints);
+                        Array.prototype.push.apply(fileData.inlayHints, resolvedParameterHints);
+                    }
+                    fileData.promise = new ManualPromise<vscode.InlayHint[]>();
+                    fileData.promise.resolve(fileData.inlayHints);
                     return fileData.promise;
                 }
             } else {
@@ -56,6 +95,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
         fileData = {
             version: document.version,
             promise: new ManualPromise<vscode.InlayHint[]>(),
+            typeHints: [],
+            parameterHints: [],
             inlayHints: []
         };
         this.allFileData.set(uriString, fileData);
@@ -93,6 +134,8 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 fileData = {
                     version: editor.document.version,
                     promise: new ManualPromise<vscode.InlayHint[]>(),
+                    typeHints: [],
+                    parameterHints: [],
                     inlayHints: []
                 };
                 newPromiseCreated = true;
@@ -105,25 +148,38 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                 }
                 if (fileData.version !== editor.document.version) {
                     fileData.version = editor.document.version;
+                    fileData.typeHints = [];
+                    fileData.parameterHints = [];
                     fileData.inlayHints = [];
                 }
             }
             return [fileData, newPromiseCreated];
         })();
+        const settings: CppSettings = new CppSettings(vscode.Uri.parse(uriString));
         if (startNewSet) {
             fileData.inlayHints = [];
+            fileData.typeHints = [];
+            fileData.parameterHints = [];
+            fileData.inlayHintsAutoDeclarationTypes = settings.inlayHintsAutoDeclarationTypes;
+            fileData.inlayHintsAutoDeclarationTypesShowOnLeft = settings.inlayHintsAutoDeclarationTypesShowOnLeft;
+            fileData.inlayHintsParameterNames = settings.inlayHintsParameterNames;
+            fileData.inlayHintsParameterNamesHideLeadingUnderscores = settings.inlayHintsParameterNamesHideLeadingUnderscores;
+            fileData.inlayHintsParameterNamesSuppressName = settings.inlayHintsParameterNamesSuppressName;
+            fileData.inlayHintsReferenceOperator = settings.inlayHintsReferenceOperator;
+            fileData.inlayHintsReferenceOperatorShowSpace = settings.inlayHintsReferenceOperatorShowSpace;
         }
 
-        const typeHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Type);
-        const paramHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Parameter);
+        const newTypeHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Type);
+        const newParameterHints: CppInlayHint[] = cppInlayHints.filter(h => h.inlayHintKind === InlayHintKind.Parameter);
+        Array.prototype.push.apply(fileData.typeHints, newTypeHints);
+        Array.prototype.push.apply(fileData.parameterHints, newParameterHints);
 
-        const settings: CppSettings = new CppSettings(vscode.Uri.parse(uriString));
         if (settings.inlayHintsAutoDeclarationTypes) {
-            const resolvedTypeHints: vscode.InlayHint[] = this.resolveTypeHints(settings, typeHints);
+            const resolvedTypeHints: vscode.InlayHint[] = this.resolveTypeHints(settings, newTypeHints);
             Array.prototype.push.apply(fileData.inlayHints, resolvedTypeHints);
         }
         if (settings.inlayHintsParameterNames || settings.inlayHintsReferenceOperator) {
-            const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(settings, paramHints);
+            const resolvedParameterHints: vscode.InlayHint[] = this.resolveParameterHints(settings, newParameterHints);
             Array.prototype.push.apply(fileData.inlayHints, resolvedParameterHints);
         }
 

@@ -2309,21 +2309,21 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CanceledReferencesNotification, this.serverCanceledReferences);
     }
 
-    private handleIntelliSenseResult(intelliseSenseResult: IntelliSenseResult): void {
-        const fileVersion: number | undefined = openFileVersions.get(intelliseSenseResult.uri);
-        if (fileVersion !== undefined && fileVersion !== intelliseSenseResult.fileVersion) {
+    private handleIntelliSenseResult(intelliSenseResult: IntelliSenseResult): void {
+        const fileVersion: number | undefined = openFileVersions.get(intelliSenseResult.uri);
+        if (fileVersion !== undefined && fileVersion !== intelliSenseResult.fileVersion) {
             return;
         }
 
         if (this.semanticTokensProvider) {
-            this.semanticTokensProvider.deliverTokens(intelliseSenseResult.uri, intelliseSenseResult.semanticTokens, intelliseSenseResult.clearExistingSemanticTokens);
+            this.semanticTokensProvider.deliverTokens(intelliSenseResult.uri, intelliSenseResult.semanticTokens, intelliSenseResult.clearExistingSemanticTokens);
         }
         if (this.inlayHintsProvider) {
-            this.inlayHintsProvider.deliverInlayHints(intelliseSenseResult.uri, intelliseSenseResult.inlayHints, intelliseSenseResult.clearExistingInlayHint);
+            this.inlayHintsProvider.deliverInlayHints(intelliSenseResult.uri, intelliSenseResult.inlayHints, intelliSenseResult.clearExistingInlayHint);
         }
 
-        this.updateInactiveRegions(intelliseSenseResult.uri, intelliseSenseResult.inactiveRegions, intelliseSenseResult.clearExistingInactiveRegions, intelliseSenseResult.isCompletePass);
-        this.updateSquiggles(intelliseSenseResult.uri, intelliseSenseResult.diagnostics, intelliseSenseResult.clearExistingDiagnostics);
+        this.updateInactiveRegions(intelliSenseResult.uri, intelliSenseResult.inactiveRegions, intelliSenseResult.clearExistingInactiveRegions, intelliSenseResult.isCompletePass);
+        this.updateSquiggles(intelliSenseResult.uri, intelliSenseResult.diagnostics, intelliSenseResult.clearExistingDiagnostics);
     }
 
     private updateSquiggles(uriString: string, diagnostics: IntelliSenseDiagnostic[], startNewSet: boolean): void {
