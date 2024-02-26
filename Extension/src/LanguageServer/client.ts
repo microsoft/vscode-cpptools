@@ -1836,7 +1836,7 @@ export class DefaultClient implements Client {
         if (!this.configurationProvider) {
             return;
         }
-        console.log("updateCustomBrowseConfiguration");
+
         const currentProvider: CustomConfigurationProvider1 | undefined = getCustomConfigProviders().get(this.configurationProvider);
         if (!currentProvider || !currentProvider.isReady || (requestingProvider && requestingProvider.extensionId !== currentProvider.extensionId)) {
             return;
@@ -1973,7 +1973,6 @@ export class DefaultClient implements Client {
         DefaultClient.isStarted.reset();
 
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
-        console.log("provideCustomConfiguration");
 
         const params: QueryTranslationUnitSourceParams = {
             uri: docUri.toString(),
@@ -3080,10 +3079,8 @@ export class DefaultClient implements Client {
                     if (sanitized.browsePath.length === 0) {
                         sanitized.browsePath = ["${workspaceFolder}/**"];
                     }
-                    console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
-                console.log("No browse configuration is available.");
                 return;
             }
 
@@ -3097,7 +3094,6 @@ export class DefaultClient implements Client {
                     if (sanitized.browsePath.length === 0) {
                         sanitized.browsePath = ["${workspaceFolder}/**"];
                     }
-                    console.log("Falling back to last received browse configuration: ", JSON.stringify(sanitized, null, 2));
                     break;
                 }
                 return;

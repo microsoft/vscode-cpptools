@@ -11,6 +11,8 @@
 	"use.compiler": "Použít {0}",
 	"configuration.providers": "poskytovatelé konfigurace",
 	"compilers": "kompilátory",
+	"selectIntelliSenseConfiguration.string": "Vybrat konfiguraci IntelliSense...",
+	"setCompiler.message": "Nemáte nakonfigurovaný technologii IntelliSense. Pokud nenastavíte vlastní konfigurace, IntelliSense nemusí být funkční.",
 	"use.provider": "Použít {0}",
 	"use.compileCommands": "Použít {0}",
 	"selectAnotherCompiler.string": "Vybrat jiný kompilátor na mém počítači...",

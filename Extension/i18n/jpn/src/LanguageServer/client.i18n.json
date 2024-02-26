@@ -11,6 +11,8 @@
 	"use.compiler": "{0}を使用する",
 	"configuration.providers": "構成プロバイダー",
 	"compilers": "コンパイラ",
+	"selectIntelliSenseConfiguration.string": "IntelliSense 構成を選択...",
+	"setCompiler.message": "IntelliSense が構成されていません。独自の構成を設定しない限り、IntelliSense は機能しない可能性があります。",
 	"use.provider": "{0}を使用する",
 	"use.compileCommands": "{0}を使用する",
 	"selectAnotherCompiler.string": "コンピューター上の別のコンパイラを選択...",
