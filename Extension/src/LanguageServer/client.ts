@@ -1628,6 +1628,24 @@ export class DefaultClient implements Client {
                     }
                 }
 
+                // If an inlay hints setting has changed, force an inlay provider update on the visible documents.
+                if (["inlayHints.autoDeclarationTypes.enabled",
+                    "inlayHints.autoDeclarationTypes.showOnLeft",
+                    "inlayHints.parameterNames.enabled",
+                    "inlayHints.parameterNames.hideLeadingUnderscores",
+                    "inlayHints.parameterNames.suppressWhenArgumentContainsName",
+                    "inlayHints.referenceOperator.enabled",
+                    "inlayHints.referenceOperator.showSpace"].some(setting => setting in changedSettings)) {
+                    vscode.window.visibleTextEditors.forEach((visibleEditor: vscode.TextEditor) => {
+                        // The exact range doesn't matter.
+                        const visibleRange: vscode.Range | undefined = visibleEditor.visibleRanges.at(0);
+                        if (visibleRange !== undefined) {
+                            void vscode.commands.executeCommand<vscode.InlayHint[]>('vscode.executeInlayHintProvider',
+                                visibleEditor.document.uri, visibleRange);
+                        }
+                    });
+                }
+
                 const showButtonSender: string = "settingsChanged";
                 if (changedSettings["default.configurationProvider"] !== undefined) {
                     void ui.ShowConfigureIntelliSenseButton(false, this, ConfigurationType.ConfigProvider, showButtonSender);

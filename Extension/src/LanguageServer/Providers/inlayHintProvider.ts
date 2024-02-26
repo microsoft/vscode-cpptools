@@ -45,7 +45,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
     public onDidChangeInlayHints?: vscode.Event<void> = this.onDidChangeInlayHintsEvent.event;
     private allFileData: Map<string, FileData> = new Map<string, FileData>();
 
-    public async provideInlayHints(document: vscode.TextDocument, range: vscode.Range, token: vscode.CancellationToken): Promise<vscode.InlayHint[]> {
+    public async provideInlayHints(document: vscode.TextDocument, _range: vscode.Range, token: vscode.CancellationToken): Promise<vscode.InlayHint[]> {
         const uri: vscode.Uri = document.uri;
         const uriString: string = uri.toString();
         let fileData: FileData | undefined = this.allFileData.get(uriString);
@@ -83,6 +83,7 @@ export class InlayHintsProvider implements vscode.InlayHintsProvider {
                     }
                     fileData.promise = new ManualPromise<vscode.InlayHint[]>();
                     fileData.promise.resolve(fileData.inlayHints);
+                    this.onDidChangeInlayHintsEvent.fire();
                     return fileData.promise;
                 }
             } else {
