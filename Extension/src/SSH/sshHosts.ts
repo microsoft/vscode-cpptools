@@ -64,7 +64,7 @@ function extractHostNames(parsedConfig: Configuration): { [host: string]: string
         } catch (e) {
             // The HostName may not be available.
         }
-        if (resolvedConfig !== undefined && resolvedConfig.HostName) {
+        if (resolvedConfig?.HostName !== undefined) {
             hostNames[host] = resolvedConfig.HostName;
         } else {
             hostNames[host] = host;
