@@ -10,9 +10,10 @@ import * as path from 'path';
 import {
     Configuration, ConfigurationDirective,
     ConfigurationEntry,
-    HostConfigurationDirective, parse,
+    Type as ConfigurationEntryType,
+    HostConfigurationDirective,
     ResolvedConfiguration,
-    Type as ConfigurationEntryType
+    parse
 } from 'ssh-config';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
@@ -57,8 +58,13 @@ function extractHostNames(parsedConfig: Configuration): { [host: string]: string
     const hostNames: { [host: string]: string } = Object.create(null);
 
     extractHosts(parsedConfig).forEach(host => {
-        const resolvedConfig: ResolvedConfiguration = parsedConfig.compute(host);
-        if (resolvedConfig.HostName) {
+        let resolvedConfig: ResolvedConfiguration | undefined;
+        try {
+            resolvedConfig = parsedConfig.compute(host);
+        } catch (e) {
+            // The HostName may not be available.
+        }
+        if (resolvedConfig !== undefined && resolvedConfig.HostName) {
             hostNames[host] = resolvedConfig.HostName;
         } else {
             hostNames[host] = host;
