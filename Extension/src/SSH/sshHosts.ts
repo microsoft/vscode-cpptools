@@ -62,7 +62,8 @@ function extractHostNames(parsedConfig: Configuration): { [host: string]: string
         try {
             resolvedConfig = parsedConfig.compute(host);
         } catch (e) {
-            // The HostName may not be available.
+            getSshChannel().appendLine(localize("failed.to.find.user.info.for.SSH",
+                "Failed to find user info for SSH. This could be caused by VS Code being installed using 'snap'. Please reinstall VS Code using the 'deb' package if you are planning to use SSH features."));
         }
         if (resolvedConfig?.HostName !== undefined) {
             hostNames[host] = resolvedConfig.HostName;
