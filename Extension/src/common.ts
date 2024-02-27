@@ -1651,7 +1651,7 @@ export interface IQuotedString {
 
 export type CommandString = string | IQuotedString;
 
-export function buildShellCommandLine(command: CommandString, args: CommandString[]): string {
+export function buildShellCommandLine(originalCommand: CommandString, command: CommandString, args: CommandString[]): string {
 
     let shellQuoteOptions: IShellQuotingOptions;
     const isWindows: boolean = os.platform() === 'win32';
@@ -1740,6 +1740,13 @@ export function buildShellCommandLine(command: CommandString, args: CommandStrin
         } else {
             return quote(value.value, value.quoting);
         }
+    }
+
+    // If we have no args and the command is a string then use the command to stay backwards compatible with the old command line
+    // model. To allow variable resolving with spaces we do continue if the resolved value is different than the original one
+    // and the resolved one needs quoting.
+    if ((!args || args.length === 0) && isString(command) && (command === originalCommand as string || needsQuotes(originalCommand as string))) {
+        return command;
     }
 
     const result: string[] = [];

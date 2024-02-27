@@ -313,8 +313,39 @@
                         "description": "%c_cpp.taskDefinitions.name.description%"
                     },
                     "command": {
-                        "type": "string",
-                        "description": "%c_cpp.taskDefinitions.command.description%"
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "object",
+                                "required": [
+                                    "value",
+                                    "quoting"
+                                ],
+                                "properties": {
+                                    "value": {
+                                        "type": "string",
+                                        "description": "%c_cpp.taskDefinitions.args.value.description%"
+                                    },
+                                    "quoting": {
+                                        "type": "string",
+                                        "enum": [
+                                            "escape",
+                                            "strong",
+                                            "weak"
+                                        ],
+                                        "enumDescriptions": [
+                                            "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                            "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                            "%c_cpp.taskDefinitions.args.quoting.weak.description%"
+                                        ],
+                                        "default": "strong",
+                                        "description": "%c_cpp.taskDefinitions.args.quoting.description%"
+                                    }
+                                }
+                            }
+                        ]
                     },
                     "args": {
                         "type": "array",
@@ -333,7 +364,7 @@
                                     "properties": {
                                         "value": {
                                             "type": "string",
-                                            "description": "The actual argument value"
+                                            "description": "%c_cpp.taskDefinitions.args.value.description%"
                                         },
                                         "quoting": {
                                             "type": "string",
@@ -343,12 +374,12 @@
                                                 "weak"
                                             ],
                                             "enumDescriptions": [
-                                                "Escapes characters using the shell's escape character (e.g. ` under PowerShell and \\ under bash).",
-                                                "Quotes the argument using the shell's strong quote character (e.g. ' under PowerShell and bash).",
-                                                "Quotes the argument using the shell's weak quote character (e.g. \" under PowerShell and bash)."
+                                                "%c_cpp.taskDefinitions.args.quoting.escape.description%",
+                                                "%c_cpp.taskDefinitions.args.quoting.strong.description%",
+                                                "%c_cpp.taskDefinitions.args.quoting.weak.description%"
                                             ],
                                             "default": "strong",
-                                            "description": "How the argument value should be quoted."
+                                            "description": "%c_cpp.taskDefinitions.args.quoting.description%"
                                         }
                                     }
                                 }
