@@ -444,11 +444,8 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         };
 
-        let activeCommand = util.buildShellCommandLine(resolvedCommand, this.command, this.args);
+        const activeCommand: string = util.buildShellCommandLine(resolvedCommand, this.command, this.args);
         this.writeEmitter.fire(activeCommand + this.endOfLine);
-        if (os.platform() === 'win32') {
-            activeCommand = `cmd /c chcp 65001>nul && ${activeCommand}`;
-        }
 
         let child: cp.ChildProcess | undefined;
         try {

@@ -1765,8 +1765,13 @@ export function buildShellCommandLine(originalCommand: CommandString, command: C
 
     let commandLine = result.join(' ');
     // There are special rules quoted command line in cmd.exe
-    if (isWindows && commandQuoted && argQuoted) {
-        commandLine = '"' + commandLine + '"';
+    if (isWindows)
+    {
+        commandLine = `chcp 65001>nul && ${commandLine}`;
+        if (commandQuoted && argQuoted) {
+            commandLine = '"' + commandLine + '"';
+        }
+        commandLine = `cmd /c ${commandLine}`;
     }
 
     return commandLine;
