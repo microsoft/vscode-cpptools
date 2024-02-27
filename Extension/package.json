@@ -318,7 +318,42 @@
                     },
                     "args": {
                         "type": "array",
-                        "description": "%c_cpp.taskDefinitions.args.description%"
+                        "description": "%c_cpp.taskDefinitions.args.description%",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object",
+                                    "required": [
+                                        "value",
+                                        "quoting"
+                                    ],
+                                    "properties": {
+                                        "value": {
+                                            "type": "string",
+                                            "description": "The actual argument value"
+                                        },
+                                        "quoting": {
+                                            "type": "string",
+                                            "enum": [
+                                                "escape",
+                                                "strong",
+                                                "weak"
+                                            ],
+                                            "enumDescriptions": [
+                                                "Escapes characters using the shell's escape character (e.g. ` under PowerShell and \\ under bash).",
+                                                "Quotes the argument using the shell's strong quote character (e.g. ' under PowerShell and bash).",
+                                                "Quotes the argument using the shell's weak quote character (e.g. \" under PowerShell and bash)."
+                                            ],
+                                            "default": "strong",
+                                            "description": "How the argument value should be quoted."
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     },
                     "options": {
                         "type": "object",
