@@ -1784,7 +1784,7 @@ export function findExePathInArgs(args: CommandString[]): string | undefined {
     for (const arg of args) {
         const argValue = isString(arg) ? arg : arg.value;
         if (previousArg === '-o') {
-            return argValue; // Return the argument value directly after '-o'
+            return argValue;
         }
         if (isWindows && argValue.includes('.exe')) {
             if (argValue.startsWith('/Fe')) {
@@ -1794,7 +1794,7 @@ export function findExePathInArgs(args: CommandString[]): string | undefined {
             }
         }
 
-        previousArg = argValue; // Update previousArg for the next iteration
+        previousArg = argValue;
     }
 
     return undefined;
