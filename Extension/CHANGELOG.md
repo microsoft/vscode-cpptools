@@ -1,5 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.5: February 29, 2024
+### Enhancements
+ * Change how `args` and `command` fields are handled in `cppbuild` tasks, to match the behavior of VS Code `shell` build tasks, including explicit `quoting` support. [#12001](https://github.com/microsoft/vscode-cpptools/issues/12001)
+ * Enable C23 IntelliSense support, and add support for `clatest` `std` value for MSVC. [#12020](https://github.com/microsoft/vscode-cpptools/issues/12020)
+
+### Bug Fixes
+ * Fix an issue with duplicate `Add #include` code actions appearing if the same header name exists in multiple locations. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
+ * Fix an issue with changes to `C_Cpp.inlayHints` settings not taking effect immediately. [#12013](https://github.com/microsoft/vscode-cpptools/issues/12013)
+ * Fix an issue with how Doxygen `brief` and `param` are displayed on hover. [#12015](https://github.com/microsoft/vscode-cpptools/issues/12015)
+ * Fix an issue preventing the extension from functioning if installed via snap on Linux. [#12021](https://github.com/microsoft/vscode-cpptools/issues/12021)
+ * Fix a potential cpptools process hang on shutdown.
+
 ## Version 1.19.4: February 21, 2024
 ### Enhancements
  * Enable support for fuzzy symbol searches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
