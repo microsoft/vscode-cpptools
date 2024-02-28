@@ -1,5 +1,15 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.5: February 29, 2024
+### Enhancements
+ * Aligned how `args` and `command` fields are handled in `cppbuild` tasks to match the behavior of VS Code `shell` build tasks, including explicit `quoting` behavior. [#12001](https://github.com/microsoft/vscode-cpptools/issues/12001)
+
+### Bug Fixes
+ * Fix an issue with duplicate `Add #include` code actions appearing if the same file exists at multiple locations. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
+ * Fix an issue with changes to `C_Cpp.inlayHints` settings not taking effect immediately. [#12013](https://github.com/microsoft/vscode-cpptools/issues/12013)
+ * Fix an issue that would prevent the extension from functioning if installed via snap on Linux. [#12021](https://github.com/microsoft/vscode-cpptools/issues/12021)
+ * Fix a hang on cpptools process shutdown after having recovered from a crash of the cpptool-srv process.
+
 ## Version 1.19.4: February 21, 2024
 ### Enhancements
  * Enable support for fuzzy symbol searches. [#2751](https://github.com/microsoft/vscode-cpptools/issues/2751)
