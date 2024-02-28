@@ -3,6 +3,7 @@
 ## Version 1.19.5: February 29, 2024
 ### Enhancements
  * Change how `args` and `command` fields are handled in `cppbuild` tasks, to match the behavior of VS Code `shell` build tasks, including explicit `quoting` support. [#12001](https://github.com/microsoft/vscode-cpptools/issues/12001)
+ * Enable C23 IntelliSense support, and add support for `clatest` `std` value for MSVC. [#12020](https://github.com/microsoft/vscode-cpptools/issues/12020)
 
 ### Bug Fixes
  * Fix an issue with duplicate `Add #include` code actions appearing if the same header name exists in multiple locations. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
