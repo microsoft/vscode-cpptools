@@ -536,6 +536,14 @@ interface DidChangeActiveEditorParams {
     selection?: Range;
 }
 
+export interface ChatContextResult {
+    language: string;
+    standardVersion: string;
+    compiler: string;
+    targetPlatform: string;
+    targetArchitecture: string;
+}
+
 // Requests
 const InitializationRequest: RequestType<CppInitializationParams, string, void> = new RequestType<CppInitializationParams, string, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
@@ -553,6 +561,7 @@ const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEd
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
+const CppContextRequest: RequestType<void, ChatContextResult, void> = new RequestType<void, ChatContextResult, void>('cpptools/getChatContext');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -778,6 +787,7 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
+    getChatContext(): Promise<ChatContextResult | undefined>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2185,6 +2195,11 @@ export class DefaultClient implements Client {
         };
         await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
+    }
+
+    public async getChatContext(): Promise<ChatContextResult | undefined> {
+        await this.ready;
+        return this.languageClient.sendRequest(CppContextRequest, null);
     }
 
     /**
@@ -4007,4 +4022,5 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
+    getChatContext(): Promise<ChatContextResult> { return Promise.resolve({} as ChatContextResult); }
 }
