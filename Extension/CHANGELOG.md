@@ -7,9 +7,12 @@
 
 ### Bug Fixes
  * Fix an issue with duplicate `Add #include` code actions appearing if the same header name exists in multiple locations. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
+ * Fix compiler querying with a `-index-store-path` argument. [#12012](https://github.com/microsoft/vscode-cpptools/issues/12012)
  * Fix an issue with changes to `C_Cpp.inlayHints` settings not taking effect immediately. [#12013](https://github.com/microsoft/vscode-cpptools/issues/12013)
  * Fix an issue with how Doxygen `brief` and `param` are displayed on hover. [#12015](https://github.com/microsoft/vscode-cpptools/issues/12015)
  * Fix an issue preventing the extension from functioning if installed via snap on Linux. [#12021](https://github.com/microsoft/vscode-cpptools/issues/12021)
+ * Fix compiler querying with a `-Xclang -mllvm` argument. [#12024](https://github.com/microsoft/vscode-cpptools/issues/12024)
+ * Fix the include graph lookup not occurring for source files. [#12036](https://github.com/microsoft/vscode-cpptools/issues/12036)
  * Fix a potential cpptools process hang on shutdown.
 
 ## Version 1.19.4: February 21, 2024
