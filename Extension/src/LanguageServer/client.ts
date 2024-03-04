@@ -3403,7 +3403,6 @@ export class DefaultClient implements Client {
         return this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-
     public async handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
