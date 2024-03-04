@@ -10,9 +10,10 @@ import * as path from 'path';
 import {
     Configuration, ConfigurationDirective,
     ConfigurationEntry,
-    HostConfigurationDirective, parse,
+    Type as ConfigurationEntryType,
+    HostConfigurationDirective,
     ResolvedConfiguration,
-    Type as ConfigurationEntryType
+    parse
 } from 'ssh-config';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
@@ -57,8 +58,14 @@ function extractHostNames(parsedConfig: Configuration): { [host: string]: string
     const hostNames: { [host: string]: string } = Object.create(null);
 
     extractHosts(parsedConfig).forEach(host => {
-        const resolvedConfig: ResolvedConfiguration = parsedConfig.compute(host);
-        if (resolvedConfig.HostName) {
+        let resolvedConfig: ResolvedConfiguration | undefined;
+        try {
+            resolvedConfig = parsedConfig.compute(host);
+        } catch (e) {
+            getSshChannel().appendLine(localize("failed.to.find.user.info.for.SSH",
+                "Failed to find user info for SSH. This could be caused by VS Code being installed using 'snap'. Please reinstall VS Code using the 'deb' package if you are planning to use SSH features."));
+        }
+        if (resolvedConfig?.HostName !== undefined) {
             hostNames[host] = resolvedConfig.HostName;
         } else {
             hostNames[host] = host;
