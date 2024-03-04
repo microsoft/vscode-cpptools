@@ -294,6 +294,7 @@ interface PublishRefactorDiagnosticsParams {
 }
 
 export interface CreateDeclarationOrDefinitionParams extends SelectionParams {
+    formatParams: FormatParams;
     copyToClipboard: boolean;
 }
 
@@ -497,12 +498,6 @@ interface FinishedRequestCustomConfigParams {
     uri: string;
 }
 
-interface FinishedFetchEditorParams {
-    insertSpaces: boolean;
-    tabSize: number;
-    useVcFormat: boolean;
-}
-
 export interface TextDocumentWillSaveParams {
     textDocument: TextDocumentIdentifier;
     reason: vscode.TextDocumentSaveReason;
@@ -587,7 +582,6 @@ const ClearCustomBrowseConfigurationNotification: NotificationType<WorkspaceFold
 const PreviewReferencesNotification: NotificationType<void> = new NotificationType<void>('cpptools/previewReferences');
 const RescanFolderNotification: NotificationType<void> = new NotificationType<void>('cpptools/rescanFolder');
 const FinishedRequestCustomConfig: NotificationType<FinishedRequestCustomConfigParams> = new NotificationType<FinishedRequestCustomConfigParams>('cpptools/finishedRequestCustomConfig');
-const FinishedFetchEditorSettings: NotificationType<FinishedFetchEditorParams> = new NotificationType<FinishedFetchEditorParams>('cpptools/finishedFetchEditorSettings');
 const DidChangeSettingsNotification: NotificationType<SettingsParams> = new NotificationType<SettingsParams>('cpptools/didChangeSettings');
 const DidChangeVisibleTextEditorsNotification: NotificationType<DidChangeVisibleTextEditorsParams> = new NotificationType<DidChangeVisibleTextEditorsParams>('cpptools/didChangeVisibleTextEditors');
 const DidChangeTextEditorVisibleRangesNotification: NotificationType<DidChangeTextEditorVisibleRangesParams> = new NotificationType<DidChangeTextEditorVisibleRangesParams>('cpptools/didChangeTextEditorVisibleRanges');
@@ -610,7 +604,6 @@ const CompileCommandsPathsNotification: NotificationType<CompileCommandsPaths> =
 const ReferencesNotification: NotificationType<refs.ReferencesResult> = new NotificationType<refs.ReferencesResult>('cpptools/references');
 const ReportReferencesProgressNotification: NotificationType<refs.ReportReferencesProgressNotification> = new NotificationType<refs.ReportReferencesProgressNotification>('cpptools/reportReferencesProgress');
 const RequestCustomConfig: NotificationType<string> = new NotificationType<string>('cpptools/requestCustomConfig');
-const FetchEditorFormatSettings: NotificationType<EditorParams> = new NotificationType<EditorParams>('cpptools/fetchEditorFormatSettings');
 const PublishRefactorDiagnosticsNotification: NotificationType<PublishRefactorDiagnosticsParams> = new NotificationType<PublishRefactorDiagnosticsParams>('cpptools/publishRefactorDiagnostics');
 const ShowMessageWindowNotification: NotificationType<ShowMessageWindowParams> = new NotificationType<ShowMessageWindowParams>('cpptools/showMessageWindow');
 const ShowWarningNotification: NotificationType<ShowWarningParams> = new NotificationType<ShowWarningParams>('cpptools/showWarning');
@@ -2104,30 +2097,6 @@ export class DefaultClient implements Client {
 
     }
 
-    private async fetchEditorFormatSettings(params: FinishedFetchEditorParams){
-        const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-        if (!editor) {
-            return;
-        }
-        let uri = editor.document.uri;
-        const settings: OtherSettings = new OtherSettings(uri);
-        const cppSettings: CppSettings = new CppSettings(uri);
-
-        if (settings.editorTabSize)
-        {
-            params.tabSize = settings.editorTabSize;
-        }
-        if (settings.editorInsertSpaces)
-        {
-            params.insertSpaces = settings.editorInsertSpaces
-        }
-        if (cppSettings.useVcFormat)
-        {
-            params.useVcFormat = cppSettings.useVcFormat(editor.document);
-        }
-
-        void this.languageClient.sendNotification(FinishedFetchEditorSettings, params);
-    }
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
         await this.provideCustomConfiguration(vscode.Uri.file(requestFile), requestFile);
     }
@@ -2326,7 +2295,6 @@ export class DefaultClient implements Client {
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
         this.languageClient.onNotification(ReferencesNotification, (e) => this.processReferencesPreview(e));
         this.languageClient.onNotification(ReportReferencesProgressNotification, (e) => this.handleReferencesProgress(e));
-        this.languageClient.onNotification(FetchEditorFormatSettings, (e) => this.fetchEditorFormatSettings(e));
         this.languageClient.onNotification(RequestCustomConfig, (requestFile: string) => {
             const client: Client = clients.getClientFor(vscode.Uri.file(requestFile));
             if (client instanceof DefaultClient) {
@@ -3435,43 +3403,15 @@ export class DefaultClient implements Client {
         return this.handleRemoveCodeAnalysisProblems(false, identifiersAndUris);
     }
 
-    public formatText(text: string, insertSpaces: boolean, tabSize: number): string {
-        const indentationUnit: string = insertSpaces ? ' '.repeat(tabSize) : '\t';
-
-        let indentLevel: number = 0;
-
-        const lines: string[] = text.split('\n');
-
-        // Process each line to adjust indentation
-        const formattedLines: string[] = lines.map((line: string): string => {
-            // Trim the line to check for opening and closing braces
-            const trimmedLine: string = line.trim();
-
-            // If the line contains a closing brace, decrease the indent level before applying indentation
-            if (trimmedLine.startsWith('}')) {
-                indentLevel = Math.max(indentLevel - 1, 0);
-            }
-
-            // Apply indentation to the line
-            const indentedLine: string = indentationUnit.repeat(indentLevel) + trimmedLine;
-
-            // If the line contains an opening brace, increase the indent level after applying indentation
-            if (trimmedLine.endsWith('{')) {
-                indentLevel++;
-            }
-
-            return indentedLine;
-        });
-
-        // Join the lines back together
-        return formattedLines.join('\n');
-    }
 
     public async handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
-
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+
+        const editorSettings: OtherSettings = new OtherSettings(uri);
+        const cppSettings: CppSettings = new CppSettings(uri);
+
         if (editor) {
             uri = editor.document.uri;
             if (codeActionRange !== undefined) {
@@ -3489,7 +3429,7 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (uri === undefined || range === undefined) {
+        if (uri === undefined || range === undefined || editor === undefined) {
             return;
         }
 
@@ -3504,6 +3444,25 @@ export class DefaultClient implements Client {
                     character: range.end.character,
                     line: range.end.line
                 }
+            },
+            formatParams: {
+                editorConfigSettings: {},
+                useVcFormat: cppSettings.useVcFormat(editor.document),
+                insertSpaces: editorSettings.editorInsertSpaces !== undefined ? editorSettings.editorInsertSpaces : false,
+                tabSize: editorSettings.editorTabSize !== undefined ? editorSettings.editorTabSize : 0,
+                character: "",
+                range: {
+                    start: {
+                        character: 0,
+                        line: 0
+                    },
+                    end: {
+                        character: 0,
+                        line: 0
+                    }
+                },
+                onChanges: false,
+                uri: ''
             },
             copyToClipboard: isCopyToClipboard
         };
@@ -3529,13 +3488,7 @@ export class DefaultClient implements Client {
         }
 
         if (result.clipboardText && params.copyToClipboard) {
-            const settings: OtherSettings = new OtherSettings(uri);
-            const formatOptions: vscode.FormattingOptions = {
-                insertSpaces: settings.editorInsertSpaces ?? true,
-                tabSize: settings.editorTabSize ?? 4
-            };
-
-            return vscode.env.clipboard.writeText(this.formatText(result.clipboardText, formatOptions.insertSpaces, formatOptions.tabSize));
+            return vscode.env.clipboard.writeText(result.clipboardText);
         }
 
         let workspaceEdits: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
