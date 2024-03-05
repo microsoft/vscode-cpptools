@@ -3447,8 +3447,8 @@ export class DefaultClient implements Client {
             formatParams: {
                 editorConfigSettings: {},
                 useVcFormat: cppSettings.useVcFormat(editor.document),
-                insertSpaces: editorSettings.editorInsertSpaces !== undefined ? editorSettings.editorInsertSpaces : false,
-                tabSize: editorSettings.editorTabSize !== undefined ? editorSettings.editorTabSize : 0,
+                insertSpaces: editorSettings.editorInsertSpaces !== undefined ? editorSettings.editorInsertSpaces : true,
+                tabSize: editorSettings.editorTabSize !== undefined ? editorSettings.editorTabSize : 4,
                 character: "",
                 range: {
                     start: {
