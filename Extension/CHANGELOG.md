@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.6: March 6, 2024
+### Enhancement
+* Performance improvement.
+
 ## Version 1.19.5: March 4, 2024
 ### Enhancements
 * Change how `args` and `command` fields are handled in `cppbuild` tasks, to match the behavior of VS Code `shell` build tasks, including explicit `quoting` support. [#12001](https://github.com/microsoft/vscode-cpptools/issues/12001)
