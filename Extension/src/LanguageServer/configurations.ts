@@ -1534,7 +1534,7 @@ export class CppProperties {
         if (result.includes("${userHome}")) {
             result = result.replace("${userHome}", os.homedir());
         }
-        
+
         if (result.includes("${vcpkgRoot}") && util.getVcpkgRoot()) {
             result = result.replace("${vcpkgRoot}", util.getVcpkgRoot());
         }
