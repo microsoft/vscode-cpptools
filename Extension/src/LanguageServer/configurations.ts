@@ -1530,6 +1530,11 @@ export class CppProperties {
                 result = result.replace("${workspaceRoot}", this.rootUri.fsPath);
             }
         }
+
+        if (result.includes("${userHome}")) {
+            result = result.replace("${userHome}", os.homedir());
+        }
+        
         if (result.includes("${vcpkgRoot}") && util.getVcpkgRoot()) {
             result = result.replace("${vcpkgRoot}", util.getVcpkgRoot());
         }
