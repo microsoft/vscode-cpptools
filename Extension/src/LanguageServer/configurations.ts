@@ -289,8 +289,6 @@ export class CppProperties {
                 }
             }
         });
-
-        this.handleConfigurationChange();
     }
     public set CompilerDefaults(compilerDefaults: CompilerDefaults) {
         this.defaultCompilerPath = compilerDefaults.trustedCompilerFound ? compilerDefaults.compilerPath : null;
@@ -759,7 +757,7 @@ export class CppProperties {
         return result;
     }
 
-    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, glob: boolean = false): string[] {
+    private resolveAndSplit(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true, glob: boolean = false): string[] {
         const resolvedVariables: string[] = [];
         if (paths === undefined) {
             return resolvedVariables;
@@ -771,7 +769,7 @@ export class CppProperties {
                 // Do not futher try to resolve a "${env:VAR}"
                 resolvedVariables.push(resolvedVariable);
             } else {
-                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false) : e).filter(e => e);
+                const entries: string[] = resolvedVariable.split(path.delimiter).map(e => glob ? this.resolvePath(e, false, assumeRelative) : e).filter(e => e);
                 resolvedVariables.push(...entries);
             }
         });
@@ -842,12 +840,12 @@ export class CppProperties {
         return property;
     }
 
-    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment): string[] | undefined {
+    private updateConfigurationPathsArray(paths: string[] | undefined, defaultValue: string[] | undefined, env: Environment, assumeRelative: boolean = true): string[] | undefined {
         if (paths) {
-            return this.resolveAndSplit(paths, defaultValue, env, true);
+            return this.resolveAndSplit(paths, defaultValue, env, assumeRelative, true);
         }
         if (!paths && defaultValue) {
-            return this.resolveAndSplit(defaultValue, [], env, true);
+            return this.resolveAndSplit(defaultValue, [], env, assumeRelative, true);
         }
         return paths;
     }
@@ -938,7 +936,7 @@ export class CppProperties {
 
             configuration.macFrameworkPath = this.updateConfigurationStringArray(configuration.macFrameworkPath, settings.defaultMacFrameworkPath, env);
             configuration.windowsSdkVersion = this.updateConfigurationString(configuration.windowsSdkVersion, settings.defaultWindowsSdkVersion, env);
-            configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env);
+            configuration.forcedInclude = this.updateConfigurationPathsArray(configuration.forcedInclude, settings.defaultForcedInclude, env, false);
             configuration.compileCommands = this.updateConfigurationString(configuration.compileCommands, settings.defaultCompileCommands, env);
             configuration.compilerArgs = this.updateConfigurationStringArray(configuration.compilerArgs, settings.defaultCompilerArgs, env);
             configuration.cStandard = this.updateConfigurationString(configuration.cStandard, settings.defaultCStandard, env);
@@ -1098,7 +1096,7 @@ export class CppProperties {
             }
 
             if (configuration.forcedInclude) {
-                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path));
+                configuration.forcedInclude = configuration.forcedInclude.map((path: string) => this.resolvePath(path, true, false));
             }
 
             if (configuration.includePath) {
@@ -1517,7 +1515,7 @@ export class CppProperties {
         return success;
     }
 
-    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true): string {
+    private resolvePath(input_path: string | undefined, replaceAsterisks: boolean = true, assumeRelative: boolean = true): string {
         if (!input_path || input_path === "${default}") {
             return "";
         }
@@ -1539,10 +1537,12 @@ export class CppProperties {
             result = result.replace(/\*/g, "");
         }
 
-        // Make sure all paths result to an absolute path.
-        // Do not add the root path to an unresolved env variable.
-        if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
-            result = path.join(this.rootUri.fsPath, result);
+        if (assumeRelative) {
+            // Make sure all paths result to an absolute path.
+            // Do not add the root path to an unresolved env variable.
+            if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
+                result = path.join(this.rootUri.fsPath, result);
+            }
         }
 
         return result;
@@ -1636,7 +1636,7 @@ export class CppProperties {
         errors.browsePath = this.validatePath(config.browse ? config.browse.path : undefined);
 
         // Validate files
-        errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, skipRelativePaths: true});
+        errors.forcedInclude = this.validatePath(config.forcedInclude, {isDirectory: false, assumeRelative: false});
         errors.compileCommands = this.validatePath(config.compileCommands, {isDirectory: false});
         errors.dotConfig = this.validatePath(config.dotConfig, {isDirectory: false});
         errors.databaseFilename = this.validatePath(config.browse ? config.browse.databaseFilename : undefined, {isDirectory: false});
@@ -1652,7 +1652,7 @@ export class CppProperties {
         return errors;
     }
 
-    private validatePath(input: string | string[] | undefined, {isDirectory = true, skipRelativePaths = false, globPaths = false} = {}): string | undefined {
+    private validatePath(input: string | string[] | undefined, {isDirectory = true, assumeRelative = true, globPaths = false} = {}): string | undefined {
         if (!input) {
             return undefined;
         }
@@ -1668,7 +1668,7 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, globPaths);
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, assumeRelative, globPaths);
 
         for (const p of paths) {
             let pathExists: boolean = true;
@@ -1679,7 +1679,7 @@ export class CppProperties {
 
             // Check if resolved path exists
             if (!fs.existsSync(resolvedPath)) {
-                if (skipRelativePaths && !path.isAbsolute(resolvedPath)) {
+                if (assumeRelative && !path.isAbsolute(resolvedPath)) {
                     continue;
                 } else if (!this.rootUri) {
                     pathExists = false;
