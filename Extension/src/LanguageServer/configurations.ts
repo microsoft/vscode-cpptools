@@ -425,6 +425,11 @@ export class CppProperties {
         result["workspaceFolderBasename"] = this.rootUri ? path.basename(this.rootUri.fsPath) : "";
         result["execPath"] = process.execPath;
         result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
+        result["/"] = (os.platform() === 'win32') ? "\\" : "/";
+        result["userHome"] = os.homedir();
+        if (util.getVcpkgRoot()) {
+            result["vcpkgRoot"] = util.getVcpkgRoot();
+        }
         return result;
     }
 
@@ -1528,9 +1533,7 @@ export class CppProperties {
                 result = result.replace("${workspaceRoot}", this.rootUri.fsPath);
             }
         }
-        if (result.includes("${vcpkgRoot}") && util.getVcpkgRoot()) {
-            result = result.replace("${vcpkgRoot}", util.getVcpkgRoot());
-        }
+
         if (replaceAsterisks && result.includes("*")) {
             result = result.replace(/\*/g, "");
         }
