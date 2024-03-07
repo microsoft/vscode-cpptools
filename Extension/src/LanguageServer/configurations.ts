@@ -427,8 +427,9 @@ export class CppProperties {
         result["pathSeparator"] = (os.platform() === 'win32') ? "\\" : "/";
         result["/"] = (os.platform() === 'win32') ? "\\" : "/";
         result["userHome"] = os.homedir();
-        result["vcpkgRoot"] = util.getVcpkgRoot();
-
+        if (util.getVcpkgRoot()) {
+            result["vcpkgRoot"] = util.getVcpkgRoot();
+        }
         return result;
     }
 
