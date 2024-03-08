@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.7: March 8, 2024
+### Bug Fixes
+* Fix a crash related to parsing concepts. [#12060](https://github.com/microsoft/vscode-cpptools/issues/12060)
+* Fix a potential deadlock.
+
 ## Version 1.19.6: March 6, 2024
 ### Enhancement
 * Performance improvement.
