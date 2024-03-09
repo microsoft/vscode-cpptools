@@ -9,7 +9,7 @@ class Deferral {
 
     constructor(callback: () => void, timeout: number) {
         this.timer = setTimeout(() => {
-            this.timer = undefined; ''
+            this.timer = undefined;
             callback();
         }, timeout);
     }
