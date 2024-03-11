@@ -630,11 +630,11 @@ class ClientModel {
         this.isInitializingWorkspace = new DataBinding<boolean>(false);
         this.isIndexingWorkspace = new DataBinding<boolean>(false);
 
-        // The following elements add a delay of 300ms before notitfying the UI that the icon can hide itself.
-        this.isParsingWorkspace = new DataBinding<boolean>(false, 300, false);
-        this.isParsingWorkspacePaused = new DataBinding<boolean>(false, 300, false);
-        this.isParsingFiles = new DataBinding<boolean>(false, 300, false);
-        this.isUpdatingIntelliSense = new DataBinding<boolean>(false, 300, false);
+        // The following elements add a delay of 500ms before notitfying the UI that the icon can hide itself.
+        this.isParsingWorkspace = new DataBinding<boolean>(false, 500, false);
+        this.isParsingWorkspacePaused = new DataBinding<boolean>(false, 500, false);
+        this.isParsingFiles = new DataBinding<boolean>(false, 500, false);
+        this.isUpdatingIntelliSense = new DataBinding<boolean>(false, 500, false);
 
         this.isRunningCodeAnalysis = new DataBinding<boolean>(false);
         this.isCodeAnalysisPaused = new DataBinding<boolean>(false);
