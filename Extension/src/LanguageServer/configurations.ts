@@ -1539,7 +1539,11 @@ export class CppProperties {
             // Make sure all paths result to an absolute path.
             // Do not add the root path to an unresolved env variable.
             if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
-                result = path.join(this.rootUri.fsPath, result);
+
+                if (util.checkDirectoryExistsSync(path.join(this.rootUri.fsPath, result)))
+                {
+                    result = path.join(this.rootUri.fsPath, result);
+                }
             }
         }
 
@@ -1893,7 +1897,7 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, true, true);
         compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
         compilerPath = this.resolvePath(compilerPath);
 
@@ -1984,7 +1988,6 @@ export class CppProperties {
             diagnostics.push(diagnostic);
         }
 
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, true, true);
         // Validate paths
         for (const curPath of paths) {
             if (processedPaths.has(curPath)) {
