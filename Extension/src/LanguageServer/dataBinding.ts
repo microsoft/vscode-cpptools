@@ -30,7 +30,7 @@ export class DataBinding<T> {
      * Bind an event to a value so that a data model can automatically update the UI when values change.
      * Since values can change quickly and cause UI to flicker, an optional delay/trigger combination can
      * be specified to prevent UI elements from appearing/disappearing too quickly.
-     * @param value The initial value in the binding
+     * @param value The initial value in the binding.
      * @param delay An optional delay (in milliseconds) for firing the value changed event.
      * @param delayValueTrigger The value that triggers an event delay.
      */

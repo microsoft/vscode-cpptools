@@ -55,7 +55,6 @@ export class LanguageStatusUI {
     private isParsingWorkspace: boolean = false;
     private isParsingWorkspacePaused: boolean = false;
     private isParsingFiles: boolean = false;
-    private tagParseTimeout?: NodeJS.Timeout;
     private readonly dataBaseIcon: string = "$(database)";
     private readonly workspaceParsingInitializing: string = localize("initializing.tagparser.text", "Initializing Workspace");
     private readonly workspaceParsingIndexing: string = localize("indexing.tagparser.text", "Indexing Workspace");
