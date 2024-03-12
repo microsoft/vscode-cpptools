@@ -1542,11 +1542,7 @@ export class CppProperties {
             // Make sure all paths result to an absolute path.
             // Do not add the root path to an unresolved env variable.
             if (!result.includes("env:") && !path.isAbsolute(result) && this.rootUri) {
-
-                if (util.checkDirectoryExistsSync(path.join(this.rootUri.fsPath, result)))
-                {
-                    result = path.join(this.rootUri.fsPath, result);
-                }
+                result = path.join(this.rootUri.fsPath, result);
             }
         }
 
@@ -1900,7 +1896,7 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, true, true);
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, true);
         compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
         compilerPath = this.resolvePath(compilerPath);
 
@@ -2033,7 +2029,7 @@ export class CppProperties {
             // and extend that pattern to the next quote before and next quote after it.
             const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
             const configMatches: string[] | null = curText.match(pattern);
-            if (configMatches) {
+            if (configMatches && !escapedPath.includes('*')) {
                 let curOffset: number = 0;
                 let endOffset: number = 0;
                 for (const curMatch of configMatches) {
