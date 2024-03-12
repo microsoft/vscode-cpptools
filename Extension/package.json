@@ -38,7 +38,9 @@
         "Snippets"
     ],
     "enabledApiProposals": [
-        "terminalDataWriteEvent"
+        "terminalDataWriteEvent",
+        "chatParticipant",
+        "chatVariableResolver"
     ],
     "capabilities": {
         "untrustedWorkspaces": {
