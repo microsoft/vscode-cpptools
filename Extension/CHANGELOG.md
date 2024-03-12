@@ -4,6 +4,7 @@
 ### Bug Fixes
 * Fix some potential deadlocks. [#12051](https://github.com/microsoft/vscode-cpptools/issues/12051)
 * Fix a crash related to parsing concepts. [#12060](https://github.com/microsoft/vscode-cpptools/issues/12060)
+* Fix flickering status updates in the language status bar. [#12084](https://github.com/microsoft/vscode-cpptools/issues/12084)
 * Fix a cpptools crash that can occur if cpptools-srv crashes on initialization.
 
 ## Version 1.19.6: March 6, 2024
