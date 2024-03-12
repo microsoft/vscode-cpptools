@@ -2032,11 +2032,13 @@ export class CppProperties {
 
             let globPath: boolean = false;
             const asteriskPosition = curPath.indexOf("*");
-            if (asteriskPosition !== -1 && asteriskPosition !== curPath.length - 1 && asteriskPosition !== curPath.length - 2) {
-                globPath = true;
-            } else if (asteriskPosition === curPath.length - 2) {
-                if (curPath[asteriskPosition + 1] !== '*') {
+            if (asteriskPosition !== -1 ){
+                if (asteriskPosition !== curPath.length - 1 && asteriskPosition !== curPath.length - 2) {
                     globPath = true;
+                } else if (asteriskPosition === curPath.length - 2) {
+                    if (curPath[asteriskPosition + 1] !== '*') {
+                        globPath = true;
+                    }
                 }
             }
             if (configMatches && !globPath) {
