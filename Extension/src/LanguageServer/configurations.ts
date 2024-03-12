@@ -2031,7 +2031,7 @@ export class CppProperties {
             const configMatches: string[] | null = curText.match(pattern);
 
             let globPath: boolean = false;
-            if (curPath.includes("*") && !curPath.endsWith("*")) {
+            if (curPath.includes("*") && curPath.lastIndexOf("*") !== curPath.length - 1) {
                 globPath = true;
             }
 
