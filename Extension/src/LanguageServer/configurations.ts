@@ -1896,7 +1896,7 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment, true);
+        paths = this.resolveAndSplit(paths, undefined, this.ExtendedEnvironment);
         compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
         compilerPath = this.resolvePath(compilerPath);
 
