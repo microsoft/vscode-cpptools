@@ -2029,7 +2029,19 @@ export class CppProperties {
             // and extend that pattern to the next quote before and next quote after it.
             const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
             const configMatches: string[] | null = curText.match(pattern);
-            if (configMatches) {
+
+            let globPath: boolean = false;
+            const asteriskPosition = curPath.indexOf("*");
+            if (asteriskPosition !== -1) {
+                if (asteriskPosition !== curPath.length - 1 && asteriskPosition !== curPath.length - 2) {
+                    globPath = true;
+                } else if (asteriskPosition === curPath.length - 2) {
+                    if (curPath[asteriskPosition + 1] !== '*') {
+                        globPath = true;
+                    }
+                }
+            }
+            if (configMatches && !globPath) {
                 let curOffset: number = 0;
                 let endOffset: number = 0;
                 for (const curMatch of configMatches) {
