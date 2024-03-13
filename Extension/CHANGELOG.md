@@ -1,5 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.8: March 13, 2024
+### Bug Fixes
+* Fix a potential deadlock. [#12051](https://github.com/microsoft/vscode-cpptools/issues/12051)
+* Fix a crash that could occur when failing to query clang-cl.
+
 ## Version 1.19.7: March 11, 2024
 ### Bug Fixes
 * Fix some potential deadlocks. [#12051](https://github.com/microsoft/vscode-cpptools/issues/12051)
