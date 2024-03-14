@@ -1228,7 +1228,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
 }
 
 function convertConfigurationSnippetToCompletionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
-    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Module);
 
     item.insertText = snippet.bodyText;
 
