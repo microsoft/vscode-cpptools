@@ -3453,7 +3453,7 @@ export class DefaultClient implements Client {
             return;
         }
 
-        let formatParams;
+        let formatParams: FormatParams | undefined;
         if (cppSettings.useVcFormat(editor.document))
         {
             const editorConfigSettings: any = getEditorConfigSettings(uri.fsPath);
