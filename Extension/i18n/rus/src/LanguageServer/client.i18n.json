@@ -11,6 +11,8 @@
 	"use.compiler": "Использовать {0}",
 	"configuration.providers": "поставщики конфигурации",
 	"compilers": "компиляторы",
+	"selectIntelliSenseConfiguration.string": "Выбрать конфигурацию IntelliSense…",
+	"setCompiler.message": "Нет настроенных функций IntelliSense. Если не настроить собственные конфигурации, IntelliSense может не работать.",
 	"use.provider": "Использовать {0}",
 	"use.compileCommands": "Использовать {0}",
 	"selectAnotherCompiler.string": "Выбрать другой компилятор на моем компьютере…",

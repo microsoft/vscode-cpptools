@@ -21,8 +21,8 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export interface CppBuildTaskDefinition extends TaskDefinition {
     type: string;
     label: string; // The label appears in tasks.json file.
-    command: string;
-    args: string[];
+    command: string | util.IQuotedString;
+    args: (string | util.IQuotedString)[];
     options: cp.ExecOptions | cp.SpawnOptions | undefined;
 }
 
@@ -166,20 +166,24 @@ export class CppBuildTaskProvider implements TaskProvider {
         return result;
     }
 
-    private getTask: (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string, appendSourceToName: boolean, compilerArgs?: string[], definition?: CppBuildTaskDefinition, detail?: string) => {
-        const compilerPathBase: string = path.basename(compilerPath);
+    private getTask: (compilerPath: string | util.IQuotedString, appendSourceToName: boolean, compilerArgs?: (string | util.IQuotedString)[], definition?: CppBuildTaskDefinition, detail?: string) => Task = (compilerPath: string | util.IQuotedString, appendSourceToName: boolean, compilerArgs?: (string | util.IQuotedString)[], definition?: CppBuildTaskDefinition, detail?: string) => {
+        const compilerPathString: string = util.isString(compilerPath) ? compilerPath : compilerPath.value;
+        const compilerPathBase: string = path.basename(compilerPathString);
         const isCl: boolean = compilerPathBase.toLowerCase() === "cl.exe";
         const isClang: boolean = !isCl && compilerPathBase.toLowerCase().includes("clang");
         // Double-quote the command if needed.
-        let resolvedcompilerPath: string = isCl ? compilerPathBase : compilerPath;
-        resolvedcompilerPath = util.quoteArgument(resolvedcompilerPath);
+        const resolvedCompilerPathString: string = isCl ? compilerPathBase : compilerPathString;
+        let resolvedCompilerPath: string | util.IQuotedString = compilerPath;
+        if (isCl) {
+            resolvedCompilerPath = compilerPathBase;
+        }
 
         if (!definition) {
             const isWindows: boolean = os.platform() === 'win32';
             const taskLabel: string = ((appendSourceToName && !compilerPathBase.startsWith(ext.configPrefix)) ?
                 ext.configPrefix : "") + compilerPathBase + " " + localize("build.active.file", "build active file");
             const programName: string = util.defaultExePath();
-            let args: string[] = isCl ?
+            let args: (string | util.IQuotedString)[] = isCl ?
                 ['/Zi', '/EHsc', '/nologo', `/Fe${programName}`, '${file}'] :
                 isClang ?
                     ['-fcolor-diagnostics', '-fansi-escape-codes', '-g', '${file}', '-o', programName] :
@@ -188,30 +192,38 @@ export class CppBuildTaskProvider implements TaskProvider {
             if (compilerArgs && compilerArgs.length > 0) {
                 args = args.concat(compilerArgs);
             }
-            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPath)) ? path.dirname(compilerPath) : "${fileDirname}";
+            const cwd: string = isWindows && !isCl && !process.env.PATH?.includes(path.dirname(compilerPathString)) ? path.dirname(compilerPathString) : "${fileDirname}";
             const options: cp.ExecOptions | cp.SpawnOptions | undefined = { cwd: cwd };
             definition = {
                 type: CppBuildTaskProvider.CppBuildScriptType,
                 label: taskLabel,
-                command: isCl ? compilerPathBase : compilerPath,
+                command: compilerPath,
                 args: args,
                 options: options
             };
+            if (isCl) {
+                definition.command = compilerPathBase;
+            }
         }
 
         const editor: TextEditor | undefined = window.activeTextEditor;
         const folder: WorkspaceFolder | undefined = editor ? workspace.getWorkspaceFolder(editor.document.uri) : undefined;
 
-        const taskUsesActiveFile: boolean = definition.args.some(arg => arg.indexOf('${file}') >= 0); // Need to check this before ${file} is resolved
+        const taskUsesActiveFile: boolean = definition.args.some(arg => {
+            if (util.isString(arg)) {
+                return arg.indexOf('${file}') >= 0;
+            }
+            return arg.value.indexOf('${file}') >= 0;
+        }); // Need to check this before ${file} is resolved
         const scope: WorkspaceFolder | TaskScope = folder ? folder : TaskScope.Workspace;
         const task: CppBuildTask = new Task(definition, scope, definition.label, ext.CppSourceStr,
             new CustomExecution(async (resolvedDefinition: TaskDefinition): Promise<Pseudoterminal> =>
                 // When the task is executed, this callback will run. Here, we setup for running the task.
-                new CustomBuildTaskTerminal(resolvedcompilerPath, resolvedDefinition.args, resolvedDefinition.options, { taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin' })
+                new CustomBuildTaskTerminal(resolvedCompilerPath, resolvedDefinition.args, resolvedDefinition.options, { taskUsesActiveFile, insertStd: isClang && os.platform() === 'darwin' })
             ), isCl ? '$msCompile' : '$gcc');
 
         task.group = TaskGroup.Build;
-        task.detail = detail ? detail : localize("compiler.details", "compiler:") + " " + resolvedcompilerPath;
+        task.detail = detail ? detail : localize("compiler.details", "compiler:") + " " + resolvedCompilerPathString;
 
         return task;
     };
@@ -354,7 +366,7 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
     public get onDidClose(): Event<number> { return this.closeEmitter.event; }
     private endOfLine: string = "\r\n";
 
-    constructor(private command: string, private args: string[], private options: cp.ExecOptions | cp.SpawnOptions | undefined, private buildOptions: BuildOptions) {
+    constructor(private command: string | util.IQuotedString, private args: (string | util.IQuotedString)[], private options: cp.ExecOptions | undefined, private buildOptions: BuildOptions) {
     }
 
     async open(_initialDimensions: TerminalDimensions | undefined): Promise<void> {
@@ -380,22 +392,29 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
 
     private async doBuild(): Promise<any> {
         // Do build.
-        let command: string = util.resolveVariables(this.command);
-        let activeCommand: string = command;
+        let resolvedCommand: string | util.IQuotedString | undefined;
+        if (util.isString(this.command)) {
+            resolvedCommand = util.resolveVariables(this.command);
+        } else {
+            resolvedCommand = {
+                value: util.resolveVariables(this.command.value),
+                quoting: this.command.quoting
+            };
+        }
 
         // Create the exe folder path if it doesn't exist.
         const exePath: string | undefined = util.resolveVariables(util.findExePathInArgs(this.args));
         util.createDirIfNotExistsSync(exePath);
 
         this.args.forEach((value, index) => {
-            value = util.quoteArgument(util.resolveVariables(value));
-            activeCommand = activeCommand + " " + value;
-            this.args[index] = value;
+            if (util.isString(value)) {
+                this.args[index] = util.resolveVariables(value);
+            } else {
+                value.value = util.resolveVariables(value.value);
+            }
         });
-        if (this.options) {
-            this.options.shell = true;
-        } else {
-            this.options = { "shell": true };
+        if (this.options === undefined) {
+            this.options = { };
         }
         if (this.options.cwd) {
             this.options.cwd = util.resolveVariables(this.options.cwd.toString());
@@ -425,15 +444,12 @@ class CustomBuildTaskTerminal implements Pseudoterminal {
             }
         };
 
-        if (os.platform() === 'win32') {
-            command = `cmd /c chcp 65001>nul && ${command}`;
-        }
-
+        const activeCommand: string = util.buildShellCommandLine(resolvedCommand, this.command, this.args);
         this.writeEmitter.fire(activeCommand + this.endOfLine);
 
         let child: cp.ChildProcess | undefined;
         try {
-            child = cp.spawn(command, this.args, this.options ? this.options : {});
+            child = cp.exec(activeCommand, this.options);
             let error: string = "";
             let stdout: string = "";
             let stderr: string = "";

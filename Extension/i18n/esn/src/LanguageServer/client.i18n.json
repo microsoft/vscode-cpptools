@@ -11,6 +11,8 @@
 	"use.compiler": "Uso {0}",
 	"configuration.providers": "proveedores de configuración",
 	"compilers": "Compiladores",
+	"selectIntelliSenseConfiguration.string": "Seleccionar configuración de IntelliSense...",
+	"setCompiler.message": "No tiene configurado IntelliSense. A menos que establezca sus propias configuraciones, puede que IntelliSense no funcione.",
 	"use.provider": "Uso {0}",
 	"use.compileCommands": "Uso {0}",
 	"selectAnotherCompiler.string": "Seleccionar otro compilador en mi máquina...",

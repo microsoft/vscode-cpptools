@@ -413,7 +413,7 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
         if (buildTasks.length !== 0) {
             configs = (await Promise.all(buildTasks.map<Promise<CppDebugConfiguration | undefined>>(async task => {
                 const definition: CppBuildTaskDefinition = task.definition as CppBuildTaskDefinition;
-                const compilerPath: string = definition.command;
+                const compilerPath: string = util.isString(definition.command) ? definition.command : definition.command.value;
                 // Filter out the tasks that has an invalid compiler path.
                 const compilerPathExists: boolean = path.isAbsolute(compilerPath) ?
                     // Absolute path, just check if it exists
@@ -1228,7 +1228,7 @@ class LinuxConfigurationProvider extends DefaultConfigurationProvider {
 }
 
 function convertConfigurationSnippetToCompletionItem(snippet: IConfigurationSnippet): vscode.CompletionItem {
-    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+    const item: vscode.CompletionItem = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Module);
 
     item.insertText = snippet.bodyText;
 
