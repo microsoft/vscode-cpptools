@@ -3455,7 +3455,7 @@ export class DefaultClient implements Client {
         {
             const editorConfigSettings: any = getEditorConfigSettings(uri.fsPath);
             formatParams = {
-                editorConfigSettings: {},
+                editorConfigSettings: editorConfigSettings,
                 useVcFormat: true,
                 insertSpaces: editorConfigSettings.indent_style !== undefined ? editorConfigSettings.indent_style === "space" ? true : false : true,
                 tabSize: editorConfigSettings.tab_width !== undefined ? editorConfigSettings.tab_width : 4,
