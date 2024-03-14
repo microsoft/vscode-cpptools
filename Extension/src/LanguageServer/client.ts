@@ -83,7 +83,7 @@ export function hasTrustedCompilerPaths(): boolean {
 
 // Data shared by all clients.
 let languageClient: LanguageClient;
-let firstClientStarted: Promise<boolean>;
+let firstClientStarted: Promise<void>;
 let languageClientCrashedNeedsRestart: boolean = false;
 const languageClientCrashTimes: number[] = [];
 let compilerDefaults: configs.CompilerDefaults | undefined;
@@ -1191,36 +1191,34 @@ export class DefaultClient implements Client {
         const rootUri: vscode.Uri | undefined = this.RootUri;
         this.settingsTracker = new SettingsTracker(rootUri);
 
-        let isFirstClient: boolean = false;
-        if (!languageClient || languageClientCrashedNeedsRestart) {
-            if (languageClientCrashedNeedsRestart) {
-                languageClientCrashedNeedsRestart = false;
-                // if we're recovering, the isStarted needs to be reset.
-                // because we're starting the first client again.
-                DefaultClient.isStarted.reset();
+        try {
+            let isFirstClient: boolean = false;
+            if (!languageClient || languageClientCrashedNeedsRestart) {
+                if (languageClientCrashedNeedsRestart) {
+                    languageClientCrashedNeedsRestart = false;
+                    // if we're recovering, the isStarted needs to be reset.
+                    // because we're starting the first client again.
+                    DefaultClient.isStarted.reset();
+                }
+                firstClientStarted = this.createLanguageClient();
+                util.setProgress(util.getProgressExecutableStarted());
+                isFirstClient = true;
             }
-            isFirstClient = true;
-            firstClientStarted = this.createLanguageClient();
-            firstClientStarted.catch((errJS) => {
-                const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
-                this.isSupported = false; // Running on an OS we don't support yet.
-                if (!failureMessageShown) {
-                    failureMessageShown = true;
-                    let additionalInfo: string;
-                    if (err.code === "EPERM") {
-                        additionalInfo = localize('check.permissions', "EPERM: Check permissions for '{0}'", getLanguageServerFileName());
-                    } else {
-                        additionalInfo = String(err);
-                    }
-                    void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
+            void this.init(rootUri, isFirstClient).catch(logAndReturn.undefined);
+
+        } catch (errJS) {
+            const err: NodeJS.ErrnoException = errJS as NodeJS.ErrnoException;
+            this.isSupported = false; // Running on an OS we don't support yet.
+            if (!failureMessageShown) {
+                failureMessageShown = true;
+                let additionalInfo: string;
+                if (err.code === "EPERM") {
+                    additionalInfo = localize('check.permissions', "EPERM: Check permissions for '{0}'", getLanguageServerFileName());
+                } else {
+                    additionalInfo = String(err);
                 }
-            });
-            firstClientStarted.then((success) => {
-                if (success) {
-                    util.setProgress(util.getProgressExecutableStarted());
-                    void this.init(rootUri, isFirstClient).catch(logAndReturn.undefined);
-                }
-            }, logAndReturn.undefined);
+                void vscode.window.showErrorMessage(localize("unable.to.start", "Unable to start the C/C++ language server. IntelliSense features will be disabled. Error: {0}", additionalInfo));
+            }
         }
     }
 
@@ -1466,7 +1464,7 @@ export class DefaultClient implements Client {
         };
     }
 
-    private async createLanguageClient(): Promise<boolean> {
+    private async createLanguageClient(): Promise<void> {
         const currentCaseSensitiveFileSupport: PersistentWorkspaceState<boolean> = new PersistentWorkspaceState<boolean>("CPP.currentCaseSensitiveFileSupport", false);
         let resetDatabase: boolean = false;
         const serverModule: string = getLanguageServerFileName();
@@ -1582,25 +1580,12 @@ export class DefaultClient implements Client {
         languageClient.onNotification(DebugProtocolNotification, logDebugProtocol);
         languageClient.onNotification(DebugLogNotification, logLocalized);
         languageClient.registerProposedFeatures();
-
-        // If thisLanguageClient.start() were to trigger our errorHandler.closed, it may interrupt us
-        // (since we're calling await here) and overwrite `languageClient`. Use a new var to ensure we
-        // don't attempt to sent multiple initialization messages.
-        const thisLanguageClient: LanguageClient = languageClient;
-        await thisLanguageClient.start();
-        if (thisLanguageClient !== languageClient) {
-            return false;
-        }
+        await languageClient.start();
 
         // Move initialization to a separate message, so we can see log output from it.
         // A request is used in order to wait for completion and ensure that no subsequent
         // higher priority message may be processed before the Initialization request.
-        const crashPath: string = await thisLanguageClient.sendRequest(InitializationRequest, cppInitializationParams);
-        if (crashPath) {
-            // empty string may be returned in error cases.
-            watchForCrashes(crashPath);
-        }
-        return true;
+        watchForCrashes(await languageClient.sendRequest(InitializationRequest, cppInitializationParams));
     }
 
     public async sendDidChangeSettings(): Promise<void> {
