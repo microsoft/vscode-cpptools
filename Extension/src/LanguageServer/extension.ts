@@ -401,6 +401,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1304,4 +1305,8 @@ export async function preReleaseCheck(): Promise<void> {
             });
         }
     }
+}
+
+export async function getIncludes(maxDepth: number): Promise<any> {
+    return clients.ActiveClient.getIncludes(maxDepth);
 }
