@@ -3450,21 +3450,33 @@ export class DefaultClient implements Client {
             return;
         }
 
-        const params: CreateDeclarationOrDefinitionParams = {
-            uri: uri.toString(),
-            range: {
-                start: {
-                    character: range.start.character,
-                    line: range.start.line
-                },
-                end: {
-                    character: range.end.character,
-                    line: range.end.line
-                }
-            },
-            formatParams: {
+        let formatParams;
+        if (cppSettings.useVcFormat(editor.document))
+        {
+            const editorConfigSettings: any = getEditorConfigSettings(uri.fsPath);
+            formatParams = {
                 editorConfigSettings: {},
-                useVcFormat: cppSettings.useVcFormat(editor.document),
+                useVcFormat: true,
+                insertSpaces: editorConfigSettings.indent_style !== undefined ? editorConfigSettings.indent_style === "space" ? true : false : true,
+                tabSize: editorConfigSettings.tab_width !== undefined ? editorConfigSettings.tab_width : 4,
+                character: "",
+                range: {
+                    start: {
+                        character: 0,
+                        line: 0
+                    },
+                    end: {
+                        character: 0,
+                        line: 0
+                    }
+                },
+                onChanges: false,
+                uri: ''
+            };
+        } else {
+            formatParams = {
+                editorConfigSettings: {},
+                useVcFormat: false,
                 insertSpaces: editorSettings.editorInsertSpaces !== undefined ? editorSettings.editorInsertSpaces : true,
                 tabSize: editorSettings.editorTabSize !== undefined ? editorSettings.editorTabSize : 4,
                 character: "",
@@ -3480,7 +3492,22 @@ export class DefaultClient implements Client {
                 },
                 onChanges: false,
                 uri: ''
+            };
+        }
+
+        const params: CreateDeclarationOrDefinitionParams = {
+            uri: uri.toString(),
+            range: {
+                start: {
+                    character: range.start.character,
+                    line: range.start.line
+                },
+                end: {
+                    character: range.end.character,
+                    line: range.end.line
+                }
             },
+            formatParams: formatParams,
             copyToClipboard: isCopyToClipboard
         };
 
