@@ -636,10 +636,13 @@ class ClientModel {
     constructor() {
         this.isInitializingWorkspace = new DataBinding<boolean>(false);
         this.isIndexingWorkspace = new DataBinding<boolean>(false);
-        this.isParsingWorkspace = new DataBinding<boolean>(false);
-        this.isParsingWorkspacePaused = new DataBinding<boolean>(false);
-        this.isParsingFiles = new DataBinding<boolean>(false);
-        this.isUpdatingIntelliSense = new DataBinding<boolean>(false);
+
+        // The following elements add a delay of 500ms before notitfying the UI that the icon can hide itself.
+        this.isParsingWorkspace = new DataBinding<boolean>(false, 500, false);
+        this.isParsingWorkspacePaused = new DataBinding<boolean>(false, 500, false);
+        this.isParsingFiles = new DataBinding<boolean>(false, 500, false);
+        this.isUpdatingIntelliSense = new DataBinding<boolean>(false, 500, false);
+
         this.isRunningCodeAnalysis = new DataBinding<boolean>(false);
         this.isCodeAnalysisPaused = new DataBinding<boolean>(false);
         this.codeAnalysisProcessed = new DataBinding<number>(0);
@@ -3744,9 +3747,9 @@ export class DefaultClient implements Client {
                         isReplace ? range.end.character :
                             range.end.character + edit.newText.length - rangeStartCharacter));
                 if (isSourceFile) {
-                    sourceFormatUriAndRanges.push({uri, range: newFormatRange});
+                    sourceFormatUriAndRanges.push({ uri, range: newFormatRange });
                 } else {
-                    headerFormatUriAndRanges.push({uri, range: newFormatRange});
+                    headerFormatUriAndRanges.push({ uri, range: newFormatRange });
                 }
                 if (isReplace || !isSourceFile) {
                     // Handle additional declaration lines added before the new function call.
@@ -3796,7 +3799,8 @@ export class DefaultClient implements Client {
             // without being opened because otherwise users may not realize that
             // the header had changed (unless they view source control differences).
             await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, {
-                selection: headerReplaceEditRange, preserveFocus: false });
+                selection: headerReplaceEditRange, preserveFocus: false
+            });
         }
 
         // Format the new text edits.
@@ -3840,8 +3844,7 @@ export class DefaultClient implements Client {
                 formatEdits.set(formatUriAndRange.uri, formatTextEdits);
                 return true;
             };
-            if (!await tryFormat())
-            {
+            if (!await tryFormat()) {
                 await tryFormat(); // Try again;
             }
         };
@@ -3852,7 +3855,8 @@ export class DefaultClient implements Client {
                 // This showTextDocument is required in order to get the selection to be
                 // correct after the formatting edit is applied. It could be a VS Code bug.
                 await vscode.window.showTextDocument(headerFormatUriAndRanges[0].uri, {
-                    selection: headerReplaceEditRange, preserveFocus: false });
+                    selection: headerReplaceEditRange, preserveFocus: false
+                });
                 await vscode.workspace.applyEdit(formatEdits, { isRefactoring: true });
                 formatEdits = new vscode.WorkspaceEdit();
             }
@@ -3860,7 +3864,8 @@ export class DefaultClient implements Client {
 
         // Select the replaced code.
         await vscode.window.showTextDocument(sourceFormatUriAndRanges[0].uri, {
-            selection: sourceReplaceEditRange, preserveFocus: false });
+            selection: sourceReplaceEditRange, preserveFocus: false
+        });
 
         await formatRanges(sourceFormatUriAndRanges);
         if (formatEdits.size > 0) {

@@ -1,5 +1,24 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.8: March 13, 2024
+### Bug Fixes
+* Fix an issue with applying the proper working directory from a `compile_commands.json` when a `compilePath` is also set. [#12024](https://github.com/microsoft/vscode-cpptools/issues/12024)
+* Fix a deadlock. [#12051](https://github.com/microsoft/vscode-cpptools/issues/12051)
+* Fix a crash that could occur when failing to query clang-cl.
+* Fix an issue with handling of `winsysroot` args for clang-cl.
+* Fix an issue with processing relative include paths returned by clang-cl.
+
+## Version 1.19.7: March 11, 2024
+### Bug Fixes
+* Fix some potential deadlocks. [#12051](https://github.com/microsoft/vscode-cpptools/issues/12051)
+* Fix a crash related to parsing concepts. [#12060](https://github.com/microsoft/vscode-cpptools/issues/12060)
+* Fix flickering status updates in the language status bar. [#12084](https://github.com/microsoft/vscode-cpptools/issues/12084)
+* Fix a cpptools crash that can occur if cpptools-srv crashes on initialization.
+
+## Version 1.19.6: March 6, 2024
+### Enhancement
+* Performance improvement.
+
 ## Version 1.19.5: March 4, 2024
 ### Enhancements
 * Change how `args` and `command` fields are handled in `cppbuild` tasks, to match the behavior of VS Code `shell` build tasks, including explicit `quoting` support. [#12001](https://github.com/microsoft/vscode-cpptools/issues/12001)
