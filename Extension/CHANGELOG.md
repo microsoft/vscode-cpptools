@@ -5,7 +5,7 @@
 * Fix an issue with applying the proper working directory from a `compile_commands.json` when a `compilePath` is also set. [#12024](https://github.com/microsoft/vscode-cpptools/issues/12024)
 * Fix a deadlock. [#12051](https://github.com/microsoft/vscode-cpptools/issues/12051)
 * Fix a crash that could occur when failing to query clang-cl.
-* Fix an issue with handling of `winsysroot` arg for clang-cl.
+* Fix an issue with handling of the `winsysroot` args for clang-cl.
 * Fix an issue with processing relative include paths returned by clang-cl.
 
 ## Version 1.19.7: March 11, 2024
