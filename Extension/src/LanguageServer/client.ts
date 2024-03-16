@@ -359,12 +359,6 @@ export interface FormatParams extends SelectionParams {
     onChanges: boolean;
 }
 
-export interface EditorParams {
-    insertSpaces: boolean;
-    tabSize: number;
-    useVcFormat: boolean;
-}
-
 export interface FormatResult {
     edits: TextEdit[];
 }
