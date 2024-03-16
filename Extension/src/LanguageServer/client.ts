@@ -537,6 +537,16 @@ interface DidChangeActiveEditorParams {
     selection?: Range;
 }
 
+interface GetIncludesParams
+{
+    maxDepth: number;
+}
+
+interface GetIncludesResult
+{
+    includedFiles: string[];
+}
+
 // Requests
 const InitializationRequest: RequestType<CppInitializationParams, string, void> = new RequestType<CppInitializationParams, string, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
@@ -554,6 +564,7 @@ const ExtractToFunctionRequest: RequestType<ExtractToFunctionParams, WorkspaceEd
 const GoToDirectiveInGroupRequest: RequestType<GoToDirectiveInGroupParams, Position | undefined, void> = new RequestType<GoToDirectiveInGroupParams, Position | undefined, void>('cpptools/goToDirectiveInGroup');
 const GenerateDoxygenCommentRequest: RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult | undefined, void> = new RequestType<GenerateDoxygenCommentParams, GenerateDoxygenCommentResult, void>('cpptools/generateDoxygenComment');
 const ChangeCppPropertiesRequest: RequestType<CppPropertiesParams, void, void> = new RequestType<CppPropertiesParams, void, void>('cpptools/didChangeCppProperties');
+const IncludesRequest: RequestType<GetIncludesParams, GetIncludesResult, void> = new RequestType<GetIncludesParams, GetIncludesResult, void>('cpptools/getIncludes');
 
 // Notifications to the server
 const DidOpenNotification: NotificationType<DidOpenTextDocumentParams> = new NotificationType<DidOpenTextDocumentParams>('textDocument/didOpen');
@@ -782,6 +793,7 @@ export interface Client {
     getShowConfigureIntelliSenseButton(): boolean;
     setShowConfigureIntelliSenseButton(show: boolean): void;
     addTrustedCompiler(path: string): Promise<void>;
+    getIncludes(maxDepth: number): Promise<GetIncludesResult>;
 }
 
 export function createClient(workspaceFolder?: vscode.WorkspaceFolder): Client {
@@ -2189,6 +2201,12 @@ export class DefaultClient implements Client {
         };
         await this.ready;
         await this.languageClient.sendNotification(DidOpenNotification, params);
+    }
+
+    public async getIncludes(maxDepth: number): Promise<GetIncludesResult> {
+        const params: GetIncludesParams = { maxDepth: maxDepth };
+        await this.ready;
+        return this.languageClient.sendRequest(IncludesRequest, params);
     }
 
     /**
@@ -4061,4 +4079,5 @@ class NullClient implements Client {
     getShowConfigureIntelliSenseButton(): boolean { return false; }
     setShowConfigureIntelliSenseButton(show: boolean): void { }
     addTrustedCompiler(path: string): Promise<void> { return Promise.resolve(); }
+    getIncludes(): Promise<GetIncludesResult> { return Promise.resolve({} as GetIncludesResult); }
 }
