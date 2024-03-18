@@ -294,6 +294,7 @@ interface PublishRefactorDiagnosticsParams {
 }
 
 export interface CreateDeclarationOrDefinitionParams extends SelectionParams {
+    formatParams: FormatParams;
     copyToClipboard: boolean;
 }
 
@@ -3438,8 +3439,11 @@ export class DefaultClient implements Client {
     public async handleCreateDeclarationOrDefinition(isCopyToClipboard: boolean, codeActionRange?: Range): Promise<void> {
         let range: vscode.Range | undefined;
         let uri: vscode.Uri | undefined;
-
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+
+        const editorSettings: OtherSettings = new OtherSettings(uri);
+        const cppSettings: CppSettings = new CppSettings(uri);
+
         if (editor) {
             uri = editor.document.uri;
             if (codeActionRange !== undefined) {
@@ -3457,8 +3461,53 @@ export class DefaultClient implements Client {
             }
         }
 
-        if (uri === undefined || range === undefined) {
+        if (uri === undefined || range === undefined || editor === undefined) {
             return;
+        }
+
+        let formatParams: FormatParams | undefined;
+        if (cppSettings.useVcFormat(editor.document))
+        {
+            const editorConfigSettings: any = getEditorConfigSettings(uri.fsPath);
+            formatParams = {
+                editorConfigSettings: editorConfigSettings,
+                useVcFormat: true,
+                insertSpaces: editorConfigSettings.indent_style !== undefined ? editorConfigSettings.indent_style === "space" ? true : false : true,
+                tabSize: editorConfigSettings.tab_width !== undefined ? editorConfigSettings.tab_width : 4,
+                character: "",
+                range: {
+                    start: {
+                        character: 0,
+                        line: 0
+                    },
+                    end: {
+                        character: 0,
+                        line: 0
+                    }
+                },
+                onChanges: false,
+                uri: ''
+            };
+        } else {
+            formatParams = {
+                editorConfigSettings: {},
+                useVcFormat: false,
+                insertSpaces: editorSettings.editorInsertSpaces !== undefined ? editorSettings.editorInsertSpaces : true,
+                tabSize: editorSettings.editorTabSize !== undefined ? editorSettings.editorTabSize : 4,
+                character: "",
+                range: {
+                    start: {
+                        character: 0,
+                        line: 0
+                    },
+                    end: {
+                        character: 0,
+                        line: 0
+                    }
+                },
+                onChanges: false,
+                uri: ''
+            };
         }
 
         const params: CreateDeclarationOrDefinitionParams = {
@@ -3473,6 +3522,7 @@ export class DefaultClient implements Client {
                     line: range.end.line
                 }
             },
+            formatParams: formatParams,
             copyToClipboard: isCopyToClipboard
         };
 
@@ -3496,7 +3546,6 @@ export class DefaultClient implements Client {
             return;
         }
 
-        // Handle copy to clipboard.
         if (result.clipboardText && params.copyToClipboard) {
             return vscode.env.clipboard.writeText(result.clipboardText);
         }
