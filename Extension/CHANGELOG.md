@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.19.9: March 19, 2024
+### Bug Fixes
+* Fix an issue with Cygwin system headers not being properly detected. [#12113](https://github.com/microsoft/vscode-cpptools/issues/12113)
+
 ## Version 1.19.8: March 13, 2024
 ### Bug Fixes
 * Fix an issue with applying the proper working directory from a `compile_commands.json` when a `compilePath` is also set. [#12024](https://github.com/microsoft/vscode-cpptools/issues/12024)
