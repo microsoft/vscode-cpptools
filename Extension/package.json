@@ -3079,10 +3079,7 @@
                         "scope": "machine"
                     },
                     "C_Cpp.maxSymbolSearchResults": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ],
+                        "type": "integer",
                         "markdownDescription": "%c_cpp.configuration.maxSymbolSearchResults.markdownDescription%",
                         "default": 5000,
                         "minimum": 500,
