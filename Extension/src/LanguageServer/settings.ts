@@ -314,7 +314,7 @@ export class CppSettings extends Settings {
 
     public get maxConcurrentThreads(): number | undefined | null { return super.Section.get<number | null>("maxConcurrentThreads"); }
     public get maxMemory(): number | undefined | null { return super.Section.get<number | null>("maxMemory"); }
-    public get maxSymbolSearchResults(): number | undefined | null { return super.Section.get<number | null>("maxSymbolSearchResults"); }
+    public get maxSymbolSearchResults(): number | undefined { return super.Section.get<number>("maxSymbolSearchResults"); }
     public get maxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("maxCachedProcesses"); }
     public get intelliSenseMaxCachedProcesses(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxCachedProcesses"); }
     public get intelliSenseMaxMemory(): number | undefined | null { return super.Section.get<number | null>("intelliSense.maxMemory"); }

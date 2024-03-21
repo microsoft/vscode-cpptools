@@ -67,7 +67,7 @@
         ]
     },
     "c_cpp.configuration.maxSymbolSearchResults.markdownDescription": {
-        "message": "The maximum number of results to show for Go to Symbol in Workspace. The default is `5000`.",
+        "message": "The maximum number of results to show for 'Go to Symbol in Workspace'. The default is `5000`.",
         "comment": [
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
