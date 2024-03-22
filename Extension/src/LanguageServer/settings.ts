@@ -142,7 +142,7 @@ export interface SettingsParams {
     maxConcurrentThreads: number | null | undefined;
     maxCachedProcesses: number | null | undefined;
     maxMemory: number | null | undefined;
-    maxSymbolSearchResults: number | null | undefined;
+    maxSymbolSearchResults: number | undefined;
     loggingLevel: string | undefined;
     workspaceParsingPriority: string | undefined;
     workspaceSymbols: string | undefined;
