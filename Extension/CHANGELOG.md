@@ -1,8 +1,10 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.19.9: March 19, 2024
+## Version 1.19.9: March 20, 2024
 ### Bug Fixes
 * Fix an issue with Cygwin system headers not being properly detected. [#12113](https://github.com/microsoft/vscode-cpptools/issues/12113)
+* Fix a crash in cpptools-srv when low on memory. [#12121](https://github.com/microsoft/vscode-cpptools/issues/12121)
+* Fix an issue preventing cpptools-srv from being relaunched after a crash.
 
 ## Version 1.19.8: March 13, 2024
 ### Bug Fixes

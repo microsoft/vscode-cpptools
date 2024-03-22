@@ -1458,6 +1458,7 @@ export class DefaultClient implements Client {
             maxConcurrentThreads: workspaceSettings.maxConcurrentThreads,
             maxCachedProcesses: workspaceSettings.maxCachedProcesses,
             maxMemory: workspaceSettings.maxMemory,
+            maxSymbolSearchResults: workspaceSettings.maxSymbolSearchResults,
             loggingLevel: workspaceSettings.loggingLevel,
             workspaceParsingPriority: workspaceSettings.workspaceParsingPriority,
             workspaceSymbols: workspaceSettings.workspaceSymbols,
