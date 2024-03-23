@@ -3178,6 +3178,14 @@
                         "maximum": 65536,
                         "scope": "machine"
                     },
+                    "C_Cpp.maxSymbolSearchResults": {
+                        "type": "integer",
+                        "markdownDescription": "%c_cpp.configuration.maxSymbolSearchResults.markdownDescription%",
+                        "default": 5000,
+                        "minimum": 500,
+                        "maximum": 10000,
+                        "scope": "window"
+                    },
                     "C_Cpp.intelliSense.maxCachedProcesses": {
                         "type": [
                             "integer",
