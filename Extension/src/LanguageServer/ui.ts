@@ -46,9 +46,6 @@ const commandArguments: string[] = []; // We report the sender of the command
 export class LanguageStatusUI {
     private currentClient: Client | undefined;
 
-    // Timer for icons from appearing too often and for too short of a time.
-    private readonly iconDelayTime: number = 1000;
-
     // IntelliSense language status
     private intelliSenseStatusItem: vscode.LanguageStatusItem;
     private readonly updatingIntelliSenseText: string = localize("updating.intellisense.text", "IntelliSense: Updating");
@@ -58,7 +55,6 @@ export class LanguageStatusUI {
     private isParsingWorkspace: boolean = false;
     private isParsingWorkspacePaused: boolean = false;
     private isParsingFiles: boolean = false;
-    private tagParseTimeout?: NodeJS.Timeout;
     private readonly dataBaseIcon: string = "$(database)";
     private readonly workspaceParsingInitializing: string = localize("initializing.tagparser.text", "Initializing Workspace");
     private readonly workspaceParsingIndexing: string = localize("indexing.tagparser.text", "Indexing Workspace");
@@ -115,25 +111,15 @@ export class LanguageStatusUI {
         return item;
     }
 
-    private flameTimeout?: NodeJS.Timeout;
     private setIsUpdatingIntelliSense(val: boolean): void {
         this.intelliSenseStatusItem.busy = val;
-
-        if (this.flameTimeout) {
-            clearTimeout(this.flameTimeout);
-        }
 
         if (val) {
             this.intelliSenseStatusItem.text = "$(flame)";
             this.intelliSenseStatusItem.detail = this.updatingIntelliSenseText;
-            this.flameTimeout = undefined;
         } else {
-            this.flameTimeout = setTimeout(() => {
-                if (this.intelliSenseStatusItem) {
-                    this.intelliSenseStatusItem.text = this.idleIntelliSenseText;
-                    this.intelliSenseStatusItem.detail = "";
-                }
-            }, this.iconDelayTime);
+            this.intelliSenseStatusItem.text = this.idleIntelliSenseText;
+            this.intelliSenseStatusItem.detail = "";
         }
         this.intelliSenseStatusItem.command = {
             command: "C_Cpp.RestartIntelliSenseForFile",
@@ -220,10 +206,6 @@ export class LanguageStatusUI {
     private setTagParseStatus(): void {
         // Set busy icon outside of timer for more real-time response
         this.tagParseStatusItem.busy = (this.isParsingWorkspace && !this.isParsingWorkspacePaused) || this.isParsingFiles;
-        if (this.tagParseStatusItem.busy && this.tagParseTimeout) {
-            clearTimeout(this.tagParseTimeout);
-            this.tagParseTimeout = undefined;
-        }
 
         if (this.isParsingWorkspace || this.isParsingFiles) {
             this.tagParseStatusItem.text = this.dataBaseIcon;
@@ -251,15 +233,13 @@ export class LanguageStatusUI {
             }
         } else {
             // Parsing completed.
-            this.tagParseTimeout = setTimeout(() => {
-                this.tagParseStatusItem.text = this.workspaceParsingDoneText;
-                this.tagParseStatusItem.detail = "";
-                this.tagParseStatusItem.command = {
-                    command: "C_Cpp.RescanWorkspace",
-                    title: this.workspaceRescanText,
-                    arguments: commandArguments
-                };
-            }, this.iconDelayTime);
+            this.tagParseStatusItem.text = this.workspaceParsingDoneText;
+            this.tagParseStatusItem.detail = "";
+            this.tagParseStatusItem.command = {
+                command: "C_Cpp.RescanWorkspace",
+                title: this.workspaceRescanText,
+                arguments: commandArguments
+            };
         }
     }
     //#endregion Tag parse language status

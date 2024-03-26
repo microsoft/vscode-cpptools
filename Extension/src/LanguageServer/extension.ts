@@ -145,7 +145,6 @@ function sendActivationTelemetry(): void {
  */
 export async function activate(): Promise<void> {
 
-    console.log("activating extension");
     sendActivationTelemetry();
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
@@ -157,7 +156,6 @@ export async function activate(): Promise<void> {
         }
     }
 
-    console.log("starting language server");
     clients = new ClientCollection();
     ui = getUI();
 
@@ -403,6 +401,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -1202,7 +1201,6 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
 
 export function deactivate(): Thenable<void> {
     clients.timeTelemetryCollector.clear();
-    console.log("deactivating extension");
     telemetry.logLanguageServerEvent("LanguageServerShutdown");
     clearInterval(intervalTimer);
     commandDisposables.forEach(d => d.dispose());
@@ -1307,4 +1305,8 @@ export async function preReleaseCheck(): Promise<void> {
             });
         }
     }
+}
+
+export async function getIncludes(maxDepth: number): Promise<any> {
+    return clients.ActiveClient.getIncludes(maxDepth);
 }
