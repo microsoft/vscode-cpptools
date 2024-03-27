@@ -36,12 +36,12 @@ extends:
         tsaVersion: TsaV2
         codebase: NewOrUpdate
         codebaseName: vscode-cpptools
-        tsaStamp: DevDiv
+        tsaStamp: $(TsaProjectName)
         tsaEnvironment: PROD
         notificationAlias: $(TsaNotificationAlias)
         codebaseAdmins: $(TsaCodebaseAdmins)
         instanceUrl: $(TsaInstanceUrl)
-        projectName: DevDiv
+        projectName: $(TsaProjectName)
         areaPath: $(TsaAreaPath)
         iterationPath: $(TsaIterationPath)
         alltools: true
