@@ -32,20 +32,7 @@ extends:
         image: AzurePipelinesWindows2022compliantGPT
         os: windows
       tsa:
-        enabled: true
-        tsaVersion: TsaV2
-        codebase: NewOrUpdate
-        codebaseName: vscode-cpptools
-        tsaStamp: $(TsaProjectName)
-        tsaEnvironment: PROD
-        notificationAlias: $(TsaNotificationAlias)
-        codebaseAdmins: $(TsaCodebaseAdmins)
-        instanceUrl: $(TsaInstanceUrl)
-        projectName: $(TsaProjectName)
-        areaPath: $(TsaAreaPath)
-        iterationPath: $(TsaIterationPath)
-        alltools: true
-        repositoryName: vscode-cpptools
+        enabled: false
 
     stages:
     - stage: build
