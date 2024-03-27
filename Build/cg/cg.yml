@@ -33,6 +33,8 @@ extends:
         os: windows
       tsa:
         enabled: false
+    featureFlags:
+      autoBaseline: false
 
     stages:
     - stage: build
