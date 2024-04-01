@@ -144,7 +144,6 @@ function sendActivationTelemetry(): void {
  * activate: set up the extension for language services
  */
 export async function activate(): Promise<void> {
-
     sendActivationTelemetry();
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
@@ -1156,7 +1155,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
         if (filtPath) {
-            const ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
+            if (ret?.output === funcStr) {
+                ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            }
             if (ret !== undefined) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
