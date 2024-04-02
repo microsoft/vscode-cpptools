@@ -188,6 +188,8 @@ async function makeBinariesExecutable(): Promise<void> {
                 ];
                 oldMacBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
             }
+        } else {
+            promises.push(util.allowExecution(util.getExtensionFilePath("./bin/libc.so")));
         }
     }
     await Promise.all(promises);
