@@ -188,7 +188,7 @@ async function makeBinariesExecutable(): Promise<void> {
                 ];
                 oldMacBinaries.forEach(binary => promises.push(util.allowExecution(util.getExtensionFilePath(binary))));
             }
-        } else {
+        } else if (os.arch() !== "arm") {
             promises.push(util.allowExecution(util.getExtensionFilePath("./bin/libc.so")));
         }
     }
