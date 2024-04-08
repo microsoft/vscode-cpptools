@@ -959,7 +959,7 @@ function reportMacCrashes(): void {
 }
 
 export function watchForCrashes(crashDirectory: string): void {
-    if (process.platform !== "win32") {
+    if (process.platform !== "win32" && (process.platform === "darwin" || os.arch() === "x64")) {
         prevCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
@@ -1124,9 +1124,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     data = crashFile + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
-    const startStr: string = isMac ? " _" : "(";
-    const offsetStr: string = isMac ? " + " : "+0x";
-    const endOffsetStr: string = isMac ? " " : ")";
+    const startStr: string = isMac ? " _" : "<";
+    const offsetStr: string = isMac ? " + " : "+";
+    const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "…";
     data += lines[0]; // signal type
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
@@ -1136,7 +1136,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         }
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
-        if (startPos === -1 || line[startPos + 1] === "+") {
+        if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
             data += dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
@@ -1181,9 +1181,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
             }
             addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
-            const endPos: number = line.indexOf(")", offsetPos2);
+            const endPos: number = line.indexOf(">", offsetPos2);
             if (endPos === -1) {
-                data += "<Missing )>";
+                data += "<Missing > >";
                 continue; // unexpected
             }
             data += line.substring(offsetPos2, endPos);

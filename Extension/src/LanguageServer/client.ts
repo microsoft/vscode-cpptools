@@ -1489,8 +1489,8 @@ export class DefaultClient implements Client {
         }
         const serverName: string = this.getName(this.rootFolder);
         const serverOptions: ServerOptions = {
-            run: { command: serverModule, options: { detached: false } },
-            debug: { command: serverModule, args: [serverName], options: { detached: true } }
+            run: { command: serverModule, options: { detached: false, cwd: util.getExtensionFilePath("bin") } },
+            debug: { command: serverModule, args: [serverName], options: { detached: true, cwd: util.getExtensionFilePath("bin") } }
         };
 
         // The IntelliSense process should automatically detect when AutoPCH is
