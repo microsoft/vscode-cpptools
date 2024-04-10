@@ -1867,7 +1867,7 @@ export class CppProperties {
         }
 
         // Check for path-related squiggles.
-        let paths: string[] = [];
+        const paths: string[] = [];
         let compilerPath: string | undefined;
         for (const pathArray of [ currentConfiguration.browse ? currentConfiguration.browse.path : undefined,
             currentConfiguration.includePath, currentConfiguration.macFrameworkPath ]) {
