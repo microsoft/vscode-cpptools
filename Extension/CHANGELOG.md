@@ -1,11 +1,17 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.20.1: April 9, 2024
+### Bug Fixes
+* Fix 'Add #include' code actions for code scoped by a namespace or class. [#11541](https://github.com/microsoft/vscode-cpptools/issues/11541)
+* Fix the IntelliSense server not starting when a completion, signature help, or document highlight occurs from external commands. [#12143](https://github.com/microsoft/vscode-cpptools/issues/12143)
+* Fix the IntelliSense configuration not falling back to the `c_cpp_properties.json` configuration for a file not handled by a configuration provider. [#12144](https://github.com/microsoft/vscode-cpptools/issues/12144)
+
 ## Version 1.20.0: March 26, 2024
 ### Enhancements
 * Add support for C++ modules IFC version 0.43. [#10843](https://github.com/microsoft/vscode-cpptools/issues/10843)
 * Add support for `${userHome}` in `c_cpp_properties.json`. [#11756](https://github.com/microsoft/vscode-cpptools/issues/11756)
 * Reduce the default max workspace symbol search results and add `C_Cpp.maxSymbolSearchResults`. [PR #12131](https://github.com/microsoft/vscode-cpptools/pull/12131)
-* Update to `clang-format`/`clang-tidy` 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
+* Update `clang-format`/`clang-tidy` to 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
 * Update IntelliSense engine.
 
 ### Bug Fixes
