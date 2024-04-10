@@ -11,7 +11,7 @@
 * Add support for C++ modules IFC version 0.43. [#10843](https://github.com/microsoft/vscode-cpptools/issues/10843)
 * Add support for `${userHome}` in `c_cpp_properties.json`. [#11756](https://github.com/microsoft/vscode-cpptools/issues/11756)
 * Reduce the default max workspace symbol search results and add `C_Cpp.maxSymbolSearchResults`. [PR #12131](https://github.com/microsoft/vscode-cpptools/pull/12131)
-* Update to `clang-format`/`clang-tidy` 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
+* Update `clang-format`/`clang-tidy` to 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
 * Update IntelliSense engine.
 
 ### Bug Fixes
