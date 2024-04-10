@@ -1896,8 +1896,7 @@ export class CppProperties {
         }
 
         // Resolve and split any environment variables
-        compilerPath = util.resolveVariables(compilerPath, this.ExtendedEnvironment).trim();
-        compilerPath = this.resolvePath(compilerPath);
+        compilerPath = this.resolvePath(compilerPath).trim();
 
         // Get the start/end for properties that are file-only.
         const forcedIncludeStart: number = curText.search(/\s*\"forcedInclude\"\s*:\s*\[/);
@@ -1960,8 +1959,7 @@ export class CppProperties {
         let dotConfigMessage: string | undefined;
 
         dotConfigPath = currentConfiguration.dotConfig;
-        dotConfigPath = util.resolveVariables(dotConfigPath, this.ExtendedEnvironment).trim();
-        dotConfigPath = this.resolvePath(dotConfigPath);
+        dotConfigPath = this.resolvePath(dotConfigPath).trim();
         // does not try resolve if the dotConfig property is empty
         dotConfigPath = dotConfigPath !== '' ? dotConfigPath : undefined;
 
