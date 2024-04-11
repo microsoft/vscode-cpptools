@@ -1985,7 +1985,7 @@ export class CppProperties {
         }
 
         // Validate paths
-        for (let curPath of paths) {
+        for (const curPath of paths) {
 
             if (processedPaths.has(curPath)) {
                 // Avoid duplicate squiggles for the same line.
@@ -1999,14 +1999,31 @@ export class CppProperties {
                 continue;
             }
 
-            const originalPath: string = curPath;
-            curPath = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false)[0];
-
             let resolvedPath: string = this.resolvePath(curPath);
             if (!resolvedPath) {
                 continue;
             }
+
+            // Cache the original value of each path to include any variables or path delimiting.
+            const originalPath: string = curPath;
+            const expandedPaths = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false);
             let pathExists: boolean = true;
+            const incorrectExpandedPaths: string[] = [];
+
+            if (expandedPaths.length > 1) {
+                if (this.rootUri) {
+                    for (let expandedPath of expandedPaths) {
+                        expandedPath = this.resolvePath(expandedPath);
+                        const checkPathExists: any = util.checkPathExistsSync(expandedPath, this.rootUri.fsPath + path.sep, isWindows, false);
+                        pathExists = checkPathExists.pathExists;
+                        if (!pathExists) {
+                            // If there are multiple paths, store any non-existing paths to squiggle later on.
+                            incorrectExpandedPaths.push(expandedPath);
+                        }
+                    }
+                }
+            }
+
             if (this.rootUri) {
                 const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, false);
                 pathExists = checkPathExists.pathExists;
@@ -2051,13 +2068,29 @@ export class CppProperties {
                     if (curOffset >= compilerPathStart && curOffset <= compilerPathEnd) {
                         continue;
                     }
-                    let message: string;
+                    let message: string = "";
                     if (!pathExists) {
                         if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
                                 && !path.isAbsolute(resolvedPath)) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
-                        message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                        // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
+                        if (incorrectExpandedPaths.length > 0 && configMatches[0].includes("env:")) {
+                            const splitString = configMatches[0].split("env:");
+                            if (splitString[1]) {
+                                const matchResult = splitString[1].match(/\w+/);
+                                if (matchResult) {
+                                    const envVar = matchResult[0];
+                                    message = localize('cannot.find2', "Cannot find the path or paths named \"{0}\" in {1} environment variable.", incorrectExpandedPaths.join(", "), envVar);
+                                }
+                            }
+                        // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
+                        } else if (incorrectExpandedPaths.length > 0) {
+                            message = localize('cannot.find2', "Cannot find the path or paths named \"{0}\".", incorrectExpandedPaths.join(", "));
+                        } else {
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                        }
+                        // Increment the count of non-existent paths.
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
