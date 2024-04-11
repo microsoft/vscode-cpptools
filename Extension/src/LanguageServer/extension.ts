@@ -959,7 +959,8 @@ function reportMacCrashes(): void {
 }
 
 export function watchForCrashes(crashDirectory: string): void {
-    if (process.platform !== "win32" && (process.platform === "darwin" || os.arch() === "x64")) {
+    if (crashDirectory !== ""
+        && process.platform !== "win32" && (process.platform === "darwin" || os.arch() === "x64")) {
         prevCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
