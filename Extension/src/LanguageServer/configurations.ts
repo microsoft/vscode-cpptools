@@ -1985,7 +1985,8 @@ export class CppProperties {
         }
 
         // Validate paths
-        for (const curPath of paths) {
+        for (let curPath of paths) {
+
             if (processedPaths.has(curPath)) {
                 // Avoid duplicate squiggles for the same line.
                 // Squiggles for the same path on different lines are already handled below.
@@ -1997,6 +1998,9 @@ export class CppProperties {
                 // TODO: Add squiggles for when the C_Cpp.default.* paths are invalid.
                 continue;
             }
+
+            let originalPath: string = curPath;
+            curPath = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false)[0];
 
             let resolvedPath: string = this.resolvePath(curPath);
             if (!resolvedPath) {
@@ -2019,7 +2023,7 @@ export class CppProperties {
 
             // Escape the path string for literal use in a regular expression
             // Need to escape any quotes to match the original text
-            let escapedPath: string = curPath.replace(/"/g, '\\"');
+            let escapedPath: string = originalPath.replace(/"/g, '\\"');
             escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
             // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
