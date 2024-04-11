@@ -2081,12 +2081,12 @@ export class CppProperties {
                                 const matchResult = splitString[1].match(/\w+/);
                                 if (matchResult) {
                                     const envVar = matchResult[0];
-                                    message = localize('cannot.find2', "Cannot find the path or paths named \"{0}\" in {1} environment variable.", incorrectExpandedPaths.join(", "), envVar);
+                                    message = localize('cannot.find2', "Cannot find \"{0}\" in {1} environment variable.", incorrectExpandedPaths.join(", "), envVar);
                                 }
                             }
                         // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
                         } else if (incorrectExpandedPaths.length > 0) {
-                            message = localize('cannot.find2', "Cannot find the path or paths named \"{0}\".", incorrectExpandedPaths.join(", "));
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", incorrectExpandedPaths.join(", "));
                         } else {
                             message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
                         }
