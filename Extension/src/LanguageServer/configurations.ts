@@ -1999,7 +1999,7 @@ export class CppProperties {
                 continue;
             }
 
-            let originalPath: string = curPath;
+            const originalPath: string = curPath;
             curPath = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false)[0];
 
             let resolvedPath: string = this.resolvePath(curPath);
