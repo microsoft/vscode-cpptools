@@ -1895,7 +1895,6 @@ export class CppProperties {
             compilerPath = currentConfiguration.compilerPath;
         }
 
-        // Resolve and split any environment variables
         compilerPath = this.resolvePath(compilerPath).trim();
 
         // Get the start/end for properties that are file-only.
