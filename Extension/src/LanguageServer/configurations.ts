@@ -2087,12 +2087,12 @@ export class CppProperties {
                         } else {
                             let badPath = "";
                             if (incorrectExpandedPaths.length > 0) {
-                              badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
+                                badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
                             } else {
-                              badPath = `"${resolvedPath}"`;
+                                badPath = `"${resolvedPath}"`;
                             }
                             message = localize('cannot.find2', "Cannot find {0}", badPath);
-                          }
+                        }
                         // Increment the count of non-existent paths.
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
