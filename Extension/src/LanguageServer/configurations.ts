@@ -2009,7 +2009,7 @@ export class CppProperties {
             let pathExists: boolean = true;
             const incorrectExpandedPaths: string[] = [];
 
-            if (expandedPaths.length > 1) {
+            if (expandedPaths.length > 0) {
                 if (this.rootUri) {
                     for (let expandedPath of expandedPaths) {
                         expandedPath = this.resolvePath(expandedPath);
@@ -2080,15 +2080,19 @@ export class CppProperties {
                                 const matchResult = splitString[1].match(/\w+/);
                                 if (matchResult) {
                                     const envVar = matchResult[0];
-                                    message = localize('cannot.find2', "Cannot find {0} in {1} environment variable.", incorrectExpandedPaths.map(s => `"${s}"`).join(', '), envVar);
+                                    message = localize('cannot.find3', "Cannot find {0} in environment variable: {1}.", incorrectExpandedPaths.map(s => `"${s}"`).join(', '), envVar);
                                 }
                             }
                         // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
-                        } else if (incorrectExpandedPaths.length > 0) {
-                            message = localize('cannot.find2', "Cannot find {0}.", incorrectExpandedPaths.map(s => `"${s}"`).join(', '));
                         } else {
-                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
-                        }
+                            let badPath = "";
+                            if (incorrectExpandedPaths.length > 0) {
+                              badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
+                            } else {
+                              badPath = `"${resolvedPath}"`;
+                            }
+                            message = localize('cannot.find2', "Cannot find {0}", badPath);
+                          }
                         // Increment the count of non-existent paths.
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
