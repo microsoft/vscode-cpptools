@@ -2563,7 +2563,6 @@ export class DefaultClient implements Client {
         }
         telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }
-    
 
     private async updateStatus(notificationBody: ReportStatusNotificationBody): Promise<void> {
         const message: string = notificationBody.status;
