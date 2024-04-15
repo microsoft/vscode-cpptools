@@ -2005,7 +2005,7 @@ export class CppProperties {
 
             // Cache the original value of each path to include any variables or path delimiting.
             const originalPath: string = curPath;
-            const expandedPaths = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false);
+            const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false);
             let pathExists: boolean = true;
             const incorrectExpandedPaths: string[] = [];
 
@@ -2014,8 +2014,7 @@ export class CppProperties {
                     for (let expandedPath of expandedPaths) {
                         expandedPath = this.resolvePath(expandedPath);
                         const checkPathExists: any = util.checkPathExistsSync(expandedPath, this.rootUri.fsPath + path.sep, isWindows, false);
-                        pathExists = checkPathExists.pathExists;
-                        if (!pathExists) {
+                        if (!checkPathExists.pathExists) {
                             // If there are multiple paths, store any non-existing paths to squiggle later on.
                             incorrectExpandedPaths.push(expandedPath);
                         }
@@ -2058,6 +2057,11 @@ export class CppProperties {
                     }
                 }
             }
+
+            if (incorrectExpandedPaths.length > 0) {
+                pathExists = false;
+            }
+
             if (configMatches && !globPath) {
                 let curOffset: number = 0;
                 let endOffset: number = 0;
