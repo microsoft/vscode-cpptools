@@ -2003,8 +2003,8 @@ export class DefaultClient implements Client {
         }
         try {
             DefaultClient.isStarted.reset();
-            const result = await this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, provider);
-            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, result });
+            const status = await this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, provider);
+            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, status });
         } finally {
             onFinished();
             DefaultClient.isStarted.resolve();
