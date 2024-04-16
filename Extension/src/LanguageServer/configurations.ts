@@ -1998,11 +1998,6 @@ export class CppProperties {
                 continue;
             }
 
-            let resolvedPath: string = this.resolvePath(curPath);
-            if (!resolvedPath) {
-                continue;
-            }
-
             // Cache the original value of each path to include any variables or path delimiting.
             const originalPath: string = curPath;
             const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false);
@@ -2020,18 +2015,15 @@ export class CppProperties {
                         }
                     }
                 }
+            } else {
+                continue;
             }
 
-            if (this.rootUri) {
-                const checkPathExists: any = util.checkPathExistsSync(resolvedPath, this.rootUri.fsPath + path.sep, isWindows, false);
-                pathExists = checkPathExists.pathExists;
-                resolvedPath = checkPathExists.path;
-            }
             // Normalize path separators.
-            if (path.sep === "/") {
-                resolvedPath = resolvedPath.replace(/\\/g, path.sep);
+            if (path.sep === "/" && expandedPaths.length > 0) {
+                expandedPaths[0] = expandedPaths[0].replace(/\\/g, path.sep);
             } else {
-                resolvedPath = resolvedPath.replace(/\//g, path.sep);
+                expandedPaths[0] = expandedPaths[0].replace(/\//g, path.sep);
             }
 
             // Iterate through the text and apply squiggles.
@@ -2074,7 +2066,7 @@ export class CppProperties {
                     let message: string = "";
                     if (!pathExists) {
                         if (curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd
-                                && !path.isAbsolute(resolvedPath)) {
+                                && !path.isAbsolute(expandedPaths[0])) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
                         // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
@@ -2093,7 +2085,7 @@ export class CppProperties {
                             if (incorrectExpandedPaths.length > 0) {
                                 badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
                             } else {
-                                badPath = `"${resolvedPath}"`;
+                                badPath = `"${expandedPaths[0]}"`;
                             }
                             message = localize('cannot.find2', "Cannot find {0}", badPath);
                         }
@@ -2103,16 +2095,16 @@ export class CppProperties {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
                                 (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
-                            if (util.checkFileExistsSync(resolvedPath)) {
+                            if (util.checkFileExistsSync(expandedPaths[0])) {
                                 continue;
                             }
-                            message = localize("path.is.not.a.file", "Path is not a file: {0}", resolvedPath);
+                            message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
                             newSquiggleMetrics.PathNotAFile++;
                         } else {
-                            if (util.checkDirectoryExistsSync(resolvedPath)) {
+                            if (util.checkDirectoryExistsSync(expandedPaths[0])) {
                                 continue;
                             }
-                            message = localize("path.is.not.a.directory", "Path is not a directory: {0}", resolvedPath);
+                            message = localize("path.is.not.a.directory", "Path is not a directory: {0}", expandedPaths[0]);
                             newSquiggleMetrics.PathNotADirectory++;
                         }
                     }
@@ -2133,7 +2125,7 @@ export class CppProperties {
                         endOffset = curOffset + curMatch.length;
                         let message: string;
                         if (!pathExists) {
-                            message = localize('cannot.find2', "Cannot find \"{0}\".", resolvedPath);
+                            message = localize('cannot.find2', "Cannot find \"{0}\".", expandedPaths[0]);
                             newSquiggleMetrics.PathNonExistent++;
                             const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
                                 new vscode.Range(document.positionAt(envTextStartOffSet + curOffset),
