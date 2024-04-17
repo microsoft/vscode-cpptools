@@ -53,7 +53,7 @@ import {
 import { Location, TextEdit, WorkspaceEdit } from './commonTypes';
 import * as configs from './configurations';
 import { DataBinding } from './dataBinding';
-import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, watchForCrashes } from './extension';
+import { CppSourceStr, clients, configPrefix, updateLanguageConfigurations, usesCrashHandler, watchForCrashes } from './extension';
 import { LocalizeStringParams, getLocaleId, getLocalizedString } from './localization';
 import { PersistentFolderState, PersistentWorkspaceState } from './persistentState';
 import { createProtocolFilter } from './protocolFilter';
@@ -109,10 +109,6 @@ export let semanticTokensLegend: vscode.SemanticTokensLegend | undefined;
 export function disposeWorkspaceData(): void {
     workspaceDisposables.forEach((d) => d.dispose());
     workspaceDisposables = [];
-}
-
-function logTelemetry(notificationBody: TelemetryPayload): void {
-    telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
 }
 
 /** Note: We should not await on the following functions,
@@ -548,7 +544,8 @@ interface GetIncludesResult
 }
 
 // Requests
-const InitializationRequest: RequestType<CppInitializationParams, string, void> = new RequestType<CppInitializationParams, string, void>('cpptools/initialize');
+const PreInitializationRequest: RequestType<void, string, void> = new RequestType<void, string, void>('cpptools/preinitialize');
+const InitializationRequest: RequestType<CppInitializationParams, void, void> = new RequestType<CppInitializationParams, void, void>('cpptools/initialize');
 const QueryCompilerDefaultsRequest: RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void> = new RequestType<QueryDefaultCompilerParams, configs.CompilerDefaults, void>('cpptools/queryCompilerDefaults');
 const QueryTranslationUnitSourceRequest: RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void> = new RequestType<QueryTranslationUnitSourceParams, QueryTranslationUnitSourceResult, void>('cpptools/queryTranslationUnitSource');
 const SwitchHeaderSourceRequest: RequestType<SwitchHeaderSourceParams, string, void> = new RequestType<SwitchHeaderSourceParams, string, void>('cpptools/didSwitchHeaderSource');
@@ -1596,10 +1593,14 @@ export class DefaultClient implements Client {
         languageClient.registerProposedFeatures();
         await languageClient.start();
 
+        if (usesCrashHandler()) {
+            watchForCrashes(await languageClient.sendRequest(PreInitializationRequest, null));
+        }
+
         // Move initialization to a separate message, so we can see log output from it.
         // A request is used in order to wait for completion and ensure that no subsequent
         // higher priority message may be processed before the Initialization request.
-        watchForCrashes(await languageClient.sendRequest(InitializationRequest, cppInitializationParams));
+        await languageClient.sendRequest(InitializationRequest, cppInitializationParams);
     }
 
     public async sendDidChangeSettings(): Promise<void> {
@@ -2000,13 +2001,17 @@ export class DefaultClient implements Client {
             onFinished();
             return;
         }
-        telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId });
-        void this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, onFinished, provider);
+        try {
+            DefaultClient.isStarted.reset();
+            const status = await this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, provider);
+            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, status });
+        } finally {
+            onFinished();
+            DefaultClient.isStarted.resolve();
+        }
     }
 
-    private async provideCustomConfigurationAsync(docUri: vscode.Uri, requestFile: string | undefined, replaceExisting: boolean | undefined, onFinished: () => void, provider: CustomConfigurationProvider1) {
-        DefaultClient.isStarted.reset();
-
+    private async provideCustomConfigurationAsync(docUri: vscode.Uri, requestFile: string | undefined, replaceExisting: boolean | undefined, provider: CustomConfigurationProvider1): Promise<string> {
         const tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
 
         const params: QueryTranslationUnitSourceParams = {
@@ -2018,14 +2023,12 @@ export class DefaultClient implements Client {
         const response: QueryTranslationUnitSourceResult = await this.languageClient.sendRequest(QueryTranslationUnitSourceRequest, params);
         if (!response.candidates || response.candidates.length === 0) {
             // If we didn't receive any candidates, no configuration is needed.
-            onFinished();
-            DefaultClient.isStarted.resolve();
-            return;
+            return "noCandidates";
         }
 
         // Need to loop through candidates, to see if we can get a custom configuration from any of them.
         // Wrap all lookups in a single task, so we can apply a timeout to the entire duration.
-        const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | null | undefined> = async () => {
+        const provideConfigurationAsync: () => Thenable<SourceFileConfigurationItem[] | undefined> = async () => {
             const uris: vscode.Uri[] = [];
             for (let i: number = 0; i < response.candidates.length; ++i) {
                 const candidate: string = response.candidates[i];
@@ -2085,44 +2088,41 @@ export class DefaultClient implements Client {
                 }
                 return configs as SourceFileConfigurationItem[];
             }
-            if (tokenSource.token.isCancellationRequested) {
-                return null;
-            }
+            return undefined;
         };
+        let result: string = "success";
         try {
-            const configs: SourceFileConfigurationItem[] | null | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
+            const configs: SourceFileConfigurationItem[] | undefined = await this.callTaskWithTimeout(provideConfigurationAsync, configProviderTimeout, tokenSource);
             if (configs && configs.length > 0) {
                 this.sendCustomConfigurations(configs, provider.version);
+            } else {
+                result = "noConfigurations";
             }
-            onFinished();
         } catch (err) {
-            if (requestFile) {
-                onFinished();
-                return;
-            }
-            const settings: CppSettings = new CppSettings(this.RootUri);
-            if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
-                const dismiss: string = localize("dismiss.button", "Dismiss");
-                const disable: string = localize("disable.warnings.button", "Disable Warnings");
-                const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
-                if (!configName) {
-                    return;
-                }
-                let message: string = localize("unable.to.provide.configuration",
-                    "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
-                    provider.name, docUri.fsPath, configName);
-                if (err) {
-                    message += ` (${err})`;
-                }
+            result = "timeout";
+            if (!requestFile) {
+                const settings: CppSettings = new CppSettings(this.RootUri);
+                if (settings.configurationWarnings && !this.isExternalHeader(docUri) && !vscode.debug.activeDebugSession) {
+                    const dismiss: string = localize("dismiss.button", "Dismiss");
+                    const disable: string = localize("disable.warnings.button", "Disable Warnings");
+                    const configName: string | undefined = this.configuration.CurrentConfiguration?.name;
+                    if (!configName) {
+                        return "noConfigName";
+                    }
+                    let message: string = localize("unable.to.provide.configuration",
+                        "{0} is unable to provide IntelliSense configuration information for '{1}'. Settings from the '{2}' configuration will be used instead.",
+                        provider.name, docUri.fsPath, configName);
+                    if (err) {
+                        message += ` (${err})`;
+                    }
 
-                if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
-                    settings.toggleSetting("configurationWarnings", "enabled", "disabled");
+                    if (await vscode.window.showInformationMessage(message, dismiss, disable) === disable) {
+                        settings.toggleSetting("configurationWarnings", "enabled", "disabled");
+                    }
                 }
             }
-        } finally {
-            DefaultClient.isStarted.resolve();
         }
-
+        return result;
     }
 
     private async handleRequestCustomConfig(requestFile: string): Promise<void> {
@@ -2323,7 +2323,7 @@ export class DefaultClient implements Client {
 
         this.languageClient.onNotification(ReloadWindowNotification, () => void util.promptForReloadWindowDueToSettingsChange());
         this.languageClient.onNotification(UpdateTrustedCompilersNotification, (e) => void this.addTrustedCompiler(e.compilerPath));
-        this.languageClient.onNotification(LogTelemetryNotification, logTelemetry);
+        this.languageClient.onNotification(LogTelemetryNotification, (e) => this.logTelemetry(e));
         this.languageClient.onNotification(ReportStatusNotification, (e) => void this.updateStatus(e));
         this.languageClient.onNotification(ReportTagParseStatusNotification, (e) => this.updateTagParseStatus(e));
         this.languageClient.onNotification(CompileCommandsPathsNotification, (e) => void this.promptCompileCommands(e));
@@ -2560,6 +2560,13 @@ export class DefaultClient implements Client {
         if (foundNewAssociation) {
             settings.filesAssociations = assocs;
         }
+    }
+
+    private logTelemetry(notificationBody: TelemetryPayload): void {
+        if (notificationBody.event === "includeSquiggles" && this.configurationProvider && notificationBody.properties) {
+            notificationBody.properties["providerId"] = this.configurationProvider;
+        }
+        telemetry.logLanguageServerEvent(notificationBody.event, notificationBody.properties, notificationBody.metrics);
     }
 
     private async updateStatus(notificationBody: ReportStatusNotificationBody): Promise<void> {
