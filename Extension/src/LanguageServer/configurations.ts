@@ -1728,6 +1728,31 @@ export class CppProperties {
         return errorMsg;
     }
 
+    private handleSquiggleErrorLogging(paths: string[], configMatches: string[], rawMessageKey: string, rawMessage: string): string {
+        let message: string = "";
+        // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
+        if (paths.length > 0 && configMatches[0].includes("env:")) {
+            const splitString = configMatches[0].split("env:");
+            if (splitString[1]) {
+                const matchResult = splitString[1].match(/\w+/);
+                if (matchResult) {
+                    const envVar = matchResult[0];
+                    message = localize(rawMessageKey, rawMessage, paths.map(s => `"${s}"`).join(', '), envVar);
+                }
+            }
+        } else {
+            // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
+            let badPath = "";
+            if (paths.length > 0) {
+                badPath = paths.map(s => `"${s}"`).join(', ');
+            } else {
+                badPath = `"${paths[0]}"`;
+            }
+            message = localize(rawMessageKey, rawMessage, badPath);
+        }
+        return message;
+    }
+
     private async handleSquiggles(): Promise<void> {
         if (!this.propertiesFile) {
             return;
@@ -1985,7 +2010,6 @@ export class CppProperties {
 
         // Validate paths
         for (const curPath of paths) {
-
             if (processedPaths.has(curPath)) {
                 // Avoid duplicate squiggles for the same line.
                 // Squiggles for the same path on different lines are already handled below.
@@ -1998,20 +2022,33 @@ export class CppProperties {
                 continue;
             }
 
-            // Cache the original value of each path to include any variables or path delimiting.
-            const originalPath: string = curPath;
+            // Escape the path string for literal use in a regular expression
+            // Need to escape any quotes to match the original text
+            let escapedPath: string = curPath.replace(/"/g, '\\"');
+            escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+            // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
+            // and extend that pattern to the next quote before and next quote after it.
+            const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
+            const configMatches: string[] | null = curText.match(pattern);
+
             const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false);
-            let pathExists: boolean = true;
             const incorrectExpandedPaths: string[] = [];
 
             if (expandedPaths.length > 0) {
                 if (this.rootUri) {
-                    for (let expandedPath of expandedPaths) {
-                        expandedPath = this.resolvePath(expandedPath);
-                        const checkPathExists: any = util.checkPathExistsSync(expandedPath, this.rootUri.fsPath + path.sep, isWindows, false);
+                    for (const [index, expandedPath] of expandedPaths.entries()) {
+
+                        if (expandedPath.includes("${workspaceFolder}")) {
+                            expandedPaths[index] = this.resolvePath(expandedPath, false);
+                        } else {
+                            expandedPaths[index] = this.resolvePath(expandedPath);
+                        }
+
+                        const checkPathExists: any = util.checkPathExistsSync(expandedPaths[index], this.rootUri.fsPath + path.sep, isWindows, false);
                         if (!checkPathExists.pathExists) {
                             // If there are multiple paths, store any non-existing paths to squiggle later on.
-                            incorrectExpandedPaths.push(expandedPath);
+                            incorrectExpandedPaths.push(expandedPaths[index]);
                         }
                     }
                 }
@@ -2019,24 +2056,18 @@ export class CppProperties {
                 continue;
             }
 
-            // Normalize path separators.
-            if (path.sep === "/" && expandedPaths.length > 0) {
-                expandedPaths[0] = expandedPaths[0].replace(/\\/g, path.sep);
-            } else {
-                expandedPaths[0] = expandedPaths[0].replace(/\//g, path.sep);
+            const pathExists: boolean = incorrectExpandedPaths.length === 0;
+
+            for (const [index, expandedPath] of expandedPaths.entries()) {
+                // Normalize path separators.
+                if (path.sep === "/" && expandedPaths.length > 0) {
+                    expandedPaths[index] = expandedPath.replace(/\\/g, path.sep);
+                } else {
+                    expandedPaths[index] = expandedPath.replace(/\//g, path.sep);
+                }
             }
 
             // Iterate through the text and apply squiggles.
-
-            // Escape the path string for literal use in a regular expression
-            // Need to escape any quotes to match the original text
-            let escapedPath: string = originalPath.replace(/"/g, '\\"');
-            escapedPath = escapedPath.replace(/[-\"\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-            // Create a pattern to search for the path with either a quote or semicolon immediately before and after,
-            // and extend that pattern to the next quote before and next quote after it.
-            const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
-            const configMatches: string[] | null = curText.match(pattern);
 
             let globPath: boolean = false;
             const asteriskPosition = curPath.indexOf("*");
@@ -2048,10 +2079,6 @@ export class CppProperties {
                         globPath = true;
                     }
                 }
-            }
-
-            if (incorrectExpandedPaths.length > 0) {
-                pathExists = false;
             }
 
             if (configMatches && !globPath) {
@@ -2069,25 +2096,10 @@ export class CppProperties {
                                 && !path.isAbsolute(expandedPaths[0])) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
-                        // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
-                        if (incorrectExpandedPaths.length > 0 && configMatches[0].includes("env:")) {
-                            const splitString = configMatches[0].split("env:");
-                            if (splitString[1]) {
-                                const matchResult = splitString[1].match(/\w+/);
-                                if (matchResult) {
-                                    const envVar = matchResult[0];
-                                    message = localize('cannot.find3', "Cannot find {0} in environment variable: {1}.", incorrectExpandedPaths.map(s => `"${s}"`).join(', '), envVar);
-                                }
-                            }
-                        // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
+                        if (paths.length > 0 && configMatches[0].includes("env:")) {
+                            message = this.handleSquiggleErrorLogging(incorrectExpandedPaths, configMatches, 'cannot.find3', 'Cannot find {0} for environment variable {1}');
                         } else {
-                            let badPath = "";
-                            if (incorrectExpandedPaths.length > 0) {
-                                badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
-                            } else {
-                                badPath = `"${expandedPaths[0]}"`;
-                            }
-                            message = localize('cannot.find2', "Cannot find {0}", badPath);
+                            message = this.handleSquiggleErrorLogging(incorrectExpandedPaths, configMatches, 'cannot.find2', 'Cannot find {0}');
                         }
                         // Increment the count of non-existent paths.
                         newSquiggleMetrics.PathNonExistent++;
@@ -2095,17 +2107,37 @@ export class CppProperties {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
                                 (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
-                            if (util.checkFileExistsSync(expandedPaths[0])) {
+                            const mismatchedPaths: string[] = [];
+                            for (const expandedPath of expandedPaths) {
+                                if (!util.checkFileExistsSync(expandedPath)) {
+                                    mismatchedPaths.push(expandedPath);
+                                }
+                            }
+                            if (mismatchedPaths.length > 1) {
+                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'paths.are.not.files', 'Paths are not files: {0}');
+                                newSquiggleMetrics.PathNotAFile++;
+                            } else if (mismatchedPaths.length === 1) {
+                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'path.is.not.a.file', 'Path is not a file: {0}');
+                                newSquiggleMetrics.PathNotAFile++;
+                            } else {
                                 continue;
                             }
-                            message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
-                            newSquiggleMetrics.PathNotAFile++;
                         } else {
-                            if (util.checkDirectoryExistsSync(expandedPaths[0])) {
+                            const mismatchedPaths: string[] = [];
+                            for (const expandedPath of expandedPaths) {
+                                if (!util.checkDirectoryExistsSync(expandedPath)) {
+                                    mismatchedPaths.push(expandedPath);
+                                }
+                            }
+                            if (mismatchedPaths.length > 1) {
+                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'paths.are.not.directories', 'Paths are not directories: {0}');
+                                newSquiggleMetrics.PathNotAFile++;
+                            } else if (mismatchedPaths.length === 1) {
+                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'path.is.not.a.directory', 'Path is not a directory: {0}');
+                                newSquiggleMetrics.PathNotAFile++;
+                            } else {
                                 continue;
                             }
-                            message = localize("path.is.not.a.directory", "Path is not a directory: {0}", expandedPaths[0]);
-                            newSquiggleMetrics.PathNotADirectory++;
                         }
                     }
                     const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(
