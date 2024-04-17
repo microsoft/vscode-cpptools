@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "ExtensionPack"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
