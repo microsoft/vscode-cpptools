@@ -745,8 +745,7 @@ export async function spawnChildProcess(program: string, args: string[] = [], co
     // Do not use CppSettings to avoid circular require()
     if (skipLogging === undefined || !skipLogging) {
         const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        const loggingLevel: string | undefined = settings.get<string>("loggingLevel");
-        if (loggingLevel === "Information" || loggingLevel === "Debug") {
+        if (getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 5) {
             getOutputChannelLogger().appendLine(`$ ${program} ${args.join(' ')}`);
         }
     }
@@ -777,7 +776,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
 
     // Do not use CppSettings to avoid circular require()
     const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-    const loggingLevel: string | undefined = (skipLogging === undefined || !skipLogging) ? settings.get<string>("loggingLevel") : "None";
+    const loggingLevel: number = (skipLogging === undefined || !skipLogging) ? getNumericLoggingLevel(settings.get<string>("loggingLevel")) : 0;
 
     let proc: child_process.ChildProcess;
     if (await isExecutable(program)) {
@@ -803,7 +802,7 @@ async function spawnChildProcessImpl(program: string, args: string[], continueOn
     if (proc.stdout) {
         proc.stdout.on('data', data => {
             const str: string = data.toString();
-            if (loggingLevel !== "None") {
+            if (loggingLevel > 0) {
                 getOutputChannelLogger().append(str);
             }
             stdout += str;
@@ -1579,8 +1578,10 @@ export function getNumericLoggingLevel(loggingLevel: string | undefined): number
             return 5;
         case "debug":
             return 6;
-        default:
+        case "none":
             return 0;
+        default:
+            return -1;
     }
 }
 
