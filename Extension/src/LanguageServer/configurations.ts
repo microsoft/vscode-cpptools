@@ -1728,31 +1728,6 @@ export class CppProperties {
         return errorMsg;
     }
 
-    private handleSquiggleErrorLogging(paths: string[], configMatches: string[], rawMessageKey: string, rawMessage: string): string {
-        let message: string = "";
-        // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
-        if (paths.length > 0 && configMatches[0].includes("env:")) {
-            const splitString = configMatches[0].split("env:");
-            if (splitString[1]) {
-                const matchResult = splitString[1].match(/\w+/);
-                if (matchResult) {
-                    const envVar = matchResult[0];
-                    message = localize(rawMessageKey, rawMessage, paths.map(s => `"${s}"`).join(', '), envVar);
-                }
-            }
-        } else {
-            // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
-            let badPath = "";
-            if (paths.length > 0) {
-                badPath = paths.map(s => `"${s}"`).join(', ');
-            } else {
-                badPath = `"${paths[0]}"`;
-            }
-            message = localize(rawMessageKey, rawMessage, badPath);
-        }
-        return message;
-    }
-
     private async handleSquiggles(): Promise<void> {
         if (!this.propertiesFile) {
             return;
@@ -1865,7 +1840,7 @@ export class CppProperties {
         if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
             this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
         }
-        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 };
+        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed:0 };
         const isWindows: boolean = os.platform() === 'win32';
 
         // TODO: Add other squiggles.
@@ -2081,6 +2056,7 @@ export class CppProperties {
                 }
             }
 
+
             if (configMatches && !globPath) {
                 let curOffset: number = 0;
                 let endOffset: number = 0;
@@ -2096,45 +2072,62 @@ export class CppProperties {
                                 && !path.isAbsolute(expandedPaths[0])) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
-                        if (paths.length > 0 && configMatches[0].includes("env:")) {
-                            message = this.handleSquiggleErrorLogging(incorrectExpandedPaths, configMatches, 'cannot.find3', 'Cannot find {0} for environment variable {1}');
+                        // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
+                        if (incorrectExpandedPaths.length > 0 && configMatches[0].includes("env:")) {
+                            const splitString = configMatches[0].split("env:");
+                            if (splitString[1]) {
+                                const matchResult = splitString[1].match(/\w+/);
+                                if (matchResult) {
+                                    const envVar = matchResult[0];
+                                    message = localize('cannot.find3', "Cannot find {0} in environment variable: {1}.", incorrectExpandedPaths.map(s => `"${s}"`).join(', '), envVar);
+                                }
+                            }
+                        // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
                         } else {
-                            message = this.handleSquiggleErrorLogging(incorrectExpandedPaths, configMatches, 'cannot.find2', 'Cannot find {0}');
+                            let badPath = "";
+                            if (incorrectExpandedPaths.length > 0) {
+                                badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
+                            } else {
+                                badPath = `"${expandedPaths[0]}"`;
+                            }
+                            message = localize('cannot.find2', "Cannot find {0}", badPath);
                         }
                         // Increment the count of non-existent paths.
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
                         if ((curOffset >= forcedIncludeStart && curOffset <= forcedeIncludeEnd) ||
-                                (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
-                            const mismatchedPaths: string[] = [];
-                            for (const expandedPath of expandedPaths) {
-                                if (!util.checkFileExistsSync(expandedPath)) {
-                                    mismatchedPaths.push(expandedPath);
-                                }
-                            }
-                            if (mismatchedPaths.length > 1) {
-                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'paths.are.not.files', 'Paths are not files: {0}');
-                                newSquiggleMetrics.PathNotAFile++;
-                            } else if (mismatchedPaths.length === 1) {
-                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'path.is.not.a.file', 'Path is not a file: {0}');
-                                newSquiggleMetrics.PathNotAFile++;
+                                    (curOffset >= compileCommandsStart && curOffset <= compileCommandsEnd)) {
+                            if (expandedPaths.length > 1) {
+                                message = localize("multiple.paths.not.allowed", "Multiple paths are not allowed.");
+                                newSquiggleMetrics.MultiplePathsNotAllowed++;
                             } else {
-                                continue;
+                                const resolvedPath = this.resolvePath(expandedPaths[0]);
+                                if (util.checkFileExistsSync(resolvedPath)) {
+                                    continue;
+                                }
+
+                                message = localize("path.is.not.a.file", "Path is not a file: {0}", expandedPaths[0]);
+                                newSquiggleMetrics.PathNotAFile++;
                             }
                         } else {
                             const mismatchedPaths: string[] = [];
                             for (const expandedPath of expandedPaths) {
-                                if (!util.checkDirectoryExistsSync(expandedPath)) {
+                                const resolvedPath = this.resolvePath(expandedPath);
+                                if (!util.checkDirectoryExistsSync(resolvedPath)) {
                                     mismatchedPaths.push(expandedPath);
                                 }
                             }
+
+                            let badPath = "";
                             if (mismatchedPaths.length > 1) {
-                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'paths.are.not.directories', 'Paths are not directories: {0}');
-                                newSquiggleMetrics.PathNotAFile++;
+                                badPath = mismatchedPaths.map(s => `"${s}"`).join(', ');
+                                message = localize('paths.are.not.directories', "Paths are not directories: {0}", badPath);
+                                newSquiggleMetrics.PathNotADirectory++;
                             } else if (mismatchedPaths.length === 1) {
-                                message = this.handleSquiggleErrorLogging(mismatchedPaths, configMatches, 'path.is.not.a.directory', 'Path is not a directory: {0}');
-                                newSquiggleMetrics.PathNotAFile++;
+                                badPath = `"${mismatchedPaths[0]}"`;
+                                message = localize('path.is.not.a.directory', "Path is not a directory: {0}", badPath);
+                                newSquiggleMetrics.PathNotADirectory++;
                             } else {
                                 continue;
                             }
