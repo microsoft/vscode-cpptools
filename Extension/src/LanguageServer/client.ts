@@ -1625,11 +1625,9 @@ export class DefaultClient implements Client {
                     updateLanguageConfigurations();
                 }
                 if (changedSettings.loggingLevel) {
-                    const oldLoggingLevelLogged: boolean = !!this.loggingLevel && this.loggingLevel !== 0 && this.loggingLevel !== 1;
-                    const newLoggingLevel: string | undefined = changedSettings.loggingLevel;
-                    this.loggingLevel = util.getNumericLoggingLevel(newLoggingLevel);
-                    const newLoggingLevelLogged: boolean = !!newLoggingLevel && newLoggingLevel !== "None" && newLoggingLevel !== "Error";
-                    if (oldLoggingLevelLogged || newLoggingLevelLogged) {
+                    const oldLoggingLevelLogged: boolean = this.loggingLevel > 1;
+                    this.loggingLevel = util.getNumericLoggingLevel(changedSettings.loggingLevel);
+                    if (oldLoggingLevelLogged || this.loggingLevel > 1) {
                         const out: Logger = getOutputChannelLogger();
                         out.appendLine(localize({ key: "loggingLevel.changed", comment: ["{0} is the setting name 'loggingLevel', {1} is a string value such as 'Debug'"] }, "{0} has changed to: {1}", "loggingLevel", changedSettings.loggingLevel));
                     }
@@ -2598,7 +2596,7 @@ export class DefaultClient implements Client {
             testHook.updateStatus(status);
         } else if (message.endsWith("IntelliSense done")) {
             const settings: CppSettings = new CppSettings();
-            if (settings.loggingLevel === "Debug") {
+            if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
                 const out: Logger = getOutputChannelLogger();
                 const duration: number = Date.now() - timeStamp;
                 out.appendLine(localize("update.intellisense.time", "Update IntelliSense time (sec): {0}", duration / 1000));
@@ -3030,7 +3028,7 @@ export class DefaultClient implements Client {
 
         const settings: CppSettings = new CppSettings();
         const out: Logger = getOutputChannelLogger();
-        if (settings.loggingLevel === "Debug") {
+        if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
             out.appendLine(localize("configurations.received", "Custom configurations received:"));
         }
         const sanitized: SourceFileConfigurationItemAdapter[] = [];
@@ -3044,7 +3042,7 @@ export class DefaultClient implements Client {
                     uri = item.uri.toString();
                 }
                 this.configurationLogging.set(uri, JSON.stringify(item.configuration, null, 4));
-                if (settings.loggingLevel === "Debug") {
+                if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
                     out.appendLine(`  uri: ${uri}`);
                     out.appendLine(`  config: ${JSON.stringify(item.configuration, null, 2)}`);
                 }
@@ -3148,7 +3146,7 @@ export class DefaultClient implements Client {
             }
 
             const settings: CppSettings = new CppSettings();
-            if (settings.loggingLevel === "Debug") {
+            if (util.getNumericLoggingLevel(settings.loggingLevel) >= 6) {
                 const out: Logger = getOutputChannelLogger();
                 out.appendLine(localize("browse.configuration.received", "Custom browse configuration received: {0}", JSON.stringify(sanitized, null, 2)));
             }
