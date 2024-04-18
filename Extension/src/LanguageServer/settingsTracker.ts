@@ -103,7 +103,8 @@ export class SettingsTracker {
                         return val;
                     }
                     const curEnum: any[] = curSetting["enum"];
-                    if (curEnum && curEnum.indexOf(val) === -1 && key !== "loggingLevel") {
+                    if (curEnum && curEnum.indexOf(val) === -1
+                        && (key !== "loggingLevel" || util.getNumericLoggingLevel(val) === -1)) {
                         return "<invalid>";
                     }
                     return val;

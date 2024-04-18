@@ -1581,7 +1581,7 @@ export function getNumericLoggingLevel(loggingLevel: string | undefined): number
         case "none":
             return 0;
         default:
-            return 1;
+            return -1;
     }
 }
 
