@@ -3585,5 +3585,17 @@
     "std::meta::substitute çağrısı (%r için) başarısız oldu",
     "yansıma değeri etkin olmayan varlığa başvurur",
     "ifade eşleme ile bir sabit değer, bir değişken veya bir işlev eşlenmelidir",
-    "üye erişimi eşleme ile bir veri üyesi veya bir üye işlevi eşlenmelidir"
+    "üye erişimi eşleme ile bir veri üyesi veya bir üye işlevi eşlenmelidir",
+    "%nd adlı üye, dolaylı bir %t üyesi değil",
+    "%sq adı bilinen bir Unicode karakterine işaret etmiyor",
+    "sonlandırılmamış adlandırılmış Unicode karakter kaçışı",
+    "Unicode adlarda bu karakter görünemez",
+    "boş adlandırılmış Unicode karakter kaçışı",
+    "'[:' bekleniyordu",
+    "':]' bekleniyordu",
+    "lambda ifadeleri hem 'mutable' hem de 'static' olamaz",
+    "'static' lambda ifadeleri standart değildir",
+    "'static' lambda ifadelerinin yakalama belirtimi boş olmalıdır",
+    "EDG IFC üst bilgi birimi",
+    "EDG IFC"
 ]

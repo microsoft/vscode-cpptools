@@ -3585,5 +3585,17 @@
     "échec de l’appel à std::meta::substitute (pour %r)",
     "la valeur de réflexion fait référence à l’entité inactive",
     "une splice d’expression doit spliquer une valeur constante, une variable ou une fonction",
-    "une épissure d'accès aux membres doit épisser une donnée membre ou une fonction membre"
+    "une épissure d'accès aux membres doit épisser une donnée membre ou une fonction membre",
+    "membre %nd n’est pas un membre direct ou indirect de %t",
+    "le nom %sq ne désigne pas un caractère Unicode connu",
+    "échappement de caractère Unicode nommé inachevé",
+    "le caractère ne peut pas apparaître dans un nom Unicode",
+    "échappement de caractère Unicode nommé vide",
+    "s’attendait à un « [ :] ».",
+    "s’attendait à un « :] ».",
+    "une expression lambda ne peut pas être à la fois « mutable » et « static »",
+    "une expression lambda « static » n’est pas standard",
+    "une expression lambda « static » doit avoir une spécification de capture vide",
+    "Unité d’en-tête IFC EDG",
+    "EDG IFC"
 ]
