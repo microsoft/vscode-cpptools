@@ -2997,7 +2997,7 @@
     "<error de emisión de diagnóstico>",
     "Hay demasiados errores como para que el motor de IntelliSense funcione correctamente. Puede que algunos no se vean en el editor.",
     "la asignación al anacronismo \"this\" no es compatible con el modo C++11",
-    "error desconocido. No se generó un archivo IntelliSense PCH.",
+    "error desconocido. No se generó un archivo Intellisense PCH.",
     "No se pueden asignar una o varias rutas remotas a las rutas locales actuales. La experiencia con IntelliSense puede degradarse.",
     null,
     null,
@@ -3585,5 +3585,17 @@
     "error en la llamada a std::meta::substitute (para %r)",
     "el valor de reflexión hace referencia a una entidad inactiva",
     "una expresión splice debe empalmar un valor constante, una variable o una función",
-    "un splice de acceso a miembros debe empalmar un miembro de datos o una función miembro"
+    "un splice de acceso a miembros debe empalmar un miembro de datos o una función miembro",
+    "el miembro %nd no es un miembro directo o indirecto de %t",
+    "el nombre %sq no designa un carácter Unicode conocido",
+    "escape de caracteres Unicode con nombre sin terminar",
+    "el carácter no puede aparecer en un nombre Unicode",
+    "escape de caracteres Unicode con nombre vacío",
+    "esperaba un \"[:\"",
+    "se esperaba un \":]\"",
+    "una expresión lambda no puede ser a la vez \"mutable\" y \"estática\"",
+    "una expresión lambda \"estática\" no es estándar",
+    "una expresión lambda \"estática\" debe tener una especificación de captura vacía",
+    "Unidad de encabezado EDG IFC",
+    "EDG IFC"
 ]
