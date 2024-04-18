@@ -2056,7 +2056,6 @@ export class CppProperties {
                 }
             }
 
-
             if (configMatches && !globPath) {
                 let curOffset: number = 0;
                 let endOffset: number = 0;
