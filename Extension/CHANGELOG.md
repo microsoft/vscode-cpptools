@@ -1,5 +1,11 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.20.2: April 17, 2024
+### Bug Fixes
+* Fix duplicate URIs in calls to provideConfigurations. [#12177](https://github.com/microsoft/vscode-cpptools/issues/12177)
+* Fix a crash and deadlock with a high `C_Cpp.loggingLevel`. [#12194](https://github.com/microsoft/vscode-cpptools/issues/12194)
+* Fix handling of `-iquote` for code analysis and `#include` completions. [#12198](https://github.com/microsoft/vscode-cpptools/issues/12198)
+
 ## Version 1.20.1: April 9, 2024
 ### Bug Fixes
 * Fix 'Add #include' code actions for code scoped by a namespace or class. [#11541](https://github.com/microsoft/vscode-cpptools/issues/11541)
@@ -12,10 +18,11 @@
 * Add support for `${userHome}` in `c_cpp_properties.json`. [#11756](https://github.com/microsoft/vscode-cpptools/issues/11756)
 * Reduce the default max workspace symbol search results and add `C_Cpp.maxSymbolSearchResults`. [PR #12131](https://github.com/microsoft/vscode-cpptools/pull/12131)
 * Update `clang-format`/`clang-tidy` to 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
-* Update IntelliSense engine.
+* Increase the fuzzy symbol character limit from 16 to 28.
+* Update the IntelliSense engine.
 
 ### Bug Fixes
-* Fix IntelliSense parsing issues. [#6183](https://github.com/microsoft/vscode-cpptools/issues/6183)
+* Fix an IntelliSense parsing issue. [#6183](https://github.com/microsoft/vscode-cpptools/issues/6183)
 * Fix 'Copy Declaration / Definition' code not being formatted. [#10956](https://github.com/microsoft/vscode-cpptools/issues/10956)
 * Fix 'Create Declaration / Definition' not working if the cursor isn't on the function name. [#11834](https://github.com/microsoft/vscode-cpptools/issues/11834)
 * Fix duplicate 'Add #include' code actions. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
