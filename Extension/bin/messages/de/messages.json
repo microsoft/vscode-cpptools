@@ -3597,5 +3597,8 @@
     "Ein Lambdaausdruck \"static\" entspricht nicht dem Standard.",
     "Ein Lambdaausdruck \"static\" muss eine leere Erfassungsspezifikation aufweisen.",
     "EDG IFC-Headereinheit",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]

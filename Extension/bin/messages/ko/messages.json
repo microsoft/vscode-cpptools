@@ -3597,5 +3597,8 @@
     "'static' 람다 식은 표준이 아닙니다.",
     "'static' 람다 식에는 빈 캡처 사양이 있어야 합니다.",
     "EDG IFC 헤더 단위",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]
