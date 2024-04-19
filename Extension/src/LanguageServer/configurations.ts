@@ -2070,8 +2070,8 @@ export class CppProperties {
                                 && !path.isAbsolute(expandedPaths[0])) {
                             continue; // Skip the error, because it could be resolved recursively.
                         }
-                        // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
                         if (incorrectExpandedPaths.length > 0 && configMatches[0].includes("env:")) {
+                            // If there are incorrect paths and the first match includes "env:", split the string and check for environment variable.
                             const splitString = configMatches[0].split("env:");
                             if (splitString[1]) {
                                 const matchResult = splitString[1].match(/\w+/);
@@ -2080,8 +2080,8 @@ export class CppProperties {
                                     message = localize('cannot.find3', "Cannot find {0} in environment variable: {1}.", incorrectExpandedPaths.map(s => `"${s}"`).join(', '), envVar);
                                 }
                             }
-                        // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
                         } else {
+                            // If there are incorrect paths but no "env:" in the first match, generate a message indicating the paths cannot be found.
                             let badPath = "";
                             if (incorrectExpandedPaths.length > 0) {
                                 badPath = incorrectExpandedPaths.map(s => `"${s}"`).join(', ');
