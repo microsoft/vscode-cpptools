@@ -2001,8 +2001,8 @@ export class DefaultClient implements Client {
         }
         try {
             DefaultClient.isStarted.reset();
-            const status = await this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, provider);
-            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, status });
+            const resultCode = await this.provideCustomConfigurationAsync(docUri, requestFile, replaceExisting, provider);
+            telemetry.logLanguageServerEvent('provideCustomConfiguration', { providerId, status: resultCode });
         } finally {
             onFinished();
             DefaultClient.isStarted.resolve();
