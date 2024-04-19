@@ -3597,5 +3597,8 @@
     "'static' lambda ifadeleri standart değildir",
     "'static' lambda ifadelerinin yakalama belirtimi boş olmalıdır",
     "EDG IFC üst bilgi birimi",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]

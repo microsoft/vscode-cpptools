@@ -3597,5 +3597,8 @@
     "espressione lambda 'static' non conforme allo standard",
     "un'espressione lambda 'static' deve avere una specifica di acquisizione vuota",
     "Unità di intestazione IFC EDG",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]

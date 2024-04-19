@@ -3597,5 +3597,8 @@
     "'static' Lambda 運算式是非標準",
     "'static' Lambda 運算式必須有空白的擷取規格",
     "EDG IFC 標頭單位",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]
