@@ -1838,9 +1838,9 @@ export class CppProperties {
             curText = curText.substring(0, nextNameStart2);
         }
         if (this.prevSquiggleMetrics.get(currentConfiguration.name) === undefined) {
-            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0 });
+            this.prevSquiggleMetrics.set(currentConfiguration.name, { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0 });
         }
-        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed:0 };
+        const newSquiggleMetrics: { [key: string]: number } = { PathNonExistent: 0, PathNotAFile: 0, PathNotADirectory: 0, CompilerPathMissingQuotes: 0, CompilerModeMismatch: 0, MultiplePathsNotAllowed: 0 };
         const isWindows: boolean = os.platform() === 'win32';
 
         // TODO: Add other squiggles.
@@ -2077,7 +2077,6 @@ export class CppProperties {
                             badPath = `"${expandedPaths[0]}"`;
                         }
                         message = localize('cannot.find2', "Cannot find {0}", badPath);
-                        // Increment the count of non-existent paths.
                         newSquiggleMetrics.PathNonExistent++;
                     } else {
                         // Check for file versus path mismatches.
@@ -2170,6 +2169,9 @@ export class CppProperties {
         }
         if (newSquiggleMetrics.CompilerModeMismatch !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.CompilerModeMismatch) {
             changedSquiggleMetrics.CompilerModeMismatch = newSquiggleMetrics.CompilerModeMismatch;
+        }
+        if (newSquiggleMetrics.MultiplePathsNotAllowed !== this.prevSquiggleMetrics.get(currentConfiguration.name)?.MultiplePathsNotAllowed) {
+            changedSquiggleMetrics.MultiplePathsNotAllowed = newSquiggleMetrics.MultiplePathsNotAllowed;
         }
         if (Object.keys(changedSquiggleMetrics).length > 0) {
             telemetry.logLanguageServerEvent("ConfigSquiggles", undefined, changedSquiggleMetrics);
