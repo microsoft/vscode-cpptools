@@ -3585,5 +3585,17 @@
     "Fehler beim Aufruf von std::meta::substitute (für %r).",
     "Reflexionswert bezieht sich auf inaktive Entität",
     "Eine Ausdrucks-Splice muss einen konstanten Wert, eine Variable oder eine Funktion aufteilen.",
-    "Eine Memberzugriffs-Splice muss einen Datenmember oder eine Memberfunktion unterstützen."
+    "Eine Memberzugriffs-Splice muss einen Datenmember oder eine Memberfunktion unterstützen.",
+    "Der Member \"%nd\" ist kein direkter oder indirekter Member von \"%t\".",
+    "Der Name \"%sq\" bezeichnet kein bekanntes Unicode-Zeichen.",
+    "Nicht abgeschlossenes benanntes Unicode-Escapezeichen",
+    "Zeichen darf nicht in einem UnicodeNamen verwendet werden.",
+    "Leeres benanntes Unicode-Escapezeichen",
+    "Erwartet wurde \"[:\"",
+    "Erwartet wurde \":]\"",
+    "Ein Lambdaausdruck darf nicht gleichzeitig \"mutable\" und \"static\" sein.",
+    "Ein Lambdaausdruck \"static\" entspricht nicht dem Standard.",
+    "Ein Lambdaausdruck \"static\" muss eine leere Erfassungsspezifikation aufweisen.",
+    "EDG IFC-Headereinheit",
+    "EDG IFC"
 ]

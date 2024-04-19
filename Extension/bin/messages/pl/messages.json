@@ -3585,5 +3585,17 @@
     "wywołanie metody std::meta::substitute (dla %r) nie powiodło się",
     "wartość odbicia odnosi się do jednostki nieaktywnej",
     "splice wyrażenia musi łączyć stałą wartość, zmienną lub funkcję",
-    "platforma dostępu do składowej musi łączyć składową danych lub funkcję składową"
+    "platforma dostępu do składowej musi łączyć składową danych lub funkcję składową",
+    "składowa %nd nie jest bezpośrednią ani pośrednią składową elementu %t",
+    "nazwa %sq nie wyznacza znanego znaku Unicode",
+    "niezakończony znak ucieczki o nazwie Unicode",
+    "znak nie może występować w nazwie Unicode",
+    "pusty znak ucieczki o nazwie Unicode",
+    "oczekiwano znaku „[:”",
+    "oczekiwano znaku „:]”",
+    "wyrażenie lambda nie może mieć jednocześnie wartości „zmienne” i „statyczne”",
+    "wyrażenie lambda „statyczne” jest niestandardowe",
+    "wyrażenie lambda „statyczne” musi mieć pustą specyfikację przechwytywania",
+    "Jednostka nagłówka EDG IFC",
+    "EDG IFC"
 ]
