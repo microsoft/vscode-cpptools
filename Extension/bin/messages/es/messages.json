@@ -3597,5 +3597,8 @@
     "una expresión lambda \"estática\" no es estándar",
     "una expresión lambda \"estática\" debe tener una especificación de captura vacía",
     "Unidad de encabezado EDG IFC",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]

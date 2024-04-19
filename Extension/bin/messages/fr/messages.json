@@ -3597,5 +3597,8 @@
     "une expression lambda « static » n’est pas standard",
     "une expression lambda « static » doit avoir une spécification de capture vide",
     "Unité d’en-tête IFC EDG",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]
