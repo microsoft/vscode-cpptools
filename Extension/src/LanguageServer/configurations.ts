@@ -2007,35 +2007,34 @@ export class CppProperties {
             const pattern: RegExp = new RegExp(`"[^"]*?(?<="|;)${escapedPath}(?="|;).*?"`, "g");
             const configMatches: string[] | null = curText.match(pattern);
 
-            const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, false);
+            const expandedPaths: string[] = this.resolveAndSplit([curPath], undefined, this.ExtendedEnvironment, true, true);
             const incorrectExpandedPaths: string[] = [];
 
-            if (expandedPaths.length > 0) {
-                if (this.rootUri) {
-                    for (const [index, expandedPath] of expandedPaths.entries()) {
+            if (expandedPaths.length < 0) {
+                continue;
+            }
 
-                        if (expandedPath.includes("${workspaceFolder}")) {
-                            expandedPaths[index] = this.resolvePath(expandedPath, false);
-                        } else {
-                            expandedPaths[index] = this.resolvePath(expandedPath);
-                        }
+            if (this.rootUri) {
+                for (const [index, expandedPath] of expandedPaths.entries()) {
+                    if (expandedPath.includes("${workspaceFolder}")) {
+                        expandedPaths[index] = this.resolvePath(expandedPath, false);
+                    } else {
+                        expandedPaths[index] = this.resolvePath(expandedPath);
+                    }
 
-                        const checkPathExists: any = util.checkPathExistsSync(expandedPaths[index], this.rootUri.fsPath + path.sep, isWindows, false);
-                        if (!checkPathExists.pathExists) {
-                            // If there are multiple paths, store any non-existing paths to squiggle later on.
-                            incorrectExpandedPaths.push(expandedPaths[index]);
-                        }
+                    const checkPathExists: any = util.checkPathExistsSync(expandedPaths[index], this.rootUri.fsPath + path.sep, isWindows, false);
+                    if (!checkPathExists.pathExists) {
+                        // If there are multiple paths, store any non-existing paths to squiggle later on.
+                        incorrectExpandedPaths.push(expandedPaths[index]);
                     }
                 }
-            } else {
-                continue;
             }
 
             const pathExists: boolean = incorrectExpandedPaths.length === 0;
 
             for (const [index, expandedPath] of expandedPaths.entries()) {
                 // Normalize path separators.
-                if (path.sep === "/" && expandedPaths.length > 0) {
+                if (path.sep === "/") {
                     expandedPaths[index] = expandedPath.replace(/\\/g, path.sep);
                 } else {
                     expandedPaths[index] = expandedPath.replace(/\//g, path.sep);
