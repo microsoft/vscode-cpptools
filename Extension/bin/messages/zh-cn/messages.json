@@ -3597,5 +3597,8 @@
     "\"static\" Lambda 表达式是非标准的",
     "\"static\" Lambda 表达式必须具有空的捕获规范",
     "EDG IFC 标头单元",
-    "EDG IFC"
+    "EDG IFC",
+    "a header unit could not be created for the current translation unit",
+    "the current translation unit uses one or more features that cannot currently be written to a header unit",
+    "'explicit(bool)' is a C++20 feature"
 ]
