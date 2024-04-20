@@ -36,7 +36,8 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
-let prevCrashFile: string;
+let prevMacCrashFile: string;
+let prevCppCrashFile: string;
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
@@ -914,7 +915,7 @@ function onShowRefCommand(arg?: TreeNode): void {
 
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
-        prevCrashFile = "";
+        prevMacCrashFile = "";
         const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err) => {
@@ -932,10 +933,10 @@ function reportMacCrashes(): void {
                     if (event !== "rename") {
                         return;
                     }
-                    if (!filename || filename === prevCrashFile) {
+                    if (!filename || filename === prevMacCrashFile) {
                         return;
                     }
-                    prevCrashFile = filename;
+                    prevMacCrashFile = filename;
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
@@ -964,7 +965,7 @@ export function usesCrashHandler(): boolean {
 
 export function watchForCrashes(crashDirectory: string): void {
     if (crashDirectory !== "") {
-        prevCrashFile = "";
+        prevCppCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
@@ -980,10 +981,10 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (event !== "rename") {
                         return;
                     }
-                    if (!filename || filename === prevCrashFile) {
+                    if (!filename || filename === prevCppCrashFile) {
                         return;
                     }
-                    prevCrashFile = filename;
+                    prevCppCrashFile = filename;
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
@@ -1125,7 +1126,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
 
     const lines: string[] = data.split("\n");
     let addressData: string = ".\n.";
-    data = crashFile + "\n";
+    data = (crashFile.startsWith("cpptools-srv") ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
@@ -1202,7 +1203,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     logCppCrashTelemetry(data, addressData);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
-    void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
+    if (crashFile === "cpptools.txt") {
+        void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
+    }
 }
 
 export function deactivate(): Thenable<void> {
