@@ -17,6 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { Logger, getOutputChannelLogger } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
@@ -38,6 +39,7 @@ export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
 let prevCppCrashFile: string;
+let prevCppCrashData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
@@ -1126,7 +1128,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
 
     const lines: string[] = data.split("\n");
     let addressData: string = ".\n.";
-    data = (crashFile.startsWith("cpptools-srv") ? "cpptools-srv.txt" : crashFile) + "\n";
+    const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
+    data = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
@@ -1135,10 +1138,8 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     const dotStr: string = "…";
     data += lines[0]; // signal type
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        if (lineNum > 1) {
-            data += "\n";
-            addressData += "\n";
-        }
+        data += "\n";
+        addressData += "\n";
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
@@ -1199,8 +1200,21 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         data = data.substring(0, 8191) + "…";
     }
 
-    console.log(`Crash call stack:\n${data}`);
-    logCppCrashTelemetry(data, addressData);
+    if (data !== prevCppCrashData) {
+        prevCppCrashData = data;
+        logCppCrashTelemetry(data, addressData);
+
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        if (util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
+            console.log(`Crash call stack:\n${data}`);
+            if (lines.length >= 6) {
+                const out: Logger = getOutputChannelLogger();
+                out.appendLine(localize({ key: "crash.callstack.available", comment: [ "{0} is the process name: either cpptools or cpptools-srv"]},
+                    "A {0} crash call stack for use in bug reporting is available in the 'Console' tab after using the 'Toggle Developer Tools' command.",
+                    isCppToolsSrv ? "cpptools-srv" : "cpptools"));
+            }
+        }
+    }
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     if (crashFile === "cpptools.txt") {
