@@ -1200,9 +1200,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         data = data.substring(0, 8191) + "…";
     }
 
+    logCppCrashTelemetry(data, addressData);
+
     if (data !== prevCppCrashData) {
         prevCppCrashData = data;
-        logCppCrashTelemetry(data, addressData);
 
         const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
         if (util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
