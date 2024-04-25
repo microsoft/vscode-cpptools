@@ -1138,7 +1138,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "…";
-    const signalType: string = lines[0]; // signal type
+    const signalType: string = lines[0];
     let crashCallStack: string = "";
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
         crashCallStack += "\n";
