@@ -17,6 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
@@ -38,6 +39,7 @@ export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
 let prevCppCrashFile: string;
+let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
@@ -988,10 +990,12 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
+                    const crashDate: Date = new Date();
+
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
-                            void handleCrashFileRead(crashDirectory, filename, err, data);
+                            void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
                 });
@@ -1116,7 +1120,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
-async function handleCrashFileRead(crashDirectory: string, crashFile: string, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
             return; // ignore known issue
@@ -1126,23 +1130,23 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
 
     const lines: string[] = data.split("\n");
     let addressData: string = ".\n.";
-    data = (crashFile.startsWith("cpptools-srv") ? "cpptools-srv.txt" : crashFile) + "\n";
+    const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
+    const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "…";
-    data += lines[0]; // signal type
+    const signalType: string = lines[0];
+    let crashCallStack: string = "";
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        if (lineNum > 1) {
-            data += "\n";
-            addressData += "\n";
-        }
+        crashCallStack += "\n";
+        addressData += "\n";
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
-            data += dotStr;
+            crashCallStack += dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
@@ -1154,7 +1158,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         }
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
-            data += "Missing offsetStr";
+            crashCallStack += "Missing offsetStr";
             continue; // unexpected
         }
         const startPos2: number = startPos + 1;
@@ -1174,32 +1178,43 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
-        data += funcStr + offsetStr;
+        crashCallStack += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
-            data += line.substring(offsetPos2);
+            crashCallStack += line.substring(offsetPos2);
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
                 // unexpected
-                data += "<Missing 0x>";
+                crashCallStack += "<Missing 0x>";
                 continue;
             }
             addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
             const endPos: number = line.indexOf(">", offsetPos2);
             if (endPos === -1) {
-                data += "<Missing > >";
+                crashCallStack += "<Missing > >";
                 continue; // unexpected
             }
-            data += line.substring(offsetPos2, endPos);
+            crashCallStack += line.substring(offsetPos2, endPos);
         }
     }
+
+    if (crashCallStack !== prevCppCrashCallStackData) {
+        prevCppCrashCallStackData = crashCallStack;
+
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
+            const out: vscode.OutputChannel = getCrashCallStacksChannel();
+            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
+        }
+    }
+
+    data = telemetryHeader + signalType + crashCallStack;
 
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substring(0, 8191) + "…";
     }
 
-    console.log(`Crash call stack:\n${data}`);
     logCppCrashTelemetry(data, addressData);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
