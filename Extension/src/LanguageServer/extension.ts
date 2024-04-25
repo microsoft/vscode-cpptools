@@ -17,7 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
-import { Logger, getOutputChannelLogger } from '../logger';
+import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
@@ -39,7 +39,7 @@ export const configPrefix: string = "C/C++: ";
 
 let prevMacCrashFile: string;
 let prevCppCrashFile: string;
-let prevCppCrashData: string = "";
+let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
@@ -990,10 +990,12 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
+                    const crashDate: Date = new Date();
+
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
-                            void handleCrashFileRead(crashDirectory, filename, err, data);
+                            void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
                 });
@@ -1118,7 +1120,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
-async function handleCrashFileRead(crashDirectory: string, crashFile: string, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
             return; // ignore known issue
@@ -1129,21 +1131,22 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
     const lines: string[] = data.split("\n");
     let addressData: string = ".\n.";
     const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
-    data = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
+    const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "…";
-    data += lines[0]; // signal type
+    const signalType: string = lines[0]; // signal type
+    let crashCallStack: string = "";
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        data += "\n";
+        crashCallStack += "\n";
         addressData += "\n";
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
-            data += dotStr;
+            crashCallStack += dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
@@ -1155,7 +1158,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         }
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
-            data += "Missing offsetStr";
+            crashCallStack += "Missing offsetStr";
             continue; // unexpected
         }
         const startPos2: number = startPos + 1;
@@ -1175,47 +1178,49 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
-        data += funcStr + offsetStr;
+        crashCallStack += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
-            data += line.substring(offsetPos2);
+            crashCallStack += line.substring(offsetPos2);
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
                 // unexpected
-                data += "<Missing 0x>";
+                crashCallStack += "<Missing 0x>";
                 continue;
             }
             addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
             const endPos: number = line.indexOf(">", offsetPos2);
             if (endPos === -1) {
-                data += "<Missing > >";
+                crashCallStack += "<Missing > >";
                 continue; // unexpected
             }
-            data += line.substring(offsetPos2, endPos);
+            crashCallStack += line.substring(offsetPos2, endPos);
         }
     }
+
+    if (crashCallStack !== prevCppCrashCallStackData) {
+        prevCppCrashCallStackData = crashCallStack;
+
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
+            const out: vscode.OutputChannel = getCrashCallStacksChannel();
+            out.appendLine("");
+            out.append(localize({ key: "crash.callstack.info", comment: [
+                "{0} is the process name: either cpptools or cpptools-srv. {1} is the crash date and time, e.g. 4/24/2024, 4:44:52 PM. {2} is a signal name, e.g. SIGSEGV. The call stack lines appear on a new line after the ':'" ]},
+            "The {0} process crashed on {1} from signal {2} with call stack:",
+            isCppToolsSrv ? "cpptools-srv" : "cpptools", crashDate.toLocaleString(), signalType));
+            out.appendLine(crashCallStack);
+        }
+    }
+
+    data = telemetryHeader + signalType + crashCallStack;
 
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substring(0, 8191) + "…";
     }
 
     logCppCrashTelemetry(data, addressData);
-
-    if (data !== prevCppCrashData) {
-        prevCppCrashData = data;
-
-        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
-        if (util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
-            console.log(`Crash call stack:\n${data}`);
-            if (lines.length >= 6) {
-                const out: Logger = getOutputChannelLogger();
-                out.appendLine(localize({ key: "crash.callstack.available", comment: [ "{0} is the process name: either cpptools or cpptools-srv"]},
-                    "A {0} crash call stack for use in bug reporting is available in the 'Console' tab after using the 'Toggle Developer Tools' command.",
-                    isCppToolsSrv ? "cpptools-srv" : "cpptools"));
-            }
-        }
-    }
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
     if (crashFile === "cpptools.txt") {

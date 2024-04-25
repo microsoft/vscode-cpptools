@@ -74,6 +74,7 @@ export class Logger {
 
 export let outputChannel: vscode.OutputChannel | undefined;
 export let diagnosticsChannel: vscode.OutputChannel | undefined;
+export let crashCallStacksChannel: vscode.OutputChannel | undefined;
 export let debugChannel: vscode.OutputChannel | undefined;
 export let warningChannel: vscode.OutputChannel | undefined;
 export let sshChannel: vscode.OutputChannel | undefined;
@@ -96,6 +97,15 @@ export function getDiagnosticsChannel(): vscode.OutputChannel {
         diagnosticsChannel = vscode.window.createOutputChannel(localize("c.cpp.diagnostics", "C/C++ Diagnostics"));
     }
     return diagnosticsChannel;
+}
+
+export function getCrashCallStacksChannel(): vscode.OutputChannel {
+    if (!crashCallStacksChannel) {
+        crashCallStacksChannel = vscode.window.createOutputChannel(localize("c.cpp.crash.call.stacks.title", "C/C++ Crash Call Stacks"));
+        crashCallStacksChannel.appendLine(localize("c.cpp.crash.call.stacks.description",
+            "The information below could be helpful to provide in a C/C++ extension bug report:"));
+    }
+    return crashCallStacksChannel;
 }
 
 export function getSshChannel(): vscode.OutputChannel {
