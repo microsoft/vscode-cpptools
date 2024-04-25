@@ -102,8 +102,9 @@ export function getDiagnosticsChannel(): vscode.OutputChannel {
 export function getCrashCallStacksChannel(): vscode.OutputChannel {
     if (!crashCallStacksChannel) {
         crashCallStacksChannel = vscode.window.createOutputChannel(localize("c.cpp.crash.call.stacks.title", "C/C++ Crash Call Stacks"));
-        crashCallStacksChannel.appendLine(localize("c.cpp.crash.call.stacks.description",
-            "The information below could be helpful to provide in a C/C++ extension bug report:"));
+        crashCallStacksChannel.appendLine(localize({ key: "c.cpp.crash.call.stacks.description", comment: [ "{0} is a URL."]},
+            "A C/C++ extension process has crashed. The crashing process name, date/time, signal, and call stack are below -- it would be helpful to include that in a C/C++ extension bug report at {0}.",
+            "https://github.com/Microsoft/vscode-cpptools/issues"));
     }
     return crashCallStacksChannel;
 }

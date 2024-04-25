@@ -1206,11 +1206,7 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
             const out: vscode.OutputChannel = getCrashCallStacksChannel();
             out.appendLine("");
-            out.append(localize({ key: "crash.callstack.info", comment: [
-                "{0} is the process name: either cpptools or cpptools-srv. {1} is the crash date and time, e.g. 4/24/2024, 4:44:52 PM. {2} is a signal name, e.g. SIGSEGV. The call stack lines appear on a new line after the ':'" ]},
-            "The {0} process crashed on {1} from signal {2} with call stack:",
-            isCppToolsSrv ? "cpptools-srv" : "cpptools", crashDate.toLocaleString(), signalType));
-            out.appendLine(crashCallStack);
+            out.appendLine(`${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
         }
     }
 
