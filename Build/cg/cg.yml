@@ -46,8 +46,8 @@ extends:
         iterationPath: $(TsaIterationPath)
         alltools: true
         repositoryName: vscode-cpptools
-    policheck:
-      enabled: true
+      policheck:
+        enabled: true
     featureFlags:
       autoBaseline: false
 
