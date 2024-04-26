@@ -19,6 +19,12 @@ resources:
     name: 1ESPipelineTemplates/MicroBuildTemplate
     ref: refs/tags/release
 
+variables:
+- name: Codeql.Enabled
+  value: true
+- name: Codeql.Language
+  value: javascript
+
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
@@ -33,19 +39,20 @@ extends:
         os: windows
       tsa:
         enabled: true
-        tsaVersion: TsaV2
-        codebase: NewOrUpdate
-        codebaseName: vscode-cpptools
-        tsaStamp: $(TsaProjectName)
-        tsaEnvironment: PROD
-        notificationAlias: $(TsaNotificationAlias)
-        codebaseAdmins: $(TsaCodebaseAdmins)
-        instanceUrl: $(TsaInstanceUrl)
-        projectName: $(TsaProjectName)
-        areaPath: $(TsaAreaPath)
-        iterationPath: $(TsaIterationPath)
-        alltools: true
-        repositoryName: vscode-cpptools
+        config:
+          tsaVersion: TsaV2
+          codebase: NewOrUpdate
+          codebaseName: vscode-cpptools
+          tsaStamp: $(TsaProjectName)
+          tsaEnvironment: PROD
+          notificationAlias: $(TsaNotificationAlias)
+          codebaseAdmins: $(TsaCodebaseAdmins)
+          instanceUrl: $(TsaInstanceUrl)
+          projectName: $(TsaProjectName)
+          areaPath: $(TsaAreaPath)
+          iterationPath: $(TsaIterationPath)
+          alltools: true
+          repositoryName: vscode-cpptools
       policheck:
         enabled: true
     featureFlags:
