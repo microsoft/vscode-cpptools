@@ -45,7 +45,7 @@ extends:
           codebaseName: vscode-cpptools
           tsaStamp: $(TsaProjectName)
           tsaEnvironment: PROD
-          notificationAlias: $(TsaNotificationAlias)
+          notificationAliases: $(TsaNotificationAlias)
           codebaseAdmins: $(TsaCodebaseAdmins)
           instanceUrl: $(TsaInstanceUrl)
           projectName: $(TsaProjectName)
