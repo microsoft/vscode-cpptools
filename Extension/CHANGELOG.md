@@ -16,6 +16,7 @@
 * Fix 'Add #include' code actions for code scoped by a namespace or class. [#11541](https://github.com/microsoft/vscode-cpptools/issues/11541)
 * Fix 'Create Declaration / Definition' not working if the cursor isn't on the function name. [#11834](https://github.com/microsoft/vscode-cpptools/issues/11834)
 * Fix duplicate 'Add #include' code actions. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
+* Fix directories being incorrectly recursively traversed in certain cases. [#11993](https://github.com/microsoft/vscode-cpptools/issues/11993)
 * Fix `forcedInclude` resolution for relative paths. [PR #12035](https://github.com/microsoft/vscode-cpptools/pull/12035)
 * Fix 'Add Configuration...' in `launch.json` when `editor.suggest.showSnippets` is `false`. [#12059](https://github.com/microsoft/vscode-cpptools/issues/12059)
 * Fix `c_cpp_properties.json` warnings for `includePath`s with `**` wildcard glob patterns. [#12070](https://github.com/microsoft/vscode-cpptools/issues/12070)
@@ -29,6 +30,8 @@
 * Fix duplicate URIs in calls to provideConfigurations. [#12177](https://github.com/microsoft/vscode-cpptools/issues/12177)
 * Fix a crash and deadlock with a high `C_Cpp.loggingLevel`. [#12194](https://github.com/microsoft/vscode-cpptools/issues/12194)
 * Fix handling of `-iquote` for code analysis and `#include` completions. [#12198](https://github.com/microsoft/vscode-cpptools/issues/12198)
+* Fix a crash during startup. [#12237](https://github.com/microsoft/vscode-cpptools/issues/12237)
+* Fix IntelliSense configuration on Windows ARM64. [#12253](https://github.com/microsoft/vscode-cpptools/issues/12253)
 * Fix a `cpptools` process crash and deadlock during shutdown.
 
 ## Version 1.19.9: March 20, 2024
