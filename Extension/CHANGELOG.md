@@ -1,5 +1,14 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.20.3: April 30, 2024
+### Enhancement
+* Log `cpptools` and `cpptool-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
+
+### Bug Fixes
+* Fix directories being incorrectly recursively traversed in certain cases. [#11993](https://github.com/microsoft/vscode-cpptools/issues/11993)
+* Fix a crash during startup. [#12237](https://github.com/microsoft/vscode-cpptools/issues/12237)
+* Fix IntelliSense configuration on Windows ARM64. [#12253](https://github.com/microsoft/vscode-cpptools/issues/12253)
+
 ## Version 1.20.2: April 22, 2024
 ### Bug Fixes
 * Fix non-existent relative path variables not showing a warning in `c_cpp_properties.json` (and other related issues). [#12089](https://github.com/microsoft/vscode-cpptools/issues/12089)
@@ -25,6 +34,7 @@
 ### Bug Fixes
 * Fix an IntelliSense parsing issue. [#6183](https://github.com/microsoft/vscode-cpptools/issues/6183)
 * Fix 'Copy Declaration / Definition' code not being formatted. [#10956](https://github.com/microsoft/vscode-cpptools/issues/10956)
+* Fix semantic colorization of certain macro arguments. [#11416](https://github.com/microsoft/vscode-cpptools/issues/11416)
 * Fix 'Create Declaration / Definition' not working if the cursor isn't on the function name. [#11834](https://github.com/microsoft/vscode-cpptools/issues/11834)
 * Fix duplicate 'Add #include' code actions. [#11989](https://github.com/microsoft/vscode-cpptools/issues/11989)
 * Fix `forcedInclude` resolution for relative paths. [PR #12035](https://github.com/microsoft/vscode-cpptools/pull/12035)
