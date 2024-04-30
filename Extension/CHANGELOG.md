@@ -6,7 +6,7 @@
 * Add support for `${userHome}` in `c_cpp_properties.json`. [#11756](https://github.com/microsoft/vscode-cpptools/issues/11756)
 * Reduce the default max workspace symbol search results and add `C_Cpp.maxSymbolSearchResults`. [PR #12131](https://github.com/microsoft/vscode-cpptools/pull/12131)
 * Update `clang-format`/`clang-tidy` to 18.1.2. [PR #12135](https://github.com/microsoft/vscode-cpptools/pull/12135)
-* Log `cpptools` and `cpptool-srv` crash call stacks for bug reporting (on x64 Linux and x64/arm64 Mac).
+* Log `cpptools` and `cpptool-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
 * Increase the fuzzy symbol character limit from 16 to 28.
 * Update the IntelliSense engine.
 
