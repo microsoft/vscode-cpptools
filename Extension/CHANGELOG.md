@@ -2,7 +2,7 @@
 
 ## Version 1.20.3: April 30, 2024
 ### Enhancement
-* Log `cpptools` and `cpptool-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
+* Log `cpptools` and `cpptools-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
 
 ### Bug Fixes
 * Fix directories being incorrectly recursively traversed in certain cases. [#11993](https://github.com/microsoft/vscode-cpptools/issues/11993)
