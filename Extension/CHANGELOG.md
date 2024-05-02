@@ -1,6 +1,5 @@
 # C/C++ for Visual Studio Code Changelog
 
-
 ## Version 1.20.6: May 6, 2024
 ### Enhancements
 * Add support for C++ modules IFC version 0.43. [#10843](https://github.com/microsoft/vscode-cpptools/issues/10843)
