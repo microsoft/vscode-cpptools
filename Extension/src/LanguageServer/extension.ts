@@ -962,7 +962,19 @@ function reportMacCrashes(): void {
 }
 
 export function usesCrashHandler(): boolean {
-    return process.platform !== "win32" && (process.platform === "darwin" || os.arch() === "x64");
+    if (os.platform() === "darwin") {
+        if (os.arch() === "arm64") {
+            return true;
+        } else {
+            const releaseParts: string[] = os.release().split(".");
+            if (releaseParts.length >= 1) {
+                // Avoid potentially intereferring with the older macOS crash handler.
+                return parseInt(releaseParts[0]) < 19;
+            }
+            return true;
+        }
+    }
+    return os.platform() !== "win32" && os.arch() === "x64";
 }
 
 export function watchForCrashes(crashDirectory: string): void {
