@@ -1,6 +1,6 @@
 # C/C++ for Visual Studio Code Changelog
 
-## Version 1.20.4: March 2 2024
+## Version 1.20.4: March 2, 2024
 ### Bug Fixes
 * Fix a couple crashes.
 
