@@ -1,5 +1,9 @@
 # C/C++ for Visual Studio Code Changelog
 
+## Version 1.20.4: March 2, 2024
+### Bug Fixes
+* Fix a couple crashes.
+
 ## Version 1.20.3: April 30, 2024
 ### Enhancement
 * Log `cpptools` and `cpptool-srv` crash call stacks in the 'C/C++ Crash Call Stacks' Output channel for bug reporting (on x64 Linux and x64/arm64 Mac).
