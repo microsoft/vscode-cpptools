@@ -969,7 +969,7 @@ export function usesCrashHandler(): boolean {
             const releaseParts: string[] = os.release().split(".");
             if (releaseParts.length >= 1) {
                 // Avoid potentially intereferring with the older macOS crash handler.
-                return parseInt(releaseParts[0]) < 19;
+                return parseInt(releaseParts[0]) >= 19;
             }
             return true;
         }
