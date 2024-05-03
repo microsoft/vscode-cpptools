@@ -10,6 +10,7 @@ import * as nls from 'vscode-nls';
 import { CustomConfigurationProvider1, CustomConfigurationProviderCollection, getCustomConfigProviders } from './LanguageServer/customProviders';
 import * as LanguageServer from './LanguageServer/extension';
 import { CppSettings } from './LanguageServer/settings';
+import { getNumericLoggingLevel } from './common';
 import { getOutputChannel } from './logger';
 import * as test from './testHook';
 
@@ -61,7 +62,7 @@ export class CppTools implements CppToolsTestApi {
             const added: CustomConfigurationProvider1 | undefined = providers.get(provider);
             if (added) {
                 const settings: CppSettings = new CppSettings();
-                if (settings.loggingLevel === "Information" || settings.loggingLevel === "Debug") {
+                if (getNumericLoggingLevel(settings.loggingLevel) >= 5) {
                     getOutputChannel().appendLine(localize("provider.registered", "Custom configuration provider '{0}' registered", added.name));
                 }
                 this.providers.push(added);

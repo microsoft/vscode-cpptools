@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { CppSettings } from '../LanguageServer/settings';
 import { ManualPromise } from '../Utility/Async/manualPromise';
-import { ISshHostInfo, ProcessReturnType, splitLines, stripEscapeSequences } from '../common';
+import { ISshHostInfo, ProcessReturnType, getNumericLoggingLevel, splitLines, stripEscapeSequences } from '../common';
 import { isWindows } from '../constants';
 import { getSshChannel } from '../logger';
 import {
@@ -254,7 +254,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
     const disposables: vscode.Disposable[] = [];
     const { systemInteractor, command, interactors, nickname, token } = args;
     let logIsPaused: boolean = false;
-    const loggingLevel: string | undefined = new CppSettings().loggingLevel;
+    const loggingLevel: number = getNumericLoggingLevel(new CppSettings().loggingLevel);
     const result = new ManualPromise<ProcessReturnType>();
 
     let stdout: string = '';
@@ -344,7 +344,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
     };
 
     const handleTerminalOutput = async (dataWrite: vscode.TerminalDataWriteEvent): Promise<void> => {
-        if (loggingLevel !== 'None') {
+        if (loggingLevel > 0) {
             handleOutputLogging(dataWrite.data);
         }
 
@@ -396,7 +396,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
                             const logOutput: string = interaction.isPassword
                                 ? interaction.response.replace(/./g, '*')
                                 : interaction.response;
-                            if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
+                            if (loggingLevel >= 5) {
                                 getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, logOutput));
                             }
                         }
@@ -460,7 +460,7 @@ export function runInteractiveSshTerminalCommand(args: ITerminalCommandArgs): Pr
             const sendText: string = terminalIsWindows ? `(${args.sendText})\nexit /b %ErrorLevel%` : `${args.sendText}\nexit $?`;
 
             terminal.sendText(sendText);
-            if (loggingLevel === 'Debug' || loggingLevel === 'Information') {
+            if (loggingLevel >= 5) {
                 getSshChannel().appendLine(localize('ssh.wrote.data.to.terminal', '"{0}" wrote data to terminal: "{1}".', nickname, args.sendText));
             }
         }

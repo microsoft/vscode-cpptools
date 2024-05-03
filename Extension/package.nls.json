@@ -66,6 +66,12 @@
             "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
         ]
     },
+    "c_cpp.configuration.maxSymbolSearchResults.markdownDescription": {
+        "message": "The maximum number of results to show for 'Go to Symbol in Workspace'. The default is `5000`.",
+        "comment": [
+            "Markdown text between `` should not be translated or localized (they represent literal text) and the capitalization, spacing, and punctuation (including the ``) should not be altered."
+        ]
+    },
     "c_cpp.configuration.intelliSense.maxCachedProcesses.markdownDescription": {
         "message": "The maximum number of IntelliSense processes to keep running. The default of `null` (empty) uses value inherited from `#C_Cpp.maxCachedProcesses#`.",
         "comment": [
