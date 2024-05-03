@@ -32,7 +32,7 @@
 	"intellisense.mode": "IntelliSense 模式",
 	"intellisense.mode.description": "要使用的 IntelliSense 模式 (對應到 MSVC、gcc 或 Clang 的平台及架構變體)。如果未設定或設為 {0}，延伸模組會選擇該平台的預設。Windows 預設為 {1}、Linux 預設為 {2}、macOS 預設為 {3}。選取特定的 IntelliSense 模式可覆寫 {4} 模式。僅指定 {5} 變體 (例如 {6}) 的 IntelliSense 模式即為舊版模式，會依據主機平台自動轉換為 {7} 變體。",
 	"include.path": "包含路徑",
-	"include.path.description": "include 路徑是包含來源檔案所含之標頭檔 (例如 {0}) 的資料夾。請為 IntelliSense 引擎指定搜尋所含標頭檔時所要使用的路徑清單。這些路徑不會重複搜尋。若要重複搜尋，請指定 {1}。例如 {2} 會搜尋所有子目錄，而 {3} 不會。若在安裝了 Visual Studio 的 Windows 上，或在 {4} 設定中指定了編譯器，就無須在此清單中列出系統的 include 路徑。",
+	"include.path.description": "include 路徑是包含來源檔案所含之標頭檔 (例如 {0}) 的資料夾。請為 Intellisense 引擎指定搜尋所含標頭檔時所要使用的路徑清單。這些路徑不會重複搜尋。若要重複搜尋，請指定 {1}。例如 {2} 會搜尋所有子目錄，而 {3} 不會。若在安裝了 Visual Studio 的 Windows 上，或在 {4} 設定中指定了編譯器，就無須在此清單中列出系統的 include 路徑。",
 	"one.include.path.per.line": "每行一個包含路徑。",
 	"defines": "定義",
 	"defines.description": "剖析檔案時，IntelliSense 引擎要使用的前置處理器定義清單。可使用 {0} 來設定值，例如 {1}。",
