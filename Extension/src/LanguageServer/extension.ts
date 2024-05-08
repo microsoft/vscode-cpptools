@@ -17,6 +17,7 @@ import { TargetPopulation } from 'vscode-tas-client';
 import * as which from 'which';
 import { logAndReturn } from '../Utility/Async/returns';
 import * as util from '../common';
+import { getCrashCallStacksChannel } from '../logger';
 import { PlatformInformation } from '../platform';
 import * as telemetry from '../telemetry';
 import { Client, DefaultClient, DoxygenCodeActionCommandArguments, openFileVersions } from './client';
@@ -36,7 +37,9 @@ const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 export const CppSourceStr: string = "C/C++";
 export const configPrefix: string = "C/C++: ";
 
-let prevCrashFile: string;
+let prevMacCrashFile: string;
+let prevCppCrashFile: string;
+let prevCppCrashCallStackData: string = "";
 export let clients: ClientCollection;
 let activeDocument: vscode.TextDocument | undefined;
 let ui: LanguageStatusUI;
@@ -144,7 +147,6 @@ function sendActivationTelemetry(): void {
  * activate: set up the extension for language services
  */
 export async function activate(): Promise<void> {
-
     sendActivationTelemetry();
     const checkForConflictingExtensions: PersistentState<boolean> = new PersistentState<boolean>("CPP." + util.packageJson.version + ".checkForConflictingExtensions", true);
     if (checkForConflictingExtensions.Value) {
@@ -401,6 +403,7 @@ export function registerCommands(enabled: boolean): void {
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToFreeFunction', enabled ? () => onExtractToFunction(true, false) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExtractToMemberFunction', enabled ? () => onExtractToFunction(false, true) : onDisabledCommand));
     commandDisposables.push(vscode.commands.registerCommand('C_Cpp.ExpandSelection', enabled ? (r: Range) => onExpandSelection(r) : onDisabledCommand));
+    commandDisposables.push(vscode.commands.registerCommand('C_Cpp.getIncludes', enabled ? (maxDepth: number) => getIncludes(maxDepth) : onDisabledCommand));
 }
 
 function onDisabledCommand() {
@@ -914,7 +917,7 @@ function onShowRefCommand(arg?: TreeNode): void {
 
 function reportMacCrashes(): void {
     if (process.platform === "darwin") {
-        prevCrashFile = "";
+        prevMacCrashFile = "";
         const home: string = os.homedir();
         const crashFolder: string = path.resolve(home, "Library/Logs/DiagnosticReports");
         fs.stat(crashFolder, (err) => {
@@ -932,10 +935,10 @@ function reportMacCrashes(): void {
                     if (event !== "rename") {
                         return;
                     }
-                    if (!filename || filename === prevCrashFile) {
+                    if (!filename || filename === prevMacCrashFile) {
                         return;
                     }
-                    prevCrashFile = filename;
+                    prevMacCrashFile = filename;
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
@@ -958,9 +961,25 @@ function reportMacCrashes(): void {
     }
 }
 
+export function usesCrashHandler(): boolean {
+    if (os.platform() === "darwin") {
+        if (os.arch() === "arm64") {
+            return true;
+        } else {
+            const releaseParts: string[] = os.release().split(".");
+            if (releaseParts.length >= 1) {
+                // Avoid potentially intereferring with the older macOS crash handler.
+                return parseInt(releaseParts[0]) >= 19;
+            }
+            return true;
+        }
+    }
+    return os.platform() !== "win32" && os.arch() === "x64";
+}
+
 export function watchForCrashes(crashDirectory: string): void {
-    if (process.platform !== "win32") {
-        prevCrashFile = "";
+    if (crashDirectory !== "") {
+        prevCppCrashFile = "";
         fs.stat(crashDirectory, (err) => {
             const crashObject: Record<string, string> = {};
             if (err?.code) {
@@ -976,17 +995,19 @@ export function watchForCrashes(crashDirectory: string): void {
                     if (event !== "rename") {
                         return;
                     }
-                    if (!filename || filename === prevCrashFile) {
+                    if (!filename || filename === prevCppCrashFile) {
                         return;
                     }
-                    prevCrashFile = filename;
+                    prevCppCrashFile = filename;
                     if (!filename.startsWith("cpptools")) {
                         return;
                     }
+                    const crashDate: Date = new Date();
+
                     // Wait 5 seconds to allow time for the crash log to finish being written.
                     setTimeout(() => {
                         fs.readFile(path.resolve(crashDirectory, filename), 'utf8', (err, data) => {
-                            void handleCrashFileRead(crashDirectory, filename, err, data);
+                            void handleCrashFileRead(crashDirectory, filename, crashDate, err, data);
                         });
                     }, 5000);
                 });
@@ -1111,7 +1132,7 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
     logMacCrashTelemetry(data);
 }
 
-async function handleCrashFileRead(crashDirectory: string, crashFile: string, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
+async function handleCrashFileRead(crashDirectory: string, crashFile: string, crashDate: Date, err: NodeJS.ErrnoException | undefined | null, data: string): Promise<void> {
     if (err) {
         if (err.code === "ENOENT") {
             return; // ignore known issue
@@ -1121,23 +1142,23 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
 
     const lines: string[] = data.split("\n");
     let addressData: string = ".\n.";
-    data = crashFile + "\n";
+    const isCppToolsSrv: boolean = crashFile.startsWith("cpptools-srv");
+    const telemetryHeader: string = (isCppToolsSrv ? "cpptools-srv.txt" : crashFile) + "\n";
     const filtPath: string | null = which.sync("c++filt", { nothrow: true });
     const isMac: boolean = process.platform === "darwin";
-    const startStr: string = isMac ? " _" : "(";
-    const offsetStr: string = isMac ? " + " : "+0x";
-    const endOffsetStr: string = isMac ? " " : ")";
+    const startStr: string = isMac ? " _" : "<";
+    const offsetStr: string = isMac ? " + " : "+";
+    const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "…";
-    data += lines[0]; // signal type
+    const signalType: string = lines[0];
+    let crashCallStack: string = "";
     for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        if (lineNum > 1) {
-            data += "\n";
-            addressData += "\n";
-        }
+        crashCallStack += "\n";
+        addressData += "\n";
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
-        if (startPos === -1 || line[startPos + 1] === "+") {
-            data += dotStr;
+        if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
+            crashCallStack += dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
@@ -1149,13 +1170,16 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
         }
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
-            data += "Missing offsetStr";
+            crashCallStack += "Missing offsetStr";
             continue; // unexpected
         }
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
         if (filtPath) {
-            const ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
+            if (ret?.output === funcStr) {
+                ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
+            }
             if (ret !== undefined) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
@@ -1166,36 +1190,49 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, er
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
-        data += funcStr + offsetStr;
+        crashCallStack += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
-            data += line.substring(offsetPos2);
+            crashCallStack += line.substring(offsetPos2);
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
                 // unexpected
-                data += "<Missing 0x>";
+                crashCallStack += "<Missing 0x>";
                 continue;
             }
             addressData += `${line.substring(startAddressPos, startPos)}`;
         } else {
-            const endPos: number = line.indexOf(")", offsetPos2);
+            const endPos: number = line.indexOf(">", offsetPos2);
             if (endPos === -1) {
-                data += "<Missing )>";
+                crashCallStack += "<Missing > >";
                 continue; // unexpected
             }
-            data += line.substring(offsetPos2, endPos);
+            crashCallStack += line.substring(offsetPos2, endPos);
         }
     }
+
+    if (crashCallStack !== prevCppCrashCallStackData) {
+        prevCppCrashCallStackData = crashCallStack;
+
+        const settings: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("C_Cpp", null);
+        if (lines.length >= 6 && util.getNumericLoggingLevel(settings.get<string>("loggingLevel")) >= 1) {
+            const out: vscode.OutputChannel = getCrashCallStacksChannel();
+            out.appendLine(`\n${isCppToolsSrv ? "cpptools-srv" : "cpptools"}\n${crashDate.toLocaleString()}\n${signalType}${crashCallStack}`);
+        }
+    }
+
+    data = telemetryHeader + signalType + crashCallStack;
 
     if (data.length > 8192) { // The API has an 8k limit.
         data = data.substring(0, 8191) + "…";
     }
 
-    console.log(`Crash call stack:\n${data}`);
     logCppCrashTelemetry(data, addressData);
 
     await util.deleteFile(path.resolve(crashDirectory, crashFile)).catch(logAndReturn.undefined);
-    void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
+    if (crashFile === "cpptools.txt") {
+        void util.deleteDirectory(crashDirectory).catch(logAndReturn.undefined);
+    }
 }
 
 export function deactivate(): Thenable<void> {
@@ -1304,4 +1341,8 @@ export async function preReleaseCheck(): Promise<void> {
             });
         }
     }
+}
+
+export async function getIncludes(maxDepth: number): Promise<any> {
+    return clients.ActiveClient.getIncludes(maxDepth);
 }
