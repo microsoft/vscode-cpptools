@@ -5,6 +5,7 @@
 'use strict';
 
 import * as jsonc from 'comment-json';
+import escapeStringRegExp from 'escape-string-regexp';
 import * as fastGlob from 'fast-glob';
 import * as fs from "fs";
 import * as os from 'os';
@@ -24,7 +25,6 @@ import { PersistentFolderState } from './persistentState';
 import { CppSettings, OtherSettings } from './settings';
 import { SettingsPanel } from './settingsPanel';
 import { ConfigurationType, getUI } from './ui';
-import escapeStringRegExp = require('escape-string-regexp');
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
