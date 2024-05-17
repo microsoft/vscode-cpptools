@@ -382,7 +382,7 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-5.1.2.tgz#07508b45797cb81ec3f273011b054cd0755eddca"
   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
 
-"@types/minimatch@^3.0.5":
+"@types/minimatch@^3.0.3", "@types/minimatch@^3.0.5":
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.5.tgz#1001cc5e6a3704b83c236027e77f2f58ea010f40"
   integrity sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==
@@ -876,10 +876,10 @@ array-buffer-byte-length@^1.0.1:
     call-bind "^1.0.5"
     is-array-buffer "^3.0.4"
 
-array-differ@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/array-differ/-/array-differ-4.0.0.tgz#aa3c891c653523290c880022f45b06a42051b026"
-  integrity sha512-Q6VPTLMsmXZ47ENG3V+wQyZS1ZxXMxFyYzA+Z/GMrJ6yIutAIEf9wTyroTzmGjNfox9/h3GdGBCVh43GVFx4Uw==
+array-differ@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/array-differ/-/array-differ-3.0.0.tgz#3cbb3d0f316810eafcc47624734237d6aee4ae6b"
+  integrity sha512-THtfYS6KtME/yIAhKjZ2ul7XI96lQGHRputJQHO80LAWQnuGP4iCIN8vdMRboGbIEYBwU33q8Tch1os2+X0kMg==
 
 array-each@^1.0.1:
   version "1.0.1"
@@ -912,11 +912,6 @@ array-union@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/array-union/-/array-union-2.1.0.tgz#b798420adbeb1de828d84acd8a2e23d3efe85e8d"
   integrity sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==
-
-array-union@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/array-union/-/array-union-3.0.1.tgz#da52630d327f8b88cfbfb57728e2af5cd9b6b975"
-  integrity sha512-1OvF9IbWwaeiM9VhzYXVQacMibxpXOMYVNIvMtKRyX9SImBXpKcFr8XvFDeEslCyuH/t6KRt7HEO94AlP8Iatw==
 
 array.prototype.findlastindex@^1.2.3:
   version "1.2.5"
@@ -963,6 +958,11 @@ arraybuffer.prototype.slice@^1.0.3:
     get-intrinsic "^1.2.3"
     is-array-buffer "^3.0.4"
     is-shared-array-buffer "^1.0.2"
+
+arrify@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/arrify/-/arrify-2.0.1.tgz#c9655e9331e0abcd588d2a7cad7e9956f66701fa"
+  integrity sha512-3duEwti880xqi4eAMN8AyR4a0ByT90zoYdLlevfrvU43vb0YZwZVfxOgxWrLXXXpyugL0hNZc9G6BiB5B3nUug==
 
 assign-symbols@^1.0.0:
   version "1.0.0"
@@ -2428,16 +2428,14 @@ gulp-env@^0.4.0:
     ini "^1.3.4"
     through2 "^2.0.0"
 
-gulp-filter@^9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/gulp-filter/-/gulp-filter-9.0.1.tgz#26e9c578be732423028bebde750f764b7b8d6293"
-  integrity sha512-knVYL8h9bfYIeft3VokVTkuaWJkQJMrFCS3yVjZQC6BGg+1dZFoeUY++B9D2X4eFpeNTx9StWK0qnDby3NO3PA==
+gulp-filter@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/gulp-filter/-/gulp-filter-6.0.0.tgz#9d69a408f1a9f60534264fb14464841f1b1746c2"
+  integrity sha512-veQFW93kf6jBdWdF/RxMEIlDK2mkjHyPftM381DID2C9ImTVngwYpyyThxm4/EpgcNOT37BLefzMOjEKbyYg0Q==
   dependencies:
-    multimatch "^7.0.0"
-    plugin-error "^2.0.1"
-    slash "^5.1.0"
+    multimatch "^4.0.0"
+    plugin-error "^1.0.1"
     streamfilter "^3.0.0"
-    to-absolute-glob "^3.0.0"
 
 gulp-sourcemaps@^3.0.0:
   version "3.0.0"
@@ -3163,7 +3161,7 @@ minimatch@9.0.3:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@^3.0.5, minimatch@^3.1.1, minimatch@^3.1.2:
+minimatch@^3.0.4, minimatch@^3.0.5, minimatch@^3.1.1, minimatch@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
   integrity sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==
@@ -3174,13 +3172,6 @@ minimatch@^5.0.1, minimatch@^5.1.0:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.6.tgz#1cfcb8cf5522ea69952cd2af95ae09477f122a96"
   integrity sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==
-  dependencies:
-    brace-expansion "^2.0.1"
-
-minimatch@^9.0.3:
-  version "9.0.4"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.4.tgz#8e49c731d1749cbec05050ee5145147b32496a51"
-  integrity sha512-KqWh+VchfxcMNRAJjj2tnsSJdNbHsVgnkBhTNrW7AjVo6OvLtxw8zfT9oLw1JSohlFzJ8jCoTgaoXvJ+kHt6fw==
   dependencies:
     brace-expansion "^2.0.1"
 
@@ -3230,14 +3221,16 @@ ms@2.1.3, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-multimatch@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/multimatch/-/multimatch-7.0.0.tgz#d0a1bf144db9106b8d19e3cb8cabec1a8986c27f"
-  integrity sha512-SYU3HBAdF4psHEL/+jXDKHO95/m5P2RvboHT2Y0WtTttvJLP4H/2WS9WlQPFvF6C8d6SpLw8vjCnQOnVIVOSJQ==
+multimatch@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/multimatch/-/multimatch-4.0.0.tgz#8c3c0f6e3e8449ada0af3dd29efb491a375191b3"
+  integrity sha512-lDmx79y1z6i7RNx0ZGCPq1bzJ6ZoDDKbvh7jxr9SJcWLkShMzXrHbYVpTdnhNM5MXpDUxCQ4DgqVttVXlBgiBQ==
   dependencies:
-    array-differ "^4.0.0"
-    array-union "^3.0.1"
-    minimatch "^9.0.3"
+    "@types/minimatch" "^3.0.3"
+    array-differ "^3.0.0"
+    array-union "^2.1.0"
+    arrify "^2.0.1"
+    minimatch "^3.0.4"
 
 mute-stdout@^2.0.0:
   version "2.0.0"
@@ -3580,13 +3573,6 @@ plugin-error@^1.0.1:
     arr-diff "^4.0.0"
     arr-union "^3.1.0"
     extend-shallow "^3.0.2"
-
-plugin-error@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-2.0.1.tgz#f2ac92bac8c85e3e23492d76d0c3ca12f30eb00b"
-  integrity sha512-zMakqvIDyY40xHOvzXka0kUvf40nYIuwRE8dWhti2WtjQZ31xAgBZBhxsK7vK3QbRXS1Xms/LO7B5cuAsfB2Gg==
-  dependencies:
-    ansi-colors "^1.0.1"
 
 posix-getopt@^1.2.1:
   version "1.2.1"
@@ -3979,11 +3965,6 @@ slash@^3.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-3.0.0.tgz#6539be870c165adbd5240220dbe361f1bc4d4634"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
 
-slash@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/slash/-/slash-5.1.0.tgz#be3adddcdf09ac38eebe8dcdc7b1a57a75b095ce"
-  integrity sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==
-
 source-map-js@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.0.tgz#16b809c162517b5b8c3e7dcd315a2a5c2612b2af"
@@ -4291,14 +4272,6 @@ to-absolute-glob@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/to-absolute-glob/-/to-absolute-glob-2.0.2.tgz#1865f43d9e74b0822db9f145b78cff7d0f7c849b"
   integrity sha512-rtwLUQEwT8ZeKQbyFJyomBRYXyE16U5VKuy0ftxLMK/PZb2fkOsg5r9kHdauuVDbsNdIBoC/HCthpidamQFXYA==
-  dependencies:
-    is-absolute "^1.0.0"
-    is-negated-glob "^1.0.0"
-
-to-absolute-glob@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/to-absolute-glob/-/to-absolute-glob-3.0.0.tgz#d13663608718fd44bf68fa0f034abdd4fd157eca"
-  integrity sha512-loO/XEWTRqpfcpI7+Jr2RR2Umaaozx1t6OSVWtMi0oy5F/Fxg3IC+D/TToDnxyAGs7uZBGT/6XmyDUxgsObJXA==
   dependencies:
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
