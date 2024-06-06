@@ -1066,7 +1066,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         const dynamicLoadErrorEnd: string = "\n\n";
         const endDynamicLoadError: number = data.indexOf(dynamicLoadErrorEnd, startDynamicLoadError);
         if (endDynamicLoadError >= 0) {
-            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError) + "\n\n";
+            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError);
+            if (dynamicLoadError.includes("/")) {
+                dynamicLoadError = "<dyld error>";
+            }
+            dynamicLoadError += "\n\n";
         }
     }
 
@@ -1117,7 +1121,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         if (!line.includes(".dylib") && !line.includes("???")) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
             line = line.replace(/std::__1::/g, "std::"); // __1:: is not helpful.
-            data += line + "\n";
+            if (line.includes("/")) {
+                data += "<path>\n";
+            } else {
+                data += line + "\n";
+            }
         }
     });
     data = data.trimRight();
@@ -1150,9 +1158,17 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
     const dotStr: string = "…";
-    const signalType: string = lines[0];
+    let signalType: string;
+    let lineNum: number = 1;
+    if (lines[0].startsWith("SIG")) {
+        signalType = lines[0];
+    } else {
+        // The signal type may fail to be written.
+        signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
+        lineNum = 0;
+    }
     let crashCallStack: string = "";
-    for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
+    for (; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
         crashCallStack += "\n";
         addressData += "\n";
         const line: string = lines[lineNum];
@@ -1175,12 +1191,12 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         }
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
-        if (filtPath) {
+        if (filtPath && filtPath.length !== 0) {
             let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
             if (ret?.output === funcStr) {
                 ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
             }
-            if (ret !== undefined) {
+            if (ret !== undefined && ret.succeeded) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
                 funcStr = funcStr.replace(/std::basic_/g, "std::");
@@ -1190,10 +1206,16 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
+        if (funcStr.includes("/")) {
+            funcStr = "<func>";
+        }
         crashCallStack += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
-            crashCallStack += line.substring(offsetPos2);
+            const pendingOffset: string = line.substring(offsetPos2);
+            if (!pendingOffset.includes("/")) {
+                crashCallStack += pendingOffset;
+            }
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
                 // unexpected
@@ -1207,7 +1229,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 crashCallStack += "<Missing > >";
                 continue; // unexpected
             }
-            crashCallStack += line.substring(offsetPos2, endPos);
+            const pendingOffset: string = line.substring(offsetPos2, endPos);
+            if (!pendingOffset.includes("/")) {
+                crashCallStack += pendingOffset;
+            }
         }
     }
 
