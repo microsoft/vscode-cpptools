@@ -1157,26 +1157,27 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
-    const dotStr: string = "…";
+    const dotStr: string = "\n…";
     let signalType: string;
-    let lineNum: number = 1;
     if (lines[0].startsWith("SIG")) {
         signalType = lines[0];
     } else {
         // The signal type may fail to be written.
         signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
-        lineNum = 0;
     }
     let crashCallStack: string = "";
-    for (; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        crashCallStack += "\n";
-        addressData += "\n";
+    let validFrameFound: boolean = false;
+    for (let lineNum: number = 0; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
+            if (!validFrameFound) {
+                continue; // Skip extra … at the start.
+            }
             crashCallStack += dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
+            addressData += "\n";
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
                 addressData += "Unexpected offset";
             } else {
@@ -1184,6 +1185,9 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             }
             continue;
         }
+        crashCallStack += "\n";
+        addressData += "\n";
+        validFrameFound = true;
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
             crashCallStack += "Missing offsetStr";
