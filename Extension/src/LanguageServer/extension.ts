@@ -1185,12 +1185,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
             }
             continue;
         }
-        crashCallStack += "\n";
-        addressData += "\n";
-        validFrameFound = true;
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
-            crashCallStack += "Missing offsetStr";
+            crashCallStack += "\nMissing offsetStr";
+            addressData += "\n";
             continue; // unexpected
         }
         const startPos2: number = startPos + 1;
@@ -1212,7 +1210,12 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         }
         if (funcStr.includes("/")) {
             funcStr = "<func>";
+        } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+            continue; // Skip these on early frames.
         }
+        validFrameFound = true;
+        crashCallStack += "\n";
+        addressData += "\n";
         crashCallStack += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
