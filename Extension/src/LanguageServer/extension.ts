@@ -1344,5 +1344,6 @@ export async function preReleaseCheck(): Promise<void> {
 }
 
 export async function getIncludes(maxDepth: number): Promise<any> {
-    return clients.ActiveClient.getIncludes(maxDepth);
+    const includes = await clients.ActiveClient.getIncludes(maxDepth);
+    return includes;
 }
