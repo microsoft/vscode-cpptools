@@ -6481,7 +6481,6 @@
     },
     "devDependencies": {
         "@octokit/rest": "^20.1.1",
-        "@types/glob": "^7.1.6",
         "@types/minimatch": "^3.0.5",
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.12.12",
@@ -6530,7 +6529,7 @@
         "comment-json": "^4.2.3",
         "editorconfig": "^2.0.0",
         "escape-string-regexp": "^2.0.0",
-        "glob": "^7.1.6",
+        "glob": "^10.4.1",
         "minimatch": "^3.0.5",
         "mkdirp": "^3.0.1",
         "node-fetch": "^2.6.9",

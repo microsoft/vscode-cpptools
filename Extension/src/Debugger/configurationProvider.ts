@@ -5,10 +5,9 @@
 
 import * as jsonc from 'comment-json';
 import * as fs from 'fs';
-import * as glob from 'glob';
+import { glob } from 'glob';
 import * as os from 'os';
 import * as path from 'path';
-import { promisify } from 'util';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as util from '../common';
@@ -38,8 +37,6 @@ enum StepType {
     remoteShell = 'remoteShell',
     command = 'command'
 }
-
-const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
 
 /*
  * Retrieves configurations from a provider and displays them in a quickpick menu to be selected.
@@ -1052,10 +1049,10 @@ export class DebugConfigurationProvider implements vscode.DebugConfigurationProv
                 const jumpHosts: util.ISshHostInfo[] = step.host.jumpHosts;
                 let files: vscode.Uri[] = [];
                 if (util.isString(step.files)) {
-                    files = files.concat((await globAsync(step.files)).map(file => vscode.Uri.file(file)));
+                    files = files.concat((await glob(step.files)).map(file => vscode.Uri.file(file)));
                 } else if (util.isArrayOfString(step.files)) {
                     for (const fileGlob of (step.files as string[])) {
-                        files = files.concat((await globAsync(fileGlob)).map(file => vscode.Uri.file(file)));
+                        files = files.concat((await glob(fileGlob)).map(file => vscode.Uri.file(file)));
                     }
                 } else {
                     void logger.getOutputChannelLogger().showErrorMessage(localize('incorrect.files.type.copyFile', '"files" must be a string or an array of strings in {0} steps.', isScp ? 'SCP' : 'rsync'));
