@@ -3598,7 +3598,8 @@
     "Ein Lambdaausdruck \"static\" muss eine leere Erfassungsspezifikation aufweisen.",
     "EDG IFC-Headereinheit",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "für die aktuelle Übersetzungseinheit konnte keine Headereinheit erstellt werden",
+    "Die aktuelle Übersetzungseinheit verwendet mindestens ein Feature, das derzeit nicht in eine Headereinheit geschrieben werden kann",
+    "\"explicit(bool)\" ist ein C++20-Feature",
+    "Für die Moduldateizuordnung, die auf die Datei \"%sq\" verweist, muss ein Modulname angegeben werden."
 ]

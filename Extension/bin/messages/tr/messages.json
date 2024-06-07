@@ -3598,7 +3598,8 @@
     "'static' lambda ifadelerinin yakalama belirtimi boş olmalıdır",
     "EDG IFC üst bilgi birimi",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "geçerli çeviri birimi için bir başlık birimi oluşturulamadı",
+    "mevcut çeviri birimi şu anda bir başlık birimine yazılamayan bir veya daha fazla özellik kullanıyorsa",
+    "'explicit(bool)' bir C++20 özelliğidir",
+    "%sq dosyasına başvuran modül dosyası eşlemesi için bir modül adı belirtilmelidir"
 ]

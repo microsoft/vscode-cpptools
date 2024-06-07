@@ -3598,7 +3598,8 @@
     "wyrażenie lambda „statyczne” musi mieć pustą specyfikację przechwytywania",
     "Jednostka nagłówka EDG IFC",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "nie można utworzyć jednostki nagłówka dla bieżącej jednostki translacji",
+    "bieżąca jednostka translacji używa co najmniej jednej funkcji, których obecnie nie można zapisać w jednostce nagłówka",
+    "„explicit(bool)” jest funkcją języka C++20",
+    "nazwa modułu musi być określona dla mapy pliku modułu odwołującej się do pliku %sq"
 ]

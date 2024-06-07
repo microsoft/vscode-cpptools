@@ -3598,7 +3598,8 @@
     "un'espressione lambda 'static' deve avere una specifica di acquisizione vuota",
     "Unità di intestazione IFC EDG",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "Non è possibile creare un'unità di intestazione per l'unità di conversione corrente",
+    "l'unità di conversione corrente utilizza una o più funzionalità che attualmente non possono essere scritte in un'unità di intestazione",
+    "'explicit(bool)' è una funzionalità di C++20",
+    "è necessario specificare un nome modulo per la mappa dei file del modulo che fa riferimento al file %sq"
 ]

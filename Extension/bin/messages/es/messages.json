@@ -3598,7 +3598,8 @@
     "una expresión lambda \"estática\" debe tener una especificación de captura vacía",
     "Unidad de encabezado EDG IFC",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "no se pudo crear una unidad de encabezado para la unidad de traducción actual",
+    "la unidad de traducción actual usa una o varias características que no se pueden escribir actualmente en una unidad de encabezado",
+    "'explicit(bool)' es una característica de C++20",
+    "se debe especificar un nombre de módulo para la asignación de archivos de módulo que hace referencia al archivo %sq"
 ]
