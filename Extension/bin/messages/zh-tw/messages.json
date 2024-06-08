@@ -3598,7 +3598,8 @@
     "'static' Lambda 運算式必須有空白的擷取規格",
     "EDG IFC 標頭單位",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "無法為目前的編譯單位建立標頭單位",
+    "目前的編譯單位使用一或多個目前無法寫入標頭單位的功能",
+    "'explicit(bool)' 是 C++20 功能",
+    "必須為參照檔案的模組檔案對應指定模組名稱 %sq"
 ]

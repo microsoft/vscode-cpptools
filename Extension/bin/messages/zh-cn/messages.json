@@ -3598,7 +3598,8 @@
     "\"static\" Lambda 表达式必须具有空的捕获规范",
     "EDG IFC 标头单元",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "无法为当前翻译单元创建标头单元",
+    "当前翻译单元使用当前无法写入标头单元的一个或多个功能",
+    "“explicit(bool)” 是 C++20 功能",
+    "必须为引用文件 %sq 的模块文件映射指定模块名称"
 ]

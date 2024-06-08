@@ -3598,7 +3598,8 @@
     "Лямбда-выражение \"static\" должно содержать пустую спецификацию захвата",
     "Единица заголовка EDG IFC",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "не удалось создать единицу заголовка для текущей единицы трансляции",
+    "текущая единица трансляции использует одну или несколько функций, которые в данный момент невозможно записать в единицу заголовка",
+    "\"explicit(bool)\" — это функция C++20",
+    "необходимо указать имя модуля для сопоставления файла модуля, ссылающегося на файл %sq"
 ]
