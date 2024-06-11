@@ -1066,7 +1066,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         const dynamicLoadErrorEnd: string = "\n\n";
         const endDynamicLoadError: number = data.indexOf(dynamicLoadErrorEnd, startDynamicLoadError);
         if (endDynamicLoadError >= 0) {
-            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError) + "\n\n";
+            dynamicLoadError = data.substring(startDynamicLoadError, endDynamicLoadError);
+            if (dynamicLoadError.includes("/")) {
+                dynamicLoadError = "<dyld error>";
+            }
+            dynamicLoadError += "\n\n";
         }
     }
 
@@ -1117,7 +1121,11 @@ function handleMacCrashFileRead(err: NodeJS.ErrnoException | undefined | null, d
         if (!line.includes(".dylib") && !line.includes("???")) {
             line = line.replace(/^\d+\s+/, ""); // Remove <numbers><spaces> from the start of the line.
             line = line.replace(/std::__1::/g, "std::"); // __1:: is not helpful.
-            data += line + "\n";
+            if (line.includes("/")) {
+                data += "<path>\n";
+            } else {
+                data += line + "\n";
+            }
         }
     });
     data = data.trimRight();
@@ -1149,18 +1157,27 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
     const startStr: string = isMac ? " _" : "<";
     const offsetStr: string = isMac ? " + " : "+";
     const endOffsetStr: string = isMac ? " " : " <";
-    const dotStr: string = "…";
-    const signalType: string = lines[0];
+    const dotStr: string = "\n…";
+    let signalType: string;
+    if (lines[0].startsWith("SIG")) {
+        signalType = lines[0];
+    } else {
+        // The signal type may fail to be written.
+        signalType = "SIG-??\n"; // Intentionally different from SIG-? from cpptools.
+    }
     let crashCallStack: string = "";
-    for (let lineNum: number = 2; lineNum < lines.length - 3; ++lineNum) { // skip first/last lines
-        crashCallStack += "\n";
-        addressData += "\n";
+    let validFrameFound: boolean = false;
+    for (let lineNum: number = 0; lineNum < lines.length - 3; ++lineNum) { // skip last lines
         const line: string = lines[lineNum];
         const startPos: number = line.indexOf(startStr);
         if (startPos === -1 || line[startPos + (isMac ? 1 : 4)] === "+") {
+            if (!validFrameFound) {
+                continue; // Skip extra … at the start.
+            }
             crashCallStack += dotStr;
             const startAddressPos: number = line.indexOf("0x");
             const endAddressPos: number = line.indexOf(endOffsetStr, startAddressPos + 2);
+            addressData += "\n";
             if (startAddressPos === -1 || endAddressPos === -1 || startAddressPos >= endAddressPos) {
                 addressData += "Unexpected offset";
             } else {
@@ -1170,17 +1187,18 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
         }
         const offsetPos: number = line.indexOf(offsetStr, startPos + startStr.length);
         if (offsetPos === -1) {
-            crashCallStack += "Missing offsetStr";
+            crashCallStack += "\nMissing offsetStr";
+            addressData += "\n";
             continue; // unexpected
         }
         const startPos2: number = startPos + 1;
         let funcStr: string = line.substring(startPos2, offsetPos);
-        if (filtPath) {
+        if (filtPath && filtPath.length !== 0) {
             let ret: util.ProcessReturnType | undefined = await util.spawnChildProcess(filtPath, ["--no-strip-underscore", funcStr], undefined, true).catch(logAndReturn.undefined);
             if (ret?.output === funcStr) {
                 ret = await util.spawnChildProcess(filtPath, [funcStr], undefined, true).catch(logAndReturn.undefined);
             }
-            if (ret !== undefined) {
+            if (ret !== undefined && ret.succeeded) {
                 funcStr = ret.output;
                 funcStr = funcStr.replace(/std::(?:__1|__cxx11)/g, "std"); // simplify std namespaces.
                 funcStr = funcStr.replace(/std::basic_/g, "std::");
@@ -1190,10 +1208,21 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 funcStr = funcStr.replace(/, std::allocator<std::string>/g, "");
             }
         }
+        if (funcStr.includes("/")) {
+            funcStr = "<func>";
+        } else if (!validFrameFound && (funcStr.startsWith("crash_handler(") || funcStr.startsWith("_sigtramp"))) {
+            continue; // Skip these on early frames.
+        }
+        validFrameFound = true;
+        crashCallStack += "\n";
+        addressData += "\n";
         crashCallStack += funcStr + offsetStr;
         const offsetPos2: number = offsetPos + offsetStr.length;
         if (isMac) {
-            crashCallStack += line.substring(offsetPos2);
+            const pendingOffset: string = line.substring(offsetPos2);
+            if (!pendingOffset.includes("/")) {
+                crashCallStack += pendingOffset;
+            }
             const startAddressPos: number = line.indexOf("0x");
             if (startAddressPos === -1 || startAddressPos >= startPos) {
                 // unexpected
@@ -1207,7 +1236,10 @@ async function handleCrashFileRead(crashDirectory: string, crashFile: string, cr
                 crashCallStack += "<Missing > >";
                 continue; // unexpected
             }
-            crashCallStack += line.substring(offsetPos2, endPos);
+            const pendingOffset: string = line.substring(offsetPos2, endPos);
+            if (!pendingOffset.includes("/")) {
+                crashCallStack += pendingOffset;
+            }
         }
     }
 
@@ -1344,5 +1376,6 @@ export async function preReleaseCheck(): Promise<void> {
 }
 
 export async function getIncludes(maxDepth: number): Promise<any> {
-    return clients.ActiveClient.getIncludes(maxDepth);
+    const includes = await clients.ActiveClient.getIncludes(maxDepth);
+    return includes;
 }

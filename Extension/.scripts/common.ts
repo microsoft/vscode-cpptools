@@ -8,11 +8,9 @@ import { Command, CommandFunction } from '../src/Utility/Process/program';
 import { ok } from 'assert';
 import { CommentJSONValue, parse, stringify } from 'comment-json';
 import { mkdir as md, readFile, rm, writeFile } from 'fs/promises';
-import { IOptions, glob as globSync } from 'glob';
 import { dirname, resolve } from 'path';
 import { chdir, cwd, env } from 'process';
 import { setImmediate } from 'timers/promises';
-import { promisify } from 'util';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { is } from '../src/Utility/System/guards';
 import { verbose } from '../src/Utility/Text/streams';
@@ -86,8 +84,6 @@ export async function mkdir(filePath: string) {
     await md(fullPath, { recursive: true });
     return fullPath;
 }
-
-export const glob: (pattern: string, options?: IOptions) => Promise<string[]> = promisify(globSync);
 
 export async function write(filePath: string, data: Buffer | string) {
     await mkdir(dirname(filePath));

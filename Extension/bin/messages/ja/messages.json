@@ -3598,7 +3598,8 @@
     "'static' ラムダ式には空のキャプチャ仕様が必要です",
     "EDG IFC ヘッダー ユニット",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "現在の翻訳単位のヘッダー ユニットを作成できませんでした",
+    "現在の翻訳単位は、現在ヘッダー ユニットに書き込むことができない 1 つ以上の機能を使用します",
+    "'explicit(bool)' は C++20 機能です",
+    "ファイル %sq を参照するモジュール ファイル マップにモジュール名を指定する必要があります"
 ]

@@ -3598,7 +3598,8 @@
     "'static' 람다 식에는 빈 캡처 사양이 있어야 합니다.",
     "EDG IFC 헤더 단위",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "현재 변환 단위에 대한 헤더 단위를 만들 수 없습니다.",
+    "현재 변환 단위는 헤더 단위에 현재 쓸 수 없는 하나 이상의 기능을 사용합니다.",
+    "'explicit(bool)'는 C++20 기능입니다.",
+    "%sq 파일을 참조하는 모듈 파일 맵에 대한 모듈 이름을 지정해야 합니다."
 ]

@@ -3598,7 +3598,8 @@
     "Výraz lambda static musí mít prázdnou specifikaci zachycení.",
     "Jednotka hlavičky EDG IFC",
     "EDG IFC",
-    "a header unit could not be created for the current translation unit",
-    "the current translation unit uses one or more features that cannot currently be written to a header unit",
-    "'explicit(bool)' is a C++20 feature"
+    "pro aktuální jednotku překladu se nepovedlo vytvořit jednotku hlavičky",
+    "aktuální jednotka překladu používá jednu nebo více funkcí, které se v tuto chvíli nedají zapsat do jednotky hlavičky",
+    "explicit(bool) je funkcí C++20",
+    "musí být zadán název modulu pro mapování souboru modulu odkazující na soubor %sq"
 ]
