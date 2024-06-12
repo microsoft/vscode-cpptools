@@ -4,10 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { watch as watchFiles } from 'fs/promises';
-import { glob } from 'glob';
 import { filepath } from '../src/Utility/Filesystem/filepath';
 import { verbose } from '../src/Utility/Text/streams';
-import { $root, mkdir, updateFiles } from './common';
+import { $root, glob, mkdir, updateFiles } from './common';
 
 export async function main() {
     verbose(`Copying walkthrough media to extension/dist folder`);
