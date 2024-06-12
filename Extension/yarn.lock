@@ -156,41 +156,98 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@microsoft/1ds-core-js@3.2.18", "@microsoft/1ds-core-js@^3.2.3":
-  version "3.2.18"
-  resolved "https://registry.yarnpkg.com/@microsoft/1ds-core-js/-/1ds-core-js-3.2.18.tgz#2be0dd31df0d9001a60b45eb263886fab145613b"
-  integrity sha512-ytlFv3dfb8OGqvbZP8tSIlNvn3QNYxdsF0k6ikRMWSr6CmBxBi1sliaxc2Q5KuYOuaeWkd8WRm25Rx/UtHcyMg==
+"@microsoft/1ds-core-js@4.2.2", "@microsoft/1ds-core-js@^4.1.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/1ds-core-js/-/1ds-core-js-4.2.2.tgz#7681f6a369e391abb2d72a96c4a60721b124b2de"
+  integrity sha512-4c1AXzOj7ZyX7/97v8fEDYcQ8ymTTmj+j9HYYlcO0/cUbDzZGA7/xzb34chvvAbV60qDEbX0Ha/ea7wzgefORg==
   dependencies:
-    "@microsoft/applicationinsights-core-js" "2.8.18"
-    "@microsoft/applicationinsights-shims" "^2.0.2"
-    "@microsoft/dynamicproto-js" "^1.1.11"
+    "@microsoft/applicationinsights-core-js" "3.2.2"
+    "@microsoft/applicationinsights-shims" "3.0.1"
+    "@microsoft/dynamicproto-js" "^2.0.3"
+    "@nevware21/ts-async" ">= 0.5.1 < 2.x"
+    "@nevware21/ts-utils" ">= 0.11.1 < 2.x"
 
-"@microsoft/1ds-post-js@^3.2.3":
-  version "3.2.18"
-  resolved "https://registry.yarnpkg.com/@microsoft/1ds-post-js/-/1ds-post-js-3.2.18.tgz#efbb445f486d9f92e10ff30564a6c5060aa53909"
-  integrity sha512-Tzjcja4SMyws3UP58kD2edFPNb7BJtx5uCgwf/PWXwDyfbUY1/crsTQdEyR98wy/vorvLDZdQlcL++VMChfYnQ==
+"@microsoft/1ds-post-js@^4.1.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/1ds-post-js/-/1ds-post-js-4.2.2.tgz#8b5a96f9a8bbdc9fc92ee7da5152b205832f9804"
+  integrity sha512-0k1aSxD03r3ugLaYhI8Y8AonI/whOzSQd66XBYURVTs6uheMMxDQdSnAk/4Dwn/TUK3TCEJZBIwZRVpUJtJX9w==
   dependencies:
-    "@microsoft/1ds-core-js" "3.2.18"
-    "@microsoft/applicationinsights-shims" "^2.0.2"
-    "@microsoft/dynamicproto-js" "^1.1.11"
+    "@microsoft/1ds-core-js" "4.2.2"
+    "@microsoft/applicationinsights-shims" "3.0.1"
+    "@microsoft/dynamicproto-js" "^2.0.3"
+    "@nevware21/ts-async" ">= 0.5.1 < 2.x"
+    "@nevware21/ts-utils" ">= 0.11.1 < 2.x"
 
-"@microsoft/applicationinsights-core-js@2.8.18":
-  version "2.8.18"
-  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-core-js/-/applicationinsights-core-js-2.8.18.tgz#b3ce9e834f4a09aceb82465e2410851461f5f68a"
-  integrity sha512-yPHRZFLpnEO0uSgFPM1BLMRRwjoten9YBbn4pJRbCT4PigLnj748knmWsMwXIdcehtkRTYz78kPYa/LWP7nvmA==
+"@microsoft/applicationinsights-channel-js@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-channel-js/-/applicationinsights-channel-js-3.2.2.tgz#68c58a2498158abc452ca153962547062b9c9cf7"
+  integrity sha512-4ruoKxgZYYa+K8JJu8RMY0egKazS8xClbx70NQHa/rJ7JYFgN3OIEIBZtFoMcHR8Vg7MEsNE5/wV6o7WWJkVIA==
   dependencies:
-    "@microsoft/applicationinsights-shims" "2.0.2"
-    "@microsoft/dynamicproto-js" "^1.1.11"
+    "@microsoft/applicationinsights-common" "3.2.2"
+    "@microsoft/applicationinsights-core-js" "3.2.2"
+    "@microsoft/applicationinsights-shims" "3.0.1"
+    "@microsoft/dynamicproto-js" "^2.0.3"
+    "@nevware21/ts-async" ">= 0.5.1 < 2.x"
+    "@nevware21/ts-utils" ">= 0.11.1 < 2.x"
 
-"@microsoft/applicationinsights-shims@2.0.2", "@microsoft/applicationinsights-shims@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-shims/-/applicationinsights-shims-2.0.2.tgz#92b36a09375e2d9cb2b4203383b05772be837085"
-  integrity sha512-PoHEgsnmcqruLNHZ/amACqdJ6YYQpED0KSRe6J7gIJTtpZC1FfFU9b1fmDKDKtFoUSrPzEh1qzO3kmRZP0betg==
+"@microsoft/applicationinsights-common@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-common/-/applicationinsights-common-3.2.2.tgz#86c353256fbac7297b3ba07e7c9cd56d4ebecccd"
+  integrity sha512-e1C35gdkFSzWyUUR1S8FvisXW3nT3p6wWsLNs+vUKLOTQzsvW3XpNMVtNCq4MfHWiYDuz1lPSzo2eENaij1fVA==
+  dependencies:
+    "@microsoft/applicationinsights-core-js" "3.2.2"
+    "@microsoft/applicationinsights-shims" "3.0.1"
+    "@microsoft/dynamicproto-js" "^2.0.3"
+    "@nevware21/ts-utils" ">= 0.11.1 < 2.x"
 
-"@microsoft/dynamicproto-js@^1.1.11":
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/@microsoft/dynamicproto-js/-/dynamicproto-js-1.1.11.tgz#c737e1a50db9453354729ddaeb2c3b16927ed92e"
-  integrity sha512-gNw9z9LbqLV+WadZ6/MMrWwO3e0LuoUH1wve/1iPsBNbgqeVCiB0EZFNNj2lysxS2gkqoF9hmyVaG3MoM1BkxA==
+"@microsoft/applicationinsights-core-js@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-core-js/-/applicationinsights-core-js-3.2.2.tgz#28e22bb5d26a021160b65467efd5711fbd9f82bf"
+  integrity sha512-dF6LZ4ahdhoHufw+N7OXRDzWT8QN193Dvpd8GLqEZdR/KtCTofPSI63yumu+ZkzKYadf1S3w2xg0OmbdyXexoQ==
+  dependencies:
+    "@microsoft/applicationinsights-shims" "3.0.1"
+    "@microsoft/dynamicproto-js" "^2.0.3"
+    "@nevware21/ts-async" ">= 0.5.1 < 2.x"
+    "@nevware21/ts-utils" ">= 0.11.1 < 2.x"
+
+"@microsoft/applicationinsights-shims@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-shims/-/applicationinsights-shims-3.0.1.tgz#3865b73ace8405b9c4618cc5c571f2fe3876f06f"
+  integrity sha512-DKwboF47H1nb33rSUfjqI6ryX29v+2QWcTrRvcQDA32AZr5Ilkr7whOOSsD1aBzwqX0RJEIP1Z81jfE3NBm/Lg==
+  dependencies:
+    "@nevware21/ts-utils" ">= 0.9.4 < 2.x"
+
+"@microsoft/applicationinsights-web-basic@^3.1.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@microsoft/applicationinsights-web-basic/-/applicationinsights-web-basic-3.2.2.tgz#d91bbf9002df4fac2ee543b481a0cbd58ed3975c"
+  integrity sha512-4OdgTurRr/Awm2DcWuAhidFON2UFiirabeO9SSAeTefDCdtzv5fWzntq9zvdV47c+w6WzZkz8nX/bQTgNRb2+w==
+  dependencies:
+    "@microsoft/applicationinsights-channel-js" "3.2.2"
+    "@microsoft/applicationinsights-common" "3.2.2"
+    "@microsoft/applicationinsights-core-js" "3.2.2"
+    "@microsoft/applicationinsights-shims" "3.0.1"
+    "@microsoft/dynamicproto-js" "^2.0.3"
+    "@nevware21/ts-async" ">= 0.5.1 < 2.x"
+    "@nevware21/ts-utils" ">= 0.11.1 < 2.x"
+
+"@microsoft/dynamicproto-js@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@microsoft/dynamicproto-js/-/dynamicproto-js-2.0.3.tgz#ae2b408061e3ff01a97078429fc768331e239256"
+  integrity sha512-JTWTU80rMy3mdxOjjpaiDQsTLZ6YSGGqsjURsY6AUQtIj0udlF/jYmhdLZu8693ZIC0T1IwYnFa0+QeiMnziBA==
+  dependencies:
+    "@nevware21/ts-utils" ">= 0.10.4 < 2.x"
+
+"@nevware21/ts-async@>= 0.5.1 < 2.x":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@nevware21/ts-async/-/ts-async-0.5.1.tgz#3f55fa5222b0af5a5bb019f67092cdcd6a5f82e6"
+  integrity sha512-O2kN8n2HpDWJ7Oji+oTMnhITrCndmrNvrHbGDwAIBydx+FWvLE/vrw4QwnRRMvSCa2AJrcP59Ryklxv30KfkWQ==
+  dependencies:
+    "@nevware21/ts-utils" ">= 0.11.2 < 2.x"
+
+"@nevware21/ts-utils@>= 0.10.4 < 2.x", "@nevware21/ts-utils@>= 0.11.1 < 2.x", "@nevware21/ts-utils@>= 0.11.2 < 2.x", "@nevware21/ts-utils@>= 0.9.4 < 2.x":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@nevware21/ts-utils/-/ts-utils-0.11.2.tgz#5836f338c091f47358298da1f77a67a88219a6a5"
+  integrity sha512-80W8BkS09kkGuUHJX50Fqq+QqAslxUaOQytH+3JhRacXs1EpEt2JOOkYKytqFZAYir3SeH9fahniEaDzIBxlUw==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -554,13 +611,14 @@
     minimist "^1.2.8"
     prompts "^2.4.2"
 
-"@vscode/extension-telemetry@^0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@vscode/extension-telemetry/-/extension-telemetry-0.6.2.tgz#b86814ee680615730da94220c2b03ea9c3c14a8e"
-  integrity sha512-yb/wxLuaaCRcBAZtDCjNYSisAXz3FWsSqAha5nhHcYxx2ZPdQdWuZqVXGKq0ZpHVndBWWtK6XqtpCN2/HB4S1w==
+"@vscode/extension-telemetry@^0.9.6":
+  version "0.9.6"
+  resolved "https://registry.yarnpkg.com/@vscode/extension-telemetry/-/extension-telemetry-0.9.6.tgz#97041986ddae1ae80d3dec577e4ae107e8122f3f"
+  integrity sha512-qWK2GNw+b69QRYpjuNM9g3JKToMICoNIdc0rQMtvb4gIG9vKKCZCVCz+ZOx6XM/YlfWAyuPiyxcjIY0xyF+Djg==
   dependencies:
-    "@microsoft/1ds-core-js" "^3.2.3"
-    "@microsoft/1ds-post-js" "^3.2.3"
+    "@microsoft/1ds-core-js" "^4.1.2"
+    "@microsoft/1ds-post-js" "^4.1.2"
+    "@microsoft/applicationinsights-web-basic" "^3.1.2"
 
 "@vscode/test-electron@^2.3.10":
   version "2.4.0"
