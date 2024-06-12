@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import { promises as fs } from 'fs';
-import { glob } from 'glob';
+import * as glob from 'glob';
 import * as os from 'os';
 import * as path from 'path';
 import {
@@ -15,6 +15,7 @@ import {
     ResolvedConfiguration,
     parse
 } from 'ssh-config';
+import { promisify } from 'util';
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import { ISshConfigHostInfo, resolveHome } from "../common";
@@ -23,6 +24,8 @@ import { getSshChannel } from '../logger';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
+
+const globAsync: (pattern: string, options?: glob.IOptions | undefined) => Promise<string[]> = promisify(glob);
 
 const userSshConfigurationFile: string = path.resolve(os.homedir(), '.ssh/config');
 
@@ -108,7 +111,7 @@ async function resolveConfigIncludes(config: Configuration, configPath: string):
                 includePath = path.resolve(path.dirname(configPath), includePath);
             }
 
-            const pathsToGetFilesFrom: string[] = await glob(includePath);
+            const pathsToGetFilesFrom: string[] = await globAsync(includePath);
 
             for (const filePath of pathsToGetFilesFrom) {
                 await getIncludedConfigFile(config, filePath);
