@@ -762,11 +762,12 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-core-js 2.8.18 - MIT
+@microsoft/applicationinsights-channel-js 3.2.2 - MIT
 https://github.com/microsoft/ApplicationInsights-JS#readme
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
+Copyright (c) NevWare21 and contributors
 
 The MIT License (MIT)
 
@@ -795,8 +796,76 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/applicationinsights-shims 2.0.2 - MIT
-https://github.com/microsoft/ApplicationInsights-JS/tree/master/tools/shims
+@microsoft/applicationinsights-common 3.2.2 - MIT
+https://github.com/microsoft/ApplicationInsights-JS#readme
+
+Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft and contributors
+Copyright (c) NevWare21 and contributors
+
+The MIT License (MIT)
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@microsoft/applicationinsights-core-js 3.2.2 - MIT
+https://github.com/microsoft/ApplicationInsights-JS#readme
+
+Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft and contributors
+Copyright (c) NevWare21 and contributors
+
+The MIT License (MIT)
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@microsoft/applicationinsights-shims 3.0.1 - MIT
+https://github.com/microsoft/ApplicationInsights-JS/tree/main/tools/shims
 
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
@@ -828,9 +897,10 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@microsoft/dynamicproto-js 1.1.11 - MIT
+@microsoft/dynamicproto-js 2.0.3 - MIT
 https://github.com/microsoft/DynamicProto-JS#readme
 
+Copyright (c) 2022 Nevware21
 Copyright (c) Microsoft Corporation
 Copyright (c) Microsoft and contributors
 
@@ -857,9 +927,57 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-The MIT License (MIT)
+---------------------------------------------------------
 
-Copyright (c) Microsoft Corporation
+---------------------------------------------------------
+
+@nevware21/ts-async 0.5.1 - MIT
+https://github.com/nevware21/ts-async
+
+Copyright (c) 2022 Nevware21
+Copyright (c) 2023 Nevware21
+Copyright (c) 2024 Nevware21
+Copyright (c) NevWare21 and contributors
+
+MIT License
+
+Copyright (c) 2022 Nevware21
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+
+@nevware21/ts-utils 0.11.2 - MIT
+https://github.com/nevware21/ts-utils
+
+Copyright (c) 2022 NevWare21
+Copyright (c) 2022 Nevware21
+Copyright (c) 2023 Nevware21
+Copyright (c) 2024 Nevware21
+Copyright (c) NevWare21 and contributors
+
+MIT License
+
+Copyright (c) 2022 NevWare21
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -916,11 +1034,10 @@ SOFTWARE.
 
 ---------------------------------------------------------
 
-@vscode/extension-telemetry 0.6.2 - MIT
+@vscode/extension-telemetry 0.9.6 - MIT
 https://github.com/Microsoft/vscode-extension-telemetry#readme
 
 Copyright (c) Microsoft Corporation
-Copyright (c) Microsoft and contributors
 
 vscode-extension-telemetry
 
