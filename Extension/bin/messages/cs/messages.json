@@ -3585,5 +3585,21 @@
     "volání std::meta::substitute (pro %r) bylo neúspěšné",
     "hodnota reflexe odkazuje na neaktivní entitu",
     "spojení výrazů musí spojovat konstantní hodnotu, proměnnou nebo funkci",
-    "spojení členského přístupu musí spojovat datový člen nebo členská funkce"
+    "spojení členského přístupu musí spojovat datový člen nebo členská funkce",
+    "člen %nd není přímým ani nepřímým členem %t",
+    "název %sq neurčuje známý znak Unicode",
+    "neukončený pojmenovaný znak Unicode řídicí sekvence",
+    "Znak se nemůže vyskytovat v názvu Unicode.",
+    "prázdný pojmenovaný znak Unicode řídicí sekvence",
+    "očekávalo se '[:'",
+    "očekávalo se ':]'",
+    "Výraz lambda nemůže být současně mutable i static.",
+    "Výraz lambda static je nestandardní.",
+    "Výraz lambda static musí mít prázdnou specifikaci zachycení.",
+    "Jednotka hlavičky EDG IFC",
+    "EDG IFC",
+    "pro aktuální jednotku překladu se nepovedlo vytvořit jednotku hlavičky",
+    "aktuální jednotka překladu používá jednu nebo více funkcí, které se v tuto chvíli nedají zapsat do jednotky hlavičky",
+    "explicit(bool) je funkcí C++20",
+    "musí být zadán název modulu pro mapování souboru modulu odkazující na soubor %sq"
 ]
