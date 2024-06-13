@@ -9,6 +9,8 @@
 * Fix a regression with cl.exe system include path detection. [#12293](https://github.com/microsoft/vscode-cpptools/issues/12293)
 * Fix handling of doxygen comment blocks with `*//*` in them. [#12316](https://github.com/microsoft/vscode-cpptools/issues/12316)
 * Fix a crash during IntelliSense process shutdown. [#12354](https://github.com/microsoft/vscode-cpptools/issues/12354)
+* Update the default clang/gcc versions used for IntelliSense if an unknown version is found.
+* Update clang-format and clang-tidy from 18.1.2 to 18.1.7 (for the bug fixes).
 
 ## Version 1.20.5: May 6, 2024
 ### Enhancements
